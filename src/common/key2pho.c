@@ -61,7 +61,7 @@ uint16 PhoneInx2Uint( const int ph_inx[] )
 	int i;
 	uint16 result = 0;
 
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < ZUIN_SIZE; i++ )
 		result |= ph_inx[ i ] << shift[ i ];
 	return result;
 }
@@ -77,6 +77,11 @@ uint16 PhoneBg2Uint( const char *phone )
 	char temp[ 3 ];
 	char *pc;
 
+        /*
+          The constant 4 in this loop is the size of ph_pho[] ( j =
+          0,1,2,3) , instead of the max length of a zuin-sequence. So
+          it shouldn't be replaced with ZUIN_SIZE.
+         */
 	for ( i = 0, j = 0; i < len && j < 4; j++ ) {
 		temp[ 0 ] = phone[ i ];
 		temp[ 1 ] = phone[ i + 1 ];
