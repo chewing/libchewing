@@ -17,12 +17,8 @@
 #include <unistd.h>
 
 #include "hash.h"
-#include "global.h"
 #include "private.h"
-
-#ifdef ENABLE_DEBUG
-extern FILE *fp_g;
-#endif
+#include "global.h"
 
 int chewing_lifetime;
 

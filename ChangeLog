@@ -1,3 +1,14 @@
+2005-03-22  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	test/testchewing.c,
+	test/gen_keystroke.c,
+	src/tree.c,
+	src/private.h,
+	src/chewingutil.c,
+	src/hash.c:
+	Move redundant debug macro into private.h .
+
 2005-03-21  Jim Huang  <jserv@kaffe.org>
 
 	* configure.ac,

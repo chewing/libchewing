@@ -14,16 +14,12 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "global.h"
 #include "chewingutil.h"
 #include "zuin.h"
 #include "userphrase.h"
-
-#ifdef ENABLE_DEBUG
-#include <stdio.h>
-extern FILE *fp_g;
-#endif
 
 extern const char *ph_pho[]; 
 static void MakePreferInterval( ChewingData *pgdata );

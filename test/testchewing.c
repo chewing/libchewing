@@ -32,10 +32,6 @@
 #define KEY_CTRL_BASE 1000
 #define END 2000
 
-#ifdef DEBUG
-FILE *fp_g;
-#endif
-
 static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
 
 int get_keystroke()

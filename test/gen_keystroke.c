@@ -42,11 +42,6 @@
 /* Spacing */
 #define FILL_LINE  "--------------------------------------------------------"
 #define FILL_BLANK "                                                               "
-
-#ifdef DEBUG
-FILE *fp_g;
-#endif
-
 static int hasColor = 0;
 static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
 

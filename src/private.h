@@ -5,4 +5,8 @@
   #include <config.h>
 #endif
 
+#ifdef ENABLE_DEBUG
+extern FILE *fp_g;
+#endif
+
 #endif

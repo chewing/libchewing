@@ -23,10 +23,6 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
-#define DEBUG
-#ifdef DEBUG
-extern FILE *fp_g;
-#endif
 
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
