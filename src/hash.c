@@ -215,16 +215,20 @@ int ReadHash( char *path )
 
 	/* make sure of write permission */
 	if ( access( path, W_OK ) != 0) {
-		path = getenv( "HOME" );
-		if ( ! path ) {
-			path = "/tmp";
+		if (getenv ("HOME")) {
+			sprintf(hashfilename,"%s%s", getenv ("HOME"), CHEWING_HASH_PATH);
 		}
-		strcat( path, CHEWING_HASH_PATH );
-		mkdir( path, S_IRWXU );
+		else {
+			sprintf(hashfilename,"%s%s", "/tmp", CHEWING_HASH_PATH);
+		}
+		mkdir( hashfilename, S_IRWXU );
+		strcat (hashfilename, "/");
+		strcat (hashfilename, HASH_FILE);
+	} else {
+		sprintf( hashfilename, "%s/%s", path, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 	sprintf( formatstring, "%%-%ds", FIELD_SIZE ); 
-	sprintf( hashfilename, "%s/%s", path, HASH_FILE );
 	infile = fopen( hashfilename, "r" );
 	if ( ! infile ) {
 		FILE *outfile;
