@@ -17,6 +17,7 @@ else
 fi
 
 # intltoolize -c --automake
+${AUTOHEADER:-autoheader}
 ${AUTOMAKE:-automake} --add-missing --copy --include-deps
 ${AUTOCONF:-autoconf}
 

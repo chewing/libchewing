@@ -25,8 +25,9 @@
 #include "zuin.h"
 #include "chewingutil.h"
 #include "userphrase.h"
+#include "private.h"
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 #include <stdio.h>
 #include <assert.h>
 #define FAILSAFE_OUTPUT "/tmp/chewing-debug.out"
@@ -65,7 +66,7 @@ int InitChewing( void *iccf, ChewingConf *cf )
 {
 	ChewingData *pgdata = (ChewingData *)iccf;
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
         char *dbg_path;
 	int failsafe = 1;
 	dbg_path = getenv( "CHEWING_DEBUG" );
@@ -694,7 +695,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 	CheckAndResetRange( pgdata );
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 	fprintf( fp_g, "OnKeyDefault: key=%d\n", key );
 #endif
 
@@ -715,7 +716,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 			fprintf( 
 					fp_g, 
 					"\t\tchinese mode key, "
@@ -737,7 +738,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 					break;
 				case ZUIN_KEY_ERROR:
 				case ZUIN_IGNORE:
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 					fprintf(
 							fp_g, 
 							"\t\tbefore isupper(key),key=%d\n", 
@@ -747,7 +748,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 					if ( isupper( key ) ) 
 						key = tolower( key );
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 					fprintf(
 							fp_g, 
 							"\t\tafter isupper(key),key=%d\n", 
@@ -793,7 +794,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 		}
 		/* Quick commit */
 		else {
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 			fprintf(
 					fp_g, 
 					"\t\tQuick commit buf[0]=%c\n", 

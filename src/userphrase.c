@@ -20,10 +20,6 @@
 #include "hash.h"
 #include "dict.h"
 
-#ifdef DEBUG
-extern FILE *fp_g;
-#endif
-
 extern int chewing_lifetime;
 static HASH_ITEM *pItemLast;
 

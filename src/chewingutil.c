@@ -20,7 +20,7 @@
 #include "zuin.h"
 #include "userphrase.h"
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 #include <stdio.h>
 extern FILE *fp_g;
 #endif
@@ -446,7 +446,7 @@ int AddChi( uint16 phone, ChewingData *pgdata )
 	return 0;
 }
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 void ShowChewingData( ChewingData *pgdata )
 {
 	int i ;

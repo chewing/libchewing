@@ -74,42 +74,44 @@ PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
   Caller should allocate char zuin[4].
  */
 
-int
-HanyuPinYingToZuin(char *pinyingKeySeq, char *zuinKeySeq) {
-    // pinyinKeySeq[] should have at most 6 letters (Shuang)
-    // zuinKeySeq[] has at most 3 letters.
-    char *p,*cursor;
-    char *initial = 0;
-    char *final   = 0;
-    int i;
-    for(i=0;i< HANYU_INITIALS;i++) {
-        p = strstr( pinyingKeySeq, hanyuInitialsMap[i].pinying);
-        if(p == pinyingKeySeq) {
-            initial = hanyuInitialsMap[i].zuin;
-            cursor = pinyingKeySeq + strlen(hanyuInitialsMap[i].pinying);
-            break;
-        }
-    }
-    if(i == HANYU_INITIALS) {
-        // No initials. might be £¸£¹£º
-        /* XXX: I NEED Implementation
-        if(finalsKeySeq[0] != ) {
-        }
-        */
-        return 1;
-    }
+int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
+{
+	// pinyinKeySeq[] should have at most 6 letters (Shuang)
+	// zuinKeySeq[] has at most 3 letters.
+	char *p, *cursor;
+	char *initial = 0;
+	char *final   = 0;
+	int i;
+	for (i = 0; i < HANYU_INITIALS; i++ ) {
+		p = strstr( pinyingKeySeq, hanyuInitialsMap[ i ].pinying );
+		if ( p == pinyingKeySeq ) {
+			initial = hanyuInitialsMap[ i ].zuin;
+			cursor = pinyingKeySeq +
+				strlen( hanyuInitialsMap[ i ].pinying );
+			break;
+		}
+	}
+	if ( i == HANYU_INITIALS ) {
+		// No initials. might be £¸£¹£º
+		/* XXX: I NEED Implementation
+		   if(finalsKeySeq[0] != ) {
+		   }
+		   */
+		return 1;
+	}
 
-    if(cursor) {
-        for(i=0;i< HANYU_FINALS;i++) {
-            p = strstr(cursor,hanyuFinalsMap[i].pinying);
-            if(p == cursor) {
-                final = hanyuFinalsMap[i].zuin;
-                break;
-            }
-        }
-        if(i == HANYU_FINALS) return 2;
-    }
+	if ( cursor ) {
+		for ( i = 0; i < HANYU_FINALS; i++ ) {
+			p = strstr( cursor, hanyuFinalsMap[ i ].pinying );
+			if ( p == cursor ) {
+				final = hanyuFinalsMap[ i ].zuin;
+				break;
+			}
+		}
+		if ( i == HANYU_FINALS )
+			return 2;
+	}
 
-    sprintf(zuinKeySeq,"%s%s\0",initial,final);
-    return 0;
+	sprintf( zuinKeySeq, "%s%s\0", initial, final );
+	return 0;
 }

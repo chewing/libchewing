@@ -35,6 +35,7 @@ AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION, "$PACKAGE_VERSION", [The release version 
 
 # Init automake stuff
 AM_INIT_AUTOMAKE
+AM_CONFIG_HEADER([config.h])
 AC_PREFIX_DEFAULT(/usr)
 
 # Init libtool
@@ -82,7 +83,7 @@ AC_ARG_ENABLE([debug],
 		[case "${enableval}" in
 		yes)
 		LIBDEBUG="true"
-		AC_DEFINE(DEBUG, 1,
+		AC_DEFINE(ENABLE_DEBUG, 1,
 		[Define to 1 if you want native library runtime debugging code enabled])
 		CFLAGS="$CFLAGS -g"
 		;;

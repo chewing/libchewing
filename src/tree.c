@@ -25,8 +25,9 @@
 #include "global.h"
 #include "dict.h"
 #include "char.h"
+#include "private.h"
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 extern FILE *fp_g;
 #endif
 
@@ -747,7 +748,7 @@ void CountMatchCnnct( TreeDataType *ptd, int *bUserArrCnnct, int nPhoneSeq )
 	}
 }
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 void ShowList( TreeDataType *ptd )
 {
 	RecordNode *p;
@@ -791,7 +792,7 @@ int Phrasing(
 	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
 	SortListByFreq( &treeData );
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG
 	ShowList( &treeData );
 	fflush( fp_g );
 #endif
