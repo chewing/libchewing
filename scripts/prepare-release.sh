@@ -28,6 +28,11 @@ sh autogen.sh
 
 find -name .svn | xargs rm -rf
 find -name .cvsignore | xargs rm -f
+
+# Remove local Debian information to make sure upstream be clean.
+rm -rf debian
+
+# Remove automake's cache
 rm -rf autom4te.cache
 popd
 
