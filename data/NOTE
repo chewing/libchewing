@@ -1,0 +1,8 @@
+NOTE:
+
+If someone change the size of tsi.src, he should also edit the constant
+number definition in global.h, dict.h, etc.
+
+If the size of phone.cin is changed, please also change PHONE_NUM
+in char.h
+

@@ -1,0 +1,49 @@
+What's New in Subversion
+----------------------------------------------------------
+
+What's New in libchewing 0.2.6
+----------------------------------------------------------
+* Experimental feature -- HanYu PinYing Keyboard layout.
+* Proper $HOME env handling.
+* SegFault workaround after libtabe's tsi.src merge.
+* Add the facility to input symbols.
+* Successful stories:
+  . Chewing becomes one of the built-in input methods in Sun 
+    Java Desktop System (JDS).
+
+What's New in libchewing 0.2.5
+----------------------------------------------------------
+* Merge SpaceChewing's frequency tweaking from zonble.
+* Minor fixes for building process and zuin core.
+* Successful stories:
+  . IIIMF-chewing
+  . SCIM-chewing
+  . OpenVanilla Input Method Framework for MacOS X
+
+What's New in libchewing 0.2.4
+----------------------------------------------------------
+
+* Merge from SpaceChewing:
+  . Dvorak Hsu keyboard layout.
+  . Hanin style support.
+* Directly use tsi.src from libtabe.
+  . No longer maintain separate tsi.src.
+* Fix the word selection bug.
+* Fix phonetic index in Hsu keyboard, and do fuzzy "g e"
+  to "j e" convertion.
+* Provide pkg-config and RPM spec.
+* Allow users to specify forward/backward phrase addition.
+* Initial Win32 support.
+
+What's New in libchewing 0.2.3
+----------------------------------------------------------
+
+* Fix candidate phrase choice bug.
+* Built-in debugging routines.
+* Test suite & sample implementation.
+* Merge the enhancements from SpaceChewing, such as
+  space key selection, Eten special symbol input, and
+  MacOSX awared information.
+* Fix broken encoding in sort_dic utility.
+* Doxygen documentation support.
+* Add Dvorak keyboard support.

@@ -1,0 +1,63 @@
+libchewing - The intelligent phonetic input method library
+http://chewing.csie.net/
+
+[-] History
+
+libchewing is derived from Chewing input method, a xcin module
+focusing on intelligent phonetic processing by lckung and 
+kpchen. However, the original authors of Chewing dropped its
+development, and Chewing is highly bonded with xcin, which
+prevents from wider applications.
+
+
+[-] Motion
+
+Jim Huang started to separate core algorithm and logic layer
+of Chewing since 2002, and he integrated his efforts into a
+Chinese terminal named JMCCE as a part of its input method
+modules. Also, he attempts to let more applications adapt
+his efforts, so that he created libchewing with writing some
+bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
+
+
+[-] Status
+
+1. bridge integration
+  a) works with xcin
+  b) works with JMCCE
+  c) works with IIIMF
+  d) works with SCIM
+  e) works with OpenVanilla Input Method Framework for MacOS X
+  f) works with Sun's Java Desktop System Input Method Framework.
+  g) starts ime-chewing (Chewing MS-Windows IME)
+
+2. support phonetic keyboard layout
+  a) Hsu
+  b) IBM
+  c) Gin-Yieh
+  d) Eten
+  e) Eten 26 keys
+  f) Dvorak
+  g) Dvorak Hsu
+  h) HanYu PinYing
+
+
+[-] Installation
+
+# ./configure --prefix=/usr
+  (If you checkout from svn, make sure running ./autogen.sh 
+   before this.)
+# make
+# make install
+
+see "INSTALL" for details.
+
+
+[-] License
+
+See "COPYING" for details.
+
+
+[-] Authors & Contact Information
+
+See "AUTHORS" for details.

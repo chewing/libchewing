@@ -1,0 +1,50 @@
+Source: libchewing
+Priority: optional
+Maintainer: Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
+Build-Depends: debhelper (>= 4.0.0), gcc (>= 3:3.3), autoconf (>= 2.59), automaken, libtool (>= 1.5.6), doxygen
+Standards-Version: 3.6.1
+
+Package: libchewing1-dev
+Provides: libchewing-dev
+Conflicts: libchewing-dev
+Section: devel
+Architecture: any
+Depends: libchewing1 (= ${Source-Version})
+Description: intelligent phonetic input method library(developer version)
+ libchewing is an intelligent phonetic input method library for Chinese.
+ .
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
+ .
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
+
+Package: libchewing1
+Provides: libchewing
+Section: libs
+Architecture: any
+Depends: libchewing-data (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: intelligent phonetic input method library
+ libchewing is an intelligent phonetic input method library for Chinese.
+ .
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
+ .
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
+ libchewing - The intelligent phonetic input method library
+
+Package: libchewing-data
+Conflicts: libchewing-data (<= 0.2.3)
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description:intelligent phonetic input method library - data files
+ libchewing is an intelligent phonetic input method library for Chinese.
+ .
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
+ .
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
+ libchewing - The intelligent phonetic input method library

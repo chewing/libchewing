@@ -1,0 +1,15 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+datadir=@datadir@/chewing
+sysconfdir=@sysconfdir@
+
+chewing_binary_version=@LIBCHEWING_BINARY_VERSION@
+
+Name: Chewing
+Description: Intelligent Chinese phonetic input method library
+Version: @PACKAGE_VERSION@
+Requires: 
+Libs: -L${libdir} -lchewing
+Cflags: -I${includedir}/chewing
