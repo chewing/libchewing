@@ -1,3 +1,10 @@
+2005-02-19  Kang-min Liu  <>
+	* include/hanyupinying.h
+	* src/hanyupinying.c
+	* include/global.h
+	* include/zuin.h
+	Experimental feature: HanYu PinYing Keyboard layout
+
 2005-02-08  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* data/tsi.src:
@@ -18,10 +25,10 @@
 	
 2005-01-01  Kang-min Liu <gugod@gugod.org>
 
-	*  include/chewingio.h,
-	chewingutil.h,
-	src/chewingio.c,
-	chewingutil.c:
+	* include/chewingio.h
+	* include/chewingutil.h
+	* src/chewingio.c
+	* src/chewingutil.c
 	Add the facility to input symbols.(Ctrl-0 and Ctrl-1)
 	Make the NumLock keypad work just right
 
