@@ -1,3 +1,8 @@
+2004-12-19  Kang-min Liu  <gugod@gugod.org>
+
+	* libchewing/data/tsi.src:
+	Merge SpaceChewing's frequency tweaking from zonble.
+
 2004-12-12  Kang-min Liu  <gugod@gugod.org>
 
 	* libchewing/trunk/src/zuin.c:
