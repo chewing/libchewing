@@ -69,10 +69,8 @@ int InitChewing( void *iccf, ChewingConf *cf );
  * @brief Terminate chewing
  *
  * Terminate the I/O routines for chewing.
- *
- * @return If successed then return 0
  */
-int TerminateChewing();
+void TerminateChewing();
 
 /**
  * @brief Set chewing's english, chinese mode

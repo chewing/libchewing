@@ -71,7 +71,7 @@ void SetKBType( ZuinData *pZuin, int kbtype )
 #ifdef ENABLE_DEBUG     
 static void TerminateDebug()
 {
-	fprintf( fp_g,  "DEBUG: logging service is about to terminate.\n" );
+	DEBUG_OUT( "DEBUG: logging service is about to terminate.\n" );
 	if ( fp_g ) {
 		fclose( fp_g );
 	}
@@ -104,7 +104,9 @@ int InitChewing( void *iccf, ChewingConf *cf )
 		dbg_path = FAILSAFE_OUTPUT;
 	        fp_g = fopen( dbg_path, "w+" );
 		if ( ! fp_g ) {
-			fprintf( stderr, "Error: failed to record debug message.\n" );
+			fprintf( stderr, 
+				"Failed to record debug message in file.\n"
+				"--> Output to stderr\n" );
 		}
 	}
 	if ( fp_g )
@@ -135,13 +137,13 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	return 0;
 }
 
-int TerminateChewing()
+void TerminateChewing()
 {
 	int i;
 
 	/* No terminating services are registered. */
 	if ( bTerminateCompleted || countTerminateService == 0 )
-		return 0;
+		return;
 
 	for ( i = 0; i < countTerminateService; i++ ) {
 		if ( TerminateServices[ i ] ) {
@@ -157,11 +159,7 @@ int TerminateChewing()
 	
 	/* XXX: should check if the services are really completed. */
 	bTerminateCompleted = 1;
-	/* some callback functions might not work */
-	if ( countTerminateService != i ) {
-		return 1;
-	}
-	return 0;
+	return;
 }
 
 int SetConfig( void *iccf, ConfigData *pcd )
@@ -752,9 +750,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 	CheckAndResetRange( pgdata );
 
-#ifdef ENABLE_DEBUG
-	fprintf( fp_g, "OnKeyDefault: key=%d\n", key );
-#endif
+	DEBUG_OUT( "OnKeyDefault: key=%d\n", key );
 
 	/* Dvorak Hsu */
 	if ( pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
@@ -773,14 +769,12 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
-#ifdef ENABLE_DEBUG
-			fprintf( 
-					fp_g, 
-					"\t\tchinese mode key, "
-					"ZuinPhoInput return value = %d\n", 
-					rtn );
-			fflush( fp_g );
-#endif
+			DEBUG_OUT(
+				"\t\tchinese mode key, "
+				"ZuinPhoInput return value = %d\n", 
+				rtn );
+			DEBUG_FLUSH;
+			
 			if ( rtn == ZUIN_KEY_ERROR )
 				rtn = SpecialSymbolInput( key, pgdata );
 			switch ( rtn ) {
@@ -795,22 +789,16 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 					break;
 				case ZUIN_KEY_ERROR:
 				case ZUIN_IGNORE:
-#ifdef ENABLE_DEBUG
-					fprintf(
-						fp_g, 
+					DEBUG_OUT(
 						"\t\tbefore isupper(key),key=%d\n", 
 						key );
-#endif
 					/* change upper case into lower case */
 					if ( isupper( key ) ) 
 						key = tolower( key );
 
-#ifdef ENABLE_DEBUG
-					fprintf(
-						fp_g, 
+					DEBUG_OUT(
 						"\t\tafter isupper(key),key=%d\n", 
 						key );
-#endif
 
 					/* see if buffer contains nothing */
 					if ( pgdata->chiSymbolBufLen == 0 ) {
@@ -851,12 +839,9 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 		}
 		/* Quick commit */
 		else {
-#ifdef ENABLE_DEBUG
-			fprintf(
-				fp_g, 
+			DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n", 
 				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-#endif
 			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;

@@ -750,20 +750,21 @@ void ShowList( TreeDataType *ptd )
 	RecordNode *p;
 	int i;
 
-	fprintf( fp_g, "After SaveList :\n" );
+	DEBUG_OUT( "After SaveList :\n" );
 	for ( p = ptd->phList; p; p = p->next ) {
-		fprintf( fp_g, "  interval : " );
+		DEBUG_OUT( "  interval : " );
 		for ( i = 0; i < p->nInter; i++ ) {
-			fprintf(
-				fp_g, "[%d %d] ", 
+			DEBUG_OUT(
+				"[%d %d] ", 
 				ptd->interval[ p->arrIndex[ i ] ].from,
 				ptd->interval[ p->arrIndex[ i ] ].to );
 		}
-		fprintf(fp_g, "\n   freq : %d , nMatchCnnct : %d\n", 
-				p->freq, 
-				p->nMatchCnnct );
+		DEBUG_OUT(
+			"\n   freq : %d , nMatchCnnct : %d\n", 
+			p->freq, 
+			p->nMatchCnnct );
 	}
-	fprintf( fp_g, "\n" );
+	DEBUG_OUT( "\n" );
 }
 
 #endif
@@ -790,7 +791,7 @@ int Phrasing(
 
 #ifdef ENABLE_DEBUG
 	ShowList( &treeData );
-	fflush( fp_g );
+	DEBUG_FLUSH;
 #endif
 
 	/* set phrasing output */

@@ -448,45 +448,42 @@ void ShowChewingData( ChewingData *pgdata )
 {
 	int i ;
 
-	fprintf(
-		fp_g, 
+	DEBUG_OUT(
 		"nPhoneSeq : %d\n"
 		"phoneSeq : ", 
 		pgdata->nPhoneSeq );
 	for ( i = 0; i < pgdata->nPhoneSeq; i++ )
-		fprintf( fp_g, "%hu ", pgdata->phoneSeq[ i ] );
-	fprintf(
-		fp_g, 
+		DEBUG_OUT( "%hu ", pgdata->phoneSeq[ i ] );
+	DEBUG_OUT(
 		"cursor : %d\n"
 		"nSelect : %d\n"
 		"selectStr       selectInterval\n", 
 		pgdata->cursor, 
 		pgdata->nSelect );
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
-		fprintf(
-			fp_g, "  %14s%4d%4d\n",
+		DEBUG_OUT(
+			"  %14s%4d%4d\n",
 			pgdata->selectStr[ i ], 
 			pgdata->selectInterval[ i ].from,
 			pgdata->selectInterval[ i ].to );
 	}
 	
-	fprintf( fp_g, "bUserArrCnnct : " );
+	DEBUG_OUT( "bUserArrCnnct : " );
 	for ( i = 0; i <= pgdata->nPhoneSeq; i++ )
-		fprintf( fp_g, "%d ", pgdata->bUserArrCnnct[ i ] );
-	fprintf( fp_g, "\n" );
+		DEBUG_OUT( "%d ", pgdata->bUserArrCnnct[ i ] );
+	DEBUG_OUT( "\n" );
 
-	fprintf( fp_g, "bUserArrBrkpt : " );
+	DEBUG_OUT( "bUserArrBrkpt : " );
 	for ( i = 0; i <= pgdata->nPhoneSeq; i++ )
-		fprintf( fp_g, "%d ", pgdata->bUserArrBrkpt[ i ] );
-	fprintf( fp_g, "\n" );
+		DEBUG_OUT( "%d ", pgdata->bUserArrBrkpt[ i ] );
+	DEBUG_OUT( "\n" );
 
-	fprintf( fp_g, "bArrBrkpt : " );
+	DEBUG_OUT( "bArrBrkpt : " );
 	for ( i = 0; i <= pgdata->nPhoneSeq; i++ )
-		fprintf( fp_g, "%d ", pgdata->bArrBrkpt[ i ] );
-	fprintf( fp_g, "\n" );
+		DEBUG_OUT( "%d ", pgdata->bArrBrkpt[ i ] );
+	DEBUG_OUT( "\n" );
 
-	fprintf( 
-		fp_g, 
+	DEBUG_OUT( 
 		"bChiSym : %d , bSelect : %d , bCaseChange : %d\n",
 		pgdata->bChiSym, 
 		pgdata->bSelect, 

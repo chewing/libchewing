@@ -1,4 +1,14 @@
-2004-04-03  Jim Huang  <jserv@kaffe.org>
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/tree.c,
+	src/chewingutil.c,
+	src/hash.c,
+	src/zuin.c,
+	src/chewingio.c:
+	Improved debug macro definitions.
+	
+2005-04-03  Jim Huang  <jserv@kaffe.org>
 
 	* include/chewingio.h
 	src/chewingio.c
@@ -22,13 +32,13 @@
 	data file I/O stream)
 	NOTE: atexit(3) is used.
 
-2004-04-03  Jim Huang  <jserv@kaffe.org>
+2005-04-03  Jim Huang  <jserv@kaffe.org>
 
 	* src/chewingio.c (InitChewing):
 	Remove improper exit function call, which causes
 	unexpected closing.
 
-2004-04-03  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+2005-04-03  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
 
 	* src/hanyupinying.c (FinalsMap),
 	data/pinyin.tab:

@@ -377,17 +377,14 @@ int PinYingInput( ZuinData *pZuin, int key )
 	int err = 0, status, i;
 	char zuinKeySeq[ 5 ], buf[ 2 ];
 
-#ifdef ENABLE_DEBUG
-	fprintf( fp_g, "PinYinInput() " );
-#endif
+	DEBUG_OUT( "PinYinInput() " );
 
 	if ( IsPinYingEndKey( pZuin, key ) ) {
 		err = HanyuPinYingToZuin( pZuin->pinYingData.keySeq, zuinKeySeq );
 		if (err)
 			return ZUIN_KEY_ERROR;
-#ifdef ENABLE_DEBUG
-		fprintf( fp_g, "zuinKeySeq: %s\n", zuinKeySeq );
-#endif
+
+		DEBUG_OUT( "zuinKeySeq: %s\n", zuinKeySeq );
 		for ( i = 0; i < strlen( zuinKeySeq ); i++ ) {
 			status = DefPhoInput( pZuin, zuinKeySeq[ i ] );
 			if ( status != ZUIN_ABSORB )
@@ -408,9 +405,8 @@ int PinYingInput( ZuinData *pZuin, int key )
 	}
 	buf[ 0 ] = key; buf[ 1 ] = '\0';
 	strcat( pZuin->pinYingData.keySeq, buf );
-#ifdef ENABLE_DEBUG
-	fprintf( fp_g, "PinYing Seq: %s\n", pZuin->pinYingData.keySeq );
-#endif
+	
+	DEBUG_OUT( "PinYing Seq: %s\n", pZuin->pinYingData.keySeq );
 
 	return ZUIN_ABSORB;
 }

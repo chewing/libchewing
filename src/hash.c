@@ -141,13 +141,10 @@ void HashModify( HASH_ITEM *pItem )
 	/* update "lifetime" */
 	fseek( outfile, 0, SEEK_SET );
 	sprintf( str, "%d", chewing_lifetime );
-#ifdef ENABLE_DEBUG
-	fprintf( 
-		fp_g, 
+	DEBUG_OUT( 
 		"HashModify-1: formatstring='%s',printing '%s'\n", 
 		formatstring,str );
-	fflush( fp_g );
-#endif
+	DEBUG_FLUSH;
 	fprintf( outfile, formatstring, str );
 
 	/* update record */
@@ -159,13 +156,10 @@ void HashModify( HASH_ITEM *pItem )
 		fseek( outfile, pItem->item_index * FIELD_SIZE, SEEK_SET );
 	}
 	HashItem2String( str, pItem );
-#ifdef ENABLE_DEBUG
-	fprintf( 
-		fp_g, 
+	DEBUG_OUT( 
 		"HashModify-2: formatstring='%s',printing '%s'\n",
-		formatstring,str );
-	fflush( fp_g );
-#endif
+		formatstring, str );
+	DEBUG_FLUSH;
 	fprintf( outfile, formatstring, str );
 	fclose( outfile );
 }
