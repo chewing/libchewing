@@ -367,7 +367,7 @@ int IsPinYingEndKey( ZuinData *pZuin, int key )
 {
 	if ( (key == ' ') || (key == '1') || (key == '2') ||
 			(key == '3') || (key == '4') || (key == '5') ) {
-		return strlen( pZuin->pinYingData.keySeq) ;
+		return 1;
 	}
 	return 0;
 }
