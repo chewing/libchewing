@@ -2,6 +2,7 @@ libchewing for Debian
 ----------------------
 
 libchewing - The intelligent phonetic input method library
+http://chewing.csie.net/
 
 [-] History
 
@@ -28,8 +29,9 @@ bridges among JMCCE, XCIN, and iiimf-chewing, etc.
   a) works with xcin
   b) works with JMCCE
   c) works with IIIMF-chewing
-  d) starts screen-chewing (Chewing IM for GNU screen)
-  e) starts ime-chewing (Chewing MS-Windows IME)
+  d) works with SCIM-chewing
+  e) starts screen-chewing (Chewing IM for GNU screen)
+  f) starts ime-chewing (Chewing MS-Windows IME)
 
 2. support phonetic keyboard layout
   a) Hsu

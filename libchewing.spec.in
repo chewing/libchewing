@@ -7,10 +7,10 @@ Version:	%{version}
 Release:	%{release}
 License:	LGPL
 Group:		System/Libraries
-URL:		http://jserv.sayya.org/wiki/index.php/Qooing
+URL:		http://chewing.csie.net
 Buildroot:      %_tmppath/%{name}-%{version}-%{release}-root
 
-Source:		%{name}-%{version}.tgz
+Source:		%{name}-%{version}.tar.gz
 
 BuildRequires:
 Requires:

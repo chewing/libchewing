@@ -1,3 +1,10 @@
+2004-12-26  Jim Huang  <jserv@kaffe.org>
+
+	* deabin/README.Debian,
+	README,
+	libchewing.spec.in:
+	Update web information.
+
 2004-12-19  Kang-min Liu  <gugod@gugod.org>
 
 	* libchewing/data/tsi.src:
