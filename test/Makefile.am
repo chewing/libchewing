@@ -18,6 +18,12 @@ $(TESTDATA): $(DEFAULT_TESTDATA)
 check: testchewing $(TESTDATA) $(CHEWINGDATA)
 	$(testdir)/testchewing < $(TESTDATA)
 
+vcheck: check
+	valgrind \
+		--leak-check=full \
+		--show-reachable=yes \
+		$(testdir)/.libs/testchewing < $(TESTDATA)
+
 bin_PROGRAMS = testchewing genkeystroke
 
 AM_CFLAGS = \

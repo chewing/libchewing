@@ -1,3 +1,13 @@
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am:
+	Add vcheck to perform valgrind memory checking on the buil-in
+	test suite.
+
+	* test/testchewing.c,
+	src/tree.c:
+	Minor free routines.
+
 2005-03-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* src/chewingutil.c

@@ -96,6 +96,7 @@ void ReadTree( const char *prefix )
 			&tree[ i ].child_end ) != 4 )
 			break;
 	}
+	fclose( infile );
 }
 
 int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
@@ -621,7 +622,7 @@ void SortListByFreq( TreeDataType *ptd )
 }
 
 /* when record==NULL then output the "link list" */
-void SaveRecord( int *record,int nInter, TreeDataType *ptd )
+void SaveRecord( int *record, int nInter, TreeDataType *ptd )
 {
 	RecordNode *now, *p, *pre;
 

@@ -208,6 +208,15 @@ int main( int argc, char *argv[] )
 	}
 end:
 	printf( "\n" );
+	if (da)
+		free( da );
+	if (cf) {
+		free( cf->kb_type );
+		free( cf->inp_cname );
+		free( cf->inp_ename );
+		free( cf );
+	}
+
 	return 0;
 }
 
