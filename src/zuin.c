@@ -98,7 +98,7 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 		pZuin->pho_inx[ 0 ] == 0 && 
 		pZuin->pho_inx[ 1 ] == 0 && 
 		pZuin->pho_inx[ 2 ] == 0 )
-		return ZUIN_KEY_ERROR;
+		return ZUIN_NO_WORD;
 
 	pZuin->pho_inx[ 3 ] = Key2PhoneInx( key, 3, pZuin->kbtype, searchTimes );
 	u16Pho = PhoneInx2Uint( pZuin->pho_inx );
