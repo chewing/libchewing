@@ -1,7 +1,7 @@
 Source: libchewing
 Priority: optional
 Maintainer: Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
-Build-Depends: debhelper (>= 4.0.0), gcc (>= 3:3.3), make, doxygen, cdbs
+Build-Depends: debhelper (>= 4.0.0), gcc (>= 3:3.3), autoconf (>= 2.59), automaken, libtool (>= 1.5.6), doxygen
 Standards-Version: 3.6.1
 
 Package: libchewing1-dev

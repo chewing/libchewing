@@ -17,7 +17,7 @@ of Chewing since 2002, and he integrated his efforts into a
 Chinese terminal named JMCCE as a part of its input method
 modules. Also, he attempts to let more applications adapt
 his efforts, so that he created libchewing with writing some
-bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
+bridges among JMCCE, XCIN, and iiimf-chewing, etc.
 
 
 [-] Status
@@ -25,11 +25,10 @@ bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
 1. bridge integration
   a) works with xcin
   b) works with JMCCE
-  c) works with IIIMF
-  d) works with SCIM
-  e) works with OpenVanilla Input Method Framework for MacOS X
-  f) starts screen-chewing (Chewing IM for GNU screen)
-  g) starts ime-chewing (Chewing MS-Windows IME)
+  c) works with IIIMF-chewing
+  d) works with SCIM-chewing
+  e) starts screen-chewing (Chewing IM for GNU screen)
+  f) starts ime-chewing (Chewing MS-Windows IME)
 
 2. support phonetic keyboard layout
   a) Hsu
