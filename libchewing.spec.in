@@ -1,82 +1,124 @@
 %define version @LIBCHEWING_VERSION@
 %define release 1mdk
 
-Summary:	The Chewing intelligent phonetic input method library
+%define libname_orig %{name}
+%define libname %mklibname chewing 0
+
 Name:		libchewing
+Summary:	The intelligent phonetic input method library
 Version:	%{version}
 Release:	%{release}
+Group:		System/Internationalization
 License:	LGPL
-Group:		System/Libraries
-URL:		http://chewing.csie.net
+Source0:	%{name}-%{version}.tar.bz2
+URL:		http://chewing.csie.net/
 Buildroot:      %_tmppath/%{name}-%{version}-%{release}-root
-
-Source:		%{name}-%{version}.tar.gz
-
-BuildRequires:
-Requires:
+Requires:	glibc
+BuildRequires:	glibc-devel
 
 %description
-This is an intelligent Chinese phonetic input method library. Based on
-Chewing input method.
+This is an intelligent Chinese phonetic input method library which also know 
+as Qooing. Based on Chewing input method.
 
-%package	-n %{name}-devel
-Summary:	Header files and libraries for developing apps which will use libchewing
+
+%package data
+Summary:	Data for Libchewing.
+Group:		System/Internationalization
+Requires:	%{libname} = %{version}-%{release}
+Provides:       %{libname_orig}-data = %{version}-%{release}
+
+%description data
+Data for Libchewing.
+
+%package -n	%{libname}
+Summary:	Libchewing library.
+Group:		System/Internationalization
+Requires:       %{libname_orig}-data = %{version}-%{release}
+Provides:	%{libname_orig} = %{version}-%{release}
+
+%description -n %{libname}
+Libchewing library.
+
+%package -n	%{libname}-devel
+Summary:	Headers of libchewing for development.
 Group:		Development/C
-Requires:	%{name} = %{version}
+Requires:	%{libname} = %{version}-%{release}
 Provides:	%{name}-devel = %{version}-%{release}
+Provides:	%{libname_orig}-devel = %{version}-%{release}
 
-%description	-n %{name}-devel
-Header files and libraries for developing apps which will use libchewing
+%description -n %{libname}-devel
+Headers of %{name} for development.
+
 
 %prep
-%setup -q %{name}-%{version}
+%setup -q
 
 %build
-CONFIGURE_TOP="${CONFIGURE_TOP:-.}"; \
-CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
-CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ; \
-FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ; \
-%{?__cputoolize:%{__cputoolize} -c $CONFIGURE_TOP} ; \
-%{?__libtoolize:(cd $CONFIGURE_TOP; [ -f configure.in -o -f configure.ac ] && %{__libtoolize} --copy)} ; \
-$CONFIGURE_TOP/configure --build=%{_target_platform} \
-      --prefix=%{_prefix} \
-      --exec-prefix=%{_exec_prefix} \
-      --bindir=%{_bindir} \
-      --sbindir=%{_sbindir} \
-      --sysconfdir=%{_sysconfdir} \
-      --datadir=%{_datadir} \
-      --includedir=%{_includedir} \
-      --libdir=%{_libdir} \
-      --libexecdir=%{_libexecdir} \
-      --localstatedir=%{_localstatedir} \
-      --sharedstatedir=%{_sharedstatedir} \
-      --mandir=%{_mandir} \
-      --infodir=%{_infodir} \
 
+%configure2_5x 
 %make
 
 %install
-rm -rf %{buildroot}
-%makeinstall
+rm -rf $RPM_BUILD_ROOT
+%makeinstall_std
 
 %clean
-rm -fr %buildroot
+rm -rf $RPM_BUILD_ROOT
 
-%post -n %{name} -p /sbin/ldconfig
-%postun -n %{name} -p /sbin/ldconfig
+%post -n %{libname} -p /sbin/ldconfig
+%postun -n %{libname} -p /sbin/ldconfig
 
-%files
-%defattr(-, root, root)
-%{_libdir}/*.so
-%{_libdir}/*.so.*
-%{_datadir}/*
 
-%files -n %{name}-devel
-%defattr(-, root, root)
+%files data
+%defattr(-,root,root)
+%doc COPYING
+%{_datadir}/chewing/*
+
+%files -n %{libname}
+%defattr(-,root,root)
+%doc COPYING
+%{_libdir}/lib*.so.1.0.0
+
+%files -n %{libname}-devel
+%defattr(-,root,root)
+%doc AUTHORS COPYING ChangeLog NEWS README
+%{_libdir}/lib*.so
+%{_libdir}/lib*.so.1
 %{_libdir}/*.a
 %{_libdir}/*.la
+%{_libdir}/pkgconfig/*
 %{_includedir}/*
 
+
 %changelog
+* Tue Dec 28 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.5-1shiva
+- new version 0.2.5
+
+* Fri Dec 17 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.4-4shiva
+- Fix Requires for libchewing0.
+- change URL
+
+* Tue Dec 14 2004 UTUMI Hirosi <utuhiro78@yahoo.co.jp> 0.2.4-3ut
+- rewrite spec
+- modify the privilege of libchewing.spec
+- bzme libchewing-0.2.4.tgz
+- change URL
+- change Group
+
+* Wed Dec 01 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.4-2mdk.shiva
+- Fixed libraries doesn't have the "so" (libfoo.0.0.0 instead of 
+  libfoo.so.0.0.0) problem by official way mentioned by Mandrake
+  RpmHowTo.
+- Sign this package.
+
+* Sat Oct 09 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.4-1mdk.shiva
+- Update to 0.2.4
+
+* Mon Aug 09 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.3-1mdk.shiva
+- Update to 0.2.3
+
+* Sat Aug 07 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.2-2mdk
+- Fixed BuildRequires and Requires tags
+
 * Fri Aug 06 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.2-1mdk
-- Initial release.
+- Initial spec
