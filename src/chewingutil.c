@@ -653,17 +653,33 @@ int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->chiSymbolCursor = pgdata->chiSymbolCursor;
 	
 	/*  fill zuinBuf */
-	for ( i = 0; i < ZUIN_SIZE; i++ ) { 
-		if ( pgdata->zuinData.pho_inx[ i ] != 0 ) {
-			memcpy( 
-				pgo->zuinBuf[ i ].s, 
-				& ph_pho[ i ][ pgdata->zuinData.pho_inx[ i ] * 2 ], 
-				2 ); 
-			pgo->zuinBuf[ i ].s[ 2 ] = '\0';
+        if(pgdata->zuinData.kbtype == KB_HANYU_PINYING) {
+		char *p = pgdata->zuinData.pinYingData.keySeq;
+		for ( i = 0; i< ZUIN_SIZE; i++) {
+			int j;
+			for(j = 0; j < 2; j++) {
+				if(p[0]) {
+					pgo->zuinBuf[i].s[j] = p[0];
+					p++;
+				} else {
+					pgo->zuinBuf[i].s[j] = '\0';
+				}
+			}
+			pgo->zuinBuf[i].s[2]='\0';
 		}
-		else
-			pgo->zuinBuf[ i ].wch = (wchar_t) 0;
-	} 
+	} else {
+		for ( i = 0; i < ZUIN_SIZE; i++ ) { 
+			if ( pgdata->zuinData.pho_inx[ i ] != 0 ) {
+				memcpy( 
+					pgo->zuinBuf[ i ].s, 
+					& ph_pho[ i ][ pgdata->zuinData.pho_inx[ i ] * 2 ], 
+					2 ); 
+				pgo->zuinBuf[ i ].s[ 2 ] = '\0';
+			}
+			else
+				pgo->zuinBuf[ i ].wch = (wchar_t) 0;
+		}
+        }
 
 	ShiftInterval( pgo, pgdata );
 	memcpy( 
