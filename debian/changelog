@@ -1,10 +1,25 @@
+libchewing (0.2.6-2) unstable; urgency=low
+
+  * libchewing-data: Changed Architecture: any to all
+  * Remove Provides, cause Provides and Conflicts should not be 
+    together.
+
+ -- Kanru Chen <koster@debian.org.tw>  Wed,  2 Mar 2005 20:54:18 +0800
+
+libchewing (0.2.6-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Kanru Chen <koster@debian.org.tw>  Mon, 28 Feb 2005 11:00:45 +0800
+
 libchewing (0.2.5-2) unstable; urgency=low
 
   * Update descriptions in control file.
+  * Maintainer's email changed. 
   * Execute scripts/remove-autotool.sh after 'make clean'.
-  * Remove doxygen auto produced files after 'make clean'. 
+  * Remove doxygen auto produced files after 'make clean'.
 
- -- Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>  Mon, 24 Jan 2005 15:32:42 +0800
+ -- Kanru Chen <koster@debian.org.tw>  Fri, 11 Feb 2005 15:20:51 +0800
 
 libchewing (0.2.5-1) unstable; urgency=low
 
