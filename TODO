@@ -1,7 +1,5 @@
 For developers, please add new entry for your plans.
 
-2. Add config.h.in, and put all architecture-dependent info, such as
-   uint16, int32, etc. type definition to this file.
 4. Follow the idea from kcwu to adapt some routines of libtabe, and
    seek for better way to share resources.
   a) support same phrase in different phones.
@@ -11,3 +9,6 @@ For developers, please add new entry for your plans.
   b) support memory-limited applications.
 7. Migrate to Unicode
 8. Auto calculate the size of phrase data base.
+9. Provide API for querying Keybaord Mapping information.
+  a) provide zh_TW translation of corresponding keybaord mapping.
+10. all APIs should have the same namespace Chewing_blah_blah.
