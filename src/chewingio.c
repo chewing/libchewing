@@ -117,6 +117,13 @@ int SetConfig( void *iccf, ConfigData *pcd )
 		pcd->selKey, 
 		sizeof( pcd->selKey[ 0 ] ) * MAX_SELKEY );
 	pgdata->config.bAddPhraseForward = pcd->bAddPhraseForward;
+	pgdata->config.bSpaceAsSelection = pcd->bSpaceAsSelection;
+	
+	/* Failback to default value */
+	if ( (pgdata->config.bAddPhraseForward != 0) && (pgdata->config.bAddPhraseForward != 1) )
+		pgdata->config.bAddPhraseForward = 0;
+	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
+		pgdata->config.bSpaceAsSelection = 1;
 	return 0;
 }
 
@@ -170,6 +177,11 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int toSelect = 0;
 	int rtn;
+
+	/* check if Old Chewing style */
+	if ( ! pgdata->config.bSpaceAsSelection ) {
+		return OnKeyDefault( pgdata, ' ', pgo );
+	}
 
 	CheckAndResetRange( pgdata );
 

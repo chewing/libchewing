@@ -1,5 +1,18 @@
 2005-03-20  Jim Huang  <jserv@kaffe.org>
 
+	* include/global.h
+	(ConfigData):
+	Add bSpaceAsSelection option.
+
+	* src/chewingio.c
+	(SetConfig):
+	Set bSpaceAsSelection.
+	Failback to default values if out-of-range.
+	(OnKeySpace):
+	Perform old space key behavior when bSpaceAsSelection disabled.
+
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
 	* test/Makefile.am:
 	Add vcheck to perform valgrind memory checking on the buil-in
 	test suite.
