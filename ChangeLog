@@ -1,3 +1,11 @@
+2004-12-12  Kang-min Liu  <gugod@gugod.org>
+
+	* libchewing/trunk/src/zuin.c:
+	Special handle for space key (Indeed very special one).  
+	Un-break the situation that OnKeySpace() is not called, 
+	hence the Candidate window doesn't show up, because 
+	ZUIN_NO_WORD is returned.
+
 2004-10-13  Jim Huang  <jserv@kaffe.org>
 
 	* src/tools/sort_word.c,

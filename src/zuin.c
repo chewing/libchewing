@@ -97,8 +97,15 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 	if ( 
 		pZuin->pho_inx[ 0 ] == 0 && 
 		pZuin->pho_inx[ 1 ] == 0 && 
-		pZuin->pho_inx[ 2 ] == 0 )
-		return key==' '?ZUIN_KEY_ERROR:ZUIN_NO_WORD;
+		pZuin->pho_inx[ 2 ] == 0 ) {
+		/*
+		 * Special handle for space key (Indeed very special one).
+		 * Un-break the situation that OnKeySpace() is not called,
+		 * hence the Candidate window doesn't show up, because
+		 * ZUIN_NO_WORD is returned.
+		 */
+		return (key == ' ') ? ZUIN_KEY_ERROR : ZUIN_NO_WORD;
+	}
 
 	pZuin->pho_inx[ 3 ] = Key2PhoneInx( key, 3, pZuin->kbtype, searchTimes );
 	u16Pho = PhoneInx2Uint( pZuin->pho_inx );
