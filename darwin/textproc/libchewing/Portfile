@@ -6,7 +6,6 @@ version          0.2.5
 categories       textproc
 maintainers      gugod@gugod.org
 description      The Chewing intelligent phonetic input method library
-Smart bpmf-based Chinese input method library
 long_description \
     The Chewing intelligent phonetic input method library
 homepage         http://chewing.csie.net/
