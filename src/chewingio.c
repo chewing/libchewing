@@ -34,7 +34,13 @@
 FILE *fp_g;
 #endif
 
-char *kb_type_str[] = {
+void (*TerminateServices[ TerminateServicesNUM ])() = {
+	NULL
+};
+static int countTerminateService = 0;
+static int bTerminateCompleted = 0;
+
+static char *kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
 	"KB_IBM",
@@ -62,9 +68,28 @@ void SetKBType( ZuinData *pZuin, int kbtype )
 	pZuin->kbtype = kbtype;
 }
 
+#ifdef ENABLE_DEBUG     
+static void TerminateDebug()
+{
+	fprintf( fp_g,  "DEBUG: logging service is about to terminate.\n" );
+	if ( fp_g ) {
+		fclose( fp_g );
+	}
+}               
+#endif
+
+int addTerminateService( void (*callback)() )
+{       
+	if ( callback ) {
+		TerminateServices[ countTerminateService++ ] = callback;
+		return 0;
+	}
+	return 1;
+}
+
 int InitChewing( void *iccf, ChewingConf *cf )
 {
-	ChewingData *pgdata = (ChewingData *)iccf;
+	ChewingData *pgdata = (ChewingData *) iccf;
 
 #ifdef ENABLE_DEBUG
         char *dbg_path;
@@ -80,9 +105,10 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	        fp_g = fopen( dbg_path, "w+" );
 		if ( ! fp_g ) {
 			fprintf( stderr, "Error: failed to record debug message.\n" );
-			exit( -1 );
 		}
 	}
+	if ( fp_g )
+		addTerminateService( TerminateDebug );
 #endif
 
 	/* zuinData */
@@ -104,6 +130,37 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	pgdata->nSelect = 0;
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
+	/* XXX: make options for callee to decide if use atexit or not. */
+	atexit( TerminateChewing );
+	return 0;
+}
+
+int TerminateChewing()
+{
+	int i;
+
+	/* No terminating services are registered. */
+	if ( bTerminateCompleted || countTerminateService == 0 )
+		return 0;
+
+	for ( i = 0; i < countTerminateService; i++ ) {
+		if ( TerminateServices[ i ] ) {
+#ifdef ENABLE_DEBUG
+			/* Can't output to debug file because it's about to close */
+			fprintf( stderr, 
+				"\033[44;37mTerminating service #%d in %d\033[m\n",
+				i, countTerminateService );
+#endif
+			(*TerminateServices[ i ])();
+		}
+	}
+	
+	/* XXX: should check if the services are really completed. */
+	bTerminateCompleted = 1;
+	/* some callback functions might not work */
+	if ( countTerminateService != i ) {
+		return 1;
+	}
 	return 0;
 }
 
@@ -672,7 +729,7 @@ static int dvorak_convert( int key )
 	int i = 0, Total = 67;
 
 	for ( i = 0; i < Total; i++ ) {
-		if ( key == qkey[ i ] ){
+		if ( key == qkey[ i ] ) {
 			key = dkey[ i ];
 			return key;
 		}
@@ -740,9 +797,9 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 				case ZUIN_IGNORE:
 #ifdef ENABLE_DEBUG
 					fprintf(
-							fp_g, 
-							"\t\tbefore isupper(key),key=%d\n", 
-							key );
+						fp_g, 
+						"\t\tbefore isupper(key),key=%d\n", 
+						key );
 #endif
 					/* change upper case into lower case */
 					if ( isupper( key ) ) 
@@ -750,9 +807,9 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 #ifdef ENABLE_DEBUG
 					fprintf(
-							fp_g, 
-							"\t\tafter isupper(key),key=%d\n", 
-							key );
+						fp_g, 
+						"\t\tafter isupper(key),key=%d\n", 
+						key );
 #endif
 
 					/* see if buffer contains nothing */
@@ -796,9 +853,9 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 		else {
 #ifdef ENABLE_DEBUG
 			fprintf(
-					fp_g, 
-					"\t\tQuick commit buf[0]=%c\n", 
-					pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
+				fp_g, 
+				"\t\tQuick commit buf[0]=%c\n", 
+				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
 #endif
 			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
 			pgo->nCommitStr = 1;
@@ -829,16 +886,20 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 	CallPhrasing( pgdata );
 	newPhraseLen = key - '0';
 
-	if((key == '0' || key == '1') && !pgdata->bSelect ){
-		pgdata->bSelect = 1 ;  
-		HaninSymbolInput(&(pgdata->choiceInfo), &(pgdata->availInfo), pgdata->phoneSeq, pgdata->config.selectAreaLen); 
+	if ( ( key == '0' || key == '1') && ! pgdata->bSelect ) {
+		pgdata->bSelect = 1;  
+		HaninSymbolInput(
+			&( pgdata->choiceInfo ), 
+			&( pgdata->availInfo ), 
+			pgdata->phoneSeq, 
+			pgdata->config.selectAreaLen ); 
 		SemiSymbolInput('1', pgdata);
                 CallPhrasing( pgdata );
                 MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
                 return 0;
 	}
 
-        if ( !pgdata->config.bAddPhraseForward ) {
+        if ( ! pgdata->config.bAddPhraseForward ) {
 		if ( 
 			newPhraseLen >= 1 && 
 			pgdata->cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq ) {
@@ -940,36 +1001,39 @@ int OnKeyShiftSpace( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo)
+int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
 {
-	ChewingData *pgdata = (ChewingData *)iccf;
+	ChewingData *pgdata = (ChewingData *) iccf;
 	int rtn, QuickCommit = 0;
-	int keystrokeRtn = KEYSTROKE_ABSORB ;
+	int keystrokeRtn = KEYSTROKE_ABSORB;
 	
-	if(!pgdata->bSelect ) {
-		/* zonble: If we're not selecting words, we should send out numeric
-		* characters at once. */
-		if( pgdata->chiSymbolBufLen == 0){
+	if ( ! pgdata->bSelect ) {
+		/* If we're not selecting words, we should send out numeric
+		 * characters at once. 
+		 */
+		if ( pgdata->chiSymbolBufLen == 0 ) {
 			QuickCommit = 1;
 		}
-		rtn = SymbolInput(key, pgdata);
+		rtn = SymbolInput( key, pgdata );
 		/* copied from OnKey Default */
-		if( rtn == SYMBOL_KEY_ERROR ) {
+		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE ;
-		} else if (QuickCommit) {
-			pgo->commitStr[0].wch = pgdata->chiSymbolBuf[0].wch; 
+		} else if ( QuickCommit ) {
+			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
-			keystrokeRtn = KEYSTROKE_COMMIT ;
+			keystrokeRtn = KEYSTROKE_COMMIT;
 		}
 	} else {
-		/* Otherwise, if we are selecting words, we use numeric keys as selkey
-		* and submit the words. */
+		/* Otherwise, if we are selecting words, we use numeric keys
+		 * as selkey
+		 * and submit the words. 
+		 */
 		int num = -1;
-		if(key > '0' && key < '8')
+		if ( key > '0' && key < '8' )
 			num = key - '1';
-		DoSelect(pgdata, num); //zonble
+		DoSelect( pgdata, num );
  	}
 	CallPhrasing( pgdata );
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );

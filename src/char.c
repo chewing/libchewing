@@ -51,6 +51,12 @@ int CompUint16( const uint16 *pa, const uint16 *pb )
 	return ( (*pa) - (*pb) );
 }
 
+static void TerminateChar()
+{
+	if ( dictfile )
+		fclose( dictfile );
+}
+
 int InitChar( const char *prefix )
 {
 	FILE *indexfile;
@@ -68,7 +74,8 @@ int InitChar( const char *prefix )
 
 	for ( i = 0; i <= PHONE_NUM; i++ )
 		fscanf( indexfile, "%hu %d", &arrPhone[ i ], &begin[ i ] );
-	fclose( indexfile );	
+	fclose( indexfile );
+	addTerminateService( TerminateChar );
 	return 1;
 }
 

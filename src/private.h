@@ -14,4 +14,6 @@ extern FILE *fp_g;
 
 typedef int (*CompFuncType)( const void *, const void * );
 
+#define TerminateServicesNUM 5
+extern int addTerminateService( void (*callback)() );
 #endif

@@ -39,6 +39,12 @@ char* fgettab( char *buf, int maxlen, FILE *fp )
 	return buf;
 }
 
+static void TerminateDict()
+{
+	if ( dictfile )
+		fclose( dictfile );
+}
+
 int InitDict( const char *prefix )
 {
 	FILE *indexfile;
@@ -55,6 +61,7 @@ int InitDict( const char *prefix )
 	while ( !feof( indexfile ) )
 		fscanf( indexfile, "%d", &begin[ i++ ] );
 	fclose( indexfile );
+	addTerminateService( TerminateDict );
 	return 1;
 }
 

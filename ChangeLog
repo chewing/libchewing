@@ -1,4 +1,34 @@
-2004-04-03 Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+2004-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h
+	src/chewingio.c
+	(TerminateChewing):
+	New function dedicated to terminate Chewing's internal
+	routines.
+
+	* src/private.h
+	src/chewingio.c
+	(addTerminateService):
+	New private function to register the terminate services.
+
+	* src/hanyupinying.c
+	(InitMap):
+	Use addTerminateService instead of atexit.
+
+	* src/dict.c (TerminateDict) (InitDict),
+	src/char.c (TerminateChar) (InitChar),
+	src/chewingio.c (TerminateDebug) (InitChewing):
+	Register corresponding terminate routines. (close the
+	data file I/O stream)
+	NOTE: atexit(3) is used.
+
+2004-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing):
+	Remove improper exit function call, which causes
+	unexpected closing.
+
+2004-04-03  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
 
 	* src/hanyupinying.c (FinalsMap),
 	data/pinyin.tab:

@@ -39,10 +39,10 @@ int OnKeyHome( void *, ChewingOutput * );
 int OnKeyEnd( void *, ChewingOutput * );
 int OnKeyDown( void *, ChewingOutput * );
 int OnKeyCapslock( void *, ChewingOutput * );
-int OnKeyDefault( void *,int, ChewingOutput * );
+int OnKeyDefault( void *, int, ChewingOutput * );
 int OnKeyCtrlNum( void *, int, ChewingOutput * );
-int OnKeyCtrlOption( void*, int, ChewingOutput * );
-int OnKeyShiftSpace( void*, ChewingOutput * );
+int OnKeyCtrlOption( void *, int, ChewingOutput * );
+int OnKeyShiftSpace( void *, ChewingOutput * );
 int OnKeyDblTab( void *iccf, ChewingOutput * );
 int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo);
 
@@ -64,6 +64,15 @@ int SetConfig( void *iccf, ConfigData *pcd );
  * @return If successed then return 0
  */
 int InitChewing( void *iccf, ChewingConf *cf );
+
+/**
+ * @brief Terminate chewing
+ *
+ * Terminate the I/O routines for chewing.
+ *
+ * @return If successed then return 0
+ */
+int TerminateChewing();
 
 /**
  * @brief Set chewing's english, chinese mode

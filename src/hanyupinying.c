@@ -111,7 +111,7 @@ static void InitMap()
 
 		fd = fopen( filepath, "r" );
 		if ( fd ) {
-			atexit( FreeMap );
+			addTerminateService( FreeMap );
 			fscanf( fd, "%d", &HANYU_INITIALS );
 			++HANYU_INITIALS;
 			hanyuInitialsMap = ALC( PinYingZuinMap, HANYU_INITIALS );
