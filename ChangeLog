@@ -30,8 +30,8 @@
 	(hanyuInitialsMap) (hanyuFinalsMap):
 	Adapt reference table from Lin Yu-Tang.
 	(HanyuPinYingToZuin):
-	Add "jo" detection. The patch was provided by
-	Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
+	Add "jo" detection.
+	Provided by Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
 
 2005-03-22  Jim Huang  <jserv@kaffe.org>
 
@@ -77,7 +77,7 @@
 2005-03-20  Jim Huang  <jserv@kaffe.org>
 
 	* test/Makefile.am:
-	Add vcheck to perform valgrind memory checking on the buil-in
+	Add vcheck to perform valgrind memory checking on the built-in
 	test suite.
 
 	* test/testchewing.c,
