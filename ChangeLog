@@ -1,3 +1,13 @@
+2005-04-02  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	src/private.h:
+	Clean up. Move CompFuncType and ALC to private.
+
+	* src/hanyupinying.c
+	(HanyuPinYingToZuin):
+	Avoid potential compiler-undefined behavior.
+
 2005-04-01  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
 
 	* src/hanyupinying.c

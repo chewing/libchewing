@@ -19,6 +19,7 @@
 #include "global.h"
 #include "hash.h"
 #include "dict.h"
+#include "private.h"
 
 extern int chewing_lifetime;
 static HASH_ITEM *pItemLast;

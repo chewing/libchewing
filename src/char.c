@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "char.h"
+#include "private.h"
 
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];

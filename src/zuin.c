@@ -374,8 +374,8 @@ int IsPinYingEndKey( ZuinData *pZuin, int key )
 
 int PinYingInput( ZuinData *pZuin, int key )
 {
-	int type=0, inx = 0, err = 0, status, i;
-	char zuinKeySeq[5],buf[2];
+	int err = 0, status, i;
+	char zuinKeySeq[ 5 ], buf[ 2 ];
 
 #ifdef ENABLE_DEBUG
 	fprintf( fp_g, "PinYinInput() " );

@@ -40,13 +40,15 @@
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (250)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
+
 #ifndef max
-#define max(a,b) ( (a) > (b) ? (a) : (b) )
+#define max(a, b) \
+	( (a) > (b) ? (a) : (b) )
 #endif
 #ifndef min
-#define min(a,b) ( (a) < (b) ? (a) : (b) )
+#define min(a, b) \
+	( (a) < (b) ? (a) : (b) )
 #endif
-#define ALC(type,size)  (type *) calloc( size, sizeof( type ) )
 
 typedef unsigned short uint16;
 
@@ -207,8 +209,6 @@ typedef struct {
  *   @brief  information for Chewing output.
  */
 
-typedef int (*CompFuncType)( const void *, const void * );
-
 typedef struct {
 	char phrase[ MAX_PHRASE_LEN * 2 + 1 ];
 	int freq;
@@ -218,10 +218,6 @@ typedef struct {
 	int from, to, pho_id, source;
 	Phrase *p_phr;
 } PhraseIntervalType;
-
-/* function prototype */
-
-void Live();
 
 /* tree.c */
 int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 

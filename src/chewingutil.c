@@ -20,6 +20,7 @@
 #include "chewingutil.h"
 #include "zuin.h"
 #include "userphrase.h"
+#include "private.h"
 
 extern const char *ph_pho[]; 
 static void MakePreferInterval( ChewingData *pgdata );

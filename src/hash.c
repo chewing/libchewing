@@ -176,7 +176,7 @@ int ReadHashItem( FILE *infile, HASH_ITEM *pItem, int item_index )
 	char wordbuf[ 64 ];
 
 	/* read wordSeq */
-	if ( fscanf( infile, "%s", wordbuf) != 1 )
+	if ( fscanf( infile, "%s", wordbuf ) != 1 )
 		return 0;
 	word_len = strlen( wordbuf );
 	pItem->data.wordSeq = ALC( char, word_len + 1 );
@@ -186,7 +186,7 @@ int ReadHashItem( FILE *infile, HASH_ITEM *pItem, int item_index )
 	len = word_len / 2;
 	pItem->data.phoneSeq = ALC( uint16, len + 1 );
 	for ( i = 0; i < len; i++ )
-		if ( fscanf( infile, "%hu", &( pItem->data.phoneSeq[ i ] ) ) != 1)
+		if ( fscanf( infile, "%hu", &( pItem->data.phoneSeq[ i ] ) ) != 1 )
 			return 0;
 	pItem->data.phoneSeq[ len ] = 0;
 
@@ -212,11 +212,15 @@ int ReadHash( char *path )
 
 	/* make sure of write permission */
 	if ( access( path, W_OK ) != 0) {
-		if (getenv ("HOME")) {
-			sprintf(hashfilename,"%s%s", getenv ("HOME"), CHEWING_HASH_PATH);
+		if ( getenv( "HOME" ) ) {
+			sprintf(
+				hashfilename, "%s%s", 
+				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
-			sprintf(hashfilename,"%s%s", "/tmp", CHEWING_HASH_PATH);
+			sprintf(
+				hashfilename, "%s%s",
+				"/tmp", CHEWING_HASH_PATH );
 		}
 		mkdir( hashfilename, S_IRWXU );
 		strcat (hashfilename, "/");

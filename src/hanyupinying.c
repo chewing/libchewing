@@ -23,7 +23,7 @@
 PinYingZuinMap *hanyuInitialsMap, *hanyuFinalsMap;
 int HANYU_INITIALS, HANYU_FINALS, INIT_FLAG = 0;
 
-PinYingZuinMap* InitialsMap()
+static PinYingZuinMap* InitialsMap()
 {
 	HANYU_INITIALS = 26;
 	static PinYingZuinMap map[ 26 ] = {
@@ -38,7 +38,7 @@ PinYingZuinMap* InitialsMap()
 	return map;
 }
 
-PinYingZuinMap* FinalsMap()
+static PinYingZuinMap* FinalsMap()
 {
 	HANYU_FINALS = 70;
 	static PinYingZuinMap map[ 70 ] = {
@@ -82,7 +82,7 @@ PinYingZuinMap* FinalsMap()
 		{"ui","jo"},
 		{"iu","m"}, {"yu","m"},
 		{"ue","m,"}, {"ve","m,"},
-		{"un","mp"},{"vn","mp"},
+		{"un","mp"}, {"vn","mp"},
 		{"a","8"},
 		{"e","k"},
 		{"i","u"},
@@ -93,13 +93,14 @@ PinYingZuinMap* FinalsMap()
 	};
 	return map;
 }
-void FreeMap()
+
+static void FreeMap()
 { 
 	free( hanyuInitialsMap );
 	free( hanyuFinalsMap );
 }
 
-void InitMap()
+static void InitMap()
 {
 	int i;
 	FILE *fd;
@@ -108,19 +109,20 @@ void InitMap()
 		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH);
 		char *filepath = strcat( filedir, "/pinyin.tab" );
 
-		if ( fd = fopen( filepath, "r" ) ) {
+		fd = fopen( filepath, "r" );
+		if ( ! fd ) {
 			atexit( FreeMap );
 			fscanf( fd, "%d", &HANYU_INITIALS );
-			hanyuInitialsMap = (PinYingZuinMap *) calloc(
-				++HANYU_INITIALS,
-				sizeof( PinYingZuinMap ) );
+			++HANYU_INITIALS;
+			hanyuInitialsMap = ALC( PinYingZuinMap, HANYU_INITIALS );
 			for ( i = 0; i < HANYU_INITIALS - 1; i++ )
 				fscanf( fd, "%s %s",
 					hanyuInitialsMap[ i ].pinying,
 					hanyuInitialsMap[ i ].zuin );
 			fscanf( fd, "%d", &HANYU_FINALS );
-			hanyuFinalsMap = (PinYingZuinMap*) calloc(
-				++HANYU_FINALS,
+			++HANYU_FINALS;
+			hanyuFinalsMap = (PinYingZuinMap *) calloc(
+				HANYU_FINALS,
 				sizeof( PinYingZuinMap ) * HANYU_FINALS );
 			for ( i = 0; i < HANYU_FINALS - 1; i++ )
 				fscanf( fd, "%s %s",
@@ -155,7 +157,7 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 	char *final = 0;
 	int i;
 
-	if ( ! INIT_FLAG)
+	if ( ! INIT_FLAG )
 		InitMap();
 
 	for ( i = 0; i < HANYU_INITIALS; i++ ) {
@@ -179,7 +181,7 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 	if ( cursor ) {
 		for ( i = 0; i < HANYU_FINALS; i++ ) {
 			p = strstr( cursor, hanyuFinalsMap[ i ].pinying );
-			if ( p==cursor ) {
+			if ( p == cursor ) {
 				final = hanyuFinalsMap[ i ].zuin;
 				break;
 			}
@@ -193,7 +195,7 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 			! strcmp( initial, "f" ) || 
 			! strcmp( initial, "r" ) ||
 			! strcmp( initial, "v" ) ) {
-			final="m0";
+			final = "m0";
 		}
 	}
 	sprintf( zuinKeySeq, "%s%s\0", initial, final );

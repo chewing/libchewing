@@ -9,4 +9,9 @@
 extern FILE *fp_g;
 #endif
 
+#define ALC(type, size) \
+	(type *) calloc( size, sizeof( type ) )
+
+typedef int (*CompFuncType)( const void *, const void * );
+
 #endif
