@@ -1,11 +1,18 @@
-2005-04-01  Jeff Chen <u6191488@mail.cs.tku.edu.tw>
+2005-04-01  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
 
 	* src/hanyupinying.c
+	(InitialsMap) (FinalsMap) (FreeMap) (InitMap):
+	New helper function to construct the PinYin mapping.
+	(HanyuPinYingToZuin):
 	Add support for customized PinYin table.
+
 	* src/zuin.c
+	(IsPinYingEndKey):
 	Fix "space key to select" of PinYin.
-	* data/pinyin.tab
-	A PinYin table. Put it in $HOME/.chewing.
+
+	* data/pinyin.tab,
+	data/Makefile.am:
+	New PinYin table. Put it in $HOME/.chewing.
 
 2005-03-29  Jim Huang  <jserv@kaffe.org>
 
@@ -14,7 +21,7 @@
 	Adapt reference table from Lin Yu-Tang.
 	(HanyuPinYingToZuin):
 	Add "jo" detection. The patch was provided by
-	wiz <u6191488@mail.cs.tku.edu.tw>.
+	Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
 
 2005-03-22  Jim Huang  <jserv@kaffe.org>
 
