@@ -3,7 +3,7 @@
 CHEWING=libchewing
 VERSION=`cat configure.ac | awk  '/AC_INIT/ {print $2}' | tr -d ' ' | sed -e 's/,//'`
 NEW=$CHEWING-$VERSION
-TARBALL=$NEW.tgz
+TARBALL=$NEW.tar.gz
 SVNENTRY=.svn/entries
 
 if [ ! -f $SVNENTRY ]; then
