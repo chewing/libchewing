@@ -113,18 +113,3 @@ HanyuPinYingToZuin(char *pinyingKeySeq, char *zuinKeySeq) {
     sprintf(zuinKeySeq,"%s%s\0",initial,final);
     return 0;
 }
-
-int main(void) {
-    char z[5];
-    char p[255];
-    int err;
-    while(scanf("%s",p) == 1) {
-        err = HanyuPinYingToZuin(p,z);
-        if(!err) {
-            printf("==> (%s) -> (%s)\n",p,z);
-        } else {
-            printf("Error %n (%s)\n",err, p);
-        }
-    }
-    return 0;
-}
