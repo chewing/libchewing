@@ -1,3 +1,9 @@
+2004-04-03 Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+
+	* src/hanyupinying.c (FinalsMap),
+	data/pinyin.tab:
+	Add "uei" and "uen" to PinYing-Zuin Map.
+
 2005-04-02  Jim Huang  <jserv@kaffe.org>
 
 	* include/global.h,

@@ -106,7 +106,7 @@ static void InitMap()
 	FILE *fd;
 	INIT_FLAG = 1;
 	if ( getenv( "HOME" ) ) {
-		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH);
+		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH );
 		char *filepath = strcat( filedir, "/pinyin.tab" );
 
 		fd = fopen( filepath, "r" );
@@ -121,7 +121,7 @@ static void InitMap()
 					hanyuInitialsMap[ i ].zuin );
 			fscanf( fd, "%d", &HANYU_FINALS );
 			++HANYU_FINALS;
-			hanyuFinalsMap = ALC(PinYingZuinMap,HANYU_FINALS);
+			hanyuFinalsMap = ALC( PinYingZuinMap, HANYU_FINALS );
 			for ( i = 0; i < HANYU_FINALS - 1; i++ )
 				fscanf( fd, "%s %s",
 					hanyuFinalsMap[ i ].pinying,
@@ -160,7 +160,7 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 
 	for ( i = 0; i < HANYU_INITIALS; i++ ) {
 		p = strstr( pinyingKeySeq, hanyuInitialsMap[ i ].pinying );
-		if ( p == pinyingKeySeq) {
+		if ( p == pinyingKeySeq ) {
 			initial = hanyuInitialsMap[ i ].zuin;
 			cursor = pinyingKeySeq +
 				strlen( hanyuInitialsMap[ i ].pinying );
