@@ -244,6 +244,13 @@ int OnKeyEsc( void *iccf, ChewingOutput *pgo )
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	} else if ( pgdata->bSelect ) {
+		if ( pgdata->choiceInfo.isSymbol == 1 ) {
+			ChewingKillChar(
+				pgdata, 
+				pgdata->cursor - 1, 
+				pgdata->chiSymbolCursor - 1,
+				DECREASE_CURSOR );
+		}
 		ChoiceEndChoice( pgdata );
 	} else if ( ZuinIsEntering( &( pgdata->zuinData ) ) ) {
 		ZuinRemoveAll( &( pgdata->zuinData ) );
@@ -815,7 +822,6 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 		SemiSymbolInput('1', pgdata);
                 CallPhrasing( pgdata );
                 MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-                MakeOutputAddMsgAndCleanInterval( pgo, pgdata );
                 return 0;
 	}
 
