@@ -40,7 +40,8 @@ char *key_str[ MAX_KBTYPE ] = {
 	"bpmfdtnlvkhg7c,./j;'sexuaorwiqzy890-=1234",		/* ET  */
 	"bpmfdtnlvkhgvcgycjqwsexuaorwiqzpmntlhdfjk",		/* ET26 */
 	"1'a;2,oq.ejpuk5yixfdbghm8ctw9rnv0lsz[7634",		/* Dvorak */
-	"bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnklldhtn"		/* Dvorak Hsu */
+	"bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnklldhtn",		/* Dvorak Hsu */
+	"1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* pinying */
 } ;
 
 int Key2PhoneInx( int key, int type, int kbtype, int searchTimes )
