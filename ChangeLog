@@ -1,3 +1,10 @@
+2005-02-20  Kang-min Liu  <gugod@gugod.org>
+	* src/global.h
+	(ConfigData):
+
+	Add an extra field 'hsuSelKeyType' to indicate
+	the two different kind of hsu-keyboard selection key.
+	
 2005-02-19  Jim Huang  <jserv@kaffe.org>
 
 	* src/hash.c
