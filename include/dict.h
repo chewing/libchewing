@@ -21,7 +21,7 @@
 
 #include "global.h"
 
-#define PHONE_PHRASE_NUM (120000)
+#define PHONE_PHRASE_NUM (130000)
 
 int InitDict( const char * );
 int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id );

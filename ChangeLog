@@ -1,5 +1,12 @@
 2004-12-28  Jim Huang  <jserv@kaffe.org>
 
+	* include/dict.h:
+	Adjust PHONE_PHRASE_NUM from 120000 to 130000.
+	Avoid SegFault.
+	Reported by: Wei-zhong Yang <wz.yang@msa.hinet.net>
+
+2004-12-28  Jim Huang  <jserv@kaffe.org>
+
 	* configure.ac,
 	README:
 	Bump version to 0.2.5.
