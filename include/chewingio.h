@@ -44,6 +44,7 @@ int OnKeyCtrlNum( void *, int, ChewingOutput * );
 int OnKeyCtrlOption( void*, int, ChewingOutput * );
 int OnKeyShiftSpace( void*, ChewingOutput * );
 int OnKeyDblTab( void *iccf, ChewingOutput * );
+int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo);
 
 /**
  * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd

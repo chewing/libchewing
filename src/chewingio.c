@@ -809,7 +809,18 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 
 	CallPhrasing( pgdata );
 	newPhraseLen = key - '0';
-	if ( !pgdata->config.bAddPhraseForward ) {
+
+	if((key == '0' || key == '1') && !pgdata->bSelect ){
+		pgdata->bSelect = 1 ;  
+		HaninSymbolInput(&(pgdata->choiceInfo), &(pgdata->availInfo), pgdata->phoneSeq, pgdata->config.selectAreaLen); 
+		SemiSymbolInput('1', pgdata);
+                CallPhrasing( pgdata );
+                MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+                MakeOutputAddMsgAndCleanInterval( pgo, pgdata );
+                return 0;
+	}
+
+        if ( !pgdata->config.bAddPhraseForward ) {
 		if ( 
 			newPhraseLen >= 1 && 
 			pgdata->cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq ) {
@@ -911,3 +922,38 @@ int OnKeyShiftSpace( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
+int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo)
+{
+	ChewingData *pgdata = (ChewingData *)iccf;
+	int rtn, QuickCommit = 0;
+	int keystrokeRtn = KEYSTROKE_ABSORB ;
+	
+	if(!pgdata->bSelect ) {
+		/* zonble: If we're not selecting words, we should send out numeric
+		* characters at once. */
+		if( pgdata->chiSymbolBufLen == 0){
+			QuickCommit = 1;
+		}
+		rtn = SymbolInput(key, pgdata);
+		/* copied from OnKey Default */
+		if( rtn == SYMBOL_KEY_ERROR ) {
+			keystrokeRtn = KEYSTROKE_IGNORE ;
+		} else if (QuickCommit) {
+			pgo->commitStr[0].wch = pgdata->chiSymbolBuf[0].wch; 
+			pgo->nCommitStr = 1;
+			pgdata->chiSymbolBufLen = 0;
+			pgdata->chiSymbolCursor = 0;
+			keystrokeRtn = KEYSTROKE_COMMIT ;
+		}
+	} else {
+		/* Otherwise, if we are selecting words, we use numeric keys as selkey
+		* and submit the words. */
+		int num = -1;
+		if(key > '0' && key < '8')
+			num = key - '1';
+		DoSelect(pgdata, num); //zonble
+ 	}
+	CallPhrasing( pgdata );
+	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+	return 0;
+}

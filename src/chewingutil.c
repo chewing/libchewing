@@ -94,6 +94,57 @@ int ChewingIsEntering( ChewingData *pgdata )
 		ZuinIsEntering( &( pgdata->zuinData ) ) );
 }
 
+#define CEIL_DIV(a,b) ((a+b-1)/b)
+
+int HaninSymbolInput(ChoiceInfo *pci, AvailInfo *pai, const uint16 phoneSeq[],	int selectAreaLen) {
+    static char *chibuf[] = { "¡A","¡B","¡C","¡D","¡F","¡G",
+                              "¡H","¡I","¡J","?","¡K","¡L","¡U","¡X", "¡[","¡\\",
+		"¡]","¡^","¡_","¡`","¡m","¡n","¡o","¡p",
+		"¡q","¡r","¡s","¡t","¡i","¡j","¡k","¡l",
+		"¡a","¡b","¡c","¡d","¡e","¡f","¡g","¡h",
+		"¡u","¡v","¡w","¡x","¡y","¡z","¡{","¡|",
+		"¡­","¡®","¡¯","¡°","¡±","¡²","¡³","¡´",
+		"¡·","¡À","¡µ","¡¾","¡¶","¡¿","¡ï","¡î",
+		"¡¸","¡¹","¡º","¡»","¡¼","¡½","¡ð","¡ñ",
+		"¡÷","¡ö","¡ô","¡õ","¡ù","¡ø","¡û","¡ú",
+		"¢O","¢P","¢Q","¢R","¢S","¢T","¢U","¢V",
+		"¢W","¢J","¢K","¢X","¡Ó","¡Ñ","¡Ò","¡Ü",
+		"¡Ú","¡Ø","¡Ù","¡ã","¡ç","¡æ","¡è","¡Ý",
+		"¡é","¡Û","¡Ô","?","¢z","¢s","¢{","¢u",
+		"¢q","¢t","¢|","¢r","¢}","¢w","¢x","¢¤",
+		"¢¥","¢¦","¢§","¢¬","¢­","¢®","¢~","¢¡",
+		"¢¢","¢£","¢b","¢c","¢d","¢e","¢f","¢g",
+		"¢h","¢i","¢j","¢k","¢l","¢m","¢n","¢o",
+		"¢p","¢v","¢Ã","¢Ä","¢Å","¢Æ","¢Ç","¢È",
+		"¢É","¢Ê","¢Ë","¤Q","¢Í","¤Ê","¢¹","¢º",
+		"¢»","¢¼","¢½","¢¾","¢¿","¢À","¢Á","¢Â",
+		"£D","£E","£F","£G","£H","£I","£J","£K",
+		"£L","£M","£N","£O","£P","£Q","£R","£S",
+		"£T","£U","£V","£W","£X","£Y","£Z","£[",
+		"£\\","£]","£^","£_","£`","£a","£b","£c",
+                              "£d","£e","£f","£g","£h","£i","£j","£k",
+                              "£l","£m","£n","£o","£p","£q","£r","£s"};
+    int i, all = 216;
+
+    pci->nTotalChoice = 0;
+    for(i = 0; i< all; i++){
+        memcpy( pci->totalChoiceStr[ pci->nTotalChoice],
+                chibuf[i], sizeof(char)*2) ;
+        pci->totalChoiceStr[ pci->nTotalChoice][2] = '\0' ;
+        pci->nTotalChoice++; 
+    }  
+    pai->avail[1].len = 1;
+    pai->avail[1].id = -1;  
+    pai->nAvail = all;
+    pai->currentAvail = 1;
+    pci->nChoicePerPage = (selectAreaLen - 5) / ( 2 + 3) ;
+    if(pci->nChoicePerPage > MAX_SELKEY) pci->nChoicePerPage = MAX_SELKEY ;
+    pci->nPage = CEIL_DIV(pci->nTotalChoice, pci->nChoicePerPage) ;
+    pci->pageNo = 0 ;
+    pci->isSymbol = 1;
+    return ZUIN_ABSORB;
+}
+
 static int InternalSpecialSymbol(
 		int key, ChewingData *pgdata,
 		int nSpecial, char keybuf[], char *chibuf[] )
@@ -161,34 +212,28 @@ int SpecialEtenSymbolInput( int key, ChewingData *pgdata )
 	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
 }
 
-int SymbolChoice( ChewingData *pgdata, int sel_i )
-{
-	memmove(
-		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
-		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
-		sizeof( wch_t ) *
-			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
-
-	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
-	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s[ 0 ] =
-		pgdata->choiceInfo.totalChoiceStr[ sel_i ][ 0 ];
-	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s[ 1 ] =
-		pgdata->choiceInfo.totalChoiceStr[ sel_i ][ 1 ];
-	pgdata->chiSymbolCursor++;
-	pgdata->chiSymbolBufLen++;
-	pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
-	ChoiceEndChoice( pgdata );
+int SymbolChoice(ChewingData *pgdata, int sel_i){
+	pgdata->chiSymbolCursor -- ;
+	memmove( &(pgdata->chiSymbolBuf[pgdata->chiSymbolCursor]),
+                 &(pgdata->chiSymbolBuf[pgdata->chiSymbolCursor] ) ,
+                 sizeof(wch_t)*
+                 (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor) ) ;
+	pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].wch = (wchar_t) 0 ;
+	pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].s[0] = pgdata->choiceInfo.totalChoiceStr[sel_i][0];
+	pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].s[1] = pgdata->choiceInfo.totalChoiceStr[sel_i][1];
+	pgdata->chiSymbolCursor ++ ; 
+	pgdata->bUserArrCnnct[pgdata->cursor] = 0;
+	ChoiceEndChoice(pgdata);
+	memset(&(pgdata->zuinData), 0, sizeof(ZuinData));
 	return ZUIN_ABSORB;
 }
 
-int SpaceSymbolInput( int key, ChewingData *pgdata )
+int SemiSymbolInput(int key, ChewingData *pgdata)
 {
-	static char keybuf[] = { ' ' };
-
-	static char *chibuf[] = { "¡@" };
-
-	static int nSpecial = 1;
-	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
+    static char keybuf[] = {' ', '1'} ;
+    static char *chibuf[] = {"¡@", "²Å"} ;
+    static int nSpecial = 2 ;
+    return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
 }
 
 int SymbolInput( int key, ChewingData *pgdata )

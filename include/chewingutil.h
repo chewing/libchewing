@@ -25,10 +25,12 @@ void SetUpdatePhraseMsg( ChewingData *pgdata, char *addWordSeq, int len, int sta
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end );
 int ChewingIsEntering( ChewingData *pgdata );
 void CleanAllBuf( ChewingData * );
+int SemiSymbolInput(int key, ChewingData *pgdata);
 int SpecialEtenSymbolInput( int key, ChewingData *pgdata );
 int SpecialSymbolInput( int key, ChewingData *pgdata );
 int SymbolInput( int key, ChewingData *pgdata );
 int SymbolChoice( ChewingData *pgdata, int sel_i );
+int HaninSymbolInput(ChoiceInfo *pci, AvailInfo *pai, const uint16 phoneSeq[],  int selectAreaLen);
 int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata );
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16 phone, ChewingData *pgdata );
