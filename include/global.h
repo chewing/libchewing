@@ -35,7 +35,7 @@ extern FILE *fp_g;
 
 #define MAX_KBTYPE 10
 #define MAX_SELKEY 10
-#define TREE_SIZE (149339)
+#define TREE_SIZE (153251)
 #define WCH_SIZE 4
 #define ZUIN_SIZE 4
 #define MAX_PHRASE_LEN 10
