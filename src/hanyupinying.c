@@ -25,7 +25,6 @@ PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
     {"iong","m/"},
     {"uang","j;"},
     {"uang","j;"},
-    {"yuan","m0"},
 
     {"ang",";"},
     {"eng","/"},
@@ -36,8 +35,9 @@ PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
     {"uai","j9"},
     {"uan","j0"},
     {"uei","jo"},
-    {"yue","m,"},
-    {"yun","mp"},
+    {"van","m0"},
+    {"ve","m,"},
+    {"vn","mp"},
 
     {"ai","9" },
     {"an","0" },
@@ -51,18 +51,18 @@ PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
     {"ou","l" },
     {"ou","l" },
     {"un","jp"},
+    {"va","m8"},
     {"wa","j8"},
     {"wo","ji"},
-    {"ya","m8"},
-    {"yu","m"},
 
     {"a","8"},
     {"e",","},
     {"e","k"},
     {"o","i"},
+    {"r","-"},
+    {"v","m"},
     {"w","j"},
-    {"y","u"},
-    {"r","-"}
+    {"y","u"}
 };
 
 /*
