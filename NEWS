@@ -1,6 +1,15 @@
 What's New in Subversion
 ----------------------------------------------------------
 
+What's New in libchewing 0.2.5
+----------------------------------------------------------
+* Merge SpaceChewing's frequency tweaking from zonble.
+* Minor fixes for building process and zuin core.
+* Successful stories:
+  . IIIMF-chewing
+  . SCIM-chewing
+  . OpenVanilla Input Method Framework for MacOS X
+
 What's New in libchewing 0.2.4
 ----------------------------------------------------------
 

@@ -1,3 +1,10 @@
+2004-12-28  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac,
+	README:
+	Bump version to 0.2.5.
+	Update the status of integration.
+
 2004-12-26  Jim Huang  <jserv@kaffe.org>
 
 	* deabin/README.Debian,
