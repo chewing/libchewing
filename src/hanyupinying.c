@@ -18,7 +18,7 @@
 #include "private.h"
 
 /*
-  according to http://oclccjk.lib.uci.edu/pycywg.htm
+  according to http://www.arts.cuhk.edu.hk/Lexis/Lindict/
  */
 PinYingZuinMap *hanyuInitialsMap, *hanyuFinalsMap;
 int HANYU_INITIALS, HANYU_FINALS, INIT_FLAG = 0;
@@ -40,8 +40,8 @@ static PinYingZuinMap* InitialsMap()
 
 static PinYingZuinMap* FinalsMap()
 {
-	HANYU_FINALS = 70;
-	static PinYingZuinMap map[ 70 ] = {
+	HANYU_FINALS = 72;
+	static PinYingZuinMap map[ 72 ] = {
 		{"uang","j;"}, {"wang","j;"},
 		{"wong","j/"}, {"weng","j/"},
 		{"ying","u/"},
@@ -58,9 +58,9 @@ static PinYingZuinMap* FinalsMap()
 		{"eng","/"},
 		{"iue","m,"}, {"yue","m,"},
 		{"uai","j9"}, {"wai","j9"},
-		{"wei","jo"},
+		{"uei","jo"}, {"wei","jo"},
 		{"uan","j0"}, {"wan","j0"},
-		{"wen","jp"},
+		{"uen","jp"}, {"wen","jp"},
 		{"ong","j/"},
 		{"van","m0"},
 		{"ven","mp"},
@@ -110,7 +110,7 @@ static void InitMap()
 		char *filepath = strcat( filedir, "/pinyin.tab" );
 
 		fd = fopen( filepath, "r" );
-		if ( ! fd ) {
+		if ( fd ) {
 			atexit( FreeMap );
 			fscanf( fd, "%d", &HANYU_INITIALS );
 			++HANYU_INITIALS;
@@ -121,9 +121,7 @@ static void InitMap()
 					hanyuInitialsMap[ i ].zuin );
 			fscanf( fd, "%d", &HANYU_FINALS );
 			++HANYU_FINALS;
-			hanyuFinalsMap = (PinYingZuinMap *) calloc(
-				HANYU_FINALS,
-				sizeof( PinYingZuinMap ) * HANYU_FINALS );
+			hanyuFinalsMap = ALC(PinYingZuinMap,HANYU_FINALS);
 			for ( i = 0; i < HANYU_FINALS - 1; i++ )
 				fscanf( fd, "%s %s",
 					hanyuFinalsMap[ i ].pinying,
