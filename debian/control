@@ -10,104 +10,41 @@ Conflicts: libchewing-dev
 Section: devel
 Architecture: any
 Depends: libchewing1 (= ${Source-Version})
-Description: Developer package of libchewing
- libchewing - The intelligent phonetic input method library
+Description: intelligent phonetic input method library(developer version)
+ libchewing is an intelligent phonetic input method library for Chinese.
  .
- [-] History
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
  .
- libchewing is derived from Chewing input method, a xcin module
- focusing on intelligent phonetic processing by lckung and 
- kpchen. However, the original authors of Chewing dropped its
- development, and Chewing is highly bonded with xcin, which
- prevents from wider applications.
- .
- [-] Motion
- .
- Jim Huang started to separate core algorithm and logic layer
- of Chewing since 2002, and he integrated his efforts into a
- Chinese terminal named JMCCE as a part of its input method
- modules. Also, he attempts to let more applications adapt
- his efforts, so that he created libchewing with writing some
- bridges among JMCCE, XCIN, SCIM and iiimf-chewing, etc.
- .
- [-] Status
- .
- 1. bridge integration
- a) works with xcin
- b) works with JMCCE
- c) works with SCIM-chewing
- d) works with IIIMF-chewing
- e) starts screen-chewing (Chewing IM for GNU screen)
- f) starts ime-chewing (Chewing MS-Windows IME)
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
 
 Package: libchewing1
 Provides: libchewing
 Section: libs
 Architecture: any
 Depends: libchewing-data (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
-Description: A intelligent chinese phonetic input method library
+Description: intelligent phonetic input method library
+ libchewing is an intelligent phonetic input method library for Chinese.
+ .
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
+ .
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
  libchewing - The intelligent phonetic input method library
- .
- [-] History
- .
- libchewing is derived from Chewing input method, a xcin module
- focusing on intelligent phonetic processing by lckung and 
- kpchen. However, the original authors of Chewing dropped its
- development, and Chewing is highly bonded with xcin, which
- prevents from wider applications.
- .
- [-] Motion
- .
- Jim Huang started to separate core algorithm and logic layer
- of Chewing since 2002, and he integrated his efforts into a
- Chinese terminal named JMCCE as a part of its input method
- modules. Also, he attempts to let more applications adapt
- his efforts, so that he created libchewing with writing some
- bridges among JMCCE, XCIN, SCIM and iiimf-chewing, etc.
- .
- [-] Status
- .
- 1. bridge integration
- a) works with xcin
- b) works with JMCCE
- c) works with SCIM-chewing
- d) works with IIIMF-chewing
- e) starts screen-chewing (Chewing IM for GNU screen)
- f) starts ime-chewing (Chewing MS-Windows IME)
 
 Package: libchewing-data
 Conflicts: libchewing-data (<= 0.2.3)
 Section: misc
 Architecture: any
 Depends: ${misc:Depends}
-Description: Data used by libchewing
- This package contains the file needed to run chewing.
+Description:intelligent phonetic input method library - data files
+ libchewing is an intelligent phonetic input method library for Chinese.
  .
+ It provides the core algorithm and logic so that they can be shared among
+ the various input methods like JMCCE, XCIN SCIM, iiimf-chewing, etc.
+ .
+ The Chewing input method is a smart bopomofo fonetics input method that
+ is useful for inputing many Chinese based languages.
  libchewing - The intelligent phonetic input method library
- .
- [-] History
- .
- libchewing is derived from Chewing input method, a xcin module
- focusing on intelligent phonetic processing by lckung and 
- kpchen. However, the original authors of Chewing dropped its
- development, and Chewing is highly bonded with xcin, which
- prevents from wider applications.
- .
- [-] Motion
- .
- Jim Huang started to separate core algorithm and logic layer
- of Chewing since 2002, and he integrated his efforts into a
- Chinese terminal named JMCCE as a part of its input method
- modules. Also, he attempts to let more applications adapt
- his efforts, so that he created libchewing with writing some
- bridges among JMCCE, XCIN, SCIM and iiimf-chewing, etc.
- .
- [-] Status
- .
- 1. bridge integration
- a) works with xcin
- b) works with JMCCE
- c) works with SCIM-chewing
- d) works with IIIMF-chewing
- e) starts screen-chewing (Chewing IM for GNU screen)
- f) starts ime-chewing (Chewing MS-Windows IME)

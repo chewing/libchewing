@@ -44,3 +44,6 @@ docs:
 	if [ -x "@DOXYGEN@" ]; then \
 		@DOXYGEN@ Doxyfile; \
 	fi
+clean-local:
+	rm -rf html
+	rm -rf man
