@@ -12,8 +12,8 @@
  * of this file.
  */
 
-#ifndef _GLOBAL_H
-#define _GLOBAL_H
+#ifndef _CHEWING_GLOBAL_H
+#define _CHEWING_GLOBAL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -174,11 +174,11 @@ typedef struct {
 } ChewingData;
 
 typedef struct {
-	/** @brief the content of Edit buffer.*/
+	/** @brief the content of Edit buffer. */
 	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
-	/** @brief the length of Edit buffer.*/
+	/** @brief the length of Edit buffer. */
 	int chiSymbolBufLen;
-	/** @brief current position of the cursor.*/
+	/** @brief current position of the cursor. */
 	long chiSymbolCursor;
 	long PointStart;
 	long PointEnd;

@@ -25,7 +25,7 @@ extern FILE *fp_g;
 	} while (0)
 		
 #else /* ! ENABLE_DEBUG */
-#define DEBUG_OUT( .. )
+#define DEBUG_OUT( ... )
 #define DEBUG_FLUSH
 #endif
 
