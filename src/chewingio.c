@@ -962,3 +962,8 @@ int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo)
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
+
+/* Local Variables: */
+/* c-indentation-style: linux */
+/* indent-tabs-mode: t */
+/* End: */
