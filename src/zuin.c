@@ -430,7 +430,7 @@ int ZuinPhoInput(ZuinData *pZuin,int key )
 int ZuinRemoveLast( ZuinData *pZuin )
 {
 	int i;
-	if(pZuin->kbtype == KB_HANYU_PINYING) {
+	if(pZuin->kbtype >= KB_HANYU_PINYING) {
 		i = strlen(pZuin->pinYingData.keySeq);
 		pZuin->pinYingData.keySeq[i-1]='\0';
 	} else {
@@ -455,7 +455,7 @@ int ZuinRemoveAll( ZuinData *pZuin )
 int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
-        if(pZuin->kbtype == KB_HANYU_PINYING) {
+        if(pZuin->kbtype >= KB_HANYU_PINYING) {
 	    if(pZuin->pinYingData.keySeq[0])
 		return 1;
         } else {
