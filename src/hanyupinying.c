@@ -1,3 +1,13 @@
+/**
+ * hanyupinying.c
+ *
+ * Copyright (c) 2005
+ *      libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 /* @(#)hanyupinying.c
  */
 
@@ -6,63 +16,69 @@
 #include "hanyupinying.h"
 
 /*
-  according to http://oclccjk.lib.uci.edu/pycywg.htm
+  according to http://www.arts.cuhk.edu.hk/Lexis/Lindict/
  */
-#define HANYU_INITIALS 23
+#define HANYU_INITIALS 26
 PinYingZuinMap hanyuInitialsMap[HANYU_INITIALS] = {
     {"b" , "1"}, {"p" , "q"}, {"m" , "a"}, {"f" ,"z"},
     {"d" , "2"}, {"t" , "w"}, {"n" , "s"}, {"l" ,"x"},
     {"g" , "e"}, {"k" , "d"}, {"h" , "c"},
-    {"j" , "r"}, {"g" , "f"}, {"x" , "v"},
-    {"zh", "5"}, {"ch", "t"}, {"sh", "g"}, {"r" ,"b"},
-    {"z" , "y"}, {"c" , "h"}, {"s" , "n"},
-    {"er", "-"}
+    {"j" , "r"}, {"q" , "f"}, {"x" , "v"},
+    {"zhi" , "5"}, {"zh" , "5"}, {"chi" , "t"}, {"ch" , "t"},
+    {"shi" , "g"}, {"sh" , "g"}, {"ri" , "b"}, {"r" , "b"},
+    {"z" , "y"}, {"c" , "h"}, {"s" , "n"}
 };
 
-#define HANYU_FINALS 40
+#define HANYU_FINALS 70
 PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
-    {"iang","u;"},
-    {"iong","m/"},
-    {"uang","j;"},
-    {"uang","j;"},
-
+    {"uang","j;"}, {"wang","j;"},
+    {"wong","j/"}, {"weng","j/"},
+    {"ying","u/"},
+    {"iong","m/"}, {"yong","m/"}, {"iung","m/"}, {"yung","m/"},
+    {"iang","u;"}, {"yang","u;"},
+    {"iuan","m0"}, {"yuan","m0"},
+    {"ing","u/"},
+    {"iao","ul"}, {"yao","ul"},
+    {"iun","mp"}, {"yun","mp"},
+    {"iou","u."}, {"you","u."},
+    {"ian","u0"}, {"yan","u0"},
+    {"yin","up"},
     {"ang",";"},
     {"eng","/"},
-    {"ian","u0"},
-    {"iao","ul"},
-    {"ing","u/"},
+    {"iue","m,"}, {"yue","m,"},
+    {"uai","j9"}, {"wai","j9"},
+    {"wei","jo"},
+    {"uan","j0"}, {"wan","j0"},
+    {"wen","jp"},
     {"ong","j/"},
-    {"uai","j9"},
-    {"uan","j0"},
-    {"uei","jo"},
     {"van","m0"},
-    {"ve","m,"},
-    {"vn","mp"},
-
-    {"ai","9" },
-    {"an","0" },
-    {"ao","l" },
-    {"ei","o" },
-    {"en","p" },
-    {"ia","u8"},
-    {"ie","u,"},
+    {"ven","mp"},
+    {"er","-"},
+    {"ai","9"},
+    {"ei","o"},
+    {"ao","l"},
+    {"ou","."},
+    {"an","0"},
+    {"en","p"},
+    {"yi","u"},
+    {"ia","u8"}, {"ya","u8"},
+    {"ie","u,"}, {"ye","u,"},
     {"in","up"},
-    {"iu","u."},
-    {"ou","l" },
-    {"ou","l" },
-    {"un","jp"},
-    {"va","m8"},
-    {"wa","j8"},
-    {"wo","ji"},
-
+    {"io","m."},
+    {"wu","j"},
+    {"ua","j8"}, {"wa","j8"},
+    {"uo","ji"}, {"wo","ji"},
+    {"ui","jo"}, 
+    {"iu","m"}, {"yu","m"},
+    {"ue","m,"}, {"ve","m,"},
+    {"un","mp"}, {"vn","mp"},
     {"a","8"},
-    {"e",","},
     {"e","k"},
+    {"i","u"},
     {"o","i"},
-    {"r","-"},
     {"v","m"},
-    {"w","j"},
-    {"y","u"}
+    {"u","j"},
+    {"E",","}
 };
 
 /*
@@ -76,8 +92,10 @@ PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
 
 int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 {
-	// pinyinKeySeq[] should have at most 6 letters (Shuang)
-	// zuinKeySeq[] has at most 3 letters.
+	/*
+	 * pinyinKeySeq[] should have at most 6 letters (Shuang)
+	 * zuinKeySeq[] has at most 3 letters.
+	 */
 	char *p, *cursor;
 	char *initial = 0;
 	char *final   = 0;
@@ -91,8 +109,8 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 			break;
 		}
 	}
-	if ( i == HANYU_INITIALS ) {
-		// No initials. might be £¸£¹£º
+	if ( i == (HANYU_INITIALS) ) {
+		/* No initials. might be £¸£¹£º */
 		/* XXX: I NEED Implementation
 		   if(finalsKeySeq[0] != ) {
 		   }
@@ -110,6 +128,15 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 		}
 		if ( i == HANYU_FINALS )
 			return 2;
+	}
+	
+	if ( ! strcmp( final, "j0" ) ) {
+		if (
+			! strcmp( initial, "f" ) || 
+			! strcmp( initial, "r" ) ||
+			! strcmp( initial,"v" ) ) {
+			final = "m0";
+		}
 	}
 
 	sprintf( zuinKeySeq, "%s%s\0", initial, final );

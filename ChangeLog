@@ -1,3 +1,12 @@
+2005-03-29  Jim Huang  <jserv@kaffe.org>
+
+	* src/hanyupinying.c
+	(hanyuInitialsMap) (hanyuFinalsMap):
+	Adapt reference table from Lin Yu-Tang.
+	(HanyuPinYingToZuin):
+	Add "jo" detection. The patch was provided by
+	wiz <u6191488@mail.cs.tku.edu.tw>.
+
 2005-03-22  Jim Huang  <jserv@kaffe.org>
 
 	* include/global.h,
