@@ -403,7 +403,7 @@ int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
 
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < ZUIN_SIZE; i++ )
 		if ( pZuin->pho_inx[ i ] )
 			return 1;
 	return 0;

@@ -82,7 +82,7 @@ typedef struct {
 
 typedef struct {
 	int kbtype;
-	int pho_inx[ 4 ];
+	int pho_inx[ ZUIN_SIZE ];
 	uint16 phone;
 } ZuinData;
 
