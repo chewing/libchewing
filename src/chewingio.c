@@ -41,7 +41,7 @@ char *kb_type_str[] = {
 	"KB_ET",
 	"KB_ET26",
 	"KB_DVORAK",
-	"KB_DVORAK_HSU"
+	"KB_DVORAK_HSU",
 	"KB_HANYU_PINYING"
 };
 
