@@ -1,3 +1,14 @@
+2005-02-08  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src:
+	Add missing phrase(編輯器).
+
+	* include/dict.h,
+	include/global.h:
+	Adjust PHONE_PHRASE_NUM from 130000 to 149233.
+	TREE_SIZE from 149339 to 153251.
+	Avoid SegFault.
+
 2005-01-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 	
 	* src/chewingio.c

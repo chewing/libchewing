@@ -1,0 +1,4 @@
+NOTE:
+
+If someone change the size of tsi.src, he should also edit the constant
+number definition in global.h, dict.h, etc.

@@ -10,3 +10,4 @@ For developers, please add new entry for your plans.
     a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
   b) support memory-limited applications.
 7. Migrate to Unicode
+8. Auto calculate the size of phrase data base.
