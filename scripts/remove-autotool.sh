@@ -4,16 +4,12 @@ if [ -f Makefile ]; then
 	if [ -f test/Makefile ]; then
 		make -C test distclean
 	fi
-	make distclean
+	make maintainer-clean
 fi
 
-rm -rf autom4te.cache
-
-find -name Makefile | xargs rm -f 
-find -name Makefile.in | xargs rm -f
 find -name .deps | xargs rm -rf
 
-rm -rf \
+rm -f \
 	aclocal.m4 \
 	config.sub \
 	config.guess \
