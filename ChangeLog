@@ -1,5 +1,19 @@
+2005-02-23  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	include/global.h,
+	include/chewingutil.h,
+	include/hanyupinying.h,
+	include/dict.h,
+	include/zuin.h,
+	src/chewingutil.c,
+	src/hash.c,
+	src/chewingio.c:
+	Bump copyright date.
+
 2005-02-20  Kang-min Liu  <gugod@gugod.org>
-	* src/global.h
+
+	* include/global.h
 	(ConfigData):
 
 	Add an extra field 'hsuSelKeyType' to indicate
