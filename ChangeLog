@@ -1,3 +1,9 @@
+2005-03-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/chewingutil.c
+	(InternalSpecialSymbol) (SymbolChoice):
+	Don't forget to keep the kbtype value.
+
 2005-02-28  Jim Huang  <jserv@kaffe.org>
 
 	* configure.ac:

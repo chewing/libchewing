@@ -150,6 +150,7 @@ static int InternalSpecialSymbol(
 		int nSpecial, char keybuf[], char *chibuf[] )
 {
 	int i, rtn = ZUIN_IGNORE; /* very strange , and very difficult to understand */
+        int kbtype;
 
 	for ( i = 0; i < nSpecial; i++ ) {
 		if ( key == keybuf[ i ] ) {
@@ -169,7 +170,10 @@ static int InternalSpecialSymbol(
 			pgdata->chiSymbolBufLen++;
 			pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
 			/* reset Zuin data */
+                        /* Don't forget the kbtype */
+                        kbtype = pgdata->zuinData.kbtype;
 			memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
+                        pgdata->zuinData.kbtype = kbtype;
 			break;
 		}
 	}
@@ -213,6 +217,7 @@ int SpecialEtenSymbolInput( int key, ChewingData *pgdata )
 }
 
 int SymbolChoice(ChewingData *pgdata, int sel_i){
+        int kbtype;
 	pgdata->chiSymbolCursor -- ;
 	memmove( &(pgdata->chiSymbolBuf[pgdata->chiSymbolCursor]),
                  &(pgdata->chiSymbolBuf[pgdata->chiSymbolCursor] ) ,
@@ -224,7 +229,10 @@ int SymbolChoice(ChewingData *pgdata, int sel_i){
 	pgdata->chiSymbolCursor ++ ; 
 	pgdata->bUserArrCnnct[pgdata->cursor] = 0;
 	ChoiceEndChoice(pgdata);
-	memset(&(pgdata->zuinData), 0, sizeof(ZuinData));
+        /* Don't forget the kbtype */
+        kbtype = pgdata->zuinData.kbtype;
+        memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
+        pgdata->zuinData.kbtype = kbtype;
 	return ZUIN_ABSORB;
 }
 
