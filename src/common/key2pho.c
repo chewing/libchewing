@@ -53,6 +53,10 @@ int Key2PhoneInx( int key, int type, int kbtype, int searchTimes )
 	p = strstr( ph_pho[ type ], bgStr );
 	if ( ! p )
 		return 0;
+        /*
+          This /2 here is because ph_pho[] string array uses
+          big5. Every char is 2 bytes.
+         */
 	return ( p - ph_pho[ type ] ) / 2;
 }
 
