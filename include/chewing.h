@@ -23,6 +23,7 @@ extern "C" {
 #include "hash.h"
 #include "userphrase.h"
 #include "zuin.h"
+#include "hanyupinying.h"
 
 /* statistics symbol reported by chewing */
 extern int chewing_lifetime;

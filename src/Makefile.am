@@ -11,7 +11,8 @@ libchewing_la_SOURCES = \
 	hash.c \
 	tree.c \
 	userphrase.c \
-	zuin.c
+	zuin.c \
+	hanyupinying.c
 libchewing_la_LIBADD = common/libcommon.la
 libchewing_la_LDFLAGS = \
 	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
