@@ -33,8 +33,6 @@
 FILE *fp_g;
 #endif
 
-extern int SpaceSymbolInput( int key, ChewingData *pgdata );
-
 char *kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
@@ -915,7 +913,7 @@ int OnKeyShiftSpace( void *iccf, ChewingOutput *pgo )
 
 	if ( ! pgdata->bSelect ) {
 		CheckAndResetRange( pgdata );
-		rtn = SpaceSymbolInput( key, pgdata );
+		rtn = SemiSymbolInput( key, pgdata );
 	}
 	CallPhrasing( pgdata );
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );

@@ -1,9 +1,16 @@
+2005-01-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* src/chewingio.c
+	(OnKeyShiftSpace):
+	Rename SpaceSymbolInput to SemiSymbolInput since SpaceSymbolInput
+	did not exist anymore.
+	
 2005-01-01  Kang-min Liu <gugod@gugod.org>
+
 	*  include/chewingio.h,
 	chewingutil.h,
 	src/chewingio.c,
 	chewingutil.c:
-
 	Add the facility to input symbols.(Ctrl-0 and Ctrl-1)
 	Make the NumLock keypad work just right
 
