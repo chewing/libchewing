@@ -44,11 +44,11 @@ int SortWord( const WORD_DATA *a, const WORD_DATA *b )
 int DoWord( char *buf )
 {
 	char keyBuf[ 128 ], phoneBuf[ 128 ];
-	int phoneInx[ 4 ];
+	int phoneInx[ ZUIN_SIZE ];
 
 	memset( phoneInx, 0, sizeof( phoneInx ) );
 	sscanf( buf, "%s %s", keyBuf, word_data[ nWord ].word );
-	if ( strlen( keyBuf ) > 4 )
+	if ( strlen( keyBuf ) > ZUIN_SIZE )
 		return DO_WORD_ERROR;
 
 	Key2Pho( phoneBuf, keyBuf, KB_DEFAULT, 1 );
