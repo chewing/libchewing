@@ -27,6 +27,7 @@
 #include "global.h"
 #include "zuin.h"
 #include "char.h"
+#include "hanyupinying.h"
 
 int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
@@ -361,6 +362,39 @@ int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
+int IsPinYingEndKey(int key,int type) {
+    if(key == ' ' || key == '1' || key == '2' ||
+       key == '3' || key == '4' || key == '5') {
+        return 1;
+    }
+    return 0;
+}
+
+int PinYingInput(ZuinData *pZuin,int key)
+{
+    int type=0, inx = 0, err = 0, status, i;
+    char zuinKeySeq[5],buf[2];
+
+    if ( IsPinYingEndKey( key, pZuin->pinYingData.type ) ) {
+        err = HanyuPinYingToZuin(pZuin->pinYingData.keySeq, zuinKeySeq);
+        if(err) return ZUIN_KEY_ERROR;
+        fprintf(stderr,"LibChewing: zuinKeySeq: %s\n",zuinKeySeq);
+        for(i=0;i<strlen(zuinKeySeq);i++) {
+            status = DefPhoInput( pZuin, zuinKeySeq[i] );
+            if(status != ZUIN_ABSORB) return ZUIN_KEY_ERROR;
+        }
+        
+        return EndKeyProcess( pZuin, key, 1 );
+    }
+    buf[0] = key; buf[1] = '\0';
+    strcat(pZuin->pinYingData.keySeq,buf);
+#ifdef DEBUG
+	fprintf( fp_g, "PinYing Seq: %s\n", pZuin->pinYingData.keySeq );
+#endif
+
+    return ZUIN_ABSORB;
+}
+
 /* key: ascii code of input, including space */
 int ZuinPhoInput(ZuinData *pZuin,int key )
 {
@@ -372,6 +406,9 @@ int ZuinPhoInput(ZuinData *pZuin,int key )
 		case KB_ET26:
 			return ET26PhoInput( pZuin, key );
 			break;
+        	case KB_HANYU_PINYING:
+                	return PinYingInput( pZuin, key );
+                        break;
 		default:
 			return DefPhoInput( pZuin, key );		
 	}	

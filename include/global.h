@@ -23,7 +23,7 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
-
+#define DEBUG
 #ifdef DEBUG
 extern FILE *fp_g;
 #endif
@@ -38,6 +38,7 @@ extern FILE *fp_g;
 #define TREE_SIZE (153251)
 #define WCH_SIZE 4
 #define ZUIN_SIZE 4
+#define PINYING_SIZE 10
 #define MAX_PHRASE_LEN 10
 #define MAX_PHONE_SEQ_LEN 50
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
@@ -81,9 +82,15 @@ typedef struct {
 } PhrasingOutput;
 
 typedef struct {
+    int type;
+    char keySeq[ PINYING_SIZE ];
+} PinYingData;
+
+typedef struct {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
 	uint16 phone;
+	PinYingData pinYingData;
 } ZuinData;
 
 typedef struct {
