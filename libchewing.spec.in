@@ -1,0 +1,82 @@
+%define version @LIBCHEWING_VERSION@
+%define release 1mdk
+
+Summary:	The Chewing intelligent phonetic input method library
+Name:		libchewing
+Version:	%{version}
+Release:	%{release}
+License:	LGPL
+Group:		System/Libraries
+URL:		http://jserv.sayya.org/wiki/index.php/Qooing
+Buildroot:      %_tmppath/%{name}-%{version}-%{release}-root
+
+Source:		%{name}-%{version}.tgz
+
+BuildRequires:
+Requires:
+
+%description
+This is an intelligent Chinese phonetic input method library. Based on
+Chewing input method.
+
+%package	-n %{name}-devel
+Summary:	Header files and libraries for developing apps which will use libchewing
+Group:		Development/C
+Requires:	%{name} = %{version}
+Provides:	%{name}-devel = %{version}-%{release}
+
+%description	-n %{name}-devel
+Header files and libraries for developing apps which will use libchewing
+
+%prep
+%setup -q %{name}-%{version}
+
+%build
+CONFIGURE_TOP="${CONFIGURE_TOP:-.}"; \
+CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
+CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ; \
+FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ; \
+%{?__cputoolize:%{__cputoolize} -c $CONFIGURE_TOP} ; \
+%{?__libtoolize:(cd $CONFIGURE_TOP; [ -f configure.in -o -f configure.ac ] && %{__libtoolize} --copy)} ; \
+$CONFIGURE_TOP/configure --build=%{_target_platform} \
+      --prefix=%{_prefix} \
+      --exec-prefix=%{_exec_prefix} \
+      --bindir=%{_bindir} \
+      --sbindir=%{_sbindir} \
+      --sysconfdir=%{_sysconfdir} \
+      --datadir=%{_datadir} \
+      --includedir=%{_includedir} \
+      --libdir=%{_libdir} \
+      --libexecdir=%{_libexecdir} \
+      --localstatedir=%{_localstatedir} \
+      --sharedstatedir=%{_sharedstatedir} \
+      --mandir=%{_mandir} \
+      --infodir=%{_infodir} \
+
+%make
+
+%install
+rm -rf %{buildroot}
+%makeinstall
+
+%clean
+rm -fr %buildroot
+
+%post -n %{name} -p /sbin/ldconfig
+%postun -n %{name} -p /sbin/ldconfig
+
+%files
+%defattr(-, root, root)
+%{_libdir}/*.so
+%{_libdir}/*.so.*
+%{_datadir}/*
+
+%files -n %{name}-devel
+%defattr(-, root, root)
+%{_libdir}/*.a
+%{_libdir}/*.la
+%{_includedir}/*
+
+%changelog
+* Fri Aug 06 2004 Shiva Huang <blueshiva@giga.net.tw> 0.2.2-1mdk
+- Initial release.

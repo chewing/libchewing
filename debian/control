@@ -1,0 +1,38 @@
+Source: libchewing
+Priority: optional
+Maintainer: Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
+Build-Depends: debhelper (>= 4.0.0), gcc (>= 3:3.3), make, doxygen, cdbs
+Standards-Version: 3.6.1
+
+Package: libchewing1-dev
+Provides: libchewing-dev
+Conflicts: libchewing-dev
+Section: devel
+Architecture: any
+Depends: libchewing1 (= ${Source-Version})
+Description: Developer package of libchewing
+ libchewing, a chinese input method's library that
+ can work with jmcce and xcin now, iiimf, scim the
+ future.
+
+Package: libchewing1
+Provides: libchewing
+Section: libs
+Architecture: any
+Depends: libchewing-data (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: A chinese input method's library
+ libchewing, a chinese input method's library that
+ can work with jmcce and xcin now, iiimf, scim the
+ future.
+
+Package: libchewing-data
+Conflicts: libchewing-data (<= 0.2.3)
+Section: misc
+Architecture: any
+Depends: ${misc:Depends}
+Description: Data used by libchewing
+ libchewing, a chinese input method's library that
+ can work with jmcce and xcin now, iiimf, scim the
+ future.
+ .
+ This package contains the file needed to run chewing.

@@ -1,0 +1,19 @@
+The directory contains test suite for libchewing.
+
+Here are the instructions making use of:
+
+1. Build
+  # make
+
+2. Test default test cases.
+  # make check
+
+3. (Optional) Use your own test cases.
+  # ./genkeystroke test.txt
+  # make check 
+
+Note:
+
+1. The hash data is generated in current path, and feel free
+   to replace with any existing hash.dat like:
+  # cp -f ~/.chewing/hash.dat .
