@@ -1,4 +1,4 @@
-%define version @LIBCHEWING_VERSION@
+%define version @PACKAGE_VERSION@
 %define release 1mdk
 
 %define libname_orig %{name}

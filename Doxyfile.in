@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = libchewing
-PROJECT_NUMBER         = @LIBCHEWING_VERSION@
+PROJECT_NUMBER         = @PACKAGE_VERSION@
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = Chinese-Traditional

@@ -9,7 +9,7 @@ chewing_binary_version=@LIBCHEWING_BINARY_VERSION@
 
 Name: Chewing
 Description: Intelligent Chinese phonetic input method library
-Version: @LIBCHEWING_VERSION@
+Version: @PACKAGE_VERSION@
 Requires: 
 Libs: -L${libdir} -lchewing
 Cflags: -I${includedir}/chewing
