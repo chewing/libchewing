@@ -1,3 +1,8 @@
+2005-02-27  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/char.h:
+	Adjust PHONE_NUM from 1319 to 1320.
+
 2005-02-25  Kang-min Liu  <gugod@gugod.org>
 
 	* src/chewingutil.c,
