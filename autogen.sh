@@ -7,7 +7,15 @@ if [ "x${ACLOCAL_DIR}" != "x" ]; then
 fi
 
 ${ACLOCAL:-aclocal} ${ACLOCAL_ARG}
-${LIBTOOLIZE:-libtoolize} -c --automake 
+
+# Darwin has different name for "libtoolize"
+UNAME=`uname`
+if [ "x${UNAME}" == "xDarwin" ]; then
+	${LIBTOOLIZE:-glibtoolize} -c --automake 
+else
+	${LIBTOOLIZE:-libtoolize} -c --automake 
+fi
+
 # intltoolize -c --automake
 ${AUTOMAKE:-automake} --add-missing --copy --include-deps
 ${AUTOCONF:-autoconf}
