@@ -28,7 +28,7 @@ bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
   c) works with IIIMF
   d) works with SCIM
   e) works with OpenVanilla Input Method Framework for MacOS X
-  f) starts screen-chewing (Chewing IM for GNU screen)
+  f) works with Sun's Java Desktop System Input Method Framework.
   g) starts ime-chewing (Chewing MS-Windows IME)
 
 2. support phonetic keyboard layout
@@ -39,6 +39,7 @@ bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
   e) Eten 26 keys
   f) Dvorak
   g) Dvorak Hsu
+  h) HanYu PinYing
 
 
 [-] Installation
