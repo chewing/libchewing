@@ -2,6 +2,7 @@
 
 	* configure.ac:
 	Bump version to 0.2.6.
+	Bump ABI major version.
 
 2005-02-27  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
