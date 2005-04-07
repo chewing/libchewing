@@ -17,16 +17,21 @@ extern FILE *fp_g;
 			fprintf( stderr, __VA_ARGS__ ); \
 		} \
 	} while (0)
+#define DEBUG_CHECKPOINT() \
+	DEBUG_OUT( "At %s %d\n", __FUNCTION__, __LINE__ )
 #define DEBUG_FLUSH \
 	do { \
 		if ( fp_g ) { \
 			fflush( fp_g ); \
 		} \
 	} while (0)
-		
+#define EMPHASIZE(real_string) \
+	"\033[44;37m"real_string"\033[m"
+
 #else /* ! ENABLE_DEBUG */
 #define DEBUG_OUT( ... )
 #define DEBUG_FLUSH
+#define DEBUG_CHECKPOINT()
 #endif
 
 #define ALC(type, size) \

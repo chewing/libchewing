@@ -150,7 +150,7 @@ void TerminateChewing()
 #ifdef ENABLE_DEBUG
 			/* Can't output to debug file because it's about to close */
 			fprintf( stderr, 
-				"\033[44;37mTerminating service #%d in %d\033[m\n",
+				EMPHASIZE( "Terminating service #%d / %d" ) ".\n",
 				i, countTerminateService );
 #endif
 			(*TerminateServices[ i ])();
@@ -750,7 +750,8 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 	CheckAndResetRange( pgdata );
 
-	DEBUG_OUT( "OnKeyDefault: key=%d\n", key );
+	DEBUG_CHECKPOINT();
+	DEBUG_OUT( "   key=%d\n", key );
 
 	/* Dvorak Hsu */
 	if ( pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {

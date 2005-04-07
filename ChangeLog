@@ -1,3 +1,10 @@
+2005-04-07  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/zuin.c (PinYinInput),
+	src/chewingio.c (TerminateChewing) (OnKeyDefault):
+	More improved debug macros.
+
 2005-04-03  Jim Huang  <jserv@kaffe.org>
 
 	* src/private.h,

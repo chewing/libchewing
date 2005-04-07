@@ -377,7 +377,7 @@ int PinYingInput( ZuinData *pZuin, int key )
 	int err = 0, status, i;
 	char zuinKeySeq[ 5 ], buf[ 2 ];
 
-	DEBUG_OUT( "PinYinInput() " );
+	DEBUG_CHECKPOINT();
 
 	if ( IsPinYingEndKey( pZuin, key ) ) {
 		err = HanyuPinYingToZuin( pZuin->pinYingData.keySeq, zuinKeySeq );
