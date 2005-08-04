@@ -1,5 +1,7 @@
 SUBDIRS = common tools
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = \
+	-I$(top_builddir)/include \
+	-DCHEWING_DATADIR=\"$(datadir)/chewing\"
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
