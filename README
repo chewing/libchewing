@@ -16,20 +16,21 @@ Jim Huang started to separate core algorithm and logic layer
 of Chewing since 2002, and he integrated his efforts into a
 Chinese terminal named JMCCE as a part of its input method
 modules. Also, he attempts to let more applications adapt
-his efforts, so that he created libchewing with writing some
-bridges among JMCCE, XCIN, IIIMF, SCIM, etc.
+his efforts, so that he created New Chewing Project as the
+infrastructure with writing some bridges among JMCCE, XCIN,
+IIIMF, SCIM, MS-IME, etc.
 
 
 [-] Status
 
 1. bridge integration
-  a) works with xcin
-  b) works with JMCCE
-  c) works with IIIMF
-  d) works with SCIM
-  e) works with OpenVanilla Input Method Framework for MacOS X
+  a) works with xcin.
+  b) works with JMCCE.
+  c) works with IIIMF.
+  d) works with SCIM.
+  e) works with OpenVanilla Input Method Framework for MacOS X.
   f) works with Sun's Java Desktop System Input Method Framework.
-  g) starts ime-chewing (Chewing MS-Windows IME)
+  g) works with OVIME (OpenVanilla IM Framework for MS-Windows).
 
 2. support phonetic keyboard layout
   a) Hsu
