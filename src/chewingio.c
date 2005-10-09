@@ -14,7 +14,7 @@
 
 /**
  * @file chewingio.c
- * @brief Implement some routines for chewing
+ * @brief Implement basic I/O routines for Chewing manipulation.
  */
 
 #include <string.h>
@@ -132,8 +132,6 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	pgdata->nSelect = 0;
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
-	/* XXX: make options for callee to decide if use atexit or not. */
-	atexit( TerminateChewing );
 	return 0;
 }
 
@@ -180,6 +178,7 @@ int SetConfig( void *iccf, ConfigData *pcd )
 		pgdata->config.bAddPhraseForward = 0;
 	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
 		pgdata->config.bSpaceAsSelection = 1;
+
 	return 0;
 }
 
@@ -338,11 +337,11 @@ int OnKeyEnter( void *iccf, ChewingOutput *pgo )
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	} else if ( pgdata->bSelect ) {
 		keystrokeRtn = KEYSTROKE_ABSORB | KEYSTROKE_BELL;
-	} else if ( pgdata->PointStart > -1) {
+	} else if ( pgdata->PointStart > -1 ) {
 		int buf = pgdata->cursor;
 		int key;
 		if ( pgdata->PointEnd > 0 ) {
-			if ( !pgdata->config.bAddPhraseForward ) {
+			if ( ! pgdata->config.bAddPhraseForward ) {
 				pgdata->cursor = pgdata->PointStart;
 				key = '0' + pgdata->PointEnd;
 			} else {
@@ -483,18 +482,18 @@ int OnKeyDown( void *iccf, ChewingOutput *pgo )
 /* Add phrase in Hanin Style */
 int OnKeyShiftLeft( void *iccf, ChewingOutput *pgo )
 {
-	ChewingData *pgdata = (ChewingData *)iccf ;
-	int keystrokeRtn = KEYSTROKE_ABSORB ;
+	ChewingData *pgdata = (ChewingData *) iccf;
+	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
-		keystrokeRtn = KEYSTROKE_IGNORE ;
+		keystrokeRtn = KEYSTROKE_IGNORE;
 	} 
-	if(!pgdata->bSelect ) {
+	if ( ! pgdata->bSelect ) {
 		/*  PointEnd locates (-9, +9) */
 		if ( 
 			! ZuinIsEntering( &( pgdata->zuinData ) ) && 
-			pgdata->chiSymbolCursor > 0
-			&& pgdata->PointEnd > -9 ) {
+			pgdata->chiSymbolCursor > 0 &&
+			pgdata->PointEnd > -9 ) {
 			pgdata->chiSymbolCursor--;
 			if ( pgdata->PointStart == -1 )
 				pgdata->PointStart = pgdata->cursor;
@@ -545,16 +544,16 @@ int OnKeyLeft( void *iccf, ChewingOutput *pgo )
 }
 
 /* Add phrase in Hanin Style */
-int OnKeyShiftRight(void *iccf, ChewingOutput *pgo)
+int OnKeyShiftRight( void *iccf, ChewingOutput *pgo )
 {
-	ChewingData *pgdata = (ChewingData *)iccf ;
-	int keystrokeRtn = KEYSTROKE_ABSORB ;
+	ChewingData *pgdata = (ChewingData *) iccf;
+	int keystrokeRtn = KEYSTROKE_ABSORB;
 
-	if( ! ChewingIsEntering(pgdata)) {
-		keystrokeRtn = KEYSTROKE_IGNORE ;
+	if ( ! ChewingIsEntering( pgdata ) ) {
+		keystrokeRtn = KEYSTROKE_IGNORE;
 	} 
 
-	if( ! pgdata->bSelect) {
+	if ( ! pgdata->bSelect) {
 		/* PointEnd locates (-9, +9) */
 		if ( 
 			! ZuinIsEntering( &( pgdata->zuinData ) ) && 
@@ -879,7 +878,7 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 			&( pgdata->availInfo ), 
 			pgdata->phoneSeq, 
 			pgdata->config.selectAreaLen ); 
-		SemiSymbolInput('1', pgdata);
+		SemiSymbolInput( '1', pgdata );
                 CallPhrasing( pgdata );
                 MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
                 return 0;

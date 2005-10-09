@@ -32,7 +32,7 @@
 
 int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
-	switch( key ) {
+	switch ( key ) {
 		case 'd':
 		case 'h':
 		case 't':
@@ -54,7 +54,7 @@ int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
  */
 int IsHsuPhoEndKey( int pho_inx[], int key )
 {
-	switch( key ) {
+	switch ( key ) {
 		case 's':
 		case 'd':
 		case 'f':
@@ -69,7 +69,7 @@ int IsHsuPhoEndKey( int pho_inx[], int key )
 /* copy the idea from HSU keyboard */
 int IsET26PhoEndKey( int pho_inx[], int key )
 {
-	switch( key ) {
+	switch ( key ) {
 		case 'd':
 		case 'f':
 		case 'j':
@@ -123,7 +123,7 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 
 int DefPhoInput( ZuinData *pZuin, int key )
 {
-	int type=0, inx = 0;
+	int type = 0, inx = 0;
 
 	if ( IsDefPhoEndKey( key, pZuin->kbtype ) ) {
 		return EndKeyProcess( pZuin, key, 1 );
@@ -412,13 +412,13 @@ int PinYingInput( ZuinData *pZuin, int key )
 }
 
 /* key: ascii code of input, including space */
-int ZuinPhoInput(ZuinData *pZuin,int key )
+int ZuinPhoInput(ZuinData *pZuin, int key )
 {
 	switch ( pZuin->kbtype ) {
 		case KB_HSU:
 		case KB_DVORAK_HSU:
 			return HsuPhoInput( pZuin,key );
-			break ;
+			break;
 		case KB_ET26:
 			return ET26PhoInput( pZuin, key );
 			break;
@@ -435,9 +435,9 @@ int ZuinPhoInput(ZuinData *pZuin,int key )
 int ZuinRemoveLast( ZuinData *pZuin )
 {
 	int i;
-	if(pZuin->kbtype >= KB_HANYU_PINYING) {
-		i = strlen(pZuin->pinYingData.keySeq);
-		pZuin->pinYingData.keySeq[i-1]='\0';
+	if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
+		i = strlen( pZuin->pinYingData.keySeq );
+		pZuin->pinYingData.keySeq[ i - 1 ] = '\0';
 	} else {
 		for ( i = 3; i >= 0; i-- ) {
 			if ( pZuin->pho_inx[ i ] ) {
@@ -453,15 +453,15 @@ int ZuinRemoveLast( ZuinData *pZuin )
 int ZuinRemoveAll( ZuinData *pZuin )
 {
 	memset( pZuin->pho_inx, 0, sizeof( pZuin->pho_inx ) );
-	memset( pZuin->pinYingData.keySeq,0,sizeof(pZuin->pinYingData.keySeq));
+	memset( pZuin->pinYingData.keySeq, 0, sizeof( pZuin->pinYingData.keySeq ) );
 	return 0;
 }
 
 int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
-        if(pZuin->kbtype >= KB_HANYU_PINYING) {
-	    if(pZuin->pinYingData.keySeq[0])
+        if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
+	    if ( pZuin->pinYingData.keySeq[0] )
 		return 1;
         } else {
 	    for ( i = 0; i < ZUIN_SIZE; i++ )

@@ -170,7 +170,6 @@ typedef struct {
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
 	int bChiSym, bSelect, bCaseChange, bFirstKey;
-
 } ChewingData;
 
 typedef struct {

@@ -203,6 +203,7 @@ int main( int argc, char *argv[] )
 		commit_string( &gOut );
 	}
 end:
+	TerminateChewing();
 	printf( "\n" );
 	if (da)
 		free( da );

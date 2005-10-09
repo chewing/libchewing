@@ -1,3 +1,10 @@
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing): Remove unsafe atexit.
+	Note: TerminateChewing is now required.
+
+	* test/testchewing.c: likewise.
+
 2005-09-30  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
 	* src/hanyupinying.c (InitialsMap), (FinalsMap):

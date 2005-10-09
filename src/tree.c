@@ -327,7 +327,7 @@ void FindInterval(
 					pho_id, 
 					pdictphrase, 
 					IS_DICT_PHRASE );
-			else if( puserphrase != NULL && pdictphrase != NULL ) {
+			else if ( puserphrase != NULL && pdictphrase != NULL ) {
 				/* the same phrase, userphrase overrides */
 				if ( ! memcmp( 
 					puserphrase->phrase, 
