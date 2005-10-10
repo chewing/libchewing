@@ -81,6 +81,9 @@ static void TerminateDebug()
 int addTerminateService( void (*callback)() )
 {       
 	if ( callback ) {
+		/* Avoid redundant function pointer */
+		if ( TerminateServices[ i ] == callback )
+			return 1;
 		TerminateServices[ countTerminateService++ ] = callback;
 		return 0;
 	}

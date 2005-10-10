@@ -1,5 +1,11 @@
 2005-10-10  Jim Huang  <jserv@kaffe.org>
 
+	* src/chewingio.c (addTerminateService):
+	Avoid redundant function pointer.
+	Reported by: Hong Jen Yee (PCMan) <hzysoft@sina.com.tw>.
+
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
 	* src/chewingio.c (InitChewing): Remove unsafe atexit.
 	Note: TerminateChewing is now required.
 
