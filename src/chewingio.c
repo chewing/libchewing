@@ -79,11 +79,14 @@ static void TerminateDebug()
 #endif
 
 int addTerminateService( void (*callback)() )
-{       
+{
 	if ( callback ) {
-		/* Avoid redundant function pointer */
-		if ( TerminateServices[ i ] == callback )
-			return 1;
+		int i;
+		for ( i = 0; i < countTerminateService; ++i ) {
+			/* Avoid redundant function pointer */
+			if ( TerminateServices[ i ] == callback )
+				return 1;
+		}
 		TerminateServices[ countTerminateService++ ] = callback;
 		return 0;
 	}
@@ -766,7 +769,53 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 			return OnKeyRight( iccf, pgo );
 		/* num starts from 0 */
 		num = CountSelKeyNum( key, pgdata );
-		DoSelect( pgdata, num );
+		if ( num >= 0 ) {
+			DoSelect( pgdata, num );
+			goto End_OnKeyDefault;
+		}
+		
+		/* Otherwise, use 'j' and 'k' for paging in selection mode */
+		DEBUG_OUT(
+			"\t\tchecking paging key, got '%c'\n",
+			key );
+		switch ( key ) {
+			case 'j':
+			case 'J':
+				if ( pgdata->chiSymbolCursor > 0 ) {
+					if ( ! ChewingIsEntering( pgdata ) ) {
+						keystrokeRtn = KEYSTROKE_IGNORE;
+					}
+					CheckAndResetRange( pgdata );
+					pgdata->chiSymbolCursor--;
+					if ( (pgdata->cursor > 0) && 
+					     ChewingIsChiAt(
+						     pgdata->chiSymbolCursor, 
+						     pgdata ) ) {
+						pgdata->cursor--;
+					}
+					ChoiceFirstAvail( pgdata );
+				}
+				goto End_Paging;
+			case 'k':
+			case 'K':
+				if ( pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
+					if ( ! ChewingIsEntering( pgdata ) ) {
+						keystrokeRtn = KEYSTROKE_IGNORE;
+					}
+					CheckAndResetRange( pgdata );
+					if ( (pgdata->cursor < pgdata->nPhoneSeq) &&
+					     ChewingIsChiAt(
+						     pgdata->chiSymbolCursor, 
+						     pgdata ) ) {
+						pgdata->cursor++;
+					}
+					pgdata->chiSymbolCursor++;
+					ChoiceFirstAvail( pgdata );
+				}
+				goto End_Paging;
+			default:
+				break;
+		}
 	}
 	/* editing */
 	else {
@@ -855,6 +904,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 End_OnKeyDefault:
 	CallPhrasing( pgdata );
+End_Paging:
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
