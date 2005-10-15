@@ -90,6 +90,23 @@ void SetChiEngMode( void *iccf, int mode );
 int GetChiEngMode( void *iccf );
 
 /**
+ * @brief Set chewing's fullshape, halfshape mode
+ *
+ * @param iccf
+ * @param mode FULLSHAPE_MODE or HALFSHAPE_MODE
+ */
+void SetShapeMode( void *iccf, int MODE );
+
+/**
+ * @brief Get chewing's current shape mode
+ *
+ * @param iccf
+ * 
+ * @return FULLSHAPE_MODE or HALFSHAPE_MODE
+ */
+int GetShapeMode( void *iccf );
+
+/**
  * @brief Get kbtype number from string
  *
  * @param str[] name of kbtype eg. "KB_HSU"

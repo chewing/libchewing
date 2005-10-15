@@ -108,7 +108,7 @@ void showZuin( ChewingOutput *pgo )
 		addstr( "[¤¤]" );
 	else
 		addstr( "[­^]" );
-	addstr( "  " );
+	addstr( "        " );
 	for ( i = 0, a = 2; i < ZUIN_SIZE; i++ ) {
 		if ( pgo->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			addstr( pgo->zuinBuf[ i ].s );
@@ -126,6 +126,21 @@ void show_zuin_buffer( int x, int y, ChewingOutput *pgo )
 	showZuin( pgo );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 1 ) );
+}
+
+void show_full_shape( int x, int y, ChewingData *da )
+{
+	move( x, y );
+	addstr( "[" );
+	if ( hasColor )
+		attron( COLOR_PAIR( 2 ) );
+	if ( da->bFullShape )
+		addstr( "¥þ" );
+	else
+		addstr( "¥b" );
+	if ( hasColor )
+		attroff( COLOR_PAIR( 2 ) );
+	addstr( "]" );
 }
 
 void show_userphrase( int x, int y, wch_t showMsg[], int len )
@@ -184,7 +199,7 @@ void show_choose_buffer( int x, int y, ChewingOutput *pgo )
 
 void show_commit_string( ChewingOutput *pgo )
 {
-	static int x = 11;
+	static int x = 12;
 	static int y = 0;
 	int i;
 	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
@@ -358,6 +373,12 @@ int main( int argc, char *argv[] )
 				break;
 			case KEY_CTRL_('D'):
 				goto end;
+			case KEY_CTRL_('K'): /* emulate Shift */
+				if ( da->bFullShape == FULLSHAPE_MODE )
+					da->bFullShape = HALFSHAPE_MODE;
+				else
+					da->bFullShape = FULLSHAPE_MODE;
+				break;
 			default:
 				OnKeyDefault( da, (char) ch, &gOut );
 				fprintf( fout, "%c", (char) ch );
@@ -371,10 +392,12 @@ int main( int argc, char *argv[] )
 		show_choose_buffer( 5, 0, &gOut );
 		drawline( 6, 0 );
 		show_zuin_buffer( 7, 0, &gOut );
+		show_full_shape( 7, 5, da );
 		drawline( 8, 0 );
 		mvaddstr( 9, 0, "Ctrl + d : leave" );
-		mvaddstr( 9, 20, "Ctrl + b : switch Eng/Chi mode" );
+		mvaddstr( 9, 20, "Ctrl + b : toggle Eng/Chi mode" );
 		mvaddstr( 10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
+		mvaddstr( 11, 0, "Crtl + k : toggle Full/Half shape mode" );
 		show_commit_string( &gOut );
 		if ( da->showMsgLen > 0 ) {
 			show_userphrase( 7, 12, gOut.showMsg, gOut.showMsgLen );

@@ -28,6 +28,8 @@
 #define IS_DICT_PHRASE 0
 #define CHINESE_MODE 1
 #define SYMBOL_MODE 0
+#define FULLSHAPE_MODE 1
+#define HALFSHAPE_MODE 0
 
 #define MAX_KBTYPE 10
 #define MAX_SELKEY 10
@@ -169,7 +171,7 @@ typedef struct {
 	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
-	int bChiSym, bSelect, bCaseChange, bFirstKey;
+	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
 } ChewingData;
 
 typedef struct {

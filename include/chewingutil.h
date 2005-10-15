@@ -28,6 +28,7 @@ void CleanAllBuf( ChewingData * );
 int SemiSymbolInput(int key, ChewingData *pgdata);
 int SpecialEtenSymbolInput( int key, ChewingData *pgdata );
 int SpecialSymbolInput( int key, ChewingData *pgdata );
+int FullShapeSymbolInput( int key, ChewingData *pgdata );
 int SymbolInput( int key, ChewingData *pgdata );
 int SymbolChoice( ChewingData *pgdata, int sel_i );
 int HaninSymbolInput(ChoiceInfo *pci, AvailInfo *pai, const uint16 phoneSeq[],  int selectAreaLen);
