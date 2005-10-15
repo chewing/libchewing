@@ -1,5 +1,14 @@
 2005-10-15  Jim Huang  <jserv@kaffe.org>
 
+	* src/chewingutil.c (SymbolInput),
+	src/chewingio.c (OnKeySpace):
+	Workaround to tricky crash issue.
+	That is the internal buffer in core library would be overwritten if
+	the input reaches more then 50 space characters in Chinese input mode,
+	Patched by: Sea Monster <seamxr@gmail.com>.
+
+2005-10-15  Jim Huang  <jserv@kaffe.org>
+
 	* include/chewingio.h (SetShapeMode) (GetShapeMode): New functions.
 	Set / get full-shape mode.
 	
@@ -18,7 +27,8 @@
 
 	* test/gen_keystroke.c (show_full_shape): New function to update
 	full/half-shape status.
-	(main): Add Ctrl-k to emulate Shift (toggle full/half-shape mode).
+	(main): Add Ctrl-k to emulate Shift (toggle full/half-shape mode) in
+	test case.
 
 2005-10-13  Jim Huang  <jserv@kaffe.org>
 

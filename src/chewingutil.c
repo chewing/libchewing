@@ -273,7 +273,8 @@ int SemiSymbolInput(int key, ChewingData *pgdata)
 
 int SymbolInput( int key, ChewingData *pgdata )
 {
-	if ( isprint( (char) key ) ) { /* other character was ignored */
+	if ( isprint( (char) key ) && /* other character was ignored */
+	     (pgdata->chiSymbolBufLen < MAX_PHONE_SEQ_LEN) ) { /* protect the buffer */
 		memmove(
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
