@@ -1133,6 +1133,12 @@ int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
 			pgdata->chiSymbolCursor = 0;
 			keystrokeRtn = KEYSTROKE_COMMIT;
 		}
+		else	/* Not quick commit */
+		{
+			CallPhrasing( pgdata );
+			if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
+				keystrokeRtn = KEYSTROKE_COMMIT;
+		}
 	} else {
 		/* Otherwise, if we are selecting words, we use numeric keys
 		 * as selkey
