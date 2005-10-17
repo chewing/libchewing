@@ -1,3 +1,8 @@
+2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
+
+	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):
+	Fix an error causing buffer overflow.
+	  
 2005-10-15  Jim Huang  <jserv@kaffe.org>
 
 	* src/chewingutil.c (SymbolInput),
