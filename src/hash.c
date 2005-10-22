@@ -206,15 +206,11 @@ int ReadHash( char *path )
 
 	/* make sure of write permission */
 	if ( access( path, W_OK ) != 0) {
-		if ( getenv( "HOME" ) ) {
-			sprintf(
-				hashfilename, "%s%s", 
-				getenv( "HOME" ), CHEWING_HASH_PATH );
+		if (getenv ("HOME")) {
+			sprintf(hashfilename,"%s%s", getenv ("HOME"), CHEWING_HASH_PATH);
 		}
 		else {
-			sprintf(
-				hashfilename, "%s%s",
-				"/tmp", CHEWING_HASH_PATH );
+			sprintf(hashfilename,"%s%s", "/tmp", CHEWING_HASH_PATH);
 		}
 		mkdir( hashfilename, S_IRWXU );
 		strcat (hashfilename, "/");
