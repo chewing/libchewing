@@ -1,3 +1,26 @@
+2005-08-08  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac: Bump version to 0.2.7 .
+
+	* NEWS,
+	README: Updated.
+
+2005-08-08  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src:
+	Add one missing phrase "的". Delete one non-big5 phrase "游錫堃".
+
+2005-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* src/hanyupinying.c (InitMap):
+	Add failback routines. 
+
+	* src/Makefile.am:
+	Add CHEWING_DATADIR macro.
+
+	* data/Makefile.am:
+	Remove pinyin.tab from CLEANFILES.
+
 2005-04-07  Jim Huang  <jserv@kaffe.org>
 
 	* src/private.h,

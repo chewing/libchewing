@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "hanyupinying.h"
 #include "hash.h"
 #include "private.h"
@@ -109,7 +110,15 @@ static void InitMap()
 		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH );
 		char *filepath = strcat( filedir, "/pinyin.tab" );
 
-		fd = fopen( filepath, "r" );
+		if (access(filepath, R_OK) == 0) {
+			/* Use user-defined tables */
+			fd = fopen( filepath, "r" );
+		}
+		else {
+			/* Failback */
+			fd = fopen( CHEWING_DATADIR "/pinyin.tab", "r");
+		}
+	
 		if ( fd ) {
 			addTerminateService( FreeMap );
 			fscanf( fd, "%d", &HANYU_INITIALS );
