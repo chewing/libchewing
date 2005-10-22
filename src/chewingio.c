@@ -50,6 +50,7 @@ static char *kb_type_str[] = {
 	"KB_DVORAK",
 	"KB_DVORAK_HSU",
 	"KB_HANYU_PINYING"
+	"KB_HANYU_PINYING"
 };
 
 int KBStr2Num( char str[] )

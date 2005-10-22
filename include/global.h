@@ -23,7 +23,7 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
-
+#define DEBUG
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
 #define CHINESE_MODE 1
