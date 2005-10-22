@@ -1,3 +1,9 @@
+2005-02-25  Kang-min Liu  <gugod@gugod.org>
+
+	* src/chewingutil.c,
+	src/zuin.c:
+	More HanYu PinYing support routines.
+
 2005-02-24  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 	
 	* src/chewingio.c
