@@ -28,6 +28,7 @@
 #include "zuin.h"
 #include "char.h"
 #include "hanyupinying.h"
+#include "private.h"
 
 int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
@@ -362,48 +363,56 @@ int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
-int IsPinYingEndKey(ZuinData *pZuin,int key) {
-    if(key == ' ' || key == '1' || key == '2' ||
-       key == '3' || key == '4' || key == '5') {
-        return strlen(pZuin->pinYingData.keySeq);
-    }
-    return 0;
+int IsPinYingEndKey( ZuinData *pZuin, int key )
+{
+	if ( (key == ' ') || (key == '1') || (key == '2') ||
+			(key == '3') || (key == '4') || (key == '5') ) {
+		return strlen( pZuin->pinYingData.keySeq) ;
+	}
+	return 0;
 }
 
-int PinYingInput(ZuinData *pZuin,int key)
+int PinYingInput( ZuinData *pZuin, int key )
 {
-    int type=0, inx = 0, err = 0, status, i;
-    char zuinKeySeq[5],buf[2];
+	int type=0, inx = 0, err = 0, status, i;
+	char zuinKeySeq[5],buf[2];
 
-#ifdef DEBUG
-        fprintf(fp_g,"PinYinInput() ");
+#ifdef ENABLE_DEBUG
+	fprintf( fp_g, "PinYinInput() " );
 #endif
 
-    if ( IsPinYingEndKey(pZuin,key) ) {
-        err = HanyuPinYingToZuin(pZuin->pinYingData.keySeq, zuinKeySeq);
-        if(err) return ZUIN_KEY_ERROR;
-#ifdef DEBUG
-        fprintf(fp_g,"zuinKeySeq: %s\n",zuinKeySeq);
+	if ( IsPinYingEndKey( pZuin, key ) ) {
+		err = HanyuPinYingToZuin( pZuin->pinYingData.keySeq, zuinKeySeq );
+		if (err)
+			return ZUIN_KEY_ERROR;
+#ifdef ENABLE_DEBUG
+		fprintf( fp_g, "zuinKeySeq: %s\n", zuinKeySeq );
 #endif
-        for(i=0;i<strlen(zuinKeySeq);i++) {
-            status = DefPhoInput( pZuin, zuinKeySeq[i] );
-            if(status != ZUIN_ABSORB) return ZUIN_KEY_ERROR;
-        }
-        switch(key) {
-        case '1': key = ' '; break;
-        case '2': key = '6'; break;
-        case '5': key = '7';
-        }
-        pZuin->pinYingData.keySeq[0]='\0';
-        return EndKeyProcess( pZuin, key, 1 );
-    }
-    buf[0] = key; buf[1] = '\0';
-    strcat(pZuin->pinYingData.keySeq,buf);
-#ifdef DEBUG
+		for ( i = 0; i < strlen( zuinKeySeq ); i++ ) {
+			status = DefPhoInput( pZuin, zuinKeySeq[ i ] );
+			if ( status != ZUIN_ABSORB )
+				return ZUIN_KEY_ERROR;
+		}
+		switch ( key ) {
+			case '1':
+				key = ' ';
+				break;
+			case '2':
+				key = '6';
+				break;
+			case '5': 
+				key = '7';
+		}
+		pZuin->pinYingData.keySeq[ 0 ] = '\0';
+		return EndKeyProcess( pZuin, key, 1 );
+	}
+	buf[ 0 ] = key; buf[ 1 ] = '\0';
+	strcat( pZuin->pinYingData.keySeq, buf );
+#ifdef ENABLE_DEBUG
 	fprintf( fp_g, "PinYing Seq: %s\n", pZuin->pinYingData.keySeq );
 #endif
 
-    return ZUIN_ABSORB;
+	return ZUIN_ABSORB;
 }
 
 /* key: ascii code of input, including space */

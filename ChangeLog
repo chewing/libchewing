@@ -1,3 +1,43 @@
+2005-03-21  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac,
+	autogen.sh:
+	Use autoheader.
+
+	* src/private.h:
+	New file. Define private internal macros.
+
+	* src/tree.c,
+	src/chewingutil.c,
+	src/hanyupinying.c,
+	src/hash.c,
+	src/zuin.c,
+	src/chewingio.c:
+	Adjust DEBUG macro name and include private.h .
+
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h
+	(ConfigData):
+	Add bSpaceAsSelection option.
+
+	* src/chewingio.c
+	(SetConfig):
+	Set bSpaceAsSelection.
+	Failback to default values if out-of-range.
+	(OnKeySpace):
+	Perform old space key behavior when bSpaceAsSelection disabled.
+
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am:
+	Add vcheck to perform valgrind memory checking on the buil-in
+	test suite.
+
+	* test/testchewing.c,
+	src/tree.c:
+	Minor free routines.
+
 2005-03-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* src/chewingutil.c

@@ -19,6 +19,11 @@
 #include "hash.h"
 #include "private.h"
 #include "global.h"
+#include "private.h"
+
+#ifdef ENABLE_DEBUG
+extern FILE *fp_g;
+#endif
 
 int chewing_lifetime;
 
@@ -141,7 +146,9 @@ void HashModify( HASH_ITEM *pItem )
 	/* update "lifetime" */
 	fseek( outfile, 0, SEEK_SET );
 	sprintf( str, "%d", chewing_lifetime );
-	DEBUG_OUT( 
+#ifdef ENABLE_DEBUG
+	fprintf( 
+		fp_g, 
 		"HashModify-1: formatstring='%s',printing '%s'\n", 
 		formatstring,str );
 	DEBUG_FLUSH;
@@ -156,7 +163,9 @@ void HashModify( HASH_ITEM *pItem )
 		fseek( outfile, pItem->item_index * FIELD_SIZE, SEEK_SET );
 	}
 	HashItem2String( str, pItem );
-	DEBUG_OUT( 
+#ifdef ENABLE_DEBUG
+	fprintf( 
+		fp_g, 
 		"HashModify-2: formatstring='%s',printing '%s'\n",
 		formatstring, str );
 	DEBUG_FLUSH;

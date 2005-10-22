@@ -22,6 +22,11 @@
 #include "userphrase.h"
 #include "private.h"
 
+#ifdef ENABLE_DEBUG
+#include <stdio.h>
+extern FILE *fp_g;
+#endif
+
 extern const char *ph_pho[]; 
 static void MakePreferInterval( ChewingData *pgdata );
 static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata );
