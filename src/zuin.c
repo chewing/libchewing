@@ -460,11 +460,8 @@ int ZuinRemoveAll( ZuinData *pZuin )
 int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
-        if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
-	    if ( pZuin->pinYingData.keySeq[0] )
-		return 1;
-        } else {
-	    for ( i = 0; i < ZUIN_SIZE; i++ )
+
+	for ( i = 0; i < ZUIN_SIZE; i++ )
 		if ( pZuin->pho_inx[ i ] )
 		    return 1;
         }
