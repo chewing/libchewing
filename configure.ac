@@ -5,8 +5,6 @@ AC_PREREQ(2.59)
 AC_INIT(libchewing, 0.2.7, jserv@kaffe.org)
 AC_CONFIG_SRCDIR([src/chewingio.c])
 
-AC_SUBST(PACKAGE_VERSION)
-
 # libtool versioning for libchewing
 
 # increment if the interface has additions, changes, removals.
