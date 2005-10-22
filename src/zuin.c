@@ -430,9 +430,9 @@ int ZuinPhoInput(ZuinData *pZuin, int key )
 int ZuinRemoveLast( ZuinData *pZuin )
 {
 	int i;
-	if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
-		i = strlen( pZuin->pinYingData.keySeq );
-		pZuin->pinYingData.keySeq[ i - 1 ] = '\0';
+	if(pZuin->kbtype == KB_HANYU_PINYING) {
+		i = strlen(pZuin->pinYingData.keySeq);
+		pZuin->pinYingData.keySeq[i-1]='\0';
 	} else {
 		for ( i = 3; i >= 0; i-- ) {
 			if ( pZuin->pho_inx[ i ] ) {
@@ -448,7 +448,7 @@ int ZuinRemoveLast( ZuinData *pZuin )
 int ZuinRemoveAll( ZuinData *pZuin )
 {
 	memset( pZuin->pho_inx, 0, sizeof( pZuin->pho_inx ) );
-	memset( pZuin->pinYingData.keySeq, 0, sizeof( pZuin->pinYingData.keySeq ) );
+	memset( pZuin->pinYingData.keySeq,0,sizeof(pZuin->pinYingData.keySeq));
 	return 0;
 }
 
@@ -469,5 +469,6 @@ int ZuinIsEntering( ZuinData *pZuin )
 
 /* Local Variables: */
 /* c-indentation-style: linux */
+/* c-basic-offset: 8 */
 /* indent-tabs-mode: t */
 /* End: */
