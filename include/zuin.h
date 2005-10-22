@@ -25,8 +25,7 @@
 #define KB_ET26 5
 #define KB_DVORAK 6
 #define KB_DVORAK_HSU 7
-/* Assume there are at most 1000 zuin-keyboard layouts */
-#define KB_HANYU_PINYING 1000
+#define KB_HANYU_PINYING 8
 
 #define ZUIN_IGNORE 0
 #define ZUIN_ABSORB 1
