@@ -34,9 +34,9 @@
 2005-01-01  Kang-min Liu <gugod@gugod.org>
 
 	* include/chewingio.h
-	* include/chewingutil.h
-	* src/chewingio.c
-	* src/chewingutil.c
+	include/chewingutil.h,
+	src/chewingio.c,
+	src/chewingutil.c:
 	Add the facility to input symbols.(Ctrl-0 and Ctrl-1)
 	Make the NumLock keypad work just right
 
