@@ -80,14 +80,8 @@ static void TerminateDebug()
 #endif
 
 int addTerminateService( void (*callback)() )
-{
+{       
 	if ( callback ) {
-		int i;
-		for ( i = 0; i < countTerminateService; ++i ) {
-			/* Avoid redundant function pointer */
-			if ( TerminateServices[ i ] == callback )
-				return 1;
-		}
 		TerminateServices[ countTerminateService++ ] = callback;
 		return 0;
 	}
@@ -140,6 +134,8 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	pgdata->nSelect = 0;
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
+	/* XXX: make options for callee to decide if use atexit or not. */
+	atexit( TerminateChewing );
 	return 0;
 }
 
@@ -812,9 +808,8 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 
 	CheckAndResetRange( pgdata );
 
-#ifdef ENABLE_DEBUG
-	fprintf( fp_g, "OnKeyDefault: key=%d\n", key );
-#endif
+	DEBUG_CHECKPOINT();
+	DEBUG_OUT( "   key=%d\n", key );
 
 	/* Dvorak Hsu */
 	if ( pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
@@ -879,14 +874,12 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
-#ifdef ENABLE_DEBUG
-			fprintf( 
-					fp_g, 
-					"\t\tchinese mode key, "
-					"ZuinPhoInput return value = %d\n", 
-					rtn );
-			fflush( fp_g );
-#endif
+			DEBUG_OUT(
+				"\t\tchinese mode key, "
+				"ZuinPhoInput return value = %d\n", 
+				rtn );
+			DEBUG_FLUSH;
+			
 			if ( rtn == ZUIN_KEY_ERROR )
 				rtn = SpecialSymbolInput( key, pgdata );
 			switch ( rtn ) {
@@ -901,22 +894,16 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 					break;
 				case ZUIN_KEY_ERROR:
 				case ZUIN_IGNORE:
-#ifdef ENABLE_DEBUG
-					fprintf(
-							fp_g, 
-							"\t\tbefore isupper(key),key=%d\n", 
-							key );
-#endif
+					DEBUG_OUT(
+						"\t\tbefore isupper(key),key=%d\n", 
+						key );
 					/* change upper case into lower case */
 					if ( isupper( key ) ) 
 						key = tolower( key );
 
-#ifdef ENABLE_DEBUG
-					fprintf(
-							fp_g, 
-							"\t\tafter isupper(key),key=%d\n", 
-							key );
-#endif
+					DEBUG_OUT(
+						"\t\tafter isupper(key),key=%d\n", 
+						key );
 
 					/* see if buffer contains nothing */
 					if ( pgdata->chiSymbolBufLen == 0 ) {
@@ -970,12 +957,9 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 		}
 		/* Quick commit */
 		else {
-#ifdef ENABLE_DEBUG
-			fprintf(
-					fp_g, 
-					"\t\tQuick commit buf[0]=%c\n", 
-					pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-#endif
+			DEBUG_OUT(
+				"\t\tQuick commit buf[0]=%c\n", 
+				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
 			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
@@ -1013,7 +997,7 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 			&( pgdata->availInfo ), 
 			pgdata->phoneSeq, 
 			pgdata->config.selectAreaLen ); 
-		SemiSymbolInput( '1', pgdata );
+		SemiSymbolInput('1', pgdata);
                 CallPhrasing( pgdata );
                 MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
                 return 0;

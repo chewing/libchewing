@@ -1,10 +1,5 @@
 tooldir = $(top_builddir)/src/tools
-datas = \
-	us_freq.dat \
-	ch_index.dat \
-	dict.dat \
-	ph_index.dat \
-	fonetree.dat
+datas = us_freq.dat ch_index.dat dict.dat ph_index.dat fonetree.dat pinyin.tab
 all: gendata
 gendata: phone.cin tsi.src
 	$(tooldir)/sort_word

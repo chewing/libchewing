@@ -12,7 +12,7 @@
  */
 
 #ifndef _HANYUPINYING_H
-#define _HANYUPINYING_H 1
+#define _HANYUPINYING_H
 
 /*
   This is a key-sequense map.
@@ -20,9 +20,11 @@
   Eg: Zhang -> {"zh","5"}, {"ang",";"}
  */
 typedef struct {
-    char pinying[5];
-    char zuin[4];
+	char pinying[ 5 ];
+	char zuin[ 4 ];
 } PinYingZuinMap;
+
+int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq );
 
 #endif /* _HANYUPINYING_H */
 

@@ -19,11 +19,6 @@
 #include "hash.h"
 #include "private.h"
 #include "global.h"
-#include "private.h"
-
-#ifdef ENABLE_DEBUG
-extern FILE *fp_g;
-#endif
 
 int chewing_lifetime;
 
@@ -146,9 +141,7 @@ void HashModify( HASH_ITEM *pItem )
 	/* update "lifetime" */
 	fseek( outfile, 0, SEEK_SET );
 	sprintf( str, "%d", chewing_lifetime );
-#ifdef ENABLE_DEBUG
-	fprintf( 
-		fp_g, 
+	DEBUG_OUT( 
 		"HashModify-1: formatstring='%s',printing '%s'\n", 
 		formatstring,str );
 	DEBUG_FLUSH;
@@ -163,9 +156,7 @@ void HashModify( HASH_ITEM *pItem )
 		fseek( outfile, pItem->item_index * FIELD_SIZE, SEEK_SET );
 	}
 	HashItem2String( str, pItem );
-#ifdef ENABLE_DEBUG
-	fprintf( 
-		fp_g, 
+	DEBUG_OUT( 
 		"HashModify-2: formatstring='%s',printing '%s'\n",
 		formatstring, str );
 	DEBUG_FLUSH;
@@ -215,11 +206,15 @@ int ReadHash( char *path )
 
 	/* make sure of write permission */
 	if ( access( path, W_OK ) != 0) {
-		if (getenv ("HOME")) {
-			sprintf(hashfilename,"%s%s", getenv ("HOME"), CHEWING_HASH_PATH);
+		if ( getenv( "HOME" ) ) {
+			sprintf(
+				hashfilename, "%s%s", 
+				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
-			sprintf(hashfilename,"%s%s", "/tmp", CHEWING_HASH_PATH);
+			sprintf(
+				hashfilename, "%s%s",
+				"/tmp", CHEWING_HASH_PATH );
 		}
 		mkdir( hashfilename, S_IRWXU );
 		strcat (hashfilename, "/");

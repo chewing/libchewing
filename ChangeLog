@@ -1,3 +1,102 @@
+2005-04-07  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/zuin.c (PinYinInput),
+	src/chewingio.c (TerminateChewing) (OnKeyDefault):
+	More improved debug macros.
+
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/tree.c,
+	src/chewingutil.c,
+	src/hash.c,
+	src/zuin.c,
+	src/chewingio.c:
+	Improved debug macro definitions.
+	
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h
+	src/chewingio.c
+	(TerminateChewing):
+	New function dedicated to terminate Chewing's internal
+	routines.
+
+	* src/private.h
+	src/chewingio.c
+	(addTerminateService):
+	New private function to register the terminate services.
+
+	* src/hanyupinying.c
+	(InitMap):
+	Use addTerminateService instead of atexit.
+
+	* src/dict.c (TerminateDict) (InitDict),
+	src/char.c (TerminateChar) (InitChar),
+	src/chewingio.c (TerminateDebug) (InitChewing):
+	Register corresponding terminate routines. (close the
+	data file I/O stream)
+	NOTE: atexit(3) is used.
+
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing):
+	Remove improper exit function call, which causes
+	unexpected closing.
+
+2005-04-03  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+
+	* src/hanyupinying.c (FinalsMap),
+	data/pinyin.tab:
+	Add "uei" and "uen" to PinYing-Zuin Map.
+
+2005-04-02  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	src/private.h:
+	Clean up. Move CompFuncType and ALC to private.
+
+	* src/hanyupinying.c
+	(HanyuPinYingToZuin):
+	Avoid potential compiler-undefined behavior.
+
+2005-04-01  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+
+	* src/hanyupinying.c
+	(InitialsMap) (FinalsMap) (FreeMap) (InitMap):
+	New helper function to construct the PinYin mapping.
+	(HanyuPinYingToZuin):
+	Add support for customized PinYin table.
+
+	* src/zuin.c
+	(IsPinYingEndKey):
+	Fix "space key to select" of PinYin.
+
+	* data/pinyin.tab,
+	data/Makefile.am:
+	New PinYin table. Put it in $HOME/.chewing.
+
+2005-03-29  Jim Huang  <jserv@kaffe.org>
+
+	* src/hanyupinying.c
+	(hanyuInitialsMap) (hanyuFinalsMap):
+	Adapt reference table from Lin Yu-Tang.
+	(HanyuPinYingToZuin):
+	Add "jo" detection.
+	Provided by Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
+
+2005-03-22  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	test/testchewing.c,
+	test/gen_keystroke.c,
+	src/tree.c,
+	src/private.h,
+	src/chewingutil.c,
+	src/hash.c:
+	Move redundant debug macro into private.h .
+
 2005-03-21  Jim Huang  <jserv@kaffe.org>
 
 	* configure.ac,
@@ -31,7 +130,7 @@
 2005-03-20  Jim Huang  <jserv@kaffe.org>
 
 	* test/Makefile.am:
-	Add vcheck to perform valgrind memory checking on the buil-in
+	Add vcheck to perform valgrind memory checking on the built-in
 	test suite.
 
 	* test/testchewing.c,
