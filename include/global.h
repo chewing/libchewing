@@ -125,9 +125,9 @@ typedef struct {
 	int isSymbol;
 } ChoiceInfo;
 
-/** @brief use "asdfjkl789" as selection key */
+/* asdfjkl789 */
 #define HSU_SELKEY_TYPE1 1
-/** @brief use "asdfzxcv89" as selection key */
+/* asdfzxcv89 */
 #define HSU_SELKEY_TYPE2 2
 
 typedef struct {
@@ -135,11 +135,7 @@ typedef struct {
 	int maxChiSymbolLen;
 	int selKey[ MAX_SELKEY ];
 	int bAddPhraseForward;
-	int bSpaceAsSelection;
-	/** @brief
-            HSU_SELKEY_TYPE1 = asdfjkl789,
-            HSU_SELKEY_TYPE2 = asdfzxcv89.
-         */
+	/** @brief 1 = asdfjkl789, 2 = asdfzxcv89. */
 	int hsuSelKeyType;
 } ConfigData;
 
