@@ -18,7 +18,7 @@
  * control keyboard mapping
  * include the definition of ZuinData structure
  */
-#define DEBUG
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
