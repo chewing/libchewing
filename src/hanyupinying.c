@@ -1,148 +1,69 @@
-/**
- * hanyupinying.c
- *
- * Copyright (c) 2005
- *	libchewing Core Team. See ChangeLog for details.
- *
- * See the file "COPYING" for information on usage and redistribution
- * of this file.
- */
-
 /* @(#)hanyupinying.c
  */
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include "hanyupinying.h"
-#include "hash.h"
-#include "private.h"
 
 /*
-  according to http://www.arts.cuhk.edu.hk/Lexis/Lindict/
+  according to http://oclccjk.lib.uci.edu/pycywg.htm
  */
-PinYingZuinMap *hanyuInitialsMap, *hanyuFinalsMap;
-int HANYU_INITIALS, HANYU_FINALS, INIT_FLAG = 0;
+#define HANYU_INITIALS 23
+PinYingZuinMap hanyuInitialsMap[HANYU_INITIALS] = {
+    {"b" , "1"}, {"p" , "q"}, {"m" , "a"}, {"f" ,"z"},
+    {"d" , "2"}, {"t" , "w"}, {"n" , "s"}, {"l" ,"x"},
+    {"g" , "e"}, {"k" , "d"}, {"h" , "c"},
+    {"j" , "r"}, {"g" , "f"}, {"x" , "v"},
+    {"zh", "5"}, {"ch", "t"}, {"sh", "g"}, {"r" ,"b"},
+    {"z" , "y"}, {"c" , "h"}, {"s" , "n"},
+    {"er", "-"}
+};
 
-static PinYingZuinMap* InitialsMap()
-{
-	static PinYingZuinMap map[ 26 ] = {
-		{"b" , "1"}, {"p" , "q"}, {"m" , "a"}, {"f" ,"z"},
-		{"d" , "2"}, {"t" , "w"}, {"n" , "s"}, {"l" ,"x"},
-		{"g" , "e"}, {"k" , "d"}, {"h" , "c"},
-		{"j" , "r"}, {"q" , "f"}, {"x" , "v"},
-		{"zhi", "5"}, {"zh", "5"}, {"chi", "t"}, {"ch", "t"},
-		{"shi", "g"}, {"sh", "g"}, {"ri", "b"}, {"r" ,"b"},
-		{"z" , "y"}, {"c" , "h"}, {"s" , "n"}
-	};
-	HANYU_INITIALS = 26;
-	return map;
-}
+#define HANYU_FINALS 40
+PinYingZuinMap hanyuFinalsMap[HANYU_FINALS] = {
+    {"iang","u;"},
+    {"iong","m/"},
+    {"uang","j;"},
+    {"uang","j;"},
+    {"yuan","m0"},
 
-static PinYingZuinMap* FinalsMap()
-{
-	static PinYingZuinMap map[ 72 ] = {
-		{"uang","j;"}, {"wang","j;"},
-		{"wong","j/"}, {"weng","j/"},
-		{"ying","u/"},
-		{"iong","m/"}, {"yong","m/"}, {"iung","m/"}, {"yung","m/"},
-		{"iang","u;"}, {"yang","u;"},
-		{"iuan","m0"}, {"yuan","m0"},
-		{"ing","u/"},
-		{"iao","ul"}, {"yao","ul"},
-		{"iun","mp"}, {"yun","mp"},
-		{"iou","u."}, {"you","u."},
-		{"ian","u0"}, {"yan","u0"},
-		{"yin","up"},
-		{"ang",";"},
-		{"eng","/"},
-		{"iue","m,"}, {"yue","m,"},
-		{"uai","j9"}, {"wai","j9"},
-		{"uei","jo"}, {"wei","jo"},
-		{"uan","j0"}, {"wan","j0"},
-		{"uen","jp"}, {"wen","jp"},
-		{"ong","j/"},
-		{"van","m0"},
-		{"ven","mp"},
-		{"er","-"},
-		{"ai","9"},
-		{"ei","o"},
-		{"ao","l"},
-		{"ou","."},
-		{"an","0"},
-		{"en","p"},
-		{"yi","u"},
-		{"ia","u8"}, {"ya","u8"},
-		{"ie","u,"}, {"ye","u,"},
-		{"in","up"},
-		{"io","u."},
-		{"wu","j"},
-		{"ua","j8"}, {"wa","j8"},
-		{"uo","ji"}, {"wo","ji"},
-		{"ui","jo"},
-		{"iu","m"}, {"yu","m"},
-		{"ue","m,"}, {"ve","m,"},
-		{"un","mp"}, {"vn","mp"},
-		{"a","8"},
-		{"e","k"},
-		{"i","u"},
-		{"o","i"},
-		{"v","m"},
-		{"u","j"},
-		{"E",","}
-	};
-	HANYU_FINALS = 72;
-	return map;
-}
+    {"ang",";"},
+    {"eng","/"},
+    {"ian","u0"},
+    {"iao","ul"},
+    {"ing","u/"},
+    {"ong","j/"},
+    {"uai","j9"},
+    {"uan","j0"},
+    {"uei","jo"},
+    {"yue","m,"},
+    {"yun","mp"},
 
-static void FreeMap()
-{ 
-	free( hanyuInitialsMap );
-	free( hanyuFinalsMap );
-}
+    {"ai","9" },
+    {"an","0" },
+    {"ao","l" },
+    {"ei","o" },
+    {"en","p" },
+    {"ia","u8"},
+    {"ie","u,"},
+    {"in","up"},
+    {"iu","u."},
+    {"ou","l" },
+    {"ou","l" },
+    {"un","jp"},
+    {"wa","j8"},
+    {"wo","ji"},
+    {"ya","m8"},
+    {"yu","m"},
 
-static void InitMap()
-{
-	int i;
-	FILE *fd;
-	INIT_FLAG = 1;
-	if ( getenv( "HOME" ) ) {
-		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH );
-		char *filepath = strcat( filedir, "/pinyin.tab" );
-
-		if (access(filepath, R_OK) == 0) {
-			/* Use user-defined tables */
-			fd = fopen( filepath, "r" );
-		}
-		else {
-			/* Failback */
-			fd = fopen( CHEWING_DATADIR "/pinyin.tab", "r");
-		}
-	
-		if ( fd ) {
-			addTerminateService( FreeMap );
-			fscanf( fd, "%d", &HANYU_INITIALS );
-			++HANYU_INITIALS;
-			hanyuInitialsMap = ALC( PinYingZuinMap, HANYU_INITIALS );
-			for ( i = 0; i < HANYU_INITIALS - 1; i++ )
-				fscanf( fd, "%s %s",
-					hanyuInitialsMap[ i ].pinying,
-					hanyuInitialsMap[ i ].zuin );
-			fscanf( fd, "%d", &HANYU_FINALS );
-			++HANYU_FINALS;
-			hanyuFinalsMap = ALC( PinYingZuinMap, HANYU_FINALS );
-			for ( i = 0; i < HANYU_FINALS - 1; i++ )
-				fscanf( fd, "%s %s",
-					hanyuFinalsMap[ i ].pinying,
-					hanyuFinalsMap[ i ].zuin );
-			fclose( fd );
-			return;
-		}	
-	}
-
-	hanyuInitialsMap = InitialsMap();
-	hanyuFinalsMap = FinalsMap();
-}
+    {"a","8"},
+    {"e",","},
+    {"e","k"},
+    {"o","i"},
+    {"w","j"},
+    {"y","u"},
+    {"r","-"}
+};
 
 /*
   0: Success
@@ -153,58 +74,57 @@ static void InitMap()
   Caller should allocate char zuin[4].
  */
 
-int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
-{
-	/*
-	 * pinyinKeySeq[] should have at most 6 letters (Shuang)
-	 * zuinKeySeq[] has at most 3 letters.
-	 */
-	char *p, *cursor;
-	char *initial = 0;
-	char *final = 0;
-	int i;
+int
+HanyuPinYingToZuin(char *pinyingKeySeq, char *zuinKeySeq) {
+    // pinyinKeySeq[] should have at most 6 letters (Shuang)
+    // zuinKeySeq[] has at most 3 letters.
+    char *p,*cursor;
+    char *initial = 0;
+    char *final   = 0;
+    int i;
+    for(i=0;i< HANYU_INITIALS;i++) {
+        p = strstr( pinyingKeySeq, hanyuInitialsMap[i].pinying);
+        if(p == pinyingKeySeq) {
+            initial = hanyuInitialsMap[i].zuin;
+            cursor = pinyingKeySeq + strlen(hanyuInitialsMap[i].pinying);
+            break;
+        }
+    }
+    if(i == HANYU_INITIALS) {
+        // No initials. might be £¸£¹£º
+        /* XXX: I NEED Implementation
+        if(finalsKeySeq[0] != ) {
+        }
+        */
+        return 1;
+    }
 
-	if ( ! INIT_FLAG )
-		InitMap();
+    if(cursor) {
+        for(i=0;i< HANYU_FINALS;i++) {
+            p = strstr(cursor,hanyuFinalsMap[i].pinying);
+            if(p == cursor) {
+                final = hanyuFinalsMap[i].zuin;
+                break;
+            }
+        }
+        if(i == HANYU_FINALS) return 2;
+    }
 
-	for ( i = 0; i < HANYU_INITIALS; i++ ) {
-		p = strstr( pinyingKeySeq, hanyuInitialsMap[ i ].pinying );
-		if ( p == pinyingKeySeq ) {
-			initial = hanyuInitialsMap[ i ].zuin;
-			cursor = pinyingKeySeq +
-				strlen( hanyuInitialsMap[ i ].pinying );
-			break;
-		}
-	}
-	if ( i == HANYU_INITIALS ) {
-		// No initials. might be £¸£¹£º
-		/* XXX: I NEED Implementation
-		   if(finalsKeySeq[0] != ) {
-		   }
-		   */
-		return 1;
-	}
+    sprintf(zuinKeySeq,"%s%s\0",initial,final);
+    return 0;
+}
 
-	if ( cursor ) {
-		for ( i = 0; i < HANYU_FINALS; i++ ) {
-			p = strstr( cursor, hanyuFinalsMap[ i ].pinying );
-			if ( p == cursor ) {
-				final = hanyuFinalsMap[ i ].zuin;
-				break;
-			}
-		}
-		if ( i == HANYU_FINALS )
-			return 2;
-	}
-	
-	if ( ! strcmp( final, "j0" ) ) {
-		if (
-			! strcmp( initial, "f" ) || 
-			! strcmp( initial, "r" ) ||
-			! strcmp( initial, "v" ) ) {
-			final = "m0";
-		}
-	}
-	sprintf( zuinKeySeq, "%s%s\0", initial, final );
-	return 0;
+int main(void) {
+    char z[5];
+    char p[255];
+    int err;
+    while(scanf("%s",p) == 1) {
+        err = HanyuPinYingToZuin(p,z);
+        if(!err) {
+            printf("==> (%s) -> (%s)\n",p,z);
+        } else {
+            printf("Error %n (%s)\n",err, p);
+        }
+    }
+    return 0;
 }
