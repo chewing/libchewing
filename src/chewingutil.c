@@ -686,7 +686,7 @@ int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->chiSymbolCursor = pgdata->chiSymbolCursor;
 	
 	/*  fill zuinBuf */
-        if(pgdata->zuinData.kbtype == KB_HANYU_PINYING) {
+        if(pgdata->zuinData.kbtype >= KB_HANYU_PINYING) {
 		char *p = pgdata->zuinData.pinYingData.keySeq;
 		for ( i = 0; i< ZUIN_SIZE; i++) {
 			int j;
