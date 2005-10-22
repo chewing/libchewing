@@ -24,13 +24,13 @@ IIIMF, SCIM, MS-IME, etc.
 [-] Status
 
 1. bridge integration
-  a) works with xcin.
-  b) works with JMCCE.
-  c) works with IIIMF.
-  d) works with SCIM.
-  e) works with OpenVanilla Input Method Framework for MacOS X.
+  a) works with xcin
+  b) works with JMCCE
+  c) works with IIIMF
+  d) works with SCIM
+  e) works with OpenVanilla Input Method Framework for MacOS X
   f) works with Sun's Java Desktop System Input Method Framework.
-  g) works with OVIME (OpenVanilla IM Framework for MS-Windows).
+  g) starts ime-chewing (Chewing MS-Windows IME)
 
 2. support phonetic keyboard layout
   a) Hsu
