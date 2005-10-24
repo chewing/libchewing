@@ -1,3 +1,61 @@
+2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
+
+	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):
+	Fix an error causing buffer overflow.
+	  
+2005-10-15  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingutil.c (SymbolInput),
+	src/chewingio.c (OnKeySpace):
+	Workaround to tricky crash issue.
+	That is the internal buffer in core library would be overwritten if
+	the input reaches more then 50 space characters in Chinese input mode,
+	Patched by: Sea Monster <seamxr@gmail.com>.
+
+2005-10-15  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h (SetShapeMode) (GetShapeMode): New functions.
+	Set / get full-shape mode.
+	
+	* include/global.h (ChewingData): New member data. bFullShape.
+
+	* include/chewingutil.h (FullShapeSymbolInput),
+	src/chewingutil.c (FullShapeSymbolInput): New function.
+	Provide full-shape symbol input mechanism.
+
+	* src/chewingio.c (InitChewing): Initialize bFullShape to
+	HALFSHAPE_MODE.
+	(SetShapeMode) (GetShapeMode): Implemented.
+	(OnKeySpace): Handle space input behavior in full/half-shape mode.
+	(OnKeyDefault): Likewise.
+	Patched by: Hong Jen Yee (PCMan) <hzysoft@sina.com.tw>.
+
+	* test/gen_keystroke.c (show_full_shape): New function to update
+	full/half-shape status.
+	(main): Add Ctrl-k to emulate Shift (toggle full/half-shape mode) in
+	test case.
+
+2005-10-13  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c
+	(addTerminateService): Fix previous compilation error.
+	(OnKeyDefault):
+	Support key 'j' / 'k' for paging in selection mode.
+	Patched by: Tiberius Teng <tiberiusteng@msn.com>.
+
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (addTerminateService):
+	Avoid redundant function pointer.
+	Reported by: Hong Jen Yee (PCMan) <hzysoft@sina.com.tw>.
+
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing): Remove unsafe atexit.
+	Note: TerminateChewing is now required.
+
+	* test/testchewing.c: likewise.
+
 2005-09-30  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
 	* src/hanyupinying.c (InitialsMap), (FinalsMap):

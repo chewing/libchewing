@@ -50,7 +50,6 @@ static char *kb_type_str[] = {
 	"KB_DVORAK",
 	"KB_DVORAK_HSU",
 	"KB_HANYU_PINYING"
-	"KB_HANYU_PINYING"
 };
 
 int KBStr2Num( char str[] )
@@ -80,8 +79,14 @@ static void TerminateDebug()
 #endif
 
 int addTerminateService( void (*callback)() )
-{       
+{
 	if ( callback ) {
+		int i;
+		for ( i = 0; i < countTerminateService; ++i ) {
+			/* Avoid redundant function pointer */
+			if ( TerminateServices[ i ] == callback )
+				return 1;
+		}
 		TerminateServices[ countTerminateService++ ] = callback;
 		return 0;
 	}
@@ -134,8 +139,6 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	pgdata->nSelect = 0;
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
-	/* XXX: make options for callee to decide if use atexit or not. */
-	atexit( TerminateChewing );
 	return 0;
 }
 
@@ -182,6 +185,7 @@ int SetConfig( void *iccf, ConfigData *pcd )
 		pgdata->config.bAddPhraseForward = 0;
 	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
 		pgdata->config.bSpaceAsSelection = 1;
+
 	return 0;
 }
 
@@ -997,7 +1001,7 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 			&( pgdata->availInfo ), 
 			pgdata->phoneSeq, 
 			pgdata->config.selectAreaLen ); 
-		SemiSymbolInput('1', pgdata);
+		SemiSymbolInput( '1', pgdata );
                 CallPhrasing( pgdata );
                 MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
                 return 0;
