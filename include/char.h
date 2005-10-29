@@ -25,7 +25,7 @@
 #define PHONE_NUM (1320)
 
 typedef struct {
-	char word[ 3 ];
+	char word[ 10 ];
 } Word;
 
 int InitChar( const char * );

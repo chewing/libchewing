@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
+#include <locale.h>
 
 /* Avoid incorrect KEY_ENTER definition */
 #ifdef KEY_ENTER
@@ -78,7 +79,7 @@ void show_interval_buffer( int x, int y, ChewingOutput *pgo )
 	count = 0;
 	for ( i = 0 ;i < pgo->chiSymbolBufLen; i++ ) {
 		arrPos[ i ] = count;
-		count += strlen( pgo->chiSymbolBuf[ i ].s );
+		count += strlen( pgo->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
 	}
 	arrPos[ i ] = count;
 
@@ -105,9 +106,9 @@ void showZuin( ChewingOutput *pgo )
 {
 	int i, a;
 	if ( pgo->bChiSym )
-		addstr( "[¤¤]" );
+		addstr( "[ä¸­]" );
 	else
-		addstr( "[­^]" );
+		addstr( "[è‹±]" );
 	addstr( "        " );
 	for ( i = 0, a = 2; i < ZUIN_SIZE; i++ ) {
 		if ( pgo->zuinBuf[ i ].s[ 0 ] != '\0' ) {
@@ -135,9 +136,9 @@ void show_full_shape( int x, int y, ChewingData *da )
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
 	if ( da->bFullShape )
-		addstr( "¥þ" );
+		addstr( "å…¨å½¢" );
 	else
-		addstr( "¥b" );
+		addstr( "åŠå½¢" );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 2 ) );
 	addstr( "]" );
@@ -207,7 +208,7 @@ void show_commit_string( ChewingOutput *pgo )
 			mvaddstr( x, y, pgo->commitStr[ i ].s );
 			y = ( y >= 54 ) ?
 				0 : 
-				( y + strlen( pgo->commitStr[ i ].s ) );
+				strlen( pgo->commitStr[ i ].s ) - 3 < 0 ? 1 : 2;
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
 	}
@@ -218,7 +219,7 @@ void set_cursor( int x, ChewingOutput *pgo )
 	int i, count;
 
 	for ( count = 0, i = 0; i < pgo->chiSymbolCursor; i++) {
-		count += strlen( pgo->chiSymbolBuf[ i ].s );
+		count += strlen( pgo->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
 	}
 	move( x, count );
 }
@@ -249,6 +250,7 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Initialize curses library */
+	setlocale(LC_CTYPE, "");
 	initscr();
 	if ( has_colors() == TRUE ) {
 		start_color();
@@ -267,7 +269,7 @@ int main( int argc, char *argv[] )
 
 	/* Initialize libchewing */
 	cf->kb_type = KBStr2Num( "KB_DEFAULT" );
-	cf->inp_cname = ( char * ) strdup( "·s»Å­µ" );
+	cf->inp_cname = ( char * ) strdup( "æ–°é…·éŸ³" );
 	cf->inp_ename = ( char * ) strdup( "Chewing" );
 	ReadTree( prefix );
 	InitChar( prefix );
@@ -412,6 +414,3 @@ end:
 	fclose( fout );
 	return 0;
 }
-
-/* vim:tenc=big5:
- * */

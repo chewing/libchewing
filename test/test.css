@@ -1,0 +1,33 @@
+h3.suite {
+	color: #6699cc;
+}
+
+.failed {
+	color: #C61300;
+}
+
+.success {
+	color: #015010;
+}
+
+p.testname {
+	font-weight: bold;
+}
+
+p.test {
+	color: #333333;
+}
+
+div.test {
+	text-align: left;
+	border: 1px solid #333333;
+	width: auto;
+	margin-bottom: 1em;
+}
+
+#results {
+	text-align: left;
+	border: 1px solid #333333;
+	width: auto;
+	margin-bottom: 1em;
+}

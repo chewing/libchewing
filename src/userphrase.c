@@ -16,6 +16,7 @@
 #include <time.h>
 #include <string.h>
 
+#include "chewing-utf8-util.h"
 #include "global.h"
 #include "hash.h"
 #include "dict.h"
@@ -54,7 +55,7 @@ int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int len )
 			if ( ! memcmp( 
 				phrase->phrase, 
 				wordSeq, 
-				len * 2 * sizeof( char ) ) ) { 
+				len * 3 * sizeof( char ) ) ) { 
 				retval = phrase->freq;	
 				free( phrase );
 				return retval;
@@ -133,7 +134,7 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 	UserPhraseData data;
 	int len;
 
-	len = strlen( wordSeq ) / 2;
+	len = ueStrLen( wordSeq );
 	pItem = HashFindEntry( phoneSeq, wordSeq );
 	if ( ! pItem ) {
 		if ( ! AlcUserPhraseSeq( &data, len ) ) {

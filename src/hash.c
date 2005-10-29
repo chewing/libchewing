@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "chewing-utf8-util.h"
 #include "hash.h"
 #include "private.h"
 #include "global.h"
@@ -29,7 +30,7 @@ static char hashfilename[ 200 ];
 int AlcUserPhraseSeq( UserPhraseData *pData, int len )
 {
 	pData->phoneSeq = ALC( uint16, len + 1 );
-	pData->wordSeq = ALC( char, len * 2 + 1 );
+	pData->wordSeq = ALC( char, len * 3 + 1 );
 	return ( pData->phoneSeq && pData->wordSeq );
 }
 
@@ -119,7 +120,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 	char buf[ FIELD_SIZE ];
 
 	sprintf( str, "%s ", pItem->data.wordSeq );
-	len = strlen( pItem->data.wordSeq ) / 2;
+	len = ueStrLen( pItem->data.wordSeq );
 	for ( i = 0; i < len; i++ ) {
 		sprintf( buf, "%hu ", pItem->data.phoneSeq[ i ] );
 		strcat( str, buf );

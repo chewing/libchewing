@@ -65,6 +65,9 @@ AC_SUBST(DOT)
 AC_PATH_PROG(PERL, perl)
 AC_SUBST(PERL)
 
+# Checks if check is available
+AM_PATH_CHECK
+
 # Checks for libraries.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])

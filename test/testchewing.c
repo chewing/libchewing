@@ -126,7 +126,7 @@ int main( int argc, char *argv[] )
 
 	/* Initialize libchewing */
 	cf->kb_type = KBStr2Num( "KB_DEFAULT" );
-	cf->inp_cname = (char *) strdup( "·s»Å­µ" );
+	cf->inp_cname = (char *) strdup( "æ–°é…·éŸ³" );
 	cf->inp_ename = (char *) strdup( "Chewing" );
 	ReadTree( prefix );
 	InitChar( prefix );
@@ -216,6 +216,3 @@ end:
 
 	return 0;
 }
-
-/* vim:tenc=big5:
- * */

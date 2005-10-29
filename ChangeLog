@@ -1,3 +1,47 @@
+2005-10-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Convert to using UTF-8 encoding.
+
+	* src/common/chewing-utf8-util.c,
+	include/chewing-utf8-util.h:
+	New routine to handle utf8 strings.
+
+	* src/common/key2pho.c:
+	PhoneBg2Uint() rename to UintFromPhone, modify Key2Pho() to handle utf8
+	string.
+
+	* src/common/Makefile.am:
+	Add chewing-utf8-util.c to source list.
+	
+	* src/hash.c,
+	src/tree.c,
+	src/zuin.c,
+	src/userphrase.c,
+	src/choice.c,
+	src/chewingio.c,
+	src/chewingutil.c:
+	Modify to using new utf8 routine.
+
+	* include/char.h,
+	include/chewing.h,
+	include/global.h:
+	Enlarge buffer size to satisfy utf8 string.
+
+	* test/gen_keystroke.c,
+	test/Makefile.am:
+	Using ncursesw to show proper utf8 output.
+
+	* configure.ac,
+	test/do-test.c,
+	test/test-key2pho.c,
+	test/test-utf8.c,
+	test/xhtml.xsl,
+	test/test.css,
+	test/showhide.js:
+	Add unit test using 'check' framework.
+
 2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
 	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):

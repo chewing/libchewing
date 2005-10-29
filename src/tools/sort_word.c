@@ -51,8 +51,8 @@ int DoWord( char *buf )
 	if ( strlen( keyBuf ) > ZUIN_SIZE )
 		return DO_WORD_ERROR;
 
-	Key2Pho( phoneBuf, keyBuf, KB_DEFAULT, 1 );
-	word_data[ nWord ].num = PhoneBg2Uint( phoneBuf );
+	PhoneFromKey( phoneBuf, keyBuf, KB_DEFAULT, 1 );
+	word_data[ nWord ].num = UintFromPhone( phoneBuf );
 	nWord++ ;
 	return 0;
 }
