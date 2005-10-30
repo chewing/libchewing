@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -27,8 +27,11 @@
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
 
-
+#ifdef USE_BINARY_DATA
+TreeType *tree = NULL;
+#else
 TreeType tree[ TREE_SIZE ];
+#endif
 
 void ChangeSelectIntervalAndBreakpoint( ChewingData *pgdata, int from, int to, char *str )
 {

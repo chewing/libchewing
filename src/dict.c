@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -16,9 +16,16 @@
 #include <assert.h>
 #include <string.h>
 
+#include "private.h"
+#include "plat_mmap.h"
 #include "dict.h"
 
+#ifdef USE_BINARY_DATA
+static int *begin = NULL;
+static plat_mmap m_mmap = NULL;
+#else
 static int begin[ PHONE_PHRASE_NUM + 1 ];
+#endif
 static FILE *dictfile;
 static int end_pos;
 
@@ -43,6 +50,10 @@ static void TerminateDict()
 {
 	if ( dictfile )
 		fclose( dictfile );
+#ifdef USE_BINARY_DATA
+	if ( begin )
+		free( begin );
+#endif
 }
 
 int InitDict( const char *prefix )
@@ -51,16 +62,36 @@ int InitDict( const char *prefix )
 	int i;
 	char filename[ 100 ];
 
-	sprintf( filename, "%s/%s", prefix, DICT_FILE );
+#ifdef USE_BINARY_DATA
+	unsigned int dictSize;
+	size_t offset = 0;
+	size_t csize = 0;
+#endif
+
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, DICT_FILE );
 	dictfile = fopen( filename, "r" );
 
-	sprintf( filename, "%s/%s", prefix, PH_INDEX_FILE );
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
+
+#ifdef USE_BINARY_DATA
+	dictSize = plat_mmap_create(
+			&m_mmap,
+                        filename,
+                        FLAG_ATTRIBUTE_READ );
+	if ( idxSize == 0 )
+		return 0;
+	csize = dictSize + sizeof(int);
+	begin = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+
+	mmap_close( &m_mmap );
+#else
 	indexfile = fopen( filename, "r" );
 	assert( dictfile && indexfile );
 	i = 0;
 	while ( !feof( indexfile ) )
 		fscanf( indexfile, "%d", &begin[ i++ ] );
 	fclose( indexfile );
+#endif
 	addTerminateService( TerminateDict );
 	return 1;
 }

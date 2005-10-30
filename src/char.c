@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -23,9 +23,18 @@
 
 #include "char.h"
 #include "private.h"
+#include "plat_mmap.h"
 
+#ifdef USE_BINARY_DATA
+static uint16* arrPhone = NULL;
+static int *begin = NULL;
+static char *phone_data_buf = NULL;
+static int phone_num;
+static plat_mmap m_mmap;
+#else
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];
+#endif
 static FILE *dictfile;
 static int end_pos;
 
@@ -55,6 +64,10 @@ static void TerminateChar()
 {
 	if ( dictfile )
 		fclose( dictfile );
+#ifdef USE_BINARY_DATA
+	if( phone_data_buf )
+		free( phone_data_buf );
+#endif
 }
 
 int InitChar( const char *prefix )
@@ -63,16 +76,46 @@ int InitChar( const char *prefix )
 	char filename[ 100 ];
 	int i;
 
-	sprintf( filename, "%s/%s", prefix, CHAR_FILE );
+#ifdef USE_BINARY_DATA
+	unsigned int idxSize;
+	size_t offset = 0;
+	size_t csize;
+#endif
+
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
 	dictfile = fopen( filename, "r" );
 
-	sprintf( filename, "%s/%s", prefix, CHAR_INDEX_FILE );
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
+
+#ifdef USE_BINARY_DATA
+	idxSize = plat_mmap_create(
+			&m_mmap, 
+			filename,
+			FLAG_ATTRIBUTE_READ );
+	if ( ! dictfile || idxSize == 0 )
+		return 0;
+	csize = idxSize;
+	phone_num = idxSize / (sizeof(int) + sizeof(uint16));
+	phone_data_buf = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+	if ( ! phone_data_buf )
+		return 0;
+
+	begin = ((int*)phone_data_buf);
+	arrPhone = (uint16*)(begin + phone_num);
+
+	mmap_close( &m_mmap );	
+#else
 	indexfile = fopen( filename, "r" );
+#endif
 
 	if ( ! dictfile || ! indexfile )
 		return 0;
 
+#ifdef USE_BINARY_DATA
+	for ( i = 0; i <= phone_num; i++ )
+#else
 	for ( i = 0; i <= PHONE_NUM; i++ )
+#endif
 		fscanf( indexfile, "%hu %d", &arrPhone[ i ], &begin[ i ] );
 	fclose( indexfile );
 	addTerminateService( TerminateChar );
@@ -92,8 +135,12 @@ int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
 {
 	uint16 *pinx;
 
-	pinx = (uint16 *) bsearch( 
+	pinx = (uint16 *) bsearch(
+#ifdef USE_BINARY_DATA
+		&phoneid, arrPhone, phone_num,
+#else
 		&phoneid, arrPhone, PHONE_NUM, 
+#endif
 		sizeof( uint16 ), (CompFuncType) CompUint16 );
 	if ( ! pinx )
 		return 0;

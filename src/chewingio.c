@@ -237,6 +237,13 @@ static int DoSelect( ChewingData *pgdata, int num )
 				AddSelect( pgdata, num );
 				/* second, call choice module */
 				ChoiceSelect( pgdata, num );
+				/* automatically shift the cursor to next phrase */
+				if ( pgdata->bAutoShiftCur!=0 ) {
+					int len = pgdata->availInfo.avail[
+						pgdata->availInfo.currentAvail ].len;
+					pgdata->chiSymbolCursor += len;
+					pgdata->cursor += len;
+				}
 			}
 			return 1;
 		}
@@ -266,7 +273,6 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
 	}
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
-		rtn = SymbolInput( ' ', pgdata );
 		if ( pgdata->bFullShape ) {
 			rtn = FullShapeSymbolInput( ' ', pgdata );
 		}
@@ -914,7 +920,6 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 						bQuickCommit = 1;
 					}
 
-					rtn = SymbolInput( key, pgdata );
 					if ( pgdata->bFullShape ) {
 						rtn = FullShapeSymbolInput( key, pgdata );
 					}
@@ -1145,8 +1150,10 @@ int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
 		 * and submit the words. 
 		 */
 		int num = -1;
-		if ( key > '0' && key < '8' )
+		if ( key > '0' && key < '9' )
 			num = key - '1';
+		else if ( key == '0' )
+			num = 9;
 		DoSelect( pgdata, num );
  	}
 	CallPhrasing( pgdata );

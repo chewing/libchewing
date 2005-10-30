@@ -41,7 +41,7 @@ AC_PREFIX_DEFAULT(/usr)
 # Init libtool
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
-AC_LIB_LTDL
+#AC_LIB_LTDL
 AC_SUBST(LIBTOOL_DEPS)
 
 # libtool option to control which symbols are exported
@@ -97,11 +97,18 @@ AC_ARG_ENABLE([debug],
 	[LIBDEBUG="false"])
 AC_SUBST(LIBDEBUG)
 
+# Platform-dependent
+AC_DEFINE(UNDER_POSIX, 1,
+	[Runtime is under POSIX environment])
+dnl AC_DEFINE(UNDER_WIN32, 1,
+dnl	[Runtime is under Win32 environment])
 
 AC_OUTPUT([
 	Makefile 
 	data/Makefile 
 	src/Makefile
+	src/porting_layer/Makefile
+	src/porting_layer/src/Makefile
 	src/common/Makefile
 	src/tools/Makefile 
 	test/Makefile

@@ -5,7 +5,7 @@
  *      Lu-chuan Kung and Kang-pen Chen.
  *      All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -95,11 +95,13 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 {
 	uint16 u16Pho;
 	Word tempword;
+	int pho_inx;
 
 	if ( 
 		pZuin->pho_inx[ 0 ] == 0 && 
 		pZuin->pho_inx[ 1 ] == 0 && 
-		pZuin->pho_inx[ 2 ] == 0 ) {
+		pZuin->pho_inx[ 2 ] == 0 &&
+		pZuin->pho_inx[ 3 ] == 0 ) {
 		/*
 		 * Special handle for space key (Indeed very special one).
 		 * Un-break the situation that OnKeySpace() is not called,
@@ -109,7 +111,15 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 		return (key == ' ') ? ZUIN_KEY_ERROR : ZUIN_NO_WORD;
 	}
 
-	pZuin->pho_inx[ 3 ] = Key2PhoneInx( key, 3, pZuin->kbtype, searchTimes );
+	pho_inx = Key2PhoneInx( key, 3, pZuin->kbtype, searchTimes );
+	if ( pZuin->pho_inx[ 3 ] == 0 ) {
+		pZuin->pho_inx[ 3 ] = pho_inx;
+	}
+	else if ( key != ' ' ) {
+		pZuin->pho_inx[ 3 ] = pho_inx;
+		return ZUIN_NO_WORD;
+	}
+
 	u16Pho = PhoneInx2Uint( pZuin->pho_inx );
 	if ( GetCharFirst( &tempword, u16Pho ) == 0 ) {
 		ZuinRemoveAll( pZuin );
@@ -124,20 +134,28 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 int DefPhoInput( ZuinData *pZuin, int key )
 {
 	int type = 0, inx = 0;
+	int i;
 
 	if ( IsDefPhoEndKey( key, pZuin->kbtype ) ) {
-		return EndKeyProcess( pZuin, key, 1 );
+		for ( i = 0; i < ZUIN_SIZE; ++i )
+			if ( pZuin->pho_inx[ i ] != 0 )
+				break;
+		if ( i < ZUIN_SIZE )
+			return EndKeyProcess( pZuin, key, 1 );
+	}
+	else {
+		pZuin->pho_inx[ 3 ] = 0;
 	}
 		
 	/* decide if the key is a phone */
-	for ( type = 0; type < 3; type++ ) {
+	for ( type = 0; type <= 3; type++ ) {
 		inx = Key2PhoneInx( key, type, pZuin->kbtype, 1 );
 		if ( inx )
 			break;
 	}
 	
 	/* the key is NOT a phone */
-	if ( type == 3 ) {
+	if ( type > 3 ) {
 		return ZUIN_KEY_ERROR;
 	}
 	

@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -31,7 +31,7 @@
 
 typedef struct tagRecordNode {
 	int *arrIndex;		/* the index array of the things in "interval" */
-	int nInter ,freq;
+	int nInter, freq;
 	struct tagRecordNode *next;
 	int nMatchCnnct;	/* match how many Cnnct. */
 } RecordNode;
@@ -44,7 +44,13 @@ typedef struct {
 	RecordNode *phList;  
 } TreeDataType;
 
+#ifdef USE_BINARY_DATA
+extern TreeType *tree;
+static unsigned int tree_size = 0;
+static plat_mmap m_mmap;
+#else
 extern TreeType tree[ TREE_SIZE ];
+#endif
 
 int IsContain( IntervalType in1, IntervalType in2 )
 {
@@ -76,13 +82,40 @@ int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in3 )
 	return 0;
 }
 
+#ifdef USE_BINARY_DATA
+static void TerminateTree()
+{
+	if ( tree )
+		free( tree );
+}
+#endif
+		
 void ReadTree( const char *prefix )
 {
 	int i;
 	FILE *infile;
 	char filename[ 100 ];
 
-	sprintf( filename, "%s/%s", prefix, PHONE_TREE_FILE );
+#ifdef USE_BINARY_DATA
+	size_t offset = 0;
+	size_t csize = 0;
+#endif
+
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
+#ifdef USE_BINARY_DATA
+	tree_size = plat_mmap_create(
+			&m_mmap,
+			filename,
+			FLAG_ATTRIBUTE_READ );
+	if ( tree_size == 0 )
+		return;
+
+	csize = tree_size;
+	tree = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+
+	mmap_close( &m_mmap );
+	addTerminateService( TerminateTree );
+#else
 	infile = fopen( filename, "r" );
 	assert( infile );
 	for ( i = 0; i < TREE_SIZE; i++ ) {
@@ -94,6 +127,7 @@ void ReadTree( const char *prefix )
 			break;
 	}
 	fclose( infile );
+#endif
 }
 
 int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
@@ -242,14 +276,27 @@ int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq )
 			child = tree[ tree_p ].child_begin;
 			child <= tree[ tree_p ].child_end;
 			child++ ) {
+#ifdef USE_BINARY_DATA
+			/**
+			 * This is a workaround to prevent access violation.
+			 *
+			 * Sometimes, child < 0 and tree[ child ] refer to an invalid
+			 * address for unknown reason.This could be a bug of libchewing.
+			 * This serious bug was discovered by seamxr.
+			 */
+			if ( child < 0 || child * sizeof(TreeType) > tree_size )
+				return -1;
+#endif
+	
 			if ( tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
 		/* if not found any word then fail. */
 		if ( child > tree[ tree_p ].child_end )
 			return -1;
-		else
+		else {
 			tree_p = child;
+		}
 	}
 	return tree[ tree_p ].phrase_id;
 }

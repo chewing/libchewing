@@ -1,6 +1,7 @@
-SUBDIRS = common tools
+SUBDIRS = porting_layer common tools
 INCLUDES = \
 	-I$(top_builddir)/include \
+	-I$(top_srcdir)/src/porting_layer/include \
 	-DCHEWING_DATADIR=\"$(datadir)/chewing\"
 
 lib_LTLIBRARIES = libchewing.la

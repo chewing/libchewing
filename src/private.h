@@ -5,6 +5,9 @@
   #include <config.h>
 #endif
 
+/* Platform-dependent declaration */
+#include "plat_types.h"
+
 #ifdef ENABLE_DEBUG
 #include <stdarg.h>
 extern FILE *fp_g;
@@ -29,7 +32,11 @@ extern FILE *fp_g;
 	"\033[44;37m"real_string"\033[m"
 
 #else /* ! ENABLE_DEBUG */
+#if _MSC_VER > 1000     // Vsual C++ compiler
+__forceinline void DEBUG_OUT( char* str, ... ){ }
+#else
 #define DEBUG_OUT( ... )
+#endif /* _MSC_VER > 1000 */
 #define DEBUG_FLUSH
 #define DEBUG_CHECKPOINT()
 #endif

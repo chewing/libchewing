@@ -9,13 +9,14 @@ fi
 
 find -name .deps | xargs rm -rf
 
+rm -rf autom4te.cache
+
 rm -f \
 	aclocal.m4 \
 	config.sub \
 	config.guess \
 	configure \
 	install-sh \
-	autom4te.cache \
 	config.log \
 	depcomp \
 	libtool \

@@ -214,13 +214,21 @@ int ReadHash( char *path )
 		else {
 			sprintf(
 				hashfilename, "%s%s",
+#ifndef WIN32
 				"/tmp", CHEWING_HASH_PATH );
+#else
+				"C:\\Windows\\TEM\\", CHEWING_HASH_PATH );
+#endif
 		}
+#ifndef WIN32		
 		mkdir( hashfilename, S_IRWXU );
-		strcat (hashfilename, "/");
-		strcat (hashfilename, HASH_FILE);
+#else
+		mkdir( hashfilename );
+#endif
+		strcat( hashfilename, PLAT_SEPARATOR );
+		strcat( hashfilename, HASH_FILE );
 	} else {
-		sprintf( hashfilename, "%s/%s", path, HASH_FILE );
+		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 	sprintf( formatstring, "%%-%ds", FIELD_SIZE ); 

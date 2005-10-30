@@ -1,3 +1,40 @@
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
+	* src/porting_layer/src/Makefile.am,
+	src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c,
+	src/porting_layer/Makefile.am,
+	src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h,
+	src/porting_layer/include/plat_mmap.h,
+	src/porting_layer/include/plat_types.h:
+	New files. Porting layer for libchewing.
+	Initial implementation of MMap for POSIX and Win32.
+
+	* include/global.h (ChewingData::bAutoShiftCur):
+	New member. Automatically shift the cursor to next phrase.
+
+	* src/tree.c
+	(TerminateTree): New function dedicated to USE_BINARY_DATA.
+	(ReadTree) (CheckBreakpoint),
+	src/chewingutil.c (HaninSymbolInput) (HaninSymbolInput),
+	src/dict.c (TerminateDict) (InitDict),
+	src/hash.c (ReadHash),
+	src/zuin.c (EndKeyProcess),
+	src/choice.c,
+	src/chewingio.c (DoSelect) (OnKeySpace) (OnKeyDefault) (OnKeyNumlock),
+	src/char.c (TerminateChar) (InitChar) (TerminateChar):
+	Merged USE_BINARY_DATA support and Zuin fixes from win32 branch by
+	PCMan and Sea Monster. Reimplement the original win32 routines with
+	the porting_layer.
+	
+	* src/private.h: Introduced the porting layer definitions.
+	Fixlet to Win32 DEBUG_OUT.
+	
+	* src/Makefile.am,
+	configure.ac: Add platform-dependent declarations.
+	NOTE: UNDER_POSIX is hard-coded at the moment.
+	
 2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
 	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):
@@ -58,7 +95,7 @@
 
 2005-09-30  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
-	* src/hanyupinying.c (InitialsMap), (FinalsMap):
+	* src/hanyupinying.c (InitialsMap) (FinalsMap):
 	Declaration of variables should be put at the beginning of function
 	definition.
 
