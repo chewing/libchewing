@@ -16,7 +16,10 @@ libchewing_la_SOURCES = \
 	userphrase.c \
 	zuin.c \
 	hanyupinying.c
-libchewing_la_LIBADD = common/libcommon.la
+libchewing_la_LIBADD = \
+	$(top_builddir)/src/common/libcommon.la \
+	$(top_builddir)/src/porting_layer/src/libporting_layer.la
+
 libchewing_la_LDFLAGS = \
 	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
 	-export-dynamic \

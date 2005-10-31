@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 
 #include "plat_mmap.h"
@@ -142,8 +146,8 @@ void *plat_mmap_set_view( plat_mmap *handle, size_t *offset, size_t *sizet )
 	LARGE_INTEGER t_offset;
 	LARGE_INTEGER t_sizet;
 	SYSTEM_INFO info;
-	vm_sizet pagesize;
-	vm_sizet edge;
+	size_t pagesize;
+	size_t edge;
 
 	/* check error(s) */
 	if ( ! handle )
@@ -205,7 +209,7 @@ void plat_mmap_close( plat_mmap *handle )
 }
 
 /*  return page size*/
-unsigned int vm_mmap_get_page_size()
+unsigned int plat_mmap_get_page_size()
 {
 	SYSTEM_INFO info;
 
@@ -213,7 +217,7 @@ unsigned int vm_mmap_get_page_size()
 	return info.dwPageSize;
 }
 
-unsigned int vm_mmap_get_alloc_granularity()
+unsigned int plat_mmap_get_alloc_granularity()
 {
 	SYSTEM_INFO info;
 

@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #ifdef UNDER_POSIX
 
 #include <sys/types.h>
@@ -112,7 +116,7 @@ unsigned int plat_mmap_get_alloc_granularity()
 	return 16 * getpagesize();
 }
 
-void plat_mmap_unmap(vm_mmap *handle)
+void plat_mmap_unmap( plat_mmap *handle )
 {
 	/* check error(s) */
 	if ( ! handle )

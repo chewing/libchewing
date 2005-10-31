@@ -96,14 +96,14 @@ int InitChar( const char *prefix )
 		return 0;
 	csize = idxSize;
 	phone_num = idxSize / (sizeof(int) + sizeof(uint16));
-	phone_data_buf = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+	phone_data_buf = plat_mmap_set_view( &m_mmap, &offset, &csize );
 	if ( ! phone_data_buf )
 		return 0;
 
 	begin = ((int*)phone_data_buf);
 	arrPhone = (uint16*)(begin + phone_num);
 
-	mmap_close( &m_mmap );	
+	plat_mmap_close( &m_mmap );	
 #else
 	indexfile = fopen( filename, "r" );
 #endif

@@ -81,9 +81,9 @@ int InitDict( const char *prefix )
 	if ( dictSize == 0 )
 		return 0;
 	csize = dictSize + sizeof(int);
-	begin = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+	begin = plat_mmap_set_view( &m_mmap, &offset, &csize );
 
-	mmap_close( &m_mmap );
+	plat_mmap_close( &m_mmap );
 #else
 	indexfile = fopen( filename, "r" );
 	assert( dictfile && indexfile );

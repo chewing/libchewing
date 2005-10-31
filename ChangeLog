@@ -1,5 +1,17 @@
 2005-10-31  Jim Huang  <jserv@kaffe.org>
 
+	* src/tree.c (ReadTree),
+	src/char.c (InitChar),
+	src/dict.c (InitDict): Fixlet to consistent porting layer API.
+
+	* src/Makefile.am: Introduce porting layer library.
+
+	* src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c: Fixlet to missing include
+	of config.h, and minor adjustment API naming.
+	
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
 	* src/tree.c: Fixlet to missing include of plat_mmap.h .
 
 	* src/dict.c (InitDict): Minor fixes to mmap handle.

@@ -112,9 +112,9 @@ void ReadTree( const char *prefix )
 		return;
 
 	csize = tree_size;
-	tree = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );
+	tree = plat_mmap_set_view( &m_mmap, &offset, &csize );
 
-	mmap_close( &m_mmap );
+	plat_mmap_close( &m_mmap );
 	addTerminateService( TerminateTree );
 #else
 	infile = fopen( filename, "r" );
