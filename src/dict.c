@@ -22,7 +22,7 @@
 
 #ifdef USE_BINARY_DATA
 static int *begin = NULL;
-static plat_mmap m_mmap = NULL;
+static plat_mmap m_mmap;
 #else
 static int begin[ PHONE_PHRASE_NUM + 1 ];
 #endif
@@ -78,7 +78,7 @@ int InitDict( const char *prefix )
 			&m_mmap,
                         filename,
                         FLAG_ATTRIBUTE_READ );
-	if ( idxSize == 0 )
+	if ( dictSize == 0 )
 		return 0;
 	csize = dictSize + sizeof(int);
 	begin = plat_vm_mmap_set_view( &m_mmap, &offset, &csize );

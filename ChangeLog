@@ -1,5 +1,18 @@
 2005-10-31  Jim Huang  <jserv@kaffe.org>
 
+	* src/tree.c: Fixlet to missing include of plat_mmap.h .
+
+	* src/dict.c (InitDict): Minor fixes to mmap handle.
+
+	* src/porting_layer/include/plat_mmap.h: Use macros to present
+	FLAG_ATTRIBUTE_READ / FLAG_ATTRIBUTE_WRITE for portability.
+
+	* configure.ac: New option --enable-binary-data to indicate the use
+	experimental binary data support.
+	Auto-detect $host_os via autoconf.
+
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
 	* src/chewingio.c (DoSelect):
 	Fix a overrun bug that could crush the lib when we advance the cursor
 	automatically.

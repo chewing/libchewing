@@ -26,6 +26,7 @@
 #include "dict.h"
 #include "char.h"
 #include "private.h"
+#include "plat_mmap.h"
 
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 

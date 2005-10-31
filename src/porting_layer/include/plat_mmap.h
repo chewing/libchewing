@@ -9,11 +9,8 @@ extern "C"
 #endif /* __cplusplus */
 
 /* flags */
-enum {
-	FLAG_ATTRIBUTE_READ = 0x00000001,
-	FLAG_ATTRIBUTE_WRITE = 0x00000002
-
-};
+#define FLAG_ATTRIBUTE_READ	0x00000001
+#define FLAG_ATTRIBUTE_WRITE	0x00000002
 
 /* Set the mmap handle to be invalid */
 void plat_mmap_set_invalid( plat_mmap *handle );

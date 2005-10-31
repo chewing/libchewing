@@ -97,11 +97,47 @@ AC_ARG_ENABLE([debug],
 	[LIBDEBUG="false"])
 AC_SUBST(LIBDEBUG)
 
+AC_ARG_ENABLE([binary-data],
+		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
+		[case "${enableval}" in
+		yes)
+		ENABLE_BINARY_DATA="true"
+		AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
+		;;
+		no)
+		ENABLE_BINARY_DATA="false"
+		;;
+		*)
+		AC_MSG_ERROR(bad value ${enableval} for --enable-binary-data)
+		;;
+		esac],
+	[ENABLE_BINARY_DATA="false"])
+AC_SUBST(ENABLE_BINARY_DATA)
+
 # Platform-dependent
+dnl What kind of system are we using?
+case $host_os in
+win32*)
+        SYSTEM=win32
+	;;
+cygwin*)
+        SYSTEM=unix
+	;;
+*)
+        SYSTEM=unix
+	;;
+esac
+
+case $SYSTEM in
+win32)
+AC_DEFINE(UNDER_WIN32, 1,
+	[Runtime is under Win32 environment])
+	;;
+unix)
 AC_DEFINE(UNDER_POSIX, 1,
 	[Runtime is under POSIX environment])
-dnl AC_DEFINE(UNDER_WIN32, 1,
-dnl	[Runtime is under Win32 environment])
+	;;
+esac
 
 AC_OUTPUT([
 	Makefile 
