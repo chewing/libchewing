@@ -238,7 +238,9 @@ static int DoSelect( ChewingData *pgdata, int num )
 				/* second, call choice module */
 				ChoiceSelect( pgdata, num );
 				/* automatically shift the cursor to next phrase */
-				if ( pgdata->bAutoShiftCur!=0 ) {
+				if ( pgdata->bAutoShiftCur != 0 &&
+				     /* if cursor at end of string, do not shift the cursor. */
+				     pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
 					int len = pgdata->availInfo.avail[
 						pgdata->availInfo.currentAvail ].len;
 					pgdata->chiSymbolCursor += len;

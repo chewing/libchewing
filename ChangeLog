@@ -1,5 +1,12 @@
 2005-10-31  Jim Huang  <jserv@kaffe.org>
 
+	* src/chewingio.c (DoSelect):
+	Fix a overrun bug that could crush the lib when we advance the cursor
+	automatically.
+	Patched by Sea Monster <seamxr@gmail.com>.
+	
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
 	* src/porting_layer/src/Makefile.am,
 	src/porting_layer/src/plat_mmap_win32.c,
 	src/porting_layer/src/plat_mmap_posix.c,
