@@ -8,7 +8,7 @@
 
 	* src/porting_layer/src/plat_mmap_win32.c,
 	src/porting_layer/src/plat_mmap_posix.c: Fixlet to missing include
-	of config.h, and minor adjustment API naming.
+	of config.h, and minor adjustment of API naming.
 	
 2005-10-31  Jim Huang  <jserv@kaffe.org>
 
