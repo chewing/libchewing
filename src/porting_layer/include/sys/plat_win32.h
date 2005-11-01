@@ -18,7 +18,7 @@ typedef struct plat_mmap
 	HANDLE fd_file, fd_map;
 	void *address;
 	int fAccessAttr;
-} vm_mmap;
+} plat_mmap;
 
 #ifdef __cplusplus
 }

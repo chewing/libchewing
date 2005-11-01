@@ -1,3 +1,8 @@
+2005-11-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/porting_layer/include/sys/plat_win32.h:
+	Adjustment of API naming.
+
 2005-10-31  Jim Huang  <jserv@kaffe.org>
 
 	* src/tree.c (ReadTree),
