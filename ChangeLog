@@ -36,9 +36,10 @@
 	* src/tools/dat2bin.c: New file. Convert text-based dat to binary
 	form.
 
-	* sr/tools/Makefile.am: Likewise
+	* src/tools/Makefile.am: Likewise
 
-	* 
+	* configure.ac: Define AM_CONDITIONAL ENABLE_BINARY_DATA.
+
 2005-11-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* src/porting_layer/include/sys/plat_win32.h:
