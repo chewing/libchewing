@@ -29,7 +29,7 @@ static int begin[ PHONE_PHRASE_NUM + 1 ];
 static FILE *dictfile;
 static int end_pos;
 
-char* fgettab( char *buf, int maxlen, FILE *fp )
+static char *fgettab( char *buf, int maxlen, FILE *fp )
 {
 	int i;
 
@@ -96,7 +96,7 @@ int InitDict( const char *prefix )
 	return 1;
 }
 
-void Str2Phrase( Phrase *phr_ptr )
+static void Str2Phrase( Phrase *phr_ptr )
 {
 	char buf[ 1000 ];
 

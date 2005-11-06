@@ -1,3 +1,44 @@
+2005-11-06  Jim Huang  <jserv@kaffe.org>
+
+	* src/tree.c (PhraseIntervalContain) (GetIntersection)
+	(CheckBreakpoint) (CheckUserChoose) (CheckChoose) (AddInterval)
+	(FindInterval) (SetInfo) (CompLen) (CompLenDescend) (CompFrom)
+	(CompRecord) (Discard1) (Discard2) (LoadChar) (OutputRecordStr)
+	(LoadPhraseAndCountFreq) (IsRecContain) (SortListByFreq) (SaveRecord)
+	(RecursiveSave) (SaveList) (InitPhrasing) (SaveDispInterval)
+	(CleanUpMem) (CountMatchCnnct) (ShowList): Marked as static.
+	(internal_release_Phrase): Internal phrase memory management
+	routines. Free the one not used to avoid memory leak.
+	(FindInterval): Make use of internal_release_Phrase.
+	Patched by Sea Monster <seamxr@gmail.com>.
+
+	* src/char.c (CompUint16) (Str2Word): Marked as static.
+	(InitChar): Fix the wrong operation when USE_BINARY_DATA enabled.
+
+	* src/userphrase.c (DeltaFreq) (LoadOriginalFreq) (LoadMaxFreq)
+	(UpdateFreq): Marked as static.
+	(LoadOriginalFreq): Fix memory leak.
+	(UpdateLifetime): Dummy implementation.
+	TODO: we should introduce smarter approaches to update lifetime.
+
+	* src/dict.c (fgettab) (Str2Phrase),
+	src/zuin.c (IsDvorakHsuPhoEndKey) (IsHsuPhoEndKey) (IsET26PhoEndKey)
+	(IsDefPhoEndKey) (EndKeyProcess) (DefPhoInput) (HsuPhoInput)
+	(ET26PhoInput) (IsPinYingEndKey) (PinYingInput),
+	src/choice.c (ChangeSelectIntervalAndBreakpoint) (SetAvailInfo)
+	(ChoiceTheSame) (SetChoiceInfo) (ChangeUserData): Marked as static.
+
+	* src/tools/sort_word.c (main),
+	src/tools/sort_dic.c (main),
+	src/tools/maketree.c (main): Added conditional compilation to allow to
+	be used in dat2bin.c
+
+	* src/tools/dat2bin.c: New file. Convert text-based dat to binary
+	form.
+
+	* sr/tools/Makefile.am: Likewise
+
+	* 
 2005-11-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* src/porting_layer/include/sys/plat_win32.h:

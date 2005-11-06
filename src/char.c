@@ -55,7 +55,7 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 	return buf;
 }
 
-int CompUint16( const uint16 *pa, const uint16 *pb )
+static int CompUint16( const uint16 *pa, const uint16 *pb )
 {
 	return ( (*pa) - (*pb) );
 }
@@ -106,23 +106,19 @@ int InitChar( const char *prefix )
 	plat_mmap_close( &m_mmap );	
 #else
 	indexfile = fopen( filename, "r" );
-#endif
 
 	if ( ! dictfile || ! indexfile )
 		return 0;
 
-#ifdef USE_BINARY_DATA
-	for ( i = 0; i <= phone_num; i++ )
-#else
 	for ( i = 0; i <= PHONE_NUM; i++ )
-#endif
 		fscanf( indexfile, "%hu %d", &arrPhone[ i ], &begin[ i ] );
 	fclose( indexfile );
+#endif
 	addTerminateService( TerminateChar );
 	return 1;
 }
 
-void Str2Word( Word *wrd_ptr )
+static void Str2Word( Word *wrd_ptr )
 {
 	char buf[ 1000 ];
 	uint16 sh;

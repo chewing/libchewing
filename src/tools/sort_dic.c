@@ -118,17 +118,23 @@ int CompUint( long a, long b )
 	return 0;
 }
 
+#ifdef USED_IN_DAT2BIN
+int sort_dic()
+#else
 int main( int argc, char *argv[] )
+#endif
 {
 	FILE *infile;
 	FILE *dictfile, *treedata, *ph_index;
 	char in_file[ MAX_FILE_NAME ] = "tsi.src";
 	long i, k;
 
+#ifndef USED_IN_DAT2BIN
 	if ( argc < 2 ) 
 		printf( user_msg );
 	else 
 		strcpy( in_file, argv[ 1 ] );
+#endif
 
 	infile = fopen( in_file, "r" );
 

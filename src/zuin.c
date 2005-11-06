@@ -30,7 +30,7 @@
 #include "hanyupinying.h"
 #include "private.h"
 
-int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
+static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 'd':
@@ -52,7 +52,7 @@ int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
  *	ZUIN_KEY_ERROR
  *	ZUIN_ERROR
  */
-int IsHsuPhoEndKey( int pho_inx[], int key )
+static int IsHsuPhoEndKey( int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 's':
@@ -67,7 +67,7 @@ int IsHsuPhoEndKey( int pho_inx[], int key )
 }
 
 /* copy the idea from HSU keyboard */
-int IsET26PhoEndKey( int pho_inx[], int key )
+static int IsET26PhoEndKey( int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 'd':
@@ -81,7 +81,7 @@ int IsET26PhoEndKey( int pho_inx[], int key )
 	}
 }
 
-int IsDefPhoEndKey( int key, int kbtype )
+static int IsDefPhoEndKey( int key, int kbtype )
 {
 	if ( Key2PhoneInx( key, 3, kbtype, 1 )  )
 		return 1;
@@ -91,7 +91,7 @@ int IsDefPhoEndKey( int key, int kbtype )
 	return 0;
 }
 
-int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
+static int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 {
 	uint16 u16Pho;
 	Word tempword;
@@ -131,7 +131,7 @@ int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 	return ZUIN_COMMIT;
 }
 
-int DefPhoInput( ZuinData *pZuin, int key )
+static int DefPhoInput( ZuinData *pZuin, int key )
 {
 	int type = 0, inx = 0;
 	int i;
@@ -164,7 +164,7 @@ int DefPhoInput( ZuinData *pZuin, int key )
 	return ZUIN_ABSORB;
 }
 
-int HsuPhoInput( ZuinData *pZuin, int key )
+static int HsuPhoInput( ZuinData *pZuin, int key )
 {
 	int type = 0, searchTimes = 0, inx = 0;
 
@@ -285,7 +285,7 @@ int HsuPhoInput( ZuinData *pZuin, int key )
 }
 
 /* copy the idea from hsu */
-int ET26PhoInput( ZuinData *pZuin, int key ) 
+static int ET26PhoInput( ZuinData *pZuin, int key ) 
 {
 	int type = 0, searchTimes = 0, inx = 0;
 
@@ -381,7 +381,7 @@ int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
-int IsPinYingEndKey( ZuinData *pZuin, int key )
+static int IsPinYingEndKey( ZuinData *pZuin, int key )
 {
 	if ( (key == ' ') || (key == '1') || (key == '2') ||
 			(key == '3') || (key == '4') || (key == '5') ) {
@@ -390,7 +390,7 @@ int IsPinYingEndKey( ZuinData *pZuin, int key )
 	return 0;
 }
 
-int PinYingInput( ZuinData *pZuin, int key )
+static int PinYingInput( ZuinData *pZuin, int key )
 {
 	int err = 0, status, i;
 	char zuinKeySeq[ 5 ], buf[ 2 ];

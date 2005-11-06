@@ -33,7 +33,11 @@ TreeType *tree = NULL;
 TreeType tree[ TREE_SIZE ];
 #endif
 
-void ChangeSelectIntervalAndBreakpoint( ChewingData *pgdata, int from, int to, char *str )
+static void ChangeSelectIntervalAndBreakpoint(
+		ChewingData *pgdata,
+		int from,
+		int to,
+		char *str )
 {
 	int i;
 	int user_alloc;
@@ -70,7 +74,7 @@ void ChangeSelectIntervalAndBreakpoint( ChewingData *pgdata, int from, int to, c
 }
 
 /** @brief Loading all possible phrases after the cursor from long to short into AvailInfo structure.*/
-void SetAvailInfo( 
+static void SetAvailInfo( 
 		AvailInfo *pai, const uint16 phoneSeq[], 
 		int nPhoneSeq, int begin, const int bSymbolArrBrkpt[] )
 {
@@ -110,7 +114,7 @@ void SetAvailInfo(
 	}
 }
 
-int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
+static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 {
 	int i;
 
@@ -126,7 +130,7 @@ int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
  *	   and dynamic dictionaries,\n
  *	   including number of total pages and the number of current page.\n
  */
-void SetChoiceInfo(
+static void SetChoiceInfo(
 		ChoiceInfo *pci,AvailInfo *pai, uint16 *phoneSeq, int cursor,
 		int selectAreaLen )
 {
@@ -276,7 +280,7 @@ int ChoiceEndChoice( ChewingData *pgdata )
 	return 0;
 }
 
-void ChangeUserData( ChewingData *pgdata, int selectNo )
+static void ChangeUserData( ChewingData *pgdata, int selectNo )
 {
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int len;

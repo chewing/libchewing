@@ -225,7 +225,11 @@ void BFS2()
 	fclose( output );
 }
 
+#ifdef USED_IN_DAT2BIN
+int maketree()
+#else
 int main()
+#endif
 {
 	Construct();
 	BFS1();		

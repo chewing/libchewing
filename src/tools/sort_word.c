@@ -102,7 +102,11 @@ void CountSort()
 	}
 }
 
+#ifdef USED_IN_DAT2BIN
+int sort_word()
+#else
 int main()
+#endif
 {
 	FILE *cinfile;
 	char buf[ MAX_BUF_LEN ];

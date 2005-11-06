@@ -113,6 +113,7 @@ AC_ARG_ENABLE([binary-data],
 		esac],
 	[ENABLE_BINARY_DATA="false"])
 AC_SUBST(ENABLE_BINARY_DATA)
+AM_CONDITIONAL(ENABLE_BINARY_DATA, test $ENABLE_BINARY_DATA = "true")
 
 # Platform-dependent
 dnl What kind of system are we using?
