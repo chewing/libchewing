@@ -167,7 +167,7 @@ int CheckUserChoose(
 							pUserPhraseData->wordSeq,
 							user_alloc, 1);
 				}
-				p_phr->phrase[ user_alloc * 2 ] = '\0';
+				p_phr->phrase[ user_alloc * 3 ] = '\0';
 				p_phr->freq = pUserPhraseData->userfreq;
 				*pp_phr = p_phr;
 			}
@@ -332,7 +332,7 @@ void FindInterval(
 				if ( ! memcmp( 
 					puserphrase->phrase, 
 					pdictphrase, 
-					( end - begin + 1 ) * 2 * sizeof( char ) ) ) 
+					( end - begin + 1 ) * 3 * sizeof( char ) ) ) 
 					AddInterval( 
 						ptd, 
 						begin, 

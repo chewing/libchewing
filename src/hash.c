@@ -97,7 +97,7 @@ HASH_ITEM *HashInsert( UserPhraseData *pData )
 	pItem = ALC( HASH_ITEM, 1 );
 	if ( ! pItem )
 		return NULL;  /* Error occurs */
-	len = strlen( pData->wordSeq ) / 2;
+	len = ueStrLen( pData->wordSeq );
 	if ( ! AlcUserPhraseSeq( &( pItem->data ), len ) )
 		return NULL; /* Error occurs */
 
@@ -120,7 +120,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 	char buf[ FIELD_SIZE ];
 
 	sprintf( str, "%s ", pItem->data.wordSeq );
-	len = ueStrLen( pItem->data.wordSeq );
+	len = ueStrLen(pItem->data.wordSeq);
 	for ( i = 0; i < len; i++ ) {
 		sprintf( buf, "%hu ", pItem->data.phoneSeq[ i ] );
 		strcat( str, buf );
@@ -178,7 +178,7 @@ int ReadHashItem( FILE *infile, HASH_ITEM *pItem, int item_index )
 	strcpy( pItem->data.wordSeq, wordbuf );
 
 	/* read phoneSeq */
-	len = word_len / 2;
+	len = ueStrLen(pItem->data.wordSeq);
 	pItem->data.phoneSeq = ALC( uint16, len + 1 );
 	for ( i = 0; i < len; i++ )
 		if ( fscanf( infile, "%hu", &( pItem->data.phoneSeq[ i ] ) ) != 1 )
