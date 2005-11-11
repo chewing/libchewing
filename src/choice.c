@@ -122,6 +122,7 @@ int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
  *	   and dynamic dictionaries,\n
  *	   including number of total pages and the number of current page.\n
  */
+#include <assert.h>
 void SetChoiceInfo(
 		ChoiceInfo *pci,AvailInfo *pai, uint16 *phoneSeq, int cursor,
 		int selectAreaLen )
@@ -144,6 +145,7 @@ void SetChoiceInfo(
 			memcpy( 
 				pci->totalChoiceStr[ pci->nTotalChoice ],
 				tempWord.word, ueBytesFromChar( tempWord.word[0] ) * sizeof( char ) );
+			assert(pci->nTotalChoice <= MAX_CHOICE);
 			pci->totalChoiceStr[ pci->nTotalChoice ][ ueBytesFromChar( tempWord.word[0] ) ] = '\0';
 			pci->nTotalChoice++;
 		} while( GetCharNext( &tempWord ) );

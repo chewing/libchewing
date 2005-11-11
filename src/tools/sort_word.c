@@ -24,7 +24,7 @@
 #define CHARDEF_BEGIN	"%chardef  begin"
 #define CHARDEF_END	"%chardef  end"
 #define DO_WORD_ERROR (1)
-#define MAX_WORD	(20000)
+#define MAX_WORD	(60000)
 #define MAX_NUMBER	(12000)
 #define MAX_BUF_LEN	(4096)
 

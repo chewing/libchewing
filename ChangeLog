@@ -1,3 +1,28 @@
+2005-11-11  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Merge phone and phrase from CNS11643.
+	Source:
+	http://rt.openfoundry.org/Foundry/Project/Tracker/Display.html?Queue=436&id=15263
+
+	* src/char.c
+	(Str2Word):
+	Only read 6 bytes to wrd_ptr->word avoid buffer overflow.
+
+	* src/tools/sort_word.c:
+	Adjust MAX_WORD from 20000 to 60000.
+
+	* include/char.h:
+	Adjust Word.word size from 10 bytes to 7 bytes.
+
+	* include/dict.h:
+	Adjust PHONE_PHRASE_NUM from 149233 to 162244.
+
+	* include/global.h:
+	Adjust TREE_SIZE from 153251 to 153341.
+	Adjust MAX_CHOICE from 250 to 567.
+
 2005-11-10  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 	
 	* src/hash.c,
