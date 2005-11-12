@@ -203,6 +203,7 @@ int ReadHash( char *path )
 	FILE *infile;
 	HASH_ITEM item, *pItem;
 	int item_index, hashvalue;
+	int ret_hashitem;
 
 	/* make sure of write permission */
 	if ( access( path, W_OK ) != 0) {
@@ -246,7 +247,18 @@ int ReadHash( char *path )
 	else {
 		fscanf( infile, "%d", &chewing_lifetime );
 		item_index = 0;
-		while ( ReadHashItem( infile, &item, ++item_index ) ) {
+		while ( 1 ) {
+			ret_hashitem = ReadHashItem(
+				infile, &item, ++item_index );
+			/* Ignore illegal data */
+			if ( ret_hashitem == -1 ) {
+				--item_index;
+				continue;
+			}
+			else if ( ret_hashitem == 0 ) {
+				break;
+			}
+			
 			hashvalue = HashFunc( item.data.phoneSeq );
 			pItem = ALC( HASH_ITEM, 1 );
 			memcpy( pItem, &item, sizeof( HASH_ITEM ) );

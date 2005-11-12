@@ -1,3 +1,10 @@
+2005-11-12  Jim Huang  <jserv@kaffe.org>
+
+	* src/hash.c (ReadHash): Add an workaround if illegal data exist in
+	hash.dat. Merged from win32 branch.
+
+	* data/tsi.src: Fix typo in wrong phone of "明基".
+
 2005-11-06  Jim Huang  <jserv@kaffe.org>
 
 	* src/tree.c (PhraseIntervalContain) (GetIntersection)
