@@ -14,14 +14,6 @@
 
 #include <string.h>
 #include <sys/stat.h>
-#if _MSC_VER > 1000
-	#include <io.h>
-	#define F_OK	00
-	#define W_OK	02
-	#define R_OK	04
-#else
-	#include <unistd.h>
-#endif
 
 #include "hash.h"
 #include "private.h"

@@ -13,7 +13,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include "hanyupinying.h"
 #include "hash.h"
 #include "private.h"

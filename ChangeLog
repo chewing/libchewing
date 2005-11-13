@@ -1,3 +1,11 @@
+2005-11-13  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h: Added POSIX's <unistd.h> and Win32's <io.h> include.
+
+	* src/hanyupinying.c,
+	src/hash.c: Move <unistd.h> include to private.h for
+	platform-indepedency.
+
 2005-11-12  Jim Huang  <jserv@kaffe.org>
 
 	* src/hash.c (ReadHash): Add an workaround if illegal data exist in
