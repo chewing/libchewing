@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "chewing-utf8-util.h"
 #include "global.h"
 
