@@ -313,7 +313,7 @@ int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
 			phoneseq_i += ueBytesFromChar( pgdata->phrOut.chiBuf[ phoneseq_i ] );
 		}
 		else 
-			csBuf[ i ].wch = pgdata->chiSymbolBuf[ i ].wch;
+			csBuf[ i ] = pgdata->chiSymbolBuf[ i ];
 	}
 	return 0;
 }
@@ -658,8 +658,7 @@ int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 		}
 		else {
 			/* is Symbol */
-			pgo->chiSymbolBuf[ chiSymbol_i ].wch = 
-				pgdata->chiSymbolBuf[ chiSymbol_i ].wch;
+			pgo->chiSymbolBuf[ chiSymbol_i ] = pgdata->chiSymbolBuf[ chiSymbol_i ];
 		}
 	}
 

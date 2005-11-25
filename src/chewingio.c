@@ -277,7 +277,7 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
 		else {
 			rtn = SymbolInput( ' ', pgdata );
 		}
-		pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch;
+		pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
 		pgo->nCommitStr = 1;
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
@@ -317,7 +317,7 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
                        DEBUG_OUT(
                                "\t\tQuick commit buf[0]=%c\n", 
                                pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-                       pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+                       pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
                        pgo->nCommitStr = 1;
                        pgdata->chiSymbolBufLen = 0;
                        pgdata->chiSymbolCursor = 0;
@@ -968,7 +968,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 			DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n", 
 				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
@@ -1132,7 +1132,7 @@ int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		} else if ( QuickCommit ) {
-			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
