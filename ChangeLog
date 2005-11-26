@@ -1,3 +1,27 @@
+2005-11-26  Hong Jen Yee (PCMan)  <pcman.tw@gmail.com>
+
+	* data/tsi.src:
+	Merged with new data from libchewing-data project.
+	Fix a lot of prolems caused by encoding conversion.
+
+	* src/chewingio.c
+	(OnKeySpace),
+	(OnKeyDefault),
+    (OnKeyNumlock):
+	Copy UTF-8 encoded string in chiSymbolBuf to commitStr correctly.
+
+	* src/chewingutil.c
+	(WriteChiSymbolToBuf),
+    (MakeOutput):
+	Copy UTF-8 encoded string in chiSymbolBuf correctly.
+
+	* src/hash.c,
+    src/common/key2pho.c,
+    src/private.h,
+    include/hash.h:
+    Add some conditional compilation and missing header includes for Win32 to 
+    enhance portability.
+
 2005-11-11  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* data/phone.cin,
