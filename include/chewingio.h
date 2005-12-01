@@ -63,7 +63,24 @@ int SetConfig( void *iccf, ConfigData *pcd );
  * @param cf
  * @return If successed then return 0
  */
-int InitChewing( void *iccf, ChewingConf *cf );
+int InitChewing( void *iccf );
+
+/**
+ * @breif Reset all settings
+ *
+ * @param iccf
+ * @return If successed than return 0
+ */
+int ChewingReset( void *iccf );
+
+/**
+ * @breif Set keyboard type
+ *
+ * @param iccf
+ * @param kbtype kbtype from KBStr2Num
+ * @return If successed then return 0
+ */
+int ChewingSetKBType( void *iccf, int kbtype );
 
 /**
  * @brief Terminate chewing

@@ -225,7 +225,6 @@ void set_cursor( int x, ChewingOutput *pgo )
 
 int main( int argc, char *argv[] )
 {
-	ChewingConf *cf = (ChewingConf *) malloc( sizeof( ChewingConf ) );
 	ChewingData *da = (ChewingData *) malloc( sizeof( ChewingData ) );
         ConfigData config;
 	ChewingOutput gOut;
@@ -266,15 +265,13 @@ int main( int argc, char *argv[] )
 	refresh();
 
 	/* Initialize libchewing */
-	cf->kb_type = KBStr2Num( "KB_DEFAULT" );
-	cf->inp_cname = ( char * ) strdup( "·s»Å­µ" );
-	cf->inp_ename = ( char * ) strdup( "Chewing" );
 	ReadTree( prefix );
 	InitChar( prefix );
 	InitDict( prefix );
 	/* for the sake of testing, we should not change existing hash data */
 	ReadHash( TEST_HASH_DIR );
-	InitChewing( da, cf );
+	InitChewing( da );
+    ChewingSetKBType( da, KBStr2Num( "KB_DEFAULT" ) );
 
         config.selectAreaLen = 55;
         config.maxChiSymbolLen = 16;

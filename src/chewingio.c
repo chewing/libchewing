@@ -63,7 +63,7 @@ int KBStr2Num( char str[] )
 	return KB_DEFAULT;
 }
 
-void SetKBType( ZuinData *pZuin, int kbtype )
+static void SetKBType( ZuinData *pZuin, int kbtype )
 {
 	pZuin->kbtype = kbtype;
 }
@@ -93,10 +93,10 @@ int addTerminateService( void (*callback)() )
 	return 1;
 }
 
-int InitChewing( void *iccf, ChewingConf *cf )
+int InitChewing( void *iccf )
 {
 	ChewingData *pgdata = (ChewingData *) iccf;
-
+    ChewingReset( iccf );
 #ifdef ENABLE_DEBUG
         char *dbg_path;
 	int failsafe = 1;
@@ -118,11 +118,15 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	if ( fp_g )
 		addTerminateService( TerminateDebug );
 #endif
+	return 0;
+}
+
+int ChewingReset( void *iccf )
+{
+	ChewingData *pgdata = (ChewingData *) iccf;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
-
-	SetKBType( &( pgdata->zuinData ), cf->kb_type );
 
 	/* choiceInfo */
 	memset( &( pgdata->choiceInfo ), 0, sizeof( ChoiceInfo ) );
@@ -140,6 +144,13 @@ int InitChewing( void *iccf, ChewingConf *cf )
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
 	return 0;
+}
+
+int ChewingSetKBType( void *iccf, int kbtype )
+{
+	ChewingData *pgdata = (ChewingData *) iccf;
+    SetKBType( &( pgdata->zuinData ), kbtype );
+    return 0;
 }
 
 void TerminateChewing()

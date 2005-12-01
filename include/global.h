@@ -54,12 +54,6 @@
 
 typedef unsigned short uint16;
 
-typedef struct {
-	char *inp_cname;
-	char *inp_ename;
-	int kb_type;
-} ChewingConf;
-
 typedef union {
 	unsigned char s[ WCH_SIZE ];
 	wchar_t wch;

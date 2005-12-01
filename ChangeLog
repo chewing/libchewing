@@ -1,3 +1,15 @@
+2005-12-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Bump version to 0.2.91 .
+	0.2.9x is hacker version.
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c:
+	API change: InitChewing, new API ChewingReset, ChewingSetKBType.
+	Drop obsolete struct ChewingConf.
+
 2005-11-13  Jim Huang  <jserv@kaffe.org>
 
 	* src/private.h: Added POSIX's <unistd.h> and Win32's <io.h> include.

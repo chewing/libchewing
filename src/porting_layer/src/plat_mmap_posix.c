@@ -33,7 +33,7 @@ int plat_mmap_is_valid( plat_mmap *handle )
 	return ( handle->fd == -1 );
 }
 
-/* map a file into system meory, return size of the mapped file */
+/* map a file into system memory, return size of the mapped file */
 size_t plat_mmap_create( plat_mmap *handle, char *file, int fileAccessAttr )
 {
 	size_t sizet;
