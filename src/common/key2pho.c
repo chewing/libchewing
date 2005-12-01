@@ -33,7 +33,7 @@ static char *key_str[ MAX_KBTYPE ] = {
 uint16 UintFromPhone( const char *zhuin )
 {
     char *iter, *pos;
-    char buf[4];
+    char buf[7];
     int len, result = 0;
     int i;
 
@@ -42,6 +42,7 @@ uint16 UintFromPhone( const char *zhuin )
        of zhuin_tab and zhuin_tab_num */
     for( i = 0; i < 4; i++ )
     {
+        /* Should be less than 4, how do we handle this? */
 		len = ueBytesFromChar( iter[0] );
         strncpy( buf, iter, len );
         buf[len] = '\0';
@@ -77,14 +78,6 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
             }
         }
         index = findptr - key_str[ kbtype ];
-        /* XXX: Need to modify to satisfy UTF-8 */
-        /*
-        pho[ i * 2 ] = ph_str[ index * 2 ];
-        pho[ i * 2 + 1 ] = ph_str[ index * 2 + 1 ];
-        pho[ i * 3 ] = ph_str[ index * 3 ];
-        pho[ i * 3 + 1 ] = ph_str[ index * 3 + 1 ];
-        pho[ i * 3 + 2 ] = ph_str[ index * 3 + 2 ];
-        */
         ueStrNCpy(
 			ueStrSeek(pho, i),
             ueStrSeek((char*)ph_str, index), 1, 0);
@@ -98,7 +91,7 @@ int PhoneFromUint( char *phone, long seq )
 {
     int i, j, k;
     char *pos;
-    char buffer[5];
+    char buffer[7];
     for ( i = 0, j = 0; i < 4; i++) {
         k = ((seq >> shift[ i ]) & sb[ i ] ) - 1;
         if ( k >= 0 && (pos = ueStrSeek( (char*)zhuin_tab[ i ], k )) )
@@ -113,7 +106,7 @@ int PhoneFromUint( char *phone, long seq )
 
 int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes )
 {
-    char keyStr[ 5 ], rtStr[ 10 ], *p;
+    char keyStr[ 2 ], rtStr[ 10 ], *p;
 
     keyStr[ 0 ] = key;
     keyStr[ 1 ] = '\0';
