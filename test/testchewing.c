@@ -116,94 +116,89 @@ void commit_string( ChewingOutput *pgo )
 
 int main( int argc, char *argv[] )
 {
-	ChewingData *da = (ChewingData *) malloc( sizeof( ChewingData ) );
         ConfigData config;
-	ChewingOutput gOut;
+	ChewingContext *ctx;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int i;
 	int ctrl_shifted;
 
-	/* Initialize libchewing */
-	ReadTree( prefix );
-	InitChar( prefix );
-	InitDict( prefix );
-	/* for the sake of testing, we should not change existing hash data */
-	ReadHash( TEST_HASH_DIR );
-	InitChewing( da );
-    ChewingSetKBType( da, KBStr2Num( "KB_DEFAULT" ) );
+	/* Request handle to ChewingContext */
+	ctx = chewing_new();
 
+	/* Initialize libchewing */
+	/* for the sake of testing, we should not change existing hash data */
+	chewing_Init( ctx, prefix, TEST_HASH_DIR );
+
+	/* Set keyboard type */ 
+	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
+
+	/* Fill the configuration values */
         config.selectAreaLen = 40;
         config.maxChiSymbolLen = 16;
-
         for ( i = 0; i < 10; i++ )
                 config.selKey[ i ] = selKey_define[ i ];
-        SetConfig( da, &config );
+
+	/* Enable configurations */
+	chewing_Configure( ctx, &config );
 
 	while ( 1 ) {
 		i = get_keystroke();
 		switch ( i ) {
 			case KEY_LEFT:
-				OnKeyLeft( da, &gOut );
+				chewing_handle_Left( ctx );
 				break;
 			case KEY_RIGHT:
-				OnKeyRight( da, &gOut );
+				chewing_handle_Right( ctx );
 				break;
 			case KEY_UP:
-				OnKeyUp( da, &gOut );
+				chewing_handle_Up( ctx );
 				break;
 			case KEY_DOWN:
-				OnKeyDown( da, &gOut );
+				chewing_handle_Down( ctx );
 				break;
 			case KEY_SPACE:
-				OnKeySpace( da, &gOut );
+				chewing_handle_Space( ctx );
 				break;
 			case KEY_ENTER:
-				OnKeyEnter( da, &gOut );
+				chewing_handle_Enter( ctx );
 				break;
 			case KEY_BACKSPACE:
-				OnKeyBackspace( da, &gOut );
+				chewing_handle_Backspace( ctx );
 				break;
 			case KEY_ESC:
-				OnKeyEsc( da, &gOut );
+				chewing_handle_Esc( ctx );
 				break;
 			case KEY_DELETE:
-				OnKeyDel( da, &gOut );
+				chewing_handle_Del( ctx );
 				break;
 			case KEY_HOME:
-				OnKeyHome( da, &gOut );
+				chewing_handle_Home( ctx );
 				break;
 			case KEY_END:
-				OnKeyEnd( da, &gOut );
+				chewing_handle_End( ctx );
 				break;
 			case KEY_TAB:
-				OnKeyTab( da, &gOut );
+				chewing_handle_Tab( ctx );
 				break;			
-			#if 0
-			case XK_Caps_Lock:
-				OnKeyCapslock(da, &gOut);
-				break;
-			#endif
 			case KEY_CAPSLOCK:
-				OnKeyCapslock( da, &gOut );
+				chewing_handle_Capslock( ctx );
 				break;
 			case END:
 				goto end;
 			default:
 				ctrl_shifted = ( i - KEY_CTRL_BASE );
 				if ( ( ctrl_shifted >= '0' ) && ( ctrl_shifted <= '9' ) ) {
-					OnKeyCtrlNum( da, ctrl_shifted, &gOut );
+					chewing_handle_CtrlNum( ctx, ctrl_shifted );
 				} else {
-					OnKeyDefault( da, (char) i, &gOut );
+					chewing_handle_Default( ctx, (char) i );
 				}
 				break;
 		}
-		commit_string( &gOut );
+		commit_string( ctx->output );
 	}
 end:
-	TerminateChewing();
+	chewing_Terminate( ctx );
 	printf( "\n" );
-	if (da)
-		free( da );
 
 	return 0;
 }

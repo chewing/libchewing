@@ -43,6 +43,9 @@
 #define MAX_CHOICE (250)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
 
+/* specified to Chewing API */
+#define CHEWING_API
+
 #ifndef max
 #define max(a, b) \
 	( (a) > (b) ? (a) : (b) )
@@ -202,6 +205,15 @@ typedef struct {
 /**
  *   @struct ChewingOutput
  *   @brief  information for Chewing output.
+ */
+
+typedef struct {
+	ChewingData *data;
+	ChewingOutput *output;
+} ChewingContext;
+/**
+ * @struct ChewingContext
+ * @brief context of Chewing IM
  */
 
 typedef struct {

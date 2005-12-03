@@ -1,3 +1,34 @@
+2005-12-03  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	src/chewingio.c (OnKeySpace) (OnKeyEsc) (OnKeyEnter) (OnKeyDel)
+	(OnKeyBackspace) (OnKeyTab) (OnKeyShiftLeft) (OnKeyLeft)
+	(OnKeyShiftRight) (OnKeyRight) (OnKeyUp) (OnKeyHome) (OnKeyEnd)
+	(OnKeyDown) (OnKeyCapslock) (OnKeyDefault) (OnKeyCtrlNum)
+	(OnKeyCtrlOption) (OnKeyShiftSpace) (OnKeyDblTab) (OnKeyNumlock):
+	API renamed with chewing_ prefix.
+	(SetConfig): Renamed to chewing_Configure.
+	(InitChewing): Renamed to InitChewing
+	In addition, wrap InitChar, InitDict, and ReadTree.
+	(ChewingReset): Renamed to chewing_Reset.
+	(ChewingSetKBType): Renamed to chewing_set_KBType.
+	(TerminateChewing): Renamed to chewing_Terminate.
+	In addition, release internal data structure.
+	(SetChiEngMode): Renamed to chewing_set_ChiEngMode.
+	(GetChiEngMode): Renamed to chewing_get_ChiEngMode.
+	(SetShapeMode): Renamed to chewing_set_ShapeMode.
+	(GetShapeMode): Renamed to chewing_get_ShapeMode.
+	(KBStr2Num): Renamed to chewing_KBStr2Num.
+	(SetKBType): Removed (in chewing_KBStr2Num).
+
+	* include/global.h
+	(#define CHEWING_API): New macro. Indicate the exact API.
+	(struct ChewingContext): New structure to wrap ChewingData and
+	ChewingOutput.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Use the new API.
+	
 2005-12-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* configure.ac:

@@ -58,7 +58,7 @@ void show_edit_buffer( int x, int y, ChewingOutput *pgo )
 	addstr( FILL_BLANK );
 	move( x, y );
 	for ( i = 0; i < pgo->chiSymbolBufLen; i++ )
-		addstr( pgo->chiSymbolBuf[ i ].s );
+		addstr( (const char *) pgo->chiSymbolBuf[ i ].s );
 }
 
 void show_interval_buffer( int x, int y, ChewingOutput *pgo )
@@ -78,7 +78,7 @@ void show_interval_buffer( int x, int y, ChewingOutput *pgo )
 	count = 0;
 	for ( i = 0 ;i < pgo->chiSymbolBufLen; i++ ) {
 		arrPos[ i ] = count;
-		count += strlen( pgo->chiSymbolBuf[ i ].s );
+		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s );
 	}
 	arrPos[ i ] = count;
 
@@ -111,7 +111,7 @@ void showZuin( ChewingOutput *pgo )
 	addstr( "        " );
 	for ( i = 0, a = 2; i < ZUIN_SIZE; i++ ) {
 		if ( pgo->zuinBuf[ i ].s[ 0 ] != '\0' ) {
-			addstr( pgo->zuinBuf[ i ].s );
+			addstr( (const char *) pgo->zuinBuf[ i ].s );
 		}
 	}
 }
@@ -150,7 +150,7 @@ void show_userphrase( int x, int y, wch_t showMsg[], int len )
 
 	memset( out_buf, 0, sizeof( out_buf ) );
 	for ( i = 0; i < len; i++ ) {
-		strcat( out_buf, showMsg[ i ].s );
+		strcat( out_buf, (const char *) showMsg[ i ].s );
 	}
 	move( x, y );
 	addstr( FILL_BLANK );
@@ -204,10 +204,10 @@ void show_commit_string( ChewingOutput *pgo )
 	int i;
 	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
 		for ( i = 0; i < pgo->nCommitStr; i++ ) {
-			mvaddstr( x, y, pgo->commitStr[ i ].s );
+			mvaddstr( x, y, (const char *) pgo->commitStr[ i ].s );
 			y = ( y >= 54 ) ?
 				0 : 
-				( y + strlen( pgo->commitStr[ i ].s ) );
+				( y + strlen( (const char *) pgo->commitStr[ i ].s ) );
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
 	}
@@ -218,16 +218,15 @@ void set_cursor( int x, ChewingOutput *pgo )
 	int i, count;
 
 	for ( count = 0, i = 0; i < pgo->chiSymbolCursor; i++) {
-		count += strlen( pgo->chiSymbolBuf[ i ].s );
+		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s );
 	}
 	move( x, count );
 }
 
 int main( int argc, char *argv[] )
 {
-	ChewingData *da = (ChewingData *) malloc( sizeof( ChewingData ) );
         ConfigData config;
-	ChewingOutput gOut;
+	ChewingContext *ctx;
 	FILE *fout;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
@@ -264,22 +263,25 @@ int main( int argc, char *argv[] )
 	clear();
 	refresh();
 
-	/* Initialize libchewing */
-	ReadTree( prefix );
-	InitChar( prefix );
-	InitDict( prefix );
-	/* for the sake of testing, we should not change existing hash data */
-	ReadHash( TEST_HASH_DIR );
-	InitChewing( da );
-    ChewingSetKBType( da, KBStr2Num( "KB_DEFAULT" ) );
+	/* Request handle to ChewingContext */
+	ctx = chewing_new();
 
+	/* Initialize libchewing */
+	/* for the sake of testing, we should not change existing hash data */
+	chewing_Init( ctx, prefix, TEST_HASH_DIR );
+
+	/* Set keyboard type */
+	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
+
+	/* Fill configuration values */
         config.selectAreaLen = 55;
         config.maxChiSymbolLen = 16;
 	config.bAddPhraseForward = 1;
-
         for ( i = 0; i < 10; i++ )
                 config.selKey[ i ] = selKey_define[ i ];
-        SetConfig( da, &config );
+
+	/* Enable the configurations */
+        chewing_Configure( ctx, &config );
 
 	mvaddstr( 0, 0, "Any key to start testing..." );
 
@@ -287,59 +289,59 @@ int main( int argc, char *argv[] )
 		ch = getch();
 		switch ( ch ) {
 			case KEY_LEFT:
-				OnKeyLeft( da, &gOut );
+				chewing_handle_Left( ctx );
 				fprintf( fout, "<L>" );
 				break;
 			case KEY_SLEFT:
-				OnKeyShiftLeft( da, &gOut );
+				chewing_handle_ShiftLeft( ctx );
 				fprintf( fout, "<SL>" );
 				break;
 			case KEY_RIGHT:
-				OnKeyRight( da, &gOut );
+				chewing_handle_Right( ctx );
 				fprintf( fout, "<R>" );
 				break;
 			case KEY_SRIGHT:
-				OnKeyShiftRight( da, &gOut );
+				chewing_handle_ShiftRight( ctx );
 				fprintf( fout, "<SR>" );
 				break;
 			case KEY_UP:
-				OnKeyUp( da, &gOut );
+				chewing_handle_Up( ctx );
 				fprintf( fout, "<U>" );
 				break;
 			case KEY_DOWN:
-				OnKeyDown( da, &gOut );
+				chewing_handle_Down( ctx );
 				fprintf( fout, "<D>" );
 				break;
 			case KEY_SPACE:
-				OnKeySpace( da, &gOut );
+				chewing_handle_Space( ctx );
 				fprintf( fout, " " );
 				break;
 			case KEY_ENTER:
-				OnKeyEnter( da, &gOut );
+				chewing_handle_Enter( ctx );
 				fprintf( fout, "<E>" );
 				break;
 			case KEY_BACKSPACE:
-				OnKeyBackspace( da, &gOut );
+				chewing_handle_Backspace( ctx );
 				fprintf( fout, "<B>" );
 				break;
 			case KEY_ESC:
-				OnKeyEsc( da, &gOut );
+				chewing_handle_Esc( ctx );
 				fprintf( fout, "<EE>" );
 				break;
 			case KEY_DC:
-				OnKeyDel( da, &gOut );
+				chewing_handle_Del( ctx );
 				fprintf( fout, "<DC>" );
 				break;
 			case KEY_HOME:
-				OnKeyHome( da, &gOut );
+				chewing_handle_Home( ctx );
 				fprintf( fout, "<H>" );
 				break;
 			case KEY_END:
-				OnKeyEnd( da, &gOut );
+				chewing_handle_End( ctx );
 				fprintf( fout, "<EN>" );
 				break;
 			case KEY_TAB:
-				OnKeyTab( da, &gOut );
+				chewing_handle_Tab( ctx );
 				fprintf( fout, "<T>" );
 				break;
 			case CTRL_0:
@@ -353,54 +355,46 @@ int main( int argc, char *argv[] )
 			case CTRL_8:
 			case CTRL_9:
 				add_phrase_length = ( ch - CTRL_0 + '0' );
-				OnKeyCtrlNum( 
-					da, 
-					add_phrase_length, 
-					&gOut );
+				chewing_handle_CtrlNum( ctx, add_phrase_length );
 				fprintf( fout, "<C%c>", add_phrase_length );
 				break;
-			#if 0
-			case XK_Caps_Lock:
-				OnKeyCapslock(da, &gOut);
-				break;
-			#endif
 			case KEY_CTRL_('B'): /* emulate CapsLock */
-				OnKeyCapslock(da, &gOut);
+				chewing_handle_Capslock( ctx );
 				fprintf( fout, "<CB>");
 				break;
 			case KEY_CTRL_('D'):
 				goto end;
-			case KEY_CTRL_('K'): /* emulate Shift */
-				if ( da->bFullShape == FULLSHAPE_MODE )
-					da->bFullShape = HALFSHAPE_MODE;
+			case KEY_CTRL_('H'): /* emulate Shift */
+				if ( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
+					chewing_set_ShapeMode( ctx, HALFSHAPE_MODE );
 				else
-					da->bFullShape = FULLSHAPE_MODE;
+					chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
 				break;
 			default:
-				OnKeyDefault( da, (char) ch, &gOut );
+				chewing_handle_Default( ctx, (char) ch );
 				fprintf( fout, "%c", (char) ch );
 				break;
 		}
 		drawline( 0, 0 );
-		show_edit_buffer( 1, 0, &gOut );
+		show_edit_buffer( 1, 0, ctx->output );
 		drawline( 2, 0 );
-		show_interval_buffer( 3, 0, &gOut );
+		show_interval_buffer( 3, 0, ctx->output );
 		drawline( 4, 0 );
-		show_choose_buffer( 5, 0, &gOut );
+		show_choose_buffer( 5, 0, ctx->output );
 		drawline( 6, 0 );
-		show_zuin_buffer( 7, 0, &gOut );
-		show_full_shape( 7, 5, da );
+		show_zuin_buffer( 7, 0, ctx->output );
+		show_full_shape( 7, 5, ctx->data );
 		drawline( 8, 0 );
 		mvaddstr( 9, 0, "Ctrl + d : leave" );
 		mvaddstr( 9, 20, "Ctrl + b : toggle Eng/Chi mode" );
 		mvaddstr( 10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
-		mvaddstr( 11, 0, "Crtl + k : toggle Full/Half shape mode" );
-		show_commit_string( &gOut );
-		if ( da->showMsgLen > 0 ) {
-			show_userphrase( 7, 12, gOut.showMsg, gOut.showMsgLen );
-			gOut.showMsgLen = 0;
+		mvaddstr( 11, 0, "Crtl + h : toggle Full/Half shape mode" );
+		show_commit_string( ctx->output );
+		if ( ctx->data->showMsgLen > 0 ) {
+			show_userphrase( 7, 12, ctx->output->showMsg, ctx->output->showMsgLen );
+			ctx->output->showMsgLen = 0;
 		}
-		set_cursor( 1, &gOut );
+		set_cursor( 1, ctx->output );
 	}
 end:
 	endwin();

@@ -52,7 +52,7 @@ static char *kb_type_str[] = {
 	"KB_HANYU_PINYING"
 };
 
-int KBStr2Num( char str[] )
+CHEWING_API int chewing_KBStr2Num( char str[] )
 {
 	int i;
 
@@ -61,11 +61,6 @@ int KBStr2Num( char str[] )
 			return i;
 	}
 	return KB_DEFAULT;
-}
-
-static void SetKBType( ZuinData *pZuin, int kbtype )
-{
-	pZuin->kbtype = kbtype;
 }
 
 #ifdef ENABLE_DEBUG     
@@ -93,11 +88,39 @@ int addTerminateService( void (*callback)() )
 	return 1;
 }
 
-int InitChewing( void *iccf )
+CHEWING_API ChewingContext *chewing_new()
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
-    ChewingReset( iccf );
+	ChewingContext *ctx;
+	
+	ChewingData *internal_data = ALC( ChewingData, 1 );
+	ChewingOutput *internal_output = ALC( ChewingOutput, 1 );
+	ctx = ALC( ChewingContext, 1 );
+	ctx->data = internal_data;
+	ctx->output = internal_output;
+}
+
+CHEWING_API int chewing_Init(
+		ChewingContext *ctx,
+		const char *dataPath,
+		const char *hashPath )
+{
+	ChewingData *pgdata = ctx->data;
+
+	/* initialize Tree, Char, and Dict */
+	/* FIXME: check the validation of dataPath */
+	ReadTree( dataPath );
+	InitChar( dataPath );
+	InitDict( dataPath );
+
+	/* initial Hash */
+	/* FIXME: check the validation of hashPath */
+	ReadHash( hashPath );
+
+	/* handle configuration */
+	chewing_Reset( ctx );
+
 #ifdef ENABLE_DEBUG
+{
         char *dbg_path;
 	int failsafe = 1;
 	dbg_path = getenv( "CHEWING_DEBUG" );
@@ -115,15 +138,17 @@ int InitChewing( void *iccf )
 				"--> Output to stderr\n" );
 		}
 	}
+	/* register debug service */
 	if ( fp_g )
 		addTerminateService( TerminateDebug );
+}
 #endif
 	return 0;
 }
 
-int ChewingReset( void *iccf )
+CHEWING_API int chewing_Reset( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
@@ -146,14 +171,13 @@ int ChewingReset( void *iccf )
 	return 0;
 }
 
-int ChewingSetKBType( void *iccf, int kbtype )
+CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
-    SetKBType( &( pgdata->zuinData ), kbtype );
-    return 0;
+	ctx->data->zuinData.kbtype = kbtype;
+	return 0;
 }
 
-void TerminateChewing()
+CHEWING_API void chewing_Terminate( ChewingContext *ctx )
 {
 	int i;
 
@@ -175,12 +199,20 @@ void TerminateChewing()
 	
 	/* XXX: should check if the services are really completed. */
 	bTerminateCompleted = 1;
+
+	if ( ctx->data )
+		free( ctx->data);
+	if ( ctx->output )
+		free( ctx->output);
+	if ( ctx )
+		free( ctx );
+
 	return;
 }
 
-int SetConfig( void *iccf, ConfigData *pcd )
+CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
 
 	pgdata->config.selectAreaLen = pcd->selectAreaLen;
 	pgdata->config.maxChiSymbolLen = pcd->maxChiSymbolLen;
@@ -200,9 +232,9 @@ int SetConfig( void *iccf, ConfigData *pcd )
 	return 0;
 }
 
-void SetChiEngMode( void *iccf, int mode )
+CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
 
 	if ( pgdata->bFirstKey == 0 ) {
 		pgdata->bChiSym = mode;
@@ -211,20 +243,19 @@ void SetChiEngMode( void *iccf, int mode )
 	}
 }
 
-int GetChiEngMode( void *iccf ) 
+CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx ) 
 {
-	return ( (ChewingData *) iccf )->bChiSym;
+	return ctx->data->bChiSym;
 }
 
-void SetShapeMode( void *iccf, int mode )
+CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
-	pgdata->bFullShape = (mode == FULLSHAPE_MODE ? 1 : 0);
+	ctx->data->bFullShape = (mode == FULLSHAPE_MODE ? 1 : 0);
 }
 
-int GetShapeMode( void *iccf ) 
+CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx ) 
 {
-	return ( (ChewingData *) iccf )->bFullShape;
+	return ctx->data->bFullShape;
 }
 
 static void CheckAndResetRange( ChewingData *pgdata )
@@ -264,9 +295,10 @@ static int DoSelect( ChewingData *pgdata, int num )
 	return 0;
 }
 
-int OnKeySpace( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int toSelect = 0;
 	int rtn;
@@ -274,14 +306,14 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
 
 	/* check if Old Chewing style */
 	if ( ! pgdata->config.bSpaceAsSelection ) {
-		return OnKeyDefault( pgdata, ' ', pgo );
+		return chewing_handle_Default( ctx, ' ' );
 	}
 
 	CheckAndResetRange( pgdata );
 
 	if ( pgdata->bSelect ) {
 		if ( pgdata->choiceInfo.pageNo < ( pgdata->choiceInfo.nPage - 1 ) ) {
-			return OnKeyRight( iccf, pgo );
+			return chewing_handle_Right( ctx );
 		}
 	}
 
@@ -383,9 +415,10 @@ int OnKeySpace( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyEsc( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -409,9 +442,10 @@ int OnKeyEsc( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyEnter( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int nCommitStr = pgdata->chiSymbolBufLen;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
@@ -430,13 +464,13 @@ int OnKeyEnter( void *iccf, ChewingOutput *pgo )
 				pgdata->cursor = pgdata->PointStart + pgdata->PointEnd;
 				key = '0' + pgdata->PointEnd;
 			}
-			OnKeyCtrlNum( (void *) pgdata, key, pgo );
+			chewing_handle_CtrlNum( ctx, key );
 			pgdata->cursor = buf;
 		} else if ( pgdata->PointEnd < 0 ) {
 			if ( pgdata->config.bAddPhraseForward )
 				pgdata->cursor = buf - pgdata->PointEnd;
 			key = '0' - pgdata->PointEnd;
-			OnKeyCtrlNum( (void *) pgdata, key, pgo );
+			chewing_handle_CtrlNum( ctx, key );
 			pgdata->cursor = buf;
 		}
 		pgdata->PointStart = -1;
@@ -454,9 +488,10 @@ int OnKeyEnter( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyDel( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Del( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -481,9 +516,10 @@ int OnKeyDel( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyBackspace( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Backspace( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -510,9 +546,10 @@ int OnKeyBackspace( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyUp( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -528,9 +565,10 @@ int OnKeyUp( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyDown( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int toSelect = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
@@ -562,9 +600,10 @@ int OnKeyDown( void *iccf, ChewingOutput *pgo )
 }
 
 /* Add phrase in Hanin Style */
-int OnKeyShiftLeft( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_ShiftLeft( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
@@ -594,9 +633,10 @@ int OnKeyShiftLeft( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyLeft( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Left( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
@@ -626,16 +666,17 @@ int OnKeyLeft( void *iccf, ChewingOutput *pgo )
 }
 
 /* Add phrase in Hanin Style */
-int OnKeyShiftRight( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_ShiftRight( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	} 
 
-	if ( ! pgdata->bSelect) {
+	if ( ! pgdata->bSelect ) {
 		/* PointEnd locates (-9, +9) */
 		if ( 
 			! ZuinIsEntering( &( pgdata->zuinData ) ) && 
@@ -659,9 +700,10 @@ int OnKeyShiftRight( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyRight( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Right( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
@@ -691,9 +733,10 @@ int OnKeyRight( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyTab( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -720,9 +763,10 @@ int OnKeyTab( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyDblTab( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -741,10 +785,10 @@ int OnKeyDblTab( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-
-int OnKeyCapslock( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 
 	pgdata->bChiSym = 1 - pgdata->bChiSym;
 	pgdata->bCaseChange = ( pgdata->bChiSym == CHINESE_MODE ? 0 : 1 );
@@ -752,9 +796,10 @@ int OnKeyCapslock( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyHome( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Home( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -770,9 +815,10 @@ int OnKeyHome( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyEnd( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_End( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	CheckAndResetRange( pgdata );
@@ -816,9 +862,10 @@ static int dvorak_convert( int key )
 	return key;
 }
 
-int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int rtn, num;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int bQuickCommit = 0;
@@ -826,7 +873,7 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
-		goto End_OnKeyDefault;
+		goto End_KeyDefault;
 	}
 
 	CheckAndResetRange( pgdata );
@@ -842,12 +889,12 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 	/* selecting */
 	if ( pgdata->bSelect ) {
 		if ( key == ' ' )
-			return OnKeyRight( iccf, pgo );
+			return chewing_handle_Right( ctx );
 		/* num starts from 0 */
 		num = CountSelKeyNum( key, pgdata );
 		if ( num >= 0 ) {
 			DoSelect( pgdata, num );
-			goto End_OnKeyDefault;
+			goto End_KeyDefault;
 		}
 		
 		/* Otherwise, use 'j' and 'k' for paging in selection mode */
@@ -990,16 +1037,17 @@ int OnKeyDefault( void *iccf, int key, ChewingOutput *pgo )
 		}
 	}
 
-End_OnKeyDefault:
+End_KeyDefault:
 	CallPhrasing( pgdata );
 End_Paging:
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
 
-int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int newPhraseLen;
 	int i;
@@ -1097,9 +1145,10 @@ int OnKeyCtrlNum( void *iccf, int key, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyCtrlOption( void *iccf, int key, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_CtrlOption( ChewingContext *ctx, int key )
 {
-	ChewingData *pgdata = (ChewingData *)iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int rtn;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
@@ -1112,9 +1161,10 @@ int OnKeyCtrlOption( void *iccf, int key, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyShiftSpace( void *iccf, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int rtn, key = ' ';
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
@@ -1127,9 +1177,10 @@ int OnKeyShiftSpace( void *iccf, ChewingOutput *pgo )
 	return 0;
 }
 
-int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
+CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 {
-	ChewingData *pgdata = (ChewingData *) iccf;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
 	int rtn, QuickCommit = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	
@@ -1141,7 +1192,7 @@ int OnKeyNumlock( void *iccf, int key, ChewingOutput *pgo )
 			QuickCommit = 1;
 		}
 		rtn = SymbolInput( key, pgdata );
-		/* copied from OnKey Default */
+		/* copied from chewing_handle_Default */
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		} else if ( QuickCommit ) {

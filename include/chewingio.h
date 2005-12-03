@@ -24,111 +24,121 @@
 /**
  * @brief Function should be called when ESC emit
  */
-int OnKeySpace( void *, ChewingOutput * );
-int OnKeyEsc( void *, ChewingOutput * );
-int OnKeyEnter( void *, ChewingOutput * );
-int OnKeyDel( void *, ChewingOutput * );
-int OnKeyBackspace( void *, ChewingOutput * );
-int OnKeyTab( void *, ChewingOutput * );
-int OnKeyShiftLeft( void*, ChewingOutput* );
-int OnKeyLeft( void *, ChewingOutput * );
-int OnKeyShiftRight( void*, ChewingOutput* );
-int OnKeyRight( void *, ChewingOutput * );
-int OnKeyUp( void *, ChewingOutput * );
-int OnKeyHome( void *, ChewingOutput * );
-int OnKeyEnd( void *, ChewingOutput * );
-int OnKeyDown( void *, ChewingOutput * );
-int OnKeyCapslock( void *, ChewingOutput * );
-int OnKeyDefault( void *, int, ChewingOutput * );
-int OnKeyCtrlNum( void *, int, ChewingOutput * );
-int OnKeyCtrlOption( void *, int, ChewingOutput * );
-int OnKeyShiftSpace( void *, ChewingOutput * );
-int OnKeyDblTab( void *iccf, ChewingOutput * );
-int OnKeyNumlock(void *iccf, int key, ChewingOutput *pgo);
+CHEWING_API int chewing_handle_Space( ChewingContext * );
+CHEWING_API int chewing_handle_Esc( ChewingContext * );
+CHEWING_API int chewing_handle_Enter( ChewingContext * );
+CHEWING_API int chewing_handle_Del( ChewingContext * );
+CHEWING_API int chewing_handle_Backspace( ChewingContext * );
+CHEWING_API int chewing_handle_Tab( ChewingContext * );
+CHEWING_API int chewing_handle_ShiftLeft( ChewingContext * );
+CHEWING_API int chewing_handle_Left( ChewingContext * );
+CHEWING_API int chewing_handle_ShiftRight( ChewingContext * );
+CHEWING_API int chewing_handle_Right( ChewingContext * );
+CHEWING_API int chewing_handle_Up( ChewingContext * );
+CHEWING_API int chewing_handle_Home( ChewingContext * );
+CHEWING_API int chewing_handle_End( ChewingContext * );
+CHEWING_API int chewing_handle_Down( ChewingContext * );
+CHEWING_API int chewing_handle_Capslock( ChewingContext * );
+CHEWING_API int chewing_handle_Default( ChewingContext *, int key );
+CHEWING_API int chewing_handle_CtrlNum( ChewingContext *, int key );
+CHEWING_API int chewing_handle_CtrlOption( ChewingContext *, int key );
+CHEWING_API int chewing_handle_ShiftSpace( ChewingContext * );
+CHEWING_API int chewing_handle_DblTab( ChewingContext * );
+CHEWING_API int chewing_handle_Numlock( ChewingContext *, int key);
 
 /**
  * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd
  *
- * @param iccf Static data structure
+ * @param ctx Chewing IM context
  * @param pcd
  */
-int SetConfig( void *iccf, ConfigData *pcd );
+CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd );
+
+/**
+ * @brief create new handle of ChewingContext
+ */
+CHEWING_API ChewingContext *chewing_new();
 
 /**
  * @brief Initialize chewing
  *
  * Set kbtype, choiceinfo, cursor... for chewing
  *
- * @param iccf
- * @param cf
- * @return If successed then return 0
+ * @param ctx
+ * @param dataPath
+ * @param hashPath
+ * @retval 0 if succeed
  */
-int InitChewing( void *iccf );
+CHEWING_API int chewing_Init(
+		ChewingContext *ctx,
+		const char *dataPath,
+		const char *hashPath );
 
 /**
  * @breif Reset all settings
  *
- * @param iccf
+ * @param ctx
  * @return If successed than return 0
  */
-int ChewingReset( void *iccf );
+CHEWING_API int chewing_Reset( ChewingContext *ctx );
 
 /**
  * @breif Set keyboard type
  *
- * @param iccf
+ * @param ctx
  * @param kbtype kbtype from KBStr2Num
  * @return If successed then return 0
  */
-int ChewingSetKBType( void *iccf, int kbtype );
+CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 
 /**
  * @brief Terminate chewing
  *
  * Terminate the I/O routines for chewing.
+ * Release internal memory allocation.
  */
-void TerminateChewing();
+CHEWING_API void chewing_Terminate( ChewingContext *ctx );
 
 /**
  * @brief Set chewing's english, chinese mode
  *
- * @param iccf
+ * @param ctx
  * @param mode CHINESE_MODE or ENGLISH_MODE
  */
-void SetChiEngMode( void *iccf, int mode );
+CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
 
 /**
  * @brief Get chewing's current mode
  *
- * @param iccf
+ * @param ctx
  * 
  * @return CHINESE_MODE or ENGLISH_MODE
  */
-int GetChiEngMode( void *iccf );
+CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
 
 /**
  * @brief Set chewing's fullshape, halfshape mode
  *
- * @param iccf
+ * @param ctx
  * @param mode FULLSHAPE_MODE or HALFSHAPE_MODE
  */
-void SetShapeMode( void *iccf, int MODE );
+CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
 
 /**
  * @brief Get chewing's current shape mode
  *
- * @param iccf
+ * @param ctx
  * 
  * @return FULLSHAPE_MODE or HALFSHAPE_MODE
  */
-int GetShapeMode( void *iccf );
+CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
 
 /**
  * @brief Get kbtype number from string
  *
  * @param str[] name of kbtype eg. "KB_HSU"
  */
-int KBStr2Num( char str[] );
+CHEWING_API int chewing_KBStr2Num( char str[] );
 
 #endif
 
