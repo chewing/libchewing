@@ -1,5 +1,10 @@
 2005-12-03  Jim Huang  <jserv@kaffe.org>
 
+	* test/gen_keystroke.c (show_full_shape) (main):
+	Tweaking for new API.
+
+2005-12-03  Jim Huang  <jserv@kaffe.org>
+
 	* include/chewingio.h,
 	src/chewingio.c (OnKeySpace) (OnKeyEsc) (OnKeyEnter) (OnKeyDel)
 	(OnKeyBackspace) (OnKeyTab) (OnKeyShiftLeft) (OnKeyLeft)

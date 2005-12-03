@@ -128,13 +128,13 @@ void show_zuin_buffer( int x, int y, ChewingOutput *pgo )
 		attroff( COLOR_PAIR( 1 ) );
 }
 
-void show_full_shape( int x, int y, ChewingData *da )
+void show_full_shape( int x, int y, ChewingContext *ctx )
 {
 	move( x, y );
 	addstr( "[" );
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
-	if ( da->bFullShape )
+	if ( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
 		addstr( "¥þ" );
 	else
 		addstr( "¥b" );
@@ -383,7 +383,7 @@ int main( int argc, char *argv[] )
 		show_choose_buffer( 5, 0, ctx->output );
 		drawline( 6, 0 );
 		show_zuin_buffer( 7, 0, ctx->output );
-		show_full_shape( 7, 5, ctx->data );
+		show_full_shape( 7, 5, ctx );
 		drawline( 8, 0 );
 		mvaddstr( 9, 0, "Ctrl + d : leave" );
 		mvaddstr( 9, 20, "Ctrl + b : toggle Eng/Chi mode" );
