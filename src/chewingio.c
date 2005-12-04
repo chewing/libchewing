@@ -232,6 +232,7 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd )
 		pgdata->config.bAddPhraseForward = 0;
 	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
 		pgdata->config.bSpaceAsSelection = 1;
+
 	return 0;
 }
 
@@ -983,6 +984,12 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 						bQuickCommit = 1;
 					}
 
+					if ( pgdata->bFullShape ) {
+						rtn = FullShapeSymbolInput( key, pgdata );
+					}
+					else {
+						rtn = SymbolInput( key, pgdata );
+					}
 					if ( pgdata->bFullShape ) {
 						rtn = FullShapeSymbolInput( key, pgdata );
 					}

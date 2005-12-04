@@ -116,7 +116,7 @@ void commit_string( ChewingOutput *pgo )
 
 int main( int argc, char *argv[] )
 {
-        ConfigData config;
+	ConfigData config;
 	ChewingContext *ctx;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int i;

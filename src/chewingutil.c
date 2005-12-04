@@ -55,9 +55,6 @@ void SetUpdatePhraseMsg( ChewingData *pgdata, char *addWordSeq, int len, int sta
 		ueStrNCpy( pgdata->showMsg[ begin + i ].s,
 				ueStrSeek(addWordSeq, i), 1, 1);
 	}
-	pgdata->showMsg[ begin + i].s[ 0 ] = 0;
-	pgdata->showMsg[ begin + i].s[ 1 ] = 0;
-	pgdata->showMsg[ begin + i].s[ 2 ] = 0;
 }
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )

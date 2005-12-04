@@ -144,7 +144,7 @@ static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
 static int CheckUserChoose( 
 		uint16 *new_phoneSeq, int from , int to,
 		Phrase **pp_phr, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 2 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
 		IntervalType selectInterval[], int nSelect )
 {
 	IntervalType inte, c;
