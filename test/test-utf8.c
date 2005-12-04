@@ -1,3 +1,13 @@
+/**
+ * test-utf8.c
+ *
+ * Copyright (c) 2005
+ *	libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <check.h>
@@ -47,13 +57,13 @@ END_TEST
 
 Suite *utf8_suite (void)
 {
-  Suite *s = suite_create("UTF-8_Util");
-  TCase *tc_core = tcase_create("Core");
-  suite_add_tcase (s, tc_core);
-  tcase_add_test (tc_core, test_strlen1);
-  tcase_add_test (tc_core, test_strlen2);
-  tcase_add_test (tc_core, test_strncpy);
-  tcase_add_test (tc_core, test_strseek);
-  tcase_add_test (tc_core, test_strseek2);
-  return s;
+	Suite *s = suite_create("UTF-8_Util");
+	TCase *tc_core = tcase_create("Core");
+	suite_add_tcase (s, tc_core);
+	tcase_add_test (tc_core, test_strlen1);
+	tcase_add_test (tc_core, test_strlen2);
+	tcase_add_test (tc_core, test_strncpy);
+	tcase_add_test (tc_core, test_strseek);
+	tcase_add_test (tc_core, test_strseek2);
+	return s;
 }

@@ -1,4 +1,15 @@
+/**
+ * do-test.c
+ *
+ * Copyright (c) 2005
+ *	libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #include <check.h>
+
 extern Suite *key2pho_suite (void);
 extern Suite *utf8_suite (void);
 

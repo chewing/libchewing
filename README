@@ -1,46 +1,47 @@
 libchewing - The intelligent phonetic input method library
-http://chewing.csie.net/
+  http://chewing.csie.net/
 
 [-] History
 
 libchewing is derived from Chewing input method, a xcin module
-focusing on intelligent phonetic processing by lckung and 
-kpchen. However, the original authors of Chewing dropped its
-development, and Chewing is highly bonded with xcin, which
-prevents from wider applications.
+focusing on intelligent phonetic processing by Lu-chuan Kung
+(lckung) and Kang-pen Chen (kpchen). However, the original
+authors of Chewing dropped its development, and Chewing was
+highly bonded with xcin, which prevents from wider applications.
 
 
-[-] Motion
+[-] Motivation
 
 Jim Huang started to separate core algorithm and logic layer
 of Chewing since 2002, and he integrated his efforts into a
 Chinese terminal named JMCCE as a part of its input method
-modules. Also, he attempts to let more applications adapt
-his efforts, so that he created New Chewing Project as the
-infrastructure with writing some bridges among JMCCE, XCIN,
-IIIMF, SCIM, MS-IME, etc.
+modules. Also, he attempts to let more applications adapt his
+efforts, so that new contributors created (New) Chewing Project
+as the infrastructure with writing new bridges among JMCCE,
+XCIN, IIIMF, SCIM, OpenVanilla, MS-IME, etc.
 
 
 [-] Status
 
 1. bridge integration
-  a) works with xcin.
-  b) works with JMCCE.
-  c) works with IIIMF.
-  d) works with SCIM.
-  e) works with OpenVanilla Input Method Framework for MacOS X.
-  f) works with Sun's Java Desktop System Input Method Framework.
-  g) works with OVIME (OpenVanilla IM Framework for MS-Windows).
+  - works with xcin.
+  - works with JMCCE.
+  - works with IIIMF.
+  - works with SCIM.
+  - works with OpenVanilla Input Method Framework for MacOS X.
+  - works with Sun's Java Desktop System Input Method Framework.
+  - works with OpenVanilla IM Framework.
+  - works with win32-chwing as standalone IME for native Win32.
 
 2. support phonetic keyboard layout
-  a) Hsu
-  b) IBM
-  c) Gin-Yieh
-  d) Eten
-  e) Eten 26 keys
-  f) Dvorak
-  g) Dvorak Hsu
-  h) HanYu PinYing
+  - Hsu
+  - IBM
+  - Gin-Yieh
+  - Eten
+  - Eten 26 keys
+  - Dvorak
+  - Dvorak Hsu
+  - HanYu PinYing
 
 
 [-] Installation

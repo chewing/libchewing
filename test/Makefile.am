@@ -24,12 +24,16 @@ vcheck: check
 		--show-reachable=yes \
 		$(testdir)/.libs/testchewing < $(TESTDATA)
 
-bin_PROGRAMS = testchewing genkeystroke do-test
+bin_PROGRAMS = \
+	testchewing \
+	genkeystroke \
+	$(UNIT_TEST_BIN)
 
-AM_CFLAGS = \
+INCLUDES = \
 	-I$(top_builddir)/include \
 	-DCHEWING_DATA_PREFIX="\"$(DATADIR)\"" \
-	-DTEST_HASH_DIR="\"$(PWD)\""
+	-DTEST_HASH_DIR="\"$(PWD)\"" \
+	$(CHECK_CFLAGS)
 
 testchewing_SOURCES = testchewing.c
 testchewing_LDADD = $(LIBCHEWING) -lncursesw
@@ -39,7 +43,16 @@ genkeystroke_SOURCES = gen_keystroke.c
 genkeystroke_LDADD = $(LIBCHEWING) -lncursesw
 genkeystroke_DEPENDENCIES = $(LIBCHEWING)
 
+if ENABLE_UNIT_TEST
+UNIT_TEST_BIN=do-test
 test_case_SRC = test-utf8.c test-key2pho.c
-do_test_SOURCES = do-test.c $(test_case_SRC)
-do_test_LDADD = $(LIBCHEWING) -lcheck
+do_test_SOURCES = \
+	do-test.c \
+	$(test_case_SRC)
+do_test_LDADD = \
+	$(LIBCHEWING) \
+	$(CHECK_LIBS)
 do_test_DEPENDENCIES = $(LIBCHEWING)
+else
+UNIT_TEST_BIN=
+endif

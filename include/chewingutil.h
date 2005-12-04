@@ -36,7 +36,6 @@ int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata );
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16 phone, ChewingData *pgdata );
 int CallPhrasing( ChewingData *pgdata );
-int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata );
 int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn );
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata );
 int AddSelect( ChewingData *pgdata, int sel_i );

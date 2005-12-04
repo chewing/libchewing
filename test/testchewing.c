@@ -1,7 +1,7 @@
 /**
  * testchewing.c
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -197,6 +197,7 @@ int main( int argc, char *argv[] )
 		commit_string( ctx->output );
 	}
 end:
+	/* Termate Chewing services */
 	chewing_Terminate( ctx );
 	printf( "\n" );
 

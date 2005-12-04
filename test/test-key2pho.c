@@ -1,3 +1,13 @@
+/**
+ * test-key2pho.c
+ *
+ * Copyright (c) 2005
+ *	libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <check.h>
@@ -32,10 +42,10 @@ END_TEST
 
 Suite *key2pho_suite (void)
 {
-  Suite *s = suite_create("key2pho.c");
-  TCase *tc_core = tcase_create("Core");
-  suite_add_tcase (s, tc_core);
-  tcase_add_test (tc_core, test_UintFromPhone);
-  tcase_add_test (tc_core, test_PhoneFromKey);
-  return s;
+	Suite *s = suite_create("key2pho.c");
+	TCase *tc_core = tcase_create("Core");
+	suite_add_tcase (s, tc_core);
+	tcase_add_test (tc_core, test_UintFromPhone);
+	tcase_add_test (tc_core, test_PhoneFromKey);
+	return s;
 }
