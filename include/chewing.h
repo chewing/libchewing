@@ -24,6 +24,7 @@ extern "C" {
 #include "userphrase.h"
 #include "zuin.h"
 #include "hanyupinying.h"
+#define LIBCHEWING_ENCODING "UTF-8"
 
 /* statistics symbol reported by chewing */
 extern int chewing_lifetime;

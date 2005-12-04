@@ -19,7 +19,11 @@
 
 #include <string.h>
 #include <ctype.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 
+#include "chewing-utf8-util.h"
 #include "chewingio.h"
 #include "global.h"
 #include "zuin.h"
@@ -153,6 +157,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
 
+
 	/* choiceInfo */
 	memset( &( pgdata->choiceInfo ), 0, sizeof( ChoiceInfo ) );
 
@@ -199,7 +204,6 @@ CHEWING_API void chewing_Terminate( ChewingContext *ctx )
 	
 	/* XXX: should check if the services are really completed. */
 	bTerminateCompleted = 1;
-
 	if ( ctx->data )
 		free( ctx->data);
 	if ( ctx->output )
@@ -228,7 +232,6 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd )
 		pgdata->config.bAddPhraseForward = 0;
 	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
 		pgdata->config.bSpaceAsSelection = 1;
-
 	return 0;
 }
 
@@ -324,7 +327,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		else {
 			rtn = SymbolInput( ' ', pgdata );
 		}
-		pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch;
+		pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
 		pgo->nCommitStr = 1;
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
@@ -341,7 +344,6 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 			rtn = SymbolInput( ' ', pgdata );
 		}
 		keystrokeRtn = KEYSTROKE_ABSORB;
-
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE;
 			/*
@@ -364,7 +366,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
                        DEBUG_OUT(
                                "\t\tQuick commit buf[0]=%c\n", 
                                pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-                       pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+                       pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
                        pgo->nCommitStr = 1;
                        pgdata->chiSymbolBufLen = 0;
                        pgdata->chiSymbolCursor = 0;
@@ -785,6 +787,7 @@ CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx )
 	return 0;
 }
 
+
 CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
@@ -1006,7 +1009,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 			if ( pgdata->chiSymbolBufLen == 0 ) {
 				bQuickCommit = 1;
 			}
-
 			if ( pgdata->bFullShape ) {
 				rtn = FullShapeSymbolInput( key, pgdata );
 			}
@@ -1029,7 +1031,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 			DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n", 
 				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
@@ -1052,7 +1054,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	int newPhraseLen;
 	int i;
 	uint16 addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
-	char addWordSeq[ MAX_PHONE_SEQ_LEN * 2 + 1 ];
+	char addWordSeq[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
 	int phraseState;
 
 	CheckAndResetRange( pgdata );
@@ -1087,11 +1089,12 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 					&pgdata->phoneSeq[ pgdata->cursor ],
 					sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				memcpy(
-					addWordSeq,
-					&pgdata->phrOut.chiBuf[ pgdata->cursor * 2 ],
-					sizeof( char ) * 2 * newPhraseLen );
-				addWordSeq[ newPhraseLen * 2 ] = '\0';
+				ueStrNCpy(
+						addWordSeq,
+						ueStrSeek( &pgdata->phrOut.chiBuf,
+							pgdata->cursor ),
+						newPhraseLen, 1);
+
 
 				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
@@ -1120,11 +1123,11 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 					&pgdata->phoneSeq[ pgdata->cursor - newPhraseLen ],
 					sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				memcpy(
-					addWordSeq,
-					&pgdata->phrOut.chiBuf[ ( pgdata->cursor - newPhraseLen ) * 2 ],
-					sizeof( char ) * 2 * newPhraseLen );
-				addWordSeq[ newPhraseLen * 2 ] = '\0';
+				ueStrNCpy(
+						addWordSeq,
+						ueStrSeek( &pgdata->phrOut.chiBuf,
+							pgdata->cursor - newPhraseLen ),
+						newPhraseLen, 1);
 
 				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
@@ -1196,7 +1199,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		} else if ( QuickCommit ) {
-			pgo->commitStr[ 0 ].wch = pgdata->chiSymbolBuf[ 0 ].wch; 
+			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;

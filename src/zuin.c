@@ -83,7 +83,7 @@ static int IsET26PhoEndKey( int pho_inx[], int key )
 
 static int IsDefPhoEndKey( int key, int kbtype )
 {
-	if ( Key2PhoneInx( key, 3, kbtype, 1 )  )
+	if ( PhoneInxFromKey( key, 3, kbtype, 1 )  )
 		return 1;
 	
 	if ( key == ' ' )
@@ -111,7 +111,7 @@ static int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 		return (key == ' ') ? ZUIN_KEY_ERROR : ZUIN_NO_WORD;
 	}
 
-	pho_inx = Key2PhoneInx( key, 3, pZuin->kbtype, searchTimes );
+	pho_inx = PhoneInxFromKey( key, 3, pZuin->kbtype, searchTimes );
 	if ( pZuin->pho_inx[ 3 ] == 0 ) {
 		pZuin->pho_inx[ 3 ] = pho_inx;
 	}
@@ -119,8 +119,7 @@ static int EndKeyProcess( ZuinData *pZuin, int key, int searchTimes )
 		pZuin->pho_inx[ 3 ] = pho_inx;
 		return ZUIN_NO_WORD;
 	}
-
-	u16Pho = PhoneInx2Uint( pZuin->pho_inx );
+	u16Pho = UintFromPhoneInx( pZuin->pho_inx );
 	if ( GetCharFirst( &tempword, u16Pho ) == 0 ) {
 		ZuinRemoveAll( pZuin );
 		return ZUIN_NO_WORD;
@@ -149,7 +148,7 @@ static int DefPhoInput( ZuinData *pZuin, int key )
 		
 	/* decide if the key is a phone */
 	for ( type = 0; type <= 3; type++ ) {
-		inx = Key2PhoneInx( key, type, pZuin->kbtype, 1 );
+		inx = PhoneInxFromKey( key, type, pZuin->kbtype, 1 );
 		if ( inx )
 			break;
 	}
@@ -174,36 +173,36 @@ static int HsuPhoInput( ZuinData *pZuin, int key )
 		( IsDvorakHsuPhoEndKey( pZuin->pho_inx, key ) && 
 			( pZuin->kbtype == KB_DVORAK_HSU ) ) ) {
 		if ( pZuin->pho_inx[ 1 ] == 0 && pZuin->pho_inx[ 2 ] == 0 ) {
-			/* convert "£°£¢££" to "£§£•£¶" */
+			/* convert "„Ñê„Ñë„Ñí" to "„Ñì„Ñî„Ñï" */
 			if ( 12 <= pZuin->pho_inx[ 0 ] && pZuin->pho_inx[ 0 ] <= 14 ) {
 				pZuin->pho_inx[ 0 ] += 3 ;
 			}
-			/* convert "£~" to "£¨" */
+			/* convert "„Ñè" to "„Ñõ" */
 			else if ( pZuin->pho_inx[ 0 ] == 11 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 2;
 			}
-			/* convert "£|" to "£≠" */
+			/* convert "„Ñç" to "„Ñú" */
 			else if ( pZuin->pho_inx[ 0 ] == 9 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 3;
 			}
-			/* convert "£v" to "£≥" */
+			/* convert "„Ñá" to "„Ñ¢" */
 			else if ( pZuin->pho_inx[ 0 ] == 3 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 9;
 			}
-			/* convert "£z" to "£¥" */
+			/* convert "„Ñã" to "„Ñ£" */
 			else if ( pZuin->pho_inx[ 0 ] == 7 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 10;
 			}
-			/* convert "£}" to "£µ" */
+			/* convert "„Ñé" to "„Ñ§" */
 			else if ( pZuin->pho_inx[ 0 ] == 10 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 11;
 			}
-			/* convert "£{" to "£∑" */
+			/* convert "„Ñå" to "„Ñ¶" */
 			else if ( pZuin->pho_inx[ 0 ] == 8 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 13;
@@ -227,7 +226,7 @@ static int HsuPhoInput( ZuinData *pZuin, int key )
 	else {
 		/* decide if the key is a phone */
 		for ( type = 0, searchTimes = 1; type < 3; type++ ) {
-			inx = Key2PhoneInx( key, type, pZuin->kbtype, searchTimes );
+			inx = PhoneInxFromKey( key, type, pZuin->kbtype, searchTimes );
 			if ( ! inx )
 				continue; /* if inx == 0, next type */
 			else if ( type == 0 ) {
@@ -264,7 +263,7 @@ static int HsuPhoInput( ZuinData *pZuin, int key )
 			pZuin->pho_inx[ 0 ] = 12;
 		}
 
-		/* £°£¢££ must follow £∏£∫ */
+		/* „Ñê„Ñë„Ñí must follow „Ñß„Ñ© */
 		if (
 			type == 2 && 
 			pZuin->pho_inx[ 1 ] == 0 && 
@@ -291,36 +290,36 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 
 	if ( IsET26PhoEndKey( pZuin->pho_inx, key ) ) {
 		if ( pZuin->pho_inx[ 1 ] == 0 && pZuin->pho_inx[ 2 ] == 0 ) {
-			/* convert "£°££" to "£§£¶" */
+			/* convert "„Ñê„Ñí" to "„Ñì„Ñï" */
 			if ( pZuin->pho_inx[ 0 ] == 12 || pZuin->pho_inx[ 0 ] == 14 ) {
 				pZuin->pho_inx[ 0 ] += 3;
 			}
-			/* convert "£u" to "£≤" */
+			/* convert "„ÑÜ" to "„Ñ°" */
 			else if ( pZuin->pho_inx[ 0 ] == 2 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 8;
 			}
-			/* convert "£v" to "£≥" */
+			/* convert "„Ñá" to "„Ñ¢" */
 			else if ( pZuin->pho_inx[ 0 ] == 3 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 9;
 			}
-			/* convert "£z" to "£¥" */
+			/* convert "„Ñã" to "„Ñ£" */
 			else if ( pZuin->pho_inx[ 0 ] == 7) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 10;
 			}
-			/* convert "£y" to "£µ" */
+			/* convert "„Ñä" to "„Ñ§" */
 			else if ( pZuin->pho_inx[ 0 ] == 6 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 11;
 			}
-			/* convert "£{" to "£∂" */
+			/* convert "„Ñå" to "„Ñ•" */
 			else if ( pZuin->pho_inx[ 0 ] == 8 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 12;
 			}
-			/* convert "£~" to "£∑" */
+			/* convert "„Ñè" to "„Ñ¶" */
 			else if ( pZuin->pho_inx[ 0 ] == 11 ) {
 				pZuin->pho_inx[ 0 ] = 0;
 				pZuin->pho_inx[ 2 ] = 13;
@@ -332,7 +331,7 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 	else {
 		/* decide if the key is a phone */
 		for ( type = 0, searchTimes = 1; type < 3; type++ ) {
-			inx = Key2PhoneInx( key, type, pZuin->kbtype, searchTimes );
+			inx = PhoneInxFromKey( key, type, pZuin->kbtype, searchTimes );
 			if ( ! inx ) 
 				continue; /* if inx == 0, next type */
 			else if ( type == 0 ) {
@@ -346,7 +345,7 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 			else
 				break;	
 		}
-		/* convert "£°££" to "£§£¶" */
+		/* convert "„Ñê„Ñí" to "„Ñì„Ñï" */
 		if ( type == 1 ) {
 			if ( inx == 2 ) {
 				if ( 
@@ -356,7 +355,7 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 				}
 			}
 			else {
-				/* convert "£|" to "£¢" */
+				/* convert "„Ñç" to "„Ñë" */
 				if ( pZuin->pho_inx[ 0 ] == 9 ) {
 					pZuin->pho_inx[ 0 ] = 13;	
 				}

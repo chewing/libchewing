@@ -24,7 +24,7 @@
 #define CHARDEF_BEGIN	"%chardef  begin"
 #define CHARDEF_END	"%chardef  end"
 #define DO_WORD_ERROR (1)
-#define MAX_WORD	(20000)
+#define MAX_WORD	(60000)
 #define MAX_NUMBER	(12000)
 #define MAX_BUF_LEN	(4096)
 
@@ -51,8 +51,8 @@ int DoWord( char *buf )
 	if ( strlen( keyBuf ) > ZUIN_SIZE )
 		return DO_WORD_ERROR;
 
-	Key2Pho( phoneBuf, keyBuf, KB_DEFAULT, 1 );
-	word_data[ nWord ].num = PhoneBg2Uint( phoneBuf );
+	PhoneFromKey( phoneBuf, keyBuf, KB_DEFAULT, 1 );
+	word_data[ nWord ].num = UintFromPhone( phoneBuf );
 	nWord++ ;
 	return 0;
 }

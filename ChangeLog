@@ -46,6 +46,69 @@
 	API change: InitChewing, new API ChewingReset, ChewingSetKBType.
 	Drop obsolete struct ChewingConf.
 
+2005-11-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/common/key2pho.c
+	(UintFromPhone),
+	(PhoneFromUint),
+	(PhoneInxFromKey):
+	Adjust buffer size.
+
+2005-11-26  Hong Jen Yee (PCMan)  <pcman.tw@gmail.com>
+
+	* data/tsi.src:
+	Merged with new data from libchewing-data project.
+	Fix a lot of prolems caused by encoding conversion.
+
+	* src/chewingio.c
+	(OnKeySpace),
+	(OnKeyDefault),
+    (OnKeyNumlock):
+	Copy UTF-8 encoded string in chiSymbolBuf to commitStr correctly.
+
+	* src/chewingutil.c
+	(WriteChiSymbolToBuf),
+    (MakeOutput):
+	Copy UTF-8 encoded string in chiSymbolBuf correctly.
+
+	* src/hash.c,
+    src/common/key2pho.c,
+    src/private.h,
+    include/hash.h:
+    Add some conditional compilation and missing header includes for Win32 to 
+    enhance portability.
+
+2005-11-11  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Merge phone and phrase from CNS11643.
+	Source:
+	http://rt.openfoundry.org/Foundry/Project/Tracker/Display.html?Queue=436&id=15263
+
+	* src/char.c
+	(Str2Word):
+	Only read 6 bytes to wrd_ptr->word avoid buffer overflow.
+
+	* src/tools/sort_word.c:
+	Adjust MAX_WORD from 20000 to 60000.
+
+	* include/char.h:
+	Adjust Word.word size from 10 bytes to 7 bytes.
+
+	* include/dict.h:
+	Adjust PHONE_PHRASE_NUM from 149233 to 162244.
+
+	* include/global.h:
+	Adjust TREE_SIZE from 153251 to 153341.
+	Adjust MAX_CHOICE from 250 to 567.
+
+2005-11-10  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* src/hash.c,
+	src/tree.c:
+	Use ueStrLen to count wordSeq.
+
 2005-11-13  Jim Huang  <jserv@kaffe.org>
 
 	* src/private.h: Added POSIX's <unistd.h> and Win32's <io.h> include.
@@ -177,6 +240,50 @@
 	configure.ac: Add platform-dependent declarations.
 	NOTE: UNDER_POSIX is hard-coded at the moment.
 	
+2005-10-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Convert to using UTF-8 encoding.
+
+	* src/common/chewing-utf8-util.c,
+	include/chewing-utf8-util.h:
+	New routine to handle utf8 strings.
+
+	* src/common/key2pho.c:
+	PhoneBg2Uint() rename to UintFromPhone, modify Key2Pho() to handle utf8
+	string.
+
+	* src/common/Makefile.am:
+	Add chewing-utf8-util.c to source list.
+	
+	* src/hash.c,
+	src/tree.c,
+	src/zuin.c,
+	src/userphrase.c,
+	src/choice.c,
+	src/chewingio.c,
+	src/chewingutil.c:
+	Modify to using new utf8 routine.
+
+	* include/char.h,
+	include/chewing.h,
+	include/global.h:
+	Enlarge buffer size to satisfy utf8 string.
+
+	* test/gen_keystroke.c,
+	test/Makefile.am:
+	Using ncursesw to show proper utf8 output.
+
+	* configure.ac,
+	test/do-test.c,
+	test/test-key2pho.c,
+	test/test-utf8.c,
+	test/xhtml.xsl,
+	test/test.css,
+	test/showhide.js:
+	Add unit test using 'check' framework.
+
 2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
 	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):
@@ -237,7 +344,7 @@
 
 2005-09-30  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
 
-	* src/hanyupinying.c (InitialsMap) (FinalsMap):
+	* src/hanyupinying.c (InitialsMap), (FinalsMap):
 	Declaration of variables should be put at the beginning of function
 	definition.
 

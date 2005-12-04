@@ -33,14 +33,14 @@
 
 #define MAX_KBTYPE 10
 #define MAX_SELKEY 10
-#define TREE_SIZE (153251)
+#define TREE_SIZE (153341)
 #define WCH_SIZE 4
 #define ZUIN_SIZE 4
 #define PINYING_SIZE 10
 #define MAX_PHRASE_LEN 10
 #define MAX_PHONE_SEQ_LEN 50
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
-#define MAX_CHOICE (250)
+#define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
 
 /* specified to Chewing API */
@@ -56,6 +56,7 @@
 #endif
 
 typedef unsigned short uint16;
+
 
 typedef union {
 	unsigned char s[ WCH_SIZE ];
@@ -73,7 +74,7 @@ typedef struct {
 } IntervalType;
 
 typedef struct {
-	char chiBuf[ MAX_PHONE_SEQ_LEN * 2 + 1 ];
+	char chiBuf[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
 } PhrasingOutput;
@@ -115,7 +116,7 @@ typedef struct {
 	/** @brief number of choices per page. */
 	int nChoicePerPage;
 	/** @brief store possible phrases for being chosen. */
-	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * 2 + 1 ];
+	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * 3 + 1 ];
 	/** @brief number of phrases to choose. */
 	int nTotalChoice;
 	int oldCursor, oldChiSymbolCursor;
@@ -158,7 +159,7 @@ typedef struct {
 	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	int cursor;
-	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * 2 + 1 ];
+	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * 3 + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
 	int nSelect;
 	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
@@ -217,7 +218,7 @@ typedef struct {
  */
 
 typedef struct {
-	char phrase[ MAX_PHRASE_LEN * 2 + 1 ];
+	char phrase[ MAX_PHRASE_LEN * 3 + 1 ];
 	int freq;
 } Phrase;
 
@@ -228,7 +229,7 @@ typedef struct {
 
 /* tree.c */
 int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 2 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] );
 int IsContain( IntervalType, IntervalType );
@@ -237,10 +238,10 @@ void ReadTree( const char * );
 int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq );
 
 /* key2pho.c */
-uint16 PhoneBg2Uint( const char *phone );
-uint16 PhoneInx2Uint( const int ph_inx[] );
-int Key2Pho( char *pho, const char *inputkey, int kbtype, int searchTimes );
-int Key2PhoneInx( int key, int type, int kbtype, int searchTimes );
+uint16 UintFromPhone( const char *phone );
+uint16 UintFromPhoneInx( const int ph_inx[] );
+int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes );
+int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes );
 
 /* choice module */
 int ChoiceFirstAvail( ChewingData * );

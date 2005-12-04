@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
+#include <locale.h>
 
 /* Avoid incorrect KEY_ENTER definition */
 #ifdef KEY_ENTER
@@ -105,9 +106,9 @@ void showZuin( ChewingOutput *pgo )
 {
 	int i, a;
 	if ( pgo->bChiSym )
-		addstr( "[¤¤]" );
+		addstr( "[ä¸­]" );
 	else
-		addstr( "[­^]" );
+		addstr( "[è‹±]" );
 	addstr( "        " );
 	for ( i = 0, a = 2; i < ZUIN_SIZE; i++ ) {
 		if ( pgo->zuinBuf[ i ].s[ 0 ] != '\0' ) {
@@ -134,10 +135,10 @@ void show_full_shape( int x, int y, ChewingContext *ctx )
 	addstr( "[" );
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
-	if ( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
-		addstr( "¥þ" );
-	else
-		addstr( "¥b" );
+	if (chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
+		addstr( "å…¨å½¢" );
+lse
+		addstr( "åŠå½¢" );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 2 ) );
 	addstr( "]" );
@@ -207,7 +208,7 @@ void show_commit_string( ChewingOutput *pgo )
 			mvaddstr( x, y, (const char *) pgo->commitStr[ i ].s );
 			y = ( y >= 54 ) ?
 				0 : 
-				( y + strlen( (const char *) pgo->commitStr[ i ].s ) );
+				( y + strlen( (const char *) pgo->commitStr[ i ].s ) - 3 < 0 ? 1 : 2 );
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
 	}
@@ -277,9 +278,9 @@ int main( int argc, char *argv[] )
         config.selectAreaLen = 55;
         config.maxChiSymbolLen = 16;
 	config.bAddPhraseForward = 1;
+
         for ( i = 0; i < 10; i++ )
                 config.selKey[ i ] = selKey_define[ i ];
-
 	/* Enable the configurations */
         chewing_Configure( ctx, &config );
 
@@ -404,5 +405,3 @@ end:
 	return 0;
 }
 
-/* vim:tenc=big5:
- * */

@@ -176,7 +176,7 @@ int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq )
 		}
 	}
 	if ( i == HANYU_INITIALS ) {
-		// No initials. might be £¸£¹£º
+		// No initials. might be ï¼˜ï¼™ï¼š
 		/* XXX: I NEED Implementation
 		   if(finalsKeySeq[0] != ) {
 		   }

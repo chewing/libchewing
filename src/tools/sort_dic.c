@@ -30,7 +30,7 @@
 
 #include "global.h"
 
-#define MAXLEN		98
+#define MAXLEN		149
 #define MAXZUIN		9
 #define MAX_FILE_NAME	(256)
 
@@ -56,7 +56,7 @@ const char user_msg[] =
 		"3." IN_FILE " \t-- intermediate file for make_tree \n";
 
 extern const char *ph_pho[];
-extern uint16 PhoneBg2Uint( const char *phone );
+/*extern uint16 PhoneBg2Uint( const char *phone );*/
 
 void DataSetNum( long index )
 {
@@ -67,7 +67,7 @@ void DataSetNum( long index )
 	strtok( buf, " \n\t" );
 	data[ index ].freq = atoi( strtok( NULL, " \n\t" ) );
 	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) ) 
-		data[ index ].num[ i++ ] = PhoneBg2Uint( p );
+		data[ index ].num[ i++ ] = UintFromPhone( p );
 }
 
 void SetNewline2Zero( long index )

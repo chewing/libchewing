@@ -135,9 +135,9 @@ int main( int argc, char *argv[] )
 	/* Fill the configuration values */
         config.selectAreaLen = 40;
         config.maxChiSymbolLen = 16;
+
         for ( i = 0; i < 10; i++ )
                 config.selKey[ i ] = selKey_define[ i ];
-
 	/* Enable configurations */
 	chewing_Configure( ctx, &config );
 
@@ -203,5 +203,3 @@ end:
 	return 0;
 }
 
-/* vim:tenc=big5:
- * */

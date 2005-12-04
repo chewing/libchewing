@@ -14,6 +14,11 @@
 
 #ifndef HASH_H
 #define HASH_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "global.h"
 #include "userphrase.h"
 
@@ -42,6 +47,10 @@ void HashModify( HASH_ITEM *pItem );
 int AlcUserPhraseSeq( UserPhraseData *pData, int len );
 int ReadHash( char *path );
 void FreeHashTable( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
