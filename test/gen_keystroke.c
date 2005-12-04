@@ -79,7 +79,7 @@ void show_interval_buffer( int x, int y, ChewingOutput *pgo )
 	count = 0;
 	for ( i = 0 ;i < pgo->chiSymbolBufLen; i++ ) {
 		arrPos[ i ] = count;
-		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s );
+		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
 	}
 	arrPos[ i ] = count;
 
@@ -137,7 +137,7 @@ void show_full_shape( int x, int y, ChewingContext *ctx )
 		attron( COLOR_PAIR( 2 ) );
 	if (chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
 		addstr( "全形" );
-lse
+	else
 		addstr( "半形" );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 2 ) );
@@ -208,7 +208,7 @@ void show_commit_string( ChewingOutput *pgo )
 			mvaddstr( x, y, (const char *) pgo->commitStr[ i ].s );
 			y = ( y >= 54 ) ?
 				0 : 
-				( y + strlen( (const char *) pgo->commitStr[ i ].s ) - 3 < 0 ? 1 : 2 );
+				( y + strlen( (const char *) pgo->commitStr[ i ].s ) - 3 < 0 ? y + 1 : y + 2 );
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
 	}
@@ -219,7 +219,7 @@ void set_cursor( int x, ChewingOutput *pgo )
 	int i, count;
 
 	for ( count = 0, i = 0; i < pgo->chiSymbolCursor; i++) {
-		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s );
+		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
 	}
 	move( x, count );
 }
@@ -248,6 +248,7 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Initialize curses library */
+	setlocale(LC_CTYPE, "");
 	initscr();
 	if ( has_colors() == TRUE ) {
 		start_color();
