@@ -190,6 +190,7 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
+  Enable binary data      $ENABLE_BINARY_DATA
   Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
 ])

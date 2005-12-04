@@ -33,7 +33,8 @@ INCLUDES = \
 	-I$(top_builddir)/include \
 	-DCHEWING_DATA_PREFIX="\"$(DATADIR)\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
-	$(CHECK_CFLAGS)
+	$(CHECK_CFLAGS) \
+	-I$(top_srcdir)/src/porting_layer/include
 
 testchewing_SOURCES = testchewing.c
 testchewing_LDADD = $(LIBCHEWING) -lncursesw
@@ -50,7 +51,10 @@ endif
 
 if ENABLE_UNIT_TEST
 UNIT_TEST_BIN=do-test
-test_case_SRC = test-utf8.c test-key2pho.c
+test_case_SRC = \
+	test-utf8.c \
+	test-key2pho.c \
+	test-mmap.c
 do_test_SOURCES = \
 	do-test.c \
 	$(test_case_SRC)

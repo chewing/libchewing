@@ -1,5 +1,17 @@
 2005-12-04  Jim Huang  <jserv@kaffe.org>
 
+	* test/test-mmap.c: New file. Unit test for mmap implementation in
+	porting_layer.
+
+	* test/do-test.c,
+	test/Makefile.am: Likewise.
+
+	* src/hash.c: Remove redundant macro.
+
+	* data/Makefile.am: Fixlet to binary-data generation when enabled.
+
+2005-12-04  Jim Huang  <jserv@kaffe.org>
+
 	* test/Makefile.am,
 	configure.ac: Conditional compilation for genkeystroke
 	if ncursesw is found.
