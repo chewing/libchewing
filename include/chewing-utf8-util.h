@@ -1,3 +1,13 @@
+/**
+ * chewing-utf8-util.h
+ *
+ * Copyright (c) 2005
+ *	libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #ifndef CHEWING_UTF8_UTILS_H
 #define CHEWING_UTF8_UTILS_H
 

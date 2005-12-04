@@ -7,15 +7,9 @@ For developers, please add new entry for your plans.
   a) hashed data stored in binary form.
     a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
   b) support memory-limited applications.
-7. Migrate to Unicode
-   ==> utf8 branch is working on the relative issues.
 8. Auto calculate the size of phrase data base.
 9. Provide API for querying Keybaord Mapping information.
   a) provide zh_TW translation of corresponding keybaord mapping.
-10. all APIs should have the same namespace Chewing_blah_blah.
-    ==> no more legacy InitBlahBlah APIs.
-        The API of Berkeley DB should be a good reference to API design
-	and naming.
 11. Abstract the I/O layer
   a) provide thin and efficient I/O helper functions to perform the
      operations, such as open/create specific phrase file, query,
@@ -26,3 +20,4 @@ For developers, please add new entry for your plans.
      IIIMF's namespace I/O, and even database, so that we could give
      leverage to incoming 0.3.x branch.
      ==> sqlite branch attempts to take a try.
+12.

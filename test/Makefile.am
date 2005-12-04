@@ -26,7 +26,7 @@ vcheck: check
 
 bin_PROGRAMS = \
 	testchewing \
-	genkeystroke \
+	$(TEXT_UI_BIN) \
 	$(UNIT_TEST_BIN)
 
 INCLUDES = \
@@ -39,9 +39,14 @@ testchewing_SOURCES = testchewing.c
 testchewing_LDADD = $(LIBCHEWING) -lncursesw
 testchewing_DEPENDENCIES = $(LIBCHEWING)
 
+if ENABLE_TEXT_UI
+TEXT_UI_BIN=genkeystroke
 genkeystroke_SOURCES = gen_keystroke.c
 genkeystroke_LDADD = $(LIBCHEWING) -lncursesw
 genkeystroke_DEPENDENCIES = $(LIBCHEWING)
+else
+TEXT_UI_BIN=
+endif
 
 if ENABLE_UNIT_TEST
 UNIT_TEST_BIN=do-test

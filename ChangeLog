@@ -1,6 +1,12 @@
 2005-12-04  Jim Huang  <jserv@kaffe.org>
 
 	* test/Makefile.am,
+	configure.ac: Conditional compilation for genkeystroke
+	if ncursesw is found.
+
+2005-12-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am,
 	configure.ac: Check for check unit test framework.
 	http://check.sourceforge.net/
 	Conditional compilation if enable built-in unit tests.

@@ -65,9 +65,6 @@ AC_SUBST(DOT)
 AC_PATH_PROG(PERL, perl)
 AC_SUBST(PERL)
 
-# Checks if check is available
-AM_PATH_CHECK
-
 # Checks for libraries.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
@@ -83,6 +80,33 @@ AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 # Checks for check unit test framework
 AM_PATH_CHECK([0.8.2], [ enable_check=yes ], [ enable_check=no ])
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
+
+# Checks for ncursesw
+LIB_NAME=ncursesw
+for p in $HOME /usr/local /usr
+do
+	if test -f $p/include/ncursesw/curses.h
+	then
+		NCURSESW_CFLAGS="-I$p/include/ncursesw"
+		test $p != /usr && NCURSESW_CFLAGS="-I$p/include"
+		test $p != /usr && NCURSESW_LIBS="-L$p/lib"
+		break
+	elif test $p != /usr
+	then
+		if test -f $p/include/curses.h
+		then
+			NCURSESW_CFLAGS="-I$p/include"
+			NCURSESW_LIBS="-L$p/lib"
+			break
+		fi
+	fi
+done
+
+enable_ncursesw=yes
+if test -z $NCURSESW_CFLAGS; then
+	enable_ncursesw=no
+fi
+AM_CONDITIONAL(ENABLE_TEXT_UI, test $enable_ncursesw = "yes")
 
 # Options
 AC_ARG_ENABLE([debug],
@@ -166,5 +190,6 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
-  Enable Unit Testing     $enable_check
+  Build Unit Test         $enable_check
+  Build TextUI sample     $enable_ncursesw
 ])

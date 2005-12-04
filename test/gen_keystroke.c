@@ -43,6 +43,7 @@
 /* Spacing */
 #define FILL_LINE  "--------------------------------------------------------"
 #define FILL_BLANK "                                                               "
+
 static int hasColor = 0;
 static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
 
@@ -282,6 +283,7 @@ int main( int argc, char *argv[] )
 
         for ( i = 0; i < 10; i++ )
                 config.selKey[ i ] = selKey_define[ i ];
+
 	/* Enable the configurations */
         chewing_Configure( ctx, &config );
 
