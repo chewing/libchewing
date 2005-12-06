@@ -52,7 +52,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *, int key);
  * @param ctx Chewing IM context
  * @param pcd
  */
-CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd );
+CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd );
 
 /**
  * @brief create new handle of ChewingContext

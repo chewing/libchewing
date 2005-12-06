@@ -126,7 +126,8 @@ int HaninSymbolInput(ChoiceInfo *pci, AvailInfo *pai, const uint16 phoneSeq[],	i
     pai->avail[1].id = -1;  
     pai->nAvail = all;
     pai->currentAvail = 1;
-    pci->nChoicePerPage = (selectAreaLen - 5) / ( 2 + 3) ;
+	//pci->nChoicePerPage = (selectAreaLen - 5) / ( 2 + 3) ;
+	pci->nChoicePerPage = selectAreaLen / 2;
     if(pci->nChoicePerPage > MAX_SELKEY) pci->nChoicePerPage = MAX_SELKEY ;
     pci->nPage = CEIL_DIV(pci->nTotalChoice, pci->nChoicePerPage) ;
     pci->pageNo = 0 ;

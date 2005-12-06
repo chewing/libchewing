@@ -139,14 +139,14 @@ typedef struct {
             HSU_SELKEY_TYPE2 = asdfzxcv89.
          */
 	int hsuSelKeyType;
-} ConfigData;
+} ChewingConfigData;
 
 typedef struct {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
 	ZuinData zuinData;
-	ConfigData config;
+	ChewingConfigData config;
     /** @brief current input buffer, content==0 means Chinese code */
 	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
 	int chiSymbolCursor;

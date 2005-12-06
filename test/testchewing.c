@@ -116,7 +116,7 @@ void commit_string( ChewingOutput *pgo )
 
 int main( int argc, char *argv[] )
 {
-	ConfigData config;
+	ChewingConfigData config;
 	ChewingContext *ctx;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int i;
@@ -133,11 +133,11 @@ int main( int argc, char *argv[] )
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	/* Fill the configuration values */
-        config.selectAreaLen = 40;
-        config.maxChiSymbolLen = 16;
+	config.selectAreaLen = 20;
+	config.maxChiSymbolLen = 16;
 
-        for ( i = 0; i < 10; i++ )
-                config.selKey[ i ] = selKey_define[ i ];
+	for ( i = 0; i < 10; i++ )
+		config.selKey[ i ] = selKey_define[ i ];
 	/* Enable configurations */
 	chewing_Configure( ctx, &config );
 

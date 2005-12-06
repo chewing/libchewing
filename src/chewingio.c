@@ -217,7 +217,7 @@ CHEWING_API void chewing_free( ChewingContext *ctx )
 	return;
 }
 
-CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd )
+CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 {
 	ChewingData *pgdata = ctx->data;
 

@@ -1,6 +1,18 @@
 2005-12-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c:
+	ConfigData rename to ChewingConfigData.
+
+	* src/chewingutil.c,
+	src/choice.c:
+	Change measure of selectAreaLen to number of word
+	that can be displayed.
+
+2005-12-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h,
 	src/chewingio.c
 	(chewing_Init) (chewing_Terminate):
 	Only initialize/terminate global data.
