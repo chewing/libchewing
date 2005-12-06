@@ -266,12 +266,12 @@ int main( int argc, char *argv[] )
 	clear();
 	refresh();
 
-	/* Request handle to ChewingContext */
-	ctx = chewing_new();
-
 	/* Initialize libchewing */
 	/* for the sake of testing, we should not change existing hash data */
-	chewing_Init( ctx, prefix, TEST_HASH_DIR );
+	chewing_Init( prefix, TEST_HASH_DIR );
+
+	/* Request handle to ChewingContext */
+	ctx = chewing_new();
 
 	/* Set keyboard type */
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
@@ -403,8 +403,11 @@ int main( int argc, char *argv[] )
 end:
 	endwin();
 
+	/* Release Chewing context */
+	chewing_free( ctx );
+
 	/* Termate Chewing services */
-	chewing_Terminate( ctx );
+	chewing_Terminate();
 
 	fprintf( fout, "\n" );
 	fclose( fout );

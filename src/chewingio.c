@@ -101,15 +101,17 @@ CHEWING_API ChewingContext *chewing_new()
 	ctx = ALC( ChewingContext, 1 );
 	ctx->data = internal_data;
 	ctx->output = internal_output;
+
+	/* handle configuration */
+	chewing_Reset( ctx );
+
+	return ctx;
 }
 
 CHEWING_API int chewing_Init(
-		ChewingContext *ctx,
 		const char *dataPath,
 		const char *hashPath )
 {
-	ChewingData *pgdata = ctx->data;
-
 	/* initialize Tree, Char, and Dict */
 	/* FIXME: check the validation of dataPath */
 	ReadTree( dataPath );
@@ -119,9 +121,6 @@ CHEWING_API int chewing_Init(
 	/* initial Hash */
 	/* FIXME: check the validation of hashPath */
 	ReadHash( hashPath );
-
-	/* handle configuration */
-	chewing_Reset( ctx );
 
 #ifdef ENABLE_DEBUG
 {
@@ -182,7 +181,7 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype )
 	return 0;
 }
 
-CHEWING_API void chewing_Terminate( ChewingContext *ctx )
+CHEWING_API void chewing_Terminate()
 {
 	int i;
 
@@ -204,13 +203,17 @@ CHEWING_API void chewing_Terminate( ChewingContext *ctx )
 	
 	/* XXX: should check if the services are really completed. */
 	bTerminateCompleted = 1;
+	return;
+}
+
+CHEWING_API void chewing_free( ChewingContext *ctx )
+{
 	if ( ctx->data )
 		free( ctx->data);
 	if ( ctx->output )
 		free( ctx->output);
 	if ( ctx )
 		free( ctx );
-
 	return;
 }
 

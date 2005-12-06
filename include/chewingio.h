@@ -60,17 +60,22 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ConfigData *pcd );
 CHEWING_API ChewingContext *chewing_new();
 
 /**
+ * @brief release handle of ChewingContext
+ *
+ * Release internal memory allocation.
+ */
+CHEWING_API void chewing_free( ChewingContext *ctx );
+
+/**
  * @brief Initialize chewing
  *
- * Set kbtype, choiceinfo, cursor... for chewing
+ * Init directory data.
  *
- * @param ctx
  * @param dataPath
  * @param hashPath
  * @retval 0 if succeed
  */
 CHEWING_API int chewing_Init(
-		ChewingContext *ctx,
 		const char *dataPath,
 		const char *hashPath );
 
@@ -95,9 +100,8 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
  * @brief Terminate chewing
  *
  * Terminate the I/O routines for chewing.
- * Release internal memory allocation.
  */
-CHEWING_API void chewing_Terminate( ChewingContext *ctx );
+CHEWING_API void chewing_Terminate();
 
 /**
  * @brief Set chewing's english, chinese mode

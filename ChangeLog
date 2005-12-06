@@ -1,3 +1,16 @@
+2005-12-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h,
+	src/chewingio.c
+	(chewing_Init) (chewing_Terminate):
+	Only initialize/terminate global data.
+	(chewing_new): Allocate and initialize internal data.
+	(chewing_free): New API.
+	Deallocate internal data.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Use the new API.
+
 2005-12-04  Jim Huang  <jserv@kaffe.org>
 
 	* test/test-mmap.c: New file. Unit test for mmap implementation in
