@@ -34,6 +34,7 @@ INCLUDES = \
 	-DCHEWING_DATA_PREFIX="\"$(DATADIR)\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \
+	$(NCURSESW_CFLAGS) \
 	-I$(top_srcdir)/src/porting_layer/include
 
 testchewing_SOURCES = testchewing.c
@@ -43,7 +44,7 @@ testchewing_DEPENDENCIES = $(LIBCHEWING)
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke
 genkeystroke_SOURCES = gen_keystroke.c
-genkeystroke_LDADD = $(LIBCHEWING) -lncursesw
+genkeystroke_LDADD = $(LIBCHEWING) $(NCURSESW_LIBS)
 genkeystroke_DEPENDENCIES = $(LIBCHEWING)
 else
 TEXT_UI_BIN=

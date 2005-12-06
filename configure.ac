@@ -83,29 +83,32 @@ AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
 
 # Checks for ncursesw
 LIB_NAME=ncursesw
+NCURSESW_CFLAGS=
+NCURSESW_LIBS=
 for p in $HOME /usr/local /usr
 do
 	if test -f $p/include/ncursesw/curses.h
 	then
 		NCURSESW_CFLAGS="-I$p/include/ncursesw"
 		test $p != /usr && NCURSESW_CFLAGS="-I$p/include"
-		test $p != /usr && NCURSESW_LIBS="-L$p/lib"
 		break
 	elif test $p != /usr
 	then
 		if test -f $p/include/curses.h
 		then
 			NCURSESW_CFLAGS="-I$p/include"
-			NCURSESW_LIBS="-L$p/lib"
 			break
 		fi
 	fi
 done
 
 enable_ncursesw=yes
+NCURSESW_LIBS="-lncursesw"
 if test -z $NCURSESW_CFLAGS; then
 	enable_ncursesw=no
 fi
+AC_SUBST(NCURSESW_CFLAGS)
+AC_SUBST(NCURSESW_LIBS)
 AM_CONDITIONAL(ENABLE_TEXT_UI, test $enable_ncursesw = "yes")
 
 # Options
