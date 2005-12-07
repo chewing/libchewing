@@ -144,7 +144,7 @@ static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
 static int CheckUserChoose( 
 		uint16 *new_phoneSeq, int from , int to,
 		Phrase **pp_phr, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect )
 {
 	IntervalType inte, c;
@@ -187,9 +187,9 @@ static int CheckUserChoose(
 				 * if ok then continue to test. */
 				len = c.to - c.from;
 				if ( memcmp( 
-					&pUserPhraseData->wordSeq[ ( c.from - from ) * 3 ], 
+					&pUserPhraseData->wordSeq[ ( c.from - from ) * MAX_UTF8_SIZE ], 
 					selectStr[ chno ], 
-					len * 3 ) )
+					len * MAX_UTF8_SIZE ) )
 					break;
 			}
 
@@ -202,7 +202,7 @@ static int CheckUserChoose(
 							pUserPhraseData->wordSeq,
 							user_alloc, 1);
 				}
-				p_phr->phrase[ user_alloc * 3 ] = '\0';
+				p_phr->phrase[ user_alloc * MAX_UTF8_SIZE ] = '\0';
 				p_phr->freq = pUserPhraseData->userfreq;
 				*pp_phr = p_phr;
 			}
@@ -221,7 +221,7 @@ static int CheckUserChoose(
  * their intersections are the same */
 static int CheckChoose(
 		int ph_id, int from, int to, Phrase **pp_phr, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect )
 {
 	IntervalType inte, c;
@@ -246,8 +246,8 @@ static int CheckChoose(
 				 */
 				len = c.to - c.from;
 				if ( memcmp( 
-					&( phrase->phrase[ ( c.from - from ) *  3 ] ), 
-					selectStr[ chno ], len * 3 ) )
+					&( phrase->phrase[ ( c.from - from ) *  MAX_UTF8_SIZE ] ), 
+					selectStr[ chno ], len * MAX_UTF8_SIZE ) )
 					break;
 			}
 			else if ( IsIntersect( inte, selectInterval[ chno ] ) ) {
@@ -343,7 +343,7 @@ static void internal_release_Phrase( int mode, Phrase *pUser, Phrase *pDict )
 
 static void FindInterval(
 		uint16 *phoneSeq, int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], TreeDataType *ptd )
 {
@@ -416,7 +416,7 @@ static void FindInterval(
 				if ( ! memcmp( 
 					puserphrase->phrase, 
 					pdictphrase, 
-					( end - begin + 1 ) * 3 * sizeof( char ) ) ) {
+					( end - begin + 1 ) * MAX_UTF8_SIZE * sizeof( char ) ) ) {
 					AddInterval( 
 						ptd, 
 						begin, 
@@ -607,16 +607,16 @@ static void LoadChar( char *buf, uint16 phoneSeq[], int nPhoneSeq )
 
 	for ( i = 0; i < nPhoneSeq; i++ ) {
 		GetCharFirst( &word, phoneSeq[ i ] );
-		memcpy( buf + i * 3, word.word, 3 );
+		memcpy( buf + i * MAX_UTF8_SIZE, word.word, MAX_UTF8_SIZE );
 	}
-	buf[ nPhoneSeq * 3 ] = '\0';
+	buf[ nPhoneSeq * MAX_UTF8_SIZE ] = '\0';
 }
 
 /* kpchen said, record is the index array of interval */
 static void OutputRecordStr(
 		char *out_buf, int *record, int nRecord, 
 		uint16 phoneSeq[], int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[],
 		int nSelect, TreeDataType *ptd )
 {
@@ -898,7 +898,7 @@ static void ShowList( TreeDataType *ptd )
 
 int Phrasing(
 		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] ) 
 {

@@ -1064,7 +1064,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	int newPhraseLen;
 	int i;
 	uint16 addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
-	char addWordSeq[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
+	char addWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int phraseState;
 
 	CheckAndResetRange( pgdata );

@@ -29,7 +29,7 @@ static char hashfilename[ 200 ];
 int AlcUserPhraseSeq( UserPhraseData *pData, int len )
 {
 	pData->phoneSeq = ALC( uint16, len + 1 );
-	pData->wordSeq = ALC( char, len * 3 + 1 );
+	pData->wordSeq = ALC( char, len * MAX_UTF8_SIZE + 1 );
 	return ( pData->phoneSeq && pData->wordSeq );
 }
 

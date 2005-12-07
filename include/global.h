@@ -35,6 +35,7 @@
 #define MAX_SELKEY 10
 #define TREE_SIZE (153341)
 #define WCH_SIZE 4
+#define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYING_SIZE 10
 #define MAX_PHRASE_LEN 10
@@ -59,7 +60,7 @@ typedef unsigned short uint16;
 
 
 typedef union {
-	unsigned char s[ WCH_SIZE ];
+	unsigned char s[ MAX_UTF8_SIZE + 1];
 	wchar_t wch;
 } wch_t;
 
@@ -74,7 +75,7 @@ typedef struct {
 } IntervalType;
 
 typedef struct {
-	char chiBuf[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
+	char chiBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
 } PhrasingOutput;
@@ -116,7 +117,7 @@ typedef struct {
 	/** @brief number of choices per page. */
 	int nChoicePerPage;
 	/** @brief store possible phrases for being chosen. */
-	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * 3 + 1 ];
+	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	/** @brief number of phrases to choose. */
 	int nTotalChoice;
 	int oldCursor, oldChiSymbolCursor;
@@ -159,7 +160,7 @@ typedef struct {
 	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	int cursor;
-	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * 3 + 1 ];
+	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
 	int nSelect;
 	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
@@ -218,7 +219,7 @@ typedef struct {
  */
 
 typedef struct {
-	char phrase[ MAX_PHRASE_LEN * 3 + 1 ];
+	char phrase[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	int freq;
 } Phrase;
 
@@ -229,7 +230,7 @@ typedef struct {
 
 /* tree.c */
 int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * 3 + 1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] );
 int IsContain( IntervalType, IntervalType );

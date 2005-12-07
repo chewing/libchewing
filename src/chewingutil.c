@@ -309,7 +309,7 @@ int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
 			 * Workaround to avoid different initialization behavior 
 			 * among Win32 and Unix-like OSs.
 			 */
-			memset( &( csBuf[ i ].s ), 0, WCH_SIZE );
+			memset( &( csBuf[ i ].s ), 0, MAX_UTF8_SIZE + 1 );
 			ueStrNCpy( csBuf[ i ].s, &( pgdata->phrOut.chiBuf[ phoneseq_i ] ), 1, 1);
 			phoneseq_i += ueBytesFromChar( pgdata->phrOut.chiBuf[ phoneseq_i ] );
 		}

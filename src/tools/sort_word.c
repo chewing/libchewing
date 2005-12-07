@@ -29,8 +29,8 @@
 #define MAX_BUF_LEN	(4096)
 
 typedef struct {
-	uint16 num;
-	char word[ 3 ];
+	uint16 num[2];
+	char word[ 8 ];
 } WORD_DATA;
 
 WORD_DATA word_data[ MAX_WORD ];
@@ -38,7 +38,7 @@ int nWord;
 
 int SortWord( const WORD_DATA *a, const WORD_DATA *b )
 {
-	return ( a->num - b->num );
+	return ( a->num[0] - b->num[0] );
 }
 
 int DoWord( char *buf )
@@ -52,7 +52,7 @@ int DoWord( char *buf )
 		return DO_WORD_ERROR;
 
 	PhoneFromKey( phoneBuf, keyBuf, KB_DEFAULT, 1 );
-	word_data[ nWord ].num = UintFromPhone( phoneBuf );
+	word_data[ nWord ].num[0] = UintFromPhone( phoneBuf );
 	nWord++ ;
 	return 0;
 }
@@ -72,11 +72,11 @@ void Output()
 
 	previous = 0 ;
 	for ( i = 0; i < nWord; i++ ) {
-		if ( word_data[ i ].num != previous ) {
-			previous = word_data[ i ].num;
+		if ( word_data[ i ].num[0] != previous ) {
+			previous = word_data[ i ].num[0];
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
 		}
-		fprintf( datafile, "%hu %s\t", word_data[ i ].num, word_data[ i ].word );
+		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
 	}
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
 	fclose( indexfile );
@@ -90,14 +90,14 @@ void CountSort()
 
 	memset( number, 0, sizeof( number ) );
 	for ( i = 0; i < nWord; i++ )
-		number[ word_data[ i ].num ]++;
+		number[ word_data[ i ].num[0] ]++;
 	memmove( &number[ 1 ], number, sizeof( int ) * ( MAX_NUMBER - 1 ) );
 	for ( i = 2; i < MAX_NUMBER; i++)
 		number[ i ] += number[ i - 1 ];
 
 	memcpy( oldData, word_data, sizeof( WORD_DATA ) * nWord );
 	for ( i = 0; i < nWord; i++ ) {
-		place = number[ oldData[ i ].num ]++;
+		place = number[ oldData[ i ].num[0] ]++;
 		memcpy( &word_data[ place ], &oldData[ i ], sizeof( WORD_DATA ) );
 	}
 }

@@ -55,7 +55,7 @@ static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int 
 			if ( ! memcmp( 
 				phrase->phrase, 
 				wordSeq, 
-				len * 3 * sizeof( char ) ) ) { 
+				len * MAX_UTF8_SIZE * sizeof( char ) ) ) { 
 				retval = phrase->freq;	
 				free( phrase );
 				return retval;
