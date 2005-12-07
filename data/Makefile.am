@@ -21,9 +21,9 @@ gendata2: ch_index.dat_bin fonetree.dat_bin ph_index.dat_bin
 	-mv -f ph_index.dat_bin ph_index.dat
 else
 convert_dat:
-	-echo "Nothing in convert_dat"
+	@echo "Nothing in convert_dat"
 gendata2:
-	-echo "Nothing in gendata2"
+	@echo "Nothing in gendata2"
 endif
 
 install-data-local: $(datas) pinyin.tab
