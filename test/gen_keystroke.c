@@ -53,17 +53,18 @@ void drawline( int x, int y )
 	addstr( FILL_LINE );
 }
 
-void show_edit_buffer( int x, int y, ChewingOutput *pgo )
+void show_edit_buffer( int x, int y, ChewingContext *ctx )
 {
 	int i;
 	move( x, y );
 	addstr( FILL_BLANK );
+	if ( ! chewing_buffer_Check( ctx ) )
+		return;
 	move( x, y );
-	for ( i = 0; i < pgo->chiSymbolBufLen; i++ )
-		addstr( (const char *) pgo->chiSymbolBuf[ i ].s );
+	addstr( (const char *) chewing_buffer_String( ctx ) );
 }
 
-void show_interval_buffer( int x, int y, ChewingOutput *pgo )
+void show_interval_buffer( int x, int y, ChewingContext *ctx )
 {
 	char out_buf[ 100 ];
 	int i, count;
@@ -73,59 +74,57 @@ void show_interval_buffer( int x, int y, ChewingOutput *pgo )
 	addstr( FILL_BLANK );
 	move( x, y );
 
-	if ( pgo->chiSymbolBufLen == 0 ) {
-                return;
-        }
-
+	/* Check if buffer is available. */
+	if ( ! chewing_buffer_Check( ctx ) ) {
+		return;
+	}
+	
 	count = 0;
-	for ( i = 0 ;i < pgo->chiSymbolBufLen; i++ ) {
+	for ( i = 0 ;i < ctx->output->chiSymbolBufLen; i++ ) {
 		arrPos[ i ] = count;
-		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
+		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
 	}
 	arrPos[ i ] = count;
 
 	memset( out_buf, ' ', count * ( sizeof( char ) ) );
 	out_buf[ count ] = '\0';
 
-	for ( i = 0; i < pgo->nDispInterval; i++ ) {
-		if ( ( pgo->dispInterval[ i ].to - pgo->dispInterval[ i ].from ) == 1 ) {
-			out_buf[ arrPos[ pgo->dispInterval[ i ].from ] ] = ' ';
-			out_buf[ arrPos[ pgo->dispInterval[ i ].to ] - 1 ] = ' ';
+	for ( i = 0; i < ctx->output->nDispInterval; i++ ) {
+		if ( ( ctx->output->dispInterval[ i ].to - ctx->output->dispInterval[ i ].from ) == 1 ) {
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = ' ';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] = ' ';
 		}
 		else {	
-			out_buf[ arrPos[ pgo->dispInterval[ i ].from ] ] = '[';
-			out_buf[ arrPos[ pgo->dispInterval[ i ].to ] - 1 ] =  ']';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = '[';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] =  ']';
 		}
 		memset(
-			&out_buf[ arrPos[ pgo->dispInterval[ i ].from ] + 1 ], '-',
-			arrPos[ pgo->dispInterval[ i ].to ] - arrPos[ pgo->dispInterval[ i ].from ] - 2 );
+			&out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] + 1 ], '-',
+			arrPos[ ctx->output->dispInterval[ i ].to ] - arrPos[ ctx->output->dispInterval[ i ].from ] - 2 );
 	}
 	addstr( out_buf );
 }
 
-void showZuin( ChewingOutput *pgo )
+void showZuin( ChewingContext *ctx )
 {
-	int i, a;
-	if ( pgo->bChiSym )
+	int i;
+	int zuin_count;
+	if ( chewing_get_ChiEngMode( ctx ) )
 		addstr( "[中]" );
 	else
 		addstr( "[英]" );
 	addstr( "        " );
-	for ( i = 0, a = 2; i < ZUIN_SIZE; i++ ) {
-		if ( pgo->zuinBuf[ i ].s[ 0 ] != '\0' ) {
-			addstr( (const char *) pgo->zuinBuf[ i ].s );
-		}
-	}
+	addstr( chewing_zuin_String( ctx, &zuin_count ) );
 }
 
-void show_zuin_buffer( int x, int y, ChewingOutput *pgo )
+void show_zuin_buffer( int x, int y, ChewingContext *ctx )
 {
 	move( x, y );
 	addstr( FILL_BLANK );
 	move( x, y );
 	if ( hasColor )
 		attron( COLOR_PAIR( 1 ) );
-	showZuin( pgo );
+	showZuin( ctx );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 1 ) );
 }
@@ -136,7 +135,7 @@ void show_full_shape( int x, int y, ChewingContext *ctx )
 	addstr( "[" );
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
-	if (chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
+	if ( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE )
 		addstr( "全形" );
 	else
 		addstr( "半形" );
@@ -145,65 +144,65 @@ void show_full_shape( int x, int y, ChewingContext *ctx )
 	addstr( "]" );
 }
 
-void show_userphrase( int x, int y, wch_t showMsg[], int len )
+void show_userphrase( int x, int y, ChewingContext *ctx )
 {
-	char out_buf[ 40 ];
-	int i;
+	if ( chewing_aux_Length( ctx ) == 0 )
+		return;
 
-	memset( out_buf, 0, sizeof( out_buf ) );
-	for ( i = 0; i < len; i++ ) {
-		strcat( out_buf, (const char *) showMsg[ i ].s );
-	}
 	move( x, y );
 	addstr( FILL_BLANK );
 	move( x, y );
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
-	addstr( out_buf );
+	addstr( chewing_aux_String( ctx ) );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 2 ) );
 }
 
-void show_choose_buffer( int x, int y, ChewingOutput *pgo )
+void show_choose_buffer( int x, int y, ChewingContext *ctx )
 {
-	int i, no, len;
+	int i = 1;
+	int currentPageNo;
 	char str[ 20 ];
 	move( x, y );
 	addstr( FILL_BLANK );
 	move( x, y );
-
-	if ( pgo->pci->nPage != 0 ) {
-		no = pgo->pci->pageNo * pgo->pci->nChoicePerPage;
-		len = 0;
-
-		for ( i = 0; i < pgo->pci->nChoicePerPage; no++, i++ ) {
-			if ( no >= pgo->pci->nTotalChoice )
-				break;
-			sprintf( str, "%d.", i + 1 );
-			if ( hasColor )
-				attron( COLOR_PAIR( 3 ) );
-			addstr( str );
-			if ( hasColor )
-				attroff( COLOR_PAIR( 3 ) );
-			sprintf( str, " %s ", pgo->pci->totalChoiceStr[ no ] );			
-			addstr( str );
-		}
-		if ( pgo->pci->nPage != 1 ) {
-			if ( pgo->pci->pageNo == 0 )
-				addstr( "  >" );
-			else if ( pgo->pci->pageNo == ( pgo->pci->nPage - 1 ) )
-				addstr( "<  " );
-			else
-				addstr( "< >" );
-		}
+	
+	if ( chewing_cand_TotalPage( ctx ) == 0 )
+		return;
+	
+	chewing_cand_Enumerate( ctx );
+	while ( chewing_cand_hasNext( ctx ) ) {
+		if ( i == chewing_cand_ChoicePerPage( ctx ) )
+			break;
+		sprintf( str, "%d.", i );
+		if ( hasColor )
+			attron( COLOR_PAIR( 3 ) );
+		addstr( str );
+		if ( hasColor )
+			attroff( COLOR_PAIR( 3 ) );
+		sprintf( str, " %s ", chewing_cand_String( ctx ) );
+		addstr( str );
+		i++;
+	}
+	currentPageNo = chewing_cand_CurrentPage( ctx );
+	if ( chewing_cand_TotalPage( ctx ) != 1 ) {
+		if ( currentPageNo == 0 )
+			addstr( "  >" );
+		else if ( currentPageNo == ( chewing_cand_TotalPage( ctx ) - 1 ) )
+			addstr( "<  " );
+		else
+			addstr( "< >" );
 	}
 }
 
-void show_commit_string( ChewingOutput *pgo )
+void show_commit_string( ChewingContext *ctx )
 {
 	static int x = 12;
 	static int y = 0;
 	int i;
+	char *commit_string;
+#if 0
 	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
 		for ( i = 0; i < pgo->nCommitStr; i++ ) {
 			mvaddstr( x, y, (const char *) pgo->commitStr[ i ].s );
@@ -213,14 +212,21 @@ void show_commit_string( ChewingOutput *pgo )
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
 	}
+#endif
+	if ( chewing_commit_Check( ctx ) ) {
+		commit_string = chewing_commit_String( ctx );
+		mvaddstr( x, y, FILL_BLANK);
+		mvaddstr( x, y, commit_string );
+		free(commit_string);
+	}
 }
 
-void set_cursor( int x, ChewingOutput *pgo )
+void set_cursor( int x, ChewingContext *ctx )
 {
 	int i, count;
 
-	for ( count = 0, i = 0; i < pgo->chiSymbolCursor; i++) {
-		count += strlen( (const char *) pgo->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
+	for ( count = 0, i = 0; i < ctx->output->chiSymbolCursor; i++) {
+		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
 	}
 	move( x, count );
 }
@@ -380,25 +386,22 @@ int main( int argc, char *argv[] )
 				break;
 		}
 		drawline( 0, 0 );
-		show_edit_buffer( 1, 0, ctx->output );
+		show_edit_buffer( 1, 0, ctx );
 		drawline( 2, 0 );
-		show_interval_buffer( 3, 0, ctx->output );
+		show_interval_buffer( 3, 0, ctx );
 		drawline( 4, 0 );
-		show_choose_buffer( 5, 0, ctx->output );
+		show_choose_buffer( 5, 0, ctx );
 		drawline( 6, 0 );
-		show_zuin_buffer( 7, 0, ctx->output );
+		show_zuin_buffer( 7, 0, ctx );
 		show_full_shape( 7, 5, ctx );
 		drawline( 8, 0 );
 		mvaddstr( 9, 0, "Ctrl + d : leave" );
 		mvaddstr( 9, 20, "Ctrl + b : toggle Eng/Chi mode" );
 		mvaddstr( 10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
 		mvaddstr( 11, 0, "Crtl + h : toggle Full/Half shape mode" );
-		show_commit_string( ctx->output );
-		if ( ctx->data->showMsgLen > 0 ) {
-			show_userphrase( 7, 12, ctx->output->showMsg, ctx->output->showMsgLen );
-			ctx->output->showMsgLen = 0;
-		}
-		set_cursor( 1, ctx->output );
+		show_commit_string( ctx );
+		show_userphrase( 7, 12, ctx );
+		set_cursor( 1, ctx );
 	}
 end:
 	endwin();

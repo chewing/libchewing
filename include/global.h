@@ -212,6 +212,7 @@ typedef struct {
 typedef struct {
 	ChewingData *data;
 	ChewingOutput *output;
+	int cand_no;
 } ChewingContext;
 /**
  * @struct ChewingContext

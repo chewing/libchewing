@@ -101,6 +101,7 @@ CHEWING_API ChewingContext *chewing_new()
 	ctx = ALC( ChewingContext, 1 );
 	ctx->data = internal_data;
 	ctx->output = internal_output;
+	ctx->cand_no = 0;
 
 	/* handle configuration */
 	chewing_Reset( ctx );

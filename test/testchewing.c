@@ -104,13 +104,11 @@ int get_keystroke()
 	return result = END;
 }
 
-void commit_string( ChewingOutput *pgo )
+void commit_string( ChewingContext *ctx )
 {
 	int i;
-	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
-		for ( i = 0; i < pgo->nCommitStr; i++ )	{
-			printf( "%s", pgo->commitStr[ i ].s );
-		}
+	if ( chewing_commit_Check( ctx ) ) {
+		printf( "%s", chewing_commit_String( ctx ) );
 	}
 }
 
@@ -194,10 +192,12 @@ int main( int argc, char *argv[] )
 				}
 				break;
 		}
-		commit_string( ctx->output );
+		commit_string( ctx );
 	}
 end:
+	/* Free Chewing IM handle */
 	chewing_free( ctx );
+	
 	/* Termate Chewing services */
 	chewing_Terminate();
 	printf( "\n" );

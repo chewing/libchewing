@@ -1,7 +1,7 @@
 /**
  * chewing.h
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -24,6 +24,10 @@ extern "C" {
 #include "userphrase.h"
 #include "zuin.h"
 #include "hanyupinying.h"
+#include "aux.h"
+
+/* new macro to indicate the internal encoding.
+ * since libchewing 0.3.0 */
 #define LIBCHEWING_ENCODING "UTF-8"
 
 /* statistics symbol reported by chewing */

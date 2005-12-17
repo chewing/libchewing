@@ -15,7 +15,9 @@ libchewing_la_SOURCES = \
 	tree.c \
 	userphrase.c \
 	zuin.c \
-	hanyupinying.c
+	hanyupinying.c \
+	aux.c
+
 libchewing_la_LIBADD = \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la

@@ -1,3 +1,20 @@
+2005-12-17  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/aux.c,
+	include/aux.h: New files. Introduced Auxiliary APIs.
+
+	* test/testchewing.c (get_keystroke) (main),
+	test/gen_keystroke.c (show_edit_buffer) (show_interval_buffer)
+	(showZuin) (show_zuin_buffer) (show_userphrase) (show_choose_buffer)
+	(show_commit_string) (set_cursor) (main): Use new APIs.
+	NOTE: show_commit_string needs better output handling.
+
+	* test/Makefile.am,
+	src/Makefile.am,
+	include/global.h (struct ChewingContext),
+	include/chewing.h,
+	src/chewingio.c (chewing_new): Likewise.
+
 2005-12-07  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* include/global.h,

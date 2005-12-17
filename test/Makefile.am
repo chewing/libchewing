@@ -17,8 +17,12 @@ $(TESTDATA): $(DEFAULT_TESTDATA)
 
 check: testchewing $(TESTDATA) $(CHEWINGDATA)
 	$(testdir)/testchewing < $(TESTDATA)
+if ENABLE_UNIT_TEST
+	$(testdir)/do-test
+endif
 
 vcheck: check
+	@echo "Please waiting for the valgrind results..."
 	valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
