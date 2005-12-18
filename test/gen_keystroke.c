@@ -112,12 +112,15 @@ void showZuin( ChewingContext *ctx )
 {
 	int i;
 	int zuin_count;
+	char *zuin_string;
 	if ( chewing_get_ChiEngMode( ctx ) )
 		addstr( "[中]" );
 	else
 		addstr( "[英]" );
 	addstr( "        " );
-	addstr( chewing_zuin_String( ctx, &zuin_count ) );
+	zuin_string = chewing_zuin_String( ctx, &zuin_count );
+	addstr( zuin_string );
+	free( zuin_string );
 }
 
 void show_zuin_buffer( int x, int y, ChewingContext *ctx )
@@ -149,6 +152,7 @@ void show_full_shape( int x, int y, ChewingContext *ctx )
 
 void show_userphrase( int x, int y, ChewingContext *ctx )
 {
+	char *aux_string;
 	if ( chewing_aux_Length( ctx ) == 0 )
 		return;
 
@@ -157,7 +161,9 @@ void show_userphrase( int x, int y, ChewingContext *ctx )
 	move( x, y );
 	if ( hasColor )
 		attron( COLOR_PAIR( 2 ) );
-	addstr( chewing_aux_String( ctx ) );
+	aux_string = chewing_aux_String( ctx );
+	addstr( aux_string );
+	free( aux_string );
 	if ( hasColor )
 		attroff( COLOR_PAIR( 2 ) );
 }
@@ -167,6 +173,7 @@ void show_choose_buffer( int x, int y, ChewingContext *ctx )
 	int i = 1;
 	int currentPageNo;
 	char str[ 20 ];
+	char *cand_string;
 	move( x, y );
 	addstr( FILL_BLANK );
 	move( x, y );
@@ -184,8 +191,10 @@ void show_choose_buffer( int x, int y, ChewingContext *ctx )
 		addstr( str );
 		if ( hasColor )
 			attroff( COLOR_PAIR( 3 ) );
-		sprintf( str, " %s ", chewing_cand_String( ctx ) );
+		cand_string = chewing_cand_String( ctx );
+		sprintf( str, " %s ", cand_string );
 		addstr( str );
+		free( cand_string );
 		i++;
 	}
 	currentPageNo = chewing_cand_CurrentPage( ctx );

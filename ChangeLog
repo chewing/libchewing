@@ -1,7 +1,8 @@
 2005-12-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* test/testchewing.c (commit_string),
-	test/gen_keystroke.c (show_edit_buffer):
+	test/gen_keystroke.c (show_edit_buffer) (showZuin)
+	(show_userphrase) (show_choose_buffer):
 	Correctly free allocated memory.
 
 2005-12-17  Jim Huang  <jserv.tw@gmail.com>
