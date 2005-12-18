@@ -56,12 +56,15 @@ void drawline( int x, int y )
 void show_edit_buffer( int x, int y, ChewingContext *ctx )
 {
 	int i;
+	char *buffer_string;
 	move( x, y );
 	addstr( FILL_BLANK );
 	if ( ! chewing_buffer_Check( ctx ) )
 		return;
 	move( x, y );
-	addstr( (const char *) chewing_buffer_String( ctx ) );
+	buffer_string = (const char *) chewing_buffer_String( ctx );
+	addstr( buffer_string );
+	free( buffer_string );
 }
 
 void show_interval_buffer( int x, int y, ChewingContext *ctx )
@@ -217,7 +220,7 @@ void show_commit_string( ChewingContext *ctx )
 		commit_string = chewing_commit_String( ctx );
 		mvaddstr( x, y, FILL_BLANK);
 		mvaddstr( x, y, commit_string );
-		free(commit_string);
+		free( commit_string );
 	}
 }
 

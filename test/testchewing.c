@@ -107,8 +107,11 @@ int get_keystroke()
 void commit_string( ChewingContext *ctx )
 {
 	int i;
+	char *s;
 	if ( chewing_commit_Check( ctx ) ) {
-		printf( "%s", chewing_commit_String( ctx ) );
+		s = chewing_commit_String( ctx );
+		printf( "%s", s );
+		free( s );
 	}
 }
 
