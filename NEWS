@@ -1,4 +1,23 @@
-What's New in Subversion
+What's New in libchewing 0.3.0
+----------------------------------------------------------
+* This is a new development branch differing a lot from
+  0.2.x series, and breaks API/ABI for new features.
+* UTF-8 based language engine core for common Unicode
+  environment.
+* Porting layer for POSIX/Unix-like and Win32 to reduce the
+  redundant porting process.
+* New API design for better consistency.
+* Merge the efforts from libchewing-data subproject, which
+  means various phrases have been reviewed and corrected.
+* Zuin fixes and symbol improvements.
+* Support key 'j' / 'k' for paging in selection mode.
+* Fix some internal memory management bugs.
+* Improved internal test suite.
+* Successful stories:
+  . Sun Solaris 10 U2 and 11 will provide built-in Chewing
+    IM support.
+    
+What's New in libchewing 0.2.7
 ----------------------------------------------------------
 * Fix the keyboard type state changing bug.
 * Add new function to specify the space as the selection
