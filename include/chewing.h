@@ -24,7 +24,7 @@ extern "C" {
 #include "userphrase.h"
 #include "zuin.h"
 #include "hanyupinying.h"
-#include "aux.h"
+#include "mod_aux.h"
 
 /* new macro to indicate the internal encoding.
  * since libchewing 0.3.0 */

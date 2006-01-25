@@ -1,3 +1,11 @@
+2005-12-17  James Huang (seamxr) <seamxr@gmail.com>
+
+	* src/aux.c,
+	src/Makefile.am,
+	include/aux.h,
+	include/chewing.h:
+	Rename "aux.?" to "mod_aux.?". "aux" is a reserved keyword of win32 system.
+
 2005-12-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* test/testchewing.c (commit_string),

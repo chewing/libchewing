@@ -16,7 +16,7 @@ libchewing_la_SOURCES = \
 	userphrase.c \
 	zuin.c \
 	hanyupinying.c \
-	aux.c
+	mod_aux.c
 
 libchewing_la_LIBADD = \
 	$(top_builddir)/src/common/libcommon.la \

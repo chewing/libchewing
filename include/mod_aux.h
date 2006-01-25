@@ -1,5 +1,5 @@
 /**
- * aux.c
+ * mod_aux.c
  *
  * Copyright (c) 2005
  *	libchewing Core Team. See ChangeLog for details.
@@ -8,11 +8,11 @@
  * of this file.
  */
 
-#ifndef CHEWING_AUX_H
-#define CHEWING_AUX_H
+#ifndef CHEWING_MOD_AUX_H
+#define CHEWING_MOD_AUX_H
 
 /**
- * @file aux.h
+ * @file mod_aux.h
  * @brief Auxiliary module
  */
 

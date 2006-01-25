@@ -1,5 +1,5 @@
 /**
- * aux.c
+ * mod_aux.c
  *
  * Copyright (c) 2005
  *	libchewing Core Team. See ChangeLog for details.
@@ -9,7 +9,7 @@
  */
 
 /**
- * @file aux.c
+ * @file mod_aux.c
  * @brief Auxiliary module
  */
 
