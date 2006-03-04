@@ -165,7 +165,7 @@ static void SetChoiceInfo(
 				if ( ChoiceTheSame( 
 					pci, 
 					tempPhrase.phrase, 
-					len * ueBytesFromChar( tempWord.word[0] ) * sizeof( char ) ) ) {
+					len * ueBytesFromChar( tempPhrase.phrase[0] ) * sizeof( char ) ) ) {
 					continue;
 				}
 				ueStrNCpy( pci->totalChoiceStr[ pci->nTotalChoice ],

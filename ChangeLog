@@ -1,3 +1,7 @@
+2006-03-05  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/choice.c: Fix wrong word length check.
+
 2005-12-17  James Huang (seamxr) <seamxr@gmail.com>
 
 	* src/aux.c,
