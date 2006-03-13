@@ -1,3 +1,7 @@
+2006-03-13  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src: Add 噹 ㄉㄧㄤ to avoid crash.
+
 2006-03-05  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* src/choice.c: Fix wrong word length check.
