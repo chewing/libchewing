@@ -239,6 +239,7 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 int ChoicePrevAvail( ChewingData *pgdata )
 {
+	if (pgdata->choiceInfo.isSymbol) return 0;
 	if ( ++( pgdata->availInfo.currentAvail ) >= pgdata->availInfo.nAvail )
 		pgdata->availInfo.currentAvail = 0;
 	SetChoiceInfo( 
@@ -253,6 +254,7 @@ int ChoicePrevAvail( ChewingData *pgdata )
 /** @brief Return the next phrase not longer than the previous phrase. */
 int ChoiceNextAvail( ChewingData *pgdata ) 
 {
+	if (pgdata->choiceInfo.isSymbol) return 0;
 	if ( --( pgdata->availInfo.currentAvail ) < 0 )
 		pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
 	SetChoiceInfo(

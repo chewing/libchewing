@@ -1,3 +1,9 @@
+2006-03-15  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/chewingutil.c,
+	src/choice.c:
+	Correct symbol choice handling.
+
 2006-03-13  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* data/tsi.src: Add 噹 ㄉㄧㄤ to avoid crash.
