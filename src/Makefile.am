@@ -25,5 +25,5 @@ libchewing_la_LIBADD = \
 libchewing_la_LDFLAGS = \
 	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
 	-export-dynamic \
-	@LIBTOOL_EXPORT_OPTIONS@
+	$(LIBTOOL_EXPORT_OPTIONS) \
 	-rpath $(libdir)
