@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005
+ * Copyright (c) 2004, 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -43,7 +43,8 @@ typedef struct {
 	char graph[ MAX_PHONE_SEQ_LEN + 1 ][ MAX_PHONE_SEQ_LEN + 1 ];
 	PhraseIntervalType interval[ MAX_INTERVAL ];
 	int nInterval;
-	RecordNode *phList;  
+	RecordNode *phList;
+	int nPhListLen;
 } TreeDataType;
 
 #ifdef USE_BINARY_DATA
@@ -712,6 +713,7 @@ static void SortListByFreq( TreeDataType *ptd )
 		p; 
 		listLen++, p = p->next )
 		;
+	ptd->nPhListLen = listLen;
 
 	arr = ALC( RecordNode *, listLen );
 	assert( arr );
@@ -896,6 +898,16 @@ static void ShowList( TreeDataType *ptd )
 
 #endif
 
+static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
+{
+	int i;
+	if ( ppo->nNumCut >= tdt->nPhListLen )
+		ppo->nNumCut = 0;
+	for ( i = 0; i < ppo->nNumCut; i++ )
+		tdt->phList = tdt->phList->next;
+	return tdt->phList;
+}
+
 int Phrasing(
 		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
@@ -915,6 +927,7 @@ int Phrasing(
 	SaveList( &treeData );
 	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
 	SortListByFreq( &treeData );
+	NextCut( &treeData, ppo );
 
 #ifdef ENABLE_DEBUG
 	ShowList( &treeData );

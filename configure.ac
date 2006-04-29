@@ -2,7 +2,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT(libchewing, 0.2.91, jserv@kaffe.org)
+AC_INIT(libchewing, 0.2.92, jserv.tw@gmail.com)
 AC_CONFIG_SRCDIR([src/chewingio.c])
 
 AC_SUBST(PACKAGE_VERSION)

@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005
+ * Copyright (c) 2004, 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -198,6 +198,41 @@ int ReadHashItem( FILE *infile, HASH_ITEM *pItem, int item_index )
 	return 1;
 }
 
+static int ComputeChewingLifeTime()
+{
+       HASH_ITEM *item;
+       int i, min;
+       
+       i = 0;
+
+       chewing_lifetime++;
+       min = chewing_lifetime;
+
+       while ( hashtable[i] ) {
+               item = hashtable[i];
+               while ( item ) {
+                       if ( item->data.recentTime < min )
+                               min = item->data.recentTime;
+                       item = item->next;
+               }
+               i++;
+       }
+
+       chewing_lifetime -= min;
+       i = 0;
+
+       while ( hashtable[i] ) {
+               item = hashtable[i];
+               while ( item ) {
+                       item->data.recentTime -= min;
+                       HashModify( item );
+                       item = item->next;
+               }
+               i++;
+       }
+       return 0;
+}
+
 int ReadHash( char *path )
 {
 	FILE *infile;
@@ -266,6 +301,7 @@ int ReadHash( char *path )
 			hashtable[ hashvalue ] = pItem;
 		}
 		fclose( infile );
+		ComputeChewingLifeTime();
 	}
 	return 1;
 }

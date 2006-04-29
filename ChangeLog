@@ -1,3 +1,57 @@
+2006-04-29  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h
+	(struct PhrasingOutput::nNumCut): New member. Indicate the number to
+	be cut-off while phrasing.
+	(struct ChewingData::symbolKeyBuf): New member. Used as symbol key
+	buffer.
+
+	* include/chewingutil.h (OpenSymbolChoice): New function.
+
+	* src/tree.c
+	(struct TreeDataType::nPhListLen): New member. Indicate the length of
+	phrase list.
+	(SortListByFreq): Update nPhListLen.
+	(NextCut): New helper function. Calculate the next cut-off node.
+	(Phrasing): Invoke NextCut after frequency-evaluation is done.
+
+	* src/chewingio.c
+	(chewing_Reset): Initialize nNumCut.
+	(DoSelect): change the checking rule for isSymbol since the semantics
+	of isSymbol is extended for the following values: (TODO: it should be
+	renamed for better readability)
+	  1: traditional Hanin symbols.
+	  2: pair symbols for OpenSymbolChoice.
+	(chewing_handle_Space) (chewing_handle_Down): Simplify the handling
+	of Chinese symbol cursor. Add new feature to invoke OpenSymbolChoice
+	for pair symbols.
+	(chewing_handle_Enter): Disable the call of CallPhrasing.
+	(chewing_handle_Tab): Adjust nNumCut while Tab triggered.
+	(chewing_handle_Default): Reset nNumCut = 0 and update user phrase
+	interval while everything got done.
+
+	* src/chewingutil.c
+	(InternalSpecialSymbol) (SymbolInput): Perform the storage of symbol
+	keys, that is required by OpenSymbolChoice.
+	(SymbolChoice): Handle different type of isSymbol.
+	(CleanAllBuf): Clean symbolKeyBuf.
+	(ChewingKillChar): ditto.
+	(OpenSymbolChoice): New function. Implement the choice mechanism for
+	pair symbols.
+
+	* src/hash.c
+	(ComputeChewingLifeTime): New helper function. Attempt to re-compute
+	chewing lifetime.
+	(ReadHash): Invoke ComputeChewingLifeTime.
+
+	* src/choice.c (ChoiceEndChoice): Handle different type of isSymbol.
+	The above changes are based on the hard from
+	Andy Horng  <andyhorng168@gmail.com>.
+	
+	* configure.ac: Bump version to 0.2.92 .
+
+	* AUTHORS: Updated.
+	
 2006-04-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* configure.ac:
@@ -28,8 +82,8 @@
 
 2006-03-15  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
-	* src/chewingutil.c,
-	src/choice.c:
+	* src/chewingutil.c (HaninSymbolInput),
+	src/choice.c (ChoicePrevAvail) (ChoiceNextAvail):
 	Correct symbol choice handling.
 
 2006-03-13  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
@@ -38,7 +92,7 @@
 
 2006-03-05  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
-	* src/choice.c: Fix wrong word length check.
+	* src/choice.c (SetChoiceInfo): Fix wrong word length check.
 
 2005-12-17  James Huang (seamxr) <seamxr@gmail.com>
 

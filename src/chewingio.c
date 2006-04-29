@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005
+ * Copyright (c) 2004, 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -173,6 +173,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	pgdata->nSelect = 0;
 	pgdata->PointStart = -1;
 	pgdata->PointEnd = 0;
+	pgdata->phrOut.nNumCut = 0;
 	return 0;
 }
 
@@ -280,7 +281,7 @@ static int DoSelect( ChewingData *pgdata, int num )
 		num += pgdata->choiceInfo.pageNo * pgdata->choiceInfo.nChoicePerPage;
 		/* Note: if num is larger than the total, there will be big troubles. */
 		if ( num < pgdata->choiceInfo.nTotalChoice ) {
-			if ( pgdata->choiceInfo.isSymbol == 1 ) {
+			if ( pgdata->choiceInfo.isSymbol ) {
 				SymbolChoice( pgdata, num );
 			} else { 
 				/* change the select interval & selectStr & nSelect */
@@ -309,7 +310,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int toSelect = 0;
-	int rtn;
+	int rtn, key_buf_cursor;
 	int bQuickCommit = 0;
 
 	/* check if Old Chewing style */
@@ -337,17 +338,20 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
 		keystrokeRtn = KEYSTROKE_COMMIT;
-	} else if ( pgdata->bChiSym != CHINESE_MODE ) {
+	} 
+	else if ( pgdata->bChiSym != CHINESE_MODE ) {
 		/* see if buffer contains nothing */
 		if ( pgdata->chiSymbolBufLen == 0 ) {
 			bQuickCommit = 1;
 		}
+
 		if ( pgdata->bFullShape ) {
 			rtn = FullShapeSymbolInput( ' ', pgdata );
 		}
 		else {
 			rtn = SymbolInput( ' ', pgdata );
 		}
+
 		keystrokeRtn = KEYSTROKE_ABSORB;
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE;
@@ -377,7 +381,8 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
                        pgdata->chiSymbolCursor = 0;
                        keystrokeRtn = KEYSTROKE_COMMIT;
                }
-	} else {
+	}
+	else {
 		rtn = ZuinPhoInput( &( pgdata->zuinData ), ' ' );
 		switch ( rtn ) {
 			case ZUIN_ABSORB:
@@ -392,27 +397,24 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 				break;
 			case ZUIN_KEY_ERROR:
 			case ZUIN_IGNORE:
-				if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen ) {
-					if (
-						ChewingIsChiAt(
-							pgdata->chiSymbolCursor - 1,
-							pgdata ) ) {
-						toSelect = 1;
-					}
-				} else {
-					if (
-						ChewingIsChiAt(
-							pgdata->chiSymbolCursor,
-							pgdata ) ) {
-						toSelect = 1;
-					}
-				}
+				key_buf_cursor = pgdata->chiSymbolCursor;
+				if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
+					key_buf_cursor--;
+
+				/* see if to select */
+				if ( ChewingIsChiAt( key_buf_cursor, pgdata ) )
+					toSelect = 1;
 
 				if ( toSelect ) {
 					if ( ! pgdata->bSelect )
 						ChoiceFirstAvail( pgdata );
 					else
 						ChoiceNextAvail( pgdata );
+				}
+				else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
+					/* Open Symbol Choice List */
+					if( ! pgdata->choiceInfo.isSymbol )
+						OpenSymbolChoice( pgdata );
 				}
 				break;
 		}
@@ -487,7 +489,6 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 		WriteChiSymbolToBuf( pgo->commitStr, nCommitStr, pgdata );
 		AutoLearnPhrase( pgdata );
 		CleanAllBuf( pgdata );  
-		CallPhrasing( pgdata );
 		pgo->nCommitStr = nCommitStr;
 	}
 
@@ -578,6 +579,7 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 	ChewingOutput *pgo = ctx->output;
 	int toSelect = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
+	int key_buf_cursor;
 
 	CheckAndResetRange( pgdata );
 
@@ -585,14 +587,13 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	}
 
+	key_buf_cursor = pgdata->chiSymbolCursor;
+	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
+		key_buf_cursor--;
+
 	/* see if to select */
-	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen ) {
-		if ( ChewingIsChiAt( pgdata->chiSymbolCursor - 1, pgdata ) )
+	if ( ChewingIsChiAt( key_buf_cursor, pgdata ) )
 			toSelect = 1;
-	} else {
-		if ( ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) ) 
-			toSelect = 1;
-	}
 
 	if ( toSelect ) {
 		if( ! pgdata->bSelect ) {
@@ -600,6 +601,11 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 		} else {
 			ChoiceNextAvail( pgdata );
 		}
+	} 
+	else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
+		/* Open Symbol Choice List */
+		if ( ! pgdata->choiceInfo.isSymbol )
+			OpenSymbolChoice( pgdata );
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -754,7 +760,10 @@ CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 
 
 	if ( ! pgdata->bSelect ) {
-		if ( ChewingIsChiAt( pgdata->chiSymbolCursor - 1, pgdata ) ) {
+		if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen ) {
+			pgdata->phrOut.nNumCut++;
+		}
+		else if ( ChewingIsChiAt( pgdata->chiSymbolCursor - 1, pgdata ) ) {
 			if ( IsPreferIntervalConnted( pgdata->cursor, pgdata) ) {
 				pgdata->bUserArrBrkpt[ pgdata->cursor ] = 1;
 				pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
@@ -1048,6 +1057,15 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 			pgdata->chiSymbolCursor = 0;
 			keystrokeRtn = KEYSTROKE_COMMIT;
 		}
+	}
+
+	if ( pgdata->phrOut.nNumCut > 0 ) {
+		int i;
+		for ( i = 0; i < pgdata->phrOut.nDispInterval; i++ ) {
+			pgdata->bUserArrBrkpt[ pgdata->phrOut.dispInterval[ i ].from ] = 1;
+			pgdata->bUserArrBrkpt[ pgdata->phrOut.dispInterval[ i ].to ] = 1;
+		}
+		pgdata->phrOut.nNumCut = 0;
 	}
 
 End_KeyDefault:
