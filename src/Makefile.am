@@ -15,7 +15,7 @@ libchewing_la_SOURCES = \
 	tree.c \
 	userphrase.c \
 	zuin.c \
-	hanyupinying.c \
+	hanyupinyin.c \
 	mod_aux.c
 
 libchewing_la_LIBADD = \

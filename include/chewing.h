@@ -23,7 +23,7 @@ extern "C" {
 #include "hash.h"
 #include "userphrase.h"
 #include "zuin.h"
-#include "hanyupinying.h"
+#include "hanyupinyin.h"
 #include "mod_aux.h"
 
 /* new macro to indicate the internal encoding.

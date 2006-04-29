@@ -35,7 +35,7 @@ AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION, "$PACKAGE_VERSION", [The release version 
 
 # Init automake stuff
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([include/config.h])
 AC_PREFIX_DEFAULT(/usr)
 
 # Init libtool
@@ -47,6 +47,7 @@ AC_SUBST(LIBTOOL_DEPS)
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
 LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^[[^_]].*"'
+AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 
 # Checks for programs.
 AC_PROG_CC

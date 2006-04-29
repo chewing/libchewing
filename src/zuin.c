@@ -27,7 +27,7 @@
 #include "global.h"
 #include "zuin.h"
 #include "char.h"
-#include "hanyupinying.h"
+#include "hanyupinyin.h"
 #include "private.h"
 
 static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
@@ -380,7 +380,7 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
-static int IsPinYingEndKey( ZuinData *pZuin, int key )
+static int IsPinYinEndKey( ZuinData *pZuin, int key )
 {
 	if ( (key == ' ') || (key == '1') || (key == '2') ||
 			(key == '3') || (key == '4') || (key == '5') ) {
@@ -389,15 +389,15 @@ static int IsPinYingEndKey( ZuinData *pZuin, int key )
 	return 0;
 }
 
-static int PinYingInput( ZuinData *pZuin, int key )
+static int PinYinInput( ZuinData *pZuin, int key )
 {
 	int err = 0, status, i;
 	char zuinKeySeq[ 5 ], buf[ 2 ];
 
 	DEBUG_CHECKPOINT();
 
-	if ( IsPinYingEndKey( pZuin, key ) ) {
-		err = HanyuPinYingToZuin( pZuin->pinYingData.keySeq, zuinKeySeq );
+	if ( IsPinYinEndKey( pZuin, key ) ) {
+		err = HanyuPinYinToZuin( pZuin->pinYinData.keySeq, zuinKeySeq );
 		if (err)
 			return ZUIN_KEY_ERROR;
 
@@ -417,13 +417,13 @@ static int PinYingInput( ZuinData *pZuin, int key )
 			case '5': 
 				key = '7';
 		}
-		pZuin->pinYingData.keySeq[ 0 ] = '\0';
+		pZuin->pinYinData.keySeq[ 0 ] = '\0';
 		return EndKeyProcess( pZuin, key, 1 );
 	}
 	buf[ 0 ] = key; buf[ 1 ] = '\0';
-	strcat( pZuin->pinYingData.keySeq, buf );
+	strcat( pZuin->pinYinData.keySeq, buf );
 	
-	DEBUG_OUT( "PinYing Seq: %s\n", pZuin->pinYingData.keySeq );
+	DEBUG_OUT( "PinYin Seq: %s\n", pZuin->pinYinData.keySeq );
 
 	return ZUIN_ABSORB;
 }
@@ -439,8 +439,8 @@ int ZuinPhoInput(ZuinData *pZuin, int key )
 		case KB_ET26:
 			return ET26PhoInput( pZuin, key );
 			break;
-        	case KB_HANYU_PINYING:
-                	return PinYingInput( pZuin, key );
+        	case KB_HANYU_PINYIN:
+                	return PinYinInput( pZuin, key );
                         break;
 		default:
 			return DefPhoInput( pZuin, key );		
@@ -452,9 +452,9 @@ int ZuinPhoInput(ZuinData *pZuin, int key )
 int ZuinRemoveLast( ZuinData *pZuin )
 {
 	int i;
-	if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
-		i = strlen( pZuin->pinYingData.keySeq );
-		pZuin->pinYingData.keySeq[ i - 1 ] = '\0';
+	if ( pZuin->kbtype >= KB_HANYU_PINYIN ) {
+		i = strlen( pZuin->pinYinData.keySeq );
+		pZuin->pinYinData.keySeq[ i - 1 ] = '\0';
 	} else {
 		for ( i = 3; i >= 0; i-- ) {
 			if ( pZuin->pho_inx[ i ] ) {
@@ -470,15 +470,15 @@ int ZuinRemoveLast( ZuinData *pZuin )
 int ZuinRemoveAll( ZuinData *pZuin )
 {
 	memset( pZuin->pho_inx, 0, sizeof( pZuin->pho_inx ) );
-	memset( pZuin->pinYingData.keySeq, 0, sizeof( pZuin->pinYingData.keySeq ) );
+	memset( pZuin->pinYinData.keySeq, 0, sizeof( pZuin->pinYinData.keySeq ) );
 	return 0;
 }
 
 int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
-        if ( pZuin->kbtype >= KB_HANYU_PINYING ) {
-	    if ( pZuin->pinYingData.keySeq[0] )
+        if ( pZuin->kbtype >= KB_HANYU_PINYIN ) {
+	    if ( pZuin->pinYinData.keySeq[0] )
 		return 1;
         } else {
 	    for ( i = 0; i < ZUIN_SIZE; i++ )

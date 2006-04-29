@@ -1,3 +1,27 @@
+2006-04-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Correctly output include/config.h.in
+	Export LIBTOOL_EXPORT_OPTIONS to Makefile.
+	
+	* include/config.h.in:
+	Removed.
+
+2006-04-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/pinyin.tab,
+	include/chewing.h,
+	include/global.h,
+	include/hanyupinyin.h,
+	include/zuin.h,
+	src/Makefile.am,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/hanyupinyin.c,
+	src/zuin.c:
+	Change KB_HANYUPINYIN to table based implementation.
+	Rename all `pinying' to `pinyin'.
+
 2006-03-23  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/Makefile.am: Trivial change for libtool symbols.
