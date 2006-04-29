@@ -1,5 +1,5 @@
 /**
- * hanyupinying.h 
+ * hanyupinyin.h 
  *
  * Copyright (c) 2005
  *      libchewing Core Team. See ChangeLog for details.
@@ -8,23 +8,25 @@
  * of this file.
  */
 
-/* @(#)hanyupinying.h
+/* @(#)hanyupinyin.h
  */
 
-#ifndef _HANYUPINYING_H
-#define _HANYUPINYING_H
+#ifndef _HANYUPINYIN_H
+#define _HANYUPINYIN_H
 
 /*
   This is a key-sequense map.
   From pinyin sequence to a default-layout sequence.
   Eg: Zhang -> {"zh","5"}, {"ang",";"}
  */
-typedef struct {
-	char pinying[ 5 ];
-	char zuin[ 4 ];
-} PinYingZuinMap;
+struct keymap {
+	char pinyin[7];
+	char zuin[4];
+};
+typedef struct keymap keymap;
 
-int HanyuPinYingToZuin( char *pinyingKeySeq, char *zuinKeySeq );
 
-#endif /* _HANYUPINYING_H */
+int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq );
+
+#endif /* _HANYUPINYIN_H */
 
