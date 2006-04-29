@@ -1,5 +1,11 @@
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/chewingutil.c (MakeOutput):
+	Fixes in KB_HANYU_PINYIN to avoid wrong Unicode transformation.
+	Patched by hialan ( http://hialan.twbbs.org/ ).
+	
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/global.h (struct ChewingConfigData::bEscCleanAllBuf):
 	New member. Add bEscCleanAllBuf option.
 
@@ -12,6 +18,7 @@
 	(OutputRecordStr): Likewise.
 	(Phrasing): Passing the length of chiBuf to OutputRecordStr.
 	The changes should be able to fix previous wrong behavior.
+	Taken from win32-utf8 branch.
 
 	* src/common/key2pho.c (PhoneFromUint): Removed since unused.
 
@@ -90,7 +97,8 @@
 	src/chewingutil.c,
 	src/hanyupinyin.c,
 	src/zuin.c:
-	Change KB_HANYUPINYIN to table based implementation.
+	Change KB_HANYUPINYIN (renamed to KB_HANYU_PINYIN) to table-lookup
+	implementation.
 	Rename all `pinying' to `pinyin'.
 
 2006-03-23  Jim Huang  <jserv.tw@gmail.com>

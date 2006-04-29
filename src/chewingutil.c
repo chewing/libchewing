@@ -700,17 +700,35 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->chiSymbolCursor = pgdata->chiSymbolCursor;
 	
 	/*  fill zuinBuf */
-        if(pgdata->zuinData.kbtype >= KB_HANYU_PINYIN) {
+        if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
 		char *p = pgdata->zuinData.pinYinData.keySeq;
+		/* 
+		 * Copy from old content in zuinBuf
+		 * NOTE: No Unicode transformation here.
+		 */
 		for ( i = 0; i< ZUIN_SIZE; i++) {
-			ueStrNCpy( pgo->zuinBuf[i].s, p, 1, 1);
+			int j;
+			for ( j = 0; j < 2; j++ ) {
+				if ( p[0] ) {
+					pgo->zuinBuf[ i ].s[ j ] = p[ 0 ];
+					p++;
+				} 
+				else {
+					pgo->zuinBuf[ i ].s[ j ] = '\0';
+				}
+			}
+			pgo->zuinBuf[ i ].s[ 2 ] = '\0';
 		}
 	} else {
 		for ( i = 0; i < ZUIN_SIZE; i++ ) { 
 			if ( pgdata->zuinData.pho_inx[ i ] != 0 ) {
+				/* Here we should use (zhuin_tab[i] + 2) to
+				 * skip the 2 space characters at 
+				 * zhuin_tab[0] and zhuin_tab[1]. */
 				ueStrNCpy( pgo->zuinBuf[ i ].s,
-						ueStrSeek( zhuin_tab[ i ], pgdata->zuinData.pho_inx[ i ] - 1 ),
-						1, 1);
+				           ueStrSeek( (zhuin_tab[ i ] + 2),
+						      pgdata->zuinData.pho_inx[ i ] - 1 ),
+				           1, 1);
 			}
 			else
 				pgo->zuinBuf[ i ].wch = (wchar_t) 0;
