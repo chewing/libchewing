@@ -136,6 +136,7 @@ typedef struct {
 	int selKey[ MAX_SELKEY ];
 	int bAddPhraseForward;
 	int bSpaceAsSelection;
+	int bEscCleanAllBuf;
 	/** @brief
             HSU_SELKEY_TYPE1 = asdfjkl789,
             HSU_SELKEY_TYPE2 = asdfzxcv89.

@@ -231,12 +231,15 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 		sizeof( pcd->selKey[ 0 ] ) * MAX_SELKEY );
 	pgdata->config.bAddPhraseForward = pcd->bAddPhraseForward;
 	pgdata->config.bSpaceAsSelection = pcd->bSpaceAsSelection;
+	pgdata->config.bEscCleanAllBuf = pcd->bEscCleanAllBuf;
 	
 	/* Failback to default value */
 	if ( (pgdata->config.bAddPhraseForward != 0) && (pgdata->config.bAddPhraseForward != 1) )
 		pgdata->config.bAddPhraseForward = 0;
 	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
 		pgdata->config.bSpaceAsSelection = 1;
+	if ( (pgdata->config.bEscCleanAllBuf != 0) && (pgdata->config.bEscCleanAllBuf != 1) )
+		pgdata->config.bEscCleanAllBuf = 0;
 
 	return 0;
 }
@@ -445,6 +448,8 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 		ChoiceEndChoice( pgdata );
 	} else if ( ZuinIsEntering( &( pgdata->zuinData ) ) ) {
 		ZuinRemoveAll( &( pgdata->zuinData ) );
+	} else if( pgdata->config.bEscCleanAllBuf ) {
+		CleanAllBuf( pgdata );
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );

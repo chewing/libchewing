@@ -601,21 +601,23 @@ static void Discard2( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
-static void LoadChar( char *buf, uint16 phoneSeq[], int nPhoneSeq )
+static void LoadChar( char *buf, int buf_len, uint16 phoneSeq[], int nPhoneSeq )
 {
 	int i;
 	Word word;
 
+	memset(buf, 0, buf_len);
 	for ( i = 0; i < nPhoneSeq; i++ ) {
 		GetCharFirst( &word, phoneSeq[ i ] );
-		memcpy( buf + i * MAX_UTF8_SIZE, word.word, MAX_UTF8_SIZE );
+		strncat(buf, word.word, buf_len);
 	}
-	buf[ nPhoneSeq * MAX_UTF8_SIZE ] = '\0';
+	buf[ buf_len - 1 ] = '\0';
 }
 
 /* kpchen said, record is the index array of interval */
 static void OutputRecordStr(
-		char *out_buf, int *record, int nRecord, 
+		char *out_buf, int out_buf_len,
+		int *record, int nRecord, 
 		uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[],
@@ -645,7 +647,7 @@ static void OutputRecordStr(
 	PhraseIntervalType inter;
 	int i;
 
-	LoadChar( out_buf, phoneSeq, nPhoneSeq );
+	LoadChar( out_buf, out_buf_len, phoneSeq, nPhoneSeq );
 	for ( i = 0; i < nRecord; i++ ) {
 		inter = ptd->interval[ record[ i ] ];
 		ueStrNCpy(
@@ -936,7 +938,7 @@ int Phrasing(
 
 	/* set phrasing output */
 	OutputRecordStr(
-		ppo->chiBuf, 
+		ppo->chiBuf, sizeof(ppo->chiBuf),
 		( treeData.phList )->arrIndex, 
 		( treeData.phList )->nInter, 
 		phoneSeq, 

@@ -1,3 +1,20 @@
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h (struct ChewingConfigData::bEscCleanAllBuf):
+	New member. Add bEscCleanAllBuf option.
+
+	* src/chewingio.c
+	(chewing_Configure): Initialize bEscCleanAllBuf.
+	(chewing_handle_Esc): CleanAllBuf when bEscCleanAllBuf is true.
+	
+	* src/tree.c
+	(LoadChar): Modify prototype to accept specific buffer length.
+	(OutputRecordStr): Likewise.
+	(Phrasing): Passing the length of chiBuf to OutputRecordStr.
+	The changes should be able to fix previous wrong behavior.
+
+	* src/common/key2pho.c (PhoneFromUint): Removed since unused.
+
 2006-04-29  Jim Huang  <jserv.tw@gmail.com>
 
 	* include/global.h
