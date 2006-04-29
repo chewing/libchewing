@@ -45,7 +45,7 @@
 	(ReadHash): Invoke ComputeChewingLifeTime.
 
 	* src/choice.c (ChoiceEndChoice): Handle different type of isSymbol.
-	The above changes are based on the hard from
+	The above changes are based on the hard work from
 	Andy Horng  <andyhorng168@gmail.com>.
 	
 	* configure.ac: Bump version to 0.2.92 .
