@@ -1,6 +1,6 @@
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
-	* test/gen_keystroke.c (main): Call cursor::clear() to turn off the
+	* test/gen_keystroke.c (main): Call curses::clear() to turn off the
 	annoying messages when debug enabled.
 
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
