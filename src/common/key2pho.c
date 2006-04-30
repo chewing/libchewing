@@ -8,6 +8,11 @@
  * of this file.
  */
 
+/** 
+ * @file key2pho.c
+ * @brief map zuins to uint16 type according to different kb_type
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -15,10 +20,10 @@
 #include "global.h"
 
 const char *zhuin_tab[] = {
-	  "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ",
-	  "ㄧㄨㄩ",
-	  "ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ",
-	  " ˙ˊˇˋ"
+	  "  ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ",
+	  "  ㄧㄨㄩ",
+	  "  ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ",
+	  "  ˙ˊˇˋ"
 };
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
