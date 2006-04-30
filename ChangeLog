@@ -53,7 +53,8 @@
 
 	* src/chewingutil.c (MakeOutput):
 	Fixes in KB_HANYU_PINYIN to avoid wrong Unicode transformation.
-	Patched by hialan ( http://hialan.twbbs.org/ ).
+	Patched by hialan <hialan.liu@hotmail.com>
+	http://hialan.twbbs.org/ .
 	
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
