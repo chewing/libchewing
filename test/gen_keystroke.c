@@ -305,6 +305,7 @@ int main( int argc, char *argv[] )
 	/* Enable the configurations */
         chewing_Configure( ctx, &config );
 
+	clear();
 	mvaddstr( 0, 0, "Any key to start testing..." );
 
 	while ( TRUE ) {
