@@ -211,8 +211,8 @@ static int ComputeChewingLifeTime()
        chewing_lifetime++;
        min = chewing_lifetime;
 
-       while ( hashtable[i] ) {
-               item = hashtable[i];
+       while ( hashtable[ i ] ) {
+               item = hashtable[ i ];
                while ( item ) {
                        if ( item->data.recentTime < min )
                                min = item->data.recentTime;
@@ -225,7 +225,7 @@ static int ComputeChewingLifeTime()
        i = 0;
 
        while ( hashtable[ i ] ) {
-               item = hashtable[i];
+               item = hashtable[ i ];
                while ( item ) {
                        item->data.recentTime -= min;
                        HashModify( item );
