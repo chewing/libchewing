@@ -34,26 +34,27 @@ void SetUpdatePhraseMsg( ChewingData *pgdata, char *addWordSeq, int len, int sta
 
 	pgdata->showMsgLen = begin + len;
 	if ( state == USER_UPDATE_INSERT ) {
-		ueStrNCpy( pgdata->showMsg[ 0 ].s, insert, 1, 1);
-		ueStrNCpy( pgdata->showMsg[ 1 ].s,
-				ueStrSeek(insert, 1)
-				, 1, 1);
-		ueStrNCpy( pgdata->showMsg[ 2 ].s,
-				ueStrSeek(insert, 2)
-				, 1, 1);
+		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, insert, 1, 1);
+		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
+		           ueStrSeek( insert, 1 ), 
+		           1, 1 );
+		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
+		           ueStrSeek( insert, 2 ), 
+		           1, 1 );
 	}
 	else {
-		ueStrNCpy( pgdata->showMsg[ 0 ].s, modify, 1, 1);
-		ueStrNCpy( pgdata->showMsg[ 1 ].s,
-				ueStrSeek(modify, 1)
-				, 1, 1);
-		ueStrNCpy( pgdata->showMsg[ 2 ].s,
-				ueStrSeek(modify, 2)
-				, 1, 1);
+		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, modify, 1, 1);
+		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
+		           ueStrSeek( modify, 1 ),
+			   1, 1 );
+		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
+		           ueStrSeek( modify, 2 ),
+			   1, 1 );
 	}
 	for ( i = 0; i < len; i++ ) {
-		ueStrNCpy( pgdata->showMsg[ begin + i ].s,
-				ueStrSeek(addWordSeq, i), 1, 1);
+		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
+		           ueStrSeek(addWordSeq, i),
+			   1, 1);
 	}
 }
 
@@ -159,8 +160,9 @@ static int InternalSpecialSymbol(
 				( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 
 			pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
-			ueStrNCpy( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
-					chibuf[ i ], 1, 1);
+			ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
+			           chibuf[ i ],
+				   1, 1);
 			/* Save Symbol Key */
 			memmove( &( pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor + 1 ] ),
 				&( pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] ),
@@ -258,8 +260,9 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
                  sizeof(wch_t) *
                  (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor) );
 	pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].wch = (wchar_t) 0;
-	ueStrNCpy( pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].s,
-			pgdata->choiceInfo.totalChoiceStr[sel_i], 1, 1);
+	ueStrNCpy( (char *) pgdata->chiSymbolBuf[pgdata->chiSymbolCursor].s,
+	           pgdata->choiceInfo.totalChoiceStr[sel_i],
+		   1, 1);
 	pgdata->chiSymbolCursor ++ ; 
 	pgdata->bUserArrCnnct[pgdata->cursor] = 0;
 	ChoiceEndChoice(pgdata);
@@ -334,7 +337,9 @@ int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
 			 * among Win32 and Unix-like OSs.
 			 */
 			memset( &( csBuf[ i ].s ), 0, MAX_UTF8_SIZE + 1 );
-			ueStrNCpy( csBuf[ i ].s, &( pgdata->phrOut.chiBuf[ phoneseq_i ] ), 1, 1);
+			ueStrNCpy( (char *) csBuf[ i ].s,
+			           &( pgdata->phrOut.chiBuf[ phoneseq_i ] ), 
+				   1, 1);
 			phoneseq_i += ueBytesFromChar( pgdata->phrOut.chiBuf[ phoneseq_i ] );
 		}
 		else 
@@ -440,8 +445,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
 		bufPhoneSeq[ len ] = (uint16) 0;
 		ueStrNCpy( bufWordSeq,
-				ueStrSeek( &pgdata->phrOut.chiBuf, from ),
-				len, 1);
+		           ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
+		           len, 1);
 		UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
 	}
 }
@@ -680,9 +685,9 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 		if ( pgdata->chiSymbolBuf[ chiSymbol_i ].wch == (wchar_t) 0 ) { 
 			/* is Chinese, then copy from the PhrasingOutput "phrOut" */
 			pgo->chiSymbolBuf[ chiSymbol_i ].wch = (wchar_t) 0;
-			ueStrNCpy( pgo->chiSymbolBuf[ chiSymbol_i ].s,
-					&( pgdata->phrOut.chiBuf[ chi_i ] ),
-					1, 1 );
+			ueStrNCpy( (char *) pgo->chiSymbolBuf[ chiSymbol_i ].s,
+			           &( pgdata->phrOut.chiBuf[ chi_i ] ),
+			           1, 1 );
 			chi_i += ueBytesFromChar( pgo->chiSymbolBuf[ chiSymbol_i ].s[0] );
 		}
 		else {
@@ -725,8 +730,8 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 				/* Here we should use (zhuin_tab[i] + 2) to
 				 * skip the 2 space characters at 
 				 * zhuin_tab[0] and zhuin_tab[1]. */
-				ueStrNCpy( pgo->zuinBuf[ i ].s,
-				           ueStrSeek( (zhuin_tab[ i ] + 2),
+				ueStrNCpy( (char *) pgo->zuinBuf[ i ].s,
+				           ueStrSeek( (char *) (zhuin_tab[ i ] + 2),
 						      pgdata->zuinData.pho_inx[ i ] - 1 ),
 				           1, 1);
 			}

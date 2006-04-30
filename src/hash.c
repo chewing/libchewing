@@ -198,6 +198,9 @@ int ReadHashItem( FILE *infile, HASH_ITEM *pItem, int item_index )
 	return 1;
 }
 
+/**
+ * Attempt to re-compute lifetime
+ */
 static int ComputeChewingLifeTime()
 {
        HASH_ITEM *item;
@@ -221,7 +224,7 @@ static int ComputeChewingLifeTime()
        chewing_lifetime -= min;
        i = 0;
 
-       while ( hashtable[i] ) {
+       while ( hashtable[ i ] ) {
                item = hashtable[i];
                while ( item ) {
                        item->data.recentTime -= min;
@@ -233,7 +236,7 @@ static int ComputeChewingLifeTime()
        return 0;
 }
 
-int ReadHash( char *path )
+int ReadHash( const char *path )
 {
 	FILE *infile;
 	HASH_ITEM item, *pItem;
@@ -251,10 +254,11 @@ int ReadHash( char *path )
 			sprintf(
 				hashfilename, "%s%s",
 #ifndef WIN32
-				"/tmp", CHEWING_HASH_PATH );
+				"/tmp", CHEWING_HASH_PATH
 #else
-				"C:\\Windows\\TEM\\", CHEWING_HASH_PATH );
+				"C:\\Windows\\TEM\\", CHEWING_HASH_PATH
 #endif
+			);
 		}
 #ifndef WIN32		
 		mkdir( hashfilename, S_IRWXU );

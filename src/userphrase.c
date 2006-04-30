@@ -25,6 +25,7 @@
 extern int chewing_lifetime;
 static HASH_ITEM *pItemLast;
 
+#if 0
 static int DeltaFreq( int recentTime )
 {
 	int diff;
@@ -39,6 +40,7 @@ static int DeltaFreq( int recentTime )
 		return ( 2500 - diff ); /* 500 ~ -500 */
 	return ( -500 );    /* -500 forever */
 }
+#endif
 
 /* load the orginal frequency from the static dict */
 static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int len )
@@ -135,7 +137,7 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 	UserPhraseData data;
 	int len;
 
-	len = ueStrLen( wordSeq );
+	len = ueStrLen( (char *) wordSeq );
 	pItem = HashFindEntry( phoneSeq, wordSeq );
 	if ( ! pItem ) {
 		if ( ! AlcUserPhraseSeq( &data, len ) ) {

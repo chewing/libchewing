@@ -1,5 +1,31 @@
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/gen_keystroke.c (show_edit_buffer): Fixlet to wrong casting.
+
+	* include/hash.h (ReadHash),
+	src/hash.c (ReadHash): Change prototype from char * to const char *.
+
+	* include/chewing-utf8-util.h (ueStrNCpy),
+	src/common/chewing-utf8-util.c (ueStrNCpy): Change prototype from char
+	dest* to char dest[].
+
+	* src/tree.c (GetIntersection) (CompLen) (CompLenDescend) (CompFrom):
+	Removed since unused.
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin): Use strdup instead of
+	sprintf.
+
+	* src/char.c (Str2Word): Fixlet to assert.
+
+	* src/userphrase.c (DeltaFreq): Removed since unused.
+
+	* src/mod_aux.c (chewing_cand_String): Add return value.
+
+	* README,
+	NEWS: Update OXIM bridge information.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/chewingutil.c (MakeOutput):
 	Fixes in KB_HANYU_PINYIN to avoid wrong Unicode transformation.
 	Patched by hialan ( http://hialan.twbbs.org/ ).

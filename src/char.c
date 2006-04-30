@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005
+ * Copyright (c) 2004, 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -126,7 +126,7 @@ static void Str2Word( Word *wrd_ptr )
 	fgettab( buf, 1000, dictfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6s", &sh, wrd_ptr->word );
-	assert(wrd_ptr->word[0] != NULL);
+	assert( wrd_ptr->word != NULL );
 }
 
 int GetCharFirst( Word *wrd_ptr, uint16 phoneid )

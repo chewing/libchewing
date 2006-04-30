@@ -91,8 +91,8 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 	strcpy( key.pinyin, pinyinKeySeq );
 	res = bsearch( &key, keytable, N_TOTAL, sizeof(keymap), compkey );
 	if ( res != NULL )
-		sprintf( zuinKeySeq, "%s\0", res->zuin );
+		zuinKeySeq = strdup( res->zuin );
 	else
-		strcpy( zuinKeySeq, "" );
+		zuinKeySeq = strdup( "" );
 	return 0;
 }

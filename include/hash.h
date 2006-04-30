@@ -45,7 +45,7 @@ HASH_ITEM *HashInsert( UserPhraseData *pData );
 HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pHashLast );
 void HashModify( HASH_ITEM *pItem );
 int AlcUserPhraseSeq( UserPhraseData *pData, int len );
-int ReadHash( char *path );
+int ReadHash( const char *path );
 void FreeHashTable( void );
 
 #ifdef __cplusplus

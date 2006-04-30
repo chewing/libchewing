@@ -62,7 +62,7 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 	if ( ! chewing_buffer_Check( ctx ) )
 		return;
 	move( x, y );
-	buffer_string = (const char *) chewing_buffer_String( ctx );
+	buffer_string = chewing_buffer_String( ctx );
 	addstr( buffer_string );
 	free( buffer_string );
 }

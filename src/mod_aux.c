@@ -1,7 +1,7 @@
 /**
  * mod_aux.c
  *
- * Copyright (c) 2005
+ * Copyright (c) 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -144,6 +144,7 @@ CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
 		ctx->cand_no++;
 	}
+	return s;
 }
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx )
@@ -176,5 +177,6 @@ CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 CHEWING_API int Chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 { 
 	  return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
-} 
+}
+
 

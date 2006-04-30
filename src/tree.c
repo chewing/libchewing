@@ -75,6 +75,7 @@ static int PhraseIntervalIntersect(PhraseIntervalType in1, PhraseIntervalType in
 	return ( max( in1.from, in2.from ) < min( in1.to, in2.to ) );
 }
 
+#if 0
 /** @brief check for intersection of two intervals and return it */
 static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in3 )
 {
@@ -84,6 +85,7 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 		return 1;
 	return 0;
 }
+#endif
 
 #ifdef USE_BINARY_DATA
 static void TerminateTree()
@@ -480,6 +482,7 @@ static void SetInfo( int len, TreeDataType *ptd )
 	}
 }
 
+#if 0
 static int CompLen( IntervalType *pa, IntervalType *pb )
 {
 	return ( ( pa->to - pa->from ) - ( pb->to - pb->from ) );
@@ -497,6 +500,7 @@ static int CompFrom( IntervalType *pa, IntervalType *pb )
 		return cmp;
 	return ( pa->to - pb->to );
 }
+#endif
 
 /* 
  * First we compare the 'nMatchCnnct'.

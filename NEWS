@@ -16,6 +16,8 @@ What's New in libchewing 0.3.0
 * Successful stories:
   . Sun Solaris 10 U2 and 11 will provide built-in Chewing
     IM support.
+  . OXIM input method suite from OpenDesktop/OSSI provides
+    built-in Chewing support since version 1.0.x
     
 What's New in libchewing 0.2.7
 ----------------------------------------------------------

@@ -100,7 +100,7 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		}
 		index = findptr - key_str[ kbtype ];
 		ueStrNCpy( ueStrSeek( pho, i ),
-		           ueStrSeek( (char*) ph_str, index ), 
+		           ueStrSeek( (char *) ph_str, index ), 
 			   1, 0);
 	}
 	pTarget = ueStrSeek( pho, len );

@@ -29,6 +29,9 @@
 #include "zuin.h"
 #include "chewingutil.h"
 #include "userphrase.h"
+#include "dict.h"
+#include "char.h"
+#include "hash.h"
 #include "private.h"
 
 #ifdef ENABLE_DEBUG
@@ -1118,16 +1121,14 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				pgdata->cursor, 
 				pgdata->cursor + newPhraseLen - 1 ) ) {
 				/* Manually add phrase to the user phrase database. */
-				memcpy(
-					addPhoneSeq,
-					&pgdata->phoneSeq[ pgdata->cursor ],
-					sizeof( uint16 ) * newPhraseLen );
+				memcpy( addPhoneSeq,
+				        &pgdata->phoneSeq[ pgdata->cursor ],
+				        sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy(
-						addWordSeq,
-						ueStrSeek( &pgdata->phrOut.chiBuf,
-							pgdata->cursor ),
-						newPhraseLen, 1);
+				ueStrNCpy( addWordSeq,
+				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
+				                      pgdata->cursor ),
+				           newPhraseLen, 1);
 
 
 				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
@@ -1147,21 +1148,18 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		if ( 
 			newPhraseLen >= 1 && 
 			pgdata->cursor - newPhraseLen >= 0 ) {
-			if ( NoSymbolBetween( 
-				pgdata, 
-				pgdata->cursor, 
-				pgdata->cursor - newPhraseLen ) ) {
+			if ( NoSymbolBetween( pgdata, 
+			                      pgdata->cursor, 
+			                      pgdata->cursor - newPhraseLen ) ) {
 				/* Manually add phrase to the user phrase database. */
-				memcpy(
-					addPhoneSeq,
-					&pgdata->phoneSeq[ pgdata->cursor - newPhraseLen ],
-					sizeof( uint16 ) * newPhraseLen );
+				memcpy( addPhoneSeq,
+				        &pgdata->phoneSeq[ pgdata->cursor - newPhraseLen ],
+				        sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy(
-						addWordSeq,
-						ueStrSeek( &pgdata->phrOut.chiBuf,
-							pgdata->cursor - newPhraseLen ),
-						newPhraseLen, 1);
+				ueStrNCpy( addWordSeq,
+				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
+				           pgdata->cursor - newPhraseLen ),
+				           newPhraseLen, 1);
 
 				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
