@@ -6,6 +6,8 @@
 #include <sys/types.h>
 
 #define PLAT_SEPARATOR "/"
+#define PLAT_TMPDIR "/tmp"
+#define PLAT_MKDIR(dir) mkdir(dir, S_IRWXU)
 
 #ifdef __cplusplus
 extern "C"

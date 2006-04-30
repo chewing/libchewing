@@ -6,6 +6,8 @@
 #include <stdio.h>
 
 #define PLAT_SEPARATOR "\\"
+#define PLAT_TMPDIR "C:\\Windows\\TEM\\"
+#define PLAT_MKDIR(dir) mkdir(dir)
 
 #ifdef __cplusplus
 extern "C"

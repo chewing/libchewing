@@ -1,5 +1,16 @@
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/chewingio.c: Remove redundant WIN32 definitions since we have
+	porting_layer.
+
+	* src/hash.c (ReadHash): Clean up platform-dependent implementation.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Define platform-dependent
+	tmp_dir / mkdir.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/common/key2pho.c (zhuin_tab): Add prefix space to distinguish
 	zhuin type to fix MakeOutput errors.
 

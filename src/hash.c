@@ -143,12 +143,12 @@ void HashModify( HASH_ITEM *pItem )
 	sprintf( str, "%d", chewing_lifetime );
 	DEBUG_OUT( 
 		"HashModify-1: formatstring='%s',printing '%s'\n", 
-		formatstring,str );
+		formatstring, str );
 	DEBUG_FLUSH;
 	fprintf( outfile, formatstring, str );
 
 	/* update record */
-	if( pItem->item_index < 0 ) {
+	if ( pItem->item_index < 0 ) {
 		fseek( outfile, 0, SEEK_END );
 		pItem->item_index = ftell( outfile ) / FIELD_SIZE;
 	}
@@ -253,18 +253,9 @@ int ReadHash( const char *path )
 		else {
 			sprintf(
 				hashfilename, "%s%s",
-#ifndef WIN32
-				"/tmp", CHEWING_HASH_PATH
-#else
-				"C:\\Windows\\TEM\\", CHEWING_HASH_PATH
-#endif
-			);
+				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
-#ifndef WIN32		
-		mkdir( hashfilename, S_IRWXU );
-#else
-		mkdir( hashfilename );
-#endif
+		PLAT_MKDIR( hashfilename );
 		strcat( hashfilename, PLAT_SEPARATOR );
 		strcat( hashfilename, HASH_FILE );
 	} else {

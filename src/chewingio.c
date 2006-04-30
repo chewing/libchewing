@@ -19,9 +19,6 @@
 
 #include <string.h>
 #include <ctype.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
 
 #include "chewing-utf8-util.h"
 #include "chewingio.h"

@@ -19,11 +19,11 @@
 #include "chewing-utf8-util.h"
 #include "global.h"
 
-const char *zhuin_tab[] = {
-	  "  ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ",
-	  "  ㄧㄨㄩ",
-	  "  ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ",
-	  "  ˙ˊˇˋ"
+const char *zhuin_tab[] = {					/* number of bits */
+	  "  ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ",	/* 5 */
+	  "  ㄧㄨㄩ",						/* 2 */
+	  "  ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ",			/* 4 */
+	  "  ˙ˊˇˋ"						/* 3 */
 };
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
@@ -50,7 +50,7 @@ static char *key_str[ MAX_KBTYPE ] = {
 	 "bpmfdtnlvkhgvcgycjqwsexuaorwiqzpmntlhdfjk",		/* ET26 */
 	 "1'a;2,oq.ejpuk5yixfdbghm8ctw9rnv0lsz[7634",		/* Dvorak */
 	 "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnklldhtn",		/* Dvorak Hsu */
-	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* pinying */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* pinyin */
 } ;
 
 /* 
