@@ -1,3 +1,32 @@
+2006-05-02  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/hash.h
+	(BIN_HASH_SIG): New macro. Used for new binary-based hash data
+	signature.
+	(AlcUserPhraseSeq): Change prototype to assign phonelen and wordlen.
+
+	* src/userphrase.c (UserUpdatePhrase): Fix buggy memory allocation.
+
+	* src/hash.c
+	(AlcUserPhraseSeq) (HashInsert) (HashItem2String): Ditto.
+	(HashItem2Binary): New helper function. Convert Hash items to binary
+	form.
+	(HashModify): Handle hash storage via HashItem2Binary.
+	(isValidChineseString): New helper function. Check if input is a valid
+	Chinese string.
+	(ReadHashItem_bin) (ReadHashItem_txt): New helper function. Separate
+	ReadHashItem to two functions for binary and text-based form.
+	(open_file_get_length) (_load_hash_file) (migrate_hash_to_bin): New
+	helper functions. Used for binary hash file format and workaround for
+	hash corruption.
+	(ReadHash): Make use of the above new changes.
+	Taken from win32-utf8 branch, and modified with porting_layer.
+	Patched by James Huang (seamxr) <seamxr@gmail.com>.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h (PLAT_RENAME)
+	(PLAT_UNLINK): New macros. Wrapper for rename / unlink.
+
 2006-04-30  Jim Huang  <jserv.tw@gmail.com>
 
 	* data/tsi.src: Remove all suffix <CR>.

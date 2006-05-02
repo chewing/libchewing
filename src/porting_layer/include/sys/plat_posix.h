@@ -7,7 +7,12 @@
 
 #define PLAT_SEPARATOR "/"
 #define PLAT_TMPDIR "/tmp"
-#define PLAT_MKDIR(dir) mkdir(dir, S_IRWXU)
+#define PLAT_MKDIR(dir) \
+	mkdir(dir, S_IRWXU)
+#define PLAT_RENAME(oldpath, newpath) \
+	rename(oldpath, newpath)
+#define PLAT_UNLINK(path) \
+	unlink(path)
 
 #ifdef __cplusplus
 extern "C"

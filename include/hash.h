@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -24,6 +24,7 @@ extern "C" {
 
 #define FIELD_SIZE (125)
 #define N_HASH_BIT (14)
+#define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "hash.dat"
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
@@ -44,7 +45,7 @@ HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] );
 HASH_ITEM *HashInsert( UserPhraseData *pData );
 HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pHashLast );
 void HashModify( HASH_ITEM *pItem );
-int AlcUserPhraseSeq( UserPhraseData *pData, int len );
+int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen );
 int ReadHash( const char *path );
 void FreeHashTable( void );
 

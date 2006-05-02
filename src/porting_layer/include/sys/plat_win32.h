@@ -7,7 +7,12 @@
 
 #define PLAT_SEPARATOR "\\"
 #define PLAT_TMPDIR "C:\\Windows\\TEM\\"
-#define PLAT_MKDIR(dir) mkdir(dir)
+#define PLAT_MKDIR(dir) \
+	mkdir(dir)
+#define PLAT_RENAME(oldpath, newpath) \
+	MoveFile(oldpath, newpath)
+#define PLAT_UNLINK(path) \
+	_unlink(path)
 
 #ifdef __cplusplus
 extern "C"

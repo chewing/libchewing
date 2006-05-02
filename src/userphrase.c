@@ -140,7 +140,7 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 	len = ueStrLen( (char *) wordSeq );
 	pItem = HashFindEntry( phoneSeq, wordSeq );
 	if ( ! pItem ) {
-		if ( ! AlcUserPhraseSeq( &data, len ) ) {
+		if ( ! AlcUserPhraseSeq( &data, len, strlen( wordSeq ) ) ) {
 			return USER_UPDATE_FAIL;
 		}
 
