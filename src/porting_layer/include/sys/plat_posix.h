@@ -3,6 +3,8 @@
 
 #ifdef UNDER_POSIX
 
+#include <unistd.h>
+
 #include <sys/types.h>
 
 #define PLAT_SEPARATOR "/"

@@ -1,9 +1,17 @@
 #ifndef PLAT_WIN32_H
+#define PLAT_WIN32_H
 
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 
 #include <windows.h>
 #include <stdio.h>
+
+#if _MSC_VER > 1000
+#include <io.h>
+#define F_OK	00
+#define W_OK	02
+#define R_OK	04
+#endif
 
 #define PLAT_SEPARATOR "\\"
 #define PLAT_TMPDIR "C:\\Windows\\TEM\\"

@@ -1,5 +1,11 @@
 2006-05-02  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/private.h,
+	src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Clean up private.h .
+	
+2006-05-02  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/hash.h
 	(BIN_HASH_SIG): New macro. Used for new binary-based hash data
 	signature.
