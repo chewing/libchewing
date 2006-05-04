@@ -11,7 +11,6 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,13 +58,14 @@ int DoWord( char *buf )
 
 void Output()
 {
-	FILE *indexfile, *datafile;
-	int i;
+	FILE *indexfile, *datafile, *configfile;
+	int i, count = 0;
 	uint16 previous;
 
 	indexfile = fopen( CHAR_INDEX_FILE, "w" );
 	datafile = fopen( CHAR_FILE, "w" );
-	if ( ! indexfile || ! datafile ) {
+	configfile = fopen( CHEWING_DEFINITION_FILE, "aw" );
+	if ( ! indexfile || ! datafile || ! configfile ) {
 		fprintf( stderr, "File Write Error\n" );
 		exit( 1 );
 	}
@@ -75,12 +75,15 @@ void Output()
 		if ( word_data[ i ].num[0] != previous ) {
 			previous = word_data[ i ].num[0];
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
+			count++;
 		}
 		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
 	}
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
+	fprintf( configfile, "#define PHONE_NUM (%d)\n", count );
 	fclose( indexfile );
 	fclose( datafile );
+	fclose( configfile );
 }
 
 void CountSort()

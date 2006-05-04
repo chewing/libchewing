@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "chewing-utf8-util.h"
+#include "chewing-definition.h"
 #include "userphrase.h"
 #include "global.h"
 #include "dict.h"

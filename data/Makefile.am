@@ -12,6 +12,7 @@ gendata: phone.cin tsi.src
 	$(tooldir)/sort_dic $(top_srcdir)/data/tsi.src
 	$(tooldir)/maketree
 	-rm -f phoneid.dic
+	-mv -f chewing-definition.h ../src
 if ENABLE_BINARY_DATA
 convert_dat:
 	$(tooldir)/dat2bin

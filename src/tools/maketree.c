@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
 #include "global.h"
 
 /*
@@ -191,12 +190,19 @@ void BFS1()
 
 void BFS2()
 {
+	unsigned int count = 0;
 	NODE *pNode;
 	LISTNODE *pList;
 	FILE *output = fopen( PHONE_TREE_FILE, "w" );
+	FILE *config = fopen( CHEWING_DEFINITION_FILE, "aw" );
 
 	if ( ! output ) {
 		fprintf( stderr, "Error opening file " PHONE_TREE_FILE " for output.\n" );
+		exit( 1 );
+	}
+
+	if ( ! config ) {
+		fprintf( stderr, "Error opening file " CHEWING_DEFINITION_FILE " for output.\n" );
 		exit( 1 );
 	}
 
@@ -220,9 +226,11 @@ void BFS2()
 		}
 		else
 			fprintf( output, "-1 -1\n" );
-
+		count++;
 	}
+	fprintf( config, "#define TREE_SIZE (%d)\n", count );
 	fclose( output );
+	fclose( config );
 }
 
 #ifdef USED_IN_DAT2BIN

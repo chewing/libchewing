@@ -1,3 +1,18 @@
+2006-05-04  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* Makefile.am,
+	data/Makefile.am,
+	include/char.h,
+	include/global.h,
+	src/Makefile.am,
+	src/char.c,
+	src/choice.c,
+	src/tools/maketree.c,
+	src/tools/sort_word.c,
+	src/tree.c:
+	Automatically generate "src/chewing-definition.h" which contains
+	definition of TREE_SISE and PHONE_NUM.
+			  
 2006-05-02  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* include/char.h,

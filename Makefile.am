@@ -17,7 +17,7 @@ EXTRA_DIST = \
 	Doxyfile
 
 AUTOMAKE_OPTIONS = gnu
-SUBDIRS = src data
+SUBDIRS = src/common src/tools data src
 
 MAINTAINERCLEANFILES = \
 	Makefile.in \

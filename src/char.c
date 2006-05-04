@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "chewing-definition.h"
 #include "char.h"
 #include "private.h"
 #include "plat_mmap.h"

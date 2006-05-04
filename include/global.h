@@ -23,6 +23,7 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
+#define CHEWING_DEFINITION_FILE "chewing-definition.h"
 
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
@@ -33,7 +34,6 @@
 
 #define MAX_KBTYPE 10
 #define MAX_SELKEY 10
-#define TREE_SIZE (153362)
 #define WCH_SIZE 4
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4

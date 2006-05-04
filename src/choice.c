@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "chewing-definition.h"
 #include "chewing-utf8-util.h"
 #include "global.h"
 #include "dict.h"
