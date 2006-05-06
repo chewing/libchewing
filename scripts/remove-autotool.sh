@@ -8,6 +8,7 @@ if [ -f Makefile ]; then
 fi
 
 find -name .deps | xargs rm -rf
+find -name stamp-h1 | xargs rm -f
 
 rm -rf autom4te.cache
 

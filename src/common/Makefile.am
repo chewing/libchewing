@@ -1,5 +1,3 @@
-MAINTAINERCLEANFILES = Makefile.in
-
 INCLUDES = -I$(top_builddir)/include
 
 noinst_LTLIBRARIES = libcommon.la

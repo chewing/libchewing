@@ -1,5 +1,14 @@
 2006-05-06  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/Makefile.am,
+	src/common/Makefile.am: Fixlet to distclean.
+
+	* Makefile.am: Fixlet to installed headers.
+
+	* configure.ac: Bump version to 0.2.93 .
+
+2006-05-06  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/chewingutil.h,
 	src/chewingutil.h: Move from ... to ...
 
