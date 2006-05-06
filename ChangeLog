@@ -26,7 +26,7 @@
 	src/tools/sort_word.c,
 	src/tree.c:
 	Automatically generate "src/chewing-definition.h" which contains
-	definition of TREE_SISE and PHONE_NUM.
+	definition of TREE_SIZE and PHONE_NUM.
 			  
 2006-05-02  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 

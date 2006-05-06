@@ -11,13 +11,28 @@ What's New in libchewing 0.3.0
   means various phrases have been reviewed and corrected.
 * Zuin fixes and symbol improvements.
 * Support key 'j' / 'k' for paging in selection mode.
-* Fix some internal memory management bugs.
+* Fix some internal memory management bugs and leaks.
 * Improved internal test suite.
+* New binary-form of user hash data to speed up loading and
+  solve hash data corruption.
+* Better calculating of internal tree and phone constants.
+* Revised tsi.src for richer phrases and avoiding crashes.
+* Merge phone and phrase from CNS11643.
+* Reduce the amount for the expose for internal symbols.
+* Improved Han-Yu PinYin to use table-lookup implementation.
+* Experimental frequency-evaluation. (re-compute chewing 
+  lifetime)
+* Implement the choice mechanism for pair symbols.
+* Improved Tab handling to allow the switching over different
+  frequency orders of candidated phrases.
+* New auxiliary module for simpler API uses.
+* Experimental memory-mapping based binary data handling to
+  speed up data loading.
 * Successful stories:
   . Sun Solaris 10 U2 and 11 will provide built-in Chewing
     IM support.
   . OXIM input method suite from OpenDesktop/OSSI provides
-    built-in Chewing support since version 1.0.x
+    Chewing support as its default input method.
     
 What's New in libchewing 0.2.7
 ----------------------------------------------------------
