@@ -41,8 +41,7 @@ void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 int AddSelect( ChewingData *pgdata, int sel_i );
 int CountSelKeyNum( int key, ChewingData *pgdata );
 int ChewingIsChiAt( int cursor, ChewingData *pgdata );
-int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
-int KillCharInSelectIntervalAndBrkpt( ChewingData *pgdata, int cursorToKill );
+static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
 int ChewingKillChar(
 		ChewingData *pgdata, 
 		int cursorToKill, 

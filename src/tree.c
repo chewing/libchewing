@@ -56,7 +56,7 @@ static plat_mmap m_mmap;
 extern TreeType tree[ TREE_SIZE ];
 #endif
 
-int IsContain( IntervalType in1, IntervalType in2 )
+static int IsContain( IntervalType in1, IntervalType in2 )
 {
 	return ( in1.from <= in2.from && in1.to >= in2.to );
 }

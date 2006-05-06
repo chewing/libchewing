@@ -316,7 +316,7 @@ static int CompInterval( const IntervalType *a, const IntervalType *b )
 	return ( a->to - b->to );
 }
 
-int FindIntervalFrom( int from, IntervalType inte[], int nInte )
+static int FindIntervalFrom( int from, IntervalType inte[], int nInte )
 {
 	int i;
 
@@ -348,7 +348,7 @@ int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
 	return 0;
 }
 
-int CountReleaseNum( ChewingData *pgdata )
+static int CountReleaseNum( ChewingData *pgdata )
 {
 	int remain, i;
 
@@ -374,7 +374,7 @@ int CountReleaseNum( ChewingData *pgdata )
 	return 1;
 }
 
-void KillFromLeft( ChewingData *pgdata, int nKill )
+static void KillFromLeft( ChewingData *pgdata, int nKill )
 {
 	int i;
 
@@ -496,7 +496,7 @@ int AddChi( uint16 phone, ChewingData *pgdata )
 }
 
 #ifdef ENABLE_DEBUG
-void ShowChewingData( ChewingData *pgdata )
+static void ShowChewingData( ChewingData *pgdata )
 {
 	int i ;
 
@@ -541,7 +541,6 @@ void ShowChewingData( ChewingData *pgdata )
 		pgdata->bSelect, 
 		pgdata->bCaseChange );
 }
-
 #endif
 
 int CallPhrasing( ChewingData *pgdata )
@@ -811,7 +810,7 @@ void RemoveSelectElement( int i, ChewingData *pgdata )
 	strcpy( pgdata->selectStr[ i ], pgdata->selectStr[ pgdata->nSelect ] );
 }
 
-int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata )
+static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata )
 {
 	int i;
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
@@ -824,7 +823,7 @@ int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata )
 	return 0;
 }
 
-int KillCharInSelectIntervalAndBrkpt( ChewingData *pgdata, int cursorToKill )
+static int KillCharInSelectIntervalAndBrkpt( ChewingData *pgdata, int cursorToKill )
 {
 	int i; 
 

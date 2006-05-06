@@ -17,7 +17,6 @@ extern "C" {
 
 #include "char.h"
 #include "chewingio.h"
-#include "chewingutil.h"
 #include "dict.h"
 #include "global.h"
 #include "hash.h"

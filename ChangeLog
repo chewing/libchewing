@@ -1,3 +1,18 @@
+2006-05-06  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingutil.h,
+	src/chewingutil.h: Move from ... to ...
+
+	* include/global.h,
+	src/tree.c (IsContain),
+	src/chewingutil.c (FindIntervalFrom) (CountReleaseNum) (KillFromLeft)
+	(ShowChewingData) (ChewingKillSelectIntervalAcross)
+	(KillCharInSelectIntervalAndBrkpt): Marked as static.
+
+	* data/Makefile.am: Improved time stamp handling for data generation.
+
+	* data/NOTE: Added constant-calculating information.
+	
 2006-05-04  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* Makefile.am,

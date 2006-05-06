@@ -238,8 +238,7 @@ int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] );
-int IsContain( IntervalType, IntervalType );
-int IsIntersect( IntervalType, IntervalType );
+int IsIntersect( IntervalType in1, IntervalType in2 );
 void ReadTree( const char * );
 int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq );
 
