@@ -21,7 +21,7 @@ extern FILE *fp_g;
 		} \
 	} while (0)
 #define DEBUG_CHECKPOINT() \
-	DEBUG_OUT( "At %s %d\n", __FUNCTION__, __LINE__ )
+	DEBUG_OUT( "[ File: %s  Func: %s  Line: %d ]\n", __FILE__, __FUNCTION__, __LINE__ )
 #define DEBUG_FLUSH \
 	do { \
 		if ( fp_g ) { \

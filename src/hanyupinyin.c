@@ -71,13 +71,13 @@ static int compkey( const void *k1, const void *k2 )
 	return strcmp( key1->pinyin, key2->pinyin );
 }
 
-/*
-  0: Success
-  Non-Zero: Fail to fully convert
-  1: Failed fo lookup initals
-  2: Failed fo lookup finals
-  Map pinyin key-sequence to Zuin key-sequence.
-  Caller should allocate char zuin[4].
+/**
+ * Map pinyin key-sequence to Zuin key-sequence.
+ * Caller should allocate char zuin[4].
+ * 
+ * Non-Zero: Fail to fully convert
+ * 
+ * @retval 0 Success
  */
 int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 {
@@ -89,9 +89,11 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 	 */
 	keymap key, *res;
 	strcpy( key.pinyin, pinyinKeySeq );
+
+	DEBUG_CHECKPOINT();
 	res = bsearch( &key, keytable, N_TOTAL, sizeof(keymap), compkey );
 	if ( res != NULL )
-		zuinKeySeq = strdup( res->zuin );
+		strcpy( zuinKeySeq, res->zuin );
 	else
 		zuinKeySeq = strdup( "" );
 	return 0;

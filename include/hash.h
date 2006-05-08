@@ -25,7 +25,7 @@ extern "C" {
 #define FIELD_SIZE (125)
 #define N_HASH_BIT (14)
 #define BIN_HASH_SIG "CBiH"
-#define HASH_FILE  "hash.dat"
+#define HASH_FILE  "uhash.dat"
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
 #ifdef __MacOSX__

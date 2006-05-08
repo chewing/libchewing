@@ -187,8 +187,3 @@ UserPhraseData *UserGetPhraseNext( const uint16 phoneSeq[] )
 	return &( pItemLast->data );
 }
 
-void UpdateLifetime( void )
-{
-	/* TODO */
-}
-

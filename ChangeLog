@@ -1,3 +1,15 @@
+2006-05-08  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/userphrase.h (UserGetPhraseFirst),
+	src/userphrase.c (UserGetPhraseFirst): Removed since unused.
+
+	* include/hash.h (HASH_FILE): Redefine from "hash.dat" to "uhash.dat".
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin): Fixlet and insert
+	DEBUG_CHECKPOINT for future handling.
+
+	* src/private.h (DEBUG_CHECKPOINT): Added filename information.
+
 2006-05-06  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/Makefile.am,

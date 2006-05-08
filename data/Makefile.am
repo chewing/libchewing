@@ -44,5 +44,5 @@ endif
 
 install-data-local: $(datas) pinyin.tab
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
-	$(INSTALL_DATA) $(datas) $(DESTDIR)/$(datadir)/chewing
+	$(INSTALL_DATA) $(datas) pinyin.tab $(DESTDIR)/$(datadir)/chewing
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

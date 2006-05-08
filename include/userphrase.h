@@ -68,10 +68,5 @@ UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] );
  */
 UserPhraseData *UserGetPhraseNext( const uint16 phoneSeq[] );
 
-/**
- * @brief Not implement yet.
- */
-void UpdateLifetime( void );
-
 #endif
 
