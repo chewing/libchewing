@@ -898,6 +898,10 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 		goto End_KeyDefault;
 	}
 
+	/* We ignore non-printable input */
+	if ( ! isprint( key ) )
+		goto End_KeyDefault;
+
 	CheckAndResetRange( pgdata );
 
 	DEBUG_CHECKPOINT();

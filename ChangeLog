@@ -1,5 +1,10 @@
 2006-05-08  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/chewingio.c (chewing_handle_Default): Ignore non-printable
+	input to avoid unexpected behavior.
+
+2006-05-08  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/userphrase.h (UserGetPhraseFirst),
 	src/userphrase.c (UserGetPhraseFirst): Removed since unused.
 
@@ -9,6 +14,8 @@
 	DEBUG_CHECKPOINT for future handling.
 
 	* src/private.h (DEBUG_CHECKPOINT): Added filename information.
+
+	* data/Makefile.am: Install pinyin.dat .
 
 2006-05-06  Jim Huang  <jserv.tw@gmail.com>
 
