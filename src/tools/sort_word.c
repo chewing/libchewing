@@ -34,6 +34,7 @@ typedef struct {
 
 WORD_DATA word_data[ MAX_WORD ];
 int nWord;
+int phone_num;
 
 int SortWord( const WORD_DATA *a, const WORD_DATA *b )
 {
@@ -59,7 +60,7 @@ int DoWord( char *buf )
 void Output()
 {
 	FILE *indexfile, *datafile, *configfile;
-	int i, count = 0;
+	int i;
 	uint16 previous;
 
 	indexfile = fopen( CHAR_INDEX_FILE, "w" );
@@ -71,16 +72,17 @@ void Output()
 	}
 
 	previous = 0 ;
+	phone_num = 0;
 	for ( i = 0; i < nWord; i++ ) {
 		if ( word_data[ i ].num[0] != previous ) {
 			previous = word_data[ i ].num[0];
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
-			count++;
+			phone_num++;
 		}
 		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
 	}
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
-	fprintf( configfile, "#define PHONE_NUM (%d)\n", count );
+	fprintf( configfile, "#define PHONE_NUM (%d)\n", phone_num );
 	fclose( indexfile );
 	fclose( datafile );
 	fclose( configfile );

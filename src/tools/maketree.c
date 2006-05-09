@@ -68,6 +68,7 @@ NODE *queue[ MAX_PH_NODE ];
 int head, tail;
 
 int node_count;
+int tree_size;
 
 void QueuePut( NODE *pN )
 {
@@ -190,7 +191,6 @@ void BFS1()
 
 void BFS2()
 {
-	unsigned int count = 0;
 	NODE *pNode;
 	LISTNODE *pList;
 	FILE *output = fopen( PHONE_TREE_FILE, "w" );
@@ -207,6 +207,7 @@ void BFS2()
 	}
 
 	QueuePut( root );
+	tree_size = 0;
 	while ( ! QueueEmpty() ) {
 		pNode = QueueGet();
 		
@@ -226,9 +227,9 @@ void BFS2()
 		}
 		else
 			fprintf( output, "-1 -1\n" );
-		count++;
+		tree_size++;
 	}
-	fprintf( config, "#define TREE_SIZE (%d)\n", count );
+	fprintf( config, "#define TREE_SIZE (%d)\n", tree_size );
 	fclose( output );
 	fclose( config );
 }

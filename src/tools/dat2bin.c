@@ -75,10 +75,12 @@ int main( int argc, char* argv[] )
 
 	if( fo )
 	{
-		for ( i = 0; i <= PHONE_NUM * 2; i++ )
+		static uint16 *arrPhone;
+		static int *begin;
+		arrPhone = ALC( uint16, phone_num * 2 );
+		begin = ALC( int, phone_num * 2 );
+		for ( i = 0; i <= phone_num * 2; i++ )
 		{
-			static uint16 arrPhone[PHONE_NUM * 2];
-			static int begin[PHONE_NUM * 2];
 			if( fscanf( fi, "%hu %d", &arrPhone[i], &begin[i] ) < 2 )
 			{
 				fwrite( begin, sizeof(int), i, fo );
@@ -86,6 +88,8 @@ int main( int argc, char* argv[] )
 				break;
 			}
 		}
+		free( arrPhone );
+		free( begin );
 		fclose( fo );
 	}
 	fclose( fi );
@@ -100,7 +104,7 @@ int main( int argc, char* argv[] )
 	if( fo )
 	{
 		TreeType tree = {0};
-		for ( i = 0; i < TREE_SIZE * 2; i++ ) {
+		for ( i = 0; i < tree_size * 2; i++ ) {
 			if ( fscanf( fi, "%hu%d%d%d",
 				&tree.phone_id,
 				&tree.phrase_id,

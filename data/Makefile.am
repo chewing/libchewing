@@ -16,18 +16,13 @@ gendata_stamp:
 	if test -f $(generated_header); then \
 		echo "chewing-definition.h exists."; \
 	else \
-		$(MAKE) gendata \
+		$(MAKE) gendata; \
 		$(MAKE) convert_dat; \
 		$(MAKE) gendata2; \
 	fi
 	@echo "timestamp" > $@
 
 gendata:
-	$(tooldir)/sort_word
-	$(tooldir)/sort_dic $(top_srcdir)/data/tsi.src
-	$(tooldir)/maketree
-	-rm -f phoneid.dic
-	-mv -f chewing-definition.h $(top_builddir)/src/
 if ENABLE_BINARY_DATA
 convert_dat:
 	$(tooldir)/dat2bin
@@ -36,11 +31,16 @@ gendata2: ch_index.dat_bin fonetree.dat_bin ph_index.dat_bin
 	-mv -f fonetree.dat_bin fonetree.dat
 	-mv -f ph_index.dat_bin ph_index.dat
 else
+	$(tooldir)/sort_word
+	$(tooldir)/sort_dic $(top_srcdir)/data/tsi.src
+	$(tooldir)/maketree
 convert_dat:
 	@echo "Nothing in convert_dat"
 gendata2:
 	@echo "Nothing in gendata2"
 endif
+	-rm -f phoneid.dic
+	-mv -f chewing-definition.h $(top_builddir)/src/
 
 install-data-local: $(datas) pinyin.tab
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing

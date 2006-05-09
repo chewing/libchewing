@@ -1,3 +1,10 @@
+2006-05-09  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/Makefile.am,
+	src/tools/dat2bin.c,
+	src/tools/maketree.c,
+	src/sort_word.c: Fix binary data build process.
+
 2006-05-08  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/chewingio.c (chewing_handle_Default): Ignore non-printable
