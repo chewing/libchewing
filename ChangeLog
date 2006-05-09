@@ -1,5 +1,9 @@
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
 
+	* * configure.ac: Bump version to 0.2.94 .
+
+2006-05-10  Jim Huang  <jserv.tw@gmail.com>
+
 	* debian/*: Removed. Debian@Taiwan maintains the packaging.
 
 2006-05-09  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
