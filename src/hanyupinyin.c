@@ -17,6 +17,8 @@
 #include "hash.h"
 #include "private.h"
 
+#define PINYIN_TAB_NAME "pinyin.tab"
+
 /*
   according to XCIN bims_pinyin.cin
  */
@@ -25,8 +27,9 @@ static int INIT_FLAG = 0;
 static int N_TOTAL = 0;
 
 static void FreeMap()
-{ 
-	free(keytable);
+{
+	if (keytable)
+		free(keytable);
 }
 
 static void InitMap()
@@ -36,32 +39,36 @@ static void InitMap()
 	INIT_FLAG = 1;
 	if ( getenv( "HOME" ) ) {
 		char *filedir = strcat( getenv( "HOME" ), CHEWING_HASH_PATH );
-		char *filepath = strcat( filedir, "/pinyin.tab" );
+		char *filepath = strcat( filedir, PINYIN_TAB_NAME );
 
 		if (access(filepath, R_OK) == 0) {
 			/* Use user-defined tables */
 			fd = fopen( filepath, "r" );
 		}
 		else {
-			return;
 			/* Failback */
-			fd = fopen( CHEWING_DATADIR "/pinyin.tab", "r" );
+			fd = fopen( CHEWING_DATADIR "/" PINYIN_TAB_NAME, "r" );
 		}
-	
-		if ( fd ) {
-			addTerminateService( FreeMap );
-			fscanf( fd, "%d", &N_TOTAL );
-			keytable = ALC( keymap, N_TOTAL );
-			for ( i = 0; i < N_TOTAL - 1; i++ ) {
-				memset( &keytable[i], 0, sizeof(keymap) );
-				fscanf( fd, "%s %s",
+	}
+	else {
+		/* Failback */
+		fd = fopen( CHEWING_DATADIR "/" PINYIN_TAB_NAME, "r" );
+	}
+
+	if ( fd ) {
+		addTerminateService( FreeMap );
+		fscanf( fd, "%d", &N_TOTAL );
+		keytable = ALC( keymap, N_TOTAL );
+		for ( i = 0; i < N_TOTAL - 1; i++ ) {
+			memset( &keytable[i], 0, sizeof(keymap) );
+			fscanf( fd, "%s %s",
 					keytable[ i ].pinyin,
 					keytable[ i ].zuin );
-			}
-			fclose( fd );
-			return;
-		}	
+		}
+		fclose( fd );
+		return;
 	}
+		
 }
 
 static int compkey( const void *k1, const void *k2 )

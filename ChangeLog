@@ -1,5 +1,9 @@
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/hanyupinyin.c (FreeMap) (InitMap): Fix incorrect file operation.
+
+2006-05-10  Jim Huang  <jserv.tw@gmail.com>
+
 	* * configure.ac: Bump version to 0.2.94 .
 
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
