@@ -195,7 +195,7 @@ void HashModify( HASH_ITEM *pItem )
 	}
 	else {
 		fseek( outfile,
-		       (pItem->item_index - 1) * FIELD_SIZE + 4 + strlen( BIN_HASH_SIG ),
+		       pItem->item_index * FIELD_SIZE + 4 + strlen( BIN_HASH_SIG ),
 		       SEEK_SET );
 	}
 #ifdef ENABLE_DEBUG
@@ -508,6 +508,7 @@ int ReadHash( const char *path )
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );
 	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
+	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
 		FILE *outfile;
 		outfile = fopen( hashfilename, "w+b" );
@@ -537,9 +538,8 @@ open_hash_file:
 		seekdump = dump + hdrlen;
 		fsize -= hdrlen;
 
-		item_index = 0;
 		while ( fsize >= FIELD_SIZE ) {
-			iret = ReadHashItem_bin( seekdump, &item, ++item_index );
+			iret = ReadHashItem_bin( seekdump, &item, item_index++ );
 			/* Ignore illegal data */
 			if ( iret == -1 ) {
 				seekdump += FIELD_SIZE;

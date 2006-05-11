@@ -1,3 +1,10 @@
+2006-05-11  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hash.c (HashModify) (ReadHash):
+	Initiate variable at correct location and fix incorrect record locate
+	expression to avoid crashes if users don't have their own hash.dat .
+	Patched by James Huang <seamxr@gmail.com>.
+
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/hanyupinyin.c (FreeMap) (InitMap): Fix incorrect file operation.
