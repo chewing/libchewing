@@ -1,5 +1,13 @@
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* configure.ac: Bump ABI major version.
+
+	* data/Makefile.am,
+	src/tools/Makefile.am,
+	configure.ac: Disable --enable-binary-data option.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* configure.ac: Fill chewing-devel@googlegroups.com as contact
 	address.
 

@@ -10,7 +10,7 @@ AC_SUBST(PACKAGE_VERSION)
 # libtool versioning for libchewing
 
 # increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=2
+LIBCHEWING_CURRENT=3
 
 # increment any time the source changes; set to 0 if you increment CURRENT
 LIBCHEWING_REVISION=0
@@ -132,23 +132,23 @@ AC_ARG_ENABLE([debug],
 	[LIBDEBUG="false"])
 AC_SUBST(LIBDEBUG)
 
-AC_ARG_ENABLE([binary-data],
-		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
-		[case "${enableval}" in
-		yes)
-		ENABLE_BINARY_DATA="true"
-		AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
-		;;
-		no)
-		ENABLE_BINARY_DATA="false"
-		;;
-		*)
-		AC_MSG_ERROR(bad value ${enableval} for --enable-binary-data)
-		;;
-		esac],
-	[ENABLE_BINARY_DATA="false"])
-AC_SUBST(ENABLE_BINARY_DATA)
-AM_CONDITIONAL(ENABLE_BINARY_DATA, test $ENABLE_BINARY_DATA = "true")
+#AC_ARG_ENABLE([binary-data],
+#		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
+#		[case "${enableval}" in
+#		yes)
+#		ENABLE_BINARY_DATA="true"
+#		AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
+#		;;
+#		no)
+#		ENABLE_BINARY_DATA="false"
+#		;;
+#		*)
+#		AC_MSG_ERROR(bad value ${enableval} for --enable-binary-data)
+#		;;
+#		esac],
+#	[ENABLE_BINARY_DATA="false"])
+#AC_SUBST(ENABLE_BINARY_DATA)
+#AM_CONDITIONAL(ENABLE_BINARY_DATA, test $ENABLE_BINARY_DATA = "true")
 
 # Platform-dependent
 dnl What kind of system are we using?
@@ -194,7 +194,7 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
-  Enable binary data      $ENABLE_BINARY_DATA
+dnl  Enable binary data      $ENABLE_BINARY_DATA
   Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
 ])
