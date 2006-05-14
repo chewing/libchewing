@@ -1,7 +1,12 @@
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/chewingio.c (chewing_handle_Default): Update lifetime.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* data/phone.cin-CNS11643-complete.patch: New file. Extract all entries
 	that CJKUnifont doesn't contain from data/phone.cin .
+	Used for reference only.
 
 	* data/phone.cin: Hugely reduced.
 	Chewing could output most of Unihan (Extension A and B).

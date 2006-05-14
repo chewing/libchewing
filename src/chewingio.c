@@ -38,6 +38,8 @@
 FILE *fp_g;
 #endif
 
+extern int chewing_lifetime;
+
 void (*TerminateServices[ TerminateServicesNUM ])() = {
 	NULL
 };
@@ -891,6 +893,9 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	int rtn, num;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int bQuickCommit = 0;
+
+	/* Update lifetime */
+	chewing_lifetime++;
 
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {
