@@ -1,3 +1,11 @@
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/phone.cin-CNS11643-complete.patch: New file. Extract all entries
+	that CJKUnifont doesn't contain from data/phone.cin .
+
+	* data/phone.cin: Hugely reduced.
+	Chewing could output most of Unihan (Extension A and B).
+
 2006-05-11  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/hash.c (HashModify) (ReadHash):
@@ -11,7 +19,7 @@
 
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
 
-	* * configure.ac: Bump version to 0.2.94 .
+	* configure.ac: Bump version to 0.2.94 .
 
 2006-05-10  Jim Huang  <jserv.tw@gmail.com>
 
