@@ -1,5 +1,10 @@
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* configure.ac: Fill chewing-devel@googlegroups.com as contact
+	address.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/chewingio.c (chewing_handle_Default): Update lifetime.
 
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
