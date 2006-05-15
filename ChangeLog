@@ -1,5 +1,9 @@
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* configure.ac: Bump version to 0.3.0 (final).
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* configure.ac: Bump ABI major version.
 
 	* data/Makefile.am,
