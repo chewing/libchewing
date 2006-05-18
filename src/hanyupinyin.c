@@ -59,7 +59,7 @@ static void InitMap()
 		addTerminateService( FreeMap );
 		fscanf( fd, "%d", &N_TOTAL );
 		keytable = ALC( keymap, N_TOTAL );
-		for ( i = 0; i < N_TOTAL - 1; i++ ) {
+		for ( i = 0; i < N_TOTAL; i++ ) {
 			memset( &keytable[i], 0, sizeof(keymap) );
 			fscanf( fd, "%s %s",
 					keytable[ i ].pinyin,
