@@ -1,3 +1,10 @@
+2006-05-19  Jeff Chen  <wiz.chen@gmail.com>
+
+	* data/pinyin.tab (fix key order): put "shun" before "shuo".
+	
+	* src/hanyupinyin.c (InitMap): The upper limit of for-loop should 
+	be N_TOTAL not (N_TOTAL - 1).
+
 2006-05-15  Jim Huang  <jserv.tw@gmail.com>
 
 	* configure.ac: Bump version to 0.3.0 (final).
