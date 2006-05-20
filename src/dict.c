@@ -101,7 +101,7 @@ static void Str2Phrase( Phrase *phr_ptr )
 	char buf[ 1000 ];
 
 	fgettab( buf, 1000, dictfile );
-	sscanf( buf, "%s %d", phr_ptr->phrase, &( phr_ptr->freq ) );
+	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
 }
 
 int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )

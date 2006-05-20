@@ -1,3 +1,12 @@
+2006-05-20  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/char.c (Str2Word),
+	src/dict.c (Str2Phrase): Clarify the retrieval from char/dict data.
+	In the previous revision, sscanf with %s was used, and isspace(0xa0)
+	returns 1 on some BSD libc implementations due to the sematics of non
+	breaking space, that is platform-dependent.
+	Patched by Rong-En Fan <rafan@infor.org>.
+
 2006-05-20  Jeff Chen  <wiz.chen@gmail.com>
 
 	* src/hanyupinyin.c (HanyuPinYinToZuin):

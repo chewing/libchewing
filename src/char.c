@@ -126,7 +126,7 @@ static void Str2Word( Word *wrd_ptr )
 
 	fgettab( buf, 1000, dictfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
-	sscanf( buf, "%hu %6s", &sh, wrd_ptr->word );
+	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
 	assert( wrd_ptr->word != NULL );
 }
 
