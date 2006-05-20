@@ -54,7 +54,7 @@ static void InitMap()
 		/* Failback */
 		fd = fopen( CHEWING_DATADIR "/" PINYIN_TAB_NAME, "r" );
 	}
-
+	
 	if ( fd ) {
 		addTerminateService( FreeMap );
 		fscanf( fd, "%d", &N_TOTAL );
@@ -99,9 +99,10 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 
 	DEBUG_CHECKPOINT();
 	res = bsearch( &key, keytable, N_TOTAL, sizeof(keymap), compkey );
-	if ( res != NULL )
+	if ( res != NULL ) {
 		strcpy( zuinKeySeq, res->zuin );
+		return 0;
+	}
 	else
-		zuinKeySeq = strdup( "" );
-	return 0;
+		return 1;
 }

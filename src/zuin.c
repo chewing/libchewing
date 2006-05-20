@@ -392,14 +392,17 @@ static int IsPinYinEndKey( ZuinData *pZuin, int key )
 static int PinYinInput( ZuinData *pZuin, int key )
 {
 	int err = 0, status, i;
-	char zuinKeySeq[ 5 ], buf[ 2 ];
+	char zuinKeySeq[ 5 ];
 
 	DEBUG_CHECKPOINT();
 
 	if ( IsPinYinEndKey( pZuin, key ) ) {
 		err = HanyuPinYinToZuin( pZuin->pinYinData.keySeq, zuinKeySeq );
 		if (err)
-			return ZUIN_KEY_ERROR;
+		{
+			pZuin->pinYinData.keySeq[ 0 ] = '\0';
+			return ZUIN_ABSORB;
+		}
 
 		DEBUG_OUT( "zuinKeySeq: %s\n", zuinKeySeq );
 		for ( i = 0; i < strlen( zuinKeySeq ); i++ ) {
@@ -420,6 +423,7 @@ static int PinYinInput( ZuinData *pZuin, int key )
 		pZuin->pinYinData.keySeq[ 0 ] = '\0';
 		return EndKeyProcess( pZuin, key, 1 );
 	}
+	char buf[ 2 ];
 	buf[ 0 ] = key; buf[ 1 ] = '\0';
 	strcat( pZuin->pinYinData.keySeq, buf );
 	

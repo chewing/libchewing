@@ -1,3 +1,13 @@
+2006-05-20  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin):
+	  The return value of HanyuPinYinToZuin should not be zero when
+          looking up table failed.
+
+	* src/zuin.c (PinYinInput):
+	  It should clean the buffer of PinYin data and return "ZUIN_ABSORB"
+	  to ignore the current key when converting failed.
+
 2006-05-19  Jeff Chen  <wiz.chen@gmail.com>
 
 	* data/pinyin.tab (fix key order): put "shun" before "shuo".
