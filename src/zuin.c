@@ -380,12 +380,24 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
-static int IsPinYinEndKey( ZuinData *pZuin, int key )
+static int IsPinYinEndKey(int key )
 {
 	if ( (key == ' ') || (key == '1') || (key == '2') ||
 			(key == '3') || (key == '4') || (key == '5') ) {
 		return 1;
 	}
+	return 0;
+}
+
+static int IsSymbolKey(int key)
+{
+	if ( (key == '.') || (key == ',') || (key == '?') ||
+		(key == ';') || (key == ':') || (key == '\'') ||
+		(key == '"') || (key == '[') || (key == '{') ||
+		(key == '}') || (key == ']')) {
+		return 1;
+	}
+		
 	return 0;
 }
 
@@ -396,7 +408,11 @@ static int PinYinInput( ZuinData *pZuin, int key )
 
 	DEBUG_CHECKPOINT();
 
-	if ( IsPinYinEndKey( pZuin, key ) ) {
+	if (IsSymbolKey(key)) {
+		return ZUIN_KEY_ERROR;
+	}
+
+	if ( IsPinYinEndKey( key ) ) {
 		err = HanyuPinYinToZuin( pZuin->pinYinData.keySeq, zuinKeySeq );
 		if (err)
 		{

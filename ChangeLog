@@ -1,3 +1,17 @@
+2006-06-19  Jeff Chen  <wiz.chen@gmail.com>
+
+	* data/pinyin.tab
+	  A new HanYu-PinYin mapping table contributed by Alexander Beels.
+
+	* src/hanyupinyin.h (chewing_set_PinYinMethod), src/hanyupinyin.c:
+	  Adding a new API --- "chewing_set_PinYinMethod" to support multiple
+	  PinYin methods. 
+	  Using the implementation of 0.2.x insteads of current one.
+
+	* src/zuin.c (IsSymbolKey)
+	  Adding "IsSymbolKey" function to make PinYin method support symbol
+	  input.
+
 2006-05-20  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/char.c (Str2Word),
