@@ -1,3 +1,12 @@
+2006-10-30  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c
+	  (chewing_handle_ShiftSpace)
+	  Fixed chewing switch between Full/Half mode and cursor moves one 
+	  space in gedit.
+	  (Shift + Space should just only trigger between Full-width and Half-
+           width.)
+
 2006-06-19  Jeff Chen  <wiz.chen@gmail.com>
 
 	* data/pinyin.tab
