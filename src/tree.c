@@ -907,11 +907,32 @@ static void ShowList( TreeDataType *ptd )
 
 static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 {
+	/* pop nNumCut-th candidate to first */
 	int i;
+	RecordNode *former;
+	RecordNode *want;
+
 	if ( ppo->nNumCut >= tdt->nPhListLen )
 		ppo->nNumCut = 0;
-	for ( i = 0; i < ppo->nNumCut; i++ )
-		tdt->phList = tdt->phList->next;
+	if (ppo->nNumCut == 0)
+		return tdt->phList;
+
+	/* find the former of our candidate */
+	former = tdt->phList;
+	for ( i = 0; i < ppo->nNumCut - 1; i++ ) {
+		former = former->next;
+		assert(former);
+	}
+
+	/* take the candidate out of the listed list */
+	want = former->next;
+	assert(want);
+	former->next = former->next->next;
+
+	/* prepend to front of list */
+	want->next = tdt->phList;
+	tdt->phList = want;
+	
 	return tdt->phList;
 }
 
