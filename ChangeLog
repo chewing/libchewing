@@ -1,3 +1,10 @@
+2006-11-08  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/choice.c (SetAvailInfo):
+	Fix bug, when list available phrases to choice, user's own phrases are
+	not included.  This was fixed by Andy Horng <andyhorng168@gmail.com>
+	in r537 win32 branch.
+
 2006-11-04  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/tree.c (NextCut): Fix memory leak. (ticket #20818)
