@@ -14,6 +14,8 @@
 
 #include <string.h>
 #include <sys/stat.h>
+/* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
+#include <limits.h>
 
 #include "chewing-utf8-util.h"
 #include "hash.h"
@@ -440,6 +442,7 @@ static int migrate_hash_to_bin( const char *ofilename )
 	return  1;
 }
 
+#if 0
 /**
  * Attempt to re-compute lifetime
  */
@@ -477,15 +480,16 @@ static int ComputeChewingLifeTime()
        }
        return 0;
 }
+#endif
 
 int ReadHash( const char *path )
 {
-	HASH_ITEM item, *pItem;
-	int item_index, hashvalue, iret, fsize, hdrlen;
+	HASH_ITEM item, *pItem, *pPool = NULL;
+	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
 	/* make sure of write permission */
-	if ( access( path, W_OK ) != 0) {
+	if ( access( path, W_OK ) != 0 ) {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
 				hashfilename, "%s%s", 
@@ -550,16 +554,27 @@ open_hash_file:
 			else if ( iret == 0 )
 				break;
 
-			hashvalue = HashFunc( item.data.phoneSeq );
 			pItem = ALC( HASH_ITEM, 1 );
 			memcpy( pItem, &item, sizeof( HASH_ITEM ) );
-			pItem->next = hashtable[ hashvalue ];
-			hashtable[ hashvalue ] = pItem;
+			pItem->next = pPool;
+			pPool = pItem;
+			if ( oldest > pItem->data.recentTime ) {
+				oldest = pItem->data.recentTime;
+			}
+
 			seekdump += FIELD_SIZE;
 			fsize -= FIELD_SIZE;
 		}
 		free( dump );
-		ComputeChewingLifeTime();
+
+		while ( pPool ) {
+			pItem = pPool;
+			pPool = pItem->next;
+
+			hashvalue = HashFunc( pItem->data.phoneSeq );
+			pItem->next = hashtable[ hashvalue ];
+			pItem->data.recentTime -= oldest;
+		}
 	}
 	return 1;
 }

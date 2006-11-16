@@ -121,9 +121,15 @@ CHEWING_API int chewing_Init(
 	InitChar( dataPath );
 	InitDict( dataPath );
 
-	/* initial Hash */
+	/* initialize Hash */
 	/* FIXME: check the validation of hashPath */
 	ReadHash( hashPath );
+
+	/* initialize SymbolTable */
+	if ( ! InitSymbolTable( (char*) hashPath ) )
+		InitSymbolTable( (char*) dataPath );
+	if ( ! InitEasySymbolInput( (char *) hashPath ) )
+		InitEasySymbolInput( (char *) dataPath );
 
 #ifdef ENABLE_DEBUG
 {
@@ -155,10 +161,15 @@ CHEWING_API int chewing_Init(
 CHEWING_API int chewing_Reset( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
+	ChewingConfigData old_config;
+
+	/* Backup old config and restore it after clearing pgdata structure. */
+	old_config = pgdata->config;
+	memset( pgdata, 0, sizeof( ChewingData ) );
+	pgdata->config = old_config;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
-
 
 	/* choiceInfo */
 	memset( &( pgdata->choiceInfo ), 0, sizeof( ChoiceInfo ) );
@@ -225,7 +236,7 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 {
 	ChewingData *pgdata = ctx->data;
 
-	pgdata->config.selectAreaLen = pcd->selectAreaLen;
+	pgdata->config.candPerPage = pcd->candPerPage;
 	pgdata->config.maxChiSymbolLen = pcd->maxChiSymbolLen;
 	memcpy( 
 		pgdata->config.selKey,
@@ -288,7 +299,8 @@ static int DoSelect( ChewingData *pgdata, int num )
 		if ( num < pgdata->choiceInfo.nTotalChoice ) {
 			if ( pgdata->choiceInfo.isSymbol ) {
 				SymbolChoice( pgdata, num );
-			} else { 
+			}
+			else { 
 				/* change the select interval & selectStr & nSelect */
 				AddSelect( pgdata, num );
 				/* second, call choice module */
@@ -362,7 +374,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 			keystrokeRtn = KEYSTROKE_IGNORE;
 			/*
 			 * If the key is not a printable symbol, 
-			 * then it's wrongto commit it.
+			 * then it's wrong to commit it.
 			 */
 			bQuickCommit = 0;
 		} 
@@ -439,8 +451,10 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
-	} else if ( pgdata->bSelect ) {
-		if ( pgdata->choiceInfo.isSymbol == 1 ) {
+	}
+	else if ( pgdata->bSelect ) {
+		if ( pgdata->choiceInfo.isSymbol != 0 ) {
+			/* TODO: this should be checked again. */
 			ChewingKillChar(
 				pgdata, 
 				pgdata->cursor - 1, 
@@ -448,9 +462,11 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 				DECREASE_CURSOR );
 		}
 		ChoiceEndChoice( pgdata );
-	} else if ( ZuinIsEntering( &( pgdata->zuinData ) ) ) {
+	}
+	else if ( ZuinIsEntering( &( pgdata->zuinData ) ) ) {
 		ZuinRemoveAll( &( pgdata->zuinData ) );
-	} else if( pgdata->config.bEscCleanAllBuf ) {
+	}
+	else if ( pgdata->config.bEscCleanAllBuf ) {
 		CleanAllBuf( pgdata );
 	}
 
@@ -467,22 +483,26 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
-	} else if ( pgdata->bSelect ) {
+	}
+	else if ( pgdata->bSelect ) {
 		keystrokeRtn = KEYSTROKE_ABSORB | KEYSTROKE_BELL;
-	} else if ( pgdata->PointStart > -1 ) {
+	}
+	else if ( pgdata->PointStart > -1 ) {
 		int buf = pgdata->cursor;
 		int key;
 		if ( pgdata->PointEnd > 0 ) {
 			if ( ! pgdata->config.bAddPhraseForward ) {
 				pgdata->cursor = pgdata->PointStart;
 				key = '0' + pgdata->PointEnd;
-			} else {
+			}
+			else {
 				pgdata->cursor = pgdata->PointStart + pgdata->PointEnd;
 				key = '0' + pgdata->PointEnd;
 			}
 			chewing_handle_CtrlNum( ctx, key );
 			pgdata->cursor = buf;
-		} else if ( pgdata->PointEnd < 0 ) {
+		}
+		else if ( pgdata->PointEnd < 0 ) {
 			if ( pgdata->config.bAddPhraseForward )
 				pgdata->cursor = buf - pgdata->PointEnd;
 			key = '0' - pgdata->PointEnd;
@@ -491,7 +511,8 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 		}
 		pgdata->PointStart = -1;
 		pgdata->PointEnd = 0;
-	} else {
+	}
+	else {
 		keystrokeRtn = KEYSTROKE_COMMIT;
 		WriteChiSymbolToBuf( pgo->commitStr, nCommitStr, pgdata );
 		AutoLearnPhrase( pgdata );
@@ -605,7 +626,8 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 	if ( toSelect ) {
 		if( ! pgdata->bSelect ) {
 			ChoiceFirstAvail( pgdata );
-		} else {
+		}
+		else {
 			ChoiceNextAvail( pgdata );
 		}
 	} 
@@ -974,6 +996,25 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	/* editing */
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
+			if ( pgdata->bEasySymbolInput != 0 ) {
+				EasySymbolInput( key, pgdata, pgo );
+				goto End_keyproc;
+			}
+
+			/* open symbol table */
+			if ( key == '`' ) {
+				pgdata->bSelect = 1;
+				pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
+				pgdata->choiceInfo.oldCursor = pgdata->cursor;
+
+				HaninSymbolInput(
+					&( pgdata->choiceInfo ),
+					&( pgdata->availInfo ),
+					pgdata->phoneSeq,
+					pgdata->config.candPerPage );
+				goto End_keyproc;
+			}
+
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
 			DEBUG_OUT(
 				"\t\tchinese mode key, "
@@ -1011,26 +1052,22 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 						bQuickCommit = 1;
 					}
 
-					if ( pgdata->bFullShape ) {
-						rtn = FullShapeSymbolInput( key, pgdata );
+					if ( pgdata->bEasySymbolInput == 0 ) {
+						if ( pgdata->bFullShape )
+							rtn = FullShapeSymbolInput( key, pgdata );
+						else
+							rtn = SymbolInput( key, pgdata );
 					}
-					else {
-						rtn = SymbolInput( key, pgdata );
-					}
-					if ( pgdata->bFullShape ) {
-						rtn = FullShapeSymbolInput( key, pgdata );
-					}
-					else {
-						rtn = SymbolInput( key, pgdata );
-					}
+
 					if ( rtn == SYMBOL_KEY_ERROR ) {
 						keystrokeRtn = KEYSTROKE_IGNORE;
 						/*
 						 * If the key is not a printable symbol, 
-						 * then it's wrongto commit it.
+						 * then it's wrong to commit it.
 						 */
 						bQuickCommit = 0;
-					} else
+					}
+					else
 						keystrokeRtn = KEYSTROKE_ABSORB;
 
 					break;
@@ -1055,9 +1092,11 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				bQuickCommit = 0;
 			}
 		}
+
+End_keyproc:
 		if ( ! bQuickCommit ) {
 			CallPhrasing( pgdata );
-			if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
+			if ( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
 				keystrokeRtn = KEYSTROKE_COMMIT;
 		}
 		/* Quick commit */
@@ -1105,17 +1144,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	CallPhrasing( pgdata );
 	newPhraseLen = key - '0';
 
-	if ( ( key == '0' || key == '1') && ! pgdata->bSelect ) {
-		pgdata->bSelect = 1;  
-		HaninSymbolInput(
-			&( pgdata->choiceInfo ), 
-			&( pgdata->availInfo ), 
-			pgdata->phoneSeq, 
-			pgdata->config.selectAreaLen ); 
-		SemiSymbolInput( '1', pgdata );
-                CallPhrasing( pgdata );
-                MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-                return 0;
+	if ( ( key == '0' || key == '1' ) ) {
+		return 0;
 	}
 
         if ( ! pgdata->config.bAddPhraseForward ) {
@@ -1236,20 +1266,21 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 		/* copied from chewing_handle_Default */
 		if ( rtn == SYMBOL_KEY_ERROR ) {
 			keystrokeRtn = KEYSTROKE_IGNORE ;
-		} else if ( QuickCommit ) {
+		}
+		else if ( QuickCommit ) {
 			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
 			keystrokeRtn = KEYSTROKE_COMMIT;
 		}
-		else	/* Not quick commit */
-		{
+		else {	/* Not quick commit */
 			CallPhrasing( pgdata );
 			if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
 				keystrokeRtn = KEYSTROKE_COMMIT;
 		}
-	} else {
+	}
+	else {
 		/* Otherwise, if we are selecting words, we use numeric keys
 		 * as selkey
 		 * and submit the words. 

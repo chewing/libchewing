@@ -42,7 +42,9 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq );
  * @param methodType the method type of PinYin
  * @retval 0 if succeed
  */
-CHEWING_API int chewing_set_PinYinMethod(const PinYinMethodType methodType,const char* filePath);
+CHEWING_API int chewing_set_PinYinMethod(
+		const PinYinMethodType methodType,
+		const char* filePath );
 
 #endif /* _HANYUPINYIN_H */
 

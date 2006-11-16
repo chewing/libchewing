@@ -127,7 +127,7 @@ static void Str2Word( Word *wrd_ptr )
 	fgettab( buf, 1000, dictfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
-	assert( wrd_ptr->word != NULL );
+	assert( wrd_ptr->word != '\0' );
 }
 
 int GetCharFirst( Word *wrd_ptr, uint16 phoneid )

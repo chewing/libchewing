@@ -4,7 +4,9 @@ datas = \
 	ch_index.dat \
 	dict.dat \
 	ph_index.dat \
-	fonetree.dat
+	fonetree.dat \
+	swkb.dat \
+	symbols.dat
 generated_header = $(top_builddir)/src/chewing-definition.h
 
 all: checkdata_stamp gendata_stamp

@@ -921,12 +921,12 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	former = tdt->phList;
 	for ( i = 0; i < ppo->nNumCut - 1; i++ ) {
 		former = former->next;
-		assert(former);
+		assert( former );
 	}
 
 	/* take the candidate out of the listed list */
 	want = former->next;
-	assert(want);
+	assert( want );
 	former->next = former->next->next;
 
 	/* prepend to front of list */

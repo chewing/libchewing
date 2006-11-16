@@ -23,6 +23,8 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
+#define SYMBOL_TABLE_FILE 	"symbols.dat"
+#define SOFTKBD_TABLE_FILE 	"swkb.dat"
 #define CHEWING_DEFINITION_FILE "chewing-definition.h"
 
 #define IS_USER_PHRASE 1
@@ -125,13 +127,32 @@ typedef struct {
 	int isSymbol;
 } ChoiceInfo;
 
+/** @brief entry of symbol table */
+typedef struct _SymbolEntry {
+	/** @brief  nSymnols is total number of symbols in this category.
+	 * If nSymbols = 0, category is treat as a symbol, 
+	 * which is a zero-terminated utf-8 string. 
+	 * In that case, symbols[] is unused and isn't allocated at all.
+	 */
+	int nSymbols;
+
+	/** @brief  Category name of these symbols */
+	char category[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
+
+	/** @brief  Symbols in this category.
+	 * This is an char[] array of variable length.
+	 * When nSymbols = 0, this array is not allocated.
+	 */
+	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
+} SymbolEntry;
+
 /** @brief use "asdfjkl789" as selection key */
 #define HSU_SELKEY_TYPE1 1
 /** @brief use "asdfzxcv89" as selection key */
 #define HSU_SELKEY_TYPE2 2
 
 typedef struct {
-	int selectAreaLen;
+	int candPerPage;
 	int maxChiSymbolLen;
 	int selKey[ MAX_SELKEY ];
 	int bAddPhraseForward;
@@ -172,7 +193,7 @@ typedef struct {
 	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
-	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape, bAutoShiftCur;
+	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape, bAutoShiftCur, bEasySymbolInput;
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 } ChewingData;

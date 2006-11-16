@@ -24,15 +24,17 @@ static char TAB_PATH[255];
 static keymap *hanyuInitialsMap, *hanyuFinalsMap;
 static int HANYU_INITIALS, HANYU_FINALS, INIT_FLAG = 0;
 
-CHEWING_API int chewing_set_PinYinMethod(const PinYinMethodType methodType,const char* filePath)
+CHEWING_API int chewing_set_PinYinMethod(
+		const PinYinMethodType methodType,
+		const char *filePath )
 {
-	if (methodType < 0 || methodType >= PINYIN_NONE)
-		return -1; //invaild PinYinMethodType 
+	if ( methodType < 0 || methodType >= PINYIN_NONE )
+		return -1; /* invaild PinYinMethodType */
 
 
-	if (methodType == PINYIN_EXTERNAL) {
-		if (access(filePath, R_OK) != 0)
-			return -2; //invaild external table
+	if ( methodType == PINYIN_EXTERNAL ) {
+		if ( access( filePath, R_OK ) != 0 )
+			return -2; /* invaild external table */
 		
 		INPUT_METHOD = methodType;
 		strcpy( TAB_PATH, filePath );

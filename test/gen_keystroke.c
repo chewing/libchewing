@@ -295,7 +295,7 @@ int main( int argc, char *argv[] )
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	/* Fill configuration values */
-	config.selectAreaLen = 20;
+	config.candPerPage = 20;
 	config.maxChiSymbolLen = 16;
 	config.bAddPhraseForward = 1;
 

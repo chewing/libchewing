@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -82,12 +82,23 @@ void SetNewline2Zero( long index )
 void DataStripSpace( long index )
 {
 	long i, k = 0;
-	char old[ MAXLEN ], last = '\0';
+	char old[ MAXLEN ], last = ' ';
+		/* If the first charactor of line in tsi.src is ' ',
+		 * then it should be ignore? 
+		 */
 
 	strcpy( old, data[ index ].str );
 	for ( i = 0; old[ i ]; i++ ) {
+		/* trans '\t' to ' ' , easy for process. */
+		if ( old[ i ] == '\t' )
+			old[ i ] = ' ';
 		if ( old[ i ] == ' ' && last == ' ' )
 			continue;
+		/* Ignore '#' comment in tsi.src */
+		if ( old[ i ] == '#') {
+			data[ index ].str[ k++ ] = '\n';
+			break;
+		}
 		data[ index ].str[ k++ ] = old[ i ];
 		last = old[ i ];
 	}
@@ -154,6 +165,9 @@ int main( int argc, char *argv[] )
 
 	while ( fgets( data[ nData ].str, MAXLEN, infile ) ) {
 		DataStripSpace( nData );
+		/* Ignore '#' comment for tsi.src */
+		if ( data[ nData ].str[0] == '\n' )
+			continue;
 		DataSetNum( nData );
 		SetNewline2Zero( nData );
 		nData++;
@@ -177,7 +191,8 @@ int main( int argc, char *argv[] )
 			fprintf (treedata, "%hu ", data[ i ].num[ k ] );
 		fprintf( treedata, "0\n" );
 
-	} 
+	}
+	fclose( in_file );
 	fclose( ph_index );
 	fclose( dictfile );
 	fclose( treedata );

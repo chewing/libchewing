@@ -8,7 +8,9 @@ CHEWINGDATA = \
 	$(DATADIR)/ch_index.dat \
 	$(DATADIR)/dict.dat \
 	$(DATADIR)/ph_index.dat \
-	$(DATADIR)/fonetree.dat
+	$(DATADIR)/fonetree.dat \
+	$(DATADIR)/swkb.dat \
+	$(DATADIR)/symbols.dat
 
 $(TESTDATA): $(DEFAULT_TESTDATA)
 	if [ ! -f $(TESTDATA) ]; then \

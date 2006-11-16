@@ -1,3 +1,76 @@
+2006-11-16  Jim Huang  <jserv.tw@gmail.com>
+
+	Merge win32-utf8 branch and fix incorrect initialization.
+
+	* include/global.h
+	(struct SymbolEntry): New structure as entry of symbol table.
+	(struct ChewingData): Rename selectAreaLen to candPerPage. Added
+	bEasySymbolInput.
+
+	* src/chewingio.c
+	(chewing_Init): initialize Symbol Table.
+	(chewing_Reset): Backup old config and restore it after clearing
+	pgdata structure. This is important to avoid crash when switching
+	different IM engines.
+	(chewing_Configure): Rename selectAreaLen to candPerPage.
+	(chewing_handle_Esc): Modify symbol checking rule.
+	(chewing_handle_Default): Added bEasySymbolInput checks, and see if
+	EasySymbolInput should be invoked.
+	Added key '`' to open symbol table.
+	(chewing_handle_CtrlNum): Since we are using key '`' for open symbol
+	table, ctrl-[01] action is turned off. However, it could still be
+	implemented for customized tables later.
+
+	* src/tools/sort_dic.c (SetNewline2Zero) (main): Ignore '#' comment
+	in tsi.src .
+	Here are enumerations:
+	  1. # comment with first character '#'
+	  2. # comment after some spaces
+	  3. data ... # comment after data
+	  4. allow blank line in tsi.src
+
+	* src/chewingutil.c (symbol_table) (n_symbol_entry)
+	(g_easy_symbol_key) (g_easy_symbol_value) (g_easy_symbol_num)
+	(symbol_buf): New variables for new symbol table handling.
+	(FindEasySymbolIndex): New helper function. Find out Easy symbol index
+	using binary search.
+	(SetUpdatePhraseMsg): Separate internal table and look up
+	symbol_table.
+	(_Inner_InternalSpecialSymbol): New helper function.
+	(InternalSpecialSymbol): Reimplemented using
+	_Inner_InternalSpecialSymbol.
+	(EasySymbolInput): New function for help user to input symbols easily.
+	(InitSymbolTable): Ditto.
+	(InitEasySymbolInput): Ditto.
+	(SymbolChoice): Reimplemented. Support multi-level symbol choosing.
+	(OpenSymbolChoice): Ditto.
+	(CountReleaseNum): Count symbol as well.
+	(FindSymbolKey): New helper function.
+	(TerminateSymbolTable) (TerminateEasySymbolTable): New helper function
+	registered in terminating serivces.
+
+	* src/chewingutil.h: Likewise.
+
+	* src/hash.c (ComputeChewingLifeTime): Removed.
+	(ReadHash): Fix bug of re-base recentTime.
+
+	* src/choice.c (SetChoiceInfo) (ChoicePrevAvail) (ChoiceNextAvail):
+	Rename selectAreaLen to candPerPage.
+	(ChoiceEndChoice): Added symbol check.
+
+	* data/symbols.dat,
+	data/swkb.dat: New files. Used for symbol input.
+
+	* data/Makefile.am,
+	test/Makefile.am: Ditto.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Fix for naming.
+
+	* configure.ac: Bump version to 0.3.0.91 .
+
+	* AUTHORS: Updated.
+
 2006-11-08  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/choice.c (SetAvailInfo):
@@ -11,26 +84,26 @@
 
 2006-10-30  Caius Chance  <cchance@redhat.com>
 
-	* src/chewingio.c
-	  (chewing_handle_ShiftSpace)
-	  Fixed chewing switch between Full/Half mode and cursor moves one 
-	  space in gedit.
-	  (Shift + Space should just only trigger between Full-width and Half-
-           width.)
+	* src/chewingio.c (chewing_handle_ShiftSpace):
+	Fixed chewing switch between Full/Half mode and cursor moves one 
+	space in gedit.
+	(Shift + Space should just only trigger between Full-width and Half-
+	width.)
 
 2006-06-19  Jeff Chen  <wiz.chen@gmail.com>
 
-	* data/pinyin.tab
-	  A new HanYu-PinYin mapping table contributed by Alexander Beels.
+	* data/pinyin.tab:
+	A new HanYu-PinYin mapping table contributed by Alexander Beels.
 
-	* src/hanyupinyin.h (chewing_set_PinYinMethod), src/hanyupinyin.c:
-	  Adding a new API --- "chewing_set_PinYinMethod" to support multiple
-	  PinYin methods. 
-	  Using the implementation of 0.2.x insteads of current one.
+	* src/hanyupinyin.h (chewing_set_PinYinMethod),
+	src/hanyupinyin.c:
+	Adding a new API --- "chewing_set_PinYinMethod" to support multiple
+	PinYin methods. 
+	Using the implementation of 0.2.x instead of current one.
 
-	* src/zuin.c (IsSymbolKey)
-	  Adding "IsSymbolKey" function to make PinYin method support symbol
-	  input.
+	* src/zuin.c (IsSymbolKey):
+	Adding "IsSymbolKey" function to make PinYin method support symbol
+	input.
 
 2006-05-20  Jim Huang  <jserv.tw@gmail.com>
 

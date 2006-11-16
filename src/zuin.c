@@ -391,10 +391,10 @@ static int IsPinYinEndKey(int key )
 
 static int IsSymbolKey(int key)
 {
-	if ( (key == '.') || (key == ',') || (key == '?') ||
-		(key == ';') || (key == ':') || (key == '\'') ||
-		(key == '"') || (key == '[') || (key == '{') ||
-		(key == '}') || (key == ']')) {
+	if ( ( key == '.' ) || ( key == ',' ) || ( key == '?' ) ||
+	     ( key == ';' ) || ( key == ':' ) || ( key == '\'' ) ||
+	     ( key == '"' ) || ( key == '[' ) || ( key == '{' ) ||
+	     ( key == '}' ) || ( key == ']' ) ) {
 		return 1;
 	}
 		
@@ -408,14 +408,13 @@ static int PinYinInput( ZuinData *pZuin, int key )
 
 	DEBUG_CHECKPOINT();
 
-	if (IsSymbolKey(key)) {
+	if ( IsSymbolKey( key ) ) {
 		return ZUIN_KEY_ERROR;
 	}
 
 	if ( IsPinYinEndKey( key ) ) {
 		err = HanyuPinYinToZuin( pZuin->pinYinData.keySeq, zuinKeySeq );
-		if (err)
-		{
+		if ( err ) {
 			pZuin->pinYinData.keySeq[ 0 ] = '\0';
 			return ZUIN_ABSORB;
 		}
