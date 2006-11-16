@@ -1249,7 +1249,6 @@ int InitEasySymbolInput( const char *prefix )
 			free( g_easy_symbol_value[ index ] );
 		}
 		strcmp( g_easy_symbol_value[ index ], symbol );
-		g_easy_symbol_value[ index ] = symbol;
 		g_easy_symbol_num[ index ] = len;
 
 		free( symbol );
