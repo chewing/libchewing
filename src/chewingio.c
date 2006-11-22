@@ -880,6 +880,44 @@ CHEWING_API int chewing_handle_End( ChewingContext *ctx )
 	return 0;
 }
 
+CHEWING_API int chewing_handle_PageUp( ChewingContext *ctx )
+{
+        ChewingData *pgdata = ctx->data;
+        ChewingOutput *pgo = ctx->output;
+        int keystrokeRtn = KEYSTROKE_ABSORB;
+
+        CheckAndResetRange( pgdata );
+
+        if ( ! ChewingIsEntering( pgdata ) ) {
+                keystrokeRtn = KEYSTROKE_IGNORE;
+        }
+        else if ( ! pgdata->bSelect ) { 
+                pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
+                pgdata->cursor = pgdata->nPhoneSeq;
+        } 
+        MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+        return 0;
+}
+
+CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
+{
+        ChewingData *pgdata = ctx->data;
+        ChewingOutput *pgo = ctx->output;
+        int keystrokeRtn = KEYSTROKE_ABSORB;
+
+        CheckAndResetRange( pgdata );
+
+        if ( ! ChewingIsEntering( pgdata ) ) {
+                keystrokeRtn = KEYSTROKE_IGNORE;
+        }
+        else if ( ! pgdata->bSelect ) { 
+                pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
+                pgdata->cursor = pgdata->nPhoneSeq;
+        } 
+        MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+        return 0;
+}
+
 /* Dvorak <-> Qwerty keyboard layout converter */
 static int dvorak_convert( int key )
 {

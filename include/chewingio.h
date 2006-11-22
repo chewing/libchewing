@@ -37,6 +37,8 @@ CHEWING_API int chewing_handle_Right( ChewingContext * );
 CHEWING_API int chewing_handle_Up( ChewingContext * );
 CHEWING_API int chewing_handle_Home( ChewingContext * );
 CHEWING_API int chewing_handle_End( ChewingContext * );
+CHEWING_API int chewing_handle_PageUp( ChewingContext * );
+CHEWING_API int chewing_handle_PageDown( ChewingContext * );
 CHEWING_API int chewing_handle_Down( ChewingContext * );
 CHEWING_API int chewing_handle_Capslock( ChewingContext * );
 CHEWING_API int chewing_handle_Default( ChewingContext *, int key );

@@ -1,3 +1,15 @@
+2006-11-22  Caius Chance  <cchance@redhat.com>
+
+	Release Page Up / Page Down key event to running applications.
+	(Fixed Page Up / Page Down key doesn't work when Chewing is activated.)
+
+	* src/chewingio.c
+	(chewing_handle_PageUp): Codes cloned from chewing_handle_Home().
+	(chewing_handle_PageDown): Same as above.
+	* include/chewingio.h
+	(chewing_handle_PageUp): Same as above.
+	(chewing_handle_PageDown): Same as above.
+
 2006-11-16  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/chewingutil.c (InitEasySymbolInput): Fixlet to invalid
