@@ -1,5 +1,13 @@
 2006-11-25  Kuang-che Wu  <kcwu@csie.org>
 
+	Fix bug: When insert character in front of buffer and trigger auto
+	commit, Chewing may crash.
+
+	* src/chewingutil.c (ChewingKillChar): Don't allow cursor move left
+	beyond 0.
+
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
 	Fix bug: Chewing won't auto commit the string in buffer even string is
 	too long.  This may lead buffer overflow and crash.
 

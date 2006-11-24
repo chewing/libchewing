@@ -972,6 +972,8 @@ int ChewingKillChar(
 			(pgdata->nPhoneSeq - cursorToKill - 1) * sizeof( uint16 ) );
 		pgdata->nPhoneSeq--;
 		pgdata->cursor -= minus;
+		if (pgdata->cursor < 0)
+			pgdata->cursor = 0;
 	}
 	pgdata->symbolKeyBuf[ chiSymbolCursorToKill ] = 0;
 	memmove( 
@@ -980,6 +982,8 @@ int ChewingKillChar(
 		(pgdata->chiSymbolBufLen - chiSymbolCursorToKill) * sizeof( wch_t ) );
 	pgdata->chiSymbolBufLen--;
 	pgdata->chiSymbolCursor -= minus;
+	if (pgdata->chiSymbolCursor < 0)
+		pgdata->chiSymbolCursor = 0;
 	return 0;
 }
 
