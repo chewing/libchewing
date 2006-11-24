@@ -471,7 +471,7 @@ static int CountReleaseNum( ChewingData *pgdata )
 				break;
 			}
 		}
-		return (i - 1);
+		return i;
 	}
 	
 	i = FindIntervalFrom( 0, pgdata->preferInterval, pgdata->nPrefer );

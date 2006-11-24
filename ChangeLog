@@ -1,3 +1,12 @@
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix bug: Chewing won't auto commit the string in buffer even string is
+	too long.  This may lead buffer overflow and crash.
+
+	* src/chewingutil.c (CountReleaseNum): When 1st character in buffer is
+	not Zi and 2nd is, the number ready to commit is 1, not 0.  Fix the
+	number off by 1.
+
 2006-11-22  Caius Chance  <cchance@redhat.com>
 
 	Release Page Up / Page Down key event to running applications.
