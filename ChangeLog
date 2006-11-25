@@ -1,5 +1,13 @@
 2006-11-25  Kuang-che Wu  <kcwu@csie.org>
 
+	Fix bug: When insert symbol via '`' and trigger auto commit, Chewing
+	may crash.
+
+	* src/chewingio.c (chewing_handle_Default): The saved cursor position
+	is incorrect due to auto commit. Defer auto-commit until selection.
+
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
 	Fix bug: When insert character in front of buffer and trigger auto
 	commit, Chewing may crash.
 
