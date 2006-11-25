@@ -1,3 +1,8 @@
+2006-11-26  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/chewingutil.c (SetUpdatePhraseMsg): Ticket #15025. Improve
+	message text.
+
 2006-11-25  Kuang-che Wu  <kcwu@csie.org>
 
 	Fix bug: When insert symbol via '`' and trigger auto commit, Chewing

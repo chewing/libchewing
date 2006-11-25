@@ -65,7 +65,7 @@ static int FindEasySymbolIndex( char ch )
 
 void SetUpdatePhraseMsg( ChewingData *pgdata, char *addWordSeq, int len, int state )
 {
-	char *insert = "加入－", *modify = "已有－";
+	char *insert = "加入：", *modify = "已有：";
 	int begin = 3, i;
 
 	pgdata->showMsgLen = begin + len;
