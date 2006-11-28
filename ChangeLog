@@ -1,5 +1,10 @@
 2006-11-28  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/Makefile.am: Link to internal libraries to avoid unresolved
+	symbols.
+
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/tools/sort_dic.c (main): Fix typo in fclose.
 
 	* src/hash.c (migrate_hash_to_bin): Avoid memory leak.

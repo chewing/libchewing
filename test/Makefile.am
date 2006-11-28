@@ -1,7 +1,10 @@
 testdir = $(top_builddir)/test
 TESTDATA = $(testdir)/test.txt
 DEFAULT_TESTDATA = $(testdir)/default-test.txt
-LIBCHEWING = $(top_builddir)/src/libchewing.la
+LIBCHEWING = \
+	$(top_builddir)/src/libchewing.la \
+	$(top_builddir)/src/common/libcommon.la \
+	$(top_builddir)/src/porting_layer/src/libporting_layer.la
 DATADIR = $(top_builddir)/data
 CHEWINGDATA = \
 	$(DATADIR)/us_freq.dat \
