@@ -1179,11 +1179,23 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 
 	CheckAndResetRange( pgdata );
 
+	if ( pgdata->bSelect )
+		return 0;
+
 	CallPhrasing( pgdata );
 	newPhraseLen = key - '0';
 
-	if ( ( key == '0' || key == '1' ) ) {
-		return 0;
+	if ( key == '0' || key == '1' ) {
+		pgdata->bSelect = 1;
+		pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
+		pgdata->choiceInfo.oldCursor = pgdata->cursor;
+
+		HaninSymbolInput(
+				&( pgdata->choiceInfo ),
+				&( pgdata->availInfo ),
+				pgdata->phoneSeq,
+				pgdata->config.candPerPage );
+		goto make_output;
 	}
 
         if ( ! pgdata->config.bAddPhraseForward ) {
@@ -1249,6 +1261,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		}
 	}
 	CallPhrasing( pgdata );
+make_output:
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	MakeOutputAddMsgAndCleanInterval( pgo, pgdata );
 	return 0;

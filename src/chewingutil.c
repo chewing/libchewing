@@ -281,6 +281,7 @@ int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo )
 	return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
 }
 
+#if 0
 int SpecialEtenSymbolInput( int key, ChewingData *pgdata )
 {
 	static char keybuf[] = {
@@ -297,6 +298,7 @@ int SpecialEtenSymbolInput( int key, ChewingData *pgdata )
 	static int nSpecial = 31;
 	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
 }
+#endif
 
 int SymbolChoice( ChewingData *pgdata, int sel_i )
 {

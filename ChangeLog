@@ -1,5 +1,15 @@
 2006-11-28  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/chewingio.c (chewing_handle_CtrlNum): Return while selecting.
+	Invoke symbol input with Ctrl-[01].
+
+	* src/chewingutil.c,
+	src/chewingutil.h (SpecialEtenSymbolInput): Remove unused function.
+
+	* data/Makefile.am: Fixlet to install-data-local list.
+
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
 	* test/Makefile.am: Link to internal libraries to avoid unresolved
 	symbols.
 

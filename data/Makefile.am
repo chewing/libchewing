@@ -44,5 +44,6 @@ gendata2:
 
 install-data-local: $(datas) pinyin.tab swkb.dat symbols.dat
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
-	$(INSTALL_DATA) $(datas) pinyin.tab $(DESTDIR)/$(datadir)/chewing
+	$(INSTALL_DATA) $(datas) pinyin.tab swkb.dat symbols.dat \
+		$(DESTDIR)/$(datadir)/chewing
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

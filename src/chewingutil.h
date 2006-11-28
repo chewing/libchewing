@@ -26,7 +26,6 @@ int NoSymbolBetween( ChewingData *pgdata, int begin, int end );
 int ChewingIsEntering( ChewingData *pgdata );
 void CleanAllBuf( ChewingData * );
 int SemiSymbolInput(int key, ChewingData *pgdata);
-int SpecialEtenSymbolInput( int key, ChewingData *pgdata );
 int SpecialSymbolInput( int key, ChewingData *pgdata );
 int FullShapeSymbolInput( int key, ChewingData *pgdata );
 int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo );
