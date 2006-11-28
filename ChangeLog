@@ -2,8 +2,8 @@
 
 	* src/tools/sort_dic.c (main): Fix typo in fclose.
 
-	* src/hash.c (migrate_hash_to_bin): Avoid memory leak and recalculate
-	chewing_lifetime.
+	* src/hash.c (migrate_hash_to_bin): Avoid memory leak.
+	(ReadHash): recalculate	chewing_lifetime.
 
 	* src/Makefile.am: Replace $(LIBTOOL_EXPORT_OPTIONS) with
 	`-export-symbols-regex "^(chewing)_"' to make sure exporting the right
