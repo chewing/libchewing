@@ -438,6 +438,7 @@ static int migrate_hash_to_bin( const char *ofilename )
 	fwrite( dump, seekdump - dump, 1, txtfile );
 	fflush( txtfile );
 	fclose( txtfile );
+	free( dump );
 
 	return  1;
 }
@@ -575,6 +576,7 @@ open_hash_file:
 			pItem->next = hashtable[ hashvalue ];
 			pItem->data.recentTime -= oldest;
 		}
+		chewing_lifetime -= oldest;
 	}
 	return 1;
 }

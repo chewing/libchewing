@@ -1,3 +1,17 @@
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tools/sort_dic.c (main): Fix typo in fclose.
+
+	* src/hash.c (migrate_hash_to_bin): Avoid memory leak and recalculate
+	chewing_lifetime.
+
+	* src/Makefile.am: Replace $(LIBTOOL_EXPORT_OPTIONS) with
+	`-export-symbols-regex "^(chewing)_"' to make sure exporting the right
+	Chewing API.
+
+	* data/Makefile.am: Move swkb.dat and symbols.dat to
+	install-data-local instead of datas section.
+
 2006-11-26  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/chewingutil.c (SetUpdatePhraseMsg): Ticket #15025. Improve

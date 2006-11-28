@@ -4,9 +4,7 @@ datas = \
 	ch_index.dat \
 	dict.dat \
 	ph_index.dat \
-	fonetree.dat \
-	swkb.dat \
-	symbols.dat
+	fonetree.dat
 generated_header = $(top_builddir)/src/chewing-definition.h
 
 all: checkdata_stamp gendata_stamp
@@ -44,7 +42,7 @@ gendata2:
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
 
-install-data-local: $(datas) pinyin.tab
+install-data-local: $(datas) pinyin.tab swkb.dat symbols.dat
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
 	$(INSTALL_DATA) $(datas) pinyin.tab $(DESTDIR)/$(datadir)/chewing
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

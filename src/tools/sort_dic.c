@@ -192,7 +192,7 @@ int main( int argc, char *argv[] )
 		fprintf( treedata, "0\n" );
 
 	}
-	fclose( in_file );
+	fclose( infile );
 	fclose( ph_index );
 	fclose( dictfile );
 	fclose( treedata );
