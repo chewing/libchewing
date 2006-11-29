@@ -404,7 +404,7 @@ static int IsSymbolKey(int key)
 static int PinYinInput( ZuinData *pZuin, int key )
 {
 	int err = 0, status, i;
-	char zuinKeySeq[ 5 ];
+	char zuinKeySeq[ 5 ], buf[ 2 ];
 
 	DEBUG_CHECKPOINT();
 
@@ -438,7 +438,6 @@ static int PinYinInput( ZuinData *pZuin, int key )
 		pZuin->pinYinData.keySeq[ 0 ] = '\0';
 		return EndKeyProcess( pZuin, key, 1 );
 	}
-	char buf[ 2 ];
 	buf[ 0 ] = key; buf[ 1 ] = '\0';
 	strcat( pZuin->pinYinData.keySeq, buf );
 	
@@ -458,9 +457,9 @@ int ZuinPhoInput(ZuinData *pZuin, int key )
 		case KB_ET26:
 			return ET26PhoInput( pZuin, key );
 			break;
-        	case KB_HANYU_PINYIN:
-                	return PinYinInput( pZuin, key );
-                        break;
+		case KB_HANYU_PINYIN:
+			return PinYinInput( pZuin, key );
+			break;
 		default:
 			return DefPhoInput( pZuin, key );		
 	}	

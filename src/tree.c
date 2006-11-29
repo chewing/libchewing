@@ -95,7 +95,7 @@ static void TerminateTree()
 		free( tree );
 }
 #endif
-		
+
 void ReadTree( const char *prefix )
 {
 	int i;
@@ -292,7 +292,7 @@ int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq )
 			if ( child < 0 || child * sizeof(TreeType) > tree_size )
 				return -1;
 #endif
-	
+
 			if ( tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
@@ -395,7 +395,7 @@ static void FindInterval(
 			 * but when the phrase is the same, the user phrase overrides 
 			 * static dict
 			 */
-			if ( puserphrase != NULL && pdictphrase == NULL ) { 
+			if ( puserphrase != NULL && pdictphrase == NULL ) {
 				AddInterval( 
 					ptd, 
 					begin, 
@@ -932,7 +932,7 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	/* prepend to front of list */
 	want->next = tdt->phList;
 	tdt->phList = want;
-	
+
 	return tdt->phList;
 }
 

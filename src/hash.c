@@ -197,8 +197,8 @@ void HashModify( HASH_ITEM *pItem )
 	}
 	else {
 		fseek( outfile,
-		       pItem->item_index * FIELD_SIZE + 4 + strlen( BIN_HASH_SIG ),
-		       SEEK_SET );
+			pItem->item_index * FIELD_SIZE + 4 + strlen( BIN_HASH_SIG ),
+			SEEK_SET );
 	}
 #ifdef ENABLE_DEBUG
 	HashItem2String( str, pItem );
@@ -236,56 +236,56 @@ static int isValidChineseString( char *str )
  */
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
-       int len, i, word_len, ptr;
-       uint16 *pshort;
-       char wordbuf[ 64 ];
-       unsigned char recbuf[ FIELD_SIZE ], *puc;
+	int len, i, word_len, ptr;
+	uint16 *pshort;
+	char wordbuf[ 64 ];
+	unsigned char recbuf[ FIELD_SIZE ], *puc;
 
-       memcpy( recbuf, srcbuf, FIELD_SIZE );
-       memset( pItem, 0, sizeof(HASH_ITEM) );
-       
-       /* freq info */
-       pItem->data.userfreq = *(int *) &recbuf[ 0 ];
-       pItem->data.recentTime = *(int *) &recbuf[ 4 ];
-       pItem->data.maxfreq = *(int *) &recbuf[ 8 ];
-       pItem->data.origfreq = *(int *) &recbuf[ 12 ];
+	memcpy( recbuf, srcbuf, FIELD_SIZE );
+	memset( pItem, 0, sizeof(HASH_ITEM) );
 
-       /* phone seq, length in num of chi words */
-       len = (int) recbuf[ 16 ];
-       pItem->data.phoneSeq = ALC( uint16, len + 1 );
-       pshort = (uint16 *) &recbuf[ 17 ];
-       for ( i = 0; i < len; i++ ) {
-               pItem->data.phoneSeq[ i ] = *pshort;
-               ++pshort;
-       }
-       pItem->data.phoneSeq[ i ] = 0;
-       
-       /* phrase, length in num of bytes */
-       puc = (unsigned char *) pshort;
-       pItem->data.wordSeq = ALC( char, (*puc) + 1 );
-       strcpy( pItem->data.wordSeq, (char *) (puc + 1) );
-       pItem->data.wordSeq[ (int) *puc ] = '\0';
+	/* freq info */
+	pItem->data.userfreq = *(int *) &recbuf[ 0 ];
+	pItem->data.recentTime = *(int *) &recbuf[ 4 ];
+	pItem->data.maxfreq = *(int *) &recbuf[ 8 ];
+	pItem->data.origfreq = *(int *) &recbuf[ 12 ];
 
-       /* Invalid UTF-8 Chinese characters found */
-       if ( ! isValidChineseString( pItem->data.wordSeq ) ) {
-               goto ignore_corrupted_record;
-       }
+	/* phone seq, length in num of chi words */
+	len = (int) recbuf[ 16 ];
+	pItem->data.phoneSeq = ALC( uint16, len + 1 );
+	pshort = (uint16 *) &recbuf[ 17 ];
+	for ( i = 0; i < len; i++ ) {
+		pItem->data.phoneSeq[ i ] = *pshort;
+		++pshort;
+	}
+	pItem->data.phoneSeq[ i ] = 0;
 
-       /* set item_index */
-       pItem->item_index = item_index;
+	/* phrase, length in num of bytes */
+	puc = (unsigned char *) pshort;
+	pItem->data.wordSeq = ALC( char, (*puc) + 1 );
+	strcpy( pItem->data.wordSeq, (char *) (puc + 1) );
+	pItem->data.wordSeq[ (int) *puc ] = '\0';
 
-       return 1; /* continue */
+	/* Invalid UTF-8 Chinese characters found */
+	if ( ! isValidChineseString( pItem->data.wordSeq ) ) {
+		goto ignore_corrupted_record;
+	}
+
+	/* set item_index */
+	pItem->item_index = item_index;
+
+	return 1; /* continue */
 
 ignore_corrupted_record:
-       if ( pItem->data.phoneSeq != NULL ) {
-               free( pItem->data.phoneSeq );
-               pItem->data.phoneSeq = NULL;
-       }
-       if ( pItem->data.wordSeq != NULL ) {
-               free( pItem->data.wordSeq );
-               pItem->data.wordSeq = NULL;
-       }
-       return -1; /* ignore */
+	if ( pItem->data.phoneSeq != NULL ) {
+		free( pItem->data.phoneSeq );
+		pItem->data.phoneSeq = NULL;
+	}
+	if ( pItem->data.wordSeq != NULL ) {
+		free( pItem->data.wordSeq );
+		pItem->data.wordSeq = NULL;
+	}
+	return -1; /* ignore */
 }
 
 /**
@@ -346,7 +346,7 @@ static FILE *open_file_get_length(
 		*size = ftell( tf );
 		fseek( tf, 0, SEEK_SET );
 	}
-	return  tf;
+	return tf;
 }
 
 static char *_load_hash_file( const char *filename, int *size )

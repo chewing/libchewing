@@ -12,6 +12,8 @@
  * of this file.
  */
 
+/* This file is encoded in UTF-8 */
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -140,7 +142,7 @@ int HaninSymbolInput(
 		strcpy( pci->totalChoiceStr[ pci->nTotalChoice ], 
 			symbol_table[ i ]->category );
 		pci->nTotalChoice++; 
-	}  
+	}
 	pai->avail[ 0 ].len = 1;
 	pai->avail[ 0 ].id = -1;  
 	pai->nAvail = 1;

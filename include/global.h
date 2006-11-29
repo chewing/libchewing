@@ -23,8 +23,8 @@
 #define PH_INDEX_FILE		"ph_index.dat"
 #define CHAR_FILE		"us_freq.dat"
 #define CHAR_INDEX_FILE		"ch_index.dat"
-#define SYMBOL_TABLE_FILE 	"symbols.dat"
-#define SOFTKBD_TABLE_FILE 	"swkb.dat"
+#define SYMBOL_TABLE_FILE	"symbols.dat"
+#define SOFTKBD_TABLE_FILE	"swkb.dat"
 #define CHEWING_DEFINITION_FILE "chewing-definition.h"
 
 #define IS_USER_PHRASE 1

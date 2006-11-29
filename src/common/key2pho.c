@@ -13,6 +13,8 @@
  * @brief map zuins to uint16 type according to different kb_type
  */
 
+/* This file is encoded in UTF-8 */
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>

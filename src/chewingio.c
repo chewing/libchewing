@@ -383,21 +383,21 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		}
 
 		if ( ! bQuickCommit ) {
-                       CallPhrasing( pgdata );
-                       if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
-                               keystrokeRtn = KEYSTROKE_COMMIT;
-               }
-               /* Quick commit */
-               else {
-                       DEBUG_OUT(
-                               "\t\tQuick commit buf[0]=%c\n", 
-                               pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-                       pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
-                       pgo->nCommitStr = 1;
-                       pgdata->chiSymbolBufLen = 0;
-                       pgdata->chiSymbolCursor = 0;
-                       keystrokeRtn = KEYSTROKE_COMMIT;
-               }
+			CallPhrasing( pgdata );
+			if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
+				keystrokeRtn = KEYSTROKE_COMMIT;
+		}
+		/* Quick commit */
+		else {
+			DEBUG_OUT(
+				"\t\tQuick commit buf[0]=%c\n", 
+				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
+			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
+			pgo->nCommitStr = 1;
+			pgdata->chiSymbolBufLen = 0;
+			pgdata->chiSymbolCursor = 0;
+			keystrokeRtn = KEYSTROKE_COMMIT;
+		}
 	}
 	else {
 		rtn = ZuinPhoInput( &( pgdata->zuinData ), ' ' );
