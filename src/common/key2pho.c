@@ -1,6 +1,10 @@
 /**
  * key2pho.c
  *
+ * Copyright (c) 1999, 2000, 2001
+ *	Lu-chuan Kung and Kang-pen Chen.
+ *	All rights reserved.
+ *
  * Copyright (c) 2004, 2005, 2006
  *	libchewing Core Team. See ChangeLog for details.
  *
