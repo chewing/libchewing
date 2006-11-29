@@ -1,3 +1,13 @@
+2006-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	Most window systems bind ctrl- combination keys to specific system
+	functions, which makes chewing_handle_CtrlOption API being less
+	useful. So, just removed.
+
+	* include/chewingio.h,
+	src/chewingio.c (chewing_handle_CtrlOption): Remove unused API
+	function.
+
 2006-11-28  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/chewingio.c (chewing_handle_CtrlNum): Return while selecting.

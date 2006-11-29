@@ -43,7 +43,6 @@ CHEWING_API int chewing_handle_Down( ChewingContext * );
 CHEWING_API int chewing_handle_Capslock( ChewingContext * );
 CHEWING_API int chewing_handle_Default( ChewingContext *, int key );
 CHEWING_API int chewing_handle_CtrlNum( ChewingContext *, int key );
-CHEWING_API int chewing_handle_CtrlOption( ChewingContext *, int key );
 CHEWING_API int chewing_handle_ShiftSpace( ChewingContext * );
 CHEWING_API int chewing_handle_DblTab( ChewingContext * );
 CHEWING_API int chewing_handle_Numlock( ChewingContext *, int key);

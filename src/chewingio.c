@@ -1267,6 +1267,7 @@ make_output:
 	return 0;
 }
 
+#if 0
 CHEWING_API int chewing_handle_CtrlOption( ChewingContext *ctx, int key )
 {
 	ChewingData *pgdata = ctx->data;
@@ -1282,6 +1283,7 @@ CHEWING_API int chewing_handle_CtrlOption( ChewingContext *ctx, int key )
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
+#endif
 
 CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {
