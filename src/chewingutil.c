@@ -405,7 +405,7 @@ int SymbolInput( int key, ChewingData *pgdata )
 			sizeof( pgdata->symbolKeyBuf[0] ) * 
 			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 			pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = toupper( key );
-	
+
 		pgdata->chiSymbolCursor++;
 		pgdata->chiSymbolBufLen++;
 		pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
