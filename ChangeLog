@@ -1,5 +1,13 @@
 2006-11-30  Jim Huang  <jserv.tw@gmail.com>
 
+	Fix errors in EasySymbolInput while previous merge.
+
+	* src/chewingutil.c (InitSymbolTable) (InitEasySymbolInput): Replace
+	malloc with ALC macro.
+	(InitEasySymbolInput): Fix wrong string calls.
+
+2006-11-30  Jim Huang  <jserv.tw@gmail.com>
+
 	Most window systems bind ctrl- combination keys to specific system
 	functions, which makes chewing_handle_CtrlOption API being less
 	useful. So, just removed.

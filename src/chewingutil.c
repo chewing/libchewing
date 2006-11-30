@@ -1161,8 +1161,8 @@ int InitSymbolTable( const char *prefix )
 			symbols = strtok( NULL, "\r\n" );
 			if ( symbols ) {
 				len = ueStrLen( symbols );
-				tmp_tab[ n_symbol_entry ] = 
-					(SymbolEntry*) malloc( 
+				tmp_tab[ n_symbol_entry ] = ALC(
+						SymbolEntry,
 						sizeof( SymbolEntry ) +
 						(len - 1) * (MAX_UTF8_SIZE + 1) );
 				tmp_tab[ n_symbol_entry ]->nSymbols = len;
@@ -1247,7 +1247,7 @@ int InitEasySymbolInput( const char *prefix )
 			continue;
 		}
 
-		symbol = (char*) malloc( 6 * 10 );
+		symbol = ALC( char, 6 * 10 );
 		if ( NULL == symbol ) {
 			break;
 		}
@@ -1256,10 +1256,8 @@ int InitEasySymbolInput( const char *prefix )
 		if ( NULL != g_easy_symbol_value[ index] ) {
 			free( g_easy_symbol_value[ index ] );
 		}
-		strcmp( g_easy_symbol_value[ index ], symbol );
+		g_easy_symbol_value[ index ] = symbol;
 		g_easy_symbol_num[ index ] = len;
-
-		free( symbol );
 	}
 	fclose( file );
 	return 1;
