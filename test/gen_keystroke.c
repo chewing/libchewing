@@ -8,12 +8,20 @@
  * of this file.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "chewing.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
+#else
+#include <ncurses/ncurses.h>
+#endif
 #include <locale.h>
 
 /* Avoid incorrect KEY_ENTER definition */

@@ -1,3 +1,17 @@
+2006-12-04  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix portability issues on FreeBSD.
+	* autogen.sh: FreeBSD sh only support = for test, not ==.  Variable
+	setting should be properly quoted.
+
+	* configure.ac test/gen_keystroke.c: widec version of ncurses.h is in
+	/usr/local/include/ncurses on FreeBSD. And library in /usr/local/lib.
+
+	* test/Makefile.am: Remove libncurses dependency for testchewing.c.
+	It's no longer needed.
+
+	* test/testchewing.c: support ShiftLeft and ShiftRight key.
+
 2006-11-30  Jim Huang  <jserv.tw@gmail.com>
 
 	Fix errors in EasySymbolInput while previous merge.

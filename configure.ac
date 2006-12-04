@@ -83,29 +83,44 @@ AM_PATH_CHECK([0.8.2], [ enable_check=yes ], [ enable_check=no ])
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
 
 # Checks for ncursesw
+OLDCFLAGS=$CFLAGS
 LIB_NAME=ncursesw
 NCURSESW_CFLAGS=
 NCURSESW_LIBS=
-for p in $HOME /usr/local /usr
+for p in "$HOME/include" /usr/local/include /usr/include
 do
-	if test -f $p/include/ncursesw/curses.h
+	if test -f "$p/ncursesw/ncurses.h"
 	then
-		NCURSESW_CFLAGS="-I$p/include/ncursesw"
-		test $p != /usr && NCURSESW_CFLAGS="-I$p/include"
+		NCURSESW_CFLAGS="-I$p"
+		AC_DEFINE(HAVE_NCURSESW_NCURSES_H, 1, [ Define to 1 if you have the <ncursesw/ncurses.h> header file. ])
 		break
-	elif test $p != /usr
+	elif test -f "$p/ncurses/ncurses.h"
 	then
-		if test -f $p/include/curses.h
+		NCURSESW_CFLAGS="-I$p"
+		AC_DEFINE(HAVE_NCURSES_NCURSES_H, 1, [ Define to 1 if you have the <ncurses/ncurses.h> header file. ])
+		break
+	fi
+done
+
+for p in "$HOME/lib" /usr/local/lib /usr/lib
+do
+	if test -f "$p/libncursesw.so"
+	then
+		if test "$p" != x/usr/lib
 		then
-			NCURSESW_CFLAGS="-I$p/include"
-			break
+			NCURSESW_LIBS="-L$p -lncursesw"
+		else
+			NCURSESW_LIBS="-lncursesw"
 		fi
+		break
 	fi
 done
 
 enable_ncursesw=yes
-NCURSESW_LIBS="-lncursesw"
-if test -z $NCURSESW_CFLAGS; then
+if test -z "$NCURSESW_CFLAGS"; then
+	enable_ncursesw=no
+fi
+if test -z "$NCURSESW_LIBS"; then
 	enable_ncursesw=no
 fi
 AC_SUBST(NCURSESW_CFLAGS)

@@ -148,8 +148,14 @@ int main( int argc, char *argv[] )
 			case KEY_LEFT:
 				chewing_handle_Left( ctx );
 				break;
+			case KEY_SLEFT:
+				chewing_handle_ShiftLeft( ctx );
+				break;
 			case KEY_RIGHT:
 				chewing_handle_Right( ctx );
+				break;
+			case KEY_SRIGHT:
+				chewing_handle_ShiftRight( ctx );
 				break;
 			case KEY_UP:
 				chewing_handle_Up( ctx );

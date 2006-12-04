@@ -47,7 +47,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/porting_layer/include
 
 testchewing_SOURCES = testchewing.c
-testchewing_LDADD = $(LIBCHEWING) -lncursesw
+testchewing_LDADD = $(LIBCHEWING)
 testchewing_DEPENDENCIES = $(LIBCHEWING)
 
 if ENABLE_TEXT_UI
