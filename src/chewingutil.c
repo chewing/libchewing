@@ -516,6 +516,8 @@ void CleanAllBuf( ChewingData *pgdata )
 	pgdata->phrOut.nNumCut = 0;
 
 	memset( pgdata->symbolKeyBuf, 0, sizeof( pgdata->symbolKeyBuf ) );
+
+	pgdata->nPrefer = 0;
 }
 
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )

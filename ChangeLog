@@ -1,3 +1,9 @@
+2006-12-05  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/chewingutil.c (CleanAllBuf): nPrefer should also be cleaned when
+	clean all bufffer. Otherwise the status of candidate is incorrect
+	(after press "Enter" commit).
+
 2006-12-04  Kuang-che Wu  <kcwu@csie.org>
 
 	Fix portability issues on FreeBSD.
