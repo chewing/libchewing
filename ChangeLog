@@ -1,3 +1,10 @@
+2006-12-05  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Search $prefix/{include,lib} path first while checking
+	ncurses/ncursesw libraries. This is useful to cross-build.
+
+	* test/gen_keystroke.c: Add conditional include of ncurses.
+
 2006-12-05  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/chewingutil.c (CleanAllBuf): nPrefer should also be cleaned when

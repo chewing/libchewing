@@ -19,8 +19,10 @@
 #include <string.h>
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#else
+#elif defined( HAVE_NCURSES_NCURSES_H )
 #include <ncurses/ncurses.h>
+#else
+#error "There is no curses package found."
 #endif
 #include <locale.h>
 

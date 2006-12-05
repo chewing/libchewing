@@ -87,7 +87,7 @@ OLDCFLAGS=$CFLAGS
 LIB_NAME=ncursesw
 NCURSESW_CFLAGS=
 NCURSESW_LIBS=
-for p in "$HOME/include" /usr/local/include /usr/include
+for p in "$HOME/include" "$prefix/include" /usr/local/include /usr/include
 do
 	if test -f "$p/ncursesw/ncurses.h"
 	then
@@ -102,7 +102,7 @@ do
 	fi
 done
 
-for p in "$HOME/lib" /usr/local/lib /usr/lib
+for p in "$HOME/lib" "$prefix/lib" /usr/local/lib /usr/lib
 do
 	if test -f "$p/libncursesw.so"
 	then
