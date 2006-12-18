@@ -1,3 +1,11 @@
+2006-12-18  Jim Huang  <jserv.tw@gmail.com>
+
+	Erase candidate and reset its length when Esc key is handled.
+
+	* src/chewingio.c (chewing_handle_Esc): Adjust the number of output
+	commit string according to chiSymbolBufLen.
+	Suggested by Caius Chance  <cchance@redhat.com>.
+
 2006-12-05  Jim Huang  <jserv.tw@gmail.com>
 
 	* configure.ac: Search $prefix/{include,lib} path first while checking

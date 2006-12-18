@@ -468,6 +468,7 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 	}
 	else if ( pgdata->config.bEscCleanAllBuf ) {
 		CleanAllBuf( pgdata );
+		pgo->nCommitStr = pgdata->chiSymbolBufLen;
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
