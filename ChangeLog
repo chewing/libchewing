@@ -1,3 +1,11 @@
+2006-12-29  Jim Huang  <jserv.tw@gmail.com>
+
+	Merge from the latest libchewingdata
+
+	* data/tsi.src: Sync with libchewingdata project.
+	There are some missing glyph shown in rxvt-unicode, so omitted at the
+	moment.
+
 2006-12-18  Jim Huang  <jserv.tw@gmail.com>
 
 	Erase candidate and reset its length when Esc key is handled.
