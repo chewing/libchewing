@@ -1,3 +1,8 @@
+2007-01-03  Caius Chance  <cchance@redhat.com>
+
+        * src/choice.c: Clear previous cnadidates before population of new 
+	candidates. (Re-fixed as changes made on 2006-12-18 was not effective.)
+
 2006-12-29  Jim Huang  <jserv.tw@gmail.com>
 
 	Merge from the latest libchewingdata

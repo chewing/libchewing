@@ -141,6 +141,9 @@ static void SetChoiceInfo(
 	int len;
 	UserPhraseData *pUserPhraseData;
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
+	
+	// Clears previous candidates.
+	memset( pci->totalChoiceStr, '\0', sizeof(char) * MAX_CHOICE * MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1);
 
 	pci->nTotalChoice = 0;
 	len = pai->avail[ pai->currentAvail ].len;
