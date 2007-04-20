@@ -1,8 +1,8 @@
 2007-04-20  Caius Chance  <cchance@redhat.com>
 
         * src/choiceio.c: Closes candidate window when user pressed Up key.
-                          (Compared to Down key to open candidate window
-                           implemented currently.)
+        (Compared to Down key for opening candidate window implemented 
+         currently.)
 
 2007-01-03  Caius Chance  <cchance@redhat.com>
 
