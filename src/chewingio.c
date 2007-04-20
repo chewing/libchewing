@@ -587,7 +587,9 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
+	int toSelect = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
+	int key_buf_cursor;
 
 	CheckAndResetRange( pgdata );
 
@@ -595,8 +597,14 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	}
 
-	if ( pgdata->bSelect )
-		ChoicePrevAvail( pgdata );
+	key_buf_cursor = pgdata->chiSymbolCursor;
+	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
+		key_buf_cursor--;
+
+        if ( ! pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
+		/* Close Symbol Choice List */
+        	chewing_handle_Esc(ctx);
+	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
