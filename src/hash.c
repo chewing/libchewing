@@ -574,6 +574,7 @@ open_hash_file:
 
 			hashvalue = HashFunc( pItem->data.phoneSeq );
 			pItem->next = hashtable[ hashvalue ];
+			hashtable[ hashvalue ] = pItem;
 			pItem->data.recentTime -= oldest;
 		}
 		chewing_lifetime -= oldest;
