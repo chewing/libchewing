@@ -1,16 +1,28 @@
+2008-01-08 Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c
+	* src/porting_layer/src/plat_mmap_posix.c
+	* include/global.h
+	* include/chewingio.h
+	Keyboard layout toggle button on toolbar.
+	( Added a button for keyboard type change. It won't save to config 
+	but just for input a character occasionally if such combination keys
+	are suddenly forgotten. )
+
 2007-10-22  Kuang-che Wu  <kcwu@csie.org>
 	* src/hash.c (ReadHash): Fix user's hash.dat not functional.
 
 2007-04-20  Caius Chance  <cchance@redhat.com>
 
-        * src/chewingio.c: Closes candidate window when user pressed Up key.
-        (Compared to Down key for opening candidate window implemented 
-         currently.)
+	* src/chewingio.c: Closes candidate window when user pressed Up key.
+	(Compared to Down key for opening candidate window implemented 
+	currently.)
 
 2007-01-03  Caius Chance  <cchance@redhat.com>
 
-        * src/choice.c: Clear previous cnadidates before population of new 
-	candidates. (Re-fixed as changes made on 2006-12-18 was not effective.)
+	* src/choice.c: Clear previous cnadidates before population of new 
+	candidates. (Re-fixed as changes made on 2006-12-18 was not 
+	effective.)
 
 2006-12-29  Jim Huang  <jserv.tw@gmail.com>
 

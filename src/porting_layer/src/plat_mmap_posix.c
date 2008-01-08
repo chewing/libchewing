@@ -48,7 +48,7 @@ size_t plat_mmap_create( plat_mmap *handle, char *file, int fileAccessAttr )
 	if ( FLAG_ATTRIBUTE_READ & fileAccessAttr )
 		handle->fd = open( file, O_RDONLY );
 	else
-		handle->fd = open( file, O_RDWR | O_CREAT );
+		handle->fd = open( file, O_RDWR );
 
 	if ( handle->fd == -1 )
 		return 0;

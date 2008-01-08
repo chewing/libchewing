@@ -196,6 +196,11 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype )
 	return 0;
 }
 
+CHEWING_API int chewing_get_KBType( ChewingContext *ctx )
+{
+	return ctx->data->zuinData.kbtype;
+}
+
 CHEWING_API void chewing_Terminate()
 {
 	int i;
