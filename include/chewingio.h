@@ -98,10 +98,10 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx );
 CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 
 /**
- * @breif Set keyboard type
+ * @breif Get keyboard type
  *
  * @param ctx
- * @return If successed then return 0
+ * @return If successed then return kbtype from KBStr2Num
  */
 CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 
@@ -121,11 +121,11 @@ CHEWING_API void chewing_Terminate();
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get chewing's current keyboard type
+ * @brief Get chewing's current english, chinese mode
  *
  * @param ctx
  * 
- * @return DEFAULT_KBTYPE or HANYU_KBTYPE
+ * @return CHINESE_MODE or ENGLISH_MODE
  */
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
 

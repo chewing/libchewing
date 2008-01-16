@@ -34,18 +34,6 @@
 #define FULLSHAPE_MODE 1
 #define HALFSHAPE_MODE 0
 
-#define DEFAULT_KBTYPE 0
-#define HSU_KBTYPE 1
-#define IBM_KBTYPE 2
-#define GINYIEH_KBTYPE 3
-#define ETEN_KBTYPE 4
-#define ETEN26_KBTYPE 5
-#define DVORAK_KBTYPE 6
-#define DVORAKHSU_KBTYPE 7
-#define HANYU_KBTYPE 8
-#define FIRST_KBTYPE DEFAULT_KBTYPE
-#define LAST_KBTYPE HANYU_KBTYPE
-
 #define MAX_KBTYPE 10
 #define MAX_SELKEY 10
 #define WCH_SIZE 4
@@ -54,7 +42,7 @@
 #define PINYIN_SIZE 10
 #define MAX_PHRASE_LEN 10
 #define MAX_PHONE_SEQ_LEN 50
-#define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN  1 ) * MAX_PHONE_SEQ_LEN / 2 )
+#define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
 
@@ -74,7 +62,7 @@ typedef unsigned short uint16;
 
 
 typedef union {
-	unsigned char s[ MAX_UTF8_SIZE  1];
+	unsigned char s[ MAX_UTF8_SIZE + 1];
 	wchar_t wch;
 } wch_t;
 
@@ -89,7 +77,7 @@ typedef struct {
 } IntervalType;
 
 typedef struct {
-	char chiBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE  1 ];
+	char chiBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
 	int nNumCut;
@@ -132,7 +120,7 @@ typedef struct {
 	/** @brief number of choices per page. */
 	int nChoicePerPage;
 	/** @brief store possible phrases for being chosen. */
-	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * MAX_UTF8_SIZE  1 ];
+	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	/** @brief number of phrases to choose. */
 	int nTotalChoice;
 	int oldCursor, oldChiSymbolCursor;
@@ -149,13 +137,13 @@ typedef struct _SymbolEntry {
 	int nSymbols;
 
 	/** @brief  Category name of these symbols */
-	char category[ MAX_PHRASE_LEN * MAX_UTF8_SIZE  1 ];
+	char category[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 
 	/** @brief  Symbols in this category.
 	 * This is an char[] array of variable length.
 	 * When nSymbols = 0, this array is not allocated.
 	 */
-	char symbols[ 1 ][ MAX_UTF8_SIZE  1 ];
+	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
 /** @brief use "asdfjkl789" as selection key */
@@ -195,15 +183,15 @@ typedef struct {
 	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	int cursor;
-	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE  1 ];
+	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
 	int nSelect;
 	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
 	int nPrefer;
-	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN  1 ];
-	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN  1 ];   
-	int bArrBrkpt[ MAX_PHONE_SEQ_LEN  1 ];
-	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN  1 ];
+	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN + 1 ];
+	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];   
+	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
+	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
 	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape, bAutoShiftCur, bEasySymbolInput;
 	/* Symbol Key buffer */
@@ -225,7 +213,7 @@ typedef struct {
 	IntervalType dispInterval[ MAX_INTERVAL ]; /* from prefer, considering symbol */
 	int nDispInterval;
 	/** @brief indicate the break points going to display.*/ 
-	int dispBrkpt[ MAX_PHONE_SEQ_LEN  1 ];
+	int dispBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/** @brief the string going to commit. */
 	wch_t commitStr[ MAX_PHONE_SEQ_LEN ];
 	int nCommitStr;
@@ -257,7 +245,7 @@ typedef struct {
  */
 
 typedef struct {
-	char phrase[ MAX_PHRASE_LEN * MAX_UTF8_SIZE  1 ];
+	char phrase[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	int freq;
 } Phrase;
 
@@ -268,7 +256,7 @@ typedef struct {
 
 /* tree.c */
 int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE  1 ], 
+		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] );
 int IsIntersect( IntervalType in1, IntervalType in2 );

@@ -1,3 +1,10 @@
+2008-01-16 Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewinio.h,
+	include/global:
+	Correct the API documentation of chewing_get_ChiEngMode and
+	chewing_get_KBType. Remove redundant definition of keyboard types.
+
 2008-01-08 Caius Chance  <cchance@redhat.com>
 
 	* src/chewingio.c
