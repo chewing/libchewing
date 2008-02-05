@@ -1064,7 +1064,8 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					&( pgdata->availInfo ),
 					pgdata->phoneSeq,
 					pgdata->config.candPerPage );
-				goto End_Paging;
+				SemiSymbolInput( '1', pgdata );
+				goto End_KeyDefault;
 			}
 
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
@@ -1209,7 +1210,10 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				&( pgdata->availInfo ),
 				pgdata->phoneSeq,
 				pgdata->config.candPerPage );
-		goto make_output;
+		SemiSymbolInput( '1', pgdata );
+		CallPhrasing( pgdata );
+		MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+		return 0;
 	}
 
         if ( ! pgdata->config.bAddPhraseForward ) {
@@ -1275,7 +1279,6 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		}
 	}
 	CallPhrasing( pgdata );
-make_output:
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	MakeOutputAddMsgAndCleanInterval( pgo, pgdata );
 	return 0;
