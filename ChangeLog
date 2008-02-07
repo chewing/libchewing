@@ -1,34 +1,41 @@
-2008-02-05 Jeff Chen <wiz.chen@gmail.com>
+2008-02-07  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/tsi.src:  Sync with libchewingdata project.
+
+	* test/Makefile.am: Added uhash.dat in CLEANFILES.
+
+2008-02-05  Jeff Chen  <wiz.chen@gmail.com>
 
 	* src/chewingio.c
-	(chewing_handle_Default)
-	(chewing_handle_CtrlNum):
+	(chewing_handle_Default) (chewing_handle_CtrlNum):
 	When users cancel symbol table by "ESC" key, it causes system to step
 	into wrong state.
 	Openning symbol table needs to invoke semi-symbol input.
 
-2008-01-16 Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+2008-01-16  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* include/chewinio.h:
 	Correct the API documentation of chewing_get_ChiEngMode and
-	chewing_get_KBType. 
+	chewing_get_KBType.
+
 	* include/global.h:
 	Fix the missing plusses, thanks Bell Kin <kinbell4@gmail.com>.
 	* include/global.h:
 	Remove redundant definition of keyboard types.
 
-2008-01-08 Caius Chance  <cchance@redhat.com>
+2008-01-08  Caius Chance  <cchance@redhat.com>
 
-	* src/chewingio.c
-	* src/porting_layer/src/plat_mmap_posix.c
-	* include/global.h
-	* include/chewingio.h
+	* src/chewingio.c,
+	src/porting_layer/src/plat_mmap_posix.c,
+	include/global.h,
+	include/chewingio.h:
 	Keyboard layout toggle button on toolbar.
 	( Added a button for keyboard type change. It won't save to config 
 	but just for input a character occasionally if such combination keys
 	are suddenly forgotten. )
 
 2007-10-22  Kuang-che Wu  <kcwu@csie.org>
+
 	* src/hash.c (ReadHash): Fix user's hash.dat not functional.
 
 2007-04-20  Caius Chance  <cchance@redhat.com>

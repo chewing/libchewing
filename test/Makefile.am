@@ -75,3 +75,5 @@ do_test_DEPENDENCIES = $(LIBCHEWING)
 else
 UNIT_TEST_BIN=
 endif
+
+CLEANFILES = uhash.dat
