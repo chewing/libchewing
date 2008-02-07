@@ -1,5 +1,16 @@
 2008-02-07  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c,
+	src/hash.c,
+	src/choice.c,
+	src/porting_layer/include/plat_mmap.h,
+	src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c: Update copyright date.
+
+2008-02-07  Jim Huang  <jserv.tw@gmail.com>
+
 	* data/tsi.src:  Sync with libchewingdata project.
 
 	* test/Makefile.am: Added uhash.dat in CLEANFILES.
@@ -14,7 +25,7 @@
 
 2008-01-16  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
-	* include/chewinio.h:
+	* include/chewingio.h:
 	Correct the API documentation of chewing_get_ChiEngMode and
 	chewing_get_KBType.
 

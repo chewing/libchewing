@@ -1,3 +1,13 @@
+/**
+ * plat_mmap_win32.c
+ *
+ * Copyright (c) 2005, 2006
+ *      libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #ifdef HAVE_CONFIG_H
   #include <config.h>
 #endif
