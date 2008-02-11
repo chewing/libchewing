@@ -1,3 +1,9 @@
+2008-02-11  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/choice.c: 
+	 Behaivor changed: Doing select at the end of edit buffer works on the
+	 last phrase (interval).
+
 2008-02-08  Jim Huang  <jserv.tw@gmail.com>
 
 	* configure.ac: Make use of AC_CONFIG_AUX_DIR.

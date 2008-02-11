@@ -219,9 +219,9 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 	/* see if there is some word in the cursor position */
 	if ( pgdata->nPhoneSeq == pgdata->cursor )
-		pgdata->cursor--;
+		pgdata->cursor = pgdata->phrOut.dispInterval[ pgdata->phrOut.nDispInterval - 1 ].from;
 	if ( pgdata->chiSymbolBufLen == pgdata->chiSymbolCursor )
-		pgdata->chiSymbolCursor--;
+		pgdata->chiSymbolCursor = pgdata->phrOut.dispInterval[ pgdata->phrOut.nDispInterval - 1 ].from;
 
 	pgdata->bSelect = 1;
 
