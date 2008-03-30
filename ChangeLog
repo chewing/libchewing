@@ -1,3 +1,8 @@
+2008-03-30  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/zuin.c:
+	 Type symbols easily for PinYin input.
+
 2008-02-11  Jeff Chen  <wiz.chen@gmail.com>
 
 	* src/choice.c: 

@@ -391,10 +391,7 @@ static int IsPinYinEndKey(int key )
 
 static int IsSymbolKey(int key)
 {
-	if ( ( key == '.' ) || ( key == ',' ) || ( key == '?' ) ||
-	     ( key == ';' ) || ( key == ':' ) || ( key == '\'' ) ||
-	     ( key == '"' ) || ( key == '[' ) || ( key == '{' ) ||
-	     ( key == '}' ) || ( key == ']' ) ) {
+	if ( (key < 97) || (key > 122) ) {
 		return 1;
 	}
 		
@@ -408,7 +405,7 @@ static int PinYinInput( ZuinData *pZuin, int key )
 
 	DEBUG_CHECKPOINT();
 
-	if ( IsSymbolKey( key ) ) {
+	if ( pZuin->pinYinData.keySeq[ 0 ] == 0 && IsSymbolKey( key ) ) {
 		return ZUIN_KEY_ERROR;
 	}
 
