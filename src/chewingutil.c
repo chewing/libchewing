@@ -379,14 +379,6 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 	return ZUIN_ABSORB;
 }
 
-int SemiSymbolInput(int key, ChewingData *pgdata)
-{
-    static char keybuf[] = { ' ', '1' };
-    static char *chibuf[] = { "　", "符" };
-    static int nSpecial = 2;
-    return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
-}
-
 int SymbolInput( int key, ChewingData *pgdata )
 {
 	if ( isprint( (char) key ) && /* other character was ignored */

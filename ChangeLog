@@ -1,3 +1,9 @@
+2008-04-02  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/chewingio.c,
+	src/chewingutil.c,
+	src/chewingutil.h: SemiSymbolInput() is useless.
+
 2008-03-30  Jeff Chen  <wiz.chen@gmail.com>
 
 	* src/zuin.c:

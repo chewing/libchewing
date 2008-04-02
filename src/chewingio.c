@@ -1064,7 +1064,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					&( pgdata->availInfo ),
 					pgdata->phoneSeq,
 					pgdata->config.candPerPage );
-				SemiSymbolInput( '1', pgdata );
 				goto End_KeyDefault;
 			}
 
@@ -1210,7 +1209,6 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				&( pgdata->availInfo ),
 				pgdata->phoneSeq,
 				pgdata->config.candPerPage );
-		SemiSymbolInput( '1', pgdata );
 		CallPhrasing( pgdata );
 		MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 		return 0;
@@ -1311,7 +1309,6 @@ CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 
 	if ( ! pgdata->bSelect ) {
 		CheckAndResetRange( pgdata );
-		rtn = SemiSymbolInput( key, pgdata );
 	}
 	CallPhrasing( pgdata );
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
