@@ -1,3 +1,8 @@
+2008-04-28  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c:
+	Refactorized chewing_get_ChiEngMode( ChewingContext *ctx ).
+
 2008-04-02  Jeff Chen  <wiz.chen@gmail.com>
 
 	* src/chewingio.c,

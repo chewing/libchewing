@@ -264,13 +264,7 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
-	ChewingData *pgdata = ctx->data;
-
-	if ( pgdata->bFirstKey == 0 ) {
-		pgdata->bChiSym = mode;
-		pgdata->bCaseChange = ( mode == CHINESE_MODE ? 0 : 1 );
-		pgdata->bFirstKey = 1;
-	}
+	ctx->data->bChiSym = ( mode == CHINESE_MODE ? 1 : 0 );
 }
 
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx ) 
