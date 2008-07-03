@@ -1,3 +1,11 @@
+2008-07-04  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/zuin.h,
+	src/chewingio.c,
+	src/common/key2pho.c,
+	src/zuin.c: Apply DACHEN_CP26 patch, thanks Paul Liu.
+
 2008-04-28  Caius Chance  <cchance@redhat.com>
 
 	* src/chewingio.c:
