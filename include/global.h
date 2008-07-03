@@ -34,7 +34,7 @@
 #define FULLSHAPE_MODE 1
 #define HALFSHAPE_MODE 0
 
-#define MAX_KBTYPE 10
+#define MAX_KBTYPE 11
 #define MAX_SELKEY 10
 #define WCH_SIZE 4
 #define MAX_UTF8_SIZE 6

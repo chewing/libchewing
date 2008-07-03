@@ -81,6 +81,21 @@ static int IsET26PhoEndKey( int pho_inx[], int key )
 	}
 }
 
+/* copy the idea from HSU keyboard */
+static int IsDACHENCP26PhoEndKey( int pho_inx[], int key )
+{
+	switch ( key ) {
+		case 'e':
+		case 'r':
+		case 'd':
+		case 'y':
+		case ' ':
+			return ( pho_inx[ 0 ] || pho_inx[ 1 ] || pho_inx[ 2 ] );
+		default:
+			return 0;
+	}
+}
+
 static int IsDefPhoEndKey( int key, int kbtype )
 {
 	if ( PhoneInxFromKey( key, 3, kbtype, 1 )  )
@@ -380,6 +395,165 @@ static int ET26PhoInput( ZuinData *pZuin, int key )
 	}
 }
 
+static int DACHENCP26PhoInput( ZuinData *pZuin, int key ) 
+{
+	int type = 0, searchTimes = 0, inx = 0;
+
+	if ( IsDACHENCP26PhoEndKey( pZuin->pho_inx, key ) ) {
+		searchTimes = 2;
+		return EndKeyProcess( pZuin, key, searchTimes );
+	}
+	else {
+		/* decide if the key is a phone */
+		for ( type = 0, searchTimes = 1; type < 3; type++ ) {
+			inx = PhoneInxFromKey( key, type, pZuin->kbtype, searchTimes );
+			if ( ! inx ) 
+				continue; /* if inx == 0, next type */
+			else if ( type == 0 ) {
+				break;
+				if ( pZuin->pho_inx[ 0 ] || pZuin->pho_inx[ 1 ] ) {
+					/* if inx !=0 */
+					searchTimes = 2 ; /* possible infinite loop here */
+				}
+				else
+					break;
+			}
+			else
+				break;	
+		}
+		/* switching between "ㄅ" and "ㄆ" */
+		if ( key == 'q' ) {
+			if ( pZuin->pho_inx[ 0 ] == 1  ) {
+			 	pZuin->pho_inx[ 0 ] = 2;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[0] == 2) {
+				pZuin->pho_inx[ 0 ] = 1;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄉ" and "ㄊ" */
+		else if ( key == 'w' ) {
+			if ( pZuin->pho_inx[ 0 ] == 5  ) {
+			 	pZuin->pho_inx[ 0 ] = 6;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[0] == 6) {
+				pZuin->pho_inx[ 0 ] = 5;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄓ" and "ㄔ" */
+		else if ( key == 't' ) {
+			if ( pZuin->pho_inx[ 0 ] == 15  ) {
+			 	pZuin->pho_inx[ 0 ] = 16;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[0] == 16) {
+				pZuin->pho_inx[ 0 ] = 15;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* converting "ㄖ" to "ㄝ" */
+		else if ( key == 'b' ) {
+			if ( pZuin->pho_inx[ 0 ] != 0 || pZuin->pho_inx[1] != 0 ) {
+			pZuin->pho_inx[ 2 ] = 4;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* converting "ㄙ" to "ㄣ" */
+		else if ( key == 'n' ) {
+			if ( pZuin->pho_inx[ 0 ] != 0 || pZuin->pho_inx[1] != 0 ) {
+				pZuin->pho_inx[ 2 ] = 12;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄧ", "ㄚ", and "ㄧㄚ" */
+		else if ( key == 'u' ) {
+			if ( pZuin->pho_inx[ 1 ] == 1 && pZuin->pho_inx[ 2 ] != 1 ) {
+				pZuin->pho_inx[1] = 0;
+				pZuin->pho_inx[2] = 1;
+				return ZUIN_ABSORB;
+			}
+			else if (pZuin->pho_inx[ 1 ] != 1 && pZuin->pho_inx[2] == 1) {
+				pZuin->pho_inx[1] = 1;
+				return ZUIN_ABSORB;
+			}
+			else if (pZuin->pho_inx[1] == 1 && pZuin->pho_inx[2]==1) {
+				pZuin->pho_inx[1]=0;
+				pZuin->pho_inx[2]=0;
+				return ZUIN_ABSORB;
+			}
+			else if (pZuin->pho_inx[1] != 0) {
+				pZuin->pho_inx[2] = 1;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄩ" and "ㄡ" */
+		else if ( key == 'm' ) {
+			if ( pZuin->pho_inx[ 1 ] == 3 && pZuin->pho_inx[ 2 ] != 8 ) {
+				pZuin->pho_inx[1] = 0;
+				pZuin->pho_inx[2] = 8;
+				return ZUIN_ABSORB;
+			}
+			else if (pZuin->pho_inx[ 1 ] != 3 && pZuin->pho_inx[2] == 8) {
+				pZuin->pho_inx[1] = 3;
+				pZuin->pho_inx[2] = 0;
+				return ZUIN_ABSORB;
+			}
+			else if (pZuin->pho_inx[ 1 ] != 0) {
+				pZuin->pho_inx[2] = 8;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄛ" and "ㄞ" */
+		else if ( key == 'i' ) {
+			if ( pZuin->pho_inx[ 2 ] == 2  ) {
+			 	pZuin->pho_inx[ 2 ] = 5;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[2] == 5) {
+				pZuin->pho_inx[ 2 ] = 2;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄟ" and "ㄢ" */
+		else if ( key == 'o' ) {
+			if ( pZuin->pho_inx[ 2 ] == 6  ) {
+			 	pZuin->pho_inx[ 2 ] = 9;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[2] == 9) {
+				pZuin->pho_inx[ 2 ] = 6;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄠ" and "ㄤ" */
+		else if ( key == 'l' ) {
+			if ( pZuin->pho_inx[ 2 ] == 7  ) {
+			 	pZuin->pho_inx[ 2 ] = 11;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[2] == 11) {
+				pZuin->pho_inx[ 2 ] = 7;
+				return ZUIN_ABSORB;
+			}
+		}
+		/* switching between "ㄣ" and "ㄦ" */
+		else if ( key == 'p' ) {
+			if ( pZuin->pho_inx[ 2 ] == 10  ) {
+			 	pZuin->pho_inx[ 2 ] = 13;
+				return ZUIN_ABSORB;
+			} else if ( pZuin->pho_inx[2] == 13) {
+				pZuin->pho_inx[ 2 ] = 10;
+				return ZUIN_ABSORB;
+			}
+		}
+		if ( type == 3 ) { /* the key is NOT a phone */
+			if ( isalpha( key ) )
+				return ZUIN_NO_WORD;
+			return ZUIN_KEY_ERROR;
+		}
+		/* fill the key into the phone buffer */
+		pZuin->pho_inx[ type ] = inx;
+		return ZUIN_ABSORB;
+	}
+}
+
 static int IsPinYinEndKey(int key )
 {
 	if ( (key == ' ') || (key == '1') || (key == '2') ||
@@ -454,6 +628,9 @@ int ZuinPhoInput(ZuinData *pZuin, int key )
 		case KB_ET26:
 			return ET26PhoInput( pZuin, key );
 			break;
+ 		case KB_DACHEN_CP26:
+ 			return DACHENCP26PhoInput( pZuin, key );
+ 			break;
 		case KB_HANYU_PINYIN:
 			return PinYinInput( pZuin, key );
 			break;
