@@ -1,3 +1,8 @@
+2008-07-07  Kanru Chen  <kanru@kanru.info>
+
+	* test/gen_keystroke.c:
+	Fix choice buffer output.
+
 2008-07-04  Kanru Chen  <kanru@kanru.info>
 
 	* include/global.h,

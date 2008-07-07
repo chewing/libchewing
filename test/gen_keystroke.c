@@ -193,7 +193,7 @@ void show_choose_buffer( int x, int y, ChewingContext *ctx )
 	
 	chewing_cand_Enumerate( ctx );
 	while ( chewing_cand_hasNext( ctx ) ) {
-		if ( i == chewing_cand_ChoicePerPage( ctx ) )
+		if ( i > chewing_cand_ChoicePerPage( ctx ) )
 			break;
 		sprintf( str, "%d.", i );
 		if ( hasColor )
@@ -305,7 +305,7 @@ int main( int argc, char *argv[] )
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	/* Fill configuration values */
-	config.candPerPage = 20;
+	config.candPerPage = 9;
 	config.maxChiSymbolLen = 16;
 	config.bAddPhraseForward = 1;
 
