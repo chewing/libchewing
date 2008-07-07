@@ -2,6 +2,8 @@
 
 	* test/gen_keystroke.c:
 	Fix choice buffer output.
+	* src/mod_aux.c (chewing_cand_String):
+	Kill memory leak.
 
 2008-07-04  Kanru Chen  <kanru@kanru.info>
 

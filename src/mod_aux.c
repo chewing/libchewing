@@ -139,10 +139,12 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 {
-	char *s = strdup( "" );
+	char *s;
 	if ( chewing_cand_hasNext( ctx ) || (ctx->cand_no < cand_no_max) ) {
 		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
 		ctx->cand_no++;
+	} else {
+		s = strdup( "" );
 	}
 	return s;
 }
