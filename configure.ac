@@ -2,7 +2,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT(libchewing, 0.3.091, chewing-devel@googlegroups.com)
+AC_INIT(libchewing, 0.3.1.901, chewing-devel@googlegroups.com)
 AC_CONFIG_AUX_DIR([autotools])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 
@@ -11,7 +11,7 @@ AC_SUBST(PACKAGE_VERSION)
 # libtool versioning for libchewing
 
 # increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=3
+LIBCHEWING_CURRENT=4
 
 # increment any time the source changes; set to 0 if you increment CURRENT
 LIBCHEWING_REVISION=0
