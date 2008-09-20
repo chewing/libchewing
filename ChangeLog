@@ -1,6 +1,11 @@
 2008-09-20  Kanru Chen  <kanru@kanru.info>
 
 	* configure.ac:
+	Bump version to 0.3.0.902
+
+2008-09-20  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac:
 	Bump ABI version to 4.0.0
 
 2008-07-07  Kanru Chen  <kanru@kanru.info>
