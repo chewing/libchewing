@@ -11,10 +11,10 @@ AC_SUBST(PACKAGE_VERSION)
 # libtool versioning for libchewing
 
 # increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=4
+LIBCHEWING_CURRENT=3
 
 # increment any time the source changes; set to 0 if you increment CURRENT
-LIBCHEWING_REVISION=0
+LIBCHEWING_REVISION=1
 
 # increment if any interfaces have been added; set to 0
 # if any interfaces have been removed. removal has 

@@ -1,3 +1,11 @@
+2008-09-23  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac:
+	Change ABI version to 3.1.0
+
+	* NEWS:
+	Updated.
+
 2008-09-20  Kanru Chen  <kanru@kanru.info>
 
 	* configure.ac:
