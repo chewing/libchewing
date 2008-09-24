@@ -1,20 +1,19 @@
 2008-09-23  Kanru Chen  <kanru@kanru.info>
 
-	* configure.ac:
-	Change ABI version to 3.1.0
+	* configure.ac:	Change ABI version to 3.1.0
+	libchewing 0.3 stands for development branch.  We intend to break
+	API/ABI at the stage.  As the result, there would not be major version
+	change in library.
 
-	* NEWS:
-	Updated.
-
-2008-09-20  Kanru Chen  <kanru@kanru.info>
-
-	* configure.ac:
-	Bump version to 0.3.0.902
+	* NEWS: Updated.
 
 2008-09-20  Kanru Chen  <kanru@kanru.info>
 
-	* configure.ac:
-	Bump ABI version to 4.0.0
+	* configure.ac: Bump version to 0.3.0.902
+
+2008-09-20  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump ABI version to 4.0.0
 
 2008-07-07  Kanru Chen  <kanru@kanru.info>
 
