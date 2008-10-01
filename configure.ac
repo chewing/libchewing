@@ -80,7 +80,7 @@ AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # Checks for check unit test framework
-AM_PATH_CHECK([0.8.2], [ enable_check=yes ], [ enable_check=no ])
+PKG_CHECK_MODULES(CHECK, check >= 0.9.4, enable_check=yes, enble_check=no)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
 
 # Checks for ncursesw

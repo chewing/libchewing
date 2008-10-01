@@ -4,6 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 datadir=@datadir@/chewing
 sysconfdir=@sysconfdir@
+datarootdir=@datarootdir@
 
 chewing_binary_version=@LIBCHEWING_BINARY_VERSION@
 
