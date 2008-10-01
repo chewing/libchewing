@@ -4,8 +4,7 @@
 	Migrate check module to use pkg-config.
 	Bump version to 0.3.1
 
-	* chewing.pc.in:
-	Add --datarootdir.
+	* chewing.pc.in: Add --datarootdir.
 
 2008-09-23  Kanru Chen  <kanru@kanru.info>
 
