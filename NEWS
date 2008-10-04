@@ -9,7 +9,7 @@ What's New in libchewing 0.3.1
 * Improved reminding message text.
 * Sync with libchewingdata project.
 * A new HanYu-PinYin mapping table
-* More robust behaver when IM crashes.
+* More robust behavior when IM crashes.
 * Allow '#' comment and blank line in tsi.src.
 * Fix chewing switch between Full/Half mode and cursor moves one space in
   gedit.
