@@ -1,4 +1,5 @@
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include \
+		   -I$(top_srcdir)/include/internal
 
 noinst_LTLIBRARIES = libcommon.la
 

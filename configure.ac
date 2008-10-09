@@ -148,6 +148,19 @@ AC_ARG_ENABLE([debug],
 	[LIBDEBUG="false"])
 AC_SUBST(LIBDEBUG)
 
+AC_ARG_ENABLE([visibility-hiding],
+	      [AC_HELP_STRING([--enable-visibility-hiding],
+			      [enable visibility hiding @<:@default=yes@:>@])],
+	      [case "${enableval}" in
+	       yes)
+	       CFLAGS="$CFLAGS -fvisibility=hidden"
+	       ;;
+	       *)
+	       ;;
+	       esac],
+	       CFLAGS="$CFLAGS -fvisibility=hidden")
+
+
 #AC_ARG_ENABLE([binary-data],
 #		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
 #		[case "${enableval}" in

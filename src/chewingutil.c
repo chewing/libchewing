@@ -22,7 +22,8 @@
 #include "global.h"
 #include "chewingutil.h"
 #include "zuin.h"
-#include "userphrase.h"
+#include "zuin-private.h"
+#include "userphrase-private.h"
 #include "private.h"
 
 extern const char *zhuin_tab[]; 

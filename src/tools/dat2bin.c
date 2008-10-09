@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 #include "global.h"
-#include "char.h"
 #include "private.h"
 
 /* Some wrapper definitions */

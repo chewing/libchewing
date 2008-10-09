@@ -1,3 +1,55 @@
+2008-10-10  Kanru Chen  <kanru@kanru.info>
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c: Add public interfaces to set/get configs.
+
+2008-10-09  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Add gcc visibility support.
+
+	* include/char.h,
+	include/chewing-utf8-util.h,
+	include/chewing.h,
+	include/dict.h,
+	include/global.h,
+	include/hash.h,
+	include/mod_aux.h,
+	include/userphrase.h,
+	include/zuin.h: Remove internal interfaces.
+
+	* include/internal/char-private.h,
+	include/internal/chewing-private.h,
+	include/internal/chewing-utf8-util.h,
+	include/internal/chewingutil.h,
+	include/internal/choice-private.h,
+	include/internal/dict-private.h,
+	include/internal/hash-private.h,
+	include/internal/key2pho-private.h,
+	include/internal/tree-private.h,
+	include/internal/userphrase-private.h,
+	include/internal/zuin-private.h: Put internal interfaces here.
+
+	* src/Makefile.am,
+	src/char.c,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/chewingutil.h,
+	src/choice.c,
+	src/common/Makefile.am,
+	src/common/key2pho.c,
+	src/dict.c,
+	src/hash.c,
+	src/mod_aux.c,
+	src/porting_layer/src/Makefile.am,
+	src/tools/Makefile.am,
+	src/tools/sort_word.c,
+	src/tree.c,
+	src/userphrase.c,
+	src/zuin.c,
+	test/Makefile.am,
+	test/gen_keystroke.c: Adjust including path.
+
 2008-10-01  Kanru Chen  <kanru@kanru.info>
 
 	* configure.ac:

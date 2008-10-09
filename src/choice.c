@@ -23,10 +23,10 @@
 #include "chewing-definition.h"
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "dict.h"
-#include "char.h"
+#include "dict-private.h"
+#include "char-private.h"
 #include "chewingutil.h"
-#include "userphrase.h"
+#include "userphrase-private.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
 

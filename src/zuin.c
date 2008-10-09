@@ -26,7 +26,8 @@
 
 #include "global.h"
 #include "zuin.h"
-#include "char.h"
+#include "zuin-private.h"
+#include "char-private.h"
 #include "hanyupinyin.h"
 #include "private.h"
 

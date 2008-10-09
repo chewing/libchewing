@@ -18,7 +18,7 @@
 
 #include "private.h"
 #include "plat_mmap.h"
-#include "dict.h"
+#include "dict-private.h"
 
 #ifdef USE_BINARY_DATA
 static int *begin = NULL;

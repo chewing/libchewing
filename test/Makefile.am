@@ -39,7 +39,8 @@ bin_PROGRAMS = \
 	$(UNIT_TEST_BIN)
 
 INCLUDES = \
-	-I$(top_builddir)/include \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/include/internal \
 	-DCHEWING_DATA_PREFIX="\"$(DATADIR)\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \

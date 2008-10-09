@@ -18,8 +18,9 @@
 
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "hash.h"
-#include "dict.h"
+#include "hash-private.h"
+#include "dict-private.h"
+#include "userphrase-private.h"
 #include "private.h"
 
 extern int chewing_lifetime;

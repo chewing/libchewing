@@ -23,10 +23,10 @@
 
 #include "chewing-utf8-util.h"
 #include "chewing-definition.h"
-#include "userphrase.h"
+#include "userphrase-private.h"
 #include "global.h"
-#include "dict.h"
-#include "char.h"
+#include "dict-private.h"
+#include "char-private.h"
 #include "private.h"
 #include "plat_mmap.h"
 

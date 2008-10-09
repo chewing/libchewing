@@ -22,7 +22,7 @@
  * @param ctx handle to Chewing IM context
  * @retval TRUE if it currnet input state is at the "end-of-a-char"
  */
-int chewing_commit_Check( ChewingContext *ctx );
+CHEWING_API int chewing_commit_Check( ChewingContext *ctx );
 
 /**
  * @param ctx handle to Chewing IM context
@@ -30,10 +30,10 @@ int chewing_commit_Check( ChewingContext *ctx );
  * retrun current commit string, regardless current input state.
  * Alwasy returns a char pointer, caller must free it.
  */
-char *chewing_commit_String( ChewingContext *ctx );
+CHEWING_API char *chewing_commit_String( ChewingContext *ctx );
 
-char *chewing_buffer_String( ChewingContext *ctx );
-int chewing_buffer_Check( ChewingContext *ctx );
+CHEWING_API char *chewing_buffer_String( ChewingContext *ctx );
+CHEWING_API int chewing_buffer_Check( ChewingContext *ctx );
 
 /**
  * @param ctx handle to Chewing IM context
@@ -41,29 +41,29 @@ int chewing_buffer_Check( ChewingContext *ctx );
  *
  * Always returns a char pointer, caller must free it.
  */
-char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
+CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
 
-int chewing_zuin_Check( ChewingContext *ctx );
-
-
-char *chewing_cursor_Current( ChewingContext *ctx );
+CHEWING_API int chewing_zuin_Check( ChewingContext *ctx );
 
 
-int chewing_cand_CheckDone( ChewingContext *ctx );
-int chewing_cand_TotalPage( ChewingContext *ctx );
-int chewing_cand_ChoicePerPage( ChewingContext *ctx );
-int chewing_cand_TotalChoice( ChewingContext *ctx );
-int chewing_cand_CurrentPage( ChewingContext *ctx );
-void chewing_cand_Enumerate( ChewingContext *ctx );
-int chewing_cand_hasNext( ChewingContext *ctx );
-char *chewing_cand_String( ChewingContext *ctx );
+CHEWING_API char *chewing_cursor_Current( ChewingContext *ctx );
 
-int chewing_aux_Check( ChewingContext *ctx );
-int chewing_aux_Length( ChewingContext *ctx );
 
-char *chewing_aux_String( ChewingContext *ctx );
+CHEWING_API int chewing_cand_CheckDone( ChewingContext *ctx );
+CHEWING_API int chewing_cand_TotalPage( ChewingContext *ctx );
+CHEWING_API int chewing_cand_ChoicePerPage( ChewingContext *ctx );
+CHEWING_API int chewing_cand_TotalChoice( ChewingContext *ctx );
+CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx );
+CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx );
+CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx );
+CHEWING_API char *chewing_cand_String( ChewingContext *ctx );
 
-int chewing_keystroke_CheckIgnore( ChewingContext *ctx );
-int Chewing_keystroke_CheckAbsorb( ChewingContext *ctx );
+CHEWING_API int chewing_aux_Check( ChewingContext *ctx );
+CHEWING_API int chewing_aux_Length( ChewingContext *ctx );
+
+CHEWING_API char *chewing_aux_String( ChewingContext *ctx );
+
+CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx );
+CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx );
 
 #endif

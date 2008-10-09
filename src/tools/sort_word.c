@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "global.h"
+#include "chewing-private.h"
 #include "zuin.h"
 
 #define PHONE_CIN_FILE	"phone.cin"

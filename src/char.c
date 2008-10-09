@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "chewing-definition.h"
-#include "char.h"
+#include "char-private.h"
 #include "private.h"
 #include "plat_mmap.h"
 

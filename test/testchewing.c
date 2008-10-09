@@ -32,7 +32,7 @@
 #define KEY_CTRL_BASE 1000
 #define END 2000
 
-static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
+static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
 int get_keystroke()
 {
@@ -133,14 +133,11 @@ int main( int argc, char *argv[] )
 	/* Set keyboard type */ 
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
-	/* Fill the configuration values */
-	config.candPerPage = 20;
-	config.maxChiSymbolLen = 16;
-
-	for ( i = 0; i < 10; i++ )
-		config.selKey[ i ] = selKey_define[ i ];
-	/* Enable configurations */
-	chewing_Configure( ctx, &config );
+	chewing_set_candPerPage( ctx, 9 );
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_addPhraseDirection( ctx, 1 );
+	chewing_set_selKey( ctx, selKey_define, 10 );
+	chewing_set_spaceAsSelection( ctx, 1 );
 
 	while ( 1 ) {
 		i = get_keystroke();

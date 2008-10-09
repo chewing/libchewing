@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006
+ * Copyright (c) 2004, 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -35,11 +35,4 @@
 #define ZUIN_ERROR 8
 #define ZUIN_NO_WORD 16
 
-/* Zuin module */
-int ZuinPhoInput( ZuinData *,int key );  /* assume `key' is "ascii" code. */
-int ZuinRemoveLast( ZuinData * );
-int ZuinRemoveAll( ZuinData * );
-int ZuinIsEntering( ZuinData * );
-         
 #endif
-

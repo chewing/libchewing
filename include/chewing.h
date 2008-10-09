@@ -15,12 +15,8 @@
 extern "C" {
 #endif
 
-#include "char.h"
 #include "chewingio.h"
-#include "dict.h"
 #include "global.h"
-#include "hash.h"
-#include "userphrase.h"
 #include "zuin.h"
 #include "hanyupinyin.h"
 #include "mod_aux.h"
@@ -37,4 +33,3 @@ extern int chewing_lifetime;
 #endif
 
 #endif
-

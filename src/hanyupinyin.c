@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "hanyupinyin.h"
-#include "hash.h"
+#include "hash-private.h"
 #include "private.h"
 
 static char* PINYIN_TAB_NAME[] = { "pinyin.tab" };

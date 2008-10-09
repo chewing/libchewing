@@ -18,7 +18,7 @@
 #include <limits.h>
 
 #include "chewing-utf8-util.h"
-#include "hash.h"
+#include "hash-private.h"
 #include "private.h"
 #include "global.h"
 

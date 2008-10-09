@@ -55,7 +55,7 @@
 #define FILL_BLANK "                                                               "
 
 static int hasColor = 0;
-static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
+static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
 void drawline( int x, int y )
 {
@@ -79,9 +79,10 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 
 void show_interval_buffer( int x, int y, ChewingContext *ctx )
 {
+#if 0
 	char out_buf[ 100 ];
 	int i, count;
-	int arrPos[ MAX_PHONE_SEQ_LEN ];
+	int arrPos[ 50 ];
 
 	move( x, y );
 	addstr( FILL_BLANK );
@@ -116,6 +117,7 @@ void show_interval_buffer( int x, int y, ChewingContext *ctx )
 			arrPos[ ctx->output->dispInterval[ i ].to ] - arrPos[ ctx->output->dispInterval[ i ].from ] - 2 );
 	}
 	addstr( out_buf );
+#endif
 }
 
 void showZuin( ChewingContext *ctx )
@@ -245,12 +247,14 @@ void show_commit_string( ChewingContext *ctx )
 
 void set_cursor( int x, ChewingContext *ctx )
 {
+#if 0
 	int i, count;
 
 	for ( count = 0, i = 0; i < ctx->output->chiSymbolCursor; i++) {
 		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
 	}
 	move( x, count );
+#endif
 }
 
 int main( int argc, char *argv[] )
@@ -305,15 +309,11 @@ int main( int argc, char *argv[] )
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	/* Fill configuration values */
-	config.candPerPage = 9;
-	config.maxChiSymbolLen = 16;
-	config.bAddPhraseForward = 1;
-
-	for ( i = 0; i < 10; i++ )
-		config.selKey[ i ] = selKey_define[ i ];
-
-	/* Enable the configurations */
-        chewing_Configure( ctx, &config );
+	chewing_set_candPerPage( ctx, 9 );
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_addPhraseDirection( ctx, 1 );
+	chewing_set_selKey( ctx, selKey_define, 10 );
+	chewing_set_spaceAsSelection( ctx, 1 );
 
 	clear();
 	mvaddstr( 0, 0, "Any key to start testing..." );
