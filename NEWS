@@ -1,3 +1,12 @@
+What's New in libchewing SVN
+---------------------------------------------------------
+* Add gcc visibility support to hide private APIs.
+* Headers refactoring.
+* Set binary data handling as default.
+* Successful stories:
+  . OpenBSD porting
+  . UIM-chewing leveraging libchewing 0.3.x development branch.
+
 What's New in libchewing 0.3.1
 ----------------------------------------------------------
 * New keyboard layout DACHEN_CP26.
@@ -96,7 +105,6 @@ What's New in libchewing 0.2.5
 
 What's New in libchewing 0.2.4
 ----------------------------------------------------------
-
 * Merge from SpaceChewing:
   . Dvorak Hsu keyboard layout.
   . Hanin style support.
@@ -111,7 +119,6 @@ What's New in libchewing 0.2.4
 
 What's New in libchewing 0.2.3
 ----------------------------------------------------------
-
 * Fix candidate phrase choice bug.
 * Built-in debugging routines.
 * Test suite & sample implementation.
