@@ -31,7 +31,6 @@ static uint16* arrPhone = NULL;
 static int *begin = NULL;
 static char *phone_data_buf = NULL;
 static int phone_num;
-static plat_mmap m_mmap;
 #else
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];
@@ -101,12 +100,12 @@ int InitChar( const char *prefix )
 
 	if ( !phone_data_buf ||
 	     !read( indexfile, phone_data_buf, file_size ) ) {
-		close(indexfile);
+		close( indexfile );
 		return 0;
 	}
 
-	begin = ((int*)phone_data_buf);
-	arrPhone = (uint16*)(begin + phone_num);
+	begin = (int *) phone_data_buf;
+	arrPhone = (uint16 *) (begin + phone_num);
 
 	close(indexfile);
 #else
