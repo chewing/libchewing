@@ -27,21 +27,29 @@
 
 /* specified to Chewing API */
 #ifdef WIN32
-#define CHEWING_DLL_IMPORT __declspec(dllimport)
-#define CHEWING_DLL_EXPORT __declspec(dllexport)
-#ifdef CHEWINGDLL_EXPORTS
-#define CHEWING_API CHEWING_DLL_EXPORT
-#define CHEWING_PRIVATE
-#else
-#define CHEWING_API CHEWING_DLL_IMPORT
-#define CHEWING_PRIVATE
-#endif
+    #define CHEWING_DLL_IMPORT __declspec(dllimport)
+    #define CHEWING_DLL_EXPORT __declspec(dllexport)
+#   ifdef CHEWINGDLL_EXPORTS
+#      define CHEWING_API CHEWING_DLL_EXPORT
+#      define CHEWING_PRIVATE
+#   else
+#      define CHEWING_API CHEWING_DLL_IMPORT
+#      define CHEWING_PRIVATE
+#   endif
 #elif (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3)) && defined(__ELF__)
-#define CHEWING_API __attribute__((__visibility__("default")))
-#define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
+#   define CHEWING_API __attribute__((__visibility__("default")))
+#   define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
 #else
-#define CHEWING_API
-#define CHEWING_PRIVATE
+#  define CHEWING_API
+#  define CHEWING_PRIVATE
+#endif
+
+#ifndef UNUSED
+#if defined(__GNUC__) /* gcc specific */
+#   define UNUSED __attribute__((unused))
+#else
+#   define UNUSED
+#endif
 #endif
 
 #define MAX_SELKEY 10

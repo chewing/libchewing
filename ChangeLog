@@ -1,3 +1,38 @@
+2008-10-12  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h: Added macro UNUSED = __attribute__((unused)).
+
+	* include/internal/chewingutil.h: Removed static functions.
+
+	* src/tree.c (ReadTree): Added terminating service: TerminateTree.
+
+	* src/hanyupinyin.c (chewing_set_PinYinMethod): Confirming vaild
+	PinYin method type.
+	(HanyuPinYinToZuin): Eliminate compiler warning.
+
+	* src/chewingio.c (chewing_Configure)
+	(chewing_set_selKey) (chewing_handle_Up) (chewing_handle_ShiftSpac):
+	Mark UNUSED parameters.
+
+	* src/tools/dat2bin.c (main): Properly initialize TreeType.
+
+	* src/chewingutil.c (HaninSymbolInput) (_Inner_InternalSpecialSymbol)
+	(EasySymbolInput): Mark UNUSED parameters.
+	(FindSymbolKey) (TerminateSymbolTable) (TerminateEasySymbolTable):
+	Eliminate compiler warning.
+
+	* src/hash.c (HashItem2String): Conditional build with ENABLE_DEBUG.
+	(HashItem2Binary) (ReadHashItem_bin) (migrate_hash_to_bin): Eliminate
+	compiler warning.
+
+	* src/tools/sort_word.c,
+	src/tools/sort_dic.c,
+	src/userphrase.c,
+	src/chewingutil.c,
+	src/zuin.c: Proper inclusion for internal headers.
+
+	* configure.ac: Refactor --enable-debug detection.
+
 2008-10-11  Jim Huang  <jserv.tw@gmail.com>
 
 	* include/global.h,

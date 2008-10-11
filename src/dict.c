@@ -74,7 +74,7 @@ int InitDict( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
-	indexfile = open( filename, O_RDONLY);
+	indexfile = open( filename, O_RDONLY );
 
 	if ( indexfile == -1 )
 		return 0;

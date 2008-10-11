@@ -88,13 +88,13 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 }
 #endif
 
-#ifdef USE_BINARY_DATA
 static void TerminateTree()
 {
+#ifdef USE_BINARY_DATA
 	if ( tree )
 		free( tree );
-}
 #endif
+}
 
 void ReadTree( const char *prefix )
 {
@@ -135,6 +135,8 @@ void ReadTree( const char *prefix )
 	}
 	fclose( infile );
 #endif
+
+	addTerminateService( TerminateTree );
 }
 
 static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )

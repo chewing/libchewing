@@ -42,7 +42,6 @@ void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 int AddSelect( ChewingData *pgdata, int sel_i );
 int CountSelKeyNum( int key, ChewingData *pgdata );
 int ChewingIsChiAt( int cursor, ChewingData *pgdata );
-static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
 int ChewingKillChar(
 		ChewingData *pgdata, 
 		int cursorToKill, 
@@ -54,7 +53,6 @@ int OpenSymbolChoice( ChewingData *pgdata );
 
 int InitSymbolTable( const char *prefix );
 int InitEasySymbolInput(const char *prefix);
-static int FindSymbolKey( const char* symbol );
 
 #endif
 

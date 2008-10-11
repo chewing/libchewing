@@ -11,12 +11,15 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "global-private.h"
 #include "chewing-private.h"
+#include "key2pho-private.h"
 #include "zuin.h"
 
 #define PHONE_CIN_FILE	"phone.cin"

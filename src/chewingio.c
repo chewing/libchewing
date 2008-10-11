@@ -26,6 +26,7 @@
 #include "zuin-private.h"
 #include "chewingutil.h"
 #include "userphrase-private.h"
+#include "choice-private.h"
 #include "dict-private.h"
 #include "char-private.h"
 #include "hash-private.h"
@@ -241,8 +242,6 @@ CHEWING_API void chewing_free( ChewingContext *ctx )
 
 CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 {
-	ChewingData *pgdata = ctx->data;
-
 	chewing_set_candPerPage( ctx, pcd->candPerPage );
 	chewing_set_maxChiSymbolLen( ctx, pcd->maxChiSymbolLen );
 	chewing_set_selKey( ctx, pcd->selKey, MAX_SELKEY );
@@ -273,7 +272,8 @@ CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx )
 	return ctx->data->config.maxChiSymbolLen;
 }
 
-CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len )
+CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys,
+                                     int len UNUSED)
 {
 	memcpy(
 		ctx->data->config.selKey,
@@ -661,7 +661,6 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
-	int toSelect = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int key_buf_cursor;
 
@@ -1373,7 +1372,6 @@ CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
-	int rtn, key = '\0';
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! pgdata->bSelect ) {

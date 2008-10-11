@@ -130,22 +130,22 @@ AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 
 # Options
 AC_ARG_ENABLE([debug],
-		[AS_HELP_STRING(--enable-debug,Turn on debugging support)],
-		[case "${enableval}" in
-		yes)
-		LIBDEBUG="true"
-		AC_DEFINE(ENABLE_DEBUG, 1,
+              [AS_HELP_STRING([--enable-debug],
+                              [Turn on debugging support @<:@default=no@:>@])],
+              [case "${enableval}" in
+               yes)
+               LIBDEBUG="true"
+               ;;
+               *)
+               ;;
+               esac],
+              [LIBDEBUG="false"])
+
+if test x$LIBDEBUG = x"true"; then
+	AC_DEFINE(ENABLE_DEBUG, 1,
 		[Define to 1 if you want native library runtime debugging code enabled])
-		CFLAGS="$CFLAGS -g"
-		;;
-		no)
-		LIBDEBUG="false"
-		;;
-		*)
-		AC_MSG_ERROR(bad value ${enableval} for --enable-debug)
-		;;
-		esac],
-	[LIBDEBUG="false"])
+	CFLAGS="$CFLAGS -g"
+fi
 AC_SUBST(LIBDEBUG)
 
 AC_ARG_ENABLE([visibility-hiding],
@@ -171,7 +171,7 @@ AC_ARG_ENABLE([binary-data],
 		*)
 		;;
 		esac],
-	[binary_data="yes"])
+	      [binary_data="yes"])
 if test x$binary_data = "xyes"; then
 	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
 fi

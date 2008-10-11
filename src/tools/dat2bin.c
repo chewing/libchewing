@@ -1,7 +1,7 @@
 /**
  * dat2bin.c
  *
- * Copyright (c) 2005
+ * Copyright (c) 2005, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -99,8 +99,8 @@ int main( int argc, char* argv[] )
 	strcat(filename, "_bin");
 	fo = fopen( filename, "wb" );
 
-	if( fo ) {
-		TreeType tree = { 0 };
+	if ( fo ) {
+		TreeType tree = { 0, 0, 0, 0 };
 		for ( i = 0; i < tree_size * 2; i++ ) {
 			if ( fscanf( fi, "%hu%d%d%d",
 				&tree.phone_id,
@@ -122,7 +122,6 @@ int main( int argc, char* argv[] )
 	strcat( filename, "_bin" );
 	fo = fopen( filename, "wb" );
 	if ( fo ) {
-		int i = 0;
 		int begin;
 		while ( !feof( fi ) ) {
 			fscanf( fi, "%d", &begin );

@@ -1,7 +1,7 @@
 /**
  * hanyupinyin.c
  *
- * Copyright (c) 2005, 2006
+ * Copyright (c) 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+
 #include "hanyupinyin.h"
 #include "hash-private.h"
 #include "private.h"
@@ -28,7 +30,7 @@ CHEWING_API int chewing_set_PinYinMethod(
 		const PinYinMethodType methodType,
 		const char *filePath )
 {
-	if ( methodType < 0 || methodType >= PINYIN_NONE )
+	if ( (int) methodType < 0 || methodType >= PINYIN_NONE )
 		return -1; /* invaild PinYinMethodType */
 
 
@@ -48,12 +50,14 @@ static void FreeMap()
 	free( hanyuFinalsMap );
 }
 
+#if 0
 static int compkey( const void *k1, const void *k2 )
 {
 	keymap *key1 = (keymap *) k1;
 	keymap *key2 = (keymap *) k2;
 	return strcmp( key1->pinyin, key2->pinyin );
 }
+#endif
 
 static void InitMap()
 {
@@ -111,7 +115,7 @@ static void InitMap()
  */
 int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 {
-	char *p, *cursor;
+	char *p, *cursor = NULL;
 	char *initial = 0;
 	char *final = 0;
 	int i;
@@ -159,6 +163,6 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 		}
 	}
 	
-	sprintf( zuinKeySeq, "%s%s\0", initial, final );
+	sprintf( zuinKeySeq, "%s%s", initial, final );
 	return 0;
 }

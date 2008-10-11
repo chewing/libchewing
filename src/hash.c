@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
+#include <assert.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -115,6 +116,7 @@ HASH_ITEM *HashInsert( UserPhraseData *pData )
 	return pItem;
 }
 
+#ifdef ENABLE_DEBUG
 static void HashItem2String( char *str, HASH_ITEM *pItem )
 {
 	int i, len;
@@ -132,6 +134,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 		pItem->data.maxfreq, pItem->data.origfreq );
 	strcat( str, buf );
 }
+#endif
 
 /* 
  * capacity of 'str' MUST bigger then FIELD_SIZE !
@@ -140,7 +143,7 @@ static void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
 	uint16 *pshort;
-	unsigned char buf[ FIELD_SIZE ], *puc;
+	unsigned char *puc;
 
 	memset(str, 0, FIELD_SIZE);
 	if ( sizeof(int) * 4 + ueStrLen( pItem->data.wordSeq ) * 2 +
@@ -236,9 +239,8 @@ static int isValidChineseString( char *str )
  */
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
-	int len, i, word_len, ptr;
+	int len, i;
 	uint16 *pshort;
-	char wordbuf[ 64 ];
 	unsigned char recbuf[ FIELD_SIZE ], *puc;
 
 	memcpy( recbuf, srcbuf, FIELD_SIZE );
@@ -383,8 +385,8 @@ static int migrate_hash_to_bin( const char *ofilename )
 {
 	FILE *txtfile;
 	char oldname[ 256 ], *dump, *seekdump;
-	HASH_ITEM item, *pItem;
-	int item_index, hashvalue, iret, tflen;
+	HASH_ITEM item;
+	int item_index, iret, tflen;
 
 	/* allocate dump buffer */
 	txtfile = open_file_get_length( ofilename, "r", &tflen );
@@ -525,11 +527,11 @@ open_hash_file:
 		}
 		chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-		fwrite( &chewing_lifetime, 1, sizeof(chewing_lifetime), outfile );
+		fwrite( &chewing_lifetime, 1,
+		                sizeof(chewing_lifetime), outfile );
 		fclose( outfile );
 	}
 	else {
-		char header[ 5 ];
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );

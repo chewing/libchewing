@@ -30,6 +30,7 @@
 
 #include "global.h"
 #include "global-private.h"
+#include "key2pho-private.h"
 
 #define MAXLEN		149
 #define MAXZUIN		9
