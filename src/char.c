@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006
+ * Copyright (c) 2004, 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -73,14 +73,15 @@ static void TerminateChar()
 
 int InitChar( const char *prefix )
 {
-	FILE *indexfile;
 	char filename[ 100 ];
-	int i;
 
 #ifdef USE_BINARY_DATA
-	unsigned int idxSize;
-	size_t offset = 0;
-	size_t csize;
+	long file_size;
+	int indexfile;
+	struct stat file_stat;
+#else
+	FILE *indexfile;
+	int i;
 #endif
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
@@ -89,22 +90,25 @@ int InitChar( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
-	idxSize = plat_mmap_create(
-			&m_mmap, 
-			filename,
-			FLAG_ATTRIBUTE_READ );
-	if ( ! dictfile || idxSize == 0 )
+	indexfile = open( filename, O_RDONLY );
+	if ( ! dictfile || -1 == indexfile )
 		return 0;
-	csize = idxSize;
-	phone_num = idxSize / (sizeof(int) + sizeof(uint16));
-	phone_data_buf = plat_mmap_set_view( &m_mmap, &offset, &csize );
-	if ( ! phone_data_buf )
+	fstat( indexfile, &file_stat );
+	file_size = (long)file_stat.st_size;
+
+	phone_num = file_size / (sizeof(int) + sizeof(uint16));
+	phone_data_buf = malloc( file_size );
+
+	if ( !phone_data_buf ||
+	     !read( indexfile, phone_data_buf, file_size ) ) {
+		close(indexfile);
 		return 0;
+	}
 
 	begin = ((int*)phone_data_buf);
 	arrPhone = (uint16*)(begin + phone_num);
 
-	plat_mmap_close( &m_mmap );	
+	close(indexfile);
 #else
 	indexfile = fopen( filename, "r" );
 

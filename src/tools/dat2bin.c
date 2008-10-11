@@ -41,7 +41,7 @@
 
 int main( int argc, char* argv[] )
 {
-	char* prefix = argc < 2 ? "" : argv[1];
+	char *prefix = argc < 2 ? "" : argv[1];
 	char filename[ 100 ];
 	char workdir[ 100 ];
 	int i;
@@ -64,24 +64,22 @@ int main( int argc, char* argv[] )
 
 	printf("convert dat files to binary format...\n");
 
+	/* CHAR_INDEX_FILE */
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
 	FILE* fi = fopen( filename, "r" );
 	if ( !fi )
 		return 1;
 
-	strcat(filename, "_bin");
-	FILE* fo = fopen( filename, "wb" );
+	strcat( filename, "_bin" );
+	FILE *fo = fopen( filename, "wb" );
 
-	if( fo )
-	{
+	if ( fo ) {
 		static uint16 *arrPhone;
 		static int *begin;
 		arrPhone = ALC( uint16, phone_num * 2 );
 		begin = ALC( int, phone_num * 2 );
-		for ( i = 0; i <= phone_num * 2; i++ )
-		{
-			if( fscanf( fi, "%hu %d", &arrPhone[i], &begin[i] ) < 2 )
-			{
+		for ( i = 0; i <= phone_num * 2; i++ ) {
+			if ( fscanf( fi, "%hu %d", &arrPhone[i], &begin[i] ) < 2 ) {
 				fwrite( begin, sizeof(int), i, fo );
 				fwrite( arrPhone, sizeof(uint16), i, fo );
 				break;
@@ -93,6 +91,7 @@ int main( int argc, char* argv[] )
 	}
 	fclose( fi );
 
+	/* PHONE_TREE_FILE */
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
 	fi = fopen( filename, "r" );
 	if ( !fi )
@@ -100,9 +99,8 @@ int main( int argc, char* argv[] )
 	strcat(filename, "_bin");
 	fo = fopen( filename, "wb" );
 
-	if( fo )
-	{
-		TreeType tree = {0};
+	if( fo ) {
+		TreeType tree = { 0 };
 		for ( i = 0; i < tree_size * 2; i++ ) {
 			if ( fscanf( fi, "%hu%d%d%d",
 				&tree.phone_id,
@@ -116,18 +114,17 @@ int main( int argc, char* argv[] )
 	}
 	fclose( fi );
 
+	/* PH_INDEX_FILE */
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 	fi = fopen( filename, "r" );
-	if( !fi )
+	if ( !fi )
 		return 1;
 	strcat( filename, "_bin" );
 	fo = fopen( filename, "wb" );
-	if( fo )
-	{
+	if ( fo ) {
 		int i = 0;
 		int begin;
-		while ( !feof( fi ) )
-		{
+		while ( !feof( fi ) ) {
 			fscanf( fi, "%d", &begin );
 			fwrite( &begin, sizeof(int), 1, fo );
 		}

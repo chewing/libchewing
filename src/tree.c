@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006
+ * Copyright (c) 2004, 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -51,7 +51,6 @@ typedef struct {
 #ifdef USE_BINARY_DATA
 extern TreeType *tree;
 static unsigned int tree_size = 0;
-static plat_mmap m_mmap;
 #else
 extern TreeType tree[ TREE_SIZE ];
 #endif
@@ -98,29 +97,30 @@ static void TerminateTree()
 
 void ReadTree( const char *prefix )
 {
-	int i;
-	FILE *infile;
 	char filename[ 100 ];
 
 #ifdef USE_BINARY_DATA
-	size_t offset = 0;
-	size_t csize = 0;
+	int infile;
+	struct stat file_stat;
+#else
+	FILE *infile;
+	int i;
 #endif
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
 #ifdef USE_BINARY_DATA
-	tree_size = plat_mmap_create(
-			&m_mmap,
-			filename,
-			FLAG_ATTRIBUTE_READ );
-	if ( tree_size == 0 )
+	infile = open( filename, O_RDONLY );
+
+	if ( infile == -1  )
 		return;
 
-	csize = tree_size;
-	tree = plat_mmap_set_view( &m_mmap, &offset, &csize );
+	fstat( infile, &file_stat );
 
-	plat_mmap_close( &m_mmap );
-	addTerminateService( TerminateTree );
+	tree_size = (long) file_stat.st_size;
+	if ((tree = malloc( tree_size )) )
+		read( infile, tree, tree_size );
+
+	close( infile );
 #else
 	infile = fopen( filename, "r" );
 	assert( infile );

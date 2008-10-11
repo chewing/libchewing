@@ -81,7 +81,7 @@ AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # Checks for check unit test framework
 PKG_CHECK_MODULES(CHECK, check >= 0.9.4, enable_check=yes, enble_check=no)
-AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
+AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
 OLDCFLAGS=$CFLAGS
@@ -126,7 +126,7 @@ if test -z "$NCURSESW_LIBS"; then
 fi
 AC_SUBST(NCURSESW_CFLAGS)
 AC_SUBST(NCURSESW_LIBS)
-AM_CONDITIONAL(ENABLE_TEXT_UI, test $enable_ncursesw = "yes")
+AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 
 # Options
 AC_ARG_ENABLE([debug],
@@ -161,23 +161,22 @@ AC_ARG_ENABLE([visibility-hiding],
 	       CFLAGS="$CFLAGS -fvisibility=hidden")
 
 
-#AC_ARG_ENABLE([binary-data],
-#		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
-#		[case "${enableval}" in
-#		yes)
-#		ENABLE_BINARY_DATA="true"
-#		AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
-#		;;
-#		no)
-#		ENABLE_BINARY_DATA="false"
-#		;;
-#		*)
-#		AC_MSG_ERROR(bad value ${enableval} for --enable-binary-data)
-#		;;
-#		esac],
-#	[ENABLE_BINARY_DATA="false"])
-#AC_SUBST(ENABLE_BINARY_DATA)
-#AM_CONDITIONAL(ENABLE_BINARY_DATA, test $ENABLE_BINARY_DATA = "true")
+AC_ARG_ENABLE([binary-data],
+		[AS_HELP_STRING([--enable-binary-data],
+				[Experimental use of binary data @<:@default=yes@:>@])],
+		[case "${enableval}" in
+		no)
+		binary_data="no"
+		;;
+		*)
+		;;
+		esac],
+	[binary_data="yes"])
+if test x$binary_data = "xyes"; then
+	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
+fi
+AC_SUBST(ENABLE_BINARY_DATA)
+AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
 
 # Platform-dependent
 dnl What kind of system are we using?
@@ -223,7 +222,7 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
-dnl  Enable binary data      $ENABLE_BINARY_DATA
+  Enable binary data      $binary_data
   Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
 ])
