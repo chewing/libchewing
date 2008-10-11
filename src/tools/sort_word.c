@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "global.h"
+#include "global-private.h"
 #include "chewing-private.h"
 #include "zuin.h"
 

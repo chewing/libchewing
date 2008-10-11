@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "global.h"
+#include "global-private.h"
 
 #define MAXLEN		149
 #define MAXZUIN		9

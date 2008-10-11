@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "global-private.h"
 #include "chewing-definition.h"
 #include "char-private.h"
 #include "private.h"

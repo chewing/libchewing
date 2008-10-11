@@ -18,15 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PHONE_TREE_FILE		"fonetree.dat"
-#define DICT_FILE		"dict.dat"
-#define PH_INDEX_FILE		"ph_index.dat"
-#define CHAR_FILE		"us_freq.dat"
-#define CHAR_INDEX_FILE		"ch_index.dat"
-#define SYMBOL_TABLE_FILE	"symbols.dat"
-#define SOFTKBD_TABLE_FILE	"swkb.dat"
-#define CHEWING_DEFINITION_FILE "chewing-definition.h"
-
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
 #define CHINESE_MODE 1

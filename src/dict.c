@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "global-private.h"
 #include "private.h"
 #include "plat_mmap.h"
 #include "dict-private.h"

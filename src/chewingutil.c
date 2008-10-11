@@ -20,6 +20,7 @@
 
 #include "chewing-utf8-util.h"
 #include "global.h"
+#include "global-private.h"
 #include "chewingutil.h"
 #include "zuin.h"
 #include "zuin-private.h"

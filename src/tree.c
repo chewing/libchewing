@@ -25,6 +25,7 @@
 #include "chewing-definition.h"
 #include "userphrase-private.h"
 #include "global.h"
+#include "global-private.h"
 #include "dict-private.h"
 #include "char-private.h"
 #include "private.h"

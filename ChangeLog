@@ -1,5 +1,21 @@
 2008-10-11  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/global.h,
+	include/internal/global-private.h: Move filename definitions to the
+	later.  Not necessary to expose chewing data filename information.
+
+	* src/tree.c,
+	src/char.c,
+	src/tools/sort_word.c,
+	src/tools/sort_dic.c,
+	src/tools/maketree.c,
+	src/chewingutil.c,
+	src/dict.c: Ditto.  Proper inclusion.
+
+	* Makefile.am: Remove internal headers.
+
+2008-10-11  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/tree.c (ReadTree),
 	src/char.c (InitChar),
 	src/dict.c (InitDict),
