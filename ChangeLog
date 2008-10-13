@@ -1,3 +1,7 @@
+2008-10-13  Kanru Chen  <kanru@kanru.info>
+
+	* src/gen_keystroke.c (set_cursor): Removed.
+
 2008-10-12  Jim Huang  <jserv.tw@gmail.com>
 
 	* include/global.h: Added macro UNUSED = __attribute__((unused)).

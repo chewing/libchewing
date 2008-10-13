@@ -69,11 +69,12 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 	char *buffer_string;
 	move( x, y );
 	addstr( FILL_BLANK );
-	if ( ! chewing_buffer_Check( ctx ) )
+	if ( ! chewing_buffer_Check( ctx ) ) {
+		move( x, y );
 		return;
-	move( x, y );
+	}
 	buffer_string = chewing_buffer_String( ctx );
-	addstr( buffer_string );
+	mvaddstr( x, y, buffer_string );
 	free( buffer_string );
 }
 
@@ -245,18 +246,6 @@ void show_commit_string( ChewingContext *ctx )
 	}
 }
 
-void set_cursor( int x, ChewingContext *ctx )
-{
-#if 0
-	int i, count;
-
-	for ( count = 0, i = 0; i < ctx->output->chiSymbolCursor; i++) {
-		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
-	}
-	move( x, count );
-#endif
-}
-
 int main( int argc, char *argv[] )
 {
 	ChewingConfigData config;
@@ -409,7 +398,6 @@ int main( int argc, char *argv[] )
 				break;
 		}
 		drawline( 0, 0 );
-		show_edit_buffer( 1, 0, ctx );
 		drawline( 2, 0 );
 		show_interval_buffer( 3, 0, ctx );
 		drawline( 4, 0 );
@@ -424,7 +412,7 @@ int main( int argc, char *argv[] )
 		mvaddstr( 11, 0, "Crtl + h : toggle Full/Half shape mode" );
 		show_commit_string( ctx );
 		show_userphrase( 7, 12, ctx );
-		set_cursor( 1, ctx );
+		show_edit_buffer( 1, 0, ctx );
 	}
 end:
 	endwin();
