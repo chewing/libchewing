@@ -16,9 +16,7 @@ CHEWINGDATA = \
 	$(DATADIR)/symbols.dat
 
 $(TESTDATA): $(DEFAULT_TESTDATA)
-	if [ ! -f $(TESTDATA) ]; then \
-		cp $(DEFAULT_TESTDATA) $(TESTDATA) ; \
-	fi
+	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi
 
 check: testchewing $(TESTDATA) $(CHEWINGDATA)
 	$(testdir)/testchewing < $(TESTDATA)

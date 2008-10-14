@@ -734,7 +734,7 @@ static void SortListByFreq( TreeDataType *ptd )
 	assert( arr );
 
 	for ( 
-		i = 0, p=ptd->phList;
+		i = 0, p = ptd->phList;
 		i < listLen;
 		p = p->next, i++ ) {
 		arr[ i ] = p;
@@ -904,13 +904,13 @@ static void ShowList( TreeDataType *ptd )
 				ptd->interval[ p->arrIndex[ i ] ].to );
 		}
 		DEBUG_OUT(
-			"\n   freq : %d , nMatchCnnct : %d\n", 
+			"\n"
+			   "      freq : %d , nMatchCnnct : %d\n", 
 			p->freq, 
 			p->nMatchCnnct );
 	}
 	DEBUG_OUT( "\n" );
 }
-
 #endif
 
 static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )

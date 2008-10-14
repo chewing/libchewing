@@ -1,5 +1,15 @@
 2008-10-14  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/Makefile.am: Quiet copy default test data.
+
+	* src/tree.c (ShowList),
+	src/chewingutil.c (ShowChewingData): Debug output tweaking.
+
+	* src/chewingutil.c (CallPhrasing): Dump chewing data internals when
+	debug mode.
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
 	* choice.c,
 	tree.c: Move the declaration of [TreeType] tree from ... to ...
 

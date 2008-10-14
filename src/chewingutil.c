@@ -642,7 +642,7 @@ static void ShowChewingData( ChewingData *pgdata )
 		DEBUG_OUT( "%d ", pgdata->bUserArrBrkpt[ i ] );
 	DEBUG_OUT( "\n" );
 
-	DEBUG_OUT( "bArrBrkpt : " );
+	DEBUG_OUT( "bArrBrkpt     : " );
 	for ( i = 0; i <= pgdata->nPhoneSeq; i++ )
 		DEBUG_OUT( "%d ", pgdata->bArrBrkpt[ i ] );
 	DEBUG_OUT( "\n" );
@@ -683,6 +683,10 @@ int CallPhrasing( ChewingData *pgdata )
 			ChewingKillSelectIntervalAcross( i, pgdata );
 		}
 	}
+
+#ifdef ENABLE_DEBUG
+	ShowChewingData(pgdata);
+#endif
 
 	/* then phrasing */
 	Phrasing( 
