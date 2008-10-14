@@ -55,10 +55,10 @@ typedef struct {
 } TreeDataType;
 
 #ifdef USE_BINARY_DATA
-extern TreeType *tree;
+TreeType *tree;
 static unsigned int tree_size = 0;
 #else
-extern TreeType tree[ TREE_SIZE ];
+TreeType tree[ TREE_SIZE ];
 #endif
 
 static int IsContain( IntervalType in1, IntervalType in2 )

@@ -25,17 +25,10 @@
 #include "global.h"
 #include "dict-private.h"
 #include "char-private.h"
-#include "tree-private.h"
 #include "chewingutil.h"
 #include "userphrase-private.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
-
-#ifdef USE_BINARY_DATA
-TreeType *tree = NULL;
-#else
-TreeType tree[ TREE_SIZE ];
-#endif
 
 static void ChangeSelectIntervalAndBreakpoint(
 		ChewingData *pgdata,
