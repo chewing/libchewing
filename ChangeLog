@@ -1,4 +1,10 @@
 2008-10-14  Kanru Chen  <kanru@kanru.info>
+	
+	* include/mod_aux.h (chewing_cursor_Current): Correct return type.
+
+	* test/gen_keystroke.c: Add back cursor position.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
 
 	* include/global.h,
 	include/internal/chewing-private.h: Expose InternalType.

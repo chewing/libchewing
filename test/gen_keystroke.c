@@ -68,8 +68,9 @@ void drawline( int x, int y )
 
 void show_edit_buffer( int x, int y, ChewingContext *ctx )
 {
-	int i;
+	int i, cursor, count;
 	char *buffer_string;
+	char *p;
 	move( x, y );
 	addstr( FILL_BLANK );
 	if ( ! chewing_buffer_Check( ctx ) ) {
@@ -78,6 +79,13 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 	}
 	buffer_string = chewing_buffer_String( ctx );
 	mvaddstr( x, y, buffer_string );
+	cursor = chewing_cursor_Current( ctx );
+	p = buffer_string;
+	for ( i = 0 ;i < cursor; i++ ) {
+		count += ueBytesFromChar(*p) <= 1 ? 1 : 2;
+		p += ueBytesFromChar(*p);
+	}
+	move( x, count );
 	free( buffer_string );
 }
 
@@ -307,7 +315,7 @@ int main( int argc, char *argv[] )
 	ctx = chewing_new();
 
 	/* Set keyboard type */
-	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
+	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DVORAK" ) );
 
 	/* Fill configuration values */
 	chewing_set_candPerPage( ctx, 9 );

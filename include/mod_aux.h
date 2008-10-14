@@ -47,7 +47,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx );
 
 
-CHEWING_API char *chewing_cursor_Current( ChewingContext *ctx );
+CHEWING_API int chewing_cursor_Current( ChewingContext *ctx );
 
 
 CHEWING_API int chewing_cand_CheckDone( ChewingContext *ctx );
