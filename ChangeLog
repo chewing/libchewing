@@ -1,3 +1,7 @@
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* src/mod_aux.c (cand_no_max): Remove unnecessary static variable.
+
 2008-10-13  Kanru Chen  <kanru@kanru.info>
 
 	* test/gen_keystroke.c (set_cursor): Removed.

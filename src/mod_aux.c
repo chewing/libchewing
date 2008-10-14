@@ -126,11 +126,9 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx )
 	return (ctx->output->pci ? ctx->output->pci->pageNo : -1);
 }
 
-static int cand_no_max = 9999;
 CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx )
 {
 	ctx->cand_no = ctx->output->pci->pageNo * ctx->output->pci->nChoicePerPage;
-	cand_no_max = ctx->output->pci->nTotalChoice;
 }
 
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
@@ -141,7 +139,7 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 {
 	char *s;
-	if ( chewing_cand_hasNext( ctx ) || (ctx->cand_no < cand_no_max) ) {
+	if ( chewing_cand_hasNext( ctx ) || (ctx->cand_no < ctx->output->pci->nTotalChoice) ) {
 		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
 		ctx->cand_no++;
 	} else {
