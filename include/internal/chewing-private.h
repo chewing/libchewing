@@ -202,9 +202,4 @@ typedef struct {
 	int freq;
 } Phrase;
 
-typedef struct {
-	int from, to, pho_id, source;
-	Phrase *p_phr;
-} PhraseIntervalType;
-
 #endif

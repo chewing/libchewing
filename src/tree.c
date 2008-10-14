@@ -33,6 +33,11 @@
 
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 
+typedef struct {
+	int from, to, pho_id, source;
+	Phrase *p_phr;
+} PhraseIntervalType;
+
 typedef struct tagRecordNode {
 	int *arrIndex;		/* the index array of the things in "interval" */
 	int nInter, freq;

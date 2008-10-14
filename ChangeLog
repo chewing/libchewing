@@ -2,6 +2,15 @@
 
 	* src/mod_aux.c (cand_no_max): Remove unnecessary static variable.
 
+	* include/internal/chewing-private.h,
+	src/tree.c (PhraseIntervalType): Move from ... to ...
+
+	* include/global.h,
+	include/internal/tree-private.h (ReadTree): Ditto.
+
+	* include/hanyupinyin.h,
+	include/internal/hanyupinyin-private.h: Hide private structure.
+
 2008-10-13  Kanru Chen  <kanru@kanru.info>
 
 	* test/gen_keystroke.c (set_cursor): Removed.

@@ -16,25 +16,11 @@
 
 #include "global.h"
 
-/*
-  This is a key-sequense map.
-  From pinyin sequence to a default-layout sequence.
-  Eg: Zhang -> {"zh","5"}, {"ang",";"}
- */
-struct keymap {
-	char pinyin[7];
-	char zuin[4];
-};
-typedef struct keymap keymap;
-
 typedef enum {
 	PINYIN_HANYU,
 	PINYIN_EXTERNAL,
 	PINYIN_NONE
 } PinYinMethodType;
-
-
-int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq );
 
 /**
  * @breif Set PinYin input method

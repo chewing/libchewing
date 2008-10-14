@@ -77,7 +77,4 @@ typedef struct _ChewingContext ChewingContext;
 /** @brief use "asdfzxcv89" as selection key */
 #define HSU_SELKEY_TYPE2 2
 
-/* tree.c */
-void ReadTree( const char * );
-
 #endif
