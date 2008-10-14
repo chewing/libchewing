@@ -30,8 +30,8 @@
 #ifdef USE_BINARY_DATA
 static uint16* arrPhone = NULL;
 static int *begin = NULL;
-static char *phone_data_buf = NULL;
 static int phone_num;
+static plat_mmap char_mmap;
 #else
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];
@@ -66,8 +66,7 @@ static void TerminateChar()
 	if ( dictfile )
 		fclose( dictfile );
 #ifdef USE_BINARY_DATA
-	if( phone_data_buf )
-		free( phone_data_buf );
+	plat_mmap_close( &char_mmap );
 #endif
 }
 
@@ -77,8 +76,8 @@ int InitChar( const char *prefix )
 
 #ifdef USE_BINARY_DATA
 	long file_size;
-	int indexfile;
-	struct stat file_stat;
+	size_t offset = 0;
+	size_t csize;
 #else
 	FILE *indexfile;
 	int i;
@@ -90,25 +89,20 @@ int InitChar( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
-	indexfile = open( filename, O_RDONLY );
-	if ( ! dictfile || -1 == indexfile )
+	file_size = plat_mmap_create( &char_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( file_size );
+	if ( ! dictfile || -1 == file_size )
 		return 0;
-	fstat( indexfile, &file_stat );
-	file_size = (long)file_stat.st_size;
 
 	phone_num = file_size / (sizeof(int) + sizeof(uint16));
-	phone_data_buf = malloc( file_size );
 
-	if ( !phone_data_buf ||
-	     !read( indexfile, phone_data_buf, file_size ) ) {
-		close( indexfile );
+	csize = file_size;
+	begin = (int *) plat_mmap_set_view( &char_mmap, &offset, &csize );
+	assert( begin );
+	if ( ! begin )
 		return 0;
-	}
 
-	begin = (int *) phone_data_buf;
 	arrPhone = (uint16 *) (begin + phone_num);
-
-	close(indexfile);
 #else
 	indexfile = fopen( filename, "r" );
 

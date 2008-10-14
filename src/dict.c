@@ -23,6 +23,7 @@
 
 #ifdef USE_BINARY_DATA
 static int *begin = NULL;
+static plat_mmap dict_mmap;
 #else
 static int begin[ PHONE_PHRASE_NUM + 1 ];
 #endif
@@ -51,8 +52,7 @@ static void TerminateDict()
 	if ( dictfile )
 		fclose( dictfile );
 #ifdef USE_BINARY_DATA
-	if ( begin )
-		free( begin );
+	plat_mmap_close( &dict_mmap );
 #endif
 }
 
@@ -61,8 +61,9 @@ int InitDict( const char *prefix )
 	char filename[ 100 ];
 
 #ifdef USE_BINARY_DATA
-	int indexfile;
-	struct stat file_stat;
+	long file_size;
+	size_t offset = 0;
+	size_t csize;
 #else
 	FILE *indexfile;
 	int i;
@@ -78,16 +79,14 @@ int InitDict( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
-	indexfile = open( filename, O_RDONLY );
-
-	if ( indexfile == -1 )
+	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( file_size );
+	if ( file_size < 0 )
 		return 0;
-	fstat( indexfile, &file_stat );
 
-	if ( (begin = (int *) malloc( (size_t) file_stat.st_size + sizeof(int)) ) )
-		read( indexfile, begin, (size_t) file_stat.st_size );
-
-	close( indexfile );
+	csize = file_size + sizeof(int);
+	begin = (int *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
+	assert( begin );
 #else
 	indexfile = fopen( filename, "r" );
 	assert( dictfile && indexfile );

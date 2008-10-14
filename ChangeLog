@@ -1,3 +1,11 @@
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (TerminateTree) (ReadTree),
+	src/char.c (TerminateChar) (InitChar),
+	src/dict.c (TerminateDict) (InitDict): Rewrite binary data
+	manipulation by using mmap (memory mapped, provided by porting_layer).
+	Expected to dramatically reduce loading	time.
+
 2008-10-14  Kanru Chen  <kanru@kanru.info>
 
 	* src/dict.c,

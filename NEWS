@@ -2,8 +2,8 @@ What's New in libchewing SVN
 ---------------------------------------------------------
 * Add gcc visibility support to hide private APIs.
 * Headers refactoring.
-* Improved binary data handling to dramatically reduce storage
-  usage.(enabled by default)
+* New binary data manipulation approach to dramatically reduce storage
+  usage and loading time via memory map. (enabled by default)
 * Successful stories:
   . OpenBSD porting
   . ibus-chewing : chewing engine for ibus input method framework.

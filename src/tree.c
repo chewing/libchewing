@@ -57,6 +57,7 @@ typedef struct {
 #ifdef USE_BINARY_DATA
 TreeType *tree;
 static unsigned int tree_size = 0;
+static plat_mmap tree_mmap;
 #else
 TreeType tree[ TREE_SIZE ];
 #endif
@@ -96,8 +97,7 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 static void TerminateTree()
 {
 #ifdef USE_BINARY_DATA
-	if ( tree )
-		free( tree );
+	plat_mmap_close( &tree_mmap );
 #endif
 }
 
@@ -106,8 +106,8 @@ void ReadTree( const char *prefix )
 	char filename[ 100 ];
 
 #ifdef USE_BINARY_DATA
-	int infile;
-	struct stat file_stat;
+	size_t offset = 0;
+	size_t csize;
 #else
 	FILE *infile;
 	int i;
@@ -115,18 +115,14 @@ void ReadTree( const char *prefix )
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
 #ifdef USE_BINARY_DATA
-	infile = open( filename, O_RDONLY );
-
-	if ( infile == -1  )
+	tree_size = plat_mmap_create( &tree_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( tree_size );
+	if ( tree_size < 0 )
 		return;
 
-	fstat( infile, &file_stat );
-
-	tree_size = (long) file_stat.st_size;
-	if ((tree = malloc( tree_size )) )
-		read( infile, tree, tree_size );
-
-	close( infile );
+	csize = tree_size;
+	tree = (TreeType *) plat_mmap_set_view( &tree_mmap, &offset, &csize );
+	assert( tree );
 #else
 	infile = fopen( filename, "r" );
 	assert( infile );
