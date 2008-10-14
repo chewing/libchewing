@@ -1052,7 +1052,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	CheckAndResetRange( pgdata );
 
 	DEBUG_CHECKPOINT();
-	DEBUG_OUT( "   key=%d\n", key );
+	DEBUG_OUT( "   key=%d", key );
 
 	/* Dvorak Hsu */
 	if ( pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
@@ -1137,7 +1137,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
 			DEBUG_OUT(
-				"\t\tchinese mode key, "
+				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
 				rtn );
 			DEBUG_FLUSH;

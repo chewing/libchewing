@@ -614,12 +614,12 @@ static void ShowChewingData( ChewingData *pgdata )
 
 	DEBUG_OUT(
 		"nPhoneSeq : %d\n"
-		"phoneSeq : ", 
+		"phoneSeq  : ", 
 		pgdata->nPhoneSeq );
 	for ( i = 0; i < pgdata->nPhoneSeq; i++ )
 		DEBUG_OUT( "%hu ", pgdata->phoneSeq[ i ] );
 	DEBUG_OUT(
-		"cursor : %d\n"
+		"[cursor : %d]\n"
 		"nSelect : %d\n"
 		"selectStr       selectInterval\n", 
 		pgdata->cursor, 
