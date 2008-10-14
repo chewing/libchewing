@@ -26,7 +26,6 @@
 int chewing_lifetime;
 
 static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-static char formatstring[ 30 ];
 static char hashfilename[ 200 ];
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
@@ -186,9 +185,7 @@ void HashModify( HASH_ITEM *pItem )
 	fwrite( &chewing_lifetime, 1, 4, outfile );
 #ifdef ENABLE_DEBUG
 	sprintf( str, "%d", chewing_lifetime );
-	DEBUG_OUT( 
-		"HashModify-1: formatstring='%s',printing '%s'\n", 
-		formatstring, str );
+	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
 	DEBUG_FLUSH;
 #endif
 
@@ -205,9 +202,7 @@ void HashModify( HASH_ITEM *pItem )
 	}
 #ifdef ENABLE_DEBUG
 	HashItem2String( str, pItem );
-	DEBUG_OUT( 
-		"HashModify-2: formatstring='%s',printing '%s'\n",
-		formatstring, str );
+	DEBUG_OUT( "HashModify-2: '%-75s'\n", str );
 	DEBUG_FLUSH;
 #endif
 	HashItem2Binary( str, pItem );
@@ -510,7 +505,6 @@ int ReadHash( const char *path )
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
-	sprintf( formatstring, "%%-%ds", FIELD_SIZE );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );

@@ -1,5 +1,10 @@
 2008-10-14  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/hash.c (formatstring): Removed since it does nothing readable.
+	(HashModify): Simplified hash output text.
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
 	* configure.ac: Refactor enabling rules.
 
 2008-10-14  Kanru Chen  <kanru@kanru.info>
