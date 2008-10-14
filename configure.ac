@@ -79,8 +79,12 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
+# optional modules
+CHECK_REQUIRED_VERSION=0.9.4
+
 # Checks for check unit test framework
-PKG_CHECK_MODULES(CHECK, check >= 0.9.4, enable_check=yes, enble_check=no)
+PKG_CHECK_MODULES(CHECK, check >= $CHECK_REQUIRED_VERSION,
+		  enable_check=yes, enble_check=no)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
@@ -169,9 +173,9 @@ AC_ARG_ENABLE([binary-data],
 		binary_data="no"
 		;;
 		*)
+		binary_data="yes"
 		;;
-		esac],
-	      [binary_data="yes"])
+		esac],)
 if test x$binary_data = "xyes"; then
 	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
 fi
