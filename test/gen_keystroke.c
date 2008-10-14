@@ -315,7 +315,7 @@ int main( int argc, char *argv[] )
 	ctx = chewing_new();
 
 	/* Set keyboard type */
-	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DVORAK" ) );
+	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	/* Fill configuration values */
 	chewing_set_candPerPage( ctx, 9 );
