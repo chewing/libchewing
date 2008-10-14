@@ -480,7 +480,7 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
-int ReadHash( const char *path )
+int InitHash( const char *path )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;

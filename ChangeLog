@@ -1,5 +1,14 @@
 2008-10-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/internal/hash-private.h,
+	include/internal/tree-private.h,
+	src/tree.c,
+	src/hash.c,
+	src/chewingio.c (chewing_Init): Consistent naming for internal APIs.
+	Rename from ReadHash to InitHash.  Rename from ReadTree to InitTree.
+
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/tree.c (TerminateTree) (ReadTree),
 	src/char.c (TerminateChar) (InitChar),
 	src/dict.c (TerminateDict) (InitDict): Rewrite binary data

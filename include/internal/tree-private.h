@@ -11,7 +11,7 @@
 #ifndef _CHEWING_TREE_PRIVATE_H
 #define _CHEWING_TREE_PRIVATE_H
 
-void ReadTree( const char * );
+void InitTree( const char * );
 int Phrasing( PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 

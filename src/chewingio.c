@@ -120,13 +120,13 @@ CHEWING_API int chewing_Init(
 {
 	/* initialize Tree, Char, and Dict */
 	/* FIXME: check the validation of dataPath */
-	ReadTree( dataPath );
+	InitTree( dataPath );
 	InitChar( dataPath );
 	InitDict( dataPath );
 
 	/* initialize Hash */
 	/* FIXME: check the validation of hashPath */
-	ReadHash( hashPath );
+	InitHash( hashPath );
 
 	/* initialize SymbolTable */
 	if ( ! InitSymbolTable( (char*) hashPath ) )

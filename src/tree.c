@@ -101,7 +101,7 @@ static void TerminateTree()
 #endif
 }
 
-void ReadTree( const char *prefix )
+void InitTree( const char *prefix )
 {
 	char filename[ 100 ];
 
