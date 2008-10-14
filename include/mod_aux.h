@@ -34,6 +34,7 @@ CHEWING_API char *chewing_commit_String( ChewingContext *ctx );
 
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx );
 CHEWING_API int chewing_buffer_Check( ChewingContext *ctx );
+CHEWING_API int chewing_buffer_Len( ChewingContext *ctx );
 
 /**
  * @param ctx handle to Chewing IM context
@@ -57,6 +58,10 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx );
 CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx );
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx );
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx );
+
+CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx );
+CHEWING_API int chewing_interval_hasNext( ChewingContext *ctx );
+CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it );
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx );
 CHEWING_API int chewing_aux_Length( ChewingContext *ctx );

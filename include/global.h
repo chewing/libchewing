@@ -69,6 +69,10 @@ typedef struct {
 } ChewingConfigData;
 /** @brief deprecated */
 
+typedef struct {
+	int from, to;
+} IntervalType;
+
 typedef unsigned short uint16;
 typedef struct _ChewingContext ChewingContext;
 

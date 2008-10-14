@@ -14,6 +14,9 @@
 
 #include "chewing.h"
 
+/* Only used by calculating char position */
+#include "internal/chewing-utf8-util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,10 +83,13 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 
 void show_interval_buffer( int x, int y, ChewingContext *ctx )
 {
-#if 0
+	char *buf;
+	char *p;
+	int buf_len;
 	char out_buf[ 100 ];
 	int i, count;
 	int arrPos[ 50 ];
+	IntervalType it;
 
 	move( x, y );
 	addstr( FILL_BLANK );
@@ -93,32 +99,38 @@ void show_interval_buffer( int x, int y, ChewingContext *ctx )
 	if ( ! chewing_buffer_Check( ctx ) ) {
 		return;
 	}
-	
+
+	buf = chewing_buffer_String( ctx );
+	buf_len = chewing_buffer_Len( ctx );
+
+	p = buf;
 	count = 0;
-	for ( i = 0 ;i < ctx->output->chiSymbolBufLen; i++ ) {
+	for ( i = 0 ;i < buf_len; i++ ) {
 		arrPos[ i ] = count;
-		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
+		count += ueBytesFromChar(*p) <= 1 ? 1 : 2;
+		p += ueBytesFromChar(*p);
 	}
 	arrPos[ i ] = count;
 
 	memset( out_buf, ' ', count * ( sizeof( char ) ) );
 	out_buf[ count ] = '\0';
 
-	for ( i = 0; i < ctx->output->nDispInterval; i++ ) {
-		if ( ( ctx->output->dispInterval[ i ].to - ctx->output->dispInterval[ i ].from ) == 1 ) {
-			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = ' ';
-			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] = ' ';
+	chewing_interval_Enumerate( ctx );
+	while ( chewing_interval_hasNext( ctx ) ) {
+		chewing_interval_Get( ctx, &it );
+		if ( ( it.to - it.from ) == 1 ) {
+			out_buf[ arrPos[ it.from ] ] = ' ';
+			out_buf[ arrPos[ it.to ] - 1 ] = ' ';
 		}
 		else {	
-			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = '[';
-			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] =  ']';
+			out_buf[ arrPos[ it.from ] ] = '[';
+			out_buf[ arrPos[ it.to ] - 1 ] =  ']';
 		}
 		memset(
-			&out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] + 1 ], '-',
-			arrPos[ ctx->output->dispInterval[ i ].to ] - arrPos[ ctx->output->dispInterval[ i ].from ] - 2 );
+			&out_buf[ arrPos[ it.from ] + 1 ], '-',
+			arrPos[ it.to ] - arrPos[ it.from ] - 2 );
 	}
 	addstr( out_buf );
-#endif
 }
 
 void showZuin( ChewingContext *ctx )

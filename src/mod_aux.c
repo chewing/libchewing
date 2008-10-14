@@ -53,6 +53,11 @@ CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )
 	return (ctx->output->chiSymbolBufLen != 0);
 }
 
+CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
+{
+	return ctx->output->chiSymbolBufLen;
+}
+
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 {
 	int i;
@@ -146,6 +151,25 @@ CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 		s = strdup( "" );
 	}
 	return s;
+}
+
+CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx )
+{
+	ctx->it_no = 0;
+}
+
+CHEWING_API int chewing_interval_hasNext( ChewingContext *ctx )
+{
+	return (ctx->it_no < ctx->output->nDispInterval);
+}
+
+CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
+{
+	if ( chewing_interval_hasNext( ctx ) ) {
+		it->from = ctx->output->dispInterval[ ctx->it_no ].from;
+		it->to = ctx->output->dispInterval[ ctx->it_no ].to;
+		ctx->it_no++;
+	}
 }
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx )

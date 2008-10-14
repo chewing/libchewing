@@ -45,10 +45,6 @@ typedef struct {
 } TreeType;
 
 typedef struct {
-	int from, to;
-} IntervalType;
-
-typedef struct {
 	char chiBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
@@ -191,6 +187,7 @@ struct _ChewingContext {
 	ChewingData *data;
 	ChewingOutput *output;
 	int cand_no;
+	int it_no;
 };
 /**
  * @struct ChewingContext

@@ -1,5 +1,16 @@
 2008-10-14  Kanru Chen  <kanru@kanru.info>
 
+	* include/global.h,
+	include/internal/chewing-private.h: Expose InternalType.
+
+	* include/mod_aux.h,
+	src/mod_aux.c (chewing_interval_Enumerate) (chewing_interval_hasNext)
+	(chewing_interval_Get): New API to enumerate intervals.
+
+	* test/gen_keystroke.c: Use new API to display intervals.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
 	* src/mod_aux.c (cand_no_max): Remove unnecessary static variable.
 
 	* include/internal/chewing-private.h,
