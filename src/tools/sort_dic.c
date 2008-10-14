@@ -72,15 +72,6 @@ void DataSetNum( long index )
 		data[ index ].num[ i++ ] = UintFromPhone( p );
 }
 
-void SetNewline2Zero( long index )
-{
-	char *p;
-
-	p = strchr( data[ index ].str, '\n' );
-	if ( p )
-		*p = '\0';
-}
-
 void DataStripSpace( long index )
 {
 	long i, k = 0;
@@ -105,6 +96,15 @@ void DataStripSpace( long index )
 		last = old[ i ];
 	}
 	data[ index ].str[ k ] = '\0';
+}
+
+void DataStripAll( long index )
+{
+	char *p;
+
+	p = strchr( data[ index ].str, ' ' );
+	if ( p )
+		*p = '\0';
 }
 
 int CompRecord( const void *a, const void *b )
@@ -141,6 +141,9 @@ int main( int argc, char *argv[] )
 	FILE *dictfile, *treedata, *ph_index;
 	char in_file[ MAX_FILE_NAME ] = "tsi.src";
 	long i, k;
+#ifdef USE_BINARY_DATA
+	unsigned char size;
+#endif
 
 #ifndef USED_IN_DAT2BIN
 	if ( argc < 2 ) 
@@ -156,7 +159,11 @@ int main( int argc, char *argv[] )
 		exit( -1 );
 	}
 
+#ifdef USE_BINARY_DATA
+	dictfile = fopen( DICT_FILE, "wb" );
+#else
 	dictfile = fopen( DICT_FILE, "w" );
+#endif
 	treedata = fopen( IN_FILE, "w" );
 	ph_index = fopen( PH_INDEX_FILE, "w" );
 
@@ -171,7 +178,7 @@ int main( int argc, char *argv[] )
 		if ( data[ nData ].str[0] == '\n' )
 			continue;
 		DataSetNum( nData );
-		SetNewline2Zero( nData );
+		DataStripAll( nData );
 		nData++;
 	}
 	qsort( data, nData, sizeof( RECORD ), CompRecord );
@@ -179,10 +186,24 @@ int main( int argc, char *argv[] )
 	for ( i = 0; i < nData - 1; i++ ) {
 		if ( ( i == 0 ) || ( CompUint( i, i - 1 ) != 0 ) ) 
 			fprintf( ph_index, "%ld\n", ftell( dictfile ) );
-		fprintf( dictfile, "%s\t", data[ i ].str );
+#ifdef USE_BINARY_DATA
+		size = sizeof( char ) * strlen( data[ i ].str );
+		fwrite( &size, sizeof( unsigned char ), 1, dictfile );
+		fwrite( data[ i ].str, size, 1, dictfile );
+		fwrite( &data[ i ].freq, sizeof( int ), 1, dictfile );
+#else
+		fprintf( dictfile, "%s %d\t", data[ i ].str, data[ nData - 1 ].freq );
+#endif
 	}
 	fprintf( ph_index, "%ld\n", ftell( dictfile ) ); 
-	fprintf( dictfile, "%s", data[ nData - 1 ].str );
+#ifdef USE_BINARY_DATA
+	size = sizeof( char ) * strlen( data[ nData - 1 ].str );
+	fwrite( &size, sizeof( unsigned char ), 1, dictfile );
+	fwrite( data[ nData - 1 ].str, size, 1, dictfile );
+	fwrite( &data[ nData - 1 ].freq, sizeof( int ), 1, dictfile );
+#else
+	fprintf( dictfile, "%s %d", data[ nData - 1 ].str, data[ nData - 1 ].freq );
+#endif
 	fprintf( ph_index, "%ld\n", ftell( dictfile ) );
 
 	for ( i = 0; i < nData; i++ ) {

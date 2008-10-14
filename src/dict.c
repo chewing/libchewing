@@ -69,7 +69,11 @@ int InitDict( const char *prefix )
 #endif
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, DICT_FILE );
+#ifdef USE_BINARY_DATA
+	dictfile = fopen( filename, "rb" );
+#else
 	dictfile = fopen( filename, "r" );
+#endif
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 
@@ -98,10 +102,18 @@ int InitDict( const char *prefix )
 
 static void Str2Phrase( Phrase *phr_ptr )
 {
+#ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
 
 	fgettab( buf, 1000, dictfile );
 	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
+#else
+	unsigned char size;
+	fread( &size, sizeof( unsigned char ), 1, dictfile );
+	fread( phr_ptr->phrase, size, 1, dictfile );
+	fread( &( phr_ptr->freq ), sizeof( int ), 1, dictfile );
+	phr_ptr->phrase[size] = '\0';
+#endif
 }
 
 int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
