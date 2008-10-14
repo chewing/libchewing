@@ -30,6 +30,7 @@
 #include "char-private.h"
 #include "hanyupinyin.h"
 #include "key2pho-private.h"
+#include "hanyupinyin-private.h"
 #include "private.h"
 
 static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )

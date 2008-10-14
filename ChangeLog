@@ -1,5 +1,15 @@
 2008-10-15  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/tree.c (OutputRecordStr): clean up dead code.
+
+	* src/chewingio.c,
+	src/zuin.c,
+	src/choice.c: Proper inclusion.
+
+	* src/dict.c (fgettab): Conditional build.
+
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/internal/hash-private.h,
 	include/internal/tree-private.h,
 	src/tree.c,

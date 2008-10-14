@@ -26,6 +26,7 @@
 #include "dict-private.h"
 #include "char-private.h"
 #include "chewingutil.h"
+#include "tree-private.h"
 #include "userphrase-private.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )

@@ -632,27 +632,6 @@ static void OutputRecordStr(
 		IntervalType selectInterval[],
 		int nSelect, TreeDataType *ptd )
 {
-	/*
-	PhraseIntervalType inter;
-	int i;
-
-	LoadChar( out_buf, phoneSeq, nPhoneSeq );
-	out_buf[ nPhoneSeq * 3 ] = '\0' ;
-	for ( i = 0; i < nRecord; i++ ) {
-		inter = ptd->interval[ record[ i ] ];
-		memcpy(
-				out_buf + inter.from * 3,
-				( inter.p_phr )->phrase,
-				( inter.to - inter.from ) * 3 );
-	}
-	for ( i = 0; i < nSelect; i++ ) {
-		inter.from = selectInterval[ i ].from;
-		inter.to = selectInterval[ i ].to ;
-		ueStrNCpy(
-				ueStrSeek( out_buf, inter.from ),
-				selectStr[ i ], ( inter.to - inter.from ), -1);
-	}
-	*/
 	PhraseIntervalType inter;
 	int i;
 

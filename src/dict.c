@@ -30,6 +30,7 @@ static int begin[ PHONE_PHRASE_NUM + 1 ];
 static FILE *dictfile;
 static int end_pos;
 
+#if ! defined(USE_BINARY_DATA)
 static char *fgettab( char *buf, int maxlen, FILE *fp )
 {
 	int i;
@@ -46,6 +47,7 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 	buf[ i ] = '\0';
 	return buf;
 }
+#endif
 
 static void TerminateDict()
 {
