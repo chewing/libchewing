@@ -175,7 +175,7 @@ AC_ARG_ENABLE([binary-data],
 		*)
 		binary_data="yes"
 		;;
-		esac],)
+		esac],binary_data="yes")
 if test x$binary_data = "xyes"; then
 	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
 fi
