@@ -7,7 +7,6 @@ For developers, please add new entry for your plans.
   a) hashed data stored in binary form.
     a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
   b) support memory-limited applications.
-8. Auto calculate the size of phrase data base.
 9. Provide API for querying Keybaord Mapping information.
   a) provide zh_TW translation of corresponding keybaord mapping.
 11. Abstract the I/O layer
