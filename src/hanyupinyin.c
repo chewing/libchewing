@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "hanyupinyin.h"
+#include "hanyupinyin-private.h"
 #include "hash-private.h"
 #include "private.h"
 
