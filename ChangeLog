@@ -1,4 +1,9 @@
 2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* test/Makefile.am,
+	test/randkeystroke.c: Add randkeystroke test program.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
 	
 	* include/mod_aux.h (chewing_cursor_Current): Correct return type.
 

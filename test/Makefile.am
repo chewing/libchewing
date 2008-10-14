@@ -35,6 +35,7 @@ vcheck: check
 
 bin_PROGRAMS = \
 	testchewing \
+	randkeystroke \
 	$(TEXT_UI_BIN) \
 	$(UNIT_TEST_BIN)
 
