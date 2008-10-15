@@ -1,3 +1,8 @@
+2008-10-15  Kanru Chen  <kanru@kanru.info>
+
+	* src/dict.c (TerminateDict) (InitDict) (Str2Phrase): Rewrite dict
+	binary data manipulation by using mmap.
+
 2008-10-15  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/tree.c (OutputRecordStr): clean up dead code.

@@ -23,11 +23,14 @@
 
 #ifdef USE_BINARY_DATA
 static int *begin = NULL;
+static plat_mmap index_mmap;
+static void *dict = NULL;
+static void *cur_pos = NULL;
 static plat_mmap dict_mmap;
 #else
 static int begin[ PHONE_PHRASE_NUM + 1 ];
-#endif
 static FILE *dictfile;
+#endif
 static int end_pos;
 
 #if ! defined(USE_BINARY_DATA)
@@ -51,10 +54,12 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 
 static void TerminateDict()
 {
+#ifdef USE_BINARY_DATA
+	plat_mmap_close( &index_mmap );
+	plat_mmap_close( &dict_mmap );
+#else
 	if ( dictfile )
 		fclose( dictfile );
-#ifdef USE_BINARY_DATA
-	plat_mmap_close( &dict_mmap );
 #endif
 }
 
@@ -73,7 +78,13 @@ int InitDict( const char *prefix )
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, DICT_FILE );
 #ifdef USE_BINARY_DATA
-	dictfile = fopen( filename, "rb" );
+	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( file_size );
+	if ( file_size < 0 )
+		return 0;
+	csize = file_size + sizeof(int);
+	dict = (void *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
+	assert( dict );
 #else
 	dictfile = fopen( filename, "r" );
 #endif
@@ -81,13 +92,13 @@ int InitDict( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
-	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	file_size = plat_mmap_create( &index_mmap, filename, FLAG_ATTRIBUTE_READ );
 	assert( file_size );
 	if ( file_size < 0 )
 		return 0;
 
 	csize = file_size + sizeof(int);
-	begin = (int *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
+	begin = (int *) plat_mmap_set_view( &index_mmap, &offset, &csize );
 	assert( begin );
 #else
 	indexfile = fopen( filename, "r" );
@@ -110,9 +121,12 @@ static void Str2Phrase( Phrase *phr_ptr )
 	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
 #else
 	unsigned char size;
-	fread( &size, sizeof( unsigned char ), 1, dictfile );
-	fread( phr_ptr->phrase, size, 1, dictfile );
-	fread( &( phr_ptr->freq ), sizeof( int ), 1, dictfile );
+	size = *(char *)cur_pos;
+	cur_pos += sizeof( char );
+	memcpy( phr_ptr->phrase, cur_pos, size );
+	cur_pos += size;
+	phr_ptr->freq = *(int *)cur_pos;
+	cur_pos += sizeof( int );
 	phr_ptr->phrase[size] = '\0';
 #endif
 }
@@ -121,7 +135,11 @@ int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
 {
 	assert( ( 0 <= phone_phr_id ) && ( phone_phr_id < PHONE_PHRASE_NUM ) );
 
+#ifndef USE_BINARY_DATA
 	fseek( dictfile, begin[ phone_phr_id ], SEEK_SET );
+#else
+	cur_pos = dict + begin[ phone_phr_id ];
+#endif
 	end_pos = begin[ phone_phr_id + 1 ];
 	Str2Phrase( phr_ptr );
 	return 1;
@@ -129,9 +147,13 @@ int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
 
 int GetPhraseNext( Phrase *phr_ptr )
 {
+#ifndef USE_BINARY_DATA
 	if ( ftell( dictfile ) >= end_pos )
 		return 0;
+#else
+	if ( cur_pos >= dict + end_pos )
+		return 0;
+#endif
 	Str2Phrase( phr_ptr );
 	return 1;
 }
-
