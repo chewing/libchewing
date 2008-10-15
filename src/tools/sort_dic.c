@@ -195,7 +195,7 @@ int main( int argc, char *argv[] )
 		fwrite( data[ i ].str, size, 1, dictfile );
 		fwrite( &data[ i ].freq, sizeof( int ), 1, dictfile );
 #else
-		fprintf( dictfile, "%s %d\t", data[ i ].str, data[ nData - 1 ].freq );
+		fprintf( dictfile, "%s %d\t", data[ i ].str, data[ i ].freq );
 #endif
 	}
 #ifdef USE_BINARY_DATA
