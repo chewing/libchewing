@@ -121,8 +121,8 @@ static void Str2Phrase( Phrase *phr_ptr )
 	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
 #else
 	unsigned char size;
-	size = *(char *) cur_pos;
-	cur_pos += sizeof(char);
+	size = *(unsigned char *) cur_pos;
+	cur_pos += sizeof(unsigned char);
 	memcpy( phr_ptr->phrase, cur_pos, size );
 	cur_pos += size;
 	phr_ptr->freq = *(int *) cur_pos;
