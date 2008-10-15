@@ -33,6 +33,8 @@
 #include <assert.h>
 #include "global.h"
 #include "global-private.h"
+#include "chewing-private.h"
+#include "config.h"
 
 /*
 	defines
@@ -194,7 +196,13 @@ void BFS2()
 {
 	NODE *pNode;
 	LISTNODE *pList;
+	TreeType tree = {0, 0, 0, 0};
+#ifdef USE_BINARY_DATA
+	FILE *output = fopen( PHONE_TREE_FILE, "wb" );
+	int32 tmp;
+#else
 	FILE *output = fopen( PHONE_TREE_FILE, "w" );
+#endif
 	FILE *config = fopen( CHEWING_DEFINITION_FILE, "aw" );
 
 	if ( ! output ) {
@@ -212,22 +220,31 @@ void BFS2()
 	while ( ! QueueEmpty() ) {
 		pNode = QueueGet();
 		
-		fprintf( output, "%hu ", pNode->key );
-		fprintf( output, "%d ", pNode->phraseno );
+		tree.phone_id = pNode->key;
+		tree.phrase_id = pNode->phraseno;
 
 		/* compute the begin and end index */
 		pList = pNode->childList;
 		if( pList ) {
-			fprintf( output, "%d ", pList->pNode->nodeno );
+			tree.child_begin = pList->pNode->nodeno;
 
 			for ( ; pList->next; pList = pList->next ) {
 				QueuePut( pList->pNode );
 			}
 			QueuePut( pList->pNode );
-			fprintf( output, "%d\n", pList->pNode->nodeno );
+			tree.child_end = pList->pNode->nodeno;
 		}
-		else
-			fprintf( output, "-1 -1\n" );
+		else {
+			tree.child_begin = -1;
+			tree.child_end = -1;
+		}
+#ifdef USE_BINARY_DATA
+		fwrite( &tree, sizeof(TreeType), 1, output );
+#else
+		fprintf( output, "%hu %d %d %d\n",
+				tree.phone_id, tree.phrase_id,
+				tree.child_begin, tree.child_end );
+#endif
 		tree_size++;
 	}
 	fprintf( config, "#define TREE_SIZE (%d)\n", tree_size );
@@ -235,11 +252,7 @@ void BFS2()
 	fclose( config );
 }
 
-#ifdef USED_IN_DAT2BIN
-int maketree()
-#else
 int main()
-#endif
 {
 	Construct();
 	BFS1();		

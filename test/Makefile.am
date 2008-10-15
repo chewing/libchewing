@@ -6,14 +6,20 @@ LIBCHEWING = \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la
 DATADIR = $(top_builddir)/data
+if ENABLE_BINARY_DATA
+CHINDEXS = $(DATADIR)/ch_index_begin.dat \
+		   $(DATADIR)/ch_index_phone.dat
+else
+CHINDEXS = $(DATADIR)/ch_index.dat
+endif
 CHEWINGDATA = \
 	$(DATADIR)/us_freq.dat \
-	$(DATADIR)/ch_index.dat \
 	$(DATADIR)/dict.dat \
 	$(DATADIR)/ph_index.dat \
 	$(DATADIR)/fonetree.dat \
 	$(DATADIR)/swkb.dat \
-	$(DATADIR)/symbols.dat
+	$(DATADIR)/symbols.dat \
+	$(CHINDEXS)
 
 $(TESTDATA): $(DEFAULT_TESTDATA)
 	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi

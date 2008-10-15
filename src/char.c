@@ -31,7 +31,8 @@
 static uint16* arrPhone = NULL;
 static int *begin = NULL;
 static int phone_num;
-static plat_mmap char_mmap;
+static plat_mmap char_begin_mmap;
+static plat_mmap char_phone_mmap;
 #else
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];
@@ -66,7 +67,8 @@ static void TerminateChar()
 	if ( dictfile )
 		fclose( dictfile );
 #ifdef USE_BINARY_DATA
-	plat_mmap_close( &char_mmap );
+	plat_mmap_close( &char_begin_mmap );
+	plat_mmap_close( &char_phone_mmap );
 #endif
 }
 
@@ -86,24 +88,37 @@ int InitChar( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
 	dictfile = fopen( filename, "r" );
 
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
-
 #ifdef USE_BINARY_DATA
-	file_size = plat_mmap_create( &char_mmap, filename, FLAG_ATTRIBUTE_READ );
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
+	file_size = plat_mmap_create( &char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
 	assert( file_size );
 	if ( ! dictfile || -1 == file_size )
 		return 0;
 
-	phone_num = file_size / (sizeof(int) + sizeof(uint16));
+	phone_num = file_size / sizeof(int);
 
 	csize = file_size;
-	begin = (int *) plat_mmap_set_view( &char_mmap, &offset, &csize );
+	begin = (int *) plat_mmap_set_view( &char_begin_mmap, &offset, &csize );
 	assert( begin );
 	if ( ! begin )
 		return 0;
 
-	arrPhone = (uint16 *) (begin + phone_num);
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
+	file_size = plat_mmap_create( &char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( file_size );
+	if ( ! dictfile || -1 == file_size )
+		return 0;
+
+	assert( phone_num == file_size / sizeof(uint16) );
+
+	offset = 0;
+	csize = file_size;
+	arrPhone = (uint16 *) plat_mmap_set_view( &char_phone_mmap, &offset, &csize );
+	assert( arrPhone );
+	if ( ! arrPhone )
+		return 0;
 #else
+	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
 	indexfile = fopen( filename, "r" );
 
 	if ( ! dictfile || ! indexfile )

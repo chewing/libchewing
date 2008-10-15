@@ -1,4 +1,16 @@
 2008-10-15  Kanru Chen  <kanru@kanru.info>
+	
+	* data/Makefile.am,
+	include/internal/global-private.h,
+	src/char.c,
+	src/tools/Makefile.am,
+	src/tools/dat2bin.c,
+	src/tools/maketree.c,
+	src/tools/sort_dic.c,
+	src/tools/sort_word.c,
+	test/Makefile.am: Generate binary data in place.
+
+2008-10-15  Kanru Chen  <kanru@kanru.info>
 
 	* src/dict.c (TerminateDict) (InitDict) (Str2Phrase): Rewrite dict
 	binary data manipulation by using mmap.

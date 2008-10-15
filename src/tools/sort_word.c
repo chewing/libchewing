@@ -21,6 +21,7 @@
 #include "chewing-private.h"
 #include "key2pho-private.h"
 #include "zuin.h"
+#include "config.h"
 
 #define PHONE_CIN_FILE	"phone.cin"
 
@@ -67,7 +68,14 @@ void Output()
 	int i;
 	uint16 previous;
 
+#ifdef USE_BINARY_DATA
+	int tmp;
+	FILE *indexfile2;
+	indexfile = fopen( CHAR_INDEX_BEGIN_FILE, "wb" );
+	indexfile2 = fopen( CHAR_INDEX_PHONE_FILE, "wb" );
+#else
 	indexfile = fopen( CHAR_INDEX_FILE, "w" );
+#endif
 	datafile = fopen( CHAR_FILE, "w" );
 	configfile = fopen( CHEWING_DEFINITION_FILE, "aw" );
 	if ( ! indexfile || ! datafile || ! configfile ) {
@@ -80,12 +88,25 @@ void Output()
 	for ( i = 0; i < nWord; i++ ) {
 		if ( word_data[ i ].num[0] != previous ) {
 			previous = word_data[ i ].num[0];
+#ifdef USE_BINARY_DATA
+			tmp = ftell( datafile );
+			fwrite( &tmp, sizeof(int), 1, indexfile );
+			fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+#else
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
+#endif
 			phone_num++;
 		}
 		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
 	}
+#ifdef USE_BINARY_DATA
+	tmp = ftell( datafile );
+	fwrite( &tmp, sizeof(int), 1, indexfile );
+	previous = 0;
+	fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+#else
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
+#endif
 	fprintf( configfile, "#define PHONE_NUM (%d)\n", phone_num );
 	fclose( indexfile );
 	fclose( datafile );
@@ -111,11 +132,7 @@ void CountSort()
 	}
 }
 
-#ifdef USED_IN_DAT2BIN
-int sort_word()
-#else
 int main()
-#endif
 {
 	FILE *cinfile;
 	char buf[ MAX_BUF_LEN ];
