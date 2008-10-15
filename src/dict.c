@@ -1,5 +1,5 @@
 /**
- * dict.h
+ * dict.c
  *
  * Copyright (c) 1999, 2000, 2001
  *	Lu-chuan Kung and Kang-pen Chen.
@@ -121,13 +121,13 @@ static void Str2Phrase( Phrase *phr_ptr )
 	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
 #else
 	unsigned char size;
-	size = *(char *)cur_pos;
-	cur_pos += sizeof( char );
+	size = *(char *) cur_pos;
+	cur_pos += sizeof(char);
 	memcpy( phr_ptr->phrase, cur_pos, size );
 	cur_pos += size;
-	phr_ptr->freq = *(int *)cur_pos;
-	cur_pos += sizeof( int );
-	phr_ptr->phrase[size] = '\0';
+	phr_ptr->freq = *(int *) cur_pos;
+	cur_pos += sizeof(int);
+	phr_ptr->phrase[ size ] = '\0';
 #endif
 }
 

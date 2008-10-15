@@ -59,8 +59,8 @@
 
 2008-10-14  Jim Huang  <jserv.tw@gmail.com>
 
-	* choice.c,
-	tree.c: Move the declaration of [TreeType] tree from ... to ...
+	* src/choice.c,
+	src/tree.c: Move the declaration of [TreeType] tree from ... to ...
 
 2008-10-14  Jim Huang  <jserv.tw@gmail.com>
 
