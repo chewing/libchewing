@@ -1,4 +1,9 @@
 2008-10-15  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/tools/sort_word.c: Enable us_freq.dat binary format.
+
+2008-10-15  Kanru Chen  <kanru@kanru.info>
 	
 	* data/Makefile.am,
 	include/internal/global-private.h,

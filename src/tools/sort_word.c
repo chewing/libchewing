@@ -70,13 +70,15 @@ void Output()
 
 #ifdef USE_BINARY_DATA
 	int tmp;
+    unsigned char size;
 	FILE *indexfile2;
 	indexfile = fopen( CHAR_INDEX_BEGIN_FILE, "wb" );
 	indexfile2 = fopen( CHAR_INDEX_PHONE_FILE, "wb" );
+	datafile = fopen( CHAR_FILE, "wb" );
 #else
 	indexfile = fopen( CHAR_INDEX_FILE, "w" );
-#endif
 	datafile = fopen( CHAR_FILE, "w" );
+#endif
 	configfile = fopen( CHEWING_DEFINITION_FILE, "aw" );
 	if ( ! indexfile || ! datafile || ! configfile ) {
 		fprintf( stderr, "File Write Error\n" );
@@ -97,7 +99,13 @@ void Output()
 #endif
 			phone_num++;
 		}
+#ifdef USE_BINARY_DATA
+		size = strlen( word_data[ i ].word );
+		fwrite( &size, sizeof(size), 1, datafile );
+		fwrite( word_data[ i ].word, size, 1, datafile );
+#else
 		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
+#endif
 	}
 #ifdef USE_BINARY_DATA
 	tmp = ftell( datafile );

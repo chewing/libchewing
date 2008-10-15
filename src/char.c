@@ -33,13 +33,17 @@ static int *begin = NULL;
 static int phone_num;
 static plat_mmap char_begin_mmap;
 static plat_mmap char_phone_mmap;
+static void *dict = NULL;
+static void *cur_pos = NULL;
+static plat_mmap dict_mmap;
 #else
 static uint16 arrPhone[ PHONE_NUM + 1 ];
 static int begin[ PHONE_NUM + 1 ];
-#endif
 static FILE *dictfile;
+#endif
 static int end_pos;
 
+#if ! defined(USE_BINARY_DATA)
 static char *fgettab( char *buf, int maxlen, FILE *fp )
 {
 	int i;
@@ -56,6 +60,7 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 	buf[ i ] = '\0';
 	return buf;
 }
+#endif
 
 static int CompUint16( const uint16 *pa, const uint16 *pb )
 {
@@ -64,11 +69,13 @@ static int CompUint16( const uint16 *pa, const uint16 *pb )
 
 static void TerminateChar()
 {
-	if ( dictfile )
-		fclose( dictfile );
 #ifdef USE_BINARY_DATA
 	plat_mmap_close( &char_begin_mmap );
 	plat_mmap_close( &char_phone_mmap );
+	plat_mmap_close( &dict_mmap );
+#else
+	if ( dictfile )
+		fclose( dictfile );
 #endif
 }
 
@@ -86,13 +93,25 @@ int InitChar( const char *prefix )
 #endif
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
+#ifdef USE_BINARY_DATA
+	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	assert( file_size );
+	if ( file_size < 0 )
+		return 0;
+	csize = file_size + sizeof(int);
+	dict = (void *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
+	assert( dict );
+#else
 	dictfile = fopen( filename, "r" );
+    if ( ! dictfile )
+        return 0;
+#endif
 
 #ifdef USE_BINARY_DATA
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
 	file_size = plat_mmap_create( &char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
 	assert( file_size );
-	if ( ! dictfile || -1 == file_size )
+	if ( -1 == file_size )
 		return 0;
 
 	phone_num = file_size / sizeof(int);
@@ -106,7 +125,7 @@ int InitChar( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
 	file_size = plat_mmap_create( &char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
 	assert( file_size );
-	if ( ! dictfile || -1 == file_size )
+	if ( -1 == file_size )
 		return 0;
 
 	assert( phone_num == file_size / sizeof(uint16) );
@@ -134,6 +153,7 @@ int InitChar( const char *prefix )
 
 static void Str2Word( Word *wrd_ptr )
 {
+#ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
 	uint16 sh;
 
@@ -141,6 +161,14 @@ static void Str2Word( Word *wrd_ptr )
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
 	assert( wrd_ptr->word != '\0' );
+#else
+	unsigned char size;
+	size = *(unsigned char *) cur_pos;
+	cur_pos += sizeof(unsigned char);
+	memcpy( wrd_ptr->word, cur_pos, size );
+	cur_pos += size;
+	wrd_ptr->word[ size ] = '\0';
+#endif
 }
 
 int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
@@ -157,7 +185,11 @@ int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
 	if ( ! pinx )
 		return 0;
 
+#ifndef USE_BINARY_DATA
 	fseek( dictfile, begin[ pinx - arrPhone ], SEEK_SET );
+#else
+	cur_pos = dict + begin[ pinx - arrPhone ];
+#endif
 	end_pos = begin[ pinx - arrPhone + 1 ];
 	Str2Word( wrd_ptr );
 	return 1;
@@ -165,9 +197,13 @@ int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
 
 int GetCharNext( Word *wrd_ptr )
 {
+#ifndef USE_BINARY_DATA
 	if ( ftell( dictfile ) >= end_pos )
 		return 0;
+#else
+	if ( cur_pos >= dict + end_pos )
+		return 0;
+#endif
 	Str2Word( wrd_ptr );
 	return 1;
 }
-
