@@ -36,7 +36,7 @@
 #      define CHEWING_API CHEWING_DLL_IMPORT
 #      define CHEWING_PRIVATE
 #   endif
-#elif (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3)) && defined(__ELF__)
+#elif (__GNUC__ > 3) && defined(__ELF__)
 #   define CHEWING_API __attribute__((__visibility__("default")))
 #   define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
 #else

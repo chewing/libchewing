@@ -1,3 +1,11 @@
+2008-10-16  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h,
+	configure.ac: Disable GCC visibility support on gcc 3.x .
+	Although there are several gcc patches included in some gcc 3
+	distributions, they are somehow buggy until gcc4 finally releases.
+	Also, visibility is enabled on gcc4 by default.
+
 2008-10-15  Kanru Chen  <kanru@kanru.info>
 
 	* src/char.c,

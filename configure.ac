@@ -133,6 +133,8 @@ AC_SUBST(NCURSESW_LIBS)
 AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 
 # Options
+
+dnl Debugging switch
 AC_ARG_ENABLE([debug],
               [AS_HELP_STRING([--enable-debug],
                               [Turn on debugging support @<:@default=no@:>@])],
@@ -152,19 +154,23 @@ if test x$LIBDEBUG = x"true"; then
 fi
 AC_SUBST(LIBDEBUG)
 
-AC_ARG_ENABLE([visibility-hiding],
-	      [AC_HELP_STRING([--enable-visibility-hiding],
-			      [enable visibility hiding @<:@default=yes@:>@])],
-	      [case "${enableval}" in
-	       yes)
-	       CFLAGS="$CFLAGS -fvisibility=hidden"
-	       ;;
-	       *)
-	       ;;
-	       esac],
-	       CFLAGS="$CFLAGS -fvisibility=hidden")
+dnl Adds -fvisibility=hidden to CFLAGS if running with gcc 4 or greater.
+AC_MSG_CHECKING([whether the compiler supports GCC Visibility])
+dnl Check for gcc4 or greater
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+void
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+foo () {};                                                                                         
+#endif
+]], [[]])],[
+  has_visibility=yes
+  CFLAGS="$CFLAGS -fvisibility=hidden"
+],[
+  has_visibility=no
+])
+AC_MSG_RESULT($has_visibility)
 
-
+dnl binary form of chewing data
 AC_ARG_ENABLE([binary-data],
 		[AS_HELP_STRING([--enable-binary-data],
 				[Experimental use of binary data @<:@default=yes@:>@])],
