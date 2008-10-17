@@ -1,5 +1,11 @@
 2008-10-18  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/README: Added the information about debugging genkeystroke.
+	The way to debug genkeystroke via gdb is a bit tricky since it uses
+	ncurses library.  We use two X terminals to do this.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
 	* data/tsi.src: Merged with libchewing-data project.
 	Last change: r342 | sky008888 | 2008-07-04 23:09:07 +0800
 

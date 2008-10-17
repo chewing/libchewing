@@ -16,4 +16,28 @@ Note:
 
 1. The hash data is generated in current path, and feel free
    to replace with any existing hash.dat like:
-  # cp -f ~/.chewing/hash.dat .
+  # cp -f ~/.chewing/uhash.dat .
+
+2. The way to debug genkeystroke via gdb is a bit tricky since it uses ncurses
+   library.  First, launch two X terminal such as rxvt.  Assume X terminal (1)
+   is the window where the expected ncurses application shows, and X terminal
+   (2) the one where gdb runs.
+
+    X Terminal (1)                  X Terminal (2)
+[where ncurses shows]           [where gdb runs]
+  +-----------------+   +-------------------------------------------+
+  | $ tty           |   | $ libtool --mode=execute gdb genkeystroke |
+  | /dev/ttyp0      |   | (gdb) tty /dev/ttyp0                      |
+  | $ sleep 100000  |   | (gdb) b main                              |
+  +-----------------+   | (gdb) r test.txt                          |
+                         +------------------------------------------+
+  Run "tty" inside X terminal (1) to obtain the pseudo-tty device.  It shows
+  "/dev/ttyp0" in the above example, and then we let shell sleeps in order to
+  accept the I/O redirection from gdb session.
+
+  Inside gdb debugging session, it is the window, X terminal (2), launch the
+  test suite program, genkeystroke, as usual.  Then, pass the command
+  "tty /dev/ttyp0", obtained from X terminal (1).  Set the breakpoints and 
+  run program after that.  Of course, you shall make key strokes inside X
+  terminal (1) instead of X terminal (2) if you would like to input on test
+  suite.
