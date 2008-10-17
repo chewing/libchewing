@@ -1,3 +1,13 @@
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/tsi.src: Merged with libchewing-data project.
+	Last change: r342 | sky008888 | 2008-07-04 23:09:07 +0800
+
+	* data/phone.cin: Cherry pick from libchewing-data.
+
+	* data/phone.cin-CNS11643-complete.patch: Split the phone-word pair
+	that CJKUnifont doesn't display from data/phone.cin .
+
 2008-10-16  Jim Huang  <jserv.tw@gmail.com>
 
 	* include/global.h,
