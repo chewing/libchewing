@@ -1,5 +1,12 @@
 2008-10-19  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/debug-chewing-shell.sh: New script to automake the actions to
+	debug genkeystroke via gdb.
+
+	* test/README: Mentioned debug-chewing-shell.sh
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
 	* test/simulate.sh,
 	test/materials.txt: New bacth simulating script.  It makes use of
 	program "testchewing" from test suite and compare with the expected

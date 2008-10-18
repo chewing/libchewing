@@ -3,7 +3,7 @@ What's New in libchewing SVN
 * Add gcc visibility support to hide private APIs.
 * Headers refactoring.
 * New binary data manipulation approach to dramatically reduce storage
-  usage and loading time via memory map. (enabled by default)
+  usage and loading time via memory mapping. (enabled by default)
 * Successful stories:
   . OpenBSD porting
   . ibus-chewing : chewing engine for ibus input method framework.
@@ -73,6 +73,8 @@ What's New in libchewing 0.3.0
     IM support.
   . OXIM input method suite from OpenDesktop/OSSI provides
     Chewing support as its default input method.
+  . New Win32-Chewing subproject to provide efficient input
+    mthod solution on Microsoft Windows platforms.
     
 What's New in libchewing 0.2.7
 ----------------------------------------------------------

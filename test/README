@@ -47,3 +47,7 @@ Note:
   run program after that.  Of course, you shall make key strokes inside X
   Terminal (1) instead of X Terminal (2) if you would like to input on test
   suite.
+
+  Alternately, the automated script "debug-chewing-shell.sh" covers the above
+  actions.  Change the variable $PREFERABLE_XTERM to other X terminals like
+  xterm as you wish.
