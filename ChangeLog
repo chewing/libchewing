@@ -1,5 +1,10 @@
 2008-10-18  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/README: Mentioned randkeystroke as the stress test for
+	libchewing robustness.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/tree.c (struct smart_com) (rule_largest_sum)
 	(rule_largest_avgwordlen) (rule_smallest_lenvariance)
 	(rule_largest_freqsum) (filter_by_rule) (add_comb)
