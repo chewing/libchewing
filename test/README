@@ -8,11 +8,14 @@ Here are the instructions:
 2. Test default test case.
   # make check
 
-3. (Optional) Use your own test cases.
+3. Simulate batch testing
+  # ./simulate
+
+4. (Optional) Use your own test cases.
   # ./genkeystroke test.txt
   # make check 
 
-4. (Optional) Stress test for libchewing robustness.
+5. (Optional) Stress test for libchewing robustness.
   # ./randkeystroke | ./testchewing
 
 Note:

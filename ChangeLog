@@ -1,5 +1,20 @@
 2008-10-19  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/simulate.sh,
+	test/materials.txt: New bacth simulating script.  It makes use of
+	program "testchewing" from test suite and compare with the expected
+	string correspondingly defined in file materials.txt.  The reference
+	output:
+	[Committed] 就平常交鋼琴
+	[Expected]  就平常教鋼琴
+
+	* test/README: Mentioned simulate.sh
+
+	* test/Makefile.am: Default test data should point to
+	$(top_srcdir)/test instead of $(top_builddir)/test.
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/tree.c (InitTree),
 	src/char.c (InitChar),
 	src/dict.c (InitDict): Properly initialize plat_mmap instances and

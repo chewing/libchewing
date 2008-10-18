@@ -1,0 +1,14 @@
+# Materials to feed simulator
+#
+# format:
+#   key storke				expected string
+#
+# http://zonble.twbbs.org/archives/2008_05/1005.php
+ru.4qu/6t;6rul e; fup6<E>		就平常教鋼琴
+xu3194xu.4b4y94rul4cjo4ej/ yji4<E>	禮拜六日在教會工作
+ru.4294g 10 'xu/3g 5 xo42k7<E>		就帶詩班、領詩之類的
+fu6g6ji3g45k4u su06104h96d9 g3rul g 10 2k7<E>	其實我是這一年半才開始教詩班的
+u3fu06g4yji4vu/65/4z; au042k7g4<E>	以前是做行政方面的事
+c06rm4ep vu u;6rm4u u;4t8 rup4<E>	韓劇跟西洋劇一樣差勁
+#
+u.31u3rul4cl3u 2u03<E>			有比較好一點
