@@ -115,8 +115,9 @@ void InitTree( const char *prefix )
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
 #ifdef USE_BINARY_DATA
+	plat_mmap_set_invalid( &tree_mmap );
 	tree_size = plat_mmap_create( &tree_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( tree_size );
+	assert( plat_mmap_is_valid( &tree_mmap ) );
 	if ( tree_size < 0 )
 		return;
 

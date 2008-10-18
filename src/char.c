@@ -94,8 +94,9 @@ int InitChar( const char *prefix )
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
 #ifdef USE_BINARY_DATA
+	plat_mmap_set_invalid( &dict_mmap );
 	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( file_size );
+	assert( plat_mmap_is_valid( &dict_mmap ) );
 	if ( file_size < 0 )
 		return 0;
 	csize = file_size + sizeof(int);
@@ -109,9 +110,10 @@ int InitChar( const char *prefix )
 
 #ifdef USE_BINARY_DATA
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
+	plat_mmap_set_invalid( &char_begin_mmap );
 	file_size = plat_mmap_create( &char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( file_size );
-	if ( -1 == file_size )
+	assert( plat_mmap_is_valid( &char_begin_mmap ) );
+	if ( file_size < 0 )
 		return 0;
 
 	phone_num = file_size / sizeof(int);
@@ -123,9 +125,10 @@ int InitChar( const char *prefix )
 		return 0;
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
+	plat_mmap_set_invalid( &char_phone_mmap );
 	file_size = plat_mmap_create( &char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( file_size );
-	if ( -1 == file_size )
+	assert( plat_mmap_is_valid( &char_phone_mmap ) );
+	if ( file_size < 0 )
 		return 0;
 
 	assert( phone_num == file_size / sizeof(uint16) );

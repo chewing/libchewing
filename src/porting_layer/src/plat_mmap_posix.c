@@ -40,7 +40,7 @@ int plat_mmap_is_valid( plat_mmap *handle )
 	if ( ! handle )
 		return 0;
 
-	return ( handle->fd == -1 );
+	return ( handle->fd != -1 );
 }
 
 /* map a file into system memory, return size of the mapped file */

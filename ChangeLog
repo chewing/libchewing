@@ -1,3 +1,13 @@
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (InitTree),
+	src/char.c (InitChar),
+	src/dict.c (InitDict): Properly initialize plat_mmap instances and
+	verify them by plat_mmap_is_valid().
+
+	* src/porting_layer/src/plat_mmap_posix.c (plat_mmap_is_valid): Fix
+	faulty implementation on verification file descriptor.
+
 2008-10-18  Jim Huang  <jserv.tw@gmail.com>
 
 	* test/README: Mentioned randkeystroke as the stress test for
@@ -299,10 +309,9 @@
 
 2008-07-07  Kanru Chen  <kanru@kanru.info>
 
-	* test/gen_keystroke.c:
-	Fix choice buffer output.
-	* src/mod_aux.c (chewing_cand_String):
-	Kill memory leak.
+	* test/gen_keystroke.c:	Fix choice buffer output.
+
+	* src/mod_aux.c (chewing_cand_String): Kill memory leak.
 
 2008-07-04  Kanru Chen  <kanru@kanru.info>
 
@@ -383,8 +392,7 @@
 	* src/chewingio.c,
 	src/porting_layer/src/plat_mmap_posix.c,
 	include/global.h,
-	include/chewingio.h:
-	Keyboard layout toggle button on toolbar.
+	include/chewingio.h: Keyboard layout toggle button on toolbar.
 	( Added a button for keyboard type change. It won't save to config 
 	but just for input a character occasionally if such combination keys
 	are suddenly forgotten. )

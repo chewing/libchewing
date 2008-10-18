@@ -78,8 +78,9 @@ int InitDict( const char *prefix )
 
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, DICT_FILE );
 #ifdef USE_BINARY_DATA
+	plat_mmap_set_invalid( &dict_mmap );
 	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( file_size );
+	assert( plat_mmap_is_valid( &dict_mmap ) );
 	if ( file_size < 0 )
 		return 0;
 	csize = file_size + sizeof(int);
@@ -92,8 +93,9 @@ int InitDict( const char *prefix )
 	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 
 #ifdef USE_BINARY_DATA
+	plat_mmap_set_invalid( &index_mmap );
 	file_size = plat_mmap_create( &index_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( file_size );
+	assert( plat_mmap_is_valid( &index_mmap ) );
 	if ( file_size < 0 )
 		return 0;
 
