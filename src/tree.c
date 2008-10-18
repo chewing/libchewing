@@ -327,7 +327,7 @@ static void internal_release_Phrase( int mode, Phrase *pUser, Phrase *pDict )
 	/* Item who insert to interval array:
 	 *   mode=1: pUser,
 	 *   mode=2: pDict,
-	 *   mode=0 : none of items useed.
+	 *   mode=0 : none of items used.
 	 *
 	 * we must free the one not used to avoid memory leak
 	 */
@@ -919,6 +919,134 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
+typedef struct {
+	int n;		/**< number of interval */
+	int inte[ 3 ];	/**< index of interval */
+	int len[ 3 ];	/**< length of each interval, 0 if shorter */
+	int rule_value;	/**< store rule value by filter */
+} smart_com;
+
+typedef int (*rule_func)( TreeDataType *, smart_com * );
+
+static int rule_largest_sum( TreeDataType *ptd, smart_com *com )
+{
+	int i;
+	int sum = 0;
+	for ( i = 0; i < com->n; i++ )
+		sum += com->len[ i ];
+	return sum;
+}
+
+static int rule_largest_avgwordlen( TreeDataType *ptd, smart_com *com )
+{
+	/* constant factor 6=1*2*3, to keep value as integer */
+	return 6 * rule_largest_sum( ptd, com ) / com->n;
+}
+
+static int rule_smallest_lenvariance( TreeDataType *ptd, smart_com *com )
+{
+	int i, j;
+	int sum = 0;
+	/* kcwu: heuristic? why variance no square function? */
+	for ( i = 0; i < 3; i++ )
+		for ( j = i + 1; j < 3; j++ )
+			sum += abs( com->len[ i ] - com->len[ j ] );
+	return -sum;
+}
+
+static int rule_largest_freqsum( TreeDataType *ptd, smart_com *com )
+{
+	int i;
+	int sum = 0;
+	for ( i = 0; i < com->n; i++ )
+		if ( com->len[ i ] > 1 )
+			sum += ptd->interval[ com->inte[ i ] ].p_phr->freq;
+	return sum;
+}
+
+static int filter_by_rule( TreeDataType *ptd, int ncomb, smart_com *comb,
+                           rule_func rule )
+{
+	int i;
+	int maxvalue;
+	int newnum = 0;
+
+	if ( ncomb <= 1 )
+		return ncomb;
+
+	for ( i = 0; i < ncomb; i++ ) {
+		comb[ i ].rule_value = rule( ptd, &comb[ i ] );
+		if ( i == 0 || maxvalue < comb[ i ].rule_value )
+			maxvalue = comb[ i ].rule_value;
+	}
+
+	for ( i = 0; i < ncomb; i++ ) {
+		if ( comb[ i ].rule_value == maxvalue )
+			comb[ newnum++ ] = comb[ i ];
+	}
+	assert( newnum > 0 );
+	return newnum;
+}
+
+static smart_com *add_comb( TreeDataType *ptd, int ncomb,
+                            smart_com *comb,
+			    int n, int i, int j, int k )
+{
+	int z;
+
+	/* FIXME: less realloc */
+	comb = (smart_com *) realloc( comb, sizeof(smart_com) * (ncomb + 1) );
+	memset( &comb[ ncomb ], 0, sizeof(smart_com) );
+	comb[ ncomb ].n = n;
+	comb[ ncomb ].inte[ 0 ] = i;
+	comb[ ncomb ].inte[ 1 ] = j;
+	comb[ ncomb ].inte[ 2 ] = k;
+	for ( z = 0; z < n; z++ ) {
+		int idx = comb[ ncomb ].inte[ z ];
+		comb[ ncomb ].len[ z ] = ptd->interval[ idx ].to -
+		                         ptd->interval[ idx ].from;
+	}
+	return comb;
+}
+
+static int DetermineFirstTsi( int begin, int end, TreeDataType *ptd )
+{
+	int i, j, k;
+	int result;
+	int ncomb = 0;
+	smart_com *comb = (smart_com *) NULL;
+
+	for ( i = 0; i < ptd->nInterval; i++ ) {
+		if ( begin != ptd->interval[ i ].from )
+			continue;
+		comb = add_comb( ptd, ncomb, comb, 1, i, 0, 0 );
+		ncomb++;
+		for ( j = 0; j < ptd->nInterval; j++ ) {
+			if ( ptd->interval[ i ].to != ptd->interval[ j ].from )
+				continue;
+			comb = add_comb( ptd, ncomb, comb, 2, i, j, 0 );
+			ncomb++;
+			for ( k = 0; k < ptd->nInterval; k++ ) {
+				if ( ptd->interval[ j ].to != ptd->interval[ k ].from )
+					continue;
+
+				comb = add_comb( ptd, ncomb, comb, 3, i, j, k );
+				ncomb++;
+			}
+		}
+	}
+	assert( ncomb > 0 );
+	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_sum );
+	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_avgwordlen );
+	ncomb = filter_by_rule( ptd, ncomb, comb, rule_smallest_lenvariance );
+	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_freqsum );
+	assert( ncomb > 0 );
+	result = comb[ 0 ].inte[ 0 ];
+
+	free( comb );
+	return result;
+}
+
 int Phrasing(
 		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
@@ -935,7 +1063,35 @@ int Phrasing(
 	SetInfo( nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
-	SaveList( &treeData );
+	/* FIXME: judgement to switch algorithm */
+	if ( nPhoneSeq > 3 &&
+	     treeData.leftmost[ nPhoneSeq ] == 0 /* all phrase exist */ ) {
+		/* Use the algorithm used in bimsphone, which is based on
+		 * mmseg;  http://technology.chtsai.org/mmseg/
+		 */
+		int i;
+		int tsilen;
+		RecordNode *now = ALC( RecordNode, 1 );
+		assert( now );
+		treeData.phList = now;
+		now->arrIndex = ALC( int, MAX_PHONE_SEQ_LEN + 1 );
+		assert( now->arrIndex );
+		now->nInter = 0;
+		now->next = NULL;
+
+		for ( i = 0; i < nPhoneSeq; i += tsilen ) {
+			int pick = DetermineFirstTsi( i, nPhoneSeq, &treeData );
+			now->arrIndex[ now->nInter++ ] = pick;
+			tsilen = treeData.interval[ pick ].to -
+			         treeData.interval[ pick ].from;
+			assert( now->nInter < MAX_PHONE_SEQ_LEN );
+		}
+	}
+	else {
+		DEBUG_CHECKPOINT();
+		/* original chewing algorithm */
+		SaveList( &treeData );
+	}
 	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
 	SortListByFreq( &treeData );
 	NextCut( &treeData, ppo );
@@ -959,4 +1115,3 @@ int Phrasing(
 	CleanUpMem( &treeData );
 	return 0;
 }
-
