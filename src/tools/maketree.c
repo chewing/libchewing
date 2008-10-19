@@ -199,11 +199,10 @@ void BFS2()
 	TreeType tree = {0, 0, 0, 0};
 #ifdef USE_BINARY_DATA
 	FILE *output = fopen( PHONE_TREE_FILE, "wb" );
-	int32 tmp;
 #else
 	FILE *output = fopen( PHONE_TREE_FILE, "w" );
 #endif
-	FILE *config = fopen( CHEWING_DEFINITION_FILE, "aw" );
+	FILE *config = fopen( CHEWING_DEFINITION_FILE, "a" );
 
 	if ( ! output ) {
 		fprintf( stderr, "Error opening file " PHONE_TREE_FILE " for output.\n" );

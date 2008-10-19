@@ -1,5 +1,15 @@
 2008-10-19  Kanru Chen  <kanru@kanru.info>
 
+	* src/hanyupinyin.c,
+	src/mod_aux.c,
+	src/tools/maketree.c,
+	src/tools/sort_word.c,
+	src/tree.c,
+	test/gen_keystroke.c,
+	test/testchewing.c: Misc. cleanup.
+
+2008-10-19  Kanru Chen  <kanru@kanru.info>
+
 	* src/tree.c: Combine mmseg and chewing algorithm into score based
 	algorithm.
 

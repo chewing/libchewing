@@ -62,6 +62,9 @@ static int compkey( const void *k1, const void *k2 )
 
 static void InitMap()
 {
+	int i;
+	FILE *fd;
+
 	if ( INPUT_METHOD != PINYIN_EXTERNAL ) {
 		if ( getenv( "HOME" ) ) {
 			/* Use user-defined tables */
@@ -80,8 +83,7 @@ static void InitMap()
 		}			
 	}
 	
-	int i;
-	FILE *fd = fopen(TAB_PATH, "r");
+	fd = fopen(TAB_PATH, "r");
 	
 	if ( fd ) {
 		addTerminateService( FreeMap );
@@ -134,7 +136,7 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 		}
 	}
 	if ( i == HANYU_INITIALS ) {
-		// No initials. might be ㄧㄨㄩ
+		/* No initials. might be ㄧㄨㄩ */
 		/* XXX: I NEED Implementation
 		   if(finalsKeySeq[0] != ) {
 		   }

@@ -143,7 +143,6 @@ void show_interval_buffer( int x, int y, ChewingContext *ctx )
 
 void showZuin( ChewingContext *ctx )
 {
-	int i;
 	int zuin_count;
 	char *zuin_string;
 	if ( chewing_get_ChiEngMode( ctx ) )
@@ -245,7 +244,6 @@ void show_commit_string( ChewingContext *ctx )
 {
 	static int x = 12;
 	static int y = 0;
-	int i;
 	char *commit_string;
 #if 0
 	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
@@ -268,12 +266,10 @@ void show_commit_string( ChewingContext *ctx )
 
 int main( int argc, char *argv[] )
 {
-	ChewingConfigData config;
 	ChewingContext *ctx;
 	FILE *fout;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
-	int i;
 	int width, height;
 	int add_phrase_length;
 

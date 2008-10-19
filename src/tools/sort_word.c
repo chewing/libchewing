@@ -79,7 +79,7 @@ void Output()
 	indexfile = fopen( CHAR_INDEX_FILE, "w" );
 	datafile = fopen( CHAR_FILE, "w" );
 #endif
-	configfile = fopen( CHEWING_DEFINITION_FILE, "aw" );
+	configfile = fopen( CHEWING_DEFINITION_FILE, "a" );
 	if ( ! indexfile || ! datafile || ! configfile ) {
 		fprintf( stderr, "File Write Error\n" );
 		exit( 1 );

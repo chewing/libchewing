@@ -106,7 +106,6 @@ int get_keystroke()
 
 void commit_string( ChewingContext *ctx )
 {
-	int i;
 	char *s;
 	if ( chewing_commit_Check( ctx ) ) {
 		s = chewing_commit_String( ctx );
@@ -117,7 +116,6 @@ void commit_string( ChewingContext *ctx )
 
 int main( int argc, char *argv[] )
 {
-	ChewingConfigData config;
 	ChewingContext *ctx;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int i;

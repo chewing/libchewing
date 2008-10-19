@@ -710,10 +710,12 @@ static int LoadPhraseAndCountScore( int *record, int nRecord, TreeDataType *ptd 
 {
 	int total_score = 0;
 	/* NOTE: the balance factor is tuneable */
-	total_score += 1000*rule_largest_sum( record, nRecord, ptd );
-	total_score += 1000*rule_largest_avgwordlen( record, nRecord, ptd );
-	total_score += 100*rule_smallest_lenvariance( record, nRecord, ptd );
-	total_score += rule_largest_freqsum( record, nRecord, ptd );
+	if (nRecord) {
+		total_score += 1000*rule_largest_sum( record, nRecord, ptd );
+		total_score += 1000*rule_largest_avgwordlen( record, nRecord, ptd );
+		total_score += 100*rule_smallest_lenvariance( record, nRecord, ptd );
+		total_score += rule_largest_freqsum( record, nRecord, ptd );
+	}
 	return total_score;
 }
 

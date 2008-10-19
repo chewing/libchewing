@@ -78,9 +78,10 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
  */
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
+	char *s;
 	int i;
 	*zuin_count = 0;
-	char *s = (char*) calloc(
+	s = (char*) calloc(
 		1 + ZUIN_SIZE,
 		sizeof(char) * WCH_SIZE );
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
