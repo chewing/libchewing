@@ -1,5 +1,9 @@
 2008-10-19  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/materials.txt: Imported some test cases from rt.openfoundry.org
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
 	* test/debug-chewing-shell.sh: New script to automake the actions to
 	debug genkeystroke via gdb.
 
@@ -28,7 +32,7 @@
 	verify them by plat_mmap_is_valid().
 
 	* src/porting_layer/src/plat_mmap_posix.c (plat_mmap_is_valid): Fix
-	faulty implementation on verification file descriptor.
+	faulty implementation on verifying file descriptor.
 
 2008-10-18  Jim Huang  <jserv.tw@gmail.com>
 
