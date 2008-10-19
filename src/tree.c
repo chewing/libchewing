@@ -40,7 +40,7 @@ typedef struct {
 
 typedef struct tagRecordNode {
 	int *arrIndex;		/* the index array of the things in "interval" */
-	int nInter, freq;
+	int nInter, score;
 	struct tagRecordNode *next;
 	int nMatchCnnct;	/* match how many Cnnct. */
 } RecordNode;
@@ -510,7 +510,7 @@ static int CompFrom( IntervalType *pa, IntervalType *pb )
 
 /* 
  * First we compare the 'nMatchCnnct'.
- * If the values are the same, we will compare the 'freq'
+ * If the values are the same, we will compare the 'score'
  */
 static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 {
@@ -518,7 +518,7 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 
 	if ( diff )
 		return diff;
-	return ( (*pb)->freq - (*pa)->freq );
+	return ( (*pb)->score - (*pa)->score );
 }
 
 
@@ -653,9 +653,45 @@ static void OutputRecordStr(
 	}
 }
 
-static int LoadPhraseAndCountFreq( int *record,int nRecord, TreeDataType *ptd )
+static int rule_largest_sum( int *record, int nRecord, TreeDataType *ptd )
 {
-	int i, total_freq = 0;
+	int i, score = 0;
+	PhraseIntervalType inter;
+
+	for ( i = 0; i < nRecord; i++ ) {
+		inter = ptd->interval[ record[ i ] ];
+		assert( inter.p_phr );
+		score += inter.to - inter.from;
+	}
+	return score;
+}
+
+static int rule_largest_avgwordlen( int *record, int nRecord, TreeDataType *ptd )
+{
+	/* constant factor 6=1*2*3, to keep value as integer */
+	return 6 * rule_largest_sum( record, nRecord, ptd ) / nRecord;
+}
+
+static int rule_smallest_lenvariance( int *record, int nRecord, TreeDataType *ptd )
+{
+	int i, j, score = 0;
+	PhraseIntervalType inter1, inter2;
+
+	/* kcwu: heuristic? why variance no square function? */
+	for ( i = 0; i < nRecord; i++ ) {
+		for ( j = i + 1; j < nRecord; j++ ) {
+			inter1 = ptd->interval[ record[ i ] ];
+			inter2 = ptd->interval[ record[ j ] ];
+			assert( inter1.p_phr && inter2.p_phr );
+			score += abs((inter1.to - inter1.from) - (inter2.to - inter2.from));
+		}
+	}
+	return -score;
+}
+
+static int rule_largest_freqsum( int *record, int nRecord, TreeDataType *ptd )
+{
+	int i, score = 0;
 	PhraseIntervalType inter;
 
 	for ( i = 0; i < nRecord; i++ ) {
@@ -663,11 +699,22 @@ static int LoadPhraseAndCountFreq( int *record,int nRecord, TreeDataType *ptd )
 		assert( inter.p_phr );
 		
 		/* We adjust the 'freq' of One-word Phrase */
-		total_freq += ( inter.to - inter.from == 1 ) ?
+		score += ( inter.to - inter.from == 1 ) ?
 			( inter.p_phr->freq / 512 ) :
 			inter.p_phr->freq;
 	}
-	return total_freq;
+	return score;
+}
+
+static int LoadPhraseAndCountScore( int *record, int nRecord, TreeDataType *ptd )
+{
+	int total_score = 0;
+	/* NOTE: the balance factor is tuneable */
+	total_score += 1000*rule_largest_sum( record, nRecord, ptd );
+	total_score += 1000*rule_largest_avgwordlen( record, nRecord, ptd );
+	total_score += 100*rule_smallest_lenvariance( record, nRecord, ptd );
+	total_score += rule_largest_freqsum( record, nRecord, ptd );
+	return total_score;
 }
 
 static int IsRecContain( int *intA, int nA, int *intB, int nB, TreeDataType *ptd )
@@ -694,7 +741,7 @@ static int IsRecContain( int *intA, int nA, int *intB, int nB, TreeDataType *ptd
 	return 1;
 }
 
-static void SortListByFreq( TreeDataType *ptd )
+static void SortListByScore( TreeDataType *ptd )
 {
 	int i, listLen;
 	RecordNode *p, **arr;
@@ -714,9 +761,9 @@ static void SortListByFreq( TreeDataType *ptd )
 		i < listLen;
 		p = p->next, i++ ) {
 		arr[ i ] = p;
-		p->freq = LoadPhraseAndCountFreq( 
-			p->arrIndex, 
-			p->nInter, 
+		p->score = LoadPhraseAndCountScore(
+			p->arrIndex,
+			p->nInter,
 			ptd );
 	}
 
@@ -881,8 +928,8 @@ static void ShowList( TreeDataType *ptd )
 		}
 		DEBUG_OUT(
 			"\n"
-			   "      freq : %d , nMatchCnnct : %d\n", 
-			p->freq, 
+			   "      score : %d , nMatchCnnct : %d\n",
+			p->score,
 			p->nMatchCnnct );
 	}
 	DEBUG_OUT( "\n" );
@@ -920,134 +967,6 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
-typedef struct {
-	int n;		/**< number of interval */
-	int inte[ 3 ];	/**< index of interval */
-	int len[ 3 ];	/**< length of each interval, 0 if shorter */
-	int rule_value;	/**< store rule value by filter */
-} smart_com;
-
-typedef int (*rule_func)( TreeDataType *, smart_com * );
-
-static int rule_largest_sum( TreeDataType *ptd, smart_com *com )
-{
-	int i;
-	int sum = 0;
-	for ( i = 0; i < com->n; i++ )
-		sum += com->len[ i ];
-	return sum;
-}
-
-static int rule_largest_avgwordlen( TreeDataType *ptd, smart_com *com )
-{
-	/* constant factor 6=1*2*3, to keep value as integer */
-	return 6 * rule_largest_sum( ptd, com ) / com->n;
-}
-
-static int rule_smallest_lenvariance( TreeDataType *ptd, smart_com *com )
-{
-	int i, j;
-	int sum = 0;
-	/* kcwu: heuristic? why variance no square function? */
-	for ( i = 0; i < 3; i++ )
-		for ( j = i + 1; j < 3; j++ )
-			sum += abs( com->len[ i ] - com->len[ j ] );
-	return -sum;
-}
-
-static int rule_largest_freqsum( TreeDataType *ptd, smart_com *com )
-{
-	int i;
-	int sum = 0;
-	for ( i = 0; i < com->n; i++ )
-		if ( com->len[ i ] > 1 )
-			sum += ptd->interval[ com->inte[ i ] ].p_phr->freq;
-	return sum;
-}
-
-static int filter_by_rule( TreeDataType *ptd, int ncomb, smart_com *comb,
-                           rule_func rule )
-{
-	int i;
-	int maxvalue;
-	int newnum = 0;
-
-	if ( ncomb <= 1 )
-		return ncomb;
-
-	for ( i = 0; i < ncomb; i++ ) {
-		comb[ i ].rule_value = rule( ptd, &comb[ i ] );
-		if ( i == 0 || maxvalue < comb[ i ].rule_value )
-			maxvalue = comb[ i ].rule_value;
-	}
-
-	for ( i = 0; i < ncomb; i++ ) {
-		if ( comb[ i ].rule_value == maxvalue )
-			comb[ newnum++ ] = comb[ i ];
-	}
-	assert( newnum > 0 );
-	return newnum;
-}
-
-static smart_com *add_comb( TreeDataType *ptd, int ncomb,
-                            smart_com *comb,
-			    int n, int i, int j, int k )
-{
-	int z;
-
-	/* FIXME: less realloc */
-	comb = (smart_com *) realloc( comb, sizeof(smart_com) * (ncomb + 1) );
-	memset( &comb[ ncomb ], 0, sizeof(smart_com) );
-	comb[ ncomb ].n = n;
-	comb[ ncomb ].inte[ 0 ] = i;
-	comb[ ncomb ].inte[ 1 ] = j;
-	comb[ ncomb ].inte[ 2 ] = k;
-	for ( z = 0; z < n; z++ ) {
-		int idx = comb[ ncomb ].inte[ z ];
-		comb[ ncomb ].len[ z ] = ptd->interval[ idx ].to -
-		                         ptd->interval[ idx ].from;
-	}
-	return comb;
-}
-
-static int DetermineFirstTsi( int begin, int end, TreeDataType *ptd )
-{
-	int i, j, k;
-	int result;
-	int ncomb = 0;
-	smart_com *comb = (smart_com *) NULL;
-
-	for ( i = 0; i < ptd->nInterval; i++ ) {
-		if ( begin != ptd->interval[ i ].from )
-			continue;
-		comb = add_comb( ptd, ncomb, comb, 1, i, 0, 0 );
-		ncomb++;
-		for ( j = 0; j < ptd->nInterval; j++ ) {
-			if ( ptd->interval[ i ].to != ptd->interval[ j ].from )
-				continue;
-			comb = add_comb( ptd, ncomb, comb, 2, i, j, 0 );
-			ncomb++;
-			for ( k = 0; k < ptd->nInterval; k++ ) {
-				if ( ptd->interval[ j ].to != ptd->interval[ k ].from )
-					continue;
-
-				comb = add_comb( ptd, ncomb, comb, 3, i, j, k );
-				ncomb++;
-			}
-		}
-	}
-	assert( ncomb > 0 );
-	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_sum );
-	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_avgwordlen );
-	ncomb = filter_by_rule( ptd, ncomb, comb, rule_smallest_lenvariance );
-	ncomb = filter_by_rule( ptd, ncomb, comb, rule_largest_freqsum );
-	assert( ncomb > 0 );
-	result = comb[ 0 ].inte[ 0 ];
-
-	free( comb );
-	return result;
-}
-
 int Phrasing(
 		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
@@ -1064,37 +983,9 @@ int Phrasing(
 	SetInfo( nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
-	/* FIXME: judgement to switch algorithm */
-	if ( nPhoneSeq > 3 &&
-	     treeData.leftmost[ nPhoneSeq ] == 0 /* all phrase exist */ ) {
-		/* Use the algorithm used in bimsphone, which is based on
-		 * mmseg;  http://technology.chtsai.org/mmseg/
-		 */
-		int i;
-		int tsilen;
-		RecordNode *now = ALC( RecordNode, 1 );
-		assert( now );
-		treeData.phList = now;
-		now->arrIndex = ALC( int, MAX_PHONE_SEQ_LEN + 1 );
-		assert( now->arrIndex );
-		now->nInter = 0;
-		now->next = NULL;
-
-		for ( i = 0; i < nPhoneSeq; i += tsilen ) {
-			int pick = DetermineFirstTsi( i, nPhoneSeq, &treeData );
-			now->arrIndex[ now->nInter++ ] = pick;
-			tsilen = treeData.interval[ pick ].to -
-			         treeData.interval[ pick ].from;
-			assert( now->nInter < MAX_PHONE_SEQ_LEN );
-		}
-	}
-	else {
-		DEBUG_CHECKPOINT();
-		/* original chewing algorithm */
-		SaveList( &treeData );
-	}
+	SaveList( &treeData );
 	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
-	SortListByFreq( &treeData );
+	SortListByScore( &treeData );
 	NextCut( &treeData, ppo );
 
 #ifdef ENABLE_DEBUG
