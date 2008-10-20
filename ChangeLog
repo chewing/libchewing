@@ -1,3 +1,21 @@
+2008-10-21  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/simulate.c: New file.  Rewrite bacth simulating script in C to
+	gain more features such as high-lighting difference and statistics.
+	The reference output:
+	[ Report ]
+	Checks: 385 words,  Failures: 34 words
+	Ratio: 91.17%
+
+	* test/simulate.sh: Wrapper to executable "simulate".
+
+	* test/testchewing.c
+	(commit_string) (main): Used in simulate.c file.
+	(compare_per_run): New function.  Simply compare two UTF-8 character
+	between expected and committed string.
+
+	* test/Makefile.am: Added "simulate" program.
+
 2008-10-20  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/tree.c (internal_release_Phrase) (FindInterval): Use distinct

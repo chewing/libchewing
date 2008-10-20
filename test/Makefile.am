@@ -39,6 +39,7 @@ vcheck: check
 
 bin_PROGRAMS = \
 	testchewing \
+	simulate \
 	randkeystroke \
 	$(TEXT_UI_BIN) \
 	$(UNIT_TEST_BIN)
@@ -55,6 +56,10 @@ INCLUDES = \
 testchewing_SOURCES = testchewing.c
 testchewing_LDADD = $(LIBCHEWING)
 testchewing_DEPENDENCIES = $(LIBCHEWING)
+
+simulate_SOURCES = simulate.c
+simulate_LDADD = $(LIBCHEWING)
+simulate_DEPENDENCIES = $(LIBCHEWING)
 
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke

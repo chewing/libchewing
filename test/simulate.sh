@@ -8,25 +8,14 @@ abort() {
 if [ ! -f materials.txt ]; then
     abort "Error! file materials.txt doesn't exist."
 fi
-if [ ! -f testchewing ]; then
-    echo "program 'testchewing' not found.  Try to make"
-    make >/dev/null
+if [ ! -f simulate ]; then
+    echo "program 'simulate' not found.  Try to make"
+    make >/dev/null 2>/dev/null
     if test "$?" != "0"; then
-        abort "Error! make fails"
+        abort "Error! Fail to build simulate"
     fi
 fi
 
 clear
-echo "Simulating..."
-echo "---"
-cat materials.txt | sed 's/^#.*//' | while read line ; do
-if test "x$line" != "x"; then
-    echo -n "[Committed] "
-    echo $line | awk '{split($0,x,"<E>"); print x[1]"<E>"}' | ./testchewing
-
-    echo -n "[Expected]  "
-    echo $line | awk '{split($0,x,"<E>"); print x[2]}' | sed 's/^ //g'
-    echo "---"
-fi
-done
-
+# Simply invoke simulate
+./simulate
