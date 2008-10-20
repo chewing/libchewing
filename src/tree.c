@@ -323,21 +323,22 @@ static void AddInterval(
 	ptd->nInterval++;
 }
 
-static void internal_release_Phrase( int mode, Phrase *pUser, Phrase *pDict )
+/* Item which inserts to interval array */
+typedef enum {
+	USED_PHRASE_NONE,	/**< none of items used */
+	USED_PHRASE_USER,	/**< User phrase */
+	USED_PHRASE_DICT	/**< Dict phrase */
+} UsedPhraseMode;
+
+static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase *pDict )
 {
-	/* Item who insert to interval array:
-	 *   mode=1: pUser,
-	 *   mode=2: pDict,
-	 *   mode=0 : none of items used.
-	 *
-	 * we must free the one not used to avoid memory leak
-	 */
+	/* we must free unused phrase entry to avoid memory leak. */
 	switch ( mode ) {
-		case    1:
+		case USED_PHRASE_USER:
 			if ( pDict != NULL )
 				free( pDict );
 			break;
-		case    2:
+		case USED_PHRASE_DICT:
 			if ( pUser != NULL )
 				free( pUser );
 			break;
@@ -358,7 +359,7 @@ static void FindInterval(
 {
 	int end, begin, pho_id;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
-	uint16 i_used_phrase;
+	UsedPhraseMode i_used_phrase;
 	uint16 new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
 
 	for ( begin = 0; begin < nPhoneSeq; begin++ ) {
@@ -373,10 +374,7 @@ static void FindInterval(
 				sizeof( uint16 ) * ( end - begin + 1 ) );
 			new_phoneSeq[ end - begin + 1 ] = 0;
 			puserphrase = pdictphrase = NULL;
-			/* Items which insert to interval array:
-			 *   0: none of item, 1: puserphrase, 2: pdictphrase
-			 */
-			i_used_phrase = 0;
+			i_used_phrase = USED_PHRASE_NONE;
 
 			/* check user phrase */
 			if ( UserGetPhraseFirst( new_phoneSeq ) &&
@@ -408,7 +406,7 @@ static void FindInterval(
 					-1, 
 					puserphrase, 
 					IS_USER_PHRASE );
-				i_used_phrase = 1;
+				i_used_phrase = USED_PHRASE_USER;
 			}
 			else if ( puserphrase == NULL && pdictphrase != NULL ) {
 				AddInterval( 
@@ -418,7 +416,7 @@ static void FindInterval(
 					pho_id, 
 					pdictphrase, 
 					IS_DICT_PHRASE );
-					i_used_phrase = 2;
+					i_used_phrase = USED_PHRASE_DICT;
 			}
 			else if ( puserphrase != NULL && pdictphrase != NULL ) {
 				/* the same phrase, userphrase overrides */
@@ -433,7 +431,7 @@ static void FindInterval(
 						-1, 
 						puserphrase, 
 						IS_USER_PHRASE );
-					i_used_phrase = 1;
+					i_used_phrase = USED_PHRASE_USER;
 				}
 				else {
 					if ( puserphrase->freq > pdictphrase->freq ) {
@@ -444,7 +442,7 @@ static void FindInterval(
 							-1, 
 							puserphrase, 
 							IS_USER_PHRASE );
-						i_used_phrase = 1;
+						i_used_phrase = USED_PHRASE_USER;
 					}
 					else {
 						AddInterval( 
@@ -454,7 +452,7 @@ static void FindInterval(
 							pho_id, 
 							pdictphrase, 
 							IS_DICT_PHRASE );
-						i_used_phrase = 2;
+						i_used_phrase = USED_PHRASE_DICT;
 					}
 				}
 			}
