@@ -1,3 +1,8 @@
+2008-10-20  Kanru Chen  <kanru@kanru.info>
+
+	* python/chewing.py,
+	python/test.py: Add initial python binding code.
+
 2008-10-20  Jim Huang  <jserv.tw@gmail.com>
 
 	* test/materials.txt: Added test cases from academic papers and
