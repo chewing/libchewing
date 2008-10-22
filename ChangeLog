@@ -1,5 +1,10 @@
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
+	* src/chewingio.c (chewing_handle_Esc): Remove the hack of SemiSymbolInput
+	since SemiSymbolInput is no longer existed.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
 	* src/char.c,
 	src/chewingutil.c,
 	src/dict.c,

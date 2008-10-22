@@ -533,14 +533,6 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 		keystrokeRtn = KEYSTROKE_IGNORE;
 	}
 	else if ( pgdata->bSelect ) {
-		if ( pgdata->choiceInfo.isSymbol != 0 ) {
-			/* TODO: this should be checked again. */
-			ChewingKillChar(
-				pgdata, 
-				pgdata->cursor - 1, 
-				pgdata->chiSymbolCursor - 1,
-				DECREASE_CURSOR );
-		}
 		ChoiceEndChoice( pgdata );
 	}
 	else if ( ZuinIsEntering( &( pgdata->zuinData ) ) ) {
