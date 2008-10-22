@@ -46,6 +46,6 @@ __forceinline void DEBUG_OUT( char* str, ... ){ }
 
 typedef int (*CompFuncType)( const void *, const void * );
 
-#define TerminateServicesNUM 5
+#define TerminateServicesNUM 10
 extern int addTerminateService( void (*callback)() );
 #endif

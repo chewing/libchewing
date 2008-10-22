@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <assert.h>
 #define FAILSAFE_OUTPUT "/tmp/chewing-debug.out"
-FILE *fp_g;
+FILE *fp_g = NULL;
 #endif
 
 extern int chewing_lifetime;
@@ -159,6 +159,7 @@ CHEWING_API int chewing_Init(
 		addTerminateService( TerminateDebug );
 }
 #endif
+	bTerminateCompleted = 0;
 	return 0;
 }
 

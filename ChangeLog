@@ -1,3 +1,13 @@
+2008-10-22  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c (chewing_Init): Touch bTerminateCompleted after
+	initailization.
+
+	* src/private.h (TerminateServicesNUM): Fix limit of terminating
+	service number since new services are added.
+
+	* test/simulate.c (FILE *fp): Properly init to NULL.
+
 2008-10-21  Jim Huang  <jserv.tw@gmail.com>
 
 	* test/simulate.c: New file.  Rewrite bacth simulating script in C to

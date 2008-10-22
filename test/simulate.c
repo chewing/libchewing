@@ -13,7 +13,7 @@
 
 #define FN_MATERIALS "materials.txt"
 
-static FILE *fp;
+static FILE *fp = NULL;
 
 int init_sim()
 {
@@ -23,7 +23,7 @@ int init_sim()
 
 int fini_sim()
 {
-	if (fp)
+	if ( fp )
 		fclose( fp );
 	fflush( stdout );
 }
