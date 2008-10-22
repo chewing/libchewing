@@ -28,7 +28,6 @@
 #include "zuin.h"
 #include "zuin-private.h"
 #include "char-private.h"
-#include "hanyupinyin.h"
 #include "key2pho-private.h"
 #include "hanyupinyin-private.h"
 #include "private.h"

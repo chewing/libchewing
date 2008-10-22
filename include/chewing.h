@@ -18,7 +18,6 @@ extern "C" {
 #include "chewingio.h"
 #include "global.h"
 #include "zuin.h"
-#include "hanyupinyin.h"
 #include "mod_aux.h"
 
 /* new macro to indicate the internal encoding.

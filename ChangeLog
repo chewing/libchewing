@@ -1,3 +1,17 @@
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
+	* include/internal/hanyupinyin-private.h,
+	src/chewingio.c,
+	src/hanyupinyin.c: Use consistent API to load hanyupinyin table.
+
+	* include/hanyupinyin.h: Removed.
+
+	* include/chewing.h,
+	src/zuin.c: Fix including.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Add PATH_MAX definition.
+
 2008-10-22  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/chewingio.c (chewing_Init): Touch bTerminateCompleted after

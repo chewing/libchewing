@@ -31,6 +31,7 @@
 #include "char-private.h"
 #include "hash-private.h"
 #include "tree-private.h"
+#include "hanyupinyin-private.h"
 #include "private.h"
 #include "chewingio.h"
 
@@ -134,6 +135,9 @@ CHEWING_API int chewing_Init(
 		InitSymbolTable( (char*) dataPath );
 	if ( ! InitEasySymbolInput( (char *) hashPath ) )
 		InitEasySymbolInput( (char *) dataPath );
+	/* initialize HanyuPinYin table */
+	if ( ! InitHanyuPinYin( hashPath ) )
+		InitHanyuPinYin( dataPath );
 
 #ifdef ENABLE_DEBUG
 {

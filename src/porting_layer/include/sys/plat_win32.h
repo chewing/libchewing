@@ -13,6 +13,12 @@
 #define R_OK	04
 #endif
 
+#ifdef MAX_PATH
+#define PATH_MAX MAX_PATH
+#else
+#define PATH_MAX (260)
+#endif
+
 #define PLAT_SEPARATOR "\\"
 #define PLAT_TMPDIR "C:\\Windows\\TEM\\"
 #define PLAT_MKDIR(dir) \

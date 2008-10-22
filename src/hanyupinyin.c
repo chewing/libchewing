@@ -15,37 +15,16 @@
 #include <string.h>
 #include <assert.h>
 
-#include "hanyupinyin.h"
 #include "hanyupinyin-private.h"
 #include "hash-private.h"
 #include "private.h"
 
-static char* PINYIN_TAB_NAME[] = { "pinyin.tab" };
-static PinYinMethodType INPUT_METHOD = PINYIN_HANYU;
-static char TAB_PATH[255];
+static char PINYIN_TAB_NAME[] = "pinyin.tab";
 
 static keymap *hanyuInitialsMap, *hanyuFinalsMap;
-static int HANYU_INITIALS, HANYU_FINALS, INIT_FLAG = 0;
+static int HANYU_INITIALS, HANYU_FINALS = 0;
 
-CHEWING_API int chewing_set_PinYinMethod(
-		const PinYinMethodType methodType,
-		const char *filePath )
-{
-	if ( (int) methodType < 0 || methodType >= PINYIN_NONE )
-		return -1; /* invaild PinYinMethodType */
-
-
-	if ( methodType == PINYIN_EXTERNAL ) {
-		if ( access( filePath, R_OK ) != 0 )
-			return -2; /* invaild external table */
-		
-		INPUT_METHOD = methodType;
-		strcpy( TAB_PATH, filePath );
-	}
-	return 0;
-}
-
-static void FreeMap()
+static void TerminateHanyuPinyin()
 { 
 	free( hanyuInitialsMap );
 	free( hanyuFinalsMap );
@@ -60,33 +39,22 @@ static int compkey( const void *k1, const void *k2 )
 }
 #endif
 
-static void InitMap()
+int InitHanyuPinYin( const char *prefix )
 {
+	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
+	char filename[PATH_MAX];
 	int i;
 	FILE *fd;
 
-	if ( INPUT_METHOD != PINYIN_EXTERNAL ) {
-		if ( getenv( "HOME" ) ) {
-			/* Use user-defined tables */
-			strcpy( TAB_PATH, getenv( "HOME" ));
-			strcat( TAB_PATH, CHEWING_HASH_PATH "/");
-			strcat( TAB_PATH, PINYIN_TAB_NAME[INPUT_METHOD] );
+	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, PINYIN_TAB_NAME );
 
-			if (access(TAB_PATH, R_OK) != 0) {
-				strcpy(TAB_PATH, CHEWING_DATADIR "/");
-				strcat(TAB_PATH, PINYIN_TAB_NAME[PINYIN_HANYU]);
-			}
-		}
-		else {
-				strcpy(TAB_PATH, CHEWING_DATADIR "/");
-				strcat(TAB_PATH, PINYIN_TAB_NAME[PINYIN_HANYU]);
-		}			
-	}
-	
-	fd = fopen(TAB_PATH, "r");
-	
+	fd = fopen(filename, "r");
+
+	if ( ! fd )
+		return 0;
+
 	if ( fd ) {
-		addTerminateService( FreeMap );
+		addTerminateService( TerminateHanyuPinyin );
 		fscanf( fd, "%d", &HANYU_INITIALS );
 		++HANYU_INITIALS;
 		hanyuInitialsMap = ALC( keymap, HANYU_INITIALS );
@@ -104,7 +72,6 @@ static void InitMap()
 				hanyuFinalsMap[ i ].zuin );
 		}
 		fclose( fd );
-		INIT_FLAG = 1;
 	}
 }
 
@@ -122,9 +89,6 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 	char *initial = 0;
 	char *final = 0;
 	int i;
-
-	if ( ! INIT_FLAG )
-		InitMap();
 
 	for ( i = 0; i < HANYU_INITIALS; i++ ) {
 		p = strstr( pinyinKeySeq, hanyuInitialsMap[ i ].pinyin );

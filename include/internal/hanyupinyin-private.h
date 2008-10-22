@@ -28,5 +28,6 @@ struct keymap {
 typedef struct keymap keymap;
 
 int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq );
+int InitHanyuPinYin( const char * );
 
 #endif
