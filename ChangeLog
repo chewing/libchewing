@@ -1,5 +1,11 @@
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
+	* src/common/key2pho.c,
+	src/chewingutil.c: Convert string literal to hex representation for
+	maximum portability.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
 	* src/chewingio.c (chewing_handle_Esc): Remove the hack of SemiSymbolInput
 	since SemiSymbolInput is no longer existed.
 
