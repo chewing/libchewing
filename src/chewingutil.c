@@ -1141,7 +1141,7 @@ int InitSymbolTable( const char *prefix )
 {
 	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
 	FILE *file;
-	char filename[ 100 ];
+	char filename[ PATH_MAX ];
 	char line[512];
 	char *category;
 	char *symbols, *symbol;
@@ -1215,7 +1215,7 @@ int InitEasySymbolInput( const char *prefix )
 {
 	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
 	FILE *file;
-	char filename[ 512 ];
+	char filename[ PATH_MAX ];
 	char line[ 512 ];
 	char *symbol;
 	int len = 0, index;

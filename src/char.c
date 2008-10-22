@@ -81,7 +81,7 @@ static void TerminateChar()
 
 int InitChar( const char *prefix )
 {
-	char filename[ 100 ];
+	char filename[ PATH_MAX ];
 
 #ifdef USE_BINARY_DATA
 	long file_size;

@@ -103,7 +103,7 @@ static void TerminateTree()
 
 void InitTree( const char *prefix )
 {
-	char filename[ 100 ];
+	char filename[ PATH_MAX ];
 
 #ifdef USE_BINARY_DATA
 	size_t offset = 0;

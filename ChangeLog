@@ -1,5 +1,12 @@
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
+	* src/char.c,
+	src/chewingutil.c,
+	src/dict.c,
+	src/tree.c: Use PATH_MAX.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
 	* include/internal/hanyupinyin-private.h,
 	src/chewingio.c,
 	src/hanyupinyin.c: Use consistent API to load hanyupinyin table.

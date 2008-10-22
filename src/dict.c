@@ -65,7 +65,7 @@ static void TerminateDict()
 
 int InitDict( const char *prefix )
 {
-	char filename[ 100 ];
+	char filename[ PATH_MAX ];
 
 #ifdef USE_BINARY_DATA
 	long file_size;
