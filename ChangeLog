@@ -1,3 +1,12 @@
+2008-10-23  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/common/key2pho.c (zhuin_tab) (zhuin_tab_num),
+	src/chewingutil.c (SetUpdatePhraseMsg) (SpecialSymbolInput)
+	(symbol_buf): Added human readable comments around the HEX values.
+	The reason why we onvert string literal to hex representation is for
+	the sake of portability, that avoid some buggy or faulty environment
+	like Microsoft VC9 to misinterpret the string.
+
 2008-10-23  Kanru Chen  <kanru@kanru.info>
 
 	* Makefile.am: We no longer ship hanyupinyin.h, so remove it.
@@ -37,7 +46,7 @@
 2008-10-22  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/chewingio.c (chewing_Init): Touch bTerminateCompleted after
-	initailization.
+	initialization.
 
 	* src/private.h (TerminateServicesNUM): Fix limit of terminating
 	service number since new services are added.
