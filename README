@@ -1,3 +1,10 @@
+      _                   _
+  ___| |__   _____      _(_)_ __   __ _
+ / __| '_ \ / _ \ \ /\ / / | '_ \ / _` |
+| (__| | | |  __/\ V  V /| | | | | (_| |
+ \___|_| |_|\___| \_/\_/ |_|_| |_|\__, |
+                                  |___/
+
 libchewing - The intelligent phonetic input method library
   http://chewing.csie.net/
 
@@ -5,9 +12,10 @@ libchewing - The intelligent phonetic input method library
 
 libchewing is derived from Chewing input method, a xcin module
 focusing on intelligent phonetic processing by Lu-chuan Kung
-(lckung) and Kang-pen Chen (kpchen). However, the original
-authors of Chewing dropped its development, and Chewing was
-highly bonded with xcin, which prevents from wider applications.
+(lckung) and Kang-pen Chen (kpchen) during 1999-2001. However,
+the original authors of Chewing dropped its development, and
+Chewing was highly coupled with xcin, which prevents from
+comprehensive applications.
 
 
 [-] Motivation
@@ -15,10 +23,11 @@ highly bonded with xcin, which prevents from wider applications.
 Jim Huang started to separate core algorithm and logic layer
 of Chewing since 2002, and he integrated his efforts into a
 Chinese terminal named JMCCE as a part of its input method
-modules. Also, he attempts to let more applications adapt his
-efforts, so that new contributors created (New) Chewing Project
-as the infrastructure with writing new bridges among JMCCE,
-XCIN, IIIMF, SCIM, OpenVanilla, MS-IME, etc.
+modules. Also, in 2004, he attempts to let more applications
+adapt these collaborated efforts, so that new contributors
+(mentioned in file AUTHORS) created brand new Chewing Project
+as the infrastructure and wrote serveral new bridges among
+IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
 
 
 [-] Status
@@ -33,6 +42,8 @@ XCIN, IIIMF, SCIM, OpenVanilla, MS-IME, etc.
   - works with OpenVanilla Input Method Framework.
   - works as standalone IME for native Win32 (win32-chewing).
   - works with OXIM.
+  - works with UIM.
+  - works with ibus.
 
 2. support phonetic keyboard layout
   - Hsu
