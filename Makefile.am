@@ -36,7 +36,6 @@ pkgconfig_DATA = chewing.pc
 
 chewing_headers = \
 	include/chewingio.h \
-	include/hanyupinyin.h \
 	include/mod_aux.h \
 	include/chewing.h \
 	include/global.h \

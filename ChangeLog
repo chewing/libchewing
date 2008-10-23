@@ -1,3 +1,7 @@
+2008-10-23  Kanru Chen  <kanru@kanru.info>
+
+	* Makefile.am: We no longer ship hanyupinyin.h, so remove it.
+
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
 	* src/common/key2pho.c,
