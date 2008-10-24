@@ -81,6 +81,7 @@ void show_edit_buffer( int x, int y, ChewingContext *ctx )
 	mvaddstr( x, y, buffer_string );
 	cursor = chewing_cursor_Current( ctx );
 	p = buffer_string;
+	count = 0;
 	for ( i = 0 ;i < cursor; i++ ) {
 		count += ueBytesFromChar(*p) <= 1 ? 1 : 2;
 		p += ueBytesFromChar(*p);
@@ -126,14 +127,8 @@ void show_interval_buffer( int x, int y, ChewingContext *ctx )
 	chewing_interval_Enumerate( ctx );
 	while ( chewing_interval_hasNext( ctx ) ) {
 		chewing_interval_Get( ctx, &it );
-		if ( ( it.to - it.from ) == 1 ) {
-			out_buf[ arrPos[ it.from ] ] = ' ';
-			out_buf[ arrPos[ it.to ] - 1 ] = ' ';
-		}
-		else {	
-			out_buf[ arrPos[ it.from ] ] = '[';
-			out_buf[ arrPos[ it.to ] - 1 ] =  ']';
-		}
+		out_buf[ arrPos[ it.from ] ] = '[';
+		out_buf[ arrPos[ it.to ] - 1 ] =  ']';
 		memset(
 			&out_buf[ arrPos[ it.from ] + 1 ], '-',
 			arrPos[ it.to ] - arrPos[ it.from ] - 2 );

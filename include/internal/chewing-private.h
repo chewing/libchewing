@@ -91,7 +91,7 @@ typedef struct {
 	char totalChoiceStr[ MAX_CHOICE ][ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	/** @brief number of phrases to choose. */
 	int nTotalChoice;
-	int oldCursor, oldChiSymbolCursor;
+	int oldChiSymbolCursor;
 	int isSymbol;
 } ChoiceInfo;
 
@@ -131,7 +131,6 @@ typedef struct {
 
 	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
-	int cursor;
 	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
 	int nSelect;

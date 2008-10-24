@@ -28,6 +28,7 @@
 #include "chewingutil.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
+#include "private.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
 
@@ -142,6 +143,7 @@ static void SetChoiceInfo(
 
 	pci->nTotalChoice = 0;
 	len = pai->avail[ pai->currentAvail ].len;
+	assert(len);
 
 	/* secondly, read tree phrase */
 	if ( len == 1 ) { /* single character */
@@ -209,14 +211,12 @@ static void SetChoiceInfo(
 int ChoiceFirstAvail( ChewingData *pgdata )
 {
 	/* save old cursor position */
-	pgdata->choiceInfo.oldCursor = pgdata->cursor;
 	pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
 	/* see if there is some word in the cursor position */
-	if ( pgdata->nPhoneSeq == pgdata->cursor )
-		pgdata->cursor = pgdata->phrOut.dispInterval[ pgdata->phrOut.nDispInterval - 1 ].from;
-	if ( pgdata->chiSymbolBufLen == pgdata->chiSymbolCursor )
-		pgdata->chiSymbolCursor = pgdata->phrOut.dispInterval[ pgdata->phrOut.nDispInterval - 1 ].from;
+	if ( pgdata->chiSymbolBufLen == pgdata->chiSymbolCursor ) {
+		pgdata->chiSymbolCursor = pgdata->preferInterval[ pgdata->nPrefer - 1 ].from + CountSymbols( pgdata, pgdata->chiSymbolBufLen );
+	}
 
 	pgdata->bSelect = 1;
 
@@ -224,14 +224,14 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 		&( pgdata->availInfo ), 
 		pgdata->phoneSeq, 
 		pgdata->nPhoneSeq,
-		pgdata->cursor, 
+		PhoneSeqCursor( pgdata ),
 		pgdata->bSymbolArrBrkpt );
 	pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
 	SetChoiceInfo(
 		&( pgdata->choiceInfo ), 
 		&( pgdata->availInfo ), 
 		pgdata->phoneSeq, 
-		pgdata->cursor, 
+		PhoneSeqCursor( pgdata ), 
 		pgdata->config.candPerPage );
 	return 0;
 }
@@ -245,7 +245,7 @@ int ChoicePrevAvail( ChewingData *pgdata )
 		&( pgdata->choiceInfo ), 
 		&( pgdata->availInfo ), 
 		pgdata->phoneSeq, 
-		pgdata->cursor,
+		PhoneSeqCursor( pgdata ),
 		pgdata->config.candPerPage );
 	return 0;
 }
@@ -259,7 +259,8 @@ int ChoiceNextAvail( ChewingData *pgdata )
 	SetChoiceInfo(
 		&( pgdata->choiceInfo ), 
 		&( pgdata->availInfo ), 
-		pgdata->phoneSeq,pgdata->cursor,
+		pgdata->phoneSeq,
+		PhoneSeqCursor( pgdata ),
 		pgdata->config.candPerPage );
 	return 0;
 }
@@ -271,8 +272,7 @@ int ChoiceEndChoice( ChewingData *pgdata )
 	pgdata->choiceInfo.nPage = 0;
 
 	if ( pgdata->choiceInfo.isSymbol != 1 || pgdata->choiceInfo.isSymbol != 2 ) {
-		/* return to the old cursor & chiSymbolCursor position */
-		pgdata->cursor = pgdata->choiceInfo.oldCursor;
+		/* return to the old chiSymbolCursor position */
 		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
 	}
 	pgdata->choiceInfo.isSymbol = 0;
@@ -287,7 +287,7 @@ static void ChangeUserData( ChewingData *pgdata, int selectNo )
 	len = ueStrLen( pgdata->choiceInfo.totalChoiceStr[ selectNo ] ); 
 	memcpy(
 		userPhoneSeq, 
-		&( pgdata->phoneSeq[ pgdata->cursor ] ), 
+		&( pgdata->phoneSeq[ PhoneSeqCursor( pgdata ) ] ), 
 		len * sizeof( uint16 ) );
 	userPhoneSeq[ len ] = 0;
 	UserUpdatePhrase( userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[ selectNo ] );
@@ -302,8 +302,8 @@ int ChoiceSelect( ChewingData *pgdata, int selectNo )
 	ChangeUserData( pgdata, selectNo );
 	ChangeSelectIntervalAndBreakpoint(
 			pgdata,
-			pgdata->cursor,
-			pgdata->cursor + pai->avail[ pai->currentAvail ].len,
+			PhoneSeqCursor( pgdata ),
+			PhoneSeqCursor( pgdata ) + pai->avail[ pai->currentAvail ].len,
 			pci->totalChoiceStr[ selectNo ] );
 	ChoiceEndChoice( pgdata );
 	return 0;

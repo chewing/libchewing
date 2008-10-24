@@ -186,7 +186,6 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	pgdata->chiSymbolCursor = 0;
 	pgdata->chiSymbolBufLen = 0;
 	pgdata->nPhoneSeq = 0;
-	pgdata->cursor = 0;
 	memset( pgdata->bUserArrCnnct, 0, sizeof( int ) * ( MAX_PHONE_SEQ_LEN + 1 ) );
 	memset( pgdata->bUserArrBrkpt, 0, sizeof( int ) * ( MAX_PHONE_SEQ_LEN + 1 ) );
 	pgdata->bChiSym = CHINESE_MODE;
@@ -392,7 +391,6 @@ static int DoSelect( ChewingData *pgdata, int num )
 					int len = pgdata->availInfo.avail[
 						pgdata->availInfo.currentAvail ].len;
 					pgdata->chiSymbolCursor += len;
-					pgdata->cursor += len;
 				}
 			}
 			return 1;
@@ -561,26 +559,26 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 		keystrokeRtn = KEYSTROKE_ABSORB | KEYSTROKE_BELL;
 	}
 	else if ( pgdata->PointStart > -1 ) {
-		int buf = pgdata->cursor;
+		int buf = pgdata->chiSymbolCursor;
 		int key;
 		if ( pgdata->PointEnd > 0 ) {
 			if ( ! pgdata->config.bAddPhraseForward ) {
-				pgdata->cursor = pgdata->PointStart;
+				pgdata->chiSymbolCursor = pgdata->PointStart;
 				key = '0' + pgdata->PointEnd;
 			}
 			else {
-				pgdata->cursor = pgdata->PointStart + pgdata->PointEnd;
+				pgdata->chiSymbolCursor = pgdata->PointStart + pgdata->PointEnd;
 				key = '0' + pgdata->PointEnd;
 			}
 			chewing_handle_CtrlNum( ctx, key );
-			pgdata->cursor = buf;
+			pgdata->chiSymbolCursor = buf;
 		}
 		else if ( pgdata->PointEnd < 0 ) {
 			if ( pgdata->config.bAddPhraseForward )
-				pgdata->cursor = buf - pgdata->PointEnd;
+				pgdata->chiSymbolCursor = buf - pgdata->PointEnd;
 			key = '0' - pgdata->PointEnd;
 			chewing_handle_CtrlNum( ctx, key );
-			pgdata->cursor = buf;
+			pgdata->chiSymbolCursor = buf;
 		}
 		pgdata->PointStart = -1;
 		pgdata->PointEnd = 0;
@@ -615,7 +613,6 @@ CHEWING_API int chewing_handle_Del( ChewingContext *ctx )
 			pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
 			ChewingKillChar(
 				pgdata, 
-				pgdata->cursor, 
 				pgdata->chiSymbolCursor, 
 				NONDECREASE_CURSOR );
 		}
@@ -644,7 +641,6 @@ CHEWING_API int chewing_handle_Backspace( ChewingContext *ctx )
 		else if ( pgdata->chiSymbolCursor > 0 ) {
 			ChewingKillChar(
 				pgdata, 
-				pgdata->cursor - 1, 
 				pgdata->chiSymbolCursor - 1,
 				DECREASE_CURSOR );
 		}
@@ -672,9 +668,9 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
 		key_buf_cursor--;
 
-        if ( ! pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
+	if ( ! pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
 		/* Close Symbol Choice List */
-        	chewing_handle_Esc(ctx);
+		chewing_handle_Esc(ctx);
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -737,13 +733,11 @@ CHEWING_API int chewing_handle_ShiftLeft( ChewingContext *ctx )
 			! ZuinIsEntering( &( pgdata->zuinData ) ) && 
 			pgdata->chiSymbolCursor > 0 &&
 			pgdata->PointEnd > -9 ) {
-			pgdata->chiSymbolCursor--;
 			if ( pgdata->PointStart == -1 )
-				pgdata->PointStart = pgdata->cursor;
+				pgdata->PointStart = pgdata->chiSymbolCursor;
+			pgdata->chiSymbolCursor--;
 			if (
-				pgdata->cursor > 0 && 
 				ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) ) {
-				pgdata->cursor--;
 				pgdata->PointEnd--;
 			}
 			if ( pgdata->PointEnd == 0 )
@@ -777,10 +771,6 @@ CHEWING_API int chewing_handle_Left( ChewingContext *ctx )
 			pgdata->chiSymbolCursor > 0 ) {
 			CheckAndResetRange( pgdata );
 			pgdata->chiSymbolCursor--;
-			if ( 
-				pgdata->cursor > 0 && 
-				ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
-				pgdata->cursor--;
 		}
 	}
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -805,11 +795,9 @@ CHEWING_API int chewing_handle_ShiftRight( ChewingContext *ctx )
 			pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen && 
 			pgdata->PointEnd < 9 ) {
 			if ( pgdata->PointStart == -1 )
-				pgdata->PointStart = pgdata->cursor;
+				pgdata->PointStart = pgdata->chiSymbolCursor;
 			if (
-				pgdata->cursor < pgdata->nPhoneSeq && 
 				ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) ) {
-				pgdata->cursor++;
 				pgdata->PointEnd++;
 			}
 			pgdata->chiSymbolCursor++;
@@ -843,10 +831,6 @@ CHEWING_API int chewing_handle_Right( ChewingContext *ctx )
 			! ZuinIsEntering( &( pgdata->zuinData ) ) &&			
 			pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {			
 			CheckAndResetRange( pgdata );
-			if ( 
-				pgdata->cursor < pgdata->nPhoneSeq && 
-				ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
-				pgdata->cursor++;
 			pgdata->chiSymbolCursor++;
 		}
 	}
@@ -857,6 +841,7 @@ CHEWING_API int chewing_handle_Right( ChewingContext *ctx )
 
 CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 {
+	int cursor;
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
@@ -873,13 +858,14 @@ CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 			pgdata->phrOut.nNumCut++;
 		}
 		else if ( ChewingIsChiAt( pgdata->chiSymbolCursor - 1, pgdata ) ) {
-			if ( IsPreferIntervalConnted( pgdata->cursor, pgdata) ) {
-				pgdata->bUserArrBrkpt[ pgdata->cursor ] = 1;
-				pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
+			cursor = PhoneSeqCursor( pgdata );
+			if ( IsPreferIntervalConnted( cursor, pgdata) ) {
+				pgdata->bUserArrBrkpt[ cursor ] = 1;
+				pgdata->bUserArrCnnct[ cursor ] = 0;
 			}
 			else {
-				pgdata->bUserArrBrkpt[ pgdata->cursor ] = 0;
-				pgdata->bUserArrCnnct[ pgdata->cursor ] = 1;
+				pgdata->bUserArrBrkpt[ cursor ] = 0;
+				pgdata->bUserArrCnnct[ cursor ] = 1;
 			}
 		}
 		CallPhrasing( pgdata );
@@ -890,6 +876,7 @@ CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 
 CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx )
 {
+	int cursor;
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
@@ -901,8 +888,9 @@ CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx )
 	}
 
 	if ( ! pgdata->bSelect ) {
-		pgdata->bUserArrBrkpt[ pgdata->cursor ] = 0;
-		pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
+		cursor = PhoneSeqCursor( pgdata );
+		pgdata->bUserArrBrkpt[ cursor ] = 0;
+		pgdata->bUserArrCnnct[ cursor ] = 0;
 	}
 	CallPhrasing( pgdata );
 
@@ -935,7 +923,6 @@ CHEWING_API int chewing_handle_Home( ChewingContext *ctx )
 	} 
 	else if ( ! pgdata->bSelect ) {
 		pgdata->chiSymbolCursor = 0; 
-		pgdata->cursor = 0;
 	}
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
@@ -954,7 +941,6 @@ CHEWING_API int chewing_handle_End( ChewingContext *ctx )
 	} 
 	else if ( ! pgdata->bSelect ) {
 		pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen; 
-		pgdata->cursor = pgdata->nPhoneSeq; 
 	} 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );       
 	return 0;
@@ -962,40 +948,38 @@ CHEWING_API int chewing_handle_End( ChewingContext *ctx )
 
 CHEWING_API int chewing_handle_PageUp( ChewingContext *ctx )
 {
-        ChewingData *pgdata = ctx->data;
-        ChewingOutput *pgo = ctx->output;
-        int keystrokeRtn = KEYSTROKE_ABSORB;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
+	int keystrokeRtn = KEYSTROKE_ABSORB;
 
-        CheckAndResetRange( pgdata );
+	CheckAndResetRange( pgdata );
 
-        if ( ! ChewingIsEntering( pgdata ) ) {
-                keystrokeRtn = KEYSTROKE_IGNORE;
-        }
-        else if ( ! pgdata->bSelect ) { 
-                pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
-                pgdata->cursor = pgdata->nPhoneSeq;
-        } 
-        MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-        return 0;
+	if ( ! ChewingIsEntering( pgdata ) ) {
+		keystrokeRtn = KEYSTROKE_IGNORE;
+	}
+	else if ( ! pgdata->bSelect ) { 
+		pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
+	} 
+	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+	return 0;
 }
 
 CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
 {
-        ChewingData *pgdata = ctx->data;
-        ChewingOutput *pgo = ctx->output;
-        int keystrokeRtn = KEYSTROKE_ABSORB;
+	ChewingData *pgdata = ctx->data;
+	ChewingOutput *pgo = ctx->output;
+	int keystrokeRtn = KEYSTROKE_ABSORB;
 
-        CheckAndResetRange( pgdata );
+	CheckAndResetRange( pgdata );
 
-        if ( ! ChewingIsEntering( pgdata ) ) {
-                keystrokeRtn = KEYSTROKE_IGNORE;
-        }
-        else if ( ! pgdata->bSelect ) { 
-                pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
-                pgdata->cursor = pgdata->nPhoneSeq;
-        } 
-        MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-        return 0;
+	if ( ! ChewingIsEntering( pgdata ) ) {
+		keystrokeRtn = KEYSTROKE_IGNORE;
+	}
+	else if ( ! pgdata->bSelect ) { 
+		pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
+	} 
+	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+	return 0;
 }
 
 /* Dvorak <-> Qwerty keyboard layout converter */
@@ -1081,12 +1065,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					}
 					CheckAndResetRange( pgdata );
 					pgdata->chiSymbolCursor--;
-					if ( (pgdata->cursor > 0) && 
-					     ChewingIsChiAt(
-						     pgdata->chiSymbolCursor, 
-						     pgdata ) ) {
-						pgdata->cursor--;
-					}
 					ChoiceFirstAvail( pgdata );
 				}
 				goto End_Paging;
@@ -1097,12 +1075,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 						keystrokeRtn = KEYSTROKE_IGNORE;
 					}
 					CheckAndResetRange( pgdata );
-					if ( (pgdata->cursor < pgdata->nPhoneSeq) &&
-					     ChewingIsChiAt(
-						     pgdata->chiSymbolCursor, 
-						     pgdata ) ) {
-						pgdata->cursor++;
-					}
 					pgdata->chiSymbolCursor++;
 					ChoiceFirstAvail( pgdata );
 				}
@@ -1123,7 +1095,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 			if ( key == '`' ) {
 				pgdata->bSelect = 1;
 				pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
-				pgdata->choiceInfo.oldCursor = pgdata->cursor;
 
 				HaninSymbolInput(
 					&( pgdata->choiceInfo ),
@@ -1256,6 +1227,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	uint16 addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	char addWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int phraseState;
+	int cursor;
 
 	CheckAndResetRange( pgdata );
 
@@ -1268,7 +1240,6 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	if ( key == '0' || key == '1' ) {
 		pgdata->bSelect = 1;
 		pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
-		pgdata->choiceInfo.oldCursor = pgdata->cursor;
 
 		HaninSymbolInput(
 				&( pgdata->choiceInfo ),
@@ -1280,22 +1251,23 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		return 0;
 	}
 
-        if ( ! pgdata->config.bAddPhraseForward ) {
+	cursor = PhoneSeqCursor( pgdata );
+	if ( ! pgdata->config.bAddPhraseForward ) {
 		if ( 
 			newPhraseLen >= 1 && 
-			pgdata->cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq ) {
+			cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq ) {
 			if ( NoSymbolBetween( 
 				pgdata, 
-				pgdata->cursor, 
-				pgdata->cursor + newPhraseLen - 1 ) ) {
+				cursor, 
+				cursor + newPhraseLen - 1 ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
-				        &pgdata->phoneSeq[ pgdata->cursor ],
+				        &pgdata->phoneSeq[ cursor ],
 				        sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				                      pgdata->cursor ),
+				                      cursor ),
 				           newPhraseLen, 1);
 
 
@@ -1308,25 +1280,25 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 
 				/* Clear the breakpoint between the New Phrase */
 				for ( i = 1; i < newPhraseLen; i++ )
-					pgdata->bUserArrBrkpt[ pgdata->cursor + i ] = 0;
+					pgdata->bUserArrBrkpt[ cursor + i ] = 0;
 			}
 		}
 	}
 	else {
 		if ( 
 			newPhraseLen >= 1 && 
-			pgdata->cursor - newPhraseLen >= 0 ) {
+			cursor - newPhraseLen >= 0 ) {
 			if ( NoSymbolBetween( pgdata, 
-			                      pgdata->cursor, 
-			                      pgdata->cursor - newPhraseLen ) ) {
+			                      cursor, 
+			                      cursor - newPhraseLen ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
-				        &pgdata->phoneSeq[ pgdata->cursor - newPhraseLen ],
+				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
 				        sizeof( uint16 ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				           pgdata->cursor - newPhraseLen ),
+				           cursor - newPhraseLen ),
 				           newPhraseLen, 1);
 
 				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
@@ -1338,7 +1310,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 
 				/* Clear the breakpoint between the New Phrase */
 				for ( i = 1; i < newPhraseLen; i++ )
-					pgdata->bUserArrBrkpt[ pgdata->cursor - newPhraseLen + i ] = 0;
+					pgdata->bUserArrBrkpt[ cursor - newPhraseLen + i ] = 0;
 			}
 		}
 	}
@@ -1423,7 +1395,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 		else if ( key == '0' )
 			num = 9;
 		DoSelect( pgdata, num );
- 	}
+	}
 	CallPhrasing( pgdata );
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;

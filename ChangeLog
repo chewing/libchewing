@@ -1,3 +1,18 @@
+2008-10-25  Kanru Chen  <kanru@kanru.info>
+
+	* include/internal/chewingutil.h (CountSymbols) (PhoneSeqCursor): New
+	function for calculating phone cursor position.
+
+	* include/internal/char-private.h,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/choice.c: Remove cursor field, replaced by PhoneSeqCursor function.
+
+	* src/choice.c (ChoiceFirstAvail): Use preferInterval instead of
+	phrOut.dispInterval to calculate phrase position.
+
+	* test/gen_keystroke.c: Show all interval.
+
 2008-10-24  Jim Huang  <jserv.tw@gmail.com>
 
 	* README: Update integration status and descriptions.

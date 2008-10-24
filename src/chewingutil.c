@@ -17,6 +17,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
@@ -190,9 +191,9 @@ static int _Inner_InternalSpecialSymbol(
 			sizeof( pgdata->symbolKeyBuf[0] ) * 
 			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 		pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = key;
+		pgdata->bUserArrCnnct[ PhoneSeqCursor( pgdata ) ] = 0;
 		pgdata->chiSymbolCursor++;
 		pgdata->chiSymbolBufLen++;
-		pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
 		/* reset Zuin data */
 		/* Don't forget the kbtype */
 		kbtype = pgdata->zuinData.kbtype;
@@ -412,7 +413,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		key = FindSymbolKey( pgdata->choiceInfo.totalChoiceStr[ sel_i ] );
 		pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = key ? key : '1';
 
-		pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
+		pgdata->bUserArrCnnct[ PhoneSeqCursor( pgdata ) ] = 0;
 		ChoiceEndChoice(pgdata);
 		/* Don't forget the kbtype */
 		kbtype = pgdata->zuinData.kbtype;
@@ -453,9 +454,9 @@ int SymbolInput( int key, ChewingData *pgdata )
 			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 			pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = toupper( key );
 
+		pgdata->bUserArrCnnct[ PhoneSeqCursor( pgdata ) ] = 0;
 		pgdata->chiSymbolCursor++;
 		pgdata->chiSymbolBufLen++;
-		pgdata->bUserArrCnnct[ pgdata->cursor ] = 0;
 		return SYMBOL_KEY_OK;
 	}
 	return SYMBOL_KEY_ERROR;
@@ -506,8 +507,8 @@ static int CountReleaseNum( ChewingData *pgdata )
 	int remain, i;
 
 	/* reserve ZUIN_SIZE positions for Zuin */
-	remain = pgdata->chiSymbolBufLen + ZUIN_SIZE - pgdata->config.maxChiSymbolLen;
-	if ( remain <= 0 )
+	remain = pgdata->config.maxChiSymbolLen - (pgdata->chiSymbolBufLen + ZUIN_SIZE);
+	if ( remain > 0 )
 		return 0;
 
 	qsort(
@@ -538,7 +539,7 @@ static void KillFromLeft( ChewingData *pgdata, int nKill )
 	int i;
 
 	for ( i = 0; i < nKill; i++ )
-		ChewingKillChar( pgdata, 0, 0, DECREASE_CURSOR );
+		ChewingKillChar( pgdata, 0, DECREASE_CURSOR );
 }
 
 void CleanAllBuf( ChewingData *pgdata )
@@ -554,10 +555,8 @@ void CleanAllBuf( ChewingData *pgdata )
 	/* 4 */
 	pgdata->nSelect = 0;
 	/* 5 */
-	pgdata->cursor = 0;
-	/* 6 */
 	pgdata->chiSymbolCursor = 0;
-	/* 7 */
+	/* 6 */
 	memset( pgdata->bUserArrCnnct, 0, sizeof( pgdata->bUserArrCnnct ) );
 
 	pgdata->phrOut.nNumCut = 0;
@@ -615,10 +614,11 @@ void AutoLearnPhrase( ChewingData *pgdata )
 int AddChi( uint16 phone, ChewingData *pgdata )
 {
 	int i;
+	int cursor = PhoneSeqCursor( pgdata );
 
 	/* shift the selectInterval */
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
-		if ( pgdata->selectInterval[ i ].from >= pgdata->cursor ) {
+		if ( pgdata->selectInterval[ i ].from >= cursor ) {
 			pgdata->selectInterval[ i ].from++;
 			pgdata->selectInterval[ i ].to++;
 		}
@@ -626,22 +626,21 @@ int AddChi( uint16 phone, ChewingData *pgdata )
 
 	/* shift the Brkpt */
 	memmove( 
-		&( pgdata->bUserArrBrkpt[ pgdata->cursor + 2 ] ),
-		&( pgdata->bUserArrBrkpt[ pgdata->cursor + 1 ] ),
-		sizeof( int ) * ( pgdata->nPhoneSeq - pgdata->cursor ) );
+		&( pgdata->bUserArrBrkpt[ cursor + 2 ] ),
+		&( pgdata->bUserArrBrkpt[ cursor + 1 ] ),
+		sizeof( int ) * ( pgdata->nPhoneSeq - cursor ) );
 	memmove(
-		&( pgdata->bUserArrCnnct[ pgdata->cursor + 2 ] ),
-		&( pgdata->bUserArrCnnct[pgdata->cursor + 1 ] ),
-		sizeof( int ) * ( pgdata->nPhoneSeq - pgdata->cursor ) );
+		&( pgdata->bUserArrCnnct[ cursor + 2 ] ),
+		&( pgdata->bUserArrCnnct[ cursor + 1 ] ),
+		sizeof( int ) * ( pgdata->nPhoneSeq - cursor ) );
 
 	/* add to phoneSeq */
 	memmove(
-		&( pgdata->phoneSeq[ pgdata->cursor + 1 ] ),
-		&( pgdata->phoneSeq[ pgdata->cursor ] ) ,
-		sizeof( uint16 ) * ( pgdata->nPhoneSeq - pgdata->cursor ) );
-	pgdata->phoneSeq[ pgdata->cursor ] = phone;
+		&( pgdata->phoneSeq[ cursor + 1 ] ),
+		&( pgdata->phoneSeq[ cursor ] ) ,
+		sizeof( uint16 ) * ( pgdata->nPhoneSeq - cursor ) );
+	pgdata->phoneSeq[ cursor ] = phone;
 	pgdata->nPhoneSeq ++;
-	pgdata->cursor ++;
 
 	/* add to chiSymbolBuf */
 	memmove(
@@ -671,7 +670,7 @@ static void ShowChewingData( ChewingData *pgdata )
 		"[cursor : %d]\n"
 		"nSelect : %d\n"
 		"selectStr       selectInterval\n", 
-		pgdata->cursor, 
+		PhoneSeqCursor( pgdata ),
 		pgdata->nSelect );
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
 		DEBUG_OUT(
@@ -931,7 +930,7 @@ void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 
 int AddSelect( ChewingData *pgdata, int sel_i )
 {
-	int length, nSelect;
+	int length, nSelect, cursor;
 
 	/* save the typing time */
 	length = pgdata->availInfo.avail[ pgdata->availInfo.currentAvail ].len;
@@ -941,8 +940,9 @@ int AddSelect( ChewingData *pgdata, int sel_i )
 	ueStrNCpy( pgdata->selectStr[ nSelect ],
 			pgdata->choiceInfo.totalChoiceStr[ sel_i ],
 			length, 1 );
-	pgdata->selectInterval[ nSelect ].from = pgdata->cursor;
-	pgdata->selectInterval[ nSelect ].to = pgdata->cursor + length;
+	cursor = PhoneSeqCursor( pgdata );
+	pgdata->selectInterval[ nSelect ].from = cursor;
+	pgdata->selectInterval[ nSelect ].to = cursor + length;
 	pgdata->nSelect++;
 	return 0;
 }
@@ -956,6 +956,23 @@ int CountSelKeyNum( int key, ChewingData *pgdata )
 		if ( pgdata->config.selKey[ i ] == key )
 			return i;
 	return -1;
+}
+
+int CountSymbols( ChewingData *pgdata, int to )
+{
+	int chi;
+	int i;
+	for ( chi = i = 0; i < to; i++ ) {
+		if ( ChewingIsChiAt( i, pgdata ) )
+			chi++;
+	}
+	return to - chi;
+}
+
+int PhoneSeqCursor( ChewingData *pgdata )
+{
+    int cursor = pgdata->chiSymbolCursor - CountSymbols( pgdata, pgdata->chiSymbolCursor );
+    return cursor > 0 ? cursor : 0;
 }
 
 int ChewingIsChiAt( int chiSymbolCursor, ChewingData *pgdata )
@@ -1017,10 +1034,14 @@ static int KillCharInSelectIntervalAndBrkpt( ChewingData *pgdata, int cursorToKi
 
 int ChewingKillChar(
 		ChewingData *pgdata, 
-		int cursorToKill, 
 		int chiSymbolCursorToKill, 
 		int minus )
 {
+	int tmp, cursorToKill;
+	tmp = pgdata->chiSymbolCursor;
+	pgdata->chiSymbolCursor = chiSymbolCursorToKill;
+	cursorToKill = PhoneSeqCursor( pgdata ); 
+	pgdata->chiSymbolCursor = tmp;
 	if ( ChewingIsChiAt( chiSymbolCursorToKill, pgdata ) ) {
 		KillCharInSelectIntervalAndBrkpt(pgdata, cursorToKill);
 		memmove(
@@ -1028,9 +1049,6 @@ int ChewingKillChar(
 			&(pgdata->phoneSeq[ cursorToKill + 1 ] ),
 			(pgdata->nPhoneSeq - cursorToKill - 1) * sizeof( uint16 ) );
 		pgdata->nPhoneSeq--;
-		pgdata->cursor -= minus;
-		if (pgdata->cursor < 0)
-			pgdata->cursor = 0;
 	}
 	pgdata->symbolKeyBuf[ chiSymbolCursorToKill ] = 0;
 	memmove( 
@@ -1195,7 +1213,7 @@ static char *symbol_buf[][ 50 ] = {
 		/* "Τ", "τ","θ","△","▲","▽","▼","™","⊿", "™" */
 	{ "U", "\xCE\xA5", "\xCF\x85","\xCE\xBC","\xE2\x88\xAA", "\xE2\x88\xA9", 0 },
 		/* "Υ", "υ","μ","∪", "∩" */
-	{ "V",  0 },
+	{ "V", "\xCE\xBD", 0 },
 	{ "W", "\xE2\x84\xA6", "\xCF\x89", "\xE2\x94\xAC", "\xE2\x95\xA6",
 		  "\xE2\x95\xA4", "\xE2\x95\xA5", 0 },
 		/* "Ω", "ω", "┬", "╦", "╤", "╥" */
@@ -1227,7 +1245,6 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	int i, symbol_buf_len = sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] );
 	char **pBuf;
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
-	pci->oldCursor = pgdata->cursor;
 	pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
 	/* see if there is some word in the cursor position */
