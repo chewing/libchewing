@@ -106,14 +106,18 @@ CHEWING_API ChewingContext *chewing_new()
 	ChewingData *internal_data = ALC( ChewingData, 1 );
 	ChewingOutput *internal_output = ALC( ChewingOutput, 1 );
 	ctx = ALC( ChewingContext, 1 );
-	ctx->data = internal_data;
-	ctx->output = internal_output;
-	ctx->cand_no = 0;
+	if ( ctx && internal_data && internal_output ) {
+		ctx->data = internal_data;
+		ctx->output = internal_output;
+		ctx->cand_no = 0;
 
-	/* handle configuration */
-	chewing_Reset( ctx );
+		/* handle configuration */
+		chewing_Reset( ctx );
 
-	return ctx;
+		return ctx;
+	} else {
+		return NULL;
+	}
 }
 
 CHEWING_API int chewing_Init(

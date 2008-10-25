@@ -1,5 +1,9 @@
 2008-10-25  Kanru Chen  <kanru@kanru.info>
 
+	* src/chewingio.c: Check memory allocation before using it.
+
+2008-10-25  Kanru Chen  <kanru@kanru.info>
+
 	* include/internal/chewingutil.h (CountSymbols) (PhoneSeqCursor): New
 	function for calculating phone cursor position.
 
