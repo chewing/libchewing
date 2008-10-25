@@ -399,23 +399,9 @@ static void FindInterval(
 			 * static dict
 			 */
 			if ( puserphrase != NULL && pdictphrase == NULL ) {
-				AddInterval( 
-					ptd, 
-					begin, 
-					end, 
-					-1, 
-					puserphrase, 
-					IS_USER_PHRASE );
 				i_used_phrase = USED_PHRASE_USER;
 			}
 			else if ( puserphrase == NULL && pdictphrase != NULL ) {
-				AddInterval( 
-					ptd, 
-					begin, 
-					end, 
-					pho_id, 
-					pdictphrase, 
-					IS_DICT_PHRASE );
 					i_used_phrase = USED_PHRASE_DICT;
 			}
 			else if ( puserphrase != NULL && pdictphrase != NULL ) {
@@ -424,37 +410,29 @@ static void FindInterval(
 					puserphrase->phrase, 
 					pdictphrase, 
 					( end - begin + 1 ) * MAX_UTF8_SIZE * sizeof( char ) ) ) {
-					AddInterval( 
-						ptd, 
-						begin, 
-						end, 
-						-1, 
-						puserphrase, 
-						IS_USER_PHRASE );
 					i_used_phrase = USED_PHRASE_USER;
 				}
 				else {
 					if ( puserphrase->freq > pdictphrase->freq ) {
-						AddInterval( 
-							ptd, 
-							begin, 
-							end, 
-							-1, 
-							puserphrase, 
-							IS_USER_PHRASE );
 						i_used_phrase = USED_PHRASE_USER;
 					}
 					else {
-						AddInterval( 
-							ptd, 
-							begin, 
-							end, 
-							pho_id, 
-							pdictphrase, 
-							IS_DICT_PHRASE );
 						i_used_phrase = USED_PHRASE_DICT;
 					}
 				}
+			}
+			switch ( i_used_phrase ) {
+				case USED_PHRASE_USER:
+					AddInterval( ptd, begin, end, -1, puserphrase,
+							IS_USER_PHRASE );
+					break;
+				case USED_PHRASE_DICT:
+					AddInterval( ptd, begin, end, pho_id, pdictphrase,
+							IS_DICT_PHRASE );
+					break;
+				case USED_PHRASE_NONE:
+				default:
+					break;
 			}
 			internal_release_Phrase(
 				i_used_phrase,
