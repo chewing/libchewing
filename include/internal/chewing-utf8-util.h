@@ -17,6 +17,9 @@ int ueStrLen( char *str );
 /* Return bytes of a UTF-8 character */
 int ueBytesFromChar( unsigned char b );
 
+/* Return byets of a UTF-8 string until len position */
+int ueStrNBytes( const char *, int );
+
 #define STRNCPY_CLOSE 1
 #define STRNCPY_NOT_CLOSE 0
 

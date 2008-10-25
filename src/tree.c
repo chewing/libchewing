@@ -195,9 +195,10 @@ static int CheckUserChoose(
 				 * 'selectStr[chno]' test if not ok then return 0, 
 				 * if ok then continue to test. */
 				len = c.to - c.from;
-				if ( strcmp(
+				if ( memcmp(
 					ueStrSeek( pUserPhraseData->wordSeq, c.from - from ),
-					selectStr[ chno ] ) )
+					selectStr[ chno ],
+					ueStrNBytes( selectStr[ chno ], len ) ) )
 					break;
 			}
 
@@ -210,7 +211,6 @@ static int CheckUserChoose(
 							pUserPhraseData->wordSeq,
 							user_alloc, 1);
 				}
-				*( ueStrSeek( p_phr->phrase, user_alloc )+1 )= '\0';
 				p_phr->freq = pUserPhraseData->userfreq;
 				*pp_phr = p_phr;
 			}
@@ -253,9 +253,10 @@ static int CheckChoose(
 				 * then continue to test
 				 */
 				len = c.to - c.from;
-				if ( strcmp(
+				if ( memcmp(
 					ueStrSeek( phrase->phrase, c.from - from ),
-					selectStr[ chno ] ) )
+					selectStr[ chno ],
+					ueStrNBytes( selectStr[ chno ], len ) ) )
 					break;
 			}
 			else if ( IsIntersect( inte, selectInterval[ chno ] ) ) {

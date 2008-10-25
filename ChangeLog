@@ -1,5 +1,13 @@
 2008-10-26  Kanru Chen  <kanru@kanru.info>
 
+	* include/internal/chewing-utf8-util.h,
+	src/common/chewing-utf8-util.c (ueStrNBytes): New helper function.
+
+	* src/chewingio.c,
+	src/tree.c: Don't ignore length parameter when comparing two strings.
+
+2008-10-26  Kanru Chen  <kanru@kanru.info>
+
 	* src/chewingio.c,
 	src/chewingutil.c,
 	src/choice.c,

@@ -44,15 +44,23 @@ int ueBytesFromChar( unsigned char b )
 	return utf8len_tab[ b ];
 }
 
-/* Return how many bytes was copied */
-int ueStrNCpy( char dest[], const char *src, size_t n, int end )
+/* Return byets of a UTF-8 string until n position */
+int ueStrNBytes( const char *str, int n )
 {
 	int i = 0, len = 0;
-	char *iter = (char *) src;
+	char *iter = (char *) str;
 	for ( i = 0; i < n; i++ ) {
 		len += ueBytesFromChar( iter[ len ] );
 	}
-	memcpy( dest, iter, len );
+	return len;
+}
+
+/* Return how many bytes was copied */
+int ueStrNCpy( char dest[], const char *src, size_t n, int end )
+{
+	int len = 0;
+	len = ueStrNBytes( src, n );
+	memcpy( dest, src, len );
 	if ( end == STRNCPY_CLOSE )
 		dest[ len ] = '\0';
 	return len;
