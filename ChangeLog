@@ -1,3 +1,12 @@
+2008-10-26  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingio.c,
+	src/chewingutil.c,
+	src/choice.c,
+	src/tree.c,
+	src/userphrase.c: Fix improper use of MAX_UTF8_SIZE. This is a serious bug
+	can lead to wrong phrasing result.
+
 2008-10-25  Kanru Chen  <kanru@kanru.info>
 
 	* src/tree.c (FindInterval): Cleanup duplicated codes.

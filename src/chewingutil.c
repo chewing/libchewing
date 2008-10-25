@@ -785,7 +785,7 @@ static void MakePreferInterval( ChewingData *pgdata )
 			belong_set[ j ] = i + 1;
 		}
 	}
-	set_no = i;
+	set_no = i + 1;
 	for ( i = 0; i < pgdata->nPhoneSeq; i++ )
 		if ( belong_set[i] == 0 ) 
 			belong_set[ i ] = set_no++;

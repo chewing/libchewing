@@ -195,10 +195,9 @@ static int CheckUserChoose(
 				 * 'selectStr[chno]' test if not ok then return 0, 
 				 * if ok then continue to test. */
 				len = c.to - c.from;
-				if ( memcmp( 
-					&pUserPhraseData->wordSeq[ ( c.from - from ) * MAX_UTF8_SIZE ], 
-					selectStr[ chno ], 
-					len * MAX_UTF8_SIZE ) )
+				if ( strcmp(
+					ueStrSeek( pUserPhraseData->wordSeq, c.from - from ),
+					selectStr[ chno ] ) )
 					break;
 			}
 
@@ -211,7 +210,7 @@ static int CheckUserChoose(
 							pUserPhraseData->wordSeq,
 							user_alloc, 1);
 				}
-				p_phr->phrase[ user_alloc * MAX_UTF8_SIZE ] = '\0';
+				*( ueStrSeek( p_phr->phrase, user_alloc )+1 )= '\0';
 				p_phr->freq = pUserPhraseData->userfreq;
 				*pp_phr = p_phr;
 			}
@@ -254,9 +253,9 @@ static int CheckChoose(
 				 * then continue to test
 				 */
 				len = c.to - c.from;
-				if ( memcmp( 
-					&( phrase->phrase[ ( c.from - from ) *  MAX_UTF8_SIZE ] ), 
-					selectStr[ chno ], len * MAX_UTF8_SIZE ) )
+				if ( strcmp(
+					ueStrSeek( phrase->phrase, c.from - from ),
+					selectStr[ chno ] ) )
 					break;
 			}
 			else if ( IsIntersect( inte, selectInterval[ chno ] ) ) {
@@ -402,14 +401,13 @@ static void FindInterval(
 				i_used_phrase = USED_PHRASE_USER;
 			}
 			else if ( puserphrase == NULL && pdictphrase != NULL ) {
-					i_used_phrase = USED_PHRASE_DICT;
+				i_used_phrase = USED_PHRASE_DICT;
 			}
 			else if ( puserphrase != NULL && pdictphrase != NULL ) {
 				/* the same phrase, userphrase overrides */
-				if ( ! memcmp( 
+				if ( ! strcmp(
 					puserphrase->phrase, 
-					pdictphrase, 
-					( end - begin + 1 ) * MAX_UTF8_SIZE * sizeof( char ) ) ) {
+					pdictphrase->phrase ) ) {
 					i_used_phrase = USED_PHRASE_USER;
 				}
 				else {

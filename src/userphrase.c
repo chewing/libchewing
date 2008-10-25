@@ -56,10 +56,9 @@ static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int 
 		GetPhraseFirst( phrase, pho_id );
 		do {
 			/* find the same phrase */
-			if ( ! memcmp( 
+			if ( ! strcmp(
 				phrase->phrase, 
-				wordSeq, 
-				len * MAX_UTF8_SIZE * sizeof( char ) ) ) { 
+				wordSeq ) ) {
 				retval = phrase->freq;	
 				free( phrase );
 				return retval;

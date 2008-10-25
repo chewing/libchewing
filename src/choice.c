@@ -112,6 +112,7 @@ static void SetAvailInfo(
 	}
 }
 
+/* FIXME: Improper use of len parameter */
 static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 {
 	int i;
