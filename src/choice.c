@@ -23,13 +23,18 @@
 #include "chewing-definition.h"
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "dict-private.h"
-#include "char-private.h"
+#include "dict.h"
+#include "char.h"
 #include "chewingutil.h"
-#include "tree-private.h"
-#include "userphrase-private.h"
+#include "userphrase.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
+
+#ifdef USE_BINARY_DATA
+TreeType *tree = NULL;
+#else
+TreeType tree[ TREE_SIZE ];
+#endif
 
 static void ChangeSelectIntervalAndBreakpoint(
 		ChewingData *pgdata,
@@ -137,7 +142,7 @@ static void SetChoiceInfo(
 	UserPhraseData *pUserPhraseData;
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	
-	/* Clears previous candidates. */
+	// Clears previous candidates.
 	memset( pci->totalChoiceStr, '\0', sizeof(char) * MAX_CHOICE * MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1);
 
 	pci->nTotalChoice = 0;

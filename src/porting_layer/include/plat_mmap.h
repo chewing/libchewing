@@ -1,3 +1,13 @@
+/**
+ * plat_mmap.h
+ *
+ * Copyright (c) 2005, 2006
+ *      libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #ifndef __PLAT_MMAP_H__
 #define __PLAT_MMAP_H__
 

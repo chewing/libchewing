@@ -1,28 +1,24 @@
 testdir = $(top_builddir)/test
 TESTDATA = $(testdir)/test.txt
-DEFAULT_TESTDATA = $(top_srcdir)/test/default-test.txt
+DEFAULT_TESTDATA = $(testdir)/default-test.txt
 LIBCHEWING = \
 	$(top_builddir)/src/libchewing.la \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la
 DATADIR = $(top_builddir)/data
-if ENABLE_BINARY_DATA
-CHINDEXS = $(DATADIR)/ch_index_begin.dat \
-		   $(DATADIR)/ch_index_phone.dat
-else
-CHINDEXS = $(DATADIR)/ch_index.dat
-endif
 CHEWINGDATA = \
 	$(DATADIR)/us_freq.dat \
+	$(DATADIR)/ch_index.dat \
 	$(DATADIR)/dict.dat \
 	$(DATADIR)/ph_index.dat \
 	$(DATADIR)/fonetree.dat \
 	$(DATADIR)/swkb.dat \
-	$(DATADIR)/symbols.dat \
-	$(CHINDEXS)
+	$(DATADIR)/symbols.dat
 
 $(TESTDATA): $(DEFAULT_TESTDATA)
-	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi
+	if [ ! -f $(TESTDATA) ]; then \
+		cp $(DEFAULT_TESTDATA) $(TESTDATA) ; \
+	fi
 
 check: testchewing $(TESTDATA) $(CHEWINGDATA)
 	$(testdir)/testchewing < $(TESTDATA)
@@ -39,13 +35,11 @@ vcheck: check
 
 bin_PROGRAMS = \
 	testchewing \
-	randkeystroke \
 	$(TEXT_UI_BIN) \
 	$(UNIT_TEST_BIN)
 
 INCLUDES = \
-	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/include/internal \
+	-I$(top_builddir)/include \
 	-DCHEWING_DATA_PREFIX="\"$(DATADIR)\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \

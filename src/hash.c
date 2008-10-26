@@ -16,16 +16,16 @@
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
-#include <assert.h>
 
 #include "chewing-utf8-util.h"
-#include "hash-private.h"
+#include "hash.h"
 #include "private.h"
 #include "global.h"
 
 int chewing_lifetime;
 
 static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+static char formatstring[ 30 ];
 static char hashfilename[ 200 ];
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
@@ -115,7 +115,6 @@ HASH_ITEM *HashInsert( UserPhraseData *pData )
 	return pItem;
 }
 
-#ifdef ENABLE_DEBUG
 static void HashItem2String( char *str, HASH_ITEM *pItem )
 {
 	int i, len;
@@ -133,7 +132,6 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 		pItem->data.maxfreq, pItem->data.origfreq );
 	strcat( str, buf );
 }
-#endif
 
 /* 
  * capacity of 'str' MUST bigger then FIELD_SIZE !
@@ -142,7 +140,7 @@ static void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
 	uint16 *pshort;
-	unsigned char *puc;
+	unsigned char buf[ FIELD_SIZE ], *puc;
 
 	memset(str, 0, FIELD_SIZE);
 	if ( sizeof(int) * 4 + ueStrLen( pItem->data.wordSeq ) * 2 +
@@ -185,7 +183,9 @@ void HashModify( HASH_ITEM *pItem )
 	fwrite( &chewing_lifetime, 1, 4, outfile );
 #ifdef ENABLE_DEBUG
 	sprintf( str, "%d", chewing_lifetime );
-	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
+	DEBUG_OUT( 
+		"HashModify-1: formatstring='%s',printing '%s'\n", 
+		formatstring, str );
 	DEBUG_FLUSH;
 #endif
 
@@ -202,7 +202,9 @@ void HashModify( HASH_ITEM *pItem )
 	}
 #ifdef ENABLE_DEBUG
 	HashItem2String( str, pItem );
-	DEBUG_OUT( "HashModify-2: '%-75s'\n", str );
+	DEBUG_OUT( 
+		"HashModify-2: formatstring='%s',printing '%s'\n",
+		formatstring, str );
 	DEBUG_FLUSH;
 #endif
 	HashItem2Binary( str, pItem );
@@ -234,8 +236,9 @@ static int isValidChineseString( char *str )
  */
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
-	int len, i;
+	int len, i, word_len, ptr;
 	uint16 *pshort;
+	char wordbuf[ 64 ];
 	unsigned char recbuf[ FIELD_SIZE ], *puc;
 
 	memcpy( recbuf, srcbuf, FIELD_SIZE );
@@ -380,8 +383,8 @@ static int migrate_hash_to_bin( const char *ofilename )
 {
 	FILE *txtfile;
 	char oldname[ 256 ], *dump, *seekdump;
-	HASH_ITEM item;
-	int item_index, iret, tflen;
+	HASH_ITEM item, *pItem;
+	int item_index, hashvalue, iret, tflen;
 
 	/* allocate dump buffer */
 	txtfile = open_file_get_length( ofilename, "r", &tflen );
@@ -480,7 +483,7 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
-int InitHash( const char *path )
+int ReadHash( const char *path )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
@@ -505,6 +508,7 @@ int InitHash( const char *path )
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
+	sprintf( formatstring, "%%-%ds", FIELD_SIZE );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );
@@ -521,11 +525,11 @@ open_hash_file:
 		}
 		chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-		fwrite( &chewing_lifetime, 1,
-		                sizeof(chewing_lifetime), outfile );
+		fwrite( &chewing_lifetime, 1, sizeof(chewing_lifetime), outfile );
 		fclose( outfile );
 	}
 	else {
+		char header[ 5 ];
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );

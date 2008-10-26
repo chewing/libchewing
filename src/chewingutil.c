@@ -20,23 +20,17 @@
 
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "global-private.h"
 #include "chewingutil.h"
 #include "zuin.h"
-#include "zuin-private.h"
-#include "choice-private.h"
-#include "tree-private.h"
-#include "userphrase-private.h"
+#include "userphrase.h"
 #include "private.h"
 
 extern const char *zhuin_tab[]; 
 static void MakePreferInterval( ChewingData *pgdata );
 static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata );
-static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
 
-static int FindSymbolKey( const char *symbol );
 static SymbolEntry** symbol_table = NULL;
-static unsigned int n_symbol_entry = 0;
+static int n_symbol_entry = 0;
 
 static char g_easy_symbol_key[] = {
 	'0','1','2','3','4','5','6','7','8','9',
@@ -134,10 +128,10 @@ int ChewingIsEntering( ChewingData *pgdata )
 int HaninSymbolInput(
 		ChoiceInfo *pci, 
 		AvailInfo *pai, 
-		const uint16 phoneSeq[] UNUSED, 
+		const uint16 phoneSeq[],
 		int candPerPage)
 {
-	unsigned int i;
+	int i;
 
 	/* No available symbol table */
 	if ( ! symbol_table )
@@ -178,7 +172,7 @@ static int _Inner_InternalSpecialSymbol(
 			sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 
 		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
-		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
+		ueStrNCpy( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
 				chibuf, 1, 1);
 		/* Save Symbol Key */
 		memmove( 
@@ -264,7 +258,7 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 	return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
 }
 
-int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo UNUSED )
+int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo )
 {
 	int rtn, loop, index;
 	char wordbuf[ 8 ];
@@ -356,7 +350,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 				sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 		}
 		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0 ;
-		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
+		ueStrNCpy( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
 				pgdata->choiceInfo.totalChoiceStr[ sel_i ], 1, 1);
 
 		/* This is very strange */
@@ -614,12 +608,12 @@ static void ShowChewingData( ChewingData *pgdata )
 
 	DEBUG_OUT(
 		"nPhoneSeq : %d\n"
-		"phoneSeq  : ", 
+		"phoneSeq : ", 
 		pgdata->nPhoneSeq );
 	for ( i = 0; i < pgdata->nPhoneSeq; i++ )
 		DEBUG_OUT( "%hu ", pgdata->phoneSeq[ i ] );
 	DEBUG_OUT(
-		"[cursor : %d]\n"
+		"cursor : %d\n"
 		"nSelect : %d\n"
 		"selectStr       selectInterval\n", 
 		pgdata->cursor, 
@@ -642,7 +636,7 @@ static void ShowChewingData( ChewingData *pgdata )
 		DEBUG_OUT( "%d ", pgdata->bUserArrBrkpt[ i ] );
 	DEBUG_OUT( "\n" );
 
-	DEBUG_OUT( "bArrBrkpt     : " );
+	DEBUG_OUT( "bArrBrkpt : " );
 	for ( i = 0; i <= pgdata->nPhoneSeq; i++ )
 		DEBUG_OUT( "%d ", pgdata->bArrBrkpt[ i ] );
 	DEBUG_OUT( "\n" );
@@ -683,10 +677,6 @@ int CallPhrasing( ChewingData *pgdata )
 			ChewingKillSelectIntervalAcross( i, pgdata );
 		}
 	}
-
-#ifdef ENABLE_DEBUG
-	ShowChewingData(pgdata);
-#endif
 
 	/* then phrasing */
 	Phrasing( 
@@ -1073,7 +1063,7 @@ static char *symbol_buf[][ 50 ] = {
 
 static int FindSymbolKey( const char *symbol )
 {
-	unsigned int i;
+	int i;
 	char **buf;
 	for ( i = 0; i < sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] ); ++i ) {
 		for ( buf = symbol_buf[ i ]; *buf; ++buf )	{
@@ -1201,7 +1191,7 @@ int InitSymbolTable( const char *prefix )
 
 static void TerminateSymbolTable()
 {
-	unsigned int i;
+	int i;
 	if ( symbol_table ) {
 		for ( i = 0; i < n_symbol_entry; ++i )
 			free( symbol_table[ i ] );
@@ -1269,7 +1259,7 @@ int InitEasySymbolInput( const char *prefix )
 
 static void TerminateEasySymbolTable()
 {
-	unsigned int i;
+	int i;
 	for ( i = 0; i < EASY_SYMBOL_KEY_TAB_LEN / sizeof( char ); ++i ) {
 		if ( NULL != g_easy_symbol_value[ i ] ) {
 			free( g_easy_symbol_value[ i ] );

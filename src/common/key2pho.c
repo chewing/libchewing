@@ -24,7 +24,6 @@
 #include <assert.h>
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "chewing-private.h"
 
 const char *zhuin_tab[] = {					/* number of bits */
 	  "  ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ",	/* 5 */

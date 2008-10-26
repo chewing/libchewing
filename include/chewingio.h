@@ -153,25 +153,5 @@ CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
  */
 CHEWING_API int chewing_KBStr2Num( char str[] );
 
-CHEWING_API void chewing_set_candPerPage( ChewingContext *ctx, int n );
-CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n );
-CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len );
-CHEWING_API int* chewing_get_selKey( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_addPhraseDirection( ChewingContext *ctx, int direction );
-CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_spaceAsSelection( ChewingContext *ctx, int mode );
-CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_escCleanAllBuf( ChewingContext *ctx, int mode );
-CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx );
-
-CHEWING_API void chewing_set_hsuSelKeyType( ChewingContext *ctx, int mode );
-CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx );
-
 #endif
+

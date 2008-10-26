@@ -79,9 +79,6 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
-# optional modules
-CHECK_REQUIRED_VERSION=0.9.4
-
 # Checks for check unit test framework
 PKG_CHECK_MODULES(CHECK, check >= 0.9.4, enable_check=yes, enble_check=no)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test $enable_check = "yes")
@@ -129,63 +126,45 @@ if test -z "$NCURSESW_LIBS"; then
 fi
 AC_SUBST(NCURSESW_CFLAGS)
 AC_SUBST(NCURSESW_LIBS)
-AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
+AM_CONDITIONAL(ENABLE_TEXT_UI, test $enable_ncursesw = "yes")
 
 # Options
-
-dnl Debugging switch
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-                              [Turn on debugging support @<:@default=no@:>@])],
-              [case "${enableval}" in
-               yes)
-               LIBDEBUG="true"
-               ;;
-               *)
-               ;;
-               esac],
-              [LIBDEBUG="false"])
-
-if test x$LIBDEBUG = x"true"; then
-	AC_DEFINE(ENABLE_DEBUG, 1,
-		[Define to 1 if you want native library runtime debugging code enabled])
-	CFLAGS="$CFLAGS -g"
-fi
-AC_SUBST(LIBDEBUG)
-
-dnl Adds -fvisibility=hidden to CFLAGS if running with gcc 4 or greater.
-AC_MSG_CHECKING([whether the compiler supports GCC Visibility])
-dnl Check for gcc4 or greater
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-void
-#if defined(__GNUC__) && (__GNUC__ >= 4)
-foo () {};                                                                                         
-#endif
-]], [[]])],[
-  has_visibility=yes
-  CFLAGS="$CFLAGS -fvisibility=hidden"
-],[
-  has_visibility=no
-])
-AC_MSG_RESULT($has_visibility)
-
-dnl binary form of chewing data
-AC_ARG_ENABLE([binary-data],
-		[AS_HELP_STRING([--enable-binary-data],
-				[Experimental use of binary data @<:@default=yes@:>@])],
+		[AS_HELP_STRING(--enable-debug,Turn on debugging support)],
 		[case "${enableval}" in
+		yes)
+		LIBDEBUG="true"
+		AC_DEFINE(ENABLE_DEBUG, 1,
+		[Define to 1 if you want native library runtime debugging code enabled])
+		CFLAGS="$CFLAGS -g"
+		;;
 		no)
-		binary_data="no"
+		LIBDEBUG="false"
 		;;
 		*)
-		binary_data="yes"
+		AC_MSG_ERROR(bad value ${enableval} for --enable-debug)
 		;;
-		esac],binary_data="yes")
-if test x$binary_data = "xyes"; then
-	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
-fi
-AC_SUBST(ENABLE_BINARY_DATA)
-AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
+		esac],
+	[LIBDEBUG="false"])
+AC_SUBST(LIBDEBUG)
+
+#AC_ARG_ENABLE([binary-data],
+#		[AS_HELP_STRING(--enable-binary-data,Experimental use of binary data)],
+#		[case "${enableval}" in
+#		yes)
+#		ENABLE_BINARY_DATA="true"
+#		AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
+#		;;
+#		no)
+#		ENABLE_BINARY_DATA="false"
+#		;;
+#		*)
+#		AC_MSG_ERROR(bad value ${enableval} for --enable-binary-data)
+#		;;
+#		esac],
+#	[ENABLE_BINARY_DATA="false"])
+#AC_SUBST(ENABLE_BINARY_DATA)
+#AM_CONDITIONAL(ENABLE_BINARY_DATA, test $ENABLE_BINARY_DATA = "true")
 
 # Platform-dependent
 dnl What kind of system are we using?
@@ -231,7 +210,7 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
-  Enable binary data      $binary_data
+dnl  Enable binary data      $ENABLE_BINARY_DATA
   Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
 ])

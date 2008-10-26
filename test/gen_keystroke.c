@@ -14,9 +14,6 @@
 
 #include "chewing.h"
 
-/* Only used by calculating char position */
-#include "internal/chewing-utf8-util.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +55,7 @@
 #define FILL_BLANK "                                                               "
 
 static int hasColor = 0;
-static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
+static char selKey_define[ 11 ] = "1234567890\0"; /* Default */
 
 void drawline( int x, int y )
 {
@@ -68,36 +65,23 @@ void drawline( int x, int y )
 
 void show_edit_buffer( int x, int y, ChewingContext *ctx )
 {
-	int i, cursor, count;
+	int i;
 	char *buffer_string;
-	char *p;
 	move( x, y );
 	addstr( FILL_BLANK );
-	if ( ! chewing_buffer_Check( ctx ) ) {
-		move( x, y );
+	if ( ! chewing_buffer_Check( ctx ) )
 		return;
-	}
+	move( x, y );
 	buffer_string = chewing_buffer_String( ctx );
-	mvaddstr( x, y, buffer_string );
-	cursor = chewing_cursor_Current( ctx );
-	p = buffer_string;
-	for ( i = 0 ;i < cursor; i++ ) {
-		count += ueBytesFromChar(*p) <= 1 ? 1 : 2;
-		p += ueBytesFromChar(*p);
-	}
-	move( x, count );
+	addstr( buffer_string );
 	free( buffer_string );
 }
 
 void show_interval_buffer( int x, int y, ChewingContext *ctx )
 {
-	char *buf;
-	char *p;
-	int buf_len;
 	char out_buf[ 100 ];
 	int i, count;
-	int arrPos[ 50 ];
-	IntervalType it;
+	int arrPos[ MAX_PHONE_SEQ_LEN ];
 
 	move( x, y );
 	addstr( FILL_BLANK );
@@ -107,42 +91,36 @@ void show_interval_buffer( int x, int y, ChewingContext *ctx )
 	if ( ! chewing_buffer_Check( ctx ) ) {
 		return;
 	}
-
-	buf = chewing_buffer_String( ctx );
-	buf_len = chewing_buffer_Len( ctx );
-
-	p = buf;
+	
 	count = 0;
-	for ( i = 0 ;i < buf_len; i++ ) {
+	for ( i = 0 ;i < ctx->output->chiSymbolBufLen; i++ ) {
 		arrPos[ i ] = count;
-		count += ueBytesFromChar(*p) <= 1 ? 1 : 2;
-		p += ueBytesFromChar(*p);
+		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s ) - 3 < 0 ? 1 : 2;
 	}
 	arrPos[ i ] = count;
 
 	memset( out_buf, ' ', count * ( sizeof( char ) ) );
 	out_buf[ count ] = '\0';
 
-	chewing_interval_Enumerate( ctx );
-	while ( chewing_interval_hasNext( ctx ) ) {
-		chewing_interval_Get( ctx, &it );
-		if ( ( it.to - it.from ) == 1 ) {
-			out_buf[ arrPos[ it.from ] ] = ' ';
-			out_buf[ arrPos[ it.to ] - 1 ] = ' ';
+	for ( i = 0; i < ctx->output->nDispInterval; i++ ) {
+		if ( ( ctx->output->dispInterval[ i ].to - ctx->output->dispInterval[ i ].from ) == 1 ) {
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = ' ';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] = ' ';
 		}
 		else {	
-			out_buf[ arrPos[ it.from ] ] = '[';
-			out_buf[ arrPos[ it.to ] - 1 ] =  ']';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] ] = '[';
+			out_buf[ arrPos[ ctx->output->dispInterval[ i ].to ] - 1 ] =  ']';
 		}
 		memset(
-			&out_buf[ arrPos[ it.from ] + 1 ], '-',
-			arrPos[ it.to ] - arrPos[ it.from ] - 2 );
+			&out_buf[ arrPos[ ctx->output->dispInterval[ i ].from ] + 1 ], '-',
+			arrPos[ ctx->output->dispInterval[ i ].to ] - arrPos[ ctx->output->dispInterval[ i ].from ] - 2 );
 	}
 	addstr( out_buf );
 }
 
 void showZuin( ChewingContext *ctx )
 {
+	int i;
 	int zuin_count;
 	char *zuin_string;
 	if ( chewing_get_ChiEngMode( ctx ) )
@@ -244,6 +222,7 @@ void show_commit_string( ChewingContext *ctx )
 {
 	static int x = 12;
 	static int y = 0;
+	int i;
 	char *commit_string;
 #if 0
 	if ( pgo->keystrokeRtn & KEYSTROKE_COMMIT ) {
@@ -264,12 +243,24 @@ void show_commit_string( ChewingContext *ctx )
 	}
 }
 
+void set_cursor( int x, ChewingContext *ctx )
+{
+	int i, count;
+
+	for ( count = 0, i = 0; i < ctx->output->chiSymbolCursor; i++) {
+		count += strlen( (const char *) ctx->output->chiSymbolBuf[ i ].s) - 3 < 0 ? 1 : 2;
+	}
+	move( x, count );
+}
+
 int main( int argc, char *argv[] )
 {
+	ChewingConfigData config;
 	ChewingContext *ctx;
 	FILE *fout;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
+	int i;
 	int width, height;
 	int add_phrase_length;
 
@@ -317,6 +308,12 @@ int main( int argc, char *argv[] )
 	config.candPerPage = 9;
 	config.maxChiSymbolLen = 16;
 	config.bAddPhraseForward = 1;
+
+	for ( i = 0; i < 10; i++ )
+		config.selKey[ i ] = selKey_define[ i ];
+
+	/* Enable the configurations */
+        chewing_Configure( ctx, &config );
 
 	clear();
 	mvaddstr( 0, 0, "Any key to start testing..." );
@@ -412,6 +409,7 @@ int main( int argc, char *argv[] )
 				break;
 		}
 		drawline( 0, 0 );
+		show_edit_buffer( 1, 0, ctx );
 		drawline( 2, 0 );
 		show_interval_buffer( 3, 0, ctx );
 		drawline( 4, 0 );
@@ -426,7 +424,7 @@ int main( int argc, char *argv[] )
 		mvaddstr( 11, 0, "Crtl + h : toggle Full/Half shape mode" );
 		show_commit_string( ctx );
 		show_userphrase( 7, 12, ctx );
-		show_edit_buffer( 1, 0, ctx );
+		set_cursor( 1, ctx );
 	}
 end:
 	endwin();
