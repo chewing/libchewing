@@ -21,15 +21,18 @@
 #include <ctype.h>
 
 #include "chewing-utf8-util.h"
-#include "chewingio.h"
 #include "global.h"
 #include "zuin.h"
+#include "zuin-private.h"
 #include "chewingutil.h"
-#include "userphrase.h"
-#include "dict.h"
-#include "char.h"
-#include "hash.h"
+#include "userphrase-private.h"
+#include "choice-private.h"
+#include "dict-private.h"
+#include "char-private.h"
+#include "hash-private.h"
+#include "tree-private.h"
 #include "private.h"
+#include "chewingio.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
@@ -118,13 +121,13 @@ CHEWING_API int chewing_Init(
 {
 	/* initialize Tree, Char, and Dict */
 	/* FIXME: check the validation of dataPath */
-	ReadTree( dataPath );
+	InitTree( dataPath );
 	InitChar( dataPath );
 	InitDict( dataPath );
 
 	/* initialize Hash */
 	/* FIXME: check the validation of hashPath */
-	ReadHash( hashPath );
+	InitHash( hashPath );
 
 	/* initialize SymbolTable */
 	if ( ! InitSymbolTable( (char*) hashPath ) )
@@ -240,27 +243,94 @@ CHEWING_API void chewing_free( ChewingContext *ctx )
 
 CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 {
-	ChewingData *pgdata = ctx->data;
-
-	pgdata->config.candPerPage = pcd->candPerPage;
-	pgdata->config.maxChiSymbolLen = pcd->maxChiSymbolLen;
-	memcpy( 
-		pgdata->config.selKey,
-		pcd->selKey, 
-		sizeof( pcd->selKey[ 0 ] ) * MAX_SELKEY );
-	pgdata->config.bAddPhraseForward = pcd->bAddPhraseForward;
-	pgdata->config.bSpaceAsSelection = pcd->bSpaceAsSelection;
-	pgdata->config.bEscCleanAllBuf = pcd->bEscCleanAllBuf;
-	
-	/* Failback to default value */
-	if ( (pgdata->config.bAddPhraseForward != 0) && (pgdata->config.bAddPhraseForward != 1) )
-		pgdata->config.bAddPhraseForward = 0;
-	if ( (pgdata->config.bSpaceAsSelection != 0) && (pgdata->config.bSpaceAsSelection != 1) )
-		pgdata->config.bSpaceAsSelection = 1;
-	if ( (pgdata->config.bEscCleanAllBuf != 0) && (pgdata->config.bEscCleanAllBuf != 1) )
-		pgdata->config.bEscCleanAllBuf = 0;
+	chewing_set_candPerPage( ctx, pcd->candPerPage );
+	chewing_set_maxChiSymbolLen( ctx, pcd->maxChiSymbolLen );
+	chewing_set_selKey( ctx, pcd->selKey, MAX_SELKEY );
+	chewing_set_addPhraseDirection( ctx, pcd->bAddPhraseForward );
+	chewing_set_spaceAsSelection( ctx, pcd->bSpaceAsSelection );
+	chewing_set_escCleanAllBuf( ctx, pcd->bEscCleanAllBuf );
 
 	return 0;
+}
+
+CHEWING_API void chewing_set_candPerPage( ChewingContext *ctx, int n )
+{
+	ctx->data->bChiSym = ( mode == CHINESE_MODE ? 1 : 0 );
+}
+
+CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n )
+{
+	ctx->data->config.maxChiSymbolLen = n;
+}
+
+CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx )
+{
+	return ctx->data->config.maxChiSymbolLen;
+}
+
+CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys,
+                                     int len UNUSED)
+{
+	memcpy(
+		ctx->data->config.selKey,
+		selkeys,
+		sizeof( selkeys[ 0 ] ) * MAX_SELKEY );
+}
+
+CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
+{
+	int *selkeys = ALC( int, MAX_SELKEY );
+	memcpy(
+		selkeys,
+		ctx->data->config.selKey,
+		sizeof( selkeys[ 0 ] ) * MAX_SELKEY );
+	return selkeys;
+}
+
+CHEWING_API void chewing_set_addPhraseDirection( ChewingContext *ctx, int direction )
+{
+	ctx->data->config.bAddPhraseForward = direction;
+	if ( (ctx->data->config.bAddPhraseForward != 0) && (ctx->data->config.bAddPhraseForward != 1) )
+		ctx->data->config.bAddPhraseForward = 0;
+}
+
+CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx )
+{
+	return ctx->data->config.bAddPhraseForward;
+}
+
+CHEWING_API void chewing_set_spaceAsSelection( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.bSpaceAsSelection = mode;
+	if ( (ctx->data->config.bSpaceAsSelection != 0) && (ctx->data->config.bSpaceAsSelection != 1) )
+		ctx->data->config.bSpaceAsSelection = 1;
+}
+
+CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx )
+{
+	return ctx->data->config.bSpaceAsSelection;
+}
+
+CHEWING_API void chewing_set_escCleanAllBuf( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.bEscCleanAllBuf = mode;
+	if ( (ctx->data->config.bEscCleanAllBuf != 0) && (ctx->data->config.bEscCleanAllBuf != 1) )
+		ctx->data->config.bEscCleanAllBuf = 0;
+}
+
+CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx )
+{
+	return ctx->data->config.bEscCleanAllBuf;
+}
+
+CHEWING_API void chewing_set_hsuSelKeyType( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.hsuSelKeyType = mode;
+}
+
+CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx )
+{
+	return ctx->data->config.hsuSelKeyType;
 }
 
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
@@ -587,7 +657,6 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
-	int toSelect = 0;
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int key_buf_cursor;
 
@@ -979,7 +1048,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	CheckAndResetRange( pgdata );
 
 	DEBUG_CHECKPOINT();
-	DEBUG_OUT( "   key=%d\n", key );
+	DEBUG_OUT( "   key=%d", key );
 
 	/* Dvorak Hsu */
 	if ( pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
@@ -1064,7 +1133,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 
 			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
 			DEBUG_OUT(
-				"\t\tchinese mode key, "
+				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
 				rtn );
 			DEBUG_FLUSH;
@@ -1299,7 +1368,6 @@ CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
-	int rtn, key = '\0';
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 
 	if ( ! pgdata->bSelect ) {

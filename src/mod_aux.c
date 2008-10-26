@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "global.h"
+#include "chewing-private.h"
 #include "chewingio.h"
 #include "private.h"
 
@@ -52,6 +53,11 @@ CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )
 	return (ctx->output->chiSymbolBufLen != 0);
 }
 
+CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
+{
+	return ctx->output->chiSymbolBufLen;
+}
+
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 {
 	int i;
@@ -72,9 +78,10 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
  */
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
+	char *s;
 	int i;
 	*zuin_count = 0;
-	char *s = (char*) calloc(
+	s = (char*) calloc(
 		1 + ZUIN_SIZE,
 		sizeof(char) * WCH_SIZE );
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
@@ -125,11 +132,9 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx )
 	return (ctx->output->pci ? ctx->output->pci->pageNo : -1);
 }
 
-static int cand_no_max = 9999;
 CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx )
 {
 	ctx->cand_no = ctx->output->pci->pageNo * ctx->output->pci->nChoicePerPage;
-	cand_no_max = ctx->output->pci->nTotalChoice;
 }
 
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
@@ -147,6 +152,25 @@ CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 		s = strdup( "" );
 	}
 	return s;
+}
+
+CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx )
+{
+	ctx->it_no = 0;
+}
+
+CHEWING_API int chewing_interval_hasNext( ChewingContext *ctx )
+{
+	return (ctx->it_no < ctx->output->nDispInterval);
+}
+
+CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
+{
+	if ( chewing_interval_hasNext( ctx ) ) {
+		it->from = ctx->output->dispInterval[ ctx->it_no ].from;
+		it->to = ctx->output->dispInterval[ ctx->it_no ].to;
+		ctx->it_no++;
+	}
 }
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx )
@@ -176,7 +200,7 @@ CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 	  return (ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
 } 
 
-CHEWING_API int Chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
+CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 { 
 	  return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }

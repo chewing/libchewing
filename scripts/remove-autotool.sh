@@ -14,14 +14,14 @@ rm -rf autom4te.cache
 
 rm -f \
 	aclocal.m4 \
+	config.sub \
+	config.guess \
 	configure \
+	install-sh \
 	config.log \
+	depcomp \
 	libtool \
 	config.status \
-	mkinstalldirs \
-	autotools/config.guess \
-	autotools/config.sub \
-	autotools/depcomp \
-	autotools/install-sh \
-	autotools/ltmain.sh \
-	autotools/missing
+	ltmain.sh \
+	missing \
+	mkinstalldirs
