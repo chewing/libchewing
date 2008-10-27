@@ -1,3 +1,9 @@
+2008-10-28  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingutil.c (ChewingIsBreakPoint) (AutoLearnPhrase): Add
+	experimental auto new phrase learning based on heuristic rules mentioned
+	in "port bimsphone algorithm to libchewing".
+
 2008-10-26  Kanru Chen  <kanru@kanru.info>
 
 	* include/internal/chewing-utf8-util.h,

@@ -570,7 +570,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 {
 	int throwEnd;
 	uint16 bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
-	char bufWordSeq[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
+	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 
 	throwEnd = CountReleaseNum( pgdata );
 
@@ -593,21 +593,83 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 	return throwEnd;
 }
 
+static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
+{
+	static char *break_word[] = {
+		"\xE6\x98\xAF", "\xE7\x9A\x84", "\xE4\xBA\x86", "\xE4\xB8\x8D",
+		/* 是的了不 */
+		"\xE4\xB9\x9F", "\xE8\x80\x8C", "\xE4\xBD\xA0", "\xE6\x88\x91",
+		/* 也而你我 */
+		"\xE4\xBB\x96", "\xE8\x88\x87", "\xE5\xAE\x83", "\xE5\xA5\xB9",
+		/* 他與它她 */
+		"\xE5\x85\xB6", "\xE5\xB0\xB1", "\xE5\x92\x8C", "\xE6\x88\x96",
+		/* 其就和或 */
+		"\xE5\x80\x91", "\xE6\x80\xA7", "\xE5\x93\xA1", "\xE5\xAD\x90",
+		/* 們性員子 */
+		"\xE4\xB8\x8A", "\xE4\xB8\x8B", "\xE4\xB8\xAD", "\xE5\x85\xA7",
+		/* 上下中內 */
+		"\xE5\xA4\x96", "\xE5\x8C\x96", "\xE8\x80\x85", "\xE5\xAE\xB6",
+		/* 外化者家 */
+		"\xE5\x85\x92", "\xE5\xB9\xB4", "\xE6\x9C\x88", "\xE6\x97\xA5",
+		/* 兒年月日 */
+		"\xE6\x99\x82", "\xE5\x88\x86", "\xE7\xA7\x92", "\xE8\xA1\x97",
+		/* 時分秒街 */
+		"\xE8\xB7\xAF", "\xE6\x9D\x91",
+		/* 路村 */
+        "\xE5\x9C\xA8", };
+        /* 在 */
+	char buf[ MAX_UTF8_SIZE + 1 ];
+	int i = 0, symbols = 0;
+	for ( i = 0; i < cursor; i++ )
+		if ( ! ChewingIsChiAt ( i + symbols, pgdata ) )
+			symbols++;
+	if ( ! ChewingIsChiAt( i + symbols, pgdata ) )
+		return 1;
+	else {
+		ueStrNCpy( buf,
+				ueStrSeek( (char *) &pgdata->phrOut.chiBuf, cursor ),
+				1, 1);
+		for ( i = 0; i < sizeof(break_word)/sizeof(break_word[0]); i++ ) {
+			if ( ! strcmp ( buf, break_word[i] ) )
+				return 1;
+		}
+	}
+	return 0;
+}
+
 void AutoLearnPhrase( ChewingData *pgdata )
 {
 	uint16 bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
-	char bufWordSeq[ MAX_PHONE_SEQ_LEN * 3 + 1 ];
+	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int i, from, len;
+	int prev_pos = 0;
+	int pending = 0;
 
 	for ( i = 0; i < pgdata->nPrefer; i++ ) {
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
-		memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
-		bufPhoneSeq[ len ] = (uint16) 0;
-		ueStrNCpy( bufWordSeq,
-		           ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
-		           len, 1);
-		UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+		if ( len == 1 && ! ChewingIsBreakPoint( from, pgdata ) ) {
+			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
+			bufPhoneSeq[ prev_pos + len ] = (uint16) 0;
+			ueStrNCpy( ueStrSeek( bufWordSeq, prev_pos ),
+					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
+					len, 1);
+			prev_pos += len;
+            pending = 1;
+		}
+		else {
+			if ( pending ) {
+                UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+				prev_pos = 0;
+				pending = 0;
+			}
+			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
+			bufPhoneSeq[ len ] = (uint16) 0;
+			ueStrNCpy( bufWordSeq,
+					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
+					len, 1);
+			UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+		}
 	}
 }
 
