@@ -671,6 +671,11 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
 		}
 	}
+    if ( pending ) {
+        UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+        prev_pos = 0;
+        pending = 0;
+    }
 }
 
 int AddChi( uint16 phone, ChewingData *pgdata )

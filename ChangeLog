@@ -1,5 +1,10 @@
 2008-10-28  Kanru Chen  <kanru@kanru.info>
 
+	* src/chewingutil.c (AutoLearnPhrase): Fix the last phrase is new phrase
+	case.
+
+2008-10-28  Kanru Chen  <kanru@kanru.info>
+
 	* src/chewingutil.c (ChewingIsBreakPoint) (AutoLearnPhrase): Add
 	experimental auto new phrase learning based on heuristic rules mentioned
 	in "port bimsphone algorithm to libchewing".
