@@ -1,3 +1,7 @@
+2008-11-03  Kanru Chen  <kanru@kanru.info>
+
+	* src/choice.c (ChoiceFirstAvail): Catch the zero phrase case.
+
 2008-10-28  Kanru Chen  <kanru@kanru.info>
 
 	* src/chewingutil.c (AutoLearnPhrase): Fix the last phrase is new phrase

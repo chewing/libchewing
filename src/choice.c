@@ -227,6 +227,10 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 		pgdata->nPhoneSeq,
 		PhoneSeqCursor( pgdata ),
 		pgdata->bSymbolArrBrkpt );
+
+	if ( ! pgdata->availInfo.nAvail )
+		return ChoiceEndChoice( pgdata );
+
 	pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
 	SetChoiceInfo(
 		&( pgdata->choiceInfo ), 
