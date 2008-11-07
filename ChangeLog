@@ -1,3 +1,8 @@
+2008-11-08  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/dict.c: Don't do void pointer arithmetic.
+
 2008-11-03  Kanru Chen  <kanru@kanru.info>
 
 	* src/choice.c (ChoiceFirstAvail): Catch the zero phrase case.

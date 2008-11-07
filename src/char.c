@@ -167,9 +167,9 @@ static void Str2Word( Word *wrd_ptr )
 #else
 	unsigned char size;
 	size = *(unsigned char *) cur_pos;
-	cur_pos += sizeof(unsigned char);
+	cur_pos = (unsigned char*)cur_pos + sizeof(unsigned char);
 	memcpy( wrd_ptr->word, cur_pos, size );
-	cur_pos += size;
+	cur_pos = (unsigned char*)cur_pos + size;
 	wrd_ptr->word[ size ] = '\0';
 #endif
 }
@@ -191,7 +191,7 @@ int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
 #ifndef USE_BINARY_DATA
 	fseek( dictfile, begin[ pinx - arrPhone ], SEEK_SET );
 #else
-	cur_pos = dict + begin[ pinx - arrPhone ];
+	cur_pos = (unsigned char*)dict + begin[ pinx - arrPhone ];
 #endif
 	end_pos = begin[ pinx - arrPhone + 1 ];
 	Str2Word( wrd_ptr );
@@ -204,7 +204,7 @@ int GetCharNext( Word *wrd_ptr )
 	if ( ftell( dictfile ) >= end_pos )
 		return 0;
 #else
-	if ( cur_pos >= dict + end_pos )
+	if ( (unsigned char*)cur_pos >= (unsigned char*)dict + end_pos )
 		return 0;
 #endif
 	Str2Word( wrd_ptr );

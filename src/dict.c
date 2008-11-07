@@ -124,11 +124,11 @@ static void Str2Phrase( Phrase *phr_ptr )
 #else
 	unsigned char size;
 	size = *(unsigned char *) cur_pos;
-	cur_pos += sizeof(unsigned char);
+	cur_pos = (unsigned char *)cur_pos + sizeof(unsigned char);
 	memcpy( phr_ptr->phrase, cur_pos, size );
-	cur_pos += size;
+	cur_pos = (unsigned char *)cur_pos + size;
 	phr_ptr->freq = *(int *) cur_pos;
-	cur_pos += sizeof(int);
+	cur_pos = (unsigned char *)cur_pos + sizeof(int);
 	phr_ptr->phrase[ size ] = '\0';
 #endif
 }
@@ -140,7 +140,7 @@ int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
 #ifndef USE_BINARY_DATA
 	fseek( dictfile, begin[ phone_phr_id ], SEEK_SET );
 #else
-	cur_pos = dict + begin[ phone_phr_id ];
+	cur_pos = (unsigned char *)dict + begin[ phone_phr_id ];
 #endif
 	end_pos = begin[ phone_phr_id + 1 ];
 	Str2Phrase( phr_ptr );
@@ -153,7 +153,7 @@ int GetPhraseNext( Phrase *phr_ptr )
 	if ( ftell( dictfile ) >= end_pos )
 		return 0;
 #else
-	if ( cur_pos >= dict + end_pos )
+	if ( (unsigned char *)cur_pos >= (unsigned char *)dict + end_pos )
 		return 0;
 #endif
 	Str2Phrase( phr_ptr );
