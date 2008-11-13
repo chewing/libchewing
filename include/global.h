@@ -61,6 +61,8 @@ typedef struct {
 	int bAddPhraseForward;
 	int bSpaceAsSelection;
 	int bEscCleanAllBuf;
+	int bAutoShiftCur;
+	int bEasySymbolInput;
 	/** @brief
             HSU_SELKEY_TYPE1 = asdfjkl789,
             HSU_SELKEY_TYPE2 = asdfzxcv89.

@@ -1,5 +1,16 @@
 2008-11-14  Kanru Chen  <kanru@kanru.info>
 
+	* include/global.h,
+	include/internal/chewing-private.h: Move bAutoShiftCur and
+	bEasySymbolInput from ChewingData to ChewingConfigData.
+
+	* include/chewingio.h,
+	src/chewingio.c,
+	src/chewingutil.c: Add set/get function of bAutoShiftCur and
+	bEasySymbolInput attribute.
+
+2008-11-14  Kanru Chen  <kanru@kanru.info>
+
 	* NEWS: Update.
 
 2008-11-08  Kanru Chen  <kanru@kanru.info>

@@ -423,7 +423,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		if ( symbol_type == 2 ) {
 			pgdata->chiSymbolBufLen++;
 			pgdata->chiSymbolCursor ++ ; 
-			if ( ! pgdata->bAutoShiftCur ) {
+			if ( ! pgdata->config.bAutoShiftCur ) {
 				/* No action */
 			}
 		}

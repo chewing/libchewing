@@ -257,6 +257,8 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 	chewing_set_addPhraseDirection( ctx, pcd->bAddPhraseForward );
 	chewing_set_spaceAsSelection( ctx, pcd->bSpaceAsSelection );
 	chewing_set_escCleanAllBuf( ctx, pcd->bEscCleanAllBuf );
+	chewing_set_autoShiftCur( ctx, pcd->bAutoShiftCur );
+	chewing_set_easySymbolInput( ctx, pcd->bEasySymbolInput );
 
 	return 0;
 }
@@ -346,6 +348,26 @@ CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx )
 	return ctx->data->config.hsuSelKeyType;
 }
 
+CHEWING_API void chewing_set_autoShiftCur( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.bAutoShiftCur = mode;
+}
+
+CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx )
+{
+	return ctx->data->config.bAutoShiftCur;
+}
+
+CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.bEasySymbolInput = mode;
+}
+
+CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx )
+{
+	return ctx->data->config.bEasySymbolInput;
+}
+
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
 	ctx->data->bChiSym = ( mode == CHINESE_MODE ? 1 : 0 );
@@ -389,7 +411,7 @@ static int DoSelect( ChewingData *pgdata, int num )
 				/* second, call choice module */
 				ChoiceSelect( pgdata, num );
 				/* automatically shift the cursor to next phrase */
-				if ( pgdata->bAutoShiftCur != 0 &&
+				if ( pgdata->config.bAutoShiftCur != 0 &&
 				     /* if cursor at end of string, do not shift the cursor. */
 				     pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
 					int len = pgdata->availInfo.avail[
@@ -1090,7 +1112,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	/* editing */
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
-			if ( pgdata->bEasySymbolInput != 0 ) {
+			if ( pgdata->config.bEasySymbolInput != 0 ) {
 				EasySymbolInput( key, pgdata, pgo );
 				goto End_keyproc;
 			}
@@ -1145,7 +1167,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 						bQuickCommit = 1;
 					}
 
-					if ( pgdata->bEasySymbolInput == 0 ) {
+					if ( pgdata->config.bEasySymbolInput == 0 ) {
 						if ( pgdata->bFullShape )
 							rtn = FullShapeSymbolInput( key, pgdata );
 						else

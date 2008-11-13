@@ -48,7 +48,7 @@ CHEWING_API int chewing_handle_DblTab( ChewingContext * );
 CHEWING_API int chewing_handle_Numlock( ChewingContext *, int key);
 
 /**
- * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd
+ * @brief [Deprecated] Set selectAreaLen, maxChiSymbolLen, selKey in pcd
  *
  * @param ctx Chewing IM context
  * @param pcd
@@ -173,5 +173,11 @@ CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx );
 
 CHEWING_API void chewing_set_hsuSelKeyType( ChewingContext *ctx, int mode );
 CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx );
+
+CHEWING_API void chewing_set_autoShiftCur( ChewingContext *ctx, int mode );
+CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx );
+
+CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode );
+CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
 
 #endif
