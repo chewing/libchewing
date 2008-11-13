@@ -4,6 +4,8 @@ What's New in libchewing SVN
 * Headers refactoring.
 * New binary data manipulation approach to dramatically reduce storage
   usage and loading time via memory mapping. (enabled by default)
+* New word segmentation method.
+* New auto-learn new phrases method.
 * Successful stories:
   . OpenBSD porting
   . ibus-chewing : chewing engine for ibus input method framework.
