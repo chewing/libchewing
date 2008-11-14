@@ -187,6 +187,7 @@ struct _ChewingContext {
 	ChewingOutput *output;
 	int cand_no;
 	int it_no;
+	int kb_no;
 };
 /**
  * @struct ChewingContext

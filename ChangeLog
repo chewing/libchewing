@@ -1,5 +1,18 @@
 2008-11-14  Kanru Chen  <kanru@kanru.info>
 
+	* src/private.h: Add STATIC_ASSERT macro.
+
+	* include/internal/zuin-private.h,
+	include/zuin.h,
+	src/tools/sort_word.c: Convert KB_* macros to enum.
+
+	* include/internal/chewing-private.h,
+	include/mod_aux.h,
+	src/chewingio.c,
+	src/mod_aux.c: New APIs to enumerate supported keyboard types.
+
+2008-11-14  Kanru Chen  <kanru@kanru.info>
+
 	* include/global.h,
 	include/internal/chewing-private.h: Move bAutoShiftCur and
 	bEasySymbolInput from ChewingData to ChewingConfigData.

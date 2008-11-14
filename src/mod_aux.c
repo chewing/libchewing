@@ -18,6 +18,7 @@
 
 #include "global.h"
 #include "chewing-private.h"
+#include "zuin-private.h"
 #include "chewingio.h"
 #include "private.h"
 
@@ -197,12 +198,39 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 { 
-	  return (ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
+	return (ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
 } 
 
 CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 { 
-	  return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
+	return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 
+CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx )
+{
+	return KB_TYPE_NUM;
+}
 
+CHEWING_API void chewing_kbtype_Enumerate( ChewingContext *ctx )
+{
+	ctx->kb_no = 0;
+}
+
+CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx )
+{
+	return ctx->kb_no < KB_TYPE_NUM;
+}
+
+extern char *kb_type_str[];
+
+CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
+{
+	char *s;
+	if ( chewing_kbtype_hasNext( ctx ) ) {
+		s = strdup( kb_type_str[ ctx->kb_no ] );
+		ctx->kb_no++;
+	} else {
+		s = strdup( "" );
+	}
+	return s;
+}

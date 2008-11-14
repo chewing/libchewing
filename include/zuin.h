@@ -15,19 +15,6 @@
 #ifndef _ZUIN_H
 #define _ZUIN_H
 
-/* Keyboard Layout */
-#define KB_TYPE_NUM 10
-#define KB_DEFAULT 0
-#define KB_HSU 1
-#define KB_IBM 2
-#define KB_GIN_YIEH 3
-#define KB_ET 4
-#define KB_ET26 5
-#define KB_DVORAK 6
-#define KB_DVORAK_HSU 7
-#define KB_DACHEN_CP26 8
-#define KB_HANYU_PINYIN 9
-
 #define ZUIN_IGNORE 0
 #define ZUIN_ABSORB 1
 #define ZUIN_COMMIT 2

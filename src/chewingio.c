@@ -50,7 +50,7 @@ void (*TerminateServices[ TerminateServicesNUM ])() = {
 static int countTerminateService = 0;
 static int bTerminateCompleted = 0;
 
-static char *kb_type_str[] = {
+char *kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
 	"KB_IBM",
@@ -67,6 +67,7 @@ CHEWING_API int chewing_KBStr2Num( char str[] )
 {
 	int i;
 
+	STATIC_ASSERT( KB_TYPE_NUM == sizeof(kb_type_str)/sizeof(kb_type_str[0]), kb_type_str_needs_update);
 	for ( i = 0; i < KB_TYPE_NUM; i++) {
 		if ( ! strcmp( str, kb_type_str[ i ] ) )
 			return i;

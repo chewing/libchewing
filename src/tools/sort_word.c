@@ -21,6 +21,7 @@
 #include "chewing-private.h"
 #include "key2pho-private.h"
 #include "zuin.h"
+#include "zuin-private.h"
 #include "config.h"
 
 #define PHONE_CIN_FILE	"phone.cin"

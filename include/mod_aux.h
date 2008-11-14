@@ -71,4 +71,8 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx );
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx );
 CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx );
 
+CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx );
+CHEWING_API void chewing_kbtype_Enumerate( ChewingContext *ctx );
+CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx );
+CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx );
 #endif

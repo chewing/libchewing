@@ -44,6 +44,8 @@ __forceinline void DEBUG_OUT( char* str, ... ){ }
 #define ALC(type, size) \
 	(type *) calloc( size, sizeof( type ) )
 
+#define STATIC_ASSERT( exp, name ) typedef int STATIC_ASSERT_##name [ ( exp ) ? 1 : -1 ];
+
 typedef int (*CompFuncType)( const void *, const void * );
 
 #define TerminateServicesNUM 10
