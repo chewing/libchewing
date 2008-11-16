@@ -1,3 +1,18 @@
+2008-11-16  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h (struct ChewingConfigData)
+	include/chewingio.h: Added bPhraseChoiceRearward.
+
+	* src/chewingio.c (chewing_Configure)
+	(chewing_set_phraseChoiceRearward) (chewing_get_phraseChoiceRearward):
+	Ditto
+
+	* src/choice.c (ChoiceFirstAvail): bPhraseChoiceRearward indicates the
+	behavior for phrase choice to be rearward or not.
+
+	* test/gen_keystroke.c (main): Initialize configurations with
+	chewing_set_autoShiftCur and chewing_set_phraseChoiceRearward.
+
 2008-11-14  Kanru Chen  <kanru@kanru.info>
 
 	* src/private.h: Add STATIC_ASSERT macro.
@@ -60,8 +75,8 @@
 	src/chewingutil.c,
 	src/choice.c,
 	src/tree.c,
-	src/userphrase.c: Fix improper use of MAX_UTF8_SIZE. This is a serious bug
-	can lead to wrong phrasing result.
+	src/userphrase.c: Fix improper use of MAX_UTF8_SIZE. This is a serious
+	bug that can lead to wrong phrasing result.
 
 2008-10-25  Kanru Chen  <kanru@kanru.info>
 
@@ -208,7 +223,7 @@
 2008-10-19  Jim Huang  <jserv.tw@gmail.com>
 
 	* test/simulate.sh,
-	test/materials.txt: New bacth simulating script.  It makes use of
+	test/materials.txt: New batch simulating script.  It makes use of
 	program "testchewing" from test suite and compare with the expected
 	string correspondingly defined in file materials.txt.  The reference
 	output:

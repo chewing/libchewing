@@ -180,4 +180,7 @@ CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx );
 CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode );
 CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
 
+CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode );
+CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx );
+
 #endif

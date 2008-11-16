@@ -27,8 +27,8 @@
 
 /* specified to Chewing API */
 #ifdef WIN32
-    #define CHEWING_DLL_IMPORT __declspec(dllimport)
-    #define CHEWING_DLL_EXPORT __declspec(dllexport)
+#   define CHEWING_DLL_IMPORT __declspec(dllimport)
+#   define CHEWING_DLL_EXPORT __declspec(dllexport)
 #   ifdef CHEWINGDLL_EXPORTS
 #      define CHEWING_API CHEWING_DLL_EXPORT
 #      define CHEWING_PRIVATE
@@ -63,6 +63,7 @@ typedef struct {
 	int bEscCleanAllBuf;
 	int bAutoShiftCur;
 	int bEasySymbolInput;
+	int bPhraseChoiceRearward;
 	/** @brief
             HSU_SELKEY_TYPE1 = asdfjkl789,
             HSU_SELKEY_TYPE2 = asdfzxcv89.

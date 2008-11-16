@@ -260,6 +260,7 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 	chewing_set_escCleanAllBuf( ctx, pcd->bEscCleanAllBuf );
 	chewing_set_autoShiftCur( ctx, pcd->bAutoShiftCur );
 	chewing_set_easySymbolInput( ctx, pcd->bEasySymbolInput );
+	chewing_set_phraseChoiceRearward( ctx, pcd->bPhraseChoiceRearward );
 
 	return 0;
 }
@@ -367,6 +368,16 @@ CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode )
 CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx )
 {
 	return ctx->data->config.bEasySymbolInput;
+}
+
+CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode )
+{
+	ctx->data->config.bPhraseChoiceRearward = mode;
+}
+
+CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx )
+{
+	return ctx->data->config.bPhraseChoiceRearward;
 }
 
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )

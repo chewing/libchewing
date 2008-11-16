@@ -216,7 +216,10 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 	/* see if there is some word in the cursor position */
 	if ( pgdata->chiSymbolBufLen == pgdata->chiSymbolCursor ) {
-		pgdata->chiSymbolCursor = pgdata->preferInterval[ pgdata->nPrefer - 1 ].from + CountSymbols( pgdata, pgdata->chiSymbolBufLen );
+		if ( pgdata->config.bPhraseChoiceRearward )
+			pgdata->chiSymbolCursor = pgdata->preferInterval[ pgdata->nPrefer - 1 ].from + CountSymbols( pgdata, pgdata->chiSymbolBufLen );
+		else
+			pgdata->chiSymbolCursor--;
 	}
 
 	pgdata->bSelect = 1;
