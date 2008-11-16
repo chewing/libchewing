@@ -4,19 +4,10 @@ For developers, please add new entry for your plans.
    seek for better way to share resources.
   a) support same phrase in different phones.
 5. Perform optimization on libchewing in the following aspects:
-  a) hashed data stored in binary form.
     a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
   b) support memory-limited applications.
-9. Provide API for querying Keybaord Mapping information.
-  a) provide zh_TW translation of corresponding keybaord mapping.
 11. Abstract the I/O layer
-  a) provide thin and efficient I/O helper functions to perform the
-     operations, such as open/create specific phrase file, query,
-     insert, remove, and bind to some system facilities.
-     ==> the porting_layer handles the above issues in POSIX/UNIX and
-         Win32.
   b) the backend of the I/O layer could be Standard C file operations,
      IIIMF's namespace I/O, and even database, so that we could give
-     leverage to incoming 0.3.x branch.
-     ==> sqlite branch attempts to take a try.
+     leverage to 0.3.x branch.
 12.
