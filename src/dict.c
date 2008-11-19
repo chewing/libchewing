@@ -83,7 +83,7 @@ int InitDict( const char *prefix )
 	assert( plat_mmap_is_valid( &dict_mmap ) );
 	if ( file_size < 0 )
 		return 0;
-	csize = file_size + sizeof(int);
+	csize = file_size;
 	dict = (void *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
 	assert( dict );
 #else
@@ -99,7 +99,7 @@ int InitDict( const char *prefix )
 	if ( file_size < 0 )
 		return 0;
 
-	csize = file_size + sizeof(int);
+	csize = file_size;
 	begin = (int *) plat_mmap_set_view( &index_mmap, &offset, &csize );
 	assert( begin );
 #else

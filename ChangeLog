@@ -1,5 +1,10 @@
 2008-11-19  Kanru Chen  <kanru@kanru.info>
 
+	* src/char.c,
+	src/dict.c: mmap use original file size.
+
+2008-11-19  Kanru Chen  <kanru@kanru.info>
+
 	* src/mod_aux.c: Only return by argument if the pointer is not NULL.
 
 2008-11-16  Jim Huang  <jserv.tw@gmail.com>
