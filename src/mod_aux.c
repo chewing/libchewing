@@ -81,14 +81,16 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
 	char *s;
 	int i;
-	*zuin_count = 0;
+	if (zuin_count)
+		*zuin_count = 0;
 	s = (char*) calloc(
 		1 + ZUIN_SIZE,
 		sizeof(char) * WCH_SIZE );
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
 		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
-			zuin_count++;
+			if (zuin_count)
+				*zuin_count++;
 		}
 	}
 	return s;
@@ -168,8 +170,10 @@ CHEWING_API int chewing_interval_hasNext( ChewingContext *ctx )
 CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
 {
 	if ( chewing_interval_hasNext( ctx ) ) {
-		it->from = ctx->output->dispInterval[ ctx->it_no ].from;
-		it->to = ctx->output->dispInterval[ ctx->it_no ].to;
+		if ( it ) {
+			it->from = ctx->output->dispInterval[ ctx->it_no ].from;
+			it->to = ctx->output->dispInterval[ ctx->it_no ].to;
+		}
 		ctx->it_no++;
 	}
 }
