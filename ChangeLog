@@ -1,5 +1,9 @@
 2008-11-22  Kanru Chen  <kanru@kanru.info>
 
+	* configure.ac: Bump version to 0.3.1.901 .
+
+2008-11-22  Kanru Chen  <kanru@kanru.info>
+
 	* include/chewingio.h,
 	src/chewingio.src (chewing_free) (chewing_delete): Renamed.
 	(chewing_free): Used to free memory allocated by chewing.
