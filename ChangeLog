@@ -1,3 +1,14 @@
+2008-11-22  Kanru Chen  <kanru@kanru.info>
+
+	* include/chewingio.h,
+	src/chewingio.src (chewing_free) (chewing_delete): Renamed.
+	(chewing_free): Used to free memory allocated by chewing.
+	(chewing_get_phoneSeq) (chewing_get_phoneSeqLen):
+	Win32 needs this two function.
+
+	* src/hash.c (HashItem2Binary) (_load_hash_file): Exported for
+	internal use.
+
 2008-11-19  Kanru Chen  <kanru@kanru.info>
 
 	* src/char.c,

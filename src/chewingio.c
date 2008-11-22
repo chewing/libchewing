@@ -239,7 +239,7 @@ CHEWING_API void chewing_Terminate()
 	return;
 }
 
-CHEWING_API void chewing_free( ChewingContext *ctx )
+CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx->data )
 		free( ctx->data);
@@ -247,6 +247,13 @@ CHEWING_API void chewing_free( ChewingContext *ctx )
 		free( ctx->output);
 	if ( ctx )
 		free( ctx );
+	return;
+}
+
+CHEWING_API void chewing_free( void *p )
+{
+	if ( p )
+		free( p );
 	return;
 }
 
@@ -1438,6 +1445,21 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
+
+#if defined(WIN32)
+CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx )
+{
+	uint16 *seq;
+	seq = ALC( uint16, ctx->data->nPhoneSeq );
+	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16)*ctx->data->nPhoneSeq );
+	return seq;
+}
+
+CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
+{
+	return ctx->data->nPhoneSeq;
+}
+#endif
 
 /* Local Variables: */
 /* c-indentation-style: linux */

@@ -138,7 +138,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 /* 
  * capacity of 'str' MUST bigger then FIELD_SIZE !
  */
-static void HashItem2Binary( char *str, HASH_ITEM *pItem )
+void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
 	uint16 *pshort;
@@ -346,7 +346,7 @@ static FILE *open_file_get_length(
 	return tf;
 }
 
-static char *_load_hash_file( const char *filename, int *size )
+char *_load_hash_file( const char *filename, int *size )
 {
 	int flen;
 	char *pd = NULL;

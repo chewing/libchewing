@@ -65,7 +65,12 @@ CHEWING_API ChewingContext *chewing_new();
  *
  * Release internal memory allocation.
  */
-CHEWING_API void chewing_free( ChewingContext *ctx );
+CHEWING_API void chewing_delete( ChewingContext *ctx );
+
+/**
+ * @brief release memory allocated by chewing
+ */
+CHEWING_API void chewing_free( void * );
 
 /**
  * @brief Initialize chewing
@@ -182,5 +187,10 @@ CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
 
 CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode );
 CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx );
+
+#if defined(WIN32)
+CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx );
+CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
+#endif
 
 #endif
