@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2007
+ * Copyright (c) 2004, 2005, 2006, 2007, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -38,6 +38,8 @@ int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
 {
 	int i;
+	if ( ! p1 || ! p2 )	/* FIXME: should not happend. */
+		return 0;
 
 	for ( i = 0; ( p1[ i ] != 0 && p2[ i ] != 0 ); i++ ) {
 		if ( p1[ i ] != p2[ i ] )
@@ -59,9 +61,9 @@ static unsigned int HashFunc( const uint16 phoneSeq[] )
 
 HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pItemLast )
 {
-	HASH_ITEM *pNow = ( ! pItemLast ) ?
-		hashtable[ HashFunc( phoneSeq ) ] :
-		pItemLast->next;
+	HASH_ITEM *pNow = pItemLast ?
+			pItemLast->next :
+			hashtable[ HashFunc( phoneSeq ) ];
 	
 	for ( ; pNow; pNow = pNow->next ) 
 		if ( PhoneSeqTheSame( pNow->data.phoneSeq, phoneSeq ) )
@@ -480,6 +482,20 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
+static HASH_ITEM *pHead = NULL;
+
+static void TerminateHash()
+{
+	HASH_ITEM *pItem;
+	while ( pHead ) {
+		pItem = pHead;
+		pHead = pItem->next;
+		DEBUG_CHECKPOINT();
+		free( pItem );
+	}
+	pHead = NULL;
+}
+
 int InitHash( const char *path )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
@@ -504,7 +520,7 @@ int InitHash( const char *path )
 	} else {
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
-	memset( hashtable, 0, HASH_TABLE_SIZE );
+	memset( hashtable, NULL, HASH_TABLE_SIZE );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );
@@ -526,6 +542,7 @@ open_hash_file:
 		fclose( outfile );
 	}
 	else {
+		static int is_set_pHead = 0;
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
@@ -555,6 +572,11 @@ open_hash_file:
 			memcpy( pItem, &item, sizeof( HASH_ITEM ) );
 			pItem->next = pPool;
 			pPool = pItem;
+			if ( ! is_set_pHead ) {
+				pHead = pItem;
+				is_set_pHead = 1;
+			}
+
 			if ( oldest > pItem->data.recentTime ) {
 				oldest = pItem->data.recentTime;
 			}
@@ -575,6 +597,7 @@ open_hash_file:
 		}
 		chewing_lifetime -= oldest;
 	}
+	addTerminateService( TerminateHash );
 	return 1;
 }
 
