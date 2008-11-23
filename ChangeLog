@@ -1,5 +1,12 @@
 2008-11-23  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/chewingio.h,
+	src/chewingio.c (chewing_get_phoneSeq) (chewing_get_phoneSeqLen):
+	Globally defined.  No more Win32 specific.  Considering the usage of
+	chewing-utils, the two APIs are useful.
+
+2008-11-23  Jim Huang  <jserv.tw@gmail.com>
+
 	* src/hash.c (TerminateHash): New terminating service function
 	to free allocated hash entries.
 	(PhoneSeqTheSame): Avoid invalid memory access.

@@ -140,6 +140,7 @@ CHEWING_API int chewing_Init(
 		InitSymbolTable( (char*) dataPath );
 	if ( ! InitEasySymbolInput( (char *) hashPath ) )
 		InitEasySymbolInput( (char *) dataPath );
+
 	/* initialize HanyuPinYin table */
 	if ( ! InitHanyuPinYin( hashPath ) )
 		InitHanyuPinYin( dataPath );
@@ -1446,7 +1447,6 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 	return 0;
 }
 
-#if defined(WIN32)
 CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx )
 {
 	uint16 *seq;
@@ -1459,7 +1459,6 @@ CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 {
 	return ctx->data->nPhoneSeq;
 }
-#endif
 
 /* Local Variables: */
 /* c-indentation-style: linux */
