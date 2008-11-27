@@ -220,6 +220,11 @@ CHEWING_API int chewing_get_KBType( ChewingContext *ctx )
 	return ctx->data->zuinData.kbtype;
 }
 
+CHEWING_API char* chewing_get_KBString( ChewingContext *ctx )
+{
+	return strdup( kb_type_str[ ctx->data->zuinData.kbtype ] );
+}
+
 CHEWING_API void chewing_Terminate()
 {
 	int i;

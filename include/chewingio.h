@@ -111,6 +111,14 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 
 /**
+ * @breif Get keyboard type in c string format
+ *
+ * @param ctx
+ * @return If successed then return kbtype from KBStr2Num
+ */
+CHEWING_API char* chewing_get_KBString( ChewingContext *ctx );
+
+/**
  * @brief Terminate chewing
  *
  * Terminate the I/O routines for chewing.
