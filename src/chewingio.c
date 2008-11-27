@@ -206,8 +206,13 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 
 CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype )
 {
-	ctx->data->zuinData.kbtype = kbtype;
-	return 0;
+	if ( kbtype < KB_TYPE_NUM ) {
+		ctx->data->zuinData.kbtype = kbtype;
+		return 0;
+	} else {
+		ctx->data->zuinData.kbtype = KB_DEFAULT;
+		return 1;
+	}
 }
 
 CHEWING_API int chewing_get_KBType( ChewingContext *ctx )
