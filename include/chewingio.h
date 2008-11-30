@@ -27,10 +27,10 @@
 #define KEYSTROKE_BELL 4
 #define KEYSTROKE_ABSORB 8
 
-/*
- * Series of functions handling key stroke.
+/*! \name Series of functions handling key stroke.
  */
 
+/*@{*/
 /**
  * @brief Handle the input key stroke: Space
  * @param ctx Chewing IM context
@@ -166,6 +166,8 @@ CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx );
  * @param key scan code of number key
  */
 CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key);
+/*@}*/
+
 
 /**
  * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd.
@@ -176,6 +178,11 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key);
  */
 CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd );
 
+
+/*! \name Chewing IM Instance Management
+ */
+
+/*@{*/
 /**
  * @brief Create new handle of the instance for Chewing IM
  */
@@ -192,7 +199,13 @@ CHEWING_API void chewing_delete( ChewingContext *ctx );
  * @brief Release memory allocated used by given pointer used in APIs
  */
 CHEWING_API void chewing_free( void * );
+/*@}*/
 
+
+/*! \name Chewing IM Setup
+ */
+
+/*@{*/
 /**
  * @brief Initialize directory data used by Chewing IM
  *
@@ -210,6 +223,16 @@ CHEWING_API int chewing_Init( const char *dataPath, const char *hashPath );
  */
 CHEWING_API int chewing_Reset( ChewingContext *ctx );
 
+/**
+ * @brief Terminate the I/O routines of Chewing IM
+ */
+CHEWING_API void chewing_Terminate();
+/*@}*/
+
+/*! \name Keyboard mapping
+ */
+
+/*@{*/
 /**
  * @brief Set keyboard mapping type
  *
@@ -236,10 +259,19 @@ CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 CHEWING_API char* chewing_get_KBString( ChewingContext *ctx );
 
 /**
- * @brief Terminate the I/O routines of Chewing IM
+ * @brief Get the index number of keyboard mapping type from given string
+ *
+ * @param str[] name of kbtype eg. "KB_HSU"
  */
-CHEWING_API void chewing_Terminate();
+CHEWING_API int chewing_KBStr2Num( char str[] );
 
+/*@}*/
+
+
+/*! \name Operating language mode of Chewing IM
+ */
+
+/*@{*/
 /**
  * @brief Set the operating language mode of Chewing IM.
  *
@@ -249,16 +281,22 @@ CHEWING_API void chewing_Terminate();
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get Chewing current english, chinese mode
+ * @brief Get current operating language mode: English / Chinese
  *
  * @param ctx
  * 
  * @return CHINESE_MODE or ENGLISH_MODE
  */
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
+/*@*/
 
+
+/*! \name Shape mode of output symbols
+ */
+
+/*@{*/
 /**
- * @brief Set the shape mode of output symbols: fullshape / halfshape
+ * @brief Set the shape mode of output symbols: full-shape / half-shape
  *
  * @param ctx
  * @param mode FULLSHAPE_MODE or HALFSHAPE_MODE
@@ -273,14 +311,13 @@ CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
  * @return FULLSHAPE_MODE or HALFSHAPE_MODE
  */
 CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
+/*@}*/
 
-/**
- * @brief Get the index number of keyboard mapping type from given string
- *
- * @param str[] name of kbtype eg. "KB_HSU"
+
+/*! \name Number of selection candidate per page
  */
-CHEWING_API int chewing_KBStr2Num( char str[] );
 
+/*@{*/
 /**
  * @brief Set the number of selection candidate per page
  *
@@ -295,7 +332,13 @@ CHEWING_API void chewing_set_candPerPage( ChewingContext *ctx, int n );
  * @param ctx
  */
 CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Maximum length of Chinese symbols
+ */
+
+/*@{*/
 /**
  * @brief Set the maximum length of Chinese symbols
  *
@@ -310,7 +353,13 @@ CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n );
  * @param ctx
  */
 CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Key sequence for selecting phrases
+ */
+
+/*@{*/
 /**
  * @brief Set the key sequence for selecting phrases
  *
@@ -326,7 +375,13 @@ CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len 
  * @param ctx
  */
 CHEWING_API int* chewing_get_selKey( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Direction of adding new user-defined phrases
+ */
+
+/*@{*/
 /**
  * @brief Set the direction of adding new user-defined phrases
  *
@@ -341,7 +396,13 @@ CHEWING_API void chewing_set_addPhraseDirection( ChewingContext *ctx, int direct
  * @param ctx
  */
 CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Behavior whether if space key is regarded as selection key
+ */
+
+/*@{*/
 /**
  * @brief Set the behavior whether if space key is regarded as selection key
  *
@@ -356,9 +417,15 @@ CHEWING_API void chewing_set_spaceAsSelection( ChewingContext *ctx, int mode );
  * @param ctx
  */
 CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Behavior whether if Escape should clean all buffer
+ */
+
+/*@{*/
 /**
- * @brief Set the behavior whether if Escape should clean all buffer
+ * @brief Set the behavior whether if Escape key should clean all buffer
  *
  * @param ctx
  * @param mode
@@ -366,12 +433,18 @@ CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx );
 CHEWING_API void chewing_set_escCleanAllBuf( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get the behavior whether if Escape should clean all buffer
+ * @brief Get the behavior whether if Escape key should clean all buffer
  *
  * @param ctx
  */
 CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Type of selection keys in Hsu's keyboard mapping
+ */
+
+/*@{*/
 /**
  * @brief Set the type of selection keys in Hsu's keyboard mapping
  *
@@ -386,7 +459,13 @@ CHEWING_API void chewing_set_hsuSelKeyType( ChewingContext *ctx, int mode );
  * @param ctx
  */
 CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Behavior of automatically shifting cursor after selection
+ */
+
+/*@{*/
 /**
  * @brief Set the behavior of automatically shifting cursor after selection
  *
@@ -401,7 +480,13 @@ CHEWING_API void chewing_set_autoShiftCur( ChewingContext *ctx, int mode );
  * @param ctx
  */
 CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Operating mode during easy symbol input
+ */
+
+/*@{*/
 /**
  * @brief Set the operating mode during easy symbol input
  *
@@ -416,9 +501,15 @@ CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode );
  * @param ctx
  */
 CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Behavior for phrase choice to be rearward or not
+ */
+
+/*@{*/
 /**
- * @brief Set the behavior for phrase choice to be rearward or not.
+ * @brief Set the behavior for phrase choice to be rearward or not
  *
  * @param ctx
  * @param mode
@@ -426,12 +517,18 @@ CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
 CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get the behavior for phrase choice to be rearward or not.
+ * @brief Get the behavior for phrase choice to be rearward or not
  *
  * @param ctx
  */
 CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx );
+/*@}*/
 
+
+/*! \name Phonetic sequence in Chewing internal state machine
+ */
+
+/*@{*/
 /**
  * @brief Get phonetic sequence in Chewing internal state machine
  *
@@ -445,5 +542,6 @@ CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx );
  * @param ctx
  */
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
+/*@}*/
 
 #endif /* _CHEWING_IO_H */

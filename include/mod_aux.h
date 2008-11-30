@@ -25,9 +25,9 @@
 CHEWING_API int chewing_commit_Check( ChewingContext *ctx );
 
 /**
+ * @brief Get current commit string regardless current input state
  * @param ctx handle to Chewing IM context
  *
- * retrun current commit string, regardless current input state.
  * Alwasy returns a char pointer, caller must free it.
  */
 CHEWING_API char *chewing_commit_String( ChewingContext *ctx );
