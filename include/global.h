@@ -1,4 +1,4 @@
-/**
+/*
  * global.h
  *
  * Copyright (c) 1999, 2000, 2001
@@ -15,6 +15,11 @@
 #ifndef _CHEWING_GLOBAL_H
 #define _CHEWING_GLOBAL_H
 
+/*! \file global.h
+ *  \brief Chewing Global Definitions
+ *  \author libchewing Core Team
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -27,7 +32,7 @@
 
 /* specified to Chewing API */
 #ifdef WIN32
-#   define CHEWING_DLL_IMPORT __declspec(dllimport)
+#define CHEWING_DLL_IMPORT __declspec(dllimport)
 #   define CHEWING_DLL_EXPORT __declspec(dllexport)
 #   ifdef CHEWINGDLL_EXPORTS
 #      define CHEWING_API CHEWING_DLL_EXPORT

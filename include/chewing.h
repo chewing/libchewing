@@ -1,4 +1,4 @@
-/**
+/*
  * chewing.h
  *
  * Copyright (c) 2004, 2005, 2006
@@ -14,6 +14,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*! \file chewing.h
+ *  \brief Chewing Headers
+ *  \author libchewing Core Team
+ */
 
 #include "chewingio.h"
 #include "global.h"

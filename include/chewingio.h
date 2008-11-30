@@ -1,4 +1,4 @@
-/**
+/*
  * chewingio.h
  *
  * Copyright (c) 1999, 2000, 2001
@@ -14,6 +14,12 @@
 
 #ifndef _CHEWING_IO_H
 #define _CHEWING_IO_H
+
+/*! \file chewingio.h
+ *  \brief Chewing I/O module
+ *  \author libchewing Core Team
+ */
+
 #include "global.h"
 
 #define KEYSTROKE_IGNORE 1
@@ -86,7 +92,7 @@ CHEWING_API int chewing_Init(
 		const char *hashPath );
 
 /**
- * @breif Reset all settings
+ * @brief Reset all settings
  *
  * @param ctx
  * @return If successed than return 0
@@ -94,7 +100,7 @@ CHEWING_API int chewing_Init(
 CHEWING_API int chewing_Reset( ChewingContext *ctx );
 
 /**
- * @breif Set keyboard type
+ * @brief Set keyboard type
  *
  * @param ctx
  * @param kbtype kbtype from KBStr2Num
@@ -103,7 +109,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx );
 CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 
 /**
- * @breif Get keyboard type
+ * @brief Get keyboard type
  *
  * @param ctx
  * @return If successed then return kbtype from KBStr2Num
@@ -111,7 +117,7 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 
 /**
- * @breif Get keyboard type in c string format
+ * @brief Get keyboard type in c string format
  *
  * @param ctx
  * @return If successed then return kbtype from KBStr2Num

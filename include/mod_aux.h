@@ -1,7 +1,7 @@
-/**
+/*
  * mod_aux.c
  *
- * Copyright (c) 2005
+ * Copyright (c) 2005, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -11,9 +11,9 @@
 #ifndef CHEWING_MOD_AUX_H
 #define CHEWING_MOD_AUX_H
 
-/**
- * @file mod_aux.h
- * @brief Auxiliary module
+/*! \file mod_aux.h
+ *  \brief Auxiliary module
+ *  \author libchewing Core Team
  */
 
 #include "global.h"

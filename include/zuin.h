@@ -1,4 +1,4 @@
-/**
+/*
  * zuin.h
  *
  * Copyright (c) 1999, 2000, 2001
@@ -14,6 +14,11 @@
 
 #ifndef _ZUIN_H
 #define _ZUIN_H
+
+/*! \file zuin.h
+ *  \brief Chewing Phonetic Definitions
+ *  \author libchewing Core Team
+ */
 
 #define ZUIN_IGNORE 0
 #define ZUIN_ABSORB 1
