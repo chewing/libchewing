@@ -1,5 +1,13 @@
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
+	* Doxyfile.in: To improve API documentation, enable the following
+	options:
+	  - INLINE_SOURCES
+	  - HAVE_DOT
+	  - CALL_GRAPH
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/chewingio.h,
 	include/mod_aux.h,
 	include/global.h,
