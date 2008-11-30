@@ -1,5 +1,12 @@
 2008-11-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* Doxyfile.in: Update with doxygen 1.5.7.1 -u.  Switch lang to
+	English.
+
+	* include/chewing.h: Initially documented for high level descriptions.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* test/Makefile.am: Launch valgrind via libtool.  Avoid linkage
 	problems.
 
