@@ -27,69 +27,180 @@
 #define KEYSTROKE_BELL 4
 #define KEYSTROKE_ABSORB 8
 
-/**
- * @brief Function should be called when ESC emit
+/*
+ * Series of functions handling key stroke.
  */
-CHEWING_API int chewing_handle_Space( ChewingContext * );
-CHEWING_API int chewing_handle_Esc( ChewingContext * );
-CHEWING_API int chewing_handle_Enter( ChewingContext * );
-CHEWING_API int chewing_handle_Del( ChewingContext * );
-CHEWING_API int chewing_handle_Backspace( ChewingContext * );
-CHEWING_API int chewing_handle_Tab( ChewingContext * );
-CHEWING_API int chewing_handle_ShiftLeft( ChewingContext * );
-CHEWING_API int chewing_handle_Left( ChewingContext * );
-CHEWING_API int chewing_handle_ShiftRight( ChewingContext * );
-CHEWING_API int chewing_handle_Right( ChewingContext * );
-CHEWING_API int chewing_handle_Up( ChewingContext * );
-CHEWING_API int chewing_handle_Home( ChewingContext * );
-CHEWING_API int chewing_handle_End( ChewingContext * );
-CHEWING_API int chewing_handle_PageUp( ChewingContext * );
-CHEWING_API int chewing_handle_PageDown( ChewingContext * );
-CHEWING_API int chewing_handle_Down( ChewingContext * );
-CHEWING_API int chewing_handle_Capslock( ChewingContext * );
-CHEWING_API int chewing_handle_Default( ChewingContext *, int key );
-CHEWING_API int chewing_handle_CtrlNum( ChewingContext *, int key );
-CHEWING_API int chewing_handle_ShiftSpace( ChewingContext * );
-CHEWING_API int chewing_handle_DblTab( ChewingContext * );
-CHEWING_API int chewing_handle_Numlock( ChewingContext *, int key);
 
 /**
- * @brief [Deprecated] Set selectAreaLen, maxChiSymbolLen, selKey in pcd
+ * @brief Handle the input key stroke: Space
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Space( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Escape
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Esc( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Enter/Return
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Enter( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Delete
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Del( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Backspace
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Backspace( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Tab
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Tab( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Shift + Left
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_ShiftLeft( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Left
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Left( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Shift + Right
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_ShiftRight( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Right
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Right( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Up
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Up( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Home
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Home( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: End
+ * @param ctx Chewing IM context
+ */
+
+CHEWING_API int chewing_handle_End( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: PageUp
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_PageUp( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: PageDown
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Down
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Down( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Capslock
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: casual key
+ * @param ctx Chewing IM context
+ * @param key scan code of key stroke
+ */
+CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key );
+
+/**
+ * @brief Handle the input key stroke: Ctrl + Number-key
+ * @param ctx Chewing IM context
+ * @param key scan code of number key
+ */
+CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key );
+
+/**
+ * @brief Handle the input key stroke: Shift + Space
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: double Tab
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx );
+
+/**
+ * @brief Handle the input key stroke: Numlock (keypad)
+ * @param ctx Chewing IM context
+ * @param key scan code of number key
+ */
+CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key);
+
+/**
+ * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd.
+ * @deprecated Use chewing_set_ series of functions to set parameters instead.
  *
  * @param ctx Chewing IM context
- * @param pcd
+ * @param pcd pointer to Chewing configuration data structure
  */
 CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd );
 
 /**
- * @brief create new handle of ChewingContext
+ * @brief Create new handle of the instance for Chewing IM
  */
 CHEWING_API ChewingContext *chewing_new();
 
 /**
- * @brief release handle of ChewingContext
+ * @brief Release the handle and internal memory by given Chewing instance
  *
- * Release internal memory allocation.
+ * @param ctx Chewing IM context
  */
 CHEWING_API void chewing_delete( ChewingContext *ctx );
 
 /**
- * @brief release memory allocated by chewing
+ * @brief Release memory allocated used by given pointer used in APIs
  */
 CHEWING_API void chewing_free( void * );
 
 /**
- * @brief Initialize chewing
+ * @brief Initialize directory data used by Chewing IM
  *
- * Init directory data.
- *
- * @param dataPath
- * @param hashPath
+ * @param dataPath (read-only) system path of Chewing IM data
+ * @param hashPath (read-write) the path where user-defined hash data stores
  * @retval 0 if succeed
  */
-CHEWING_API int chewing_Init(
-		const char *dataPath,
-		const char *hashPath );
+CHEWING_API int chewing_Init( const char *dataPath, const char *hashPath );
 
 /**
  * @brief Reset all settings
@@ -100,24 +211,24 @@ CHEWING_API int chewing_Init(
 CHEWING_API int chewing_Reset( ChewingContext *ctx );
 
 /**
- * @brief Set keyboard type
+ * @brief Set keyboard mapping type
  *
  * @param ctx
- * @param kbtype kbtype from KBStr2Num
+ * @param kbtype index number of keyboard mapping type from KBStr2Num
  * @return If successed then return 0
  */
 CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype );
 
 /**
- * @brief Get keyboard type
+ * @brief Get keyboard mapping type
  *
  * @param ctx
- * @return If successed then return kbtype from KBStr2Num
+ * @return If successed then return keyboard mapping type from KBStr2Num
  */
 CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 
 /**
- * @brief Get keyboard type in c string format
+ * @brief Get keyboard mapping type in C-style string format
  *
  * @param ctx
  * @return If successed then return kbtype from KBStr2Num
@@ -125,14 +236,12 @@ CHEWING_API int chewing_get_KBType( ChewingContext *ctx );
 CHEWING_API char* chewing_get_KBString( ChewingContext *ctx );
 
 /**
- * @brief Terminate chewing
- *
- * Terminate the I/O routines for chewing.
+ * @brief Terminate the I/O routines of Chewing IM
  */
 CHEWING_API void chewing_Terminate();
 
 /**
- * @brief Set chewing's english, chinese mode
+ * @brief Set the operating language mode of Chewing IM.
  *
  * @param ctx
  * @param mode CHINESE_MODE or ENGLISH_MODE
@@ -140,7 +249,7 @@ CHEWING_API void chewing_Terminate();
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get chewing's current english, chinese mode
+ * @brief Get Chewing current english, chinese mode
  *
  * @param ctx
  * 
@@ -149,7 +258,7 @@ CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
 
 /**
- * @brief Set chewing's fullshape, halfshape mode
+ * @brief Set the shape mode of output symbols: fullshape / halfshape
  *
  * @param ctx
  * @param mode FULLSHAPE_MODE or HALFSHAPE_MODE
@@ -157,7 +266,7 @@ CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
 CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
 
 /**
- * @brief Get chewing's current shape mode
+ * @brief Get current shape mode of output symbols
  *
  * @param ctx
  * 
@@ -166,16 +275,40 @@ CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
 CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
 
 /**
- * @brief Get kbtype number from string
+ * @brief Get the index number of keyboard mapping type from given string
  *
  * @param str[] name of kbtype eg. "KB_HSU"
  */
 CHEWING_API int chewing_KBStr2Num( char str[] );
 
+/**
+ * @brief Set the number of selection candidate per page
+ *
+ * @param ctx
+ * @param n number of selection candidate
+ */
 CHEWING_API void chewing_set_candPerPage( ChewingContext *ctx, int n );
+
+/**
+ * @brief Get the number of selection candidate per page
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx );
 
+/**
+ * @brief Set the maximum length of Chinese symbols
+ *
+ * @param ctx
+ * @param n maximum length
+ */
 CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n );
+
+/**
+ * @brief Get the maximum length of Chinese symbols
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx );
 
 CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len );

@@ -1,5 +1,11 @@
 2008-11-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/chewingio.h,
+	include/global.h,
+	include/chewing.h: Improve Doxygen-friendly text.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* Doxyfile.in: Update with doxygen 1.5.7.1 -u.  Switch lang to
 	English.
 

@@ -59,6 +59,9 @@
 
 #define MAX_SELKEY 10
 
+/**
+ * @deprecated Use chewing_set_ series of functions to set parameters instead.
+ */
 typedef struct {
 	int candPerPage;
 	int maxChiSymbolLen;
@@ -75,18 +78,22 @@ typedef struct {
          */
 	int hsuSelKeyType;
 } ChewingConfigData;
-/** @brief deprecated */
 
 typedef struct {
 	int from, to;
 } IntervalType;
 
 typedef unsigned short uint16;
+
+/** @brief context handle used for Chewing IM APIs
+ */
 typedef struct _ChewingContext ChewingContext;
 
-/** @brief use "asdfjkl789" as selection key */
+/** @brief use "asdfjkl789" as selection key
+ */
 #define HSU_SELKEY_TYPE1 1
-/** @brief use "asdfzxcv89" as selection key */
+/** @brief use "asdfzxcv89" as selection key
+ */
 #define HSU_SELKEY_TYPE2 2
 
 #endif

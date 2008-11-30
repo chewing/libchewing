@@ -42,7 +42,7 @@ extern "C" {
 #include "global.h"
 #include "mod_aux.h"
 
-/** @brief indicate the internal encoding.
+/** @brief indicate the internal encoding of data processing.
  *  @since 0.3.0
  */
 #define LIBCHEWING_ENCODING "UTF-8"
