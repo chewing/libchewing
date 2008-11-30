@@ -23,7 +23,6 @@
 #include "global.h"
 #include "global-private.h"
 #include "chewingutil.h"
-#include "zuin.h"
 #include "zuin-private.h"
 #include "choice-private.h"
 #include "tree-private.h"

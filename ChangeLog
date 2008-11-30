@@ -1,5 +1,20 @@
 2008-11-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/zuin.h: Removed.  We only need high level definitions so
+	far.
+
+	* include/internal/zuin-private.h: Merged the defintions orginally in
+	file include/zuin.h.
+
+	* include/chewing.h,
+	src/chewingio.c,
+	src/tools/sort_word.c,
+	src/chewingutil.c,
+	src/zuin.c,
+	Makefile.am: Ditto.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* Doxyfile.in: Ignore src/ directory since we refine APIs in headers.
 
 2008-11-30  Jim Huang  <jserv.tw@gmail.com>

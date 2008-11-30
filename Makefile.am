@@ -38,8 +38,7 @@ chewing_headers = \
 	include/chewingio.h \
 	include/mod_aux.h \
 	include/chewing.h \
-	include/global.h \
-	include/zuin.h
+	include/global.h
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)/$(prefix)/include/chewing

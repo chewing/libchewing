@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -20,7 +20,6 @@
 #include "global-private.h"
 #include "chewing-private.h"
 #include "key2pho-private.h"
-#include "zuin.h"
 #include "zuin-private.h"
 #include "config.h"
 
