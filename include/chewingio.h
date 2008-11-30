@@ -175,11 +175,13 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key);
 /*@{*/
 /**
  * @brief Create new handle of the instance for Chewing IM
+ * @see chewing_delete()
  */
 CHEWING_API ChewingContext *chewing_new();
 
 /**
  * @brief Release the handle and internal memory by given Chewing instance
+ * @see chewing_new()
  *
  * @param ctx Chewing IM context
  */
@@ -198,6 +200,7 @@ CHEWING_API void chewing_free( void * );
 /*@{*/
 /**
  * @brief Initialize directory data used by Chewing IM
+ * @see chewing_Terminate()
  *
  * @param dataPath (read-only) system path of Chewing IM data
  * @param hashPath (read-write) the path where user-defined hash data stores
@@ -215,6 +218,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx );
 
 /**
  * @brief Terminate the I/O routines of Chewing IM
+ * @see chewing_Init()
  */
 CHEWING_API void chewing_Terminate();
 
