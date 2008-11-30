@@ -20,9 +20,6 @@
  *  \author libchewing Core Team
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
 #define CHINESE_MODE 1

@@ -12,6 +12,7 @@
 #define _CHEWING_CORE_PRIVATE_H
 
 #include "global.h"
+#include <wchar.h>
 
 #define MAX_KBTYPE 11
 #define WCH_SIZE 4

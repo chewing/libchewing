@@ -11,6 +11,8 @@
 #ifndef CHEWING_UTF8_UTILS_H
 #define CHEWING_UTF8_UTILS_H
 
+#include <wchar.h>
+
 /* Return length of UTF-8 string */
 int ueStrLen( char *str );
 

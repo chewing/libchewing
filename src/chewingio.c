@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"

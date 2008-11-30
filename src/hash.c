@@ -17,6 +17,8 @@
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -520,7 +522,7 @@ int InitHash( const char *path )
 	} else {
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
-	memset( hashtable, NULL, HASH_TABLE_SIZE );
+	memset( hashtable, (int) NULL, HASH_TABLE_SIZE );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );

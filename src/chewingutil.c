@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
