@@ -169,16 +169,6 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key);
 /*@}*/
 
 
-/**
- * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd.
- * @deprecated Use chewing_set_ series of functions to set parameters instead.
- *
- * @param ctx Chewing IM context
- * @param pcd pointer to Chewing configuration data structure
- */
-CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd );
-
-
 /*! \name Chewing IM Instance Management
  */
 
@@ -227,6 +217,16 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx );
  * @brief Terminate the I/O routines of Chewing IM
  */
 CHEWING_API void chewing_Terminate();
+
+/**
+ * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd.
+ * @deprecated Use chewing_set_ series of functions to set parameters instead.
+ *
+ * @param ctx Chewing IM context
+ * @param pcd pointer to Chewing configuration data structure
+ */
+CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd );
+
 /*@}*/
 
 /*! \name Keyboard mapping
@@ -264,7 +264,6 @@ CHEWING_API char* chewing_get_KBString( ChewingContext *ctx );
  * @param str[] name of kbtype eg. "KB_HSU"
  */
 CHEWING_API int chewing_KBStr2Num( char str[] );
-
 /*@}*/
 
 
