@@ -77,7 +77,10 @@ typedef struct {
 } ChewingConfigData;
 
 typedef struct {
-	int from, to;
+	/*@{*/
+	int from;	/**< starting position of certain interval */
+	int to;		/**< ending position of certain interval */
+	/*@}*/
 } IntervalType;
 
 typedef unsigned short uint16;
@@ -89,6 +92,7 @@ typedef struct _ChewingContext ChewingContext;
 /** @brief use "asdfjkl789" as selection key
  */
 #define HSU_SELKEY_TYPE1 1
+
 /** @brief use "asdfzxcv89" as selection key
  */
 #define HSU_SELKEY_TYPE2 2

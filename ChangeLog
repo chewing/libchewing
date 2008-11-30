@@ -1,5 +1,15 @@
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
+	* include/chewingio.h,
+	include/mod_aux.h,
+	include/global.h,
+	include/chewing.h,
+	include/internal/chewing-utf8-util.h,
+	src/mod_aux.c: Improve Doxygen-friendly text.
+	Take care about @param[in] and @param[out] and name group.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/global.h,
 	include/internal/chewing-private.h,
 	include/internal/chewing-utf8-util.h,

@@ -311,31 +311,139 @@ CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n );
  */
 CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx );
 
+/**
+ * @brief Set the key sequence for selecting phrases
+ *
+ * @param ctx
+ * @param selkeys
+ * @param len
+ */
 CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len );
+
+/**
+ * @brief Get the key sequence for selecting phrases
+ *
+ * @param ctx
+ */
 CHEWING_API int* chewing_get_selKey( ChewingContext *ctx );
 
+/**
+ * @brief Set the direction of adding new user-defined phrases
+ *
+ * @param ctx
+ * @param direction
+ */
 CHEWING_API void chewing_set_addPhraseDirection( ChewingContext *ctx, int direction );
+
+/**
+ * @brief Get the direction of adding new user-defined phrases
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx );
 
+/**
+ * @brief Set the behavior whether if space key is regarded as selection key
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_spaceAsSelection( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the behavior if space key is regarded as selection key or not
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx );
 
+/**
+ * @brief Set the behavior whether if Escape should clean all buffer
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_escCleanAllBuf( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the behavior whether if Escape should clean all buffer
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx );
 
+/**
+ * @brief Set the type of selection keys in Hsu's keyboard mapping
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_hsuSelKeyType( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the type of selection keys in Hsu's keyboard mapping
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx );
 
+/**
+ * @brief Set the behavior of automatically shifting cursor after selection
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_autoShiftCur( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the behavior of automatically shifting cursor after selection
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx );
 
+/**
+ * @brief Set the operating mode during easy symbol input
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the operating mode during easy symbol input
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx );
 
+/**
+ * @brief Set the behavior for phrase choice to be rearward or not.
+ *
+ * @param ctx
+ * @param mode
+ */
 CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode );
+
+/**
+ * @brief Get the behavior for phrase choice to be rearward or not.
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx );
 
+/**
+ * @brief Get phonetic sequence in Chewing internal state machine
+ *
+ * @param ctx
+ */
 CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx );
+
+/**
+ * @brief Get the length of phonetic sequence in Chewing internal state machine
+ *
+ * @param ctx
+ */
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
 
-#endif
+#endif /* _CHEWING_IO_H */

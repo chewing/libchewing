@@ -54,4 +54,4 @@ extern int chewing_lifetime;
 }
 #endif
 
-#endif
+#endif /* _CHEWING_CORE_ */

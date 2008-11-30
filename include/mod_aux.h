@@ -38,9 +38,9 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx );
 
 /**
  * @param ctx handle to Chewing IM context
- * @param zuin_count pointer to the integer of available Zuin preedit string
+ * @param[out] zuin_count pointer to the integer of available Zuin preedit string
  *
- * Always returns a char pointer, caller must free it.
+ * Always returns a C-style string (char pointer), caller must free it.
  */
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
 
@@ -75,4 +75,5 @@ CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx );
 CHEWING_API void chewing_kbtype_Enumerate( ChewingContext *ctx );
 CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx );
 CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx );
-#endif
+
+#endif /* CHEWING_MOD_AUX_H */

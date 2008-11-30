@@ -1,7 +1,7 @@
-/**
+/*
  * chewing-utf8-util.h
  *
- * Copyright (c) 2005, 2006
+ * Copyright (c) 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -25,7 +25,13 @@ int ueStrNBytes( const char *, int );
 #define STRNCPY_CLOSE 1
 #define STRNCPY_NOT_CLOSE 0
 
-/* Return how many bytes was copied */
+/*!
+ * Return how many bytes was copied
+ * @param[out] dest 	The memory area to copy to.
+ * @param[in] src 	The memory area to copy from.
+ * @param[in] n 	The number to copy.
+ * @param[in] end
+ */
 int ueStrNCpy( char dest[], const char *src, size_t n, int end );
 
 /* Return address from n length after src */

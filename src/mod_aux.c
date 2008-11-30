@@ -1,7 +1,7 @@
-/**
+/*
  * mod_aux.c
  *
- * Copyright (c) 2005, 2006
+ * Copyright (c) 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -81,7 +81,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
 	char *s;
 	int i;
-	if (zuin_count)
+	if ( zuin_count )
 		*zuin_count = 0;
 	s = (char*) calloc(
 		1 + ZUIN_SIZE,
@@ -89,7 +89,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
 		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
-			if (zuin_count)
+			if ( zuin_count )
 				*zuin_count++;
 		}
 	}
@@ -148,7 +148,8 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 {
 	char *s;
-	if ( chewing_cand_hasNext( ctx ) || (ctx->cand_no < ctx->output->pci->nTotalChoice) ) {
+	if ( chewing_cand_hasNext( ctx ) ||
+	     (ctx->cand_no < ctx->output->pci->nTotalChoice) ) {
 		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
 		ctx->cand_no++;
 	} else {
@@ -233,7 +234,8 @@ CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
 	if ( chewing_kbtype_hasNext( ctx ) ) {
 		s = strdup( kb_type_str[ ctx->kb_no ] );
 		ctx->kb_no++;
-	} else {
+	}
+	else {
 		s = strdup( "" );
 	}
 	return s;
