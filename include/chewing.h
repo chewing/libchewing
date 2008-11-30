@@ -18,6 +18,10 @@ extern "C" {
 /*! \file chewing.h
  *  \brief Chewing Headers
  *  \author libchewing Core Team
+ *  \mainpage Chewing API
+ *
+ * <center>API Collection of Chewing intelligent Chinese
+ *         phonetic IM (Input Method).</center>
  *
  * <h1>Overview</h1>
  * 
