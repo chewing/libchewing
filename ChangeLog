@@ -1,5 +1,10 @@
 2008-11-30  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/Makefile.am: Launch valgrind via libtool.  Avoid linkage
+	problems.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
 	* include/zuin.h: Removed.  We only need high level definitions so
 	far.
 

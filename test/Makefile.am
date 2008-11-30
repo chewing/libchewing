@@ -32,10 +32,10 @@ endif
 
 vcheck: check
 	@echo "Please waiting for the valgrind results..."
-	valgrind \
+	libtool --mode=execute valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
-		$(testdir)/.libs/testchewing < $(TESTDATA)
+		$(testdir)/testchewing < $(TESTDATA)
 
 bin_PROGRAMS = \
 	testchewing \
