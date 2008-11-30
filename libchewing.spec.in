@@ -5,7 +5,7 @@
 %define libname %mklibname chewing 0
 
 Name:		libchewing
-Summary:	The intelligent phonetic input method library
+Summary:	The intelligent Chinese phonetic input method library
 Version:	%{version}
 Release:	%{release}
 Group:		System/Internationalization
@@ -17,9 +17,10 @@ Requires:	glibc
 BuildRequires:	glibc-devel
 
 %description
-This is an intelligent Chinese phonetic input method library which also know 
-as Qooing. Based on Chewing input method.
-
+This is an intelligent Chinese phonetic input method library, which abstracts
+the behavior of popular Taiwanese/Chinese intelligent phonetic input method
+usage into several APIs ready for integration.  The known examples are
+xcin-chewing, scim-chewing, iiimf-le-chewing, etc.
 
 %package data
 Summary:	Data for Libchewing.
