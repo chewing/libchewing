@@ -20,8 +20,6 @@
  *  \author libchewing Core Team
 */
 
-#define IS_USER_PHRASE 1
-#define IS_DICT_PHRASE 0
 #define CHINESE_MODE 1
 #define SYMBOL_MODE 0
 #define FULLSHAPE_MODE 1

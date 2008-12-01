@@ -1,3 +1,9 @@
+2008-12-01  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/internal/tree-private.h (IS_USER_PHRASE) (IS_DICT_PHRASE): Hide
+	internal macro.
+
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/hash.c (TerminateHash): Release internal memory allocations.
