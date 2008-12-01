@@ -4,6 +4,8 @@
 
 	* TODO: Add new entry.
 
+	* NEWS: Update.
+
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/tree.c: Fix build due to previous changes.

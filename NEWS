@@ -1,4 +1,4 @@
-What's New in libchewing SVN
+What's New in libchewing 0.3.2
 ---------------------------------------------------------
 * Add gcc visibility support to hide private APIs.
 * APIs and Headers refactoring.
