@@ -493,6 +493,8 @@ static void TerminateHash()
 		pItem = pHead;
 		pHead = pItem->next;
 		DEBUG_CHECKPOINT();
+		free( pItem->data.phoneSeq );
+		free( pItem->data.wordSeq );
 		free( pItem );
 	}
 	pHead = NULL;

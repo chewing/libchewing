@@ -1,13 +1,17 @@
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
+	* src/hash.c (TerminateHash): Release internal memory allocations.
+	`make -C test vcheck` dumps reasonable results:
+	==30989== LEAK SUMMARY:
+	==30989==    definitely lost: 0 bytes in 0 blocks.
+	==30989==      possibly lost: 0 bytes in 0 blocks.
+	==30989==    still reachable: 8,570 bytes in 582 blocks.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
 	* test/gen_keystroke.c (main),
 	test/testchewing.c (main): Use refined chewing_delete() with IM
 	context instead of chewing_free.
-	`make -C test vcheck` dumps reasonable results:
-	==29808== LEAK SUMMARY:
-	==29808==    definitely lost: 8 bytes in 2 blocks.
-	==29808==      possibly lost: 0 bytes in 0 blocks.
-	==29808==    still reachable: 100 bytes in 6 blocks.
 
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
