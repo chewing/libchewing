@@ -252,7 +252,7 @@ int main( int argc, char *argv[] )
 	}
 end:
 	/* Free Chewing IM handle */
-	chewing_free( ctx );
+	chewing_delete( ctx );
 	
 	/* Termate Chewing services */
 	chewing_Terminate();

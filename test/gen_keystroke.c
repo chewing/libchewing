@@ -431,7 +431,7 @@ end:
 	endwin();
 
 	/* Release Chewing context */
-	chewing_free( ctx );
+	chewing_delete( ctx );
 
 	/* Termate Chewing services */
 	chewing_Terminate();

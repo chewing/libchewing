@@ -1,5 +1,16 @@
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
+	* test/gen_keystroke.c (main),
+	test/testchewing.c (main): Use refined chewing_delete() with IM
+	context instead of chewing_free.
+	`make -C test vcheck` dumps reasonable results:
+	==29808== LEAK SUMMARY:
+	==29808==    definitely lost: 8 bytes in 2 blocks.
+	==29808==      possibly lost: 0 bytes in 0 blocks.
+	==29808==    still reachable: 100 bytes in 6 blocks.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
 	* Doxyfile.in: To improve API documentation, enable the following
 	options:
 	  - INLINE_SOURCES
