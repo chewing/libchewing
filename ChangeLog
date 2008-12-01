@@ -1,3 +1,9 @@
+2008-12-01  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump version to 0.3.2 .
+
+	* TODO: Add new entry.
+
 2008-12-01  Jim Huang  <jserv.tw@gmail.com>
 
 	* src/tree.c: Fix build due to previous changes.
