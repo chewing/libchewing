@@ -1,3 +1,6 @@
+2008-12-04  Kuang-che Wu <kcwu@csie.org>
+	* src/private.h: Fix compile error if --enable-debug
+
 2008-12-01  Kanru Chen  <kanru@kanru.info>
 
 	* configure.ac: Bump version to 0.3.2 .

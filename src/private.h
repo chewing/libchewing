@@ -10,6 +10,7 @@
 
 #ifdef ENABLE_DEBUG
 #include <stdarg.h>
+#include <stdio.h>
 extern FILE *fp_g;
 #define DEBUG_OUT( ... ) \
 	do { \
