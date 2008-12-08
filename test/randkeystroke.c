@@ -46,6 +46,7 @@ void usage()
 	printf( "usage: randkeystroke [-r] [-n num] [-h]\n" \
 		"\t -r     - total random\n" \
 		"\t -n num - generate num keystrokes\n"
+		"\t -s seed - random seed\n"
 		"\t -h     - help\n" );
 }
 
@@ -63,6 +64,9 @@ int main( int argc, char *argv[] )
 				nk = atoi( argv[i] );
 		} else if ( ! strcmp( argv[i], "-r" ) ) {
 			total_random = 1;
+		} else if ( ! strcmp( argv[i], "-s" ) ) {
+		    	if ( ++i < argc )
+			    	srand( atoi( argv[i] ) );
 		} else if ( ! strcmp( argv[i], "-h" ) ) {
 			usage();
 			return 0;
@@ -71,7 +75,7 @@ int main( int argc, char *argv[] )
 	if (total_random) {
 		for ( i = 0; i < nk; i++ ) {
 			n = rand() % (n_nkeys + n_okeys);
-			if ( n > n_nkeys )
+			if ( n >= n_nkeys )
 				printf( "%s", other_keys[n - n_nkeys] );
 			else
 				printf( "%c", normal_keys[n] );
@@ -97,4 +101,5 @@ int main( int argc, char *argv[] )
 	return 0;
 }
 
-/* vim: noet */
+/* vim: noet 
+ */

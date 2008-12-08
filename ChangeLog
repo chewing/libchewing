@@ -1,4 +1,10 @@
+2008-12-08  Kuang-che Wu <kcwu@csie.org>
+
+	* test/randkeystroke.c: Fix random key range, avoid genetate chr(0)
+	incorrectly. Provide random seed argument. Fix vim mode line.
+
 2008-12-04  Kuang-che Wu <kcwu@csie.org>
+
 	* src/private.h: Fix compile error if --enable-debug
 
 2008-12-01  Kanru Chen  <kanru@kanru.info>
