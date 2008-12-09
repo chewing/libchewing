@@ -1,3 +1,7 @@
+What's New in libchewing Subversion
+---------------------------------------------------------
+
+
 What's New in libchewing 0.3.2
 ---------------------------------------------------------
 * Add gcc visibility support to hide private APIs.
@@ -20,6 +24,7 @@ What's New in libchewing 0.3.2
   . OpenBSD porting
   . ibus-chewing : chewing engine for ibus input method framework.
   . UIM-chewing leveraging libchewing 0.3.x development branch.
+
 
 What's New in libchewing 0.3.1
 ----------------------------------------------------------
@@ -49,6 +54,7 @@ What's New in libchewing 0.3.1
 * New structure SymbolEntry.
 * Rename selectAreaLen to candPerPage.
 * Added bEasySymbolInput.
+
 
 What's New in libchewing 0.3.0
 ----------------------------------------------------------
@@ -87,6 +93,7 @@ What's New in libchewing 0.3.0
     Chewing support as its default input method.
   . New Win32-Chewing subproject to provide efficient input
     mthod solution on Microsoft Windows platforms.
+
     
 What's New in libchewing 0.2.7
 ----------------------------------------------------------
@@ -100,6 +107,7 @@ What's New in libchewing 0.2.7
   . Chewing has its Win32 porting (MS-IME) via OVIME (the
     Win32 port of OpenVanilla Input Method Framework).
 
+
 What's New in libchewing 0.2.6
 ----------------------------------------------------------
 * Experimental feature -- HanYu PinYing Keyboard layout.
@@ -110,6 +118,7 @@ What's New in libchewing 0.2.6
   . Chewing becomes one of the built-in input methods in Sun 
     Java Desktop System (JDS).
 
+
 What's New in libchewing 0.2.5
 ----------------------------------------------------------
 * Merge SpaceChewing's frequency tweaking from zonble.
@@ -118,6 +127,7 @@ What's New in libchewing 0.2.5
   . IIIMF-chewing
   . SCIM-chewing
   . OpenVanilla Input Method Framework for MacOS X
+
 
 What's New in libchewing 0.2.4
 ----------------------------------------------------------
@@ -132,6 +142,7 @@ What's New in libchewing 0.2.4
 * Provide pkg-config and RPM spec.
 * Allow users to specify forward/backward phrase addition.
 * Initial Win32 support.
+
 
 What's New in libchewing 0.2.3
 ----------------------------------------------------------
