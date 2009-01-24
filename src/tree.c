@@ -285,25 +285,16 @@ int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq )
 	for ( i = begin; i <= end; i++ ) {
 		for ( 
 			child = tree[ tree_p ].child_begin;
-			child <= tree[ tree_p ].child_end;
+			child != -1 && child <= tree[ tree_p ].child_end;
 			child++ ) {
-#ifdef USE_BINARY_DATA
-			/**
-			 * This is a workaround to prevent access violation.
-			 *
-			 * Sometimes, child < 0 and tree[ child ] refer to an invalid
-			 * address for unknown reason.This could be a bug of libchewing.
-			 * This serious bug was discovered by seamxr.
-			 */
-			if ( child < 0 || child * sizeof(TreeType) > tree_size )
-				return -1;
-#endif
+
+			assert(0 <= child && child * sizeof(TreeType) < tree_size);
 
 			if ( tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
 		/* if not found any word then fail. */
-		if ( child > tree[ tree_p ].child_end )
+		if ( child == -1 || child > tree[ tree_p ].child_end )
 			return -1;
 		else {
 			tree_p = child;
