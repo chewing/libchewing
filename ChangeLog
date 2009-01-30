@@ -1,14 +1,22 @@
-2009-01-24  Kuang-che Wu <kcwu@csie.org>
+2009-01-29  Jim Huang  <jserv.tw@gmail.com>
+
+	* python/chewing.py: Added cand_String, zuin_String and aux_String for
+	convenience.
+	Revised the removal of handle_Default.argtypes because handle_Default
+	accepts	(void *, int) instead of (void *, char).
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>.
+	
+2009-01-24  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/tree.c (TreeFindPhrase): Fix memory access violation, the case
 	of leaf node (index value -1) was not handled.
 
-2008-12-08  Kuang-che Wu <kcwu@csie.org>
+2008-12-08  Kuang-che Wu  <kcwu@csie.org>
 
 	* test/randkeystroke.c: Fix random key range, avoid genetate chr(0)
 	incorrectly. Provide random seed argument. Fix vim mode line.
 
-2008-12-04  Kuang-che Wu <kcwu@csie.org>
+2008-12-04  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/private.h: Fix compile error if --enable-debug
 
@@ -1079,7 +1087,7 @@
 
 	* src/hanyupinyin.c (HanyuPinYinToZuin):
 	  The return value of HanyuPinYinToZuin should not be zero when
-          looking up table failed.
+	  looking up table failed.
 
 	* src/zuin.c (PinYinInput):
 	  It should clean the buffer of PinYin data and return "ZUIN_ABSORB"

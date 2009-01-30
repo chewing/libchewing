@@ -2,9 +2,11 @@ from ctypes import *
 from functools import partial
 
 _libchewing = CDLL('libchewing.so.3')
-_libchewing.chewing_handle_Default.argtypes = [c_void_p, c_char]
 _libchewing.chewing_commit_String.restype = c_char_p
 _libchewing.chewing_buffer_String.restype = c_char_p
+_libchewing.chewing_cand_String.restype = c_char_p
+_libchewing.chewing_zuin_String.restype = c_char_p
+_libchewing.chewing_aux_String.restype = c_char_p
 
 def Init(datadir, userdir):
     return _libchewing.chewing_Init(datadir, userdir)
