@@ -1,3 +1,8 @@
+2009-02-01  Kuang-che Wu  <kcwu@csie.org>
+
+	* scripts/gen-tabe-diff.sh, scripts/tsi-chewing.diff,
+	scripts/cvsup-tsi-src.sh: Removed.
+
 2009-01-29  Jim Huang  <jserv.tw@gmail.com>
 
 	* python/chewing.py: Added cand_String, zuin_String and aux_String for
