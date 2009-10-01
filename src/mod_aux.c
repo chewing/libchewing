@@ -90,7 +90,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
 			if ( zuin_count )
-				*zuin_count++;
+				(*zuin_count)++;
 		}
 	}
 	return s;

@@ -1,3 +1,8 @@
+2009-10-01  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/mod_aux.c (chewing_zuin_String): issue 352, zuin_count should return the
+	number of zhuyin symbols. Thanks dingyichen's report and fix.
+
 2009-02-01  Kuang-che Wu  <kcwu@csie.org>
 
 	* scripts/gen-tabe-diff.sh, scripts/tsi-chewing.diff,
