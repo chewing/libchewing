@@ -1,4 +1,9 @@
-2010-08-26  Jim Huang <jserv@0xlab.org>
+2010-08-26  Jim Huang  <jserv@0xlab.org>
+
+	* src/hanyupinyin.c (InitHanyuPinYin): Ensure the explicit return
+	value when initialization process is done.
+
+2010-08-26  Jim Huang  <jserv@0xlab.org>
 
 	* src/choice.c: Fix implicit declaration of function 'ChoiceEndChoice'
 
