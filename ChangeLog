@@ -301,8 +301,8 @@
 	* src/common/key2pho.c (zhuin_tab) (zhuin_tab_num),
 	src/chewingutil.c (SetUpdatePhraseMsg) (SpecialSymbolInput)
 	(symbol_buf): Added human readable comments around the HEX values.
-	The reason why we onvert string literal to hex representation is for
-	the sake of portability, that avoid some buggy or faulty environment
+	The reason why we convert string literal to hex representation is for
+	the sake of portability, that avoids some buggy or faulty environment
 	like Microsoft VC9 to misinterpret the string.
 
 2008-10-23  Kanru Chen  <kanru@kanru.info>
