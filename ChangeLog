@@ -1,3 +1,7 @@
+2010-08-26  Jim Huang <jserv@0xlab.org>
+
+	* src/choice.c: Fix implicit declaration of function 'ChoiceEndChoice'
+
 2009-10-01  Kuang-che Wu  <kcwu@csie.org>
 
 	* src/mod_aux.c (chewing_zuin_String): issue 352, zuin_count should return the
