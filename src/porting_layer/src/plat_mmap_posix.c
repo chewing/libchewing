@@ -103,12 +103,12 @@ void plat_mmap_close( plat_mmap *handle )
 	if ( ! handle )
 		return;
 
-	if (handle->address) {
+	if ( handle->address ) {
 		munmap( handle->address, handle->sizet );
 		handle->address = NULL;
 	}
 
-	if ( handle->fd !=  -1 ) {
+	if ( handle->fd != -1 ) {
 		close( handle->fd );
 		handle->fd = -1;
 	}
