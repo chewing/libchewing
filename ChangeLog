@@ -1,5 +1,9 @@
 2010-11-07  Jim Huang  <jserv@0xlab.org>
 
+	* darwin/: Removed since ports maintainer would take care.
+
+2010-11-07  Jim Huang  <jserv@0xlab.org>
+
 	* src/tree.c (InitTree): Validate tree_size in binary data.
 
 2010-08-26  Jim Huang  <jserv@0xlab.org>
