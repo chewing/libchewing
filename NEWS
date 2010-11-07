@@ -96,7 +96,7 @@ What's New in libchewing 0.3.0
   . OXIM input method suite from OpenDesktop/OSSI provides
     Chewing support as its default input method.
   . New Win32-Chewing subproject to provide efficient input
-    mthod solution on Microsoft Windows platforms.
+    method solution on Microsoft Windows platforms.
 
     
 What's New in libchewing 0.2.7
