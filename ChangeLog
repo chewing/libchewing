@@ -1,3 +1,14 @@
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* data/svnrev: New file. Store the SVN revision number of last merge.
+
+	* data/NOTE: After merging changing from libchewing-data project,
+	please do update Subversion revision number in file "data/svnrev".
+
+	* scripts/gendiff-from-libchewingdata.sh: New file.  Used for
+	generting the diff files from libchewingdata between certain svnver
+	and last merge one.
+
 2010-11-07  Jim Huang  <jserv@0xlab.org>
 
 	* src/porting_layer/include/sys/plat_win32.h: Renamed

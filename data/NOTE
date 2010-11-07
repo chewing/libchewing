@@ -10,3 +10,6 @@ Since 2006-05-04, the build process has changed to automatically calculate
 the above constants, and you could peform the followings to rebuild:
 
   # make clean all
+
+After merging changing from libchewing-data project, please do update the
+Subversion revision number in file "svnrev".
