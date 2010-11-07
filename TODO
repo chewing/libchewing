@@ -11,3 +11,4 @@ For developers, please add new entry for your plans.
      IIIMF's namespace I/O, and even database, so that we could give
      leverage to 0.3.x branch.
 12. Provide public API to manipulate/query system and user dict.
+13. Migrate to CMake in order to make build environment consistency.
