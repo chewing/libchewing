@@ -119,7 +119,7 @@ void InitTree( const char *prefix )
 	plat_mmap_set_invalid( &tree_mmap );
 	tree_size = plat_mmap_create( &tree_mmap, filename, FLAG_ATTRIBUTE_READ );
 	assert( plat_mmap_is_valid( &tree_mmap ) );
-	if ( tree_size < 0 )
+	if ( tree_size <= 0 )
 		return;
 
 	csize = tree_size;
