@@ -4,6 +4,7 @@ What's New in libchewing Subversion
 * Improved Python binding.
 * Successful stories:
   . Google ChromeOS provides built-in Chewing IM support
+  . MeeGo platform provides built-in Chewing IM support
 
 What's New in libchewing 0.3.2
 ---------------------------------------------------------
