@@ -1,5 +1,16 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* data/phone.cin,
+	data/tsi.src: Merged with libchewing-data.
+	Changes:
+	- Remove incomplete lines to avoid tool from crashing
+	- Eliminate incorrect single character mapping
+
+	* data/svnrev: Bump merged rev to r454
+	* NEWS: Ditto
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* scripts/gendiff-from-libchewingdata.sh: Use LABEL instead of file
 	name during patch generation.
 
