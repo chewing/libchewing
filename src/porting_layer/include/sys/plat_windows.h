@@ -1,5 +1,5 @@
-#ifndef PLAT_WIN32_H
-#define PLAT_WIN32_H
+#ifndef PLAT_WINDOWS_H
+#define PLAT_WINDOWS_H
 
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 
@@ -47,5 +47,5 @@ typedef struct plat_mmap
 
 #endif /* defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE) */
 
-#endif /* PLAT_WIN32_H */
+#endif /* PLAT_WINDOWS_H */
 

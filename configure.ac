@@ -191,8 +191,8 @@ AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
 # Platform-dependent
 dnl What kind of system are we using?
 case $host_os in
-win32*)
-        SYSTEM=win32
+win*)
+        SYSTEM=windows
 	;;
 cygwin*)
         SYSTEM=unix
@@ -203,8 +203,8 @@ cygwin*)
 esac
 
 case $SYSTEM in
-win32)
-AC_DEFINE(UNDER_WIN32, 1,
+win)
+AC_DEFINE(UNDER_WINDOWS, 1,
 	[Runtime is under Win32 environment])
 	;;
 unix)

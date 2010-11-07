@@ -1,5 +1,19 @@
 2010-11-07  Jim Huang  <jserv@0xlab.org>
 
+	* src/porting_layer/include/sys/plat_win32.h: Renamed
+	to src/porting_layer/include/sys/plat_windows.h
+	Platform transition from 'win32' to 'windows' for generic
+	win32, win64, and (possibly) wince support.
+
+	* src/porting_layer/src/plat_mmap_win32.c: Ditto.
+	Rename to src/porting_layer/src/plat_mmap_windows.c
+
+	* src/porting_layer/include/plat_types.h,
+	src/porting_layer/src/Makefile.am,
+	configure.ac: Changed accordingly.
+
+2010-11-07  Jim Huang  <jserv@0xlab.org>
+
 	* darwin/: Removed since ports maintainer would take care.
 
 2010-11-07  Jim Huang  <jserv@0xlab.org>
