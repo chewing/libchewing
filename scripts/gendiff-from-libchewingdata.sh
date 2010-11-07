@@ -16,6 +16,11 @@ function sort_uniq()
     mv -f $TMP_FILE $1
 }
 
+function gendiff()
+{
+    diff -u ${1}-${2} ${1}-${3} --label ${1} --label ${1} > ${1}.diff
+}
+
 function svnrev()
 {
     if [ -f svnrev ]; then
@@ -59,8 +64,8 @@ sort_uniq tsi.src-$old_svnrev
 sort_uniq tsi.src-$new_svnrev
 
 # Generate diff
-diff -u phone.cin-$old_svnrev phone.cin-$new_svnrev > phone.cin.diff
-diff -u tsi.src-$old_svnrev tsi.src-$new_svnrev > tsi.src.diff
+gendiff phone.cin $old_svnrev $new_svnrev
+gendiff tsi.src   $old_svnrev $new_svnrev
 
 echo "Done! Please check file phone.cin.diff and tsi.src.diff"
 

@@ -1,5 +1,10 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* scripts/gendiff-from-libchewingdata.sh: Use LABEL instead of file
+	name during patch generation.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* data/svnrev: New file. Store the SVN revision number of last merge.
 
 	* data/NOTE: After merging changing from libchewing-data project,
