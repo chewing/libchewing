@@ -44,6 +44,14 @@ if [ x$1 = x ]; then
 else
     new_svnrev=$1
 fi
+if [ `echo $new_svnrev | cut -c2-` -gt `echo $old_svnrev | cut -c2-` ]; then
+    # gendiff should only work in this case.
+    echo
+else
+	echo "Given revision is ${new_svnrev} <= Original(${old_svnrev})."
+    echo "No need to gendiff.  Abort!"
+    exit 1
+fi
 
 # Download original revision
 svn_checkout phone.cin $old_svnrev

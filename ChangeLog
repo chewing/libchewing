@@ -1,5 +1,10 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* scripts/gendiff-from-libchewingdata.sh: Don't gendiff if given
+	svnrev <= original svnrev.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* data/phone.cin,
 	data/tsi.src: Merged with libchewing-data.
 	Changes:
