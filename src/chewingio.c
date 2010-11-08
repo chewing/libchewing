@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2007, 2008
+ * Copyright (c) 2004-2008, 2010
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -1049,7 +1049,7 @@ static int dvorak_convert( int key )
 		';',':','q','Q','j','J','k','K','x','X','b','B','m','M',
 		'w','W','v','V','z','Z'};
 	char qkey[] = {
-		'Q','q','w','W','e','E','r','R','t','T','y','Y','u','U',
+		'q','Q','w','W','e','E','r','R','t','T','y','Y','u','U',
 		'i','I','o','O','p','P','[','{',']','}','\\','|',
 		'a','A','s','S','d','D','f','F','g','G','h','H','j','J',
 		'k','K','l','L',';',':','\'','\"',

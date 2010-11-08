@@ -1,7 +1,7 @@
 /**
  * choice-private.h
  *
- * Copyright (c) 2008
+ * Copyright (c) 2008, 2010
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -13,7 +13,7 @@
 
 int ChoiceFirstAvail( ChewingData * );
 int ChoiceNextAvail( ChewingData * );
-int ChoicePrevAvail( ChewingData * );
+int ChoicePrevAvail( ChewingContext * );
 int ChoiceSelect( ChewingData *, int selectNo );
 int ChoiceEndChoice( ChewingData * );
 

@@ -1,5 +1,20 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* src/common/key2pho.c (key_str),
+	src/chewingio.c (qkey),
+	src/zuin.c (IsDvorakHsuPhoEndKey) (IsET26PhoEndKey) (HsuPhoInput):
+	DvorakHsu tone mark should be same with Hsu's mark after conversion.
+
+	* src/choice.c (ChoiceInfoAppendChi): New helper function.
+	(SetChoiceInfo): Issue 10.  Fix the handling of phonetic symbols in
+	Hsu and Dvorak Hsu keyboard.  Refactoring.
+	(ChoiceFirstAvail) (ChoicePrevAvail) (ChoiceNextAvail): Refactoring.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+
+	* include/internal/choice-private.h: Ditto.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* src/tools/sort_word.c (Output): Fix file descriptor leak
 
 2010-11-08  Jim Huang  <jserv@0xlab.org>

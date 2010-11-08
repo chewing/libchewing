@@ -5,7 +5,7 @@
  *      Lu-chuan Kung and Kang-pen Chen.
  *      All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006
+ * Copyright (c) 2004-2006, 2008-2010
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -31,20 +31,6 @@
 #include "hanyupinyin-private.h"
 #include "private.h"
 
-static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
-{
-	switch ( key ) {
-		case 'd':
-		case 'h':
-		case 't':
-		case 'n':
-		case ' ':
-			return ( pho_inx[ 0 ] || pho_inx[ 1 ] || pho_inx[ 2 ] );
-		default:
-			return 0;
-	}
-}
-
 /*
  * process a key input
  * return value:
@@ -66,6 +52,16 @@ static int IsHsuPhoEndKey( int pho_inx[], int key )
 			return 0;
 	}
 }
+
+static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
+{
+	/* DvorakHsu tone mark should be same with Hsu's mark 
+	 * after conversion.
+	 */
+	return IsHsuPhoEndKey(pho_inx, key);
+}
+
+
 
 /* copy the idea from HSU keyboard */
 static int IsET26PhoEndKey( int pho_inx[], int key )
@@ -183,11 +179,8 @@ static int HsuPhoInput( ZuinData *pZuin, int key )
 {
 	int type = 0, searchTimes = 0, inx = 0;
 
-	if ( 
-		( IsHsuPhoEndKey( pZuin->pho_inx, key ) && 
-			( pZuin->kbtype == KB_HSU ) ) ||
-		( IsDvorakHsuPhoEndKey( pZuin->pho_inx, key ) && 
-			( pZuin->kbtype == KB_DVORAK_HSU ) ) ) {
+	/* Dvorak Hsu key has already converted to Hsu */
+	if ( IsHsuPhoEndKey( pZuin->pho_inx, key ) ) {
 		if ( pZuin->pho_inx[ 1 ] == 0 && pZuin->pho_inx[ 2 ] == 0 ) {
 			/* convert "ㄐㄑㄒ" to "ㄓㄔㄕ" */
 			if ( 12 <= pZuin->pho_inx[ 0 ] && pZuin->pho_inx[ 0 ] <= 14 ) {
@@ -232,10 +225,7 @@ static int HsuPhoInput( ZuinData *pZuin, int key )
 			pZuin->pho_inx[ 0 ] = 12;
 		}
 
-		if ( pZuin->kbtype == KB_HSU )
-			searchTimes = ( key == 'j' ) ? 3 : 2;
-		else if ( pZuin->kbtype == KB_DVORAK_HSU )
-			searchTimes = ( key == 'h' || key == 'n' ) ? 3 : 2 ;
+		searchTimes = ( key == 'j' ) ? 3 : 2;
 
 		return EndKeyProcess( pZuin, key, searchTimes );
 	}
