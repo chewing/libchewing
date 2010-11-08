@@ -1143,7 +1143,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
 			if ( pgdata->config.bEasySymbolInput != 0 ) {
-				EasySymbolInput( key, pgdata, pgo );
+				EasySymbolInput( key, pgdata );
 				goto End_keyproc;
 			}
 

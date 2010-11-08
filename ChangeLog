@@ -1,3 +1,10 @@
+2010-11-09  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingutil.c (EasySymbolInput),
+	include/internal/chewingutil.h: Shrink parameter.
+
+	* src/chewingio.c (chewing_handle_Default): Ditto.
+
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
 	* src/chewingutil.c (HaninSymbolInput): Refactoring.  Simplify

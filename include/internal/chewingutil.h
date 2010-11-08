@@ -29,7 +29,7 @@ int ChewingIsEntering( ChewingData *pgdata );
 void CleanAllBuf( ChewingData * );
 int SpecialSymbolInput( int key, ChewingData *pgdata );
 int FullShapeSymbolInput( int key, ChewingData *pgdata );
-int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo );
+int EasySymbolInput( int key, ChewingData *pgdata );
 int SymbolInput( int key, ChewingData *pgdata );
 int SymbolChoice( ChewingData *pgdata, int sel_i );
 int HaninSymbolInput( ChewingData *pgdata );
@@ -53,7 +53,7 @@ int IsPreferIntervalConnted( int cursor, ChewingData *pgdata );
 int OpenSymbolChoice( ChewingData *pgdata );
 
 int InitSymbolTable( const char *prefix );
-int InitEasySymbolInput(const char *prefix);
+int InitEasySymbolInput( const char *prefix );
 
 #endif
 

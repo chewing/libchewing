@@ -312,7 +312,7 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 	return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
 }
 
-int EasySymbolInput( int key, ChewingData *pgdata, ChewingOutput *pgo UNUSED )
+int EasySymbolInput( int key, ChewingData *pgdata )
 {
 	int rtn, loop, index;
 	char wordbuf[ 8 ];
