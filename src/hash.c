@@ -217,8 +217,8 @@ void HashModify( HASH_ITEM *pItem )
 
 static int isValidChineseString( char *str )
 {
-	if ( strlen( str ) == 0 ) {
-		return  0;
+	if ( str == NULL || *str == '\0' ) {
+		return 0;
 	}
 	while ( *str != '\0' )  {
 		int len = ueBytesFromChar( (unsigned char) *str );

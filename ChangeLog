@@ -1,5 +1,12 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* src/chewingutil.c (SymbolChoice): Fix unexpected candidate disorder
+	when doing symbol choice.
+
+	* src/hash.c (isValidChineseString): Avoid dangling pointer.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* src/common/key2pho.c (key_str),
 	src/chewingio.c (qkey),
 	src/zuin.c (IsDvorakHsuPhoEndKey) (IsET26PhoEndKey) (HsuPhoInput):

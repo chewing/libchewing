@@ -411,7 +411,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 
 		/* This is very strange */
 		key = FindSymbolKey( pgdata->choiceInfo.totalChoiceStr[ sel_i ] );
-		pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = key ? key : '1';
+		pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] = key ? key : '0';
 
 		pgdata->bUserArrCnnct[ PhoneSeqCursor( pgdata ) ] = 0;
 		ChoiceEndChoice(pgdata);
