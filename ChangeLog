@@ -1,5 +1,10 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* src/chewingio.c (addTerminateService),
+	src/private.h: Add typedef to simplify prototype.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* src/chewingutil.c (SymbolChoice): Fix unexpected candidate disorder
 	when doing symbol choice.
 

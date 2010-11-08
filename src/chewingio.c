@@ -85,7 +85,7 @@ static void TerminateDebug()
 }               
 #endif
 
-int addTerminateService( void (*callback)() )
+int addTerminateService( callback_t callback )
 {
 	if ( callback ) {
 		int i;
