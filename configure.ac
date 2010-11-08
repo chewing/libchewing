@@ -42,8 +42,8 @@ AC_PREFIX_DEFAULT(/usr)
 # Init libtool
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
-#AC_LIB_LTDL
 AC_SUBST(LIBTOOL_DEPS)
+AC_SUBST(LIBTOOL_EXPORT_OPTIONS) 
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
