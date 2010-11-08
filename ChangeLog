@@ -72,8 +72,8 @@
 
 2009-10-01  Kuang-che Wu  <kcwu@csie.org>
 
-	* src/mod_aux.c (chewing_zuin_String): issue 352, zuin_count should return the
-	number of zhuyin symbols. Thanks dingyichen's report and fix.
+	* src/mod_aux.c (chewing_zuin_String): issue 352, zuin_count should
+	return the number of zhuyin symbols. Thank dingyichen's report and fix.
 
 2009-02-01  Kuang-che Wu  <kcwu@csie.org>
 
@@ -389,8 +389,8 @@
 
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
-	* src/chewingio.c (chewing_handle_Esc): Remove the hack of SemiSymbolInput
-	since SemiSymbolInput is no longer existed.
+	* src/chewingio.c (chewing_handle_Esc): Remove the hack of
+	SemiSymbolInput since SemiSymbolInput no longer exists.
 
 2008-10-22  Kanru Chen  <kanru@kanru.info>
 
@@ -1682,8 +1682,8 @@
 	src/common/key2pho.c,
 	src/private.h,
 	include/hash.h:
-	Add some conditional compilation and missing header includes for Win32 to 
-	enhance portability.
+	Add some conditional compilation and missing header includes for Win32
+	to enhance portability.
 
 2005-11-11  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
@@ -2053,7 +2053,8 @@
 2005-03-29  Jim Huang  <jserv@kaffe.org>
 
 	* src/hanyupinying.c
-	(hanyuInitialsMap) (hanyuFinalsMap): Adapt reference table from Lin Yu-Tang.
+	(hanyuInitialsMap) (hanyuFinalsMap): Adapt reference table from
+	Lin Yu-Tang.
 	(HanyuPinYingToZuin): Add "jo" detection.
 	Provided by Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
 
@@ -2672,7 +2673,8 @@
 	src/tools/Makefile.am,
 	src/Makefile.am,
 	data/Makefile.am:
-	Adapt autotoolized patch from Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	Adapt autotoolized patch from
+	Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
 
 	* COPYING: Specify LGPL.
 	* debian: Debianized information.
@@ -2686,4 +2688,5 @@
 	* data/tsi.src: fix some typo and errors.
 
 2004-03-25  Jim Huang  <jserv@kaffe.org>
-	Initial release of libchewing.
+
+	* Initial release of libchewing.
