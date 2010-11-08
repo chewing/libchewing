@@ -1,5 +1,15 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* src/chewingutil.c (HaninSymbolInput): Refactoring.  Simplify
+	prototype.
+	(OpenSymbolChoice):: Ditto.
+	include/internal/chewingutil.h: Ditto.
+
+	* src/chewingio.c (chewing_handle_Default) (chewing_handle_CtrlNum):
+	Changed accordinly.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* src/chewingio.c (addTerminateService),
 	src/private.h: Add typedef to simplify prototype.
 

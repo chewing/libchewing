@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2008
+ * Copyright (c) 2004, 2005, 2006, 2008, 2010
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -137,13 +137,13 @@ int ChewingIsEntering( ChewingData *pgdata )
 
 #define CEIL_DIV(a,b) ((a + b - 1) / b)
 
-int HaninSymbolInput(
-		ChoiceInfo *pci, 
-		AvailInfo *pai, 
-		const uint16 phoneSeq[] UNUSED, 
-		int candPerPage)
+int HaninSymbolInput( ChewingData *pgdata )
 {
 	unsigned int i;
+
+	ChoiceInfo *pci = &( pgdata->choiceInfo );
+	AvailInfo *pai = &( pgdata->availInfo );
+	int candPerPage = pgdata->config.candPerPage;
 
 	/* No available symbol table */
 	if ( ! symbol_table )
@@ -1325,8 +1325,7 @@ int OpenSymbolChoice( ChewingData *pgdata )
 		pgdata->chiSymbolCursor--;
 	if ( pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor ] == '1' ) {
 		pgdata->bSelect = 1;
-		HaninSymbolInput( pci, &( pgdata->availInfo ),
-				pgdata->phoneSeq, pgdata->config.candPerPage );
+		HaninSymbolInput( pgdata );
 		return 0;
 	}
 	for ( i = 0; i < symbol_buf_len; i++ ) {

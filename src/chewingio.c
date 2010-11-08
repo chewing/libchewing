@@ -1152,11 +1152,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				pgdata->bSelect = 1;
 				pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
-				HaninSymbolInput(
-					&( pgdata->choiceInfo ),
-					&( pgdata->availInfo ),
-					pgdata->phoneSeq,
-					pgdata->config.candPerPage );
+				HaninSymbolInput( pgdata );
 				goto End_KeyDefault;
 			}
 
@@ -1297,11 +1293,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		pgdata->bSelect = 1;
 		pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
-		HaninSymbolInput(
-				&( pgdata->choiceInfo ),
-				&( pgdata->availInfo ),
-				pgdata->phoneSeq,
-				pgdata->config.candPerPage );
+		HaninSymbolInput( pgdata );
 		CallPhrasing( pgdata );
 		MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 		return 0;
