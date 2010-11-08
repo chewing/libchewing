@@ -1,5 +1,9 @@
 2010-11-08  Jim Huang  <jserv@0xlab.org>
 
+	* src/tools/sort_word.c (Output): Fix file descriptor leak
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
 	* configure.ac: Properly add LIBTOOL_EXPORT_OPTIONS
 	patched by openSUSE.
 

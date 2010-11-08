@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2008
+ * Copyright (c) 2004-2006, 2008, 2010
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -70,7 +70,7 @@ void Output()
 
 #ifdef USE_BINARY_DATA
 	int tmp;
-    unsigned char size;
+	unsigned char size;
 	FILE *indexfile2;
 	indexfile = fopen( CHAR_INDEX_BEGIN_FILE, "wb" );
 	indexfile2 = fopen( CHAR_INDEX_PHONE_FILE, "wb" );
@@ -117,6 +117,9 @@ void Output()
 #endif
 	fprintf( configfile, "#define PHONE_NUM (%d)\n", phone_num );
 	fclose( indexfile );
+#ifdef USE_BINARY_DATA  
+	fclose( indexfile2 );  
+#endif
 	fclose( datafile );
 	fclose( configfile );
 }
