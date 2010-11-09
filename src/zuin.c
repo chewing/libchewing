@@ -53,6 +53,7 @@ static int IsHsuPhoEndKey( int pho_inx[], int key )
 	}
 }
 
+#if 0
 static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
 	/* DvorakHsu tone mark should be same with Hsu's mark 
@@ -60,8 +61,7 @@ static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 	 */
 	return IsHsuPhoEndKey(pho_inx, key);
 }
-
-
+#endif
 
 /* copy the idea from HSU keyboard */
 static int IsET26PhoEndKey( int pho_inx[], int key )

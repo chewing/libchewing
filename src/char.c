@@ -30,7 +30,7 @@
 #ifdef USE_BINARY_DATA
 static uint16* arrPhone = NULL;
 static int *begin = NULL;
-static int phone_num;
+static size_t phone_num;
 static plat_mmap char_begin_mmap;
 static plat_mmap char_phone_mmap;
 static void *dict = NULL;

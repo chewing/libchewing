@@ -50,7 +50,7 @@ const char *zhuin_tab[] = {					/* number of bits */
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 static const int shift[] = { 9, 7, 3, 0 };
-const static int sb[] = { 31, 3, 15, 7 };
+static const int sb[] = { 31, 3, 15, 7 };
 
 static const char *ph_str =
 	"\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
@@ -125,7 +125,7 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 	pho[ 0 ] = '\0';
 	for ( i = 0; i < len; i++ ) {
 		char *findptr = NULL;
-		int index;
+		int _index;
 
 		for (
 				s = 0, pTarget = key_str[ kbtype ];
@@ -136,9 +136,9 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 				return 0;
 			}
 		}
-		index = findptr - key_str[ kbtype ];
+		_index = findptr - key_str[ kbtype ];
 		ueStrNCpy( ueStrSeek( pho, i ),
-		           ueStrSeek( (char *) ph_str, index ), 
+		           ueStrSeek( (char *) ph_str, _index ), 
 			   1, 0);
 	}
 	pTarget = ueStrSeek( pho, len );

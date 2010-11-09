@@ -42,12 +42,13 @@ static int compkey( const void *k1, const void *k2 )
 
 int InitHanyuPinYin( const char *prefix )
 {
-	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
 	char filename[PATH_MAX];
 	int i;
 	FILE *fd;
 
-	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, PINYIN_TAB_NAME );
+	sprintf( filename,
+		"%s" PLAT_SEPARATOR "%s",
+		prefix, PINYIN_TAB_NAME );
 
 	fd = fopen(filename, "r");
 

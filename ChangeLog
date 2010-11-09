@@ -1,5 +1,15 @@
 2010-11-09  Jim Huang  <jserv@0xlab.org>
 
+	* src/common/key2pho.c,
+	src/common/chewing-utf8-util.c,
+	src/hanyupinyin.c,
+	src/char.c,
+	src/tools/sort_dic.c,
+	src/chewingutil.c,
+	src/zuin.c: Fix compilation warning with gcc-4.5
+
+2010-11-09  Jim Huang  <jserv@0xlab.org>
+
 	* src/chewingutil.c (EasySymbolInput),
 	include/internal/chewingutil.h: Shrink parameter.
 

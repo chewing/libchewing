@@ -61,19 +61,19 @@ const char user_msg[] =
 extern const char *ph_pho[];
 /*extern uint16 PhoneBg2Uint( const char *phone );*/
 
-void DataSetNum( long index )
+void DataSetNum( long _index )
 {
 	char buf[ MAXLEN ], *p;
 	int i = 0;
 
-	strcpy( buf, data[ index ].str );
+	strcpy( buf, data[ _index ].str );
 	strtok( buf, " \n\t" );
-	data[ index ].freq = atoi( strtok( NULL, " \n\t" ) );
+	data[ _index ].freq = atoi( strtok( NULL, " \n\t" ) );
 	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) ) 
-		data[ index ].num[ i++ ] = UintFromPhone( p );
+		data[ _index ].num[ i++ ] = UintFromPhone( p );
 }
 
-void DataStripSpace( long index )
+void DataStripSpace( long _index )
 {
 	long i, k = 0;
 	char old[ MAXLEN ], last = ' ';
@@ -81,7 +81,7 @@ void DataStripSpace( long index )
 		 * then it should be ignore? 
 		 */
 
-	strcpy( old, data[ index ].str );
+	strcpy( old, data[ _index ].str );
 	for ( i = 0; old[ i ]; i++ ) {
 		/* trans '\t' to ' ' , easy for process. */
 		if ( old[ i ] == '\t' )
@@ -90,20 +90,20 @@ void DataStripSpace( long index )
 			continue;
 		/* Ignore '#' comment in tsi.src */
 		if ( old[ i ] == '#') {
-			data[ index ].str[ k++ ] = '\n';
+			data[ _index ].str[ k++ ] = '\n';
 			break;
 		}
-		data[ index ].str[ k++ ] = old[ i ];
+		data[ _index ].str[ k++ ] = old[ i ];
 		last = old[ i ];
 	}
-	data[ index ].str[ k ] = '\0';
+	data[ _index ].str[ k ] = '\0';
 }
 
-void DataStripAll( long index )
+void DataStripAll( long _index )
 {
 	char *p;
 
-	p = strchr( data[ index ].str, ' ' );
+	p = strchr( data[ _index ].str, ' ' );
 	if ( p )
 		*p = '\0';
 }

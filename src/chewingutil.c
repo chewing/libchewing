@@ -314,16 +314,16 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 
 int EasySymbolInput( int key, ChewingData *pgdata )
 {
-	int rtn, loop, index;
+	int rtn, loop, _index;
 	char wordbuf[ 8 ];
 
 	int nSpecial = EASY_SYMBOL_KEY_TAB_LEN / sizeof( char );
 
-	index = FindEasySymbolIndex( key );
-	if ( -1 != index ) {
-		for ( loop = 0; loop < g_easy_symbol_num[ index ]; ++loop ) {
+	_index = FindEasySymbolIndex( key );
+	if ( -1 != _index ) {
+		for ( loop = 0; loop < g_easy_symbol_num[ _index ]; ++loop ) {
 			ueStrNCpy( wordbuf, 
-				ueStrSeek( g_easy_symbol_value[ index ],
+				ueStrSeek( g_easy_symbol_value[ _index ],
 					loop),
 				1, 1 );
 			rtn = _Inner_InternalSpecialSymbol(
@@ -1446,7 +1446,7 @@ int InitEasySymbolInput( const char *prefix )
 	char filename[ PATH_MAX ];
 	char line[ 512 ];
 	char *symbol;
-	int len = 0, index;
+	int len = 0, _index;
 
 	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SOFTKBD_TABLE_FILE );
 	file = fopen( filename, "r" );
@@ -1469,8 +1469,8 @@ int InitEasySymbolInput( const char *prefix )
 		line[ len ] = '\0';
 
 		line[ 0 ] = toupper( line[ 0 ] );
-		index = FindEasySymbolIndex( line[ 0 ] );
-		if ( -1 == index ) {
+		_index = FindEasySymbolIndex( line[ 0 ] );
+		if ( -1 == _index ) {
 			continue;
 		}
 
@@ -1485,11 +1485,11 @@ int InitEasySymbolInput( const char *prefix )
 		}
 		ueStrNCpy( symbol, &line[ 2 ], 9, 1 );
 
-		if ( NULL != g_easy_symbol_value[ index] ) {
-			free( g_easy_symbol_value[ index ] );
+		if ( NULL != g_easy_symbol_value[ _index] ) {
+			free( g_easy_symbol_value[ _index ] );
 		}
-		g_easy_symbol_value[ index ] = symbol;
-		g_easy_symbol_num[ index ] = len;
+		g_easy_symbol_value[ _index ] = symbol;
+		g_easy_symbol_num[ _index ] = len;
 	}
 	fclose( file );
 	return 1;
