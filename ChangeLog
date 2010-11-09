@@ -1,3 +1,10 @@
+2010-11-10  Jim Huang  <jserv@0xlab.org>
+
+	* include/internal/chewing-private.h (wch_t): Ensure this structure is
+	aligned.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+	https://bugzilla.redhat.com/show_bug.cgi?id=625980
+
 2010-11-09  Jim Huang  <jserv@0xlab.org>
 
 	* src/common/key2pho.c,

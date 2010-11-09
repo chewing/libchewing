@@ -1,7 +1,7 @@
 /**
  * chewing-private.h
  *
- * Copyright (c) 2008
+ * Copyright (c) 2008, 2010
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -37,6 +37,7 @@
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
 	wchar_t wch;
+	unsigned char padding[ 8 ]; /* Ensure this structure is aligned */
 } wch_t;
 
 typedef struct {
