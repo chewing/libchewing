@@ -73,11 +73,13 @@ static void ChangeSelectIntervalAndBreakpoint(
 }
 
 /** @brief Loading all possible phrases after the cursor from long to short into AvailInfo structure.*/
-static void SetAvailInfo( 
-		AvailInfo *pai, const uint16 phoneSeq[], 
-		int nPhoneSeq, int begin, const int bSymbolArrBrkpt[],
-		ChewingData *pgdata, int end )
+static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 {
+	AvailInfo *pai = &( pgdata->availInfo );
+	const uint16 *phoneSeq = pgdata->phoneSeq;
+	int nPhoneSeq = pgdata->nPhoneSeq;
+	const int *bSymbolArrBrkpt = pgdata->bSymbolArrBrkpt;
+
 	int pho_id;
 	int diff;
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -354,13 +356,7 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 	pgdata->bSelect = 1;
 
-	SetAvailInfo( 
-		&( pgdata->availInfo ), 
-		pgdata->phoneSeq, 
-		pgdata->nPhoneSeq,
-		begin,
-		pgdata->bSymbolArrBrkpt,
-		pgdata, end );
+	SetAvailInfo( pgdata, begin, end );
 
 	if ( ! pgdata->availInfo.nAvail )
 		return ChoiceEndChoice( pgdata );

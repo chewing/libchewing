@@ -1,5 +1,10 @@
 2010-11-13  Jim Huang  <jserv@0xlab.org>
 
+	* src/choice.c (SetAvailInfo): Refactored for parameter passing.
+	(ChoiceFirstAvail): Ditto.
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
 	* scripts/remove-autotool.sh: Remove include/config.h.in
 
 2010-11-13  Jim Huang  <jserv@0xlab.org>
