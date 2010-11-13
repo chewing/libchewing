@@ -1,3 +1,9 @@
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
+	* data/tsi.src: Add some entries to work around improper '不' cases.
+
+	* test/materials.txt: Update test cases.
+
 2010-11-10  Jim Huang  <jserv@0xlab.org>
 
 	* include/internal/chewing-private.h (wch_t): Ensure this structure is
