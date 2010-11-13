@@ -24,4 +24,5 @@ rm -f \
 	autotools/depcomp \
 	autotools/install-sh \
 	autotools/ltmain.sh \
-	autotools/missing
+	autotools/missing \
+	include/config.h.in
