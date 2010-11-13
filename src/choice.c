@@ -75,20 +75,43 @@ static void ChangeSelectIntervalAndBreakpoint(
 /** @brief Loading all possible phrases after the cursor from long to short into AvailInfo structure.*/
 static void SetAvailInfo( 
 		AvailInfo *pai, const uint16 phoneSeq[], 
-		int nPhoneSeq, int begin, const int bSymbolArrBrkpt[] )
+		int nPhoneSeq, int begin, const int bSymbolArrBrkpt[],
+		ChewingData *pgdata, int end )
 {
-	int end, pho_id;
+	int pho_id;
 	int diff;
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 
 	pai->nAvail = 0;
 
-	for ( end = begin; end < nPhoneSeq; end++ ) {
-		diff = end - begin;
-		if ( diff > 0 && bSymbolArrBrkpt[ end ] ) 
-			break;
+	int i, head, head_tmp;
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		for ( i = end; i >= begin; i--){
+			head = i;
+			if ( bSymbolArrBrkpt[ i ] )
+				break;
+		}
+		head_tmp = end;
+	} else {
+               head_tmp = head = begin;
+       }
 
-		pho_id = TreeFindPhrase( begin, end, phoneSeq );
+	int tail, tail_tmp;
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		tail_tmp = tail = end;
+	} else {
+		for ( i = begin; i < nPhoneSeq; i++ ) {
+			if ( bSymbolArrBrkpt[ i ] )
+				break;
+			tail = i;
+		}
+		tail_tmp = begin;
+	}
+
+	while ( head <= head_tmp && tail_tmp <= tail ) {
+		diff = tail_tmp - head_tmp;
+		pho_id = TreeFindPhrase( head_tmp, tail_tmp, phoneSeq );
+
 		if ( pho_id != -1 ) {
 			/* save it! */
 			pai->avail[ pai->nAvail ].len = diff + 1;
@@ -98,7 +121,7 @@ static void SetAvailInfo(
 		else {
 			memcpy(
 				userPhoneSeq, 
-				&phoneSeq[ begin ], 
+				&phoneSeq[ head_tmp ],
 				sizeof( uint16 ) * ( diff + 1 ) ) ;
 			userPhoneSeq[ diff + 1 ] = 0;
 			if ( UserGetPhraseFirst( userPhoneSeq ) ) {
@@ -110,6 +133,12 @@ static void SetAvailInfo(
 				pai->avail[ pai->nAvail ].len = 0;
 				pai->avail[ pai->nAvail ].id = -1;
 			}
+		}
+
+		if ( pgdata->config.bPhraseChoiceRearward ) {
+			head_tmp--;
+		} else {
+                       tail_tmp++;
 		}
 	}
 }
@@ -289,6 +318,22 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	pci->pageNo = 0;
 }
 
+/*
+ * Seek the start of the phrase (English characters are skipped.)
+ */
+static int SeekPhraseHead( ChewingData *pgdata )
+{
+	int i;
+	int phoneSeq = PhoneSeqCursor( pgdata );
+	for ( i = pgdata->nPrefer - 1; i >= 0; i-- ) {
+		if ( pgdata->preferInterval[ i ].from > phoneSeq 
+				|| pgdata->preferInterval[ i ].to < phoneSeq )
+			continue;
+		return pgdata->preferInterval[ i ].from;
+	}
+	return 0;
+}
+
 /** @brief Enter choice mode and relating initialisations. */
 int ChoiceFirstAvail( ChewingData *pgdata )
 {
@@ -297,11 +342,15 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 	/* see if there is some word in the cursor position */
 	if ( pgdata->chiSymbolBufLen == pgdata->chiSymbolCursor ) {
-		if ( pgdata->config.bPhraseChoiceRearward )
-			pgdata->chiSymbolCursor = pgdata->preferInterval[ pgdata->nPrefer - 1 ].from + CountSymbols( pgdata, pgdata->chiSymbolBufLen );
-		else
-			pgdata->chiSymbolCursor--;
+		pgdata->chiSymbolCursor--;
 	}
+
+	int end = PhoneSeqCursor( pgdata );
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		pgdata->chiSymbolCursor = SeekPhraseHead( pgdata ) +
+			CountSymbols( pgdata, pgdata->chiSymbolCursor );
+	}
+	int begin = PhoneSeqCursor( pgdata );
 
 	pgdata->bSelect = 1;
 
@@ -309,8 +358,9 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 		&( pgdata->availInfo ), 
 		pgdata->phoneSeq, 
 		pgdata->nPhoneSeq,
-		PhoneSeqCursor( pgdata ),
-		pgdata->bSymbolArrBrkpt );
+		begin,
+		pgdata->bSymbolArrBrkpt,
+		pgdata, end );
 
 	if ( ! pgdata->availInfo.nAvail )
 		return ChoiceEndChoice( pgdata );

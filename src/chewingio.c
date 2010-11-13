@@ -20,6 +20,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
@@ -98,6 +99,33 @@ int addTerminateService( callback_t callback )
 		return 0;
 	}
 	return 1;
+}
+
+static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
+{
+	ChewingData *pgdata = ctx->data;
+	if ( toSelect ) {
+		if ( ! pgdata->bSelect ) {
+			ChoiceFirstAvail( pgdata );
+		} else {
+			if ( pgdata->config.bPhraseChoiceRearward ) {
+				int avail_willbe = (pgdata->availInfo.currentAvail > 0) ?
+					pgdata->availInfo.currentAvail - 1 :
+					pgdata->availInfo.nAvail - 1;
+				pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
+					pgdata->availInfo.avail[ avail_willbe ].len;
+				if ( chewing_buffer_Len( ctx ) >
+						pgdata->choiceInfo.oldChiSymbolCursor ) {
+					pgdata->chiSymbolCursor++;
+				}
+			}
+			ChoiceNextAvail( pgdata );
+		}
+	} else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
+		/* Open Symbol Choice List */
+		if ( ! pgdata->choiceInfo.isSymbol )
+			OpenSymbolChoice( pgdata );
+	}
 }
 
 CHEWING_API ChewingContext *chewing_new()
@@ -556,17 +584,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 				if ( ChewingIsChiAt( key_buf_cursor, pgdata ) )
 					toSelect = 1;
 
-				if ( toSelect ) {
-					if ( ! pgdata->bSelect )
-						ChoiceFirstAvail( pgdata );
-					else
-						ChoiceNextAvail( pgdata );
-				}
-				else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
-					/* Open Symbol Choice List */
-					if( ! pgdata->choiceInfo.isSymbol )
-						OpenSymbolChoice( pgdata );
-				}
+				chooseCandidate( ctx, toSelect, key_buf_cursor );
 				break;
 		}
 	}
@@ -755,19 +773,7 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 	if ( ChewingIsChiAt( key_buf_cursor, pgdata ) )
 			toSelect = 1;
 
-	if ( toSelect ) {
-		if( ! pgdata->bSelect ) {
-			ChoiceFirstAvail( pgdata );
-		}
-		else {
-			ChoiceNextAvail( pgdata );
-		}
-	} 
-	else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
-		/* Open Symbol Choice List */
-		if ( ! pgdata->choiceInfo.isSymbol )
-			OpenSymbolChoice( pgdata );
-	}
+	chooseCandidate( ctx, toSelect, key_buf_cursor );
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;

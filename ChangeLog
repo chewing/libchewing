@@ -1,5 +1,15 @@
 2010-11-13  Jim Huang  <jserv@0xlab.org>
 
+	* src/chewingio.c (chooseCandidate): New helper function.
+	(chewing_handle_Space) (chewing_handle_Down): Revise phrase choice
+	from rearward logic.
+
+	* src/choice.c (SeekPhraseHead): New helper function.
+	(SetAvailInfo) (ChoiceFirstAvail): Ditto.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
 	* data/tsi.src: Add some entries to work around improper '不' cases.
 
 	* test/materials.txt: Update test cases.
@@ -32,7 +42,7 @@
 
 	* src/chewingutil.c (HaninSymbolInput): Refactoring.  Simplify
 	prototype.
-	(OpenSymbolChoice):: Ditto.
+	(OpenSymbolChoice): Ditto.
 	include/internal/chewingutil.h: Ditto.
 
 	* src/chewingio.c (chewing_handle_Default) (chewing_handle_CtrlNum):
