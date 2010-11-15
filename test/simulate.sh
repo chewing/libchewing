@@ -5,6 +5,15 @@ abort() {
     exit 1
 }
 
+do_simulate() {
+    ./simulate
+}
+
+do_rand_simulate() {
+     sort -R materials.txt | egrep -v "^#" > materials.txt-random
+     do_simulate
+}
+
 if [ ! -f materials.txt ]; then
     abort "Error! file materials.txt doesn't exist."
 fi
@@ -18,4 +27,9 @@ fi
 
 clear
 # Simply invoke simulate
-./simulate
+if [ x"$1" = "xrandom" ]; then
+    rm -f uhash.dat
+    do_rand_simulate
+else
+    do_simulate
+fi

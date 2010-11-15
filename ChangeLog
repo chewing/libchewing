@@ -1,3 +1,10 @@
+2010-11-15  Jim Huang  <jserv@0xlab.org>
+
+	* test/simulate.c (init_sim),
+	test/simulate.sh: Support randomize testing key sequence.
+
+	* test/Makefile.am: clean materials.txt-random
+
 2010-11-13  Jim Huang  <jserv@0xlab.org>
 
 	* src/choice.c (SetAvailInfo): Refactored for parameter passing.

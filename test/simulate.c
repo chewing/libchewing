@@ -10,6 +10,7 @@
 
 #define USED_IN_SIMULATION
 #include "testchewing.c"
+#include <unistd.h>
 
 #define FN_MATERIALS "materials.txt"
 
@@ -17,7 +18,10 @@ static FILE *fp = NULL;
 
 int init_sim()
 {
-	fp = fopen( FN_MATERIALS, "r" );
+	if ( 0 == access( FN_MATERIALS "-random", R_OK ))
+		fp = fopen( FN_MATERIALS "-random", "r" );
+	else
+		fp = fopen( FN_MATERIALS, "r" );
 	return (fp != NULL);
 }
 
