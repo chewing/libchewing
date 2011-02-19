@@ -1,5 +1,13 @@
 2011-02-20  Jim Huang  <jserv@0xlab.org>
 
+	* configure.ac,
+	src/tools/Makefile.am: Fix tools to run on the host system during
+	cross-compile.
+	Patched by Zach Kuznia <zork@chromium.org>
+	Review URL: http://codereview.chromium.org/2640005
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
 	* src/chewingio.c: Add inclusion for aux function.
 
 	* test/testchewing.c (get_keystroke),

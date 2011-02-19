@@ -55,6 +55,9 @@ AC_PROG_CC
 AC_LANG(C)
 AC_C_CONST
 
+CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
+AC_SUBST(CC_FOR_BUILD)
+
 # Checks if doxygen is avaiable
 AC_PATH_PROG(DOXYGEN, doxygen, no)
 AM_CONDITIONAL(HAVE_DOXYGEN, test x$DOXYGEN != xno)
