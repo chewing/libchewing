@@ -1,5 +1,13 @@
 2011-02-20  Jim Huang  <jserv@0xlab.org>
 
+	* src/chewingio.c: Add inclusion for aux function.
+
+	* test/testchewing.c (get_keystroke),
+	test/simulate.c (fake_getchar) (fini_sim): Fix compilation warnings by
+	clang.
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
 	* data/tsi.src: Merged with libchewing-data.
 	* data/svnrev: Bump merged rev to r455
 	* NEWS: Ditto

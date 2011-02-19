@@ -88,7 +88,7 @@ int get_keystroke()
 					break;
 				case 'C':
 					if ( ( ch = getchar() ) != '>' ) {
-						if ( ( ch == 'B' ))
+						if ( ch == 'B' )
 							result = ( KEY_CAPSLOCK );
 						else
 							result = ( KEY_CTRL_BASE + ch );

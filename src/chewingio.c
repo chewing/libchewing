@@ -35,6 +35,7 @@
 #include "hanyupinyin-private.h"
 #include "private.h"
 #include "chewingio.h"
+#include "mod_aux.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
