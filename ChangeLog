@@ -1,3 +1,7 @@
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
+	* scripts/gendiff-from-libchewingdata.sh: Explicit use 'bash'
+
 2010-11-15  Jim Huang  <jserv@0xlab.org>
 
 	* test/simulate.c (init_sim),

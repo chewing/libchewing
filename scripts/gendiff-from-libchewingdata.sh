@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Subversion repository of libchewing-data
 DATA_BASE_URL=http://svn.openfoundry.org/libchewingdata/utf-8
