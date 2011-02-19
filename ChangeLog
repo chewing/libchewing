@@ -1,5 +1,11 @@
 2011-02-20  Jim Huang  <jserv@0xlab.org>
 
+	* data/tsi.src: Merged with libchewing-data.
+	* data/svnrev: Bump merged rev to r455
+	* NEWS: Ditto
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
 	* scripts/gendiff-from-libchewingdata.sh: Explicit use 'bash'
 
 2010-11-15  Jim Huang  <jserv@0xlab.org>
