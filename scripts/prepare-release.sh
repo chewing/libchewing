@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 CHEWING=libchewing
 VERSION=`cat configure.ac | awk  '/AC_INIT/ {print $2}' | tr -d ' ' | sed -e 's/,//'`
 NEW=$CHEWING-$VERSION
-TARBALL=$NEW.tar.gz
+TARBALL=$NEW.tar.bz2
 SVNENTRY=.svn/entries
 
 if [ ! -f $SVNENTRY ]; then
@@ -13,7 +13,7 @@ fi
 
 rm -rf trunk $NEW $TARBALL
 
-svn co `grep "url=" $SVNENTRY | cut -d\" -f2`
+svn co `svn info | grep "URL: " | cut -c6-`
 
 if [ ! -d trunk ]; then
 	echo "Error!"
@@ -36,7 +36,7 @@ rm -rf debian
 rm -rf autom4te.cache
 popd
 
-tar zcvf $TARBALL $NEW
+tar jcvf $TARBALL $NEW
 rm -rf $NEW
 
 # Show some info
