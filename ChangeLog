@@ -1,3 +1,8 @@
+2011-02-27  Jim Huang  <jserv@0xlab.org>
+
+	* configure.ac: Bump version to 0.3.3
+	* NEWS: ditto.
+
 2011-02-20  Jim Huang  <jserv@0xlab.org>
 
 	* configure.ac,

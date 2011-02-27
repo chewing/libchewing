@@ -1,4 +1,4 @@
-What's New in libchewing Subversion
+What's New in libchewing 0.3.3
 ---------------------------------------------------------
 * Fix memory access violation.
 * Improved Python binding.
