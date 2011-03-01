@@ -40,7 +40,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
   - works with MacOS X (SpaceChewing).
   - works with Sun's Java Desktop System Input Method Framework.
   - works with OpenVanilla Input Method Framework.
-  - works as standalone IME for native Win32 (win32-chewing).
+  - works as standalone Microsoft Windows 32/64-bit (windows-chewing).
   - works with OXIM.
   - works with UIM.
   - works with ibus.
