@@ -6,9 +6,5 @@ For developers, please add new entry for your plans.
 5. Perform optimization on libchewing in the following aspects:
     a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
   b) support memory-limited applications.
-11. Abstract the I/O layer
-  b) the backend of the I/O layer could be Standard C file operations,
-     IIIMF's namespace I/O, and even database, so that we could give
-     leverage to 0.3.x branch.
 12. Provide public API to manipulate/query system and user dict.
 13. Migrate to CMake in order to make build environment consistency.
