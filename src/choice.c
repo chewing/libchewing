@@ -84,9 +84,11 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 	int diff;
 	uint16 userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 
+	int i, head, head_tmp;
+	int tail, tail_tmp;
+
 	pai->nAvail = 0;
 
-	int i, head, head_tmp;
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		for ( i = end; i >= begin; i--){
 			head = i;
@@ -95,10 +97,9 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		}
 		head_tmp = end;
 	} else {
-               head_tmp = head = begin;
-       }
+		head_tmp = head = begin;
+	}
 
-	int tail, tail_tmp;
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		tail_tmp = tail = end;
 	} else {
@@ -339,6 +340,8 @@ static int SeekPhraseHead( ChewingData *pgdata )
 /** @brief Enter choice mode and relating initialisations. */
 int ChoiceFirstAvail( ChewingData *pgdata )
 {
+	int end, begin;
+
 	/* save old cursor position */
 	pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
@@ -347,12 +350,13 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 		pgdata->chiSymbolCursor--;
 	}
 
-	int end = PhoneSeqCursor( pgdata );
+	end = PhoneSeqCursor( pgdata );
+
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		pgdata->chiSymbolCursor = SeekPhraseHead( pgdata ) +
 			CountSymbols( pgdata, pgdata->chiSymbolCursor );
 	}
-	int begin = PhoneSeqCursor( pgdata );
+	begin = PhoneSeqCursor( pgdata );
 
 	pgdata->bSelect = 1;
 

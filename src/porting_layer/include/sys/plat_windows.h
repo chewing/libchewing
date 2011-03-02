@@ -8,15 +8,18 @@
 
 #if _MSC_VER > 1000
 #include <io.h>
+#include <direct.h>
 #define F_OK	00
 #define W_OK	02
 #define R_OK	04
 #endif
 
+#ifndef PATH_MAX
 #ifdef MAX_PATH
 #define PATH_MAX MAX_PATH
 #else
 #define PATH_MAX (260)
+#endif
 #endif
 
 #define PLAT_SEPARATOR "\\"
