@@ -26,7 +26,7 @@
 #define HALFSHAPE_MODE 0
 
 /* specified to Chewing API */
-#ifdef WIN32
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 #define CHEWING_DLL_IMPORT __declspec(dllimport)
 #   define CHEWING_DLL_EXPORT __declspec(dllexport)
 #   ifdef CHEWINGDLL_EXPORTS
