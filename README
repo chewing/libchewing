@@ -67,6 +67,15 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
 see "INSTALL" for details.
 
 
+[-] Cross-build
+
+Example cross-build instructions:
+# CC=arm-none-linux-gnueabi-gcc ./configure \
+    --host=arm-none-linux-gnueabi \
+    --disable-shared --enable-static
+# make CC_FOR_BUILD=gcc
+
+
 [-] License
 
 See "COPYING" for details.

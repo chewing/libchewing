@@ -5,7 +5,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/porting_layer/include
 
 CC = $(CC_FOR_BUILD)
-CFLAGS = $(CFLAGS_FOR_BUILD)
+AM_CFLAGS = $(CFLAGS_FOR_BUILD)
 
 noinst_PROGRAMS = sort_word sort_dic maketree
 
