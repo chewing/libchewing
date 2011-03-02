@@ -288,8 +288,9 @@ int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq )
 			child != -1 && child <= tree[ tree_p ].child_end;
 			child++ ) {
 
+#ifdef USE_BINARY_DATA
 			assert(0 <= child && child * sizeof(TreeType) < tree_size);
-
+#endif
 			if ( tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
