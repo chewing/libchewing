@@ -27,21 +27,24 @@
 
 /* specified to Chewing API */
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
-#define CHEWING_DLL_IMPORT __declspec(dllimport)
+#   define CHEWING_DLL_IMPORT __declspec(dllimport)
 #   define CHEWING_DLL_EXPORT __declspec(dllexport)
 #   ifdef CHEWINGDLL_EXPORTS
 #      define CHEWING_API CHEWING_DLL_EXPORT
 #      define CHEWING_PRIVATE
-#   else
+#   elif CHEWINGDLL_IMPORTS
 #      define CHEWING_API CHEWING_DLL_IMPORT
+#      define CHEWING_PRIVATE
+#   else
+#      define CHEWING_API
 #      define CHEWING_PRIVATE
 #   endif
 #elif (__GNUC__ > 3) && defined(__ELF__)
 #   define CHEWING_API __attribute__((__visibility__("default")))
 #   define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
 #else
-#  define CHEWING_API
-#  define CHEWING_PRIVATE
+#   define CHEWING_API
+#   define CHEWING_PRIVATE
 #endif
 
 #ifndef UNUSED
