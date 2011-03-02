@@ -59,7 +59,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
 [-] Installation
 
 # ./configure --prefix=/usr
-  (If you checkout from svn, make sure running ./autogen.sh 
+  (If you checkout from GIT, make sure running ./autogen.sh
    before this.)
 # make
 # make install
