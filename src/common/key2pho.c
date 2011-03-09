@@ -27,7 +27,7 @@
 #include "chewing-private.h"
 
 /* NOTE:
- * The reason why we onvert string literal to hex representation is for the
+ * The reason why we convert string literal to hex representation is for the
  * sake of portability, that avoid some buggy or faulty environment like
  * Microsoft VC9 to misinterpret the string.
  */
