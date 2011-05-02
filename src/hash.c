@@ -524,7 +524,7 @@ int InitHash( const char *path )
 	} else {
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
-	memset( hashtable, (int) NULL, HASH_TABLE_SIZE );
+	memset( hashtable, 0, HASH_TABLE_SIZE );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );
