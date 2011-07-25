@@ -39,7 +39,7 @@
 #      define CHEWING_API
 #      define CHEWING_PRIVATE
 #   endif
-#elif (__GNUC__ > 3) && defined(__ELF__)
+#elif (__GNUC__ > 3) && (defined(__ELF__) || defined(__PIC__))
 #   define CHEWING_API __attribute__((__visibility__("default")))
 #   define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
 #else
