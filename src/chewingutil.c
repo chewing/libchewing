@@ -1377,6 +1377,7 @@ int InitSymbolTable( const char *prefix )
 
 	n_symbol_entry = 0;
 	symbol_table = NULL;
+	memset(line, 0, 512);
 
 	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SYMBOL_TABLE_FILE );
 	file = fopen( filename, "r" );
@@ -1447,6 +1448,8 @@ int InitEasySymbolInput( const char *prefix )
 	char line[ 512 ];
 	char *symbol;
 	int len = 0, _index;
+
+	memset(line, 0, 512);
 
 	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SOFTKBD_TABLE_FILE );
 	file = fopen( filename, "r" );
