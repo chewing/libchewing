@@ -44,6 +44,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
   - works with OXIM.
   - works with UIM.
   - works with ibus.
+  - works with gcin.
 
 2. support phonetic keyboard layout
   - Hsu
