@@ -35,7 +35,7 @@ What's New in libchewing 0.3.2
 * New APIs to enumerate supported keyboard types.
 * Repair improper memory access.
 * API united in Win32 and UNIX world.
-* Initial Pythin binding support.
+* Initial Python binding support.
 * Merged with libchewing-data project. (r342)
 * Canonical debugging messages.
 * Successful stories:
