@@ -34,15 +34,13 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 pkgconfig_DATA = chewing.pc
 
-chewing_headers = \
+chewing_includedir = $(includedir)/chewing
+chewing_include_HEADERS = \
 	include/chewingio.h \
 	include/mod_aux.h \
 	include/chewing.h \
 	include/global.h
 
-install-data-local:
-	$(mkinstalldirs) $(DESTDIR)/$(prefix)/include/chewing
-	$(INSTALL_DATA) $(chewing_headers) $(DESTDIR)/$(prefix)/include/chewing
 install-manpages:
 	$(mkinstalldirs) $(DESTDIR)/$(prefix)/share/man/man3
 	$(INSTALL_DATA) man/man3/*.3 $(DESTDIR)/$(prefix)/share/man/man3
