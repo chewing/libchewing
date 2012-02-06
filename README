@@ -27,7 +27,7 @@ modules. Also, in 2004, he attempts to let more applications
 adapt these collaborated efforts, so that new contributors
 (mentioned in file AUTHORS) created brand new Chewing Project
 as the infrastructure and wrote serveral new bridges among
-IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
+IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
 
 
 [-] Status
@@ -45,6 +45,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, OXIM, UIM, ibus, etc.
   - works with UIM.
   - works with ibus.
   - works with gcin/HIME
+  - works with fcitx
 
 2. support phonetic keyboard layout
   - Hsu
