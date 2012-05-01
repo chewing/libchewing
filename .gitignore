@@ -29,6 +29,7 @@ include/config.h
 include/config.h.in
 include/stamp-h1
 
+test/do-test
 test/genkeystroke
 test/randkeystroke
 test/simulate
