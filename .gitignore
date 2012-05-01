@@ -1,9 +1,10 @@
-# automake generated
+# autotools generated
 Doxyfile
 INSTALL
 Makefile
 Makefile.in
 aclocal.m4
+autom4te.cache
 autotools/
 chewing.pc
 config.log
@@ -11,6 +12,7 @@ config.status
 configure
 libchewing.spec
 libtool
+m4
 
 # compiling output
 *.dat
