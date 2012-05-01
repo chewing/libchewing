@@ -16,7 +16,7 @@ EXTRA_DIST = \
 	libchewing.spec \
 	Doxyfile
 
-AUTOMAKE_OPTIONS = gnu
+AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/common src/tools data src
 
 MAINTAINERCLEANFILES = \

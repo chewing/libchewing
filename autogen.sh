@@ -16,9 +16,6 @@ else
 	${LIBTOOLIZE:-libtoolize} -c --automake 
 fi
 
-# ChangeLog is deprecated, but autotool expects one.
-touch ChangeLog
-
 # intltoolize -c --automake
 ${AUTOHEADER:-autoheader}
 ${AUTOMAKE:-automake} --add-missing --copy --include-deps
