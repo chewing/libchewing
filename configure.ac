@@ -98,7 +98,7 @@ AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 # Checks for ncursesw
 PKG_CHECK_MODULES(NCURSESW, ncursesw >= $NCURSESW_REQUIRED_VERSION,
 		  enable_ncursesw=yes, enable_ncursesw=no)
-AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_curses = "xyes")
+AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 if test "$enable_ncursesw" = "yes"; then
     AC_DEFINE(HAVE_CURSES_H, 1, [ Define to 1 if you have the <curses.h> header file. ])
 fi
