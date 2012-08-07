@@ -1,8 +1,7 @@
 #! /bin/sh
 
 AUTORECONF_ARGS=-i
-if [ -d m4 ]; then
-    AUTORECONF_ARGS="$AUTORECONF_ARGS -I m4"
-fi
+mkdir -p m4
+AUTORECONF_ARGS="$AUTORECONF_ARGS -I m4"
 
 autoreconf $AUTORECONF_ARGS
