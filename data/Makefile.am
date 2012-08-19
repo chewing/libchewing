@@ -11,6 +11,7 @@ datas = \
 	ph_index.dat \
 	fonetree.dat \
 	$(chindexs)
+static_tables = pinyin.tab swkb.dat symbols.dat
 generated_header = $(top_builddir)/src/chewing-definition.h
 
 all: checkdata_stamp gendata_stamp
@@ -27,14 +28,18 @@ gendata_stamp:
 	@echo "timestamp" > $@
 
 gendata:
-	$(tooldir)/sort_word
+	$(tooldir)/sort_word $(top_srcdir)/data/phone.cin
 	$(tooldir)/sort_dic $(top_srcdir)/data/tsi.src
 	$(tooldir)/maketree
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
 
-install-data-local: $(datas) pinyin.tab swkb.dat symbols.dat
+install-static-tables: $(static_tables)
+	$(foreach file,$(static_tables), \
+	  $(INSTALL_DATA) $(top_srcdir)/data/$(file) $(DESTDIR)/$(datadir)/chewing;)
+
+install-data-local: $(datas) install-static-tables
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
-	$(INSTALL_DATA) $(datas) pinyin.tab swkb.dat symbols.dat \
-		$(DESTDIR)/$(datadir)/chewing
+	$(INSTALL_DATA) $(datas) $(DESTDIR)/$(datadir)/chewing
+
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

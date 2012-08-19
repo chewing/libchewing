@@ -23,8 +23,6 @@
 #include "zuin-private.h"
 #include "config.h"
 
-#define PHONE_CIN_FILE	"phone.cin"
-
 #define CHARDEF_BEGIN	"%chardef  begin"
 #define CHARDEF_END	"%chardef  end"
 #define DO_WORD_ERROR (1)
@@ -143,14 +141,21 @@ void CountSort()
 	}
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	FILE *cinfile;
 	char buf[ MAX_BUF_LEN ];
+	char *phone_cin;
 
-	cinfile = fopen( PHONE_CIN_FILE, "r" );
+	if (argc < 2) {
+		fprintf( stderr, "Usage: sort_word <phone.cin>\n" );
+		return 1;
+	}
+
+	phone_cin = argv[1];
+	cinfile = fopen( phone_cin, "r" );
 	if ( ! cinfile ) {
-		fprintf( stderr, "Error opening the file " PHONE_CIN_FILE "\n" );
+		fprintf( stderr, "Error opening the file %s\n", phone_cin );
 		return 1;
 	}
 
@@ -163,14 +168,14 @@ int main()
 		if ( buf[ 0 ] == '%' )
 			break;
 		if ( DoWord( buf ) == DO_WORD_ERROR ) {
-			fprintf( stderr, "The file " PHONE_CIN_FILE " is corrupted!\n" );
+			fprintf( stderr, "The file %s is corrupted!\n", phone_cin );
 			return 1;
 		}
 	}
 	fclose( cinfile );
 
 	if ( strncmp( buf, CHARDEF_END, strlen( CHARDEF_END ) ) ) {
-		fprintf( stderr, "The end of the file " PHONE_CIN_FILE " is error!\n" );
+		fprintf( stderr, "The end of the file %s is error!\n", phone_cin );
 		return 1;
 	}
 

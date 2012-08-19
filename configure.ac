@@ -5,6 +5,7 @@ AC_PREREQ(2.59)
 AC_INIT(libchewing, 0.3.3, chewing-devel@googlegroups.com)
 AC_CONFIG_AUX_DIR([autotools])
 AC_CONFIG_SRCDIR([src/chewingio.c])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_SUBST(PACKAGE_VERSION)
 
@@ -35,7 +36,9 @@ AC_DEFINE_UNQUOTED(LIBCHEWING_BINARY_VERSION, "$LIBCHEWING_BINARY_VERSION", [The
 AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION, "$PACKAGE_VERSION", [The release version of libchewing.])
 
 # Init automake stuff
+AM_MAINTAINER_MODE([enable])
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 AM_CONFIG_HEADER([include/config.h])
 AC_PREFIX_DEFAULT(/usr)
 
@@ -84,56 +87,21 @@ AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # optional modules
 CHECK_REQUIRED_VERSION=0.9.4
+NCURSESW_REQUIRED_VERSION=5.9
+NCURSES_REQUIRED_VERSION=5.9
 
 # Checks for check unit test framework
 PKG_CHECK_MODULES(CHECK, check >= $CHECK_REQUIRED_VERSION,
-		  enable_check=yes, enble_check=no)
+		  enable_check=yes, enable_check=no)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
-OLDCFLAGS=$CFLAGS
-LIB_NAME=ncursesw
-NCURSESW_CFLAGS=
-NCURSESW_LIBS=
-for p in "$HOME/include" "$prefix/include" /usr/local/include /usr/include
-do
-	if test -f "$p/ncursesw/ncurses.h"
-	then
-		NCURSESW_CFLAGS="-I$p"
-		AC_DEFINE(HAVE_NCURSESW_NCURSES_H, 1, [ Define to 1 if you have the <ncursesw/ncurses.h> header file. ])
-		break
-	elif test -f "$p/ncurses/ncurses.h"
-	then
-		NCURSESW_CFLAGS="-I$p"
-		AC_DEFINE(HAVE_NCURSES_NCURSES_H, 1, [ Define to 1 if you have the <ncurses/ncurses.h> header file. ])
-		break
-	fi
-done
-
-for p in "$HOME/lib" "$prefix/lib" /usr/local/lib /usr/lib
-do
-	if test -f "$p/libncursesw.so"
-	then
-		if test "$p" != x/usr/lib
-		then
-			NCURSESW_LIBS="-L$p -lncursesw"
-		else
-			NCURSESW_LIBS="-lncursesw"
-		fi
-		break
-	fi
-done
-
-enable_ncursesw=yes
-if test -z "$NCURSESW_CFLAGS"; then
-	enable_ncursesw=no
-fi
-if test -z "$NCURSESW_LIBS"; then
-	enable_ncursesw=no
-fi
-AC_SUBST(NCURSESW_CFLAGS)
-AC_SUBST(NCURSESW_LIBS)
+PKG_CHECK_MODULES(NCURSESW, ncursesw >= $NCURSESW_REQUIRED_VERSION,
+		  enable_ncursesw=yes, enable_ncursesw=no)
 AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
+if test "$enable_ncursesw" = "yes"; then
+    AC_DEFINE(HAVE_CURSES_H, 1, [ Define to 1 if you have the <curses.h> header file. ])
+fi
 
 # Options
 

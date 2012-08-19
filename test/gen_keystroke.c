@@ -20,10 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif defined( HAVE_NCURSES_NCURSES_H )
-#include <ncurses/ncurses.h>
+#ifdef HAVE_CURSES_H
+#include <curses.h>
 #else
 #error "There is no curses package found."
 #endif
