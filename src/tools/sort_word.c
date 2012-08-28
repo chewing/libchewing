@@ -31,7 +31,7 @@
 #define MAX_BUF_LEN	(4096)
 
 typedef struct {
-	uint16 num[2];
+	uint16 num;
 	char word[ 8 ];
 } WORD_DATA;
 
@@ -41,7 +41,7 @@ int phone_num;
 
 int SortWord( const WORD_DATA *a, const WORD_DATA *b )
 {
-	return ( a->num[0] - b->num[0] );
+	return ( a->num - b->num );
 }
 
 int DoWord( char *buf )
@@ -55,7 +55,7 @@ int DoWord( char *buf )
 		return DO_WORD_ERROR;
 
 	PhoneFromKey( phoneBuf, keyBuf, KB_DEFAULT, 1 );
-	word_data[ nWord ].num[0] = UintFromPhone( phoneBuf );
+	word_data[ nWord ].num = UintFromPhone( phoneBuf );
 	nWord++ ;
 	return 0;
 }
@@ -86,8 +86,8 @@ void Output()
 	previous = 0 ;
 	phone_num = 0;
 	for ( i = 0; i < nWord; i++ ) {
-		if ( word_data[ i ].num[0] != previous ) {
-			previous = word_data[ i ].num[0];
+		if ( word_data[ i ].num != previous ) {
+			previous = word_data[ i ].num;
 #ifdef USE_BINARY_DATA
 			tmp = ftell( datafile );
 			fwrite( &tmp, sizeof(int), 1, indexfile );
@@ -102,7 +102,7 @@ void Output()
 		fwrite( &size, sizeof(size), 1, datafile );
 		fwrite( word_data[ i ].word, size, 1, datafile );
 #else
-		fprintf( datafile, "%hu %s\t", word_data[ i ].num[0], word_data[ i ].word );
+		fprintf( datafile, "%hu %s\t", word_data[ i ].num, word_data[ i ].word );
 #endif
 	}
 #ifdef USE_BINARY_DATA
@@ -129,14 +129,14 @@ void CountSort()
 
 	memset( number, 0, sizeof( number ) );
 	for ( i = 0; i < nWord; i++ )
-		number[ word_data[ i ].num[0] ]++;
+		number[ word_data[ i ].num ]++;
 	memmove( &number[ 1 ], number, sizeof( int ) * ( MAX_NUMBER - 1 ) );
 	for ( i = 2; i < MAX_NUMBER; i++)
 		number[ i ] += number[ i - 1 ];
 
 	memcpy( oldData, word_data, sizeof( WORD_DATA ) * nWord );
 	for ( i = 0; i < nWord; i++ ) {
-		place = number[ oldData[ i ].num[0] ]++;
+		place = number[ oldData[ i ].num ]++;
 		memcpy( &word_data[ place ], &oldData[ i ], sizeof( WORD_DATA ) );
 	}
 }
