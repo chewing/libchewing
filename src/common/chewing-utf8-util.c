@@ -76,3 +76,18 @@ char *ueStrSeek( char *src, size_t n )
 	return iter;
 }
 
+/* Locate a UTF-8 substring from UTF-8 string */
+const char *ueStrStr( const char *str, size_t lstr,
+                      const char *substr, size_t lsub )
+{
+        const char *p = str;
+        size_t ub;
+        if ( lstr < lsub )
+		return NULL;
+        ub = lstr - lsub;
+        for ( ; p-str <= ub; p++ ) {
+                if ( !strncmp( p, substr, lsub ) )
+			return p;
+        }
+        return NULL;
+}

@@ -37,4 +37,14 @@ int ueStrNCpy( char dest[], const char *src, size_t n, int end );
 /* Return address from n length after src */
 char *ueStrSeek( char *src, size_t n );
 
+/*!
+ * Locate a UTF-8 substring from UTF-8 string
+ * @param[in] str     UTF-8 string from which substr is located
+ * @param[in] lstr    Length of str in bytes.
+ * @param[in] substr  UTF-8 string that is located in str.
+ * @param[in] lsub    Length of substr in bytes.
+ */
+const char* ueStrStr( const char *str, size_t lstr,
+                      const char *substr, size_t lsub );
+
 #endif /* CHEWING_UTF8_UTILS_H */
