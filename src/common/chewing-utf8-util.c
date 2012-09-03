@@ -26,10 +26,10 @@ static char utf8len_tab[256] =
 };
 
 /* Return length of UTF-8 string */
-int ueStrLen( char *str )
+int ueStrLen( const char *str )
 {
 	int length = 0;
-	char *strptr = str;
+	const char *strptr = str;
 
 	while ( strptr[ 0 ] != '\0' ) {
 		strptr += ueBytesFromChar( strptr[0] );

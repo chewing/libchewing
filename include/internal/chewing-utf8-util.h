@@ -14,7 +14,7 @@
 #include <wchar.h>
 
 /* Return length of UTF-8 string */
-int ueStrLen( char *str );
+int ueStrLen( const char *str );
 
 /* Return bytes of a UTF-8 character */
 int ueBytesFromChar( unsigned char b );
