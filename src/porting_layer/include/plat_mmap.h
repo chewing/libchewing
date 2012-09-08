@@ -29,7 +29,7 @@ void plat_mmap_set_invalid( plat_mmap *handle );
 int  plat_mmap_is_valid( plat_mmap *handle );
 
 /* Map a file into system meory, return size of the mapped file */
-size_t plat_mmap_create( plat_mmap *handle, char *file, int fileAttr );
+size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAttr );
 
 /* Obtain a view of the mapped file, return the page aligned offset & size */
 void *plat_mmap_set_view( plat_mmap *handle, size_t *offset, size_t *size );

@@ -40,7 +40,7 @@ int plat_mmap_is_valid( plat_mmap *handle )
 }
 
 /* map a file into system meory, return the file size */
-size_t plat_mmap_create( plat_mmap *handle, char *file, int fileAccessAttr )
+size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr )
 {
 	LARGE_INTEGER sizet;
 
