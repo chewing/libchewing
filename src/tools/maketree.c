@@ -174,6 +174,8 @@ void Construct()
 		}
 		pointer->phraseno = ph_count++;
 	}
+
+	fclose( input );
 }
 /* Give the level-order travel number to each node */
 void BFS1()
