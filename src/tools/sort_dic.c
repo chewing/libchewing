@@ -70,9 +70,6 @@ const char user_msg[] =
 		"2." PH_INDEX_FILE " \t-- index file of phrase \n" \
 		"3." IN_FILE " \t-- intermediate file for make_tree \n";
 
-extern const char *ph_pho[];
-/*extern uint16_t PhoneBg2Uint( const char *phone );*/
-
 void DataSetNum( long _index )
 {
 	char buf[ MAXLEN ], *p;
