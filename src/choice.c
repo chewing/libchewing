@@ -113,7 +113,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 
 	while ( head <= head_tmp && tail_tmp <= tail ) {
 		diff = tail_tmp - head_tmp;
-		pho_id = TreeFindPhrase( head_tmp, tail_tmp, phoneSeq );
+		pho_id = TreeFindPhrase( pgdata, head_tmp, tail_tmp, phoneSeq );
 
 		if ( pho_id != -1 ) {
 			/* save it! */
@@ -415,7 +415,7 @@ static void ChangeUserData( ChewingData *pgdata, int selectNo )
 		&( pgdata->phoneSeq[ PhoneSeqCursor( pgdata ) ] ), 
 		len * sizeof( uint16 ) );
 	userPhoneSeq[ len ] = 0;
-	UserUpdatePhrase( userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[ selectNo ] );
+	UserUpdatePhrase( pgdata, userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[ selectNo ] );
 }
 
 /** @brief commit the selected phrase. */

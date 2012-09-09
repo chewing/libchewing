@@ -45,13 +45,13 @@ static int DeltaFreq( int recentTime )
 #endif
 
 /* load the orginal frequency from the static dict */
-static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int len )
+static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[], int len )
 {
 	int pho_id;
 	int retval;
 	Phrase *phrase = ALC( Phrase, 1 );
 
-	pho_id = TreeFindPhrase( 0, len - 1, phoneSeq );
+	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
 		GetPhraseFirst( phrase, pho_id );
 		do {
@@ -71,14 +71,14 @@ static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int 
 }
 
 /* find the maximum frequency of the same phrase */
-static int LoadMaxFreq( const uint16 phoneSeq[], int len )
+static int LoadMaxFreq( ChewingData *pgdata, const uint16 phoneSeq[], int len )
 {
 	int pho_id;
 	Phrase *phrase = ALC( Phrase, 1 );
 	int maxFreq = FREQ_INIT_VALUE;
 	UserPhraseData *uphrase;
 
-	pho_id = TreeFindPhrase( 0, len - 1, phoneSeq );
+	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
 		GetPhraseFirst( phrase, pho_id );
 		do {
@@ -132,7 +132,7 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	}
 }
 
-int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
+int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	UserPhraseData data;
@@ -150,8 +150,8 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 		strcpy( data.wordSeq, wordSeq );
 
 		/* load initial freq */
-		data.origfreq = LoadOriginalFreq( phoneSeq, wordSeq, len );
-		data.maxfreq = LoadMaxFreq( phoneSeq, len );
+		data.origfreq = LoadOriginalFreq( pgdata, phoneSeq, wordSeq, len );
+		data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
 
 		data.userfreq = data.origfreq;
 		data.recentTime = chewing_lifetime;
@@ -160,7 +160,7 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 		return USER_UPDATE_INSERT;
 	}
 	else {
-		pItem->data.maxfreq = LoadMaxFreq( phoneSeq, len );
+		pItem->data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
 		pItem->data.userfreq = UpdateFreq( 
 			pItem->data.userfreq, 
 			pItem->data.maxfreq, 

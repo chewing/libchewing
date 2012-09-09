@@ -277,7 +277,7 @@ static int CheckChoose(
 /** @brief search for the phrases have the same pronunciation.*/
 /* if phoneSeq[a] ~ phoneSeq[b] is a phrase, then add an interval
  * from (a) to (b+1) */
-int TreeFindPhrase( int begin, int end, const uint16 *phoneSeq )
+int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16 *phoneSeq )
 {
 	int child, tree_p, i;
 
@@ -345,6 +345,7 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 }
 
 static void FindInterval(
+		ChewingData *pgdata,
 		uint16 *phoneSeq, int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
@@ -377,7 +378,7 @@ static void FindInterval(
 			}
 
 			/* check dict phrase */
-			pho_id = TreeFindPhrase( begin, end, phoneSeq );
+			pho_id = TreeFindPhrase( pgdata, begin, end, phoneSeq );
 			if ( 
 				( pho_id != -1 ) && 
 				CheckChoose( 
@@ -938,6 +939,7 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 }
 
 int Phrasing(
+		ChewingData *pgdata, /* FIXME: Remove other parameters since they are all in pgdata. */
 		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
@@ -948,6 +950,7 @@ int Phrasing(
 	InitPhrasing( &treeData );
 
 	FindInterval( 
+		pgdata,
 		phoneSeq, nPhoneSeq, selectStr, selectInterval, nSelect, 
 		bArrBrkpt, &treeData );
 	SetInfo( nPhoneSeq, &treeData );

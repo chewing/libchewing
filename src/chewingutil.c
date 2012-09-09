@@ -591,7 +591,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 		memcpy( bufPhoneSeq, pgdata->phoneSeq, sizeof( uint16 ) * throwEnd );
 		bufPhoneSeq[ throwEnd ] = (uint16) 0;
 		ueStrNCpy( bufWordSeq, pgdata->phrOut.chiBuf, throwEnd, 1 );
-		UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+		UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 
 		KillFromLeft( pgdata, throwEnd );
 	}
@@ -665,7 +665,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		}
 		else {
 			if ( pending ) {
-				UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+				UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 				prev_pos = 0;
 				pending = 0;
 			}
@@ -674,11 +674,11 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			ueStrNCpy( bufWordSeq,
 					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
 					len, 1);
-			UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+			UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		}
 	}
 	if ( pending ) {
-		UserUpdatePhrase( bufPhoneSeq, bufWordSeq );
+		UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		prev_pos = 0;
 		pending = 0;
 	}
@@ -810,7 +810,7 @@ int CallPhrasing( ChewingData *pgdata )
 #endif
 
 	/* then phrasing */
-	Phrasing( 
+	Phrasing( pgdata,
 		&( pgdata->phrOut ), pgdata->phoneSeq, pgdata->nPhoneSeq,
 		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, 
 		pgdata->bArrBrkpt, pgdata->bUserArrCnnct );

@@ -1326,7 +1326,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				           newPhraseLen, 1);
 
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 
@@ -1356,7 +1356,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				           cursor - newPhraseLen ),
 				           newPhraseLen, 1);
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 

@@ -44,7 +44,7 @@ typedef struct {
  * @retval USER_UPDATE_INSERT Sequence is new, add new entry.
  * @retval USER_UPDATE_MODIFY Sequence is existing, update it's data.
  */
-int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] );
+int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] );
 
 /**
  * @brief Read the first phrase of the phone in user phrase database.
