@@ -133,22 +133,26 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
-	
-	ChewingData *internal_data = ALC( ChewingData, 1 );
-	ChewingOutput *internal_output = ALC( ChewingOutput, 1 );
+
 	ctx = ALC( ChewingContext, 1 );
-	if ( ctx && internal_data && internal_output ) {
-		ctx->data = internal_data;
-		ctx->output = internal_output;
-		ctx->cand_no = 0;
+	if ( !ctx )
+		goto ERROR;
 
-		/* handle configuration */
-		chewing_Reset( ctx );
+	ctx->data = ALC ( ChewingData, 1 );
+	if ( !ctx->data )
+		goto ERROR;
 
-		return ctx;
-	} else {
-		return NULL;
-	}
+	ctx->output = ALC ( ChewingOutput, 1 );
+	if ( !ctx->output )
+		goto ERROR;
+
+	ctx->cand_no = 0;
+	chewing_Reset( ctx );
+
+	return ctx;
+ERROR:
+	chewing_delete( ctx );
+	return NULL;
 }
 
 CHEWING_API int chewing_Init(
@@ -289,12 +293,13 @@ CHEWING_API void chewing_Terminate()
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
-	if ( ctx->data )
-		free( ctx->data);
-	if ( ctx->output )
-		free( ctx->output);
-	if ( ctx )
+	if ( ctx ) {
+		if ( ctx->data )
+			free( ctx->data);
+		if ( ctx->output )
+			free( ctx->output);
 		free( ctx );
+	}
 	return;
 }
 
