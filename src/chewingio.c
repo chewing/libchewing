@@ -51,6 +51,7 @@ void (*TerminateServices[ TerminateServicesNUM ])() = {
 };
 static int countTerminateService = 0;
 static int bTerminateCompleted = 0;
+static char libraryDataPath[PATH_MAX];
 
 char *kb_type_str[] = {
 	"KB_DEFAULT",
@@ -154,6 +155,13 @@ CHEWING_API int chewing_Init(
 		const char *dataPath,
 		const char *hashPath )
 {
+	int len;
+
+	len = strlen( dataPath );
+	if ( len + 1 <= sizeof(libraryDataPath) ) {
+		strcpy(libraryDataPath, dataPath );
+	}
+
 	/* initialize Tree, Char, and Dict */
 	/* FIXME: check the validation of dataPath */
 	InitTree( dataPath );
