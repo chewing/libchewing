@@ -133,21 +133,27 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
+	int ret;
 
 	ctx = ALC( ChewingContext, 1 );
 	if ( !ctx )
-		goto ERROR;
-
-	ctx->data = ALC ( ChewingData, 1 );
-	if ( !ctx->data )
 		goto ERROR;
 
 	ctx->output = ALC ( ChewingOutput, 1 );
 	if ( !ctx->output )
 		goto ERROR;
 
-	ctx->cand_no = 0;
+	ctx->data = ALC ( ChewingData, 1 );
+	if ( !ctx->data )
+		goto ERROR;
+
 	chewing_Reset( ctx );
+
+	ret = InitTree( ctx->data, libraryDataPath );
+	if ( ret )
+		goto ERROR;
+
+	ctx->cand_no = 0;
 
 	return ctx;
 ERROR:
@@ -168,7 +174,6 @@ CHEWING_API int chewing_Init(
 
 	/* initialize Tree, Char, and Dict */
 	/* FIXME: check the validation of dataPath */
-	InitTree( dataPath );
 	InitChar( dataPath );
 	InitDict( dataPath );
 
@@ -294,8 +299,11 @@ CHEWING_API void chewing_Terminate()
 CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
-		if ( ctx->data )
-			free( ctx->data);
+		if ( ctx->data ) {
+			TerminateTree( ctx->data );
+			free( ctx->data );
+		}
+
 		if ( ctx->output )
 			free( ctx->output);
 		free( ctx );

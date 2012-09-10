@@ -14,7 +14,9 @@
 #define IS_USER_PHRASE 1
 #define IS_DICT_PHRASE 0
 
-void InitTree( const char * );
+int InitTree( ChewingData *pgdata, const char *prefix );
+void TerminateTree( ChewingData *pgdata );
+
 int Phrasing( ChewingData *pgdata, PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 

@@ -11,8 +11,13 @@
 #ifndef _CHEWING_CORE_PRIVATE_H
 #define _CHEWING_CORE_PRIVATE_H
 
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #include "global.h"
 #include <wchar.h>
+#include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
 #define WCH_SIZE 4
@@ -146,6 +151,12 @@ typedef struct {
 	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
+
+	TreeType *tree;
+	size_t tree_size;
+#ifdef USE_BINARY_DATA
+	plat_mmap tree_mmap;
+#endif
 } ChewingData;
 
 typedef struct {

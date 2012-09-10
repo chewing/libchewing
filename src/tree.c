@@ -55,14 +55,6 @@ typedef struct {
 	int nPhListLen;
 } TreeDataType;
 
-#ifdef USE_BINARY_DATA
-TreeType *tree;
-static unsigned int tree_size = 0;
-static plat_mmap tree_mmap;
-#else
-TreeType tree[ TREE_SIZE ];
-#endif
-
 static int IsContain( IntervalType in1, IntervalType in2 )
 {
 	return ( in1.from <= in2.from && in1.to >= in2.to );
@@ -95,51 +87,72 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 }
 #endif
 
-static void TerminateTree()
+void TerminateTree( ChewingData *pgdata )
 {
 #ifdef USE_BINARY_DATA
-	plat_mmap_close( &tree_mmap );
+	pgdata->tree = NULL;
+	plat_mmap_close( &pgdata->tree_mmap );
+#else
+	free( pgdata->tree );
+	pgdata->tree = NULL;
 #endif
 }
 
-void InitTree( const char *prefix )
+
+int InitTree( ChewingData *pgdata, const char * prefix )
 {
+#ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
-
-#ifdef USE_BINARY_DATA
+	int len;
 	size_t offset = 0;
-	size_t csize;
+
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
+
+	plat_mmap_set_invalid( &pgdata->tree_mmap );
+	pgdata->tree_size = plat_mmap_create( &pgdata->tree_mmap, filename, FLAG_ATTRIBUTE_READ );
+	if ( pgdata->tree_size <= 0 )
+		return -1;
+
+	pgdata->tree = (TreeType *) plat_mmap_set_view( &pgdata->tree_mmap, &offset, &pgdata->tree_size );
+	if ( !pgdata->tree )
+		return -1;
+
+	return 0;
 #else
-	FILE *infile;
+	char filename[ PATH_MAX ];
+	int len;
+	FILE *infile = NULL;
 	int i;
-#endif
 
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
-#ifdef USE_BINARY_DATA
-	plat_mmap_set_invalid( &tree_mmap );
-	tree_size = plat_mmap_create( &tree_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( plat_mmap_is_valid( &tree_mmap ) );
-	if ( tree_size <= 0 )
-		return;
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
 
-	csize = tree_size;
-	tree = (TreeType *) plat_mmap_set_view( &tree_mmap, &offset, &csize );
-	assert( tree );
-#else
 	infile = fopen( filename, "r" );
-	assert( infile );
+	if ( !infile )
+		return -1;
+
+	pgdata->tree = calloc( sizeof(*pgdata->tree), TREE_SIZE );
+	if ( !pgdata->tree ) {
+		fclose( infile );
+		return -1;
+	}
+
+	/* XXX: What happen if infile contains more than TREE_SIZE data? */
 	for ( i = 0; i < TREE_SIZE; i++ ) {
 		if ( fscanf( infile, "%hu%d%d%d",
-			&tree[ i ].phone_id,
-			&tree[ i ].phrase_id,
-			&tree[ i ].child_begin,
-			&tree[ i ].child_end ) != 4 )
+					&pgdata->tree[ i ].phone_id,
+					&pgdata->tree[ i ].phrase_id,
+					&pgdata->tree[ i ].child_begin,
+					&pgdata->tree[ i ].child_end ) != 4 )
 			break;
 	}
-	fclose( infile );
-#endif
 
-	addTerminateService( TerminateTree );
+	fclose( infile );
+	return 0;
+#endif
 }
 
 static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
@@ -284,24 +297,24 @@ int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16 *phone
 	tree_p = 0;
 	for ( i = begin; i <= end; i++ ) {
 		for ( 
-			child = tree[ tree_p ].child_begin;
-			child != -1 && child <= tree[ tree_p ].child_end;
+			child = pgdata->tree[ tree_p ].child_begin;
+			child != -1 && child <= pgdata->tree[ tree_p ].child_end;
 			child++ ) {
 
 #ifdef USE_BINARY_DATA
-			assert(0 <= child && child * sizeof(TreeType) < tree_size);
+			assert(0 <= child && child * sizeof(TreeType) < pgdata->tree_size);
 #endif
-			if ( tree[ child ].phone_id == phoneSeq[ i ] )
+			if ( pgdata->tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
 		/* if not found any word then fail. */
-		if ( child == -1 || child > tree[ tree_p ].child_end )
+		if ( child == -1 || child > pgdata->tree[ tree_p ].child_end )
 			return -1;
 		else {
 			tree_p = child;
 		}
 	}
-	return tree[ tree_p ].phrase_id;
+	return pgdata->tree[ tree_p ].phrase_id;
 }
 
 static void AddInterval(
