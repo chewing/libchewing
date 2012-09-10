@@ -584,7 +584,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		}
 	}
 	else {
-		rtn = ZuinPhoInput( &( pgdata->zuinData ), ' ' );
+		rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), ' ' );
 		switch ( rtn ) {
 			case ZUIN_ABSORB:
 				keystrokeRtn = KEYSTROKE_ABSORB;
@@ -1184,7 +1184,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				goto End_KeyDefault;
 			}
 
-			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
+			rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), key );
 			DEBUG_OUT(
 				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 

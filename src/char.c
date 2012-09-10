@@ -174,7 +174,7 @@ static void Str2Word( Word *wrd_ptr )
 #endif
 }
 
-int GetCharFirst( Word *wrd_ptr, uint16 phoneid )
+int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16 phoneid )
 {
 	uint16 *pinx;
 

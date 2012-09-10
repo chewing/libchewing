@@ -12,6 +12,7 @@
 #define _CHEWING_CHAR_PRIVATE_H
 
 #include "global.h"
+#include "chewing-private.h"
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -21,7 +22,7 @@ typedef struct {
 	char word[ 7 ];
 } Word;
 
-int GetCharFirst( Word *, uint16 );
+int GetCharFirst( ChewingData *, Word *, uint16 );
 int GetCharNext ( Word * );
 int InitChar( const char * );
 
