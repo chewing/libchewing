@@ -89,13 +89,15 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 
 void TerminateTree( ChewingData *pgdata )
 {
+	if ( pgdata->tree ) {
 #ifdef USE_BINARY_DATA
-	pgdata->tree = NULL;
-	plat_mmap_close( &pgdata->tree_mmap );
+		pgdata->tree = NULL;
+		plat_mmap_close( &pgdata->tree_mmap );
 #else
-	free( pgdata->tree );
-	pgdata->tree = NULL;
+		free( pgdata->tree );
+		pgdata->tree = NULL;
 #endif
+	}
 }
 
 
