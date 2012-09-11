@@ -27,22 +27,6 @@
 #include "private.h"
 #include "plat_mmap.h"
 
-#ifdef USE_BINARY_DATA
-static uint16* arrPhone = NULL;
-static int *begin = NULL;
-static size_t phone_num;
-static plat_mmap char_begin_mmap;
-static plat_mmap char_phone_mmap;
-static void *dict = NULL;
-static void *cur_pos = NULL;
-static plat_mmap dict_mmap;
-#else
-static uint16 arrPhone[ PHONE_NUM + 1 ];
-static int begin[ PHONE_NUM + 1 ];
-static FILE *dictfile;
-#endif
-static int end_pos;
-
 #if ! defined(USE_BINARY_DATA)
 static char *fgettab( char *buf, int maxlen, FILE *fp )
 {
@@ -67,94 +51,126 @@ static int CompUint16( const uint16 *pa, const uint16 *pb )
 	return ( (*pa) - (*pb) );
 }
 
-static void TerminateChar()
+void TerminateChar( ChewingData *pgdata )
 {
 #ifdef USE_BINARY_DATA
-	plat_mmap_close( &char_begin_mmap );
-	plat_mmap_close( &char_phone_mmap );
-	plat_mmap_close( &dict_mmap );
+	pgdata->arrPhone = NULL;
+	plat_mmap_close( &pgdata->char_phone_mmap );
+
+	pgdata->begin = NULL;
+	plat_mmap_close( &pgdata->char_begin_mmap );
+
+	pgdata->dict = NULL;
+	plat_mmap_close( &pgdata->dict_mmap );
+
+	pgdata->phone_num = 0;
 #else
-	if ( dictfile )
+	if ( pgdata->dictfile )
 		fclose( dictfile );
+	free( pgdata->begin );
+	free( pgdata->arrPhone );
+	pgdata->phone_num = 0;
 #endif
 }
 
-int InitChar( const char *prefix )
+int InitChar( ChewingData *pgdata , const char * prefix )
 {
+#ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
-
-#ifdef USE_BINARY_DATA
-	long file_size;
+	int len;
 	size_t offset = 0;
+	size_t file_size;
 	size_t csize;
-#else
-	FILE *indexfile;
-	int i;
-#endif
 
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
-#ifdef USE_BINARY_DATA
-	plat_mmap_set_invalid( &dict_mmap );
-	file_size = plat_mmap_create( &dict_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( plat_mmap_is_valid( &dict_mmap ) );
-	if ( file_size < 0 )
-		return 0;
-	csize = file_size;
-	dict = (void *) plat_mmap_set_view( &dict_mmap, &offset, &csize );
-	assert( dict );
-#else
-	dictfile = fopen( filename, "r" );
-    if ( ! dictfile )
-        return 0;
-#endif
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
 
-#ifdef USE_BINARY_DATA
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
-	plat_mmap_set_invalid( &char_begin_mmap );
-	file_size = plat_mmap_create( &char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( plat_mmap_is_valid( &char_begin_mmap ) );
-	if ( file_size < 0 )
-		return 0;
-
-	phone_num = file_size / sizeof(int);
+	plat_mmap_set_invalid( &pgdata->dict_mmap );
+	file_size = plat_mmap_create( &pgdata->dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	if ( file_size <= 0 )
+		return -1;
 
 	csize = file_size;
-	begin = (int *) plat_mmap_set_view( &char_begin_mmap, &offset, &csize );
-	assert( begin );
-	if ( ! begin )
-		return 0;
+	offset = 0;
+	pgdata->dict = plat_mmap_set_view( &pgdata->dict_mmap, &offset, &csize );
+	if ( !pgdata->dict )
+		return -1;
 
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
-	plat_mmap_set_invalid( &char_phone_mmap );
-	file_size = plat_mmap_create( &char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( plat_mmap_is_valid( &char_phone_mmap ) );
-	if ( file_size < 0 )
-		return 0;
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
 
-	assert( phone_num == file_size / sizeof(uint16) );
+	plat_mmap_set_invalid( &pgdata->char_begin_mmap );
+	file_size = plat_mmap_create( &pgdata->char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
+	if ( file_size <= 0 )
+		return -1;
+
+	pgdata->phone_num = file_size / sizeof( int );
+
+	csize = file_size;
+	pgdata->begin = plat_mmap_set_view( &pgdata->char_begin_mmap, &offset, &csize );
+	if ( !pgdata->begin )
+		return -1;
+
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
+
+	plat_mmap_set_invalid( &pgdata->char_phone_mmap );
+	file_size = plat_mmap_create( &pgdata->char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
+	if ( file_size <= 0 )
+		return -1;
+
+	if ( pgdata->phone_num != file_size / sizeof( uint16 ))
+		return -1;
 
 	offset = 0;
 	csize = file_size;
-	arrPhone = (uint16 *) plat_mmap_set_view( &char_phone_mmap, &offset, &csize );
-	assert( arrPhone );
-	if ( ! arrPhone )
-		return 0;
+	pgdata->arrPhone = plat_mmap_set_view( &pgdata->char_phone_mmap, &offset, &csize );
+	if ( !pgdata->arrPhone )
+		return -1;
+
+	return 0;
 #else
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
+	int len;
+	FILE *indexfile = NULL;
+
+	pgdata->phone_num = PHONE_NUM;
+
+	pgdata->arrPhone = calloc( pgdata->phone_num, sizeof( *pgdata->arrPhone ) );
+	if ( !pgdata->arrPhone )
+	    return -1;
+
+	pgdata->begin = calloc( pgdata->phone_num, sizeof( *pgdata->begin ) );
+	if ( !pgdata->begin )
+	    return -1;
+
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
+
+	pgdata->dictfile = fopen( filename, "r" );
+	if ( !pgdata->dictfile )
+		return -1;
+
+	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
+	if ( len + 1 > sizeof( filename ) )
+		return -1;
+
 	indexfile = fopen( filename, "r" );
+	if ( !indexfile )
+		return -1;
 
-	if ( ! dictfile || ! indexfile )
-		return 0;
+	for ( i = 0; i < pgdata->phone_num; ++i )
+		fscanf( indexfile, "%hu %d", &pgdata->arrPhone[i], &pgdata->begin[i] );
 
-	for ( i = 0; i <= PHONE_NUM; i++ )
-		fscanf( indexfile, "%hu %d", &arrPhone[ i ], &begin[ i ] );
 	fclose( indexfile );
+	return 0;
 #endif
-	addTerminateService( TerminateChar );
-	return 1;
 }
 
-static void Str2Word( Word *wrd_ptr )
+static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 {
 #ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
@@ -166,10 +182,10 @@ static void Str2Word( Word *wrd_ptr )
 	assert( wrd_ptr->word != '\0' );
 #else
 	unsigned char size;
-	size = *(unsigned char *) cur_pos;
-	cur_pos = (unsigned char*)cur_pos + sizeof(unsigned char);
-	memcpy( wrd_ptr->word, cur_pos, size );
-	cur_pos = (unsigned char*)cur_pos + size;
+	size = *(unsigned char *) pgdata->cur_pos;
+	pgdata->cur_pos = (unsigned char*) pgdata->cur_pos + sizeof(unsigned char);
+	memcpy( wrd_ptr->word, pgdata->cur_pos, size );
+	pgdata->cur_pos = (unsigned char*) pgdata->cur_pos + size;
 	wrd_ptr->word[ size ] = '\0';
 #endif
 }
@@ -179,34 +195,30 @@ int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16 phoneid )
 	uint16 *pinx;
 
 	pinx = (uint16 *) bsearch(
-#ifdef USE_BINARY_DATA
-		&phoneid, arrPhone, phone_num,
-#else
-		&phoneid, arrPhone, PHONE_NUM, 
-#endif
+		&phoneid, pgdata->arrPhone, pgdata->phone_num,
 		sizeof( uint16 ), (CompFuncType) CompUint16 );
 	if ( ! pinx )
 		return 0;
 
 #ifndef USE_BINARY_DATA
-	fseek( dictfile, begin[ pinx - arrPhone ], SEEK_SET );
+	fseek( pgdata->dictfile, pgdata->begin[ pinx - pgdata->arrPhone ], SEEK_SET );
 #else
-	cur_pos = (unsigned char*)dict + begin[ pinx - arrPhone ];
+	pgdata->cur_pos = (unsigned char*)pgdata->dict + pgdata->begin[ pinx - pgdata->arrPhone ];
 #endif
-	end_pos = begin[ pinx - arrPhone + 1 ];
-	Str2Word( wrd_ptr );
+	pgdata->end_pos = pgdata->begin[ pinx - pgdata->arrPhone + 1 ];
+	Str2Word( pgdata, wrd_ptr );
 	return 1;
 }
 
-int GetCharNext( Word *wrd_ptr )
+int GetCharNext( ChewingData *pgdata, Word *wrd_ptr )
 {
 #ifndef USE_BINARY_DATA
-	if ( ftell( dictfile ) >= end_pos )
+	if ( ftell( pgdata->dictfile ) >= pgdata->end_pos )
 		return 0;
 #else
-	if ( (unsigned char*)cur_pos >= (unsigned char*)dict + end_pos )
+	if ( (unsigned char*)pgdata->cur_pos >= (unsigned char*)pgdata->dict + pgdata->end_pos )
 		return 0;
 #endif
-	Str2Word( wrd_ptr );
+	Str2Word( pgdata, wrd_ptr );
 	return 1;
 }

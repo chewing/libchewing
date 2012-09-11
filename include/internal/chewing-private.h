@@ -157,6 +157,20 @@ typedef struct {
 #ifdef USE_BINARY_DATA
 	plat_mmap tree_mmap;
 #endif
+
+	uint16 *arrPhone;
+	int *begin;
+	size_t phone_num;
+	void *dict;
+	void *cur_pos;
+	int end_pos;
+#ifdef USE_BINARY_DATA
+	plat_mmap dict_mmap;
+	plat_mmap char_begin_mmap;
+	plat_mmap char_phone_mmap;
+#else
+	FILE *dictfile;
+#endif
 } ChewingData;
 
 typedef struct {
