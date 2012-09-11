@@ -66,7 +66,7 @@ void TerminateChar( ChewingData *pgdata )
 	pgdata->phone_num = 0;
 #else
 	if ( pgdata->dictfile )
-		fclose( dictfile );
+		fclose( pgdata->dictfile );
 	free( pgdata->begin );
 	free( pgdata->arrPhone );
 	pgdata->phone_num = 0;
@@ -133,7 +133,9 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 
 	return 0;
 #else
+	char filename[ PATH_MAX ];
 	int len;
+	int i;
 	FILE *indexfile = NULL;
 
 	pgdata->phone_num = PHONE_NUM;
@@ -176,7 +178,7 @@ static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 	char buf[ 1000 ];
 	uint16 sh;
 
-	fgettab( buf, 1000, dictfile );
+	fgettab( buf, 1000, pgdata->dictfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
 	assert( wrd_ptr->word != '\0' );
