@@ -114,7 +114,7 @@ int InitDict( const char *prefix )
 	return 1;
 }
 
-static void Str2Phrase( Phrase *phr_ptr )
+static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
 {
 #ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
@@ -133,7 +133,7 @@ static void Str2Phrase( Phrase *phr_ptr )
 #endif
 }
 
-int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
+int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id )
 {
 	assert( ( 0 <= phone_phr_id ) && ( phone_phr_id < PHONE_PHRASE_NUM ) );
 
@@ -143,11 +143,11 @@ int GetPhraseFirst( Phrase *phr_ptr, int phone_phr_id )
 	cur_pos = (unsigned char *)dict + begin[ phone_phr_id ];
 #endif
 	end_pos = begin[ phone_phr_id + 1 ];
-	Str2Phrase( phr_ptr );
+	Str2Phrase( pgdata, phr_ptr );
 	return 1;
 }
 
-int GetPhraseNext( Phrase *phr_ptr )
+int GetPhraseNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
 #ifndef USE_BINARY_DATA
 	if ( ftell( dictfile ) >= end_pos )
@@ -156,6 +156,6 @@ int GetPhraseNext( Phrase *phr_ptr )
 	if ( (unsigned char *)cur_pos >= (unsigned char *)dict + end_pos )
 		return 0;
 #endif
-	Str2Phrase( phr_ptr );
+	Str2Phrase( pgdata, phr_ptr );
 	return 1;
 }

@@ -276,7 +276,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	/* phrase */
 	else {
 		if ( pai->avail[ pai->currentAvail ].id != -1 ) {
-			GetPhraseFirst( &tempPhrase, pai->avail[ pai->currentAvail ].id );
+			GetPhraseFirst( pgdata, &tempPhrase, pai->avail[ pai->currentAvail ].id );
 			do {
 				if ( ChoiceTheSame( 
 					pci, 
@@ -287,7 +287,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 				ueStrNCpy( pci->totalChoiceStr[ pci->nTotalChoice ],
 						tempPhrase.phrase, len, 1);
 				pci->nTotalChoice++;
-			} while( GetPhraseNext( &tempPhrase ) );
+			} while( GetPhraseNext( pgdata, &tempPhrase ) );
 		}
 
 		memcpy( userPhoneSeq, &phoneSeq[ cursor ], sizeof( uint16 ) * len );

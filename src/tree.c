@@ -242,6 +242,7 @@ static int CheckUserChoose(
  * phrase is said to satisfy a choose interval if 
  * their intersections are the same */
 static int CheckChoose(
+		ChewingData *pgdata,
 		int ph_id, int from, int to, Phrase **pp_phr, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect )
@@ -256,7 +257,7 @@ static int CheckChoose(
 	*pp_phr = NULL;
 
 	/* if there exist one phrase satisfied all selectStr then return 1, else return 0. */
-	GetPhraseFirst( phrase, ph_id );
+	GetPhraseFirst( pgdata, phrase, ph_id );
 	do {
 		for ( chno = 0; chno < nSelect; chno++ ) {
 			c = selectInterval[ chno ];
@@ -282,7 +283,7 @@ static int CheckChoose(
 			*pp_phr = phrase;
 			return 1;
 		}
-	} while ( GetPhraseNext( phrase ) );
+	} while ( GetPhraseNext( pgdata, phrase ) );
 	free( phrase );
 	return 0;
 }
@@ -395,6 +396,7 @@ static void FindInterval(
 			if ( 
 				( pho_id != -1 ) && 
 				CheckChoose( 
+					pgdata,
 					pho_id, begin, end + 1, 
 					&p_phrase, selectStr, 
 					selectInterval, nSelect ) ) {

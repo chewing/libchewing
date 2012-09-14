@@ -53,7 +53,7 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const
 
 	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
-		GetPhraseFirst( phrase, pho_id );
+		GetPhraseFirst( pgdata, phrase, pho_id );
 		do {
 			/* find the same phrase */
 			if ( ! strcmp(
@@ -63,7 +63,7 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const
 				free( phrase );
 				return retval;
 			}
-		} while ( GetPhraseNext( phrase ) );
+		} while ( GetPhraseNext( pgdata, phrase ) );
 	}
 
 	free( phrase );
@@ -80,11 +80,11 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16 phoneSeq[], int len )
 
 	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
-		GetPhraseFirst( phrase, pho_id );
+		GetPhraseFirst( pgdata, phrase, pho_id );
 		do {
 			if ( phrase->freq > maxFreq )
 				maxFreq = phrase->freq;
-		} while( GetPhraseNext( phrase ) );
+		} while( GetPhraseNext( pgdata, phrase ) );
 	}
 	free( phrase );
 
