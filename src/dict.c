@@ -132,36 +132,6 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 #endif
 }
 
-#if 0
-int InitDict( const char *prefix )
-{
-	char filename[ PATH_MAX ];
-
-	sprintf( filename, "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
-
-#ifdef USE_BINARY_DATA
-	plat_mmap_set_invalid( &index_mmap );
-	file_size = plat_mmap_create( &index_mmap, filename, FLAG_ATTRIBUTE_READ );
-	assert( plat_mmap_is_valid( &index_mmap ) );
-	if ( file_size < 0 )
-		return 0;
-
-	csize = file_size;
-	begin = (int *) plat_mmap_set_view( &index_mmap, &offset, &csize );
-	assert( begin );
-#else
-	indexfile = fopen( filename, "r" );
-	assert( dictfile && indexfile );
-	i = 0;
-	while ( !feof( indexfile ) )
-		fscanf( indexfile, "%d", &begin[ i++ ] );
-	fclose( indexfile );
-#endif
-	addTerminateService( TerminateDict );
-	return 1;
-}
-#endif
-
 static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
 {
 #ifndef USE_BINARY_DATA
