@@ -171,6 +171,19 @@ typedef struct {
 #else
 	FILE *charfile;
 #endif
+
+	int *dict_begin;
+	void *dict_cur_pos;
+	int dict_end_pos;
+
+	void *dict;
+
+#ifdef USE_BINARY_DATA
+	plat_mmap dict_mmap;
+	plat_mmap index_mmap;
+#else
+	FILE *dictfile;
+#endif
 } ChewingData;
 
 typedef struct {

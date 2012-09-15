@@ -78,7 +78,7 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 #ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
 	int len;
-	size_t offset = 0;
+	size_t offset;
 	size_t file_size;
 	size_t csize;
 
@@ -108,6 +108,7 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 
 	pgdata->phone_num = file_size / sizeof( int );
 
+	offset = 0;
 	csize = file_size;
 	pgdata->char_begin = plat_mmap_set_view( &pgdata->char_begin_mmap, &offset, &csize );
 	if ( !pgdata->char_begin )

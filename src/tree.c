@@ -104,7 +104,7 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 #ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
 	int len;
-	size_t offset = 0;
+	size_t offset;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );
 	if ( len + 1 > sizeof( filename ) )
@@ -115,6 +115,7 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	if ( pgdata->tree_size <= 0 )
 		return -1;
 
+	offset = 0;
 	pgdata->tree = (TreeType *) plat_mmap_set_view( &pgdata->tree_mmap, &offset, &pgdata->tree_size );
 	if ( !pgdata->tree )
 		return -1;

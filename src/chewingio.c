@@ -157,6 +157,10 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto ERROR;
 
+	ret = InitDict( ctx->data, libraryDataPath );
+	if ( ret )
+		goto ERROR;
+
 	ctx->cand_no = 0;
 
 	return ctx;
@@ -175,10 +179,6 @@ CHEWING_API int chewing_Init(
 	if ( len + 1 <= sizeof(libraryDataPath) ) {
 		strcpy(libraryDataPath, dataPath );
 	}
-
-	/* initialize Tree, Char, and Dict */
-	/* FIXME: check the validation of dataPath */
-	InitDict( dataPath );
 
 	/* initialize Hash */
 	/* FIXME: check the validation of hashPath */
@@ -303,6 +303,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
 		if ( ctx->data ) {
+			TerminateDict( ctx->data );
 			TerminateChar( ctx->data );
 			TerminateTree( ctx->data );
 			free( ctx->data );
