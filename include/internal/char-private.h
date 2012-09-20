@@ -24,7 +24,7 @@ typedef struct {
 
 int GetCharFirst( ChewingData *, Word *, uint16 );
 int GetCharNext ( ChewingData *, Word * );
-int initChar( ChewingData *pgdata );
+int InitChar( ChewingData *pgdata, const char * prefix );
 void TerminateChar( ChewingData *pgdata );
 
 #endif
