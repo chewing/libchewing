@@ -184,6 +184,8 @@ typedef struct {
 #else
 	FILE *dictfile;
 #endif
+
+    char hashfilename[ 200 ];
 } ChewingData;
 
 typedef struct {

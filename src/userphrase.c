@@ -156,7 +156,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
 		data.userfreq = data.origfreq;
 		data.recentTime = chewing_lifetime;
 		pItem = HashInsert( &data );
-		HashModify( pItem );
+		HashModify( pgdata, pItem );
 		return USER_UPDATE_INSERT;
 	}
 	else {
@@ -167,7 +167,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
 			pItem->data.origfreq, 
 			chewing_lifetime - pItem->data.recentTime );
 		pItem->data.recentTime = chewing_lifetime;
-		HashModify( pItem );
+		HashModify( pgdata, pItem );
 		return USER_UPDATE_MODIFY;
 	}
 }

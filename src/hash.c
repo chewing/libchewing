@@ -28,7 +28,6 @@
 int chewing_lifetime;
 
 static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-static char hashfilename[ 200 ];
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
@@ -177,12 +176,12 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	pItem->data.wordSeq[ (int) *puc ] = '\0';
 }
 
-void HashModify( HASH_ITEM *pItem )
+void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 {
 	FILE *outfile;
 	char str[ FIELD_SIZE + 1 ];
 
-	outfile = fopen( hashfilename, "r+b" );
+	outfile = fopen( pgdata->hashfilename, "r+b" );
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
@@ -500,7 +499,7 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
-int InitHash()
+int InitHash( ChewingData *pgdata )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
@@ -510,31 +509,31 @@ int InitHash()
 
 	/* make sure of write permission */
 	if ( path && access( path, W_OK ) == 0 ) {
-		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+		sprintf( pgdata->hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	} else {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
-				hashfilename, "%s%s", 
+				pgdata->hashfilename, "%s%s",
 				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
 			sprintf(
-				hashfilename, "%s%s",
+				pgdata->hashfilename, "%s%s",
 				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
-		PLAT_MKDIR( hashfilename );
-		strcat( hashfilename, PLAT_SEPARATOR );
-		strcat( hashfilename, HASH_FILE );
+		PLAT_MKDIR( pgdata->hashfilename );
+		strcat( pgdata->hashfilename, PLAT_SEPARATOR );
+		strcat( pgdata->hashfilename, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
 open_hash_file:
-	dump = _load_hash_file( hashfilename, &fsize );
+	dump = _load_hash_file( pgdata->hashfilename, &fsize );
 	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
 	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
 		FILE *outfile;
-		outfile = fopen( hashfilename, "w+b" );
+		outfile = fopen( pgdata->hashfilename, "w+b" );
 		if ( ! outfile ) {
 			if ( dump ) {
 				free( dump );
@@ -552,7 +551,7 @@ open_hash_file:
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
-			if ( ! migrate_hash_to_bin( hashfilename ) ) {
+			if ( ! migrate_hash_to_bin( pgdata->hashfilename ) ) {
 				return  0;
 			}
 			goto open_hash_file;

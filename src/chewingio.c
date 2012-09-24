@@ -161,6 +161,9 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto ERROR;
 
+	// FIXME: Which return code indicate error?
+	ret = InitHash( ctx->data );
+
 	ctx->cand_no = 0;
 
 	return ctx;
@@ -179,10 +182,6 @@ CHEWING_API int chewing_Init(
 	if ( len + 1 <= sizeof(libraryDataPath) ) {
 		strcpy(libraryDataPath, dataPath );
 	}
-
-	/* initialize Hash */
-	/* FIXME: check the validation of hashPath */
-	InitHash();
 
 	/* initialize SymbolTable */
 	if ( ! InitSymbolTable( (char*) hashPath ) )

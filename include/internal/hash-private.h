@@ -36,9 +36,9 @@ HASH_ITEM *HashFindPhone( const uint16 phoneSeq[] );
 HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] );
 HASH_ITEM *HashInsert( UserPhraseData *pData );
 HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pHashLast );
-void HashModify( HASH_ITEM *pItem );
+void HashModify( ChewingData *pgdata, HASH_ITEM *pItem );
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen );
-int InitHash();
+int InitHash( ChewingData *ctx );
 void FreeHashTable( void );
 
 #endif
