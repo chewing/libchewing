@@ -24,7 +24,6 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-extern int chewing_lifetime;
 static HASH_ITEM *pItemLast;
 
 #if 0
@@ -154,7 +153,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
 		data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
 
 		data.userfreq = data.origfreq;
-		data.recentTime = chewing_lifetime;
+		data.recentTime = pgdata->chewing_lifetime;
 		pItem = HashInsert( &data );
 		HashModify( pgdata, pItem );
 		return USER_UPDATE_INSERT;
@@ -165,8 +164,8 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
 			pItem->data.userfreq, 
 			pItem->data.maxfreq, 
 			pItem->data.origfreq, 
-			chewing_lifetime - pItem->data.recentTime );
-		pItem->data.recentTime = chewing_lifetime;
+			pgdata->chewing_lifetime - pItem->data.recentTime );
+		pItem->data.recentTime = pgdata->chewing_lifetime;
 		HashModify( pgdata, pItem );
 		return USER_UPDATE_MODIFY;
 	}

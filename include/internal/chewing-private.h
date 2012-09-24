@@ -186,6 +186,8 @@ typedef struct {
 #endif
 
     char hashfilename[ 200 ];
+
+	int chewing_lifetime;
 } ChewingData;
 
 typedef struct {

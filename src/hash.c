@@ -25,8 +25,6 @@
 #include "private.h"
 #include "global.h"
 
-int chewing_lifetime;
-
 static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
@@ -185,9 +183,9 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
-	fwrite( &chewing_lifetime, 1, 4, outfile );
+	fwrite( &pgdata->chewing_lifetime, 1, 4, outfile );
 #ifdef ENABLE_DEBUG
-	sprintf( str, "%d", chewing_lifetime );
+	sprintf( str, "%d", pgdata->chewing_lifetime );
 	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
 	DEBUG_FLUSH;
 #endif
@@ -379,7 +377,8 @@ err_load_file:
 	return NULL;
 }
 
-static int migrate_hash_to_bin( const char *ofilename )
+// FIXME: Remove ofliename
+static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 {
 	FILE *txtfile;
 	char oldname[ 256 ], *dump, *seekdump;
@@ -396,15 +395,15 @@ static int migrate_hash_to_bin( const char *ofilename )
 		fclose( txtfile );
 		return 0;
 	}
-	fscanf( txtfile, "%d", &chewing_lifetime );
+	fscanf( txtfile, "%d", &pgdata->chewing_lifetime );
 
 	/* prepare the bin file */
 	seekdump = dump;
 	memcpy( seekdump, BIN_HASH_SIG, strlen( BIN_HASH_SIG ) );
 	memcpy( seekdump + strlen( BIN_HASH_SIG ),
-	        &chewing_lifetime, 
-		sizeof(chewing_lifetime) );
-	seekdump += strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
+	        &pgdata->chewing_lifetime,
+		sizeof(pgdata->chewing_lifetime) );
+	seekdump += strlen( BIN_HASH_SIG ) + sizeof(pgdata->chewing_lifetime);
 
 	/* migrate */
 	item_index = 0;
@@ -529,7 +528,7 @@ int InitHash( ChewingData *pgdata )
 
 open_hash_file:
 	dump = _load_hash_file( pgdata->hashfilename, &fsize );
-	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
+	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(pgdata->chewing_lifetime);
 	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
 		FILE *outfile;
@@ -540,10 +539,10 @@ open_hash_file:
 			}
 			return 0;
 		}
-		chewing_lifetime = 0;
+		pgdata->chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-		fwrite( &chewing_lifetime, 1,
-		                sizeof(chewing_lifetime), outfile );
+		fwrite( &pgdata->chewing_lifetime, 1,
+		                sizeof(pgdata->chewing_lifetime), outfile );
 		fclose( outfile );
 	}
 	else {
@@ -551,13 +550,13 @@ open_hash_file:
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
-			if ( ! migrate_hash_to_bin( pgdata->hashfilename ) ) {
+			if ( ! migrate_hash_to_bin( pgdata, pgdata->hashfilename ) ) {
 				return  0;
 			}
 			goto open_hash_file;
 		}
 
-		chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
+		pgdata->chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
 		seekdump = dump + hdrlen;
 		fsize -= hdrlen;
 
@@ -600,7 +599,7 @@ open_hash_file:
 			hashtable[ hashvalue ] = pItem;
 			pItem->data.recentTime -= oldest;
 		}
-		chewing_lifetime -= oldest;
+		pgdata->chewing_lifetime -= oldest;
 	}
 	addTerminateService( TerminateHash );
 	return 1;
