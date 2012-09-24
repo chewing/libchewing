@@ -182,7 +182,7 @@ CHEWING_API int chewing_Init(
 
 	/* initialize Hash */
 	/* FIXME: check the validation of hashPath */
-	InitHash( hashPath );
+	InitHash();
 
 	/* initialize SymbolTable */
 	if ( ! InitSymbolTable( (char*) hashPath ) )

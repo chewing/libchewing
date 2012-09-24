@@ -500,14 +500,18 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
-int InitHash( const char *path )
+int InitHash()
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
+	const char *path = getenv( "CHEWING_PATH" );
+
 	/* make sure of write permission */
-	if ( access( path, W_OK ) != 0 ) {
+	if ( path && access( path, W_OK ) == 0 ) {
+		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+	} else {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
 				hashfilename, "%s%s", 
@@ -521,8 +525,6 @@ int InitHash( const char *path )
 		PLAT_MKDIR( hashfilename );
 		strcat( hashfilename, PLAT_SEPARATOR );
 		strcat( hashfilename, HASH_FILE );
-	} else {
-		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
