@@ -25,8 +25,6 @@
 #include "private.h"
 #include "global.h"
 
-static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
 	pData->phoneSeq = ALC( uint16, phonelen + 1 );
@@ -58,11 +56,11 @@ static unsigned int HashFunc( const uint16 phoneSeq[] )
 	return ( value & ( HASH_TABLE_SIZE - 1 ) );
 }
 
-HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pItemLast )
+HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16 phoneSeq[], HASH_ITEM *pItemLast )
 {
 	HASH_ITEM *pNow = pItemLast ?
 			pItemLast->next :
-			hashtable[ HashFunc( phoneSeq ) ];
+			pgdata->hashtable[ HashFunc( phoneSeq ) ];
 	
 	for ( ; pNow; pNow = pNow->next ) 
 		if ( PhoneSeqTheSame( pNow->data.phoneSeq, phoneSeq ) )
@@ -70,14 +68,14 @@ HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pItemLast )
 	return NULL;
 }
 
-HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] )
+HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	int hashvalue;
 
 	hashvalue = HashFunc( phoneSeq );
 
-	for ( pItem = hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
+	for ( pItem = pgdata->hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
 		if ( 
 			! strcmp( pItem->data.wordSeq, wordSeq ) && 
 			PhoneSeqTheSame( pItem->data.phoneSeq, phoneSeq ) ) {
@@ -87,12 +85,12 @@ HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] )
 	return NULL;
 }
 
-HASH_ITEM *HashInsert( UserPhraseData *pData )
+HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 {
 	int hashvalue, len;
 	HASH_ITEM *pItem;
 
-	pItem = HashFindEntry( pData->phoneSeq, pData->wordSeq );
+	pItem = HashFindEntry( pgdata, pData->phoneSeq, pData->wordSeq );
 	if ( pItem != NULL )
 		return pItem;
 
@@ -105,13 +103,13 @@ HASH_ITEM *HashInsert( UserPhraseData *pData )
 
 	hashvalue = HashFunc( pData->phoneSeq );
 	/* set the new element */
-	pItem->next = hashtable[ hashvalue ];
+	pItem->next = pgdata->hashtable[ hashvalue ];
 
 	memcpy( &( pItem->data ), pData, sizeof( pItem->data ) );
 	pItem->item_index = -1;
 
 	/* set link to the new element */
-	hashtable[ hashvalue ] = pItem;
+	pgdata->hashtable[ hashvalue ] = pItem;
 
 	return pItem;
 }
@@ -524,7 +522,7 @@ int InitHash( ChewingData *pgdata )
 		strcat( pgdata->hashfilename, PLAT_SEPARATOR );
 		strcat( pgdata->hashfilename, HASH_FILE );
 	}
-	memset( hashtable, 0, HASH_TABLE_SIZE );
+	memset( pgdata->hashtable, 0, sizeof( pgdata->hashtable ) );
 
 open_hash_file:
 	dump = _load_hash_file( pgdata->hashfilename, &fsize );
@@ -595,8 +593,8 @@ open_hash_file:
 			pPool = pItem->next;
 
 			hashvalue = HashFunc( pItem->data.phoneSeq );
-			pItem->next = hashtable[ hashvalue ];
-			hashtable[ hashvalue ] = pItem;
+			pItem->next = pgdata->hashtable[ hashvalue ];
+			pgdata->hashtable[ hashvalue ] = pItem;
 			pItem->data.recentTime -= oldest;
 		}
 		pgdata->chewing_lifetime -= oldest;

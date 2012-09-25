@@ -127,7 +127,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 				&phoneSeq[ head_tmp ],
 				sizeof( uint16 ) * ( diff + 1 ) ) ;
 			userPhoneSeq[ diff + 1 ] = 0;
-			if ( UserGetPhraseFirst( userPhoneSeq ) ) {
+			if ( UserGetPhraseFirst( pgdata, userPhoneSeq ) ) {
 				/* save it! */
 				pai->avail[ pai->nAvail ].len = diff + 1;
 				pai->avail[ pai->nAvail ].id = -1;
@@ -292,7 +292,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 		memcpy( userPhoneSeq, &phoneSeq[ cursor ], sizeof( uint16 ) * len );
 		userPhoneSeq[ len ] = 0;
-		pUserPhraseData = UserGetPhraseFirst( userPhoneSeq );
+		pUserPhraseData = UserGetPhraseFirst( pgdata, userPhoneSeq );
 		if ( pUserPhraseData ) {
 			do {
 				/* check if the phrase is already in the choice list */
@@ -308,7 +308,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 						len, 1);
 				pci->nTotalChoice++;
 			} while ( ( pUserPhraseData = 
-				    UserGetPhraseNext( userPhoneSeq ) ) != NULL );
+				    UserGetPhraseNext( pgdata, userPhoneSeq ) ) != NULL );
 		}
 
 	}

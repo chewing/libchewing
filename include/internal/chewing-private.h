@@ -29,6 +29,8 @@
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
+#define N_HASH_BIT (14)
+#define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
 #ifndef max
 #define max(a, b) \
@@ -122,6 +124,21 @@ typedef struct _SymbolEntry {
 } SymbolEntry;
 
 typedef struct {
+	uint16 *phoneSeq;
+	char *wordSeq;
+	int userfreq;
+	int recentTime;
+	int origfreq;	/* the initial frequency of this phrase */
+	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
+} UserPhraseData ;
+
+typedef struct tag_HASH_ITEM {
+	int item_index;
+	UserPhraseData data;
+	struct tag_HASH_ITEM *next;
+} HASH_ITEM;
+
+typedef struct {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
@@ -185,9 +202,11 @@ typedef struct {
 	FILE *dictfile;
 #endif
 
-    char hashfilename[ 200 ];
 
 	int chewing_lifetime;
+
+	char hashfilename[ 200 ];
+	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 } ChewingData;
 
 typedef struct {

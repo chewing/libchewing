@@ -166,6 +166,7 @@ static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
 }
 
 static int CheckUserChoose( 
+		ChewingData *pgdata,
 		uint16 *new_phoneSeq, int from , int to,
 		Phrase **pp_phr, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
@@ -198,7 +199,7 @@ static int CheckUserChoose(
 	 * if there exist one phrase satisfied all selectStr then return 1, else return 0.
 	 * also store the phrase with highest freq
 	 */
-	pUserPhraseData = UserGetPhraseFirst( new_phoneSeq );
+	pUserPhraseData = UserGetPhraseFirst( pgdata, new_phoneSeq );
 	p_phr->freq = -1;
 	do {
 		for ( chno = 0; chno < nSelect; chno++ ) {
@@ -230,7 +231,7 @@ static int CheckUserChoose(
 				*pp_phr = p_phr;
 			}
 		}
-	} while ( ( pUserPhraseData = UserGetPhraseNext( new_phoneSeq ) ) != NULL );
+	} while ( ( pUserPhraseData = UserGetPhraseNext( pgdata, new_phoneSeq ) ) != NULL );
 
 	if ( p_phr->freq != -1 ) 
 		return 1;
@@ -386,8 +387,8 @@ static void FindInterval(
 			i_used_phrase = USED_PHRASE_NONE;
 
 			/* check user phrase */
-			if ( UserGetPhraseFirst( new_phoneSeq ) &&
-					CheckUserChoose( new_phoneSeq, begin, end + 1, 
+			if ( UserGetPhraseFirst( pgdata, new_phoneSeq ) &&
+					CheckUserChoose( pgdata, new_phoneSeq, begin, end + 1,
 					&p_phrase, selectStr, selectInterval, nSelect ) ) {
 				puserphrase = p_phrase;
 			}

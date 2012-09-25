@@ -24,15 +24,6 @@
 #define USER_UPDATE_MODIFY (2)
 #define USER_UPDATE_IGNORE (8)
 
-typedef struct {
-	uint16 *phoneSeq;
-	char *wordSeq;
-	int userfreq;
-	int recentTime;
-	int origfreq;	/* the initial frequency of this phrase */
-	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
-} UserPhraseData ;
-
 /**
  * @brief Update or add a new UserPhrase.
  *
@@ -53,7 +44,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
  * 
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] );
+UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16 phoneSeq[] );
 
 /**
  * @brief Read the next phrase of the phone in user phrase database.
@@ -62,6 +53,6 @@ UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] );
  *
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseNext( const uint16 phoneSeq[] );
+UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16 phoneSeq[] );
 
 #endif
