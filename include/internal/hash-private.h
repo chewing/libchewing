@@ -31,6 +31,7 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16 phoneSeq[], HA
 void HashModify( ChewingData *pgdata, HASH_ITEM *pItem );
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen );
 int InitHash( ChewingData *ctx );
+void TerminateHash( ChewingData *pgdata );
 void FreeHashTable( void );
 
 #endif

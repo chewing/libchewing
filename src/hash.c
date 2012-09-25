@@ -480,20 +480,19 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
-static HASH_ITEM *pHead = NULL;
 
-static void TerminateHash()
+void TerminateHash( ChewingData *pgdata )
 {
 	HASH_ITEM *pItem;
-	while ( pHead ) {
-		pItem = pHead;
-		pHead = pItem->next;
+	while ( pgdata->pHead ) {
+		pItem = pgdata->pHead;
+		pgdata->pHead = pItem->next;
 		DEBUG_CHECKPOINT();
 		free( pItem->data.phoneSeq );
 		free( pItem->data.wordSeq );
 		free( pItem );
 	}
-	pHead = NULL;
+	pgdata->pHead = NULL;
 }
 
 int InitHash( ChewingData *pgdata )
@@ -575,7 +574,7 @@ open_hash_file:
 			pItem->next = pPool;
 			pPool = pItem;
 			if ( ! is_set_pHead ) {
-				pHead = pItem;
+				pgdata->pHead = pItem;
 				is_set_pHead = 1;
 			}
 
@@ -599,7 +598,6 @@ open_hash_file:
 		}
 		pgdata->chewing_lifetime -= oldest;
 	}
-	addTerminateService( TerminateHash );
 	return 1;
 }
 

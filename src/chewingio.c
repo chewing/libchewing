@@ -300,6 +300,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
 		if ( ctx->data ) {
+			TerminateHash( ctx->data );
 			TerminateDict( ctx->data );
 			TerminateChar( ctx->data );
 			TerminateTree( ctx->data );
