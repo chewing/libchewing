@@ -1,7 +1,19 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Fix GNU Hurd build
+* Fix the detection of ncursesw
+* Fix the usage of autotools
+* Update and tune symbols
+* Fix valgrind warning
+* Fix GCC visibility availability for Darwin specific PIC code
+* Fix hash table initialization
+* Fix Microsoft VC build
+* Fix Windows 64-bit build
 * Successful stories:
  . GCIN supports experimental Chewing IM support since version 1.6.4
+ . UCIMF supports Chewing IM
+ . Fcitx supports Chewing IM
+ . mozc (IM framework maintained by Google) provides Chewing support
 
 
 What's New in libchewing 0.3.3

@@ -45,6 +45,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
   - works with UIM.
   - works with ibus.
   - works with UCIMF.
+  - works with mozc.
   - works with gcin/HIME.
   - works with fcitx.
 

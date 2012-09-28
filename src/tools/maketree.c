@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004
+ * Copyright (c) 2004, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -174,6 +174,8 @@ void Construct()
 		}
 		pointer->phraseno = ph_count++;
 	}
+
+	fclose( input );
 }
 /* Give the level-order travel number to each node */
 void BFS1()

@@ -1,7 +1,7 @@
 /*
  * chewing-utf8-util.h
  *
- * Copyright (c) 2005, 2006, 2008
+ * Copyright (c) 2005, 2006, 2008, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -14,7 +14,7 @@
 #include <wchar.h>
 
 /* Return length of UTF-8 string */
-int ueStrLen( char *str );
+int ueStrLen( const char *str );
 
 /* Return bytes of a UTF-8 character */
 int ueBytesFromChar( unsigned char b );
@@ -36,5 +36,15 @@ int ueStrNCpy( char dest[], const char *src, size_t n, int end );
 
 /* Return address from n length after src */
 char *ueStrSeek( char *src, size_t n );
+
+/*!
+ * Locate a UTF-8 substring from UTF-8 string
+ * @param[in] str     UTF-8 string from which substr is located
+ * @param[in] lstr    Length of str in bytes.
+ * @param[in] substr  UTF-8 string that is located in str.
+ * @param[in] lsub    Length of substr in bytes.
+ */
+const char* ueStrStr( const char *str, size_t lstr,
+                      const char *substr, size_t lsub );
 
 #endif /* CHEWING_UTF8_UTILS_H */

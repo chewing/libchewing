@@ -1,7 +1,7 @@
 /**
  * chewing-utf8-util.c
  *
- * Copyright (c) 2005, 2006
+ * Copyright (c) 2005, 2006, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -26,10 +26,10 @@ static char utf8len_tab[256] =
 };
 
 /* Return length of UTF-8 string */
-int ueStrLen( char *str )
+int ueStrLen( const char *str )
 {
 	int length = 0;
-	char *strptr = str;
+	const char *strptr = str;
 
 	while ( strptr[ 0 ] != '\0' ) {
 		strptr += ueBytesFromChar( strptr[0] );
@@ -76,3 +76,18 @@ char *ueStrSeek( char *src, size_t n )
 	return iter;
 }
 
+/* Locate a UTF-8 substring from UTF-8 string */
+const char *ueStrStr( const char *str, size_t lstr,
+                      const char *substr, size_t lsub )
+{
+        const char *p = str;
+        size_t ub;
+        if ( lstr < lsub )
+		return NULL;
+        ub = lstr - lsub;
+        for ( ; p-str <= ub; p++ ) {
+                if ( !strncmp( p, substr, lsub ) )
+			return p;
+        }
+        return NULL;
+}

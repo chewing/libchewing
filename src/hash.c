@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2007, 2008
+ * Copyright (c) 2004, 2005, 2006, 2007, 2008, 2011
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -148,7 +148,7 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	uint16 *pshort;
 	unsigned char *puc;
 
-	memset(str, 0, FIELD_SIZE);
+	memset( str, 0, FIELD_SIZE );
 	if ( sizeof(int) * 4 + ueStrLen( pItem->data.wordSeq ) * 2 +
 	     strlen( pItem->data.wordSeq ) >= FIELD_SIZE ) {
 		/* exceed buffer size */
@@ -524,7 +524,7 @@ int InitHash( const char *path )
 	} else {
 		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	}
-	memset( hashtable, 0, HASH_TABLE_SIZE );
+	memset( hashtable, 0, sizeof(hashtable) );
 
 open_hash_file:
 	dump = _load_hash_file( hashfilename, &fsize );

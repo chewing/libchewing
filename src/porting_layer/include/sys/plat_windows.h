@@ -1,3 +1,13 @@
+/*
+ * plat_posix.h
+ *
+ * Copyright (c) 2010, 2011
+ *      libchewing Core Team. See ChangeLog for details.
+ *
+ * See the file "COPYING" for information on usage and redistribution
+ * of this file.
+ */
+
 #ifndef PLAT_WINDOWS_H
 #define PLAT_WINDOWS_H
 
