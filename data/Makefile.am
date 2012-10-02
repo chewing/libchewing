@@ -35,8 +35,10 @@ gendata:
 	-mv -f chewing-definition.h $(top_builddir)/src/
 
 install-static-tables: $(static_tables)
-	$(foreach file,$(static_tables), \
-	  $(INSTALL_DATA) $(top_srcdir)/data/$(file) $(DESTDIR)/$(datadir)/chewing;)
+	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing;
+	for file in $(static_tables); do \
+		$(INSTALL_DATA) $(top_srcdir)/data/$$file $(DESTDIR)/$(datadir)/chewing; \
+	done
 
 install-data-local: $(datas) install-static-tables
 	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
