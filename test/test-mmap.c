@@ -27,7 +27,7 @@ START_TEST(test_UnitFromPlatMmap)
 	char hard_copy[] = "ji3cp3vu3cj0 vup dj4up <E>";
 	int i;
 	
-	idx = plat_mmap_create(&m_mmap, "default-test.txt", FLAG_ATTRIBUTE_READ);
+	idx = plat_mmap_create(&m_mmap, "test.txt", FLAG_ATTRIBUTE_READ);
 	fail_if(idx != 28);
 	if (idx > 0) {
 		csize = idx;
