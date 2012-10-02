@@ -87,4 +87,4 @@ else
 UNIT_TEST_BIN=
 endif
 
-CLEANFILES = uhash.dat materials.txt-random
+CLEANFILES = uhash.dat materials.txt-random test.txt do-test.xml
