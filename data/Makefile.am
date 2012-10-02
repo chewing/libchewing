@@ -1,7 +1,9 @@
 tooldir = $(top_builddir)/src/tools
 if ENABLE_BINARY_DATA
-chindexs = ch_index_begin.dat \
-		   ch_index_phone.dat
+chindexs = \
+	ch_index_begin.dat \
+	ch_index_phone.dat \
+	$(NULL)
 else
 chindexs = ch_index.dat
 endif
@@ -10,7 +12,8 @@ datas = \
 	dict.dat \
 	ph_index.dat \
 	fonetree.dat \
-	$(chindexs)
+	$(chindexs) \
+	$(NULL)
 static_tables = pinyin.tab swkb.dat symbols.dat
 generated_header = $(top_builddir)/src/chewing-definition.h
 
@@ -34,14 +37,15 @@ gendata:
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
 
-install-static-tables: $(static_tables)
-	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing;
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(datadir)/chewing
+
+install-static-tables: $(static_tables) installdirs
 	for file in $(static_tables); do \
-		$(INSTALL_DATA) $(top_srcdir)/data/$$file $(DESTDIR)/$(datadir)/chewing; \
+		$(INSTALL_DATA) $(top_srcdir)/data/$$file $(DESTDIR)$(datadir)/chewing; \
 	done
 
-install-data-local: $(datas) install-static-tables
-	$(mkinstalldirs) $(DESTDIR)/$(datadir)/chewing
-	$(INSTALL_DATA) $(datas) $(DESTDIR)/$(datadir)/chewing
+install-data-local: $(datas) install-static-tables installdirs
+	$(INSTALL_DATA) $(datas) $(DESTDIR)$(datadir)/chewing
 
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

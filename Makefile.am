@@ -43,9 +43,11 @@ chewing_include_HEADERS = \
 	include/chewing.h \
 	include/global.h
 
-install-manpages:
-	$(mkinstalldirs) $(DESTDIR)/$(prefix)/share/man/man3
-	$(INSTALL_DATA) man/man3/*.3 $(DESTDIR)/$(prefix)/share/man/man3
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(prefix)/share/man/man3
+
+install-manpages: installdirs
+	$(INSTALL_DATA) man/man3/*.3 $(DESTDIR)$(prefix)/share/man/man3
 docs:
 	if [ -x "@DOXYGEN@" ]; then \
 		@DOXYGEN@ Doxyfile; \
