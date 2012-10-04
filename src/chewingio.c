@@ -135,29 +135,29 @@ CHEWING_API ChewingContext *chewing_new()
 
 	ctx = ALC( ChewingContext, 1 );
 	if ( !ctx )
-		goto ERROR;
+		goto error;
 
 	ctx->output = ALC ( ChewingOutput, 1 );
 	if ( !ctx->output )
-		goto ERROR;
+		goto error;
 
 	ctx->data = ALC ( ChewingData, 1 );
 	if ( !ctx->data )
-		goto ERROR;
+		goto error;
 
 	chewing_Reset( ctx );
 
 	ret = InitTree( ctx->data, libraryDataPath );
 	if ( ret )
-		goto ERROR;
+		goto error;
 
 	ret = InitChar( ctx->data, libraryDataPath );
 	if ( ret )
-		goto ERROR;
+		goto error;
 
 	ret = InitDict( ctx->data, libraryDataPath );
 	if ( ret )
-		goto ERROR;
+		goto error;
 
 	// FIXME: Which return code indicate error?
 	ret = InitHash( ctx->data );
@@ -165,7 +165,7 @@ CHEWING_API ChewingContext *chewing_new()
 	ctx->cand_no = 0;
 
 	return ctx;
-ERROR:
+error:
 	chewing_delete( ctx );
 	return NULL;
 }
