@@ -230,6 +230,13 @@ static int isValidChineseString( char *str )
 	return 1;
 }
 
+static int ReadInt(unsigned char *addr)
+{
+	/* TODO: Use bit-wise operation to read */
+	int *p = (void*)addr;
+	return *p;
+}
+
 /**
  * @return 1, 0 or -1
  * retval 0	end of file
@@ -246,10 +253,10 @@ int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 	memset( pItem, 0, sizeof(HASH_ITEM) );
 
 	/* freq info */
-	pItem->data.userfreq = *(int *) &recbuf[ 0 ];
-	pItem->data.recentTime = *(int *) &recbuf[ 4 ];
-	pItem->data.maxfreq = *(int *) &recbuf[ 8 ];
-	pItem->data.origfreq = *(int *) &recbuf[ 12 ];
+	pItem->data.userfreq	= ReadInt(&recbuf[ 0 ]);
+	pItem->data.recentTime	= ReadInt(&recbuf[ 4 ]);
+	pItem->data.maxfreq	= ReadInt(&recbuf[ 8 ]);
+	pItem->data.origfreq	= ReadInt(&recbuf[ 12 ]);
 
 	/* phone seq, length in num of chi words */
 	len = (int) recbuf[ 16 ];
