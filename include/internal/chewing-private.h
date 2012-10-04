@@ -11,8 +11,13 @@
 #ifndef _CHEWING_CORE_PRIVATE_H
 #define _CHEWING_CORE_PRIVATE_H
 
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #include "global.h"
 #include <wchar.h>
+#include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
 #define WCH_SIZE 4
@@ -24,6 +29,8 @@
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
+#define N_HASH_BIT (14)
+#define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
 #ifndef max
 #define max(a, b) \
@@ -117,6 +124,21 @@ typedef struct _SymbolEntry {
 } SymbolEntry;
 
 typedef struct {
+	uint16 *phoneSeq;
+	char *wordSeq;
+	int userfreq;
+	int recentTime;
+	int origfreq;	/* the initial frequency of this phrase */
+	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
+} UserPhraseData ;
+
+typedef struct tag_HASH_ITEM {
+	int item_index;
+	UserPhraseData data;
+	struct tag_HASH_ITEM *next;
+} HASH_ITEM;
+
+typedef struct {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
@@ -146,6 +168,46 @@ typedef struct {
 	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
+
+	TreeType *tree;
+	size_t tree_size;
+#ifdef USE_BINARY_DATA
+	plat_mmap tree_mmap;
+#endif
+
+	uint16 *arrPhone;
+	int *char_begin;
+	size_t phone_num;
+	void *char_;
+	void *char_cur_pos;
+	int char_end_pos;
+#ifdef USE_BINARY_DATA
+	plat_mmap char_mmap;
+	plat_mmap char_begin_mmap;
+	plat_mmap char_phone_mmap;
+#else
+	FILE *charfile;
+#endif
+
+	int *dict_begin;
+	void *dict_cur_pos;
+	int dict_end_pos;
+
+	void *dict;
+
+#ifdef USE_BINARY_DATA
+	plat_mmap dict_mmap;
+	plat_mmap index_mmap;
+#else
+	FILE *dictfile;
+#endif
+
+
+	int chewing_lifetime;
+
+	char hashfilename[ 200 ];
+	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+    HASH_ITEM *pHead;
 } ChewingData;
 
 typedef struct {

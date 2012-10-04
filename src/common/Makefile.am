@@ -1,6 +1,7 @@
 INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
+	-I$(top_srcdir)/src/porting_layer/include \
 	$(NULL)
 
 noinst_LTLIBRARIES = libcommon.la

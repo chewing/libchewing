@@ -24,7 +24,6 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-extern int chewing_lifetime;
 static HASH_ITEM *pItemLast;
 
 #if 0
@@ -45,15 +44,15 @@ static int DeltaFreq( int recentTime )
 #endif
 
 /* load the orginal frequency from the static dict */
-static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int len )
+static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[], int len )
 {
 	int pho_id;
 	int retval;
 	Phrase *phrase = ALC( Phrase, 1 );
 
-	pho_id = TreeFindPhrase( 0, len - 1, phoneSeq );
+	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
-		GetPhraseFirst( phrase, pho_id );
+		GetPhraseFirst( pgdata, phrase, pho_id );
 		do {
 			/* find the same phrase */
 			if ( ! strcmp(
@@ -63,7 +62,7 @@ static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int 
 				free( phrase );
 				return retval;
 			}
-		} while ( GetPhraseNext( phrase ) );
+		} while ( GetPhraseNext( pgdata, phrase ) );
 	}
 
 	free( phrase );
@@ -71,28 +70,28 @@ static int LoadOriginalFreq( const uint16 phoneSeq[], const char wordSeq[], int 
 }
 
 /* find the maximum frequency of the same phrase */
-static int LoadMaxFreq( const uint16 phoneSeq[], int len )
+static int LoadMaxFreq( ChewingData *pgdata, const uint16 phoneSeq[], int len )
 {
 	int pho_id;
 	Phrase *phrase = ALC( Phrase, 1 );
 	int maxFreq = FREQ_INIT_VALUE;
 	UserPhraseData *uphrase;
 
-	pho_id = TreeFindPhrase( 0, len - 1, phoneSeq );
+	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
-		GetPhraseFirst( phrase, pho_id );
+		GetPhraseFirst( pgdata, phrase, pho_id );
 		do {
 			if ( phrase->freq > maxFreq )
 				maxFreq = phrase->freq;
-		} while( GetPhraseNext( phrase ) );
+		} while( GetPhraseNext( pgdata, phrase ) );
 	}
 	free( phrase );
 
-	uphrase = UserGetPhraseFirst( phoneSeq );
+	uphrase = UserGetPhraseFirst( pgdata, phoneSeq );
 	while ( uphrase ) {
 		if ( uphrase->userfreq > maxFreq )
 			maxFreq = uphrase->userfreq;
-		uphrase = UserGetPhraseNext( phoneSeq );
+		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
 	}	  
 
 	return maxFreq;
@@ -132,14 +131,14 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	}
 }
 
-int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
+int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	UserPhraseData data;
 	int len;
 
 	len = ueStrLen( (char *) wordSeq );
-	pItem = HashFindEntry( phoneSeq, wordSeq );
+	pItem = HashFindEntry( pgdata, phoneSeq, wordSeq );
 	if ( ! pItem ) {
 		if ( ! AlcUserPhraseSeq( &data, len, strlen( wordSeq ) ) ) {
 			return USER_UPDATE_FAIL;
@@ -150,39 +149,39 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] )
 		strcpy( data.wordSeq, wordSeq );
 
 		/* load initial freq */
-		data.origfreq = LoadOriginalFreq( phoneSeq, wordSeq, len );
-		data.maxfreq = LoadMaxFreq( phoneSeq, len );
+		data.origfreq = LoadOriginalFreq( pgdata, phoneSeq, wordSeq, len );
+		data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
 
 		data.userfreq = data.origfreq;
-		data.recentTime = chewing_lifetime;
-		pItem = HashInsert( &data );
-		HashModify( pItem );
+		data.recentTime = pgdata->chewing_lifetime;
+		pItem = HashInsert( pgdata, &data );
+		HashModify( pgdata, pItem );
 		return USER_UPDATE_INSERT;
 	}
 	else {
-		pItem->data.maxfreq = LoadMaxFreq( phoneSeq, len );
+		pItem->data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
 		pItem->data.userfreq = UpdateFreq( 
 			pItem->data.userfreq, 
 			pItem->data.maxfreq, 
 			pItem->data.origfreq, 
-			chewing_lifetime - pItem->data.recentTime );
-		pItem->data.recentTime = chewing_lifetime;
-		HashModify( pItem );
+			pgdata->chewing_lifetime - pItem->data.recentTime );
+		pItem->data.recentTime = pgdata->chewing_lifetime;
+		HashModify( pgdata, pItem );
 		return USER_UPDATE_MODIFY;
 	}
 }
 
-UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] )
+UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16 phoneSeq[] )
 {
-	pItemLast = HashFindPhonePhrase( phoneSeq, NULL );
+	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, NULL );
 	if ( ! pItemLast ) 
 		return NULL;
 	return &( pItemLast->data );
 }
 
-UserPhraseData *UserGetPhraseNext( const uint16 phoneSeq[] ) 
+UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16 phoneSeq[] )
 {
-	pItemLast = HashFindPhonePhrase( phoneSeq, pItemLast );
+	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, pItemLast );
 	if ( ! pItemLast )
 		return NULL;
 	return &( pItemLast->data );
