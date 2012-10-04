@@ -58,6 +58,30 @@ AC_PROG_CC
 AC_LANG(C)
 AC_C_CONST
 
+# plat_mmap_posix
+AC_CHECK_FUNCS([getpagesize])
+AC_CHECK_FUNCS([munmap])
+AC_CHECK_HEADERS([fcntl.h])
+AC_FUNC_MMAP
+
+# gen_keystroke
+AC_CHECK_FUNCS([setenv])
+AC_CHECK_FUNCS([setlocale])
+AC_CHECK_HEADERS([locale.h])
+
+# chewingutil.c
+AC_CHECK_FUNCS([strcspn])
+
+# mod_aux.c
+AC_CHECK_FUNCS([strdup])
+
+# hash.c
+AC_CHECK_HEADERS([limits.h])
+
+# chewing-utf8-util.h
+AC_CHECK_HEADERS([wchar.h])
+AC_TYPE_SIZE_T
+
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
 
