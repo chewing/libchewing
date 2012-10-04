@@ -36,7 +36,7 @@ enum {
 	KB_TYPE_NUM
 };
 
-int ZuinPhoInput( ZuinData *,int key );  /* assume `key' is "ascii" code. */
+int ZuinPhoInput( ChewingData *, ZuinData *,int key );  /* assume `key' is "ascii" code. */
 int ZuinRemoveLast( ZuinData * );
 int ZuinRemoveAll( ZuinData * );
 int ZuinIsEntering( ZuinData * );

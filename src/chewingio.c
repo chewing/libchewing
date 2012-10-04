@@ -44,13 +44,12 @@
 FILE *fp_g = NULL;
 #endif
 
-extern int chewing_lifetime;
-
 void (*TerminateServices[ TerminateServicesNUM ])() = {
 	NULL
 };
 static int countTerminateService = 0;
 static int bTerminateCompleted = 0;
+static char libraryDataPath[PATH_MAX];
 
 char *kb_type_str[] = {
 	"KB_DEFAULT",
@@ -132,37 +131,55 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
-	
-	ChewingData *internal_data = ALC( ChewingData, 1 );
-	ChewingOutput *internal_output = ALC( ChewingOutput, 1 );
+	int ret;
+
 	ctx = ALC( ChewingContext, 1 );
-	if ( ctx && internal_data && internal_output ) {
-		ctx->data = internal_data;
-		ctx->output = internal_output;
-		ctx->cand_no = 0;
+	if ( !ctx )
+		goto ERROR;
 
-		/* handle configuration */
-		chewing_Reset( ctx );
+	ctx->output = ALC ( ChewingOutput, 1 );
+	if ( !ctx->output )
+		goto ERROR;
 
-		return ctx;
-	} else {
-		return NULL;
-	}
+	ctx->data = ALC ( ChewingData, 1 );
+	if ( !ctx->data )
+		goto ERROR;
+
+	chewing_Reset( ctx );
+
+	ret = InitTree( ctx->data, libraryDataPath );
+	if ( ret )
+		goto ERROR;
+
+	ret = InitChar( ctx->data, libraryDataPath );
+	if ( ret )
+		goto ERROR;
+
+	ret = InitDict( ctx->data, libraryDataPath );
+	if ( ret )
+		goto ERROR;
+
+	// FIXME: Which return code indicate error?
+	ret = InitHash( ctx->data );
+
+	ctx->cand_no = 0;
+
+	return ctx;
+ERROR:
+	chewing_delete( ctx );
+	return NULL;
 }
 
 CHEWING_API int chewing_Init(
 		const char *dataPath,
 		const char *hashPath )
 {
-	/* initialize Tree, Char, and Dict */
-	/* FIXME: check the validation of dataPath */
-	InitTree( dataPath );
-	InitChar( dataPath );
-	InitDict( dataPath );
+	int len;
 
-	/* initialize Hash */
-	/* FIXME: check the validation of hashPath */
-	InitHash( hashPath );
+	len = strlen( dataPath );
+	if ( len + 1 <= sizeof(libraryDataPath) ) {
+		strcpy(libraryDataPath, dataPath );
+	}
 
 	/* initialize SymbolTable */
 	if ( ! InitSymbolTable( (char*) hashPath ) )
@@ -281,12 +298,19 @@ CHEWING_API void chewing_Terminate()
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
-	if ( ctx->data )
-		free( ctx->data);
-	if ( ctx->output )
-		free( ctx->output);
-	if ( ctx )
+	if ( ctx ) {
+		if ( ctx->data ) {
+			TerminateHash( ctx->data );
+			TerminateDict( ctx->data );
+			TerminateChar( ctx->data );
+			TerminateTree( ctx->data );
+			free( ctx->data );
+		}
+
+		if ( ctx->output )
+			free( ctx->output);
 		free( ctx );
+	}
 	return;
 }
 
@@ -563,7 +587,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		}
 	}
 	else {
-		rtn = ZuinPhoInput( &( pgdata->zuinData ), ' ' );
+		rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), ' ' );
 		switch ( rtn ) {
 			case ZUIN_ABSORB:
 				keystrokeRtn = KEYSTROKE_ABSORB;
@@ -1082,7 +1106,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	int bQuickCommit = 0;
 
 	/* Update lifetime */
-	chewing_lifetime++;
+	ctx->data->chewing_lifetime++;
 
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {
@@ -1163,7 +1187,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				goto End_KeyDefault;
 			}
 
-			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
+			rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), key );
 			DEBUG_OUT(
 				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
@@ -1326,7 +1350,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				           newPhraseLen, 1);
 
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 
@@ -1356,7 +1380,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				           cursor - newPhraseLen ),
 				           newPhraseLen, 1);
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 

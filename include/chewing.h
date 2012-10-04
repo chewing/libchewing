@@ -51,9 +51,6 @@ extern "C" {
  */
 #define LIBCHEWING_ENCODING "UTF-8"
 
-/* statistics symbol reported by chewing */
-extern int chewing_lifetime;
-
 #ifdef __cplusplus
 }
 #endif
