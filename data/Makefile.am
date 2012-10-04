@@ -23,7 +23,8 @@ checkdata_stamp: phone.cin tsi.src
 	@echo "timestamp" > $@
 
 gendata_stamp:
-	if test -f $(generated_header); then \
+# TODO: Support generate data when $(build_os) != $(host_os)
+	-if test -f $(generated_header); then \
 		echo "chewing-definition.h exists."; \
 	else \
 		$(MAKE) gendata; \
@@ -31,9 +32,9 @@ gendata_stamp:
 	@echo "timestamp" > $@
 
 gendata:
-	$(tooldir)/sort_word $(top_srcdir)/data/phone.cin
-	$(tooldir)/sort_dic $(top_srcdir)/data/tsi.src
-	$(tooldir)/maketree
+	$(tooldir)/sort_word$(EXEEXT) $(top_srcdir)/data/phone.cin
+	$(tooldir)/sort_dic$(EXEEXT) $(top_srcdir)/data/tsi.src
+	$(tooldir)/maketree$(EXEEXT)
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
 

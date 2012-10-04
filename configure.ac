@@ -162,7 +162,7 @@ AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
 # Platform-dependent
 dnl What kind of system are we using?
 case $host_os in
-win*)
+win*|mingw*)
         SYSTEM=windows
 	;;
 cygwin*)
@@ -200,6 +200,7 @@ AC_OUTPUT([
 
 AC_MSG_RESULT([
 Build options:
+  Host OS                 $host_os
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable debug            $LIBDEBUG
