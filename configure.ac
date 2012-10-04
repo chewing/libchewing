@@ -61,6 +61,9 @@ AC_C_CONST
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
 
+# Default CFLAGS
+AM_CFLAGS="-Wall"
+
 # Checks if doxygen is avaiable
 AC_PATH_PROG(DOXYGEN, doxygen, no)
 AM_CONDITIONAL(HAVE_DOXYGEN, test x$DOXYGEN != xno)
@@ -121,7 +124,6 @@ AC_ARG_ENABLE([debug],
 if test x$LIBDEBUG = x"true"; then
 	AC_DEFINE(ENABLE_DEBUG, 1,
 		[Define to 1 if you want native library runtime debugging code enabled])
-	CFLAGS="$CFLAGS -g"
 fi
 AC_SUBST(LIBDEBUG)
 
@@ -135,7 +137,7 @@ foo () {};
 #endif
 ]], [[]])],[
   has_visibility=yes
-  CFLAGS="$CFLAGS -fvisibility=hidden"
+  AM_CFLAGS="$AM_CFLAGS -fvisibility=hidden"
 ],[
   has_visibility=no
 ])
@@ -184,6 +186,8 @@ AC_DEFINE(UNDER_POSIX, 1,
 	;;
 esac
 
+AC_SUBST(AM_CFLAGS)
+
 AC_OUTPUT([
 	Makefile 
 	data/Makefile 
@@ -208,4 +212,5 @@ Build options:
   Enable binary data      $binary_data
   Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
+  Default CFLAGS          $AM_CFLAGS
 ])
