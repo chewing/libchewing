@@ -87,6 +87,8 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 	int i, head, head_tmp;
 	int tail, tail_tmp;
 
+	head = tail = 0;
+
 	pai->nAvail = 0;
 
 	if ( pgdata->config.bPhraseChoiceRearward ) {

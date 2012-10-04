@@ -173,11 +173,9 @@ static int _Inner_InternalSpecialSymbol(
 		int key, ChewingData *pgdata, 
 		char symkey, char *chibuf )
 {
-	int rtn = ZUIN_IGNORE; /* very strange and difficult to understand */
 	int kbtype;
 
 	if ( key == symkey && NULL != chibuf ) {
-		rtn = ZUIN_ABSORB;
 		memmove( 
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
