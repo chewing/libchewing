@@ -17,7 +17,25 @@ datas = \
 static_tables = pinyin.tab swkb.dat symbols.dat
 generated_header = $(top_builddir)/src/chewing-definition.h
 
-all: checkdata_stamp gendata_stamp
+dist_noinst_DATA = \
+	NOTE \
+	phone.cin \
+	phone.cin-CNS11643-complete.patch \
+	pinyin.tab \
+	svnrev \
+	swkb.dat \
+	symbols.dat \
+	tsi.src \
+	$(NULL)
+
+pkgdata_DATA = \
+	$(static_tables) \
+	$(datas) \
+	$(NULL)
+
+all: checkdata_stamp $(datas)
+
+$(datas): gendata_stamp
 
 checkdata_stamp: phone.cin tsi.src
 	@echo "timestamp" > $@
@@ -36,16 +54,5 @@ gendata:
 	$(tooldir)/maketree$(EXEEXT)
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
-
-installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(datadir)/chewing
-
-install-static-tables: $(static_tables) installdirs
-	for file in $(static_tables); do \
-		$(INSTALL_DATA) $(top_srcdir)/data/$$file $(DESTDIR)$(datadir)/chewing; \
-	done
-
-install-data-local: $(datas) install-static-tables installdirs
-	$(INSTALL_DATA) $(datas) $(DESTDIR)$(datadir)/chewing
 
 CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)

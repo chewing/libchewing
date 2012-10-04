@@ -200,6 +200,7 @@ AC_OUTPUT([
 
 AC_MSG_RESULT([
 Build options:
+  Build OS                $build_os
   Host OS                 $host_os
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix

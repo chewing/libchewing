@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/common src/tools data src
+SUBDIRS = src/tools data src test
 
 MAINTAINERCLEANFILES = \
 	Makefile.in \
@@ -43,6 +43,22 @@ chewing_include_HEADERS = \
 	include/mod_aux.h \
 	include/chewing.h \
 	include/global.h \
+	$(NULL)
+
+noinst_HEADERS =\
+	include/internal/char-private.h \
+	include/internal/chewing-private.h \
+	include/internal/chewing-utf8-util.h \
+	include/internal/chewingutil.h \
+	include/internal/choice-private.h \
+	include/internal/dict-private.h \
+	include/internal/global-private.h \
+	include/internal/hanyupinyin-private.h \
+	include/internal/hash-private.h \
+	include/internal/key2pho-private.h \
+	include/internal/tree-private.h \
+	include/internal/userphrase-private.h \
+	include/internal/zuin-private.h \
 	$(NULL)
 
 installdirs:

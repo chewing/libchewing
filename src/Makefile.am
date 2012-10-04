@@ -6,6 +6,10 @@ INCLUDES = \
 	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
 	$(NULL)
 
+noinst_HEADERS = \
+	private.h \
+	$(NULL)
+
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
 	char.c \

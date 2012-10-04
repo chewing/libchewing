@@ -25,6 +25,10 @@ CHEWINGDATA = \
 	$(CHINDEXS) \
 	$(NULL)
 
+dist_noinst_DATA = \
+	default-test.txt \
+	$(NULL)
+
 $(TESTDATA): $(DEFAULT_TESTDATA)
 	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi
 
@@ -41,7 +45,7 @@ vcheck: check
 		--show-reachable=yes \
 		$(testdir)/testchewing < $(TESTDATA)
 
-bin_PROGRAMS = \
+check_PROGRAMS = \
 	testchewing \
 	simulate \
 	randkeystroke \
