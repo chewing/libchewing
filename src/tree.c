@@ -587,7 +587,7 @@ static void LoadChar( char *buf, int buf_len, uint16 phoneSeq[], int nPhoneSeq )
 	memset(buf, 0, buf_len);
 	for ( i = 0; i < nPhoneSeq; i++ ) {
 		GetCharFirst( &word, phoneSeq[ i ] );
-		strncat(buf, word.word, buf_len);
+		strncat(buf, word.word, buf_len - strlen(buf) - 1);
 	}
 	buf[ buf_len - 1 ] = '\0';
 }
