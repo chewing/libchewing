@@ -23,7 +23,6 @@ checkdata_stamp: phone.cin tsi.src
 	@echo "timestamp" > $@
 
 gendata_stamp:
-# TODO: Support generate data when $(build_os) != $(host_os)
 	-if test -f $(generated_header); then \
 		echo "chewing-definition.h exists."; \
 	else \

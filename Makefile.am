@@ -8,15 +8,15 @@ AUX_DIST = \
 	$(ac_aux_dir)/install-sh \
 	$(ac_aux_dir)/ltconfig \
 	$(ac_aux_dir)/ltmain.sh \
-	$(ac_aux_dir)/missing
+	$(ac_aux_dir)/missing \
+	$(NULL)
 
 EXTRA_DIST = \
-	config.rpath
-	mkinstalldirs \
 	autogen.sh \
 	chewing.pc \
 	libchewing.spec \
-	Doxyfile
+	Doxyfile \
+	$(NULL)
 
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/common src/tools data src
@@ -26,7 +26,8 @@ MAINTAINERCLEANFILES = \
 	aclocal.m4 \
 	configure \
 	config.h.in \
-	$(AUX_DIST)
+	$(AUX_DIST) \
+	$(NULL)
 
 DISTCLEANFILES = chewing.pc
 
@@ -41,7 +42,8 @@ chewing_include_HEADERS = \
 	include/chewingio.h \
 	include/mod_aux.h \
 	include/chewing.h \
-	include/global.h
+	include/global.h \
+	$(NULL)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(prefix)/share/man/man3

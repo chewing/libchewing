@@ -4,11 +4,14 @@ DEFAULT_TESTDATA = $(top_srcdir)/test/default-test.txt
 LIBCHEWING = \
 	$(top_builddir)/src/libchewing.la \
 	$(top_builddir)/src/common/libcommon.la \
-	$(top_builddir)/src/porting_layer/src/libporting_layer.la
+	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
+	$(NULL)
 DATADIR = $(top_builddir)/data
 if ENABLE_BINARY_DATA
-CHINDEXS = $(DATADIR)/ch_index_begin.dat \
-		   $(DATADIR)/ch_index_phone.dat
+CHINDEXS = \
+	$(DATADIR)/ch_index_begin.dat \
+	$(DATADIR)/ch_index_phone.dat \
+	$(NULL)
 else
 CHINDEXS = $(DATADIR)/ch_index.dat
 endif
@@ -19,7 +22,8 @@ CHEWINGDATA = \
 	$(DATADIR)/fonetree.dat \
 	$(DATADIR)/swkb.dat \
 	$(DATADIR)/symbols.dat \
-	$(CHINDEXS)
+	$(CHINDEXS) \
+	$(NULL)
 
 $(TESTDATA): $(DEFAULT_TESTDATA)
 	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi
@@ -42,7 +46,8 @@ bin_PROGRAMS = \
 	simulate \
 	randkeystroke \
 	$(TEXT_UI_BIN) \
-	$(UNIT_TEST_BIN)
+	$(UNIT_TEST_BIN) \
+	$(NULL)
 
 INCLUDES = \
 	-I$(top_srcdir)/include \
@@ -51,7 +56,8 @@ INCLUDES = \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \
 	$(NCURSESW_CFLAGS) \
-	-I$(top_srcdir)/src/porting_layer/include
+	-I$(top_srcdir)/src/porting_layer/include \
+	$(NULL)
 
 testchewing_SOURCES = testchewing.c
 testchewing_LDADD = $(LIBCHEWING)
@@ -75,13 +81,16 @@ UNIT_TEST_BIN=do-test
 test_case_SRC = \
 	test-utf8.c \
 	test-key2pho.c \
-	test-mmap.c
+	test-mmap.c \
+	$(NULL)
 do_test_SOURCES = \
 	do-test.c \
-	$(test_case_SRC)
+	$(test_case_SRC) \
+	$(NULL)
 do_test_LDADD = \
 	$(LIBCHEWING) \
-	$(CHECK_LIBS)
+	$(CHECK_LIBS) \
+	$(NULL)
 do_test_DEPENDENCIES = $(LIBCHEWING)
 else
 UNIT_TEST_BIN=

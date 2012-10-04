@@ -3,7 +3,8 @@ INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-DCHEWING_DATADIR=\"$(datadir)/chewing\"
+	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
+	$(NULL)
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
@@ -17,14 +18,17 @@ libchewing_la_SOURCES = \
 	userphrase.c \
 	zuin.c \
 	hanyupinyin.c \
-	mod_aux.c
+	mod_aux.c \
+	$(NULL)
 
 libchewing_la_LIBADD = \
 	$(top_builddir)/src/common/libcommon.la \
-	$(top_builddir)/src/porting_layer/src/libporting_layer.la
+	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
+	$(NULL)
 
 libchewing_la_LDFLAGS = \
 	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
 	-rpath $(libdir) \
 	-no-undefined \
-	-export-symbols-regex "^(chewing)_"
+	-export-symbols-regex "^(chewing)_" \
+	$(NULL)
