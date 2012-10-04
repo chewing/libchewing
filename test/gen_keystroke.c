@@ -263,7 +263,6 @@ int main( int argc, char *argv[] )
 	FILE *fout;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
-	int width, height;
 	int add_phrase_length;
 
 	if ( argc < 2 ) {
@@ -291,7 +290,6 @@ int main( int argc, char *argv[] )
 	cbreak();
 	noecho();
 	keypad( stdscr, 1 );
-	getmaxyx( stdscr, height, width );
 	start_color();
 	clear();
 	refresh();

@@ -11,7 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <check.h>
+
+#include "global.h"
 #include "chewing-utf8-util.h"
+#include "key2pho-private.h"
 
 START_TEST(test_UintFromPhone)
 {
