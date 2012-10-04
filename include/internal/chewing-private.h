@@ -123,20 +123,7 @@ typedef struct _SymbolEntry {
 	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-typedef struct {
-	uint16 *phoneSeq;
-	char *wordSeq;
-	int userfreq;
-	int recentTime;
-	int origfreq;	/* the initial frequency of this phrase */
-	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
-} UserPhraseData ;
-
-typedef struct tag_HASH_ITEM {
-	int item_index;
-	UserPhraseData data;
-	struct tag_HASH_ITEM *next;
-} HASH_ITEM;
+typedef struct tag_HASH_ITEM HASH_ITEM;
 
 typedef struct {
 	AvailInfo availInfo;
@@ -207,7 +194,7 @@ typedef struct {
 
 	char hashfilename[ 200 ];
 	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-    HASH_ITEM *pHead;
+	HASH_ITEM *pHead;
 } ChewingData;
 
 typedef struct {

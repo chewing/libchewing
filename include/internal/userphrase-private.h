@@ -24,6 +24,15 @@
 #define USER_UPDATE_MODIFY (2)
 #define USER_UPDATE_IGNORE (8)
 
+typedef struct tag_UserPhraseData {
+	uint16 *phoneSeq;
+	char *wordSeq;
+	int userfreq;
+	int recentTime;
+	int origfreq;	/* the initial frequency of this phrase */
+	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
+} UserPhraseData ;
+
 /**
  * @brief Update or add a new UserPhrase.
  *

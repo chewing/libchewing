@@ -24,6 +24,12 @@
 #define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "uhash.dat"
 
+typedef struct tag_HASH_ITEM {
+	int item_index;
+	UserPhraseData data;
+	struct tag_HASH_ITEM *next;
+} HASH_ITEM;
+
 HASH_ITEM *HashFindPhone( const uint16 phoneSeq[] );
 HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] );
 HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData );
