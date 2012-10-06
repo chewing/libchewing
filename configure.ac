@@ -86,7 +86,7 @@ CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
-AM_CFLAGS="-Wall"
+AM_CFLAGS="-Wall -g"
 
 # Checks if doxygen is avaiable
 AC_PATH_PROG(DOXYGEN, doxygen, no)
