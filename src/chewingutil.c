@@ -939,7 +939,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->chiSymbolCursor = pgdata->chiSymbolCursor;
 	
 	/* fill zuinBuf */
-        if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
+	if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
 		char *p = pgdata->zuinData.pinYinData.keySeq;
 		/* 
 		 * Copy from old content in zuinBuf
@@ -972,7 +972,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 			else
 				pgo->zuinBuf[ i ].wch = (wchar_t) 0;
 		}
-        }
+	}
 
 	ShiftInterval( pgo, pgdata );
 	memcpy( 
@@ -1042,8 +1042,8 @@ int CountSymbols( ChewingData *pgdata, int to )
 
 int PhoneSeqCursor( ChewingData *pgdata )
 {
-    int cursor = pgdata->chiSymbolCursor - CountSymbols( pgdata, pgdata->chiSymbolCursor );
-    return cursor > 0 ? cursor : 0;
+	int cursor = pgdata->chiSymbolCursor - CountSymbols( pgdata, pgdata->chiSymbolCursor );
+	return cursor > 0 ? cursor : 0;
 }
 
 int ChewingIsChiAt( int chiSymbolCursor, ChewingData *pgdata )

@@ -143,7 +143,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		if ( pgdata->config.bPhraseChoiceRearward ) {
 			head_tmp--;
 		} else {
-                       tail_tmp++;
+			tail_tmp++;
 		}
 	}
 }

@@ -80,14 +80,14 @@ char *ueStrSeek( char *src, size_t n )
 const char *ueStrStr( const char *str, size_t lstr,
                       const char *substr, size_t lsub )
 {
-        const char *p = str;
-        size_t ub;
-        if ( lstr < lsub )
+	const char *p = str;
+	size_t ub;
+	if ( lstr < lsub )
 		return NULL;
-        ub = lstr - lsub;
-        for ( ; p-str <= ub; p++ ) {
-                if ( !strncmp( p, substr, lsub ) )
+	ub = lstr - lsub;
+	for ( ; p-str <= ub; p++ ) {
+		if ( !strncmp( p, substr, lsub ) )
 			return p;
-        }
-        return NULL;
+	}
+	return NULL;
 }

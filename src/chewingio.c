@@ -193,7 +193,7 @@ CHEWING_API int chewing_Init(
 
 #ifdef ENABLE_DEBUG
 {
-        char *dbg_path;
+	char *dbg_path;
 	int failsafe = 1;
 	dbg_path = getenv( "CHEWING_DEBUG" );
 	if ( dbg_path ) {

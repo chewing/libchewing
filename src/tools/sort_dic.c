@@ -138,7 +138,7 @@ int main( int argc, char *argv[] )
 	FILE *dictfile, *treedata, *ph_index;
 	char in_file[ MAX_FILE_NAME ] = "tsi.src";
 	long i, k;
-    int tmp;
+	int tmp;
 #ifdef USE_BINARY_DATA
 	unsigned char size;
 #endif
