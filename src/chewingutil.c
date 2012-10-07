@@ -39,7 +39,7 @@ static int FindSymbolKey( const char *symbol );
 static SymbolEntry **symbol_table = NULL;
 static unsigned int n_symbol_entry = 0;
 
-static char g_easy_symbol_key[] = {
+static const char G_EASY_SYMBOL_KEY[] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 	'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
@@ -47,7 +47,7 @@ static char g_easy_symbol_key[] = {
 };
 
 #define EASY_SYMBOL_KEY_TAB_LEN \
-	sizeof( g_easy_symbol_key )
+	sizeof( G_EASY_SYMBOL_KEY )
 static char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ] = { NULL };
 static int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ] = { 0 };
 
@@ -59,11 +59,11 @@ static int FindEasySymbolIndex( char ch )
 	hi = EASY_SYMBOL_KEY_TAB_LEN - 1;
 	while ( lo <= hi ) {
 		mid = (hi - lo) / 2 + lo;
-		if ( ch > g_easy_symbol_key[ mid ] ) {
+		if ( ch > G_EASY_SYMBOL_KEY[ mid ] ) {
 			lo = mid + 1;
 			continue;
 		}
-		else if ( ch < g_easy_symbol_key[ mid ] ) {
+		else if ( ch < G_EASY_SYMBOL_KEY[ mid ] ) {
 			hi = mid - 1;
 			continue;
 		}
@@ -206,7 +206,7 @@ static int _Inner_InternalSpecialSymbol(
 
 static int InternalSpecialSymbol(
 		int key, ChewingData *pgdata,
-		int nSpecial, char keybuf[], char *chibuf[] )
+		int nSpecial, const char keybuf[], char *chibuf[] )
 {
 	int i, rtn = ZUIN_IGNORE; /* very strange and difficult to understand */
 
@@ -332,7 +332,7 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 
 	rtn = InternalSpecialSymbol( 
 			key, pgdata, nSpecial, 
-			g_easy_symbol_key, g_easy_symbol_value );
+			G_EASY_SYMBOL_KEY, g_easy_symbol_value );
 	if ( rtn == ZUIN_IGNORE )
 		rtn = SpecialSymbolInput( key, pgdata );
 	return ( rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK );
