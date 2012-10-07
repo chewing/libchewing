@@ -559,7 +559,6 @@ open_hash_file:
 		fclose( outfile );
 	}
 	else {
-		static int is_set_pHead = 0;
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
@@ -589,10 +588,6 @@ open_hash_file:
 			memcpy( pItem, &item, sizeof( HASH_ITEM ) );
 			pItem->next = pPool;
 			pPool = pItem;
-			if ( ! is_set_pHead ) {
-				pgdata->pHead = pItem;
-				is_set_pHead = 1;
-			}
 
 			if ( oldest > pItem->data.recentTime ) {
 				oldest = pItem->data.recentTime;

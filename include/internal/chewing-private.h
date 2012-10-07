@@ -194,7 +194,6 @@ typedef struct {
 
 	char hashfilename[ 200 ];
 	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-	HASH_ITEM *pHead;
 } ChewingData;
 
 typedef struct {
