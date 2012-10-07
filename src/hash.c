@@ -487,19 +487,28 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
+static void FreeHashItem( HASH_ITEM *aItem )
+{
+	if ( aItem ) {
+		HASH_ITEM *pItem = aItem->next;
+		free( aItem->data.phoneSeq );
+		free( aItem->data.wordSeq );
+		free( aItem );
+		if ( pItem ) {
+			FreeHashItem( pItem );
+		}
+	}
+}
 
 void TerminateHash( ChewingData *pgdata )
 {
 	HASH_ITEM *pItem;
-	while ( pgdata->pHead ) {
-		pItem = pgdata->pHead;
-		pgdata->pHead = pItem->next;
+	int i;
+	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
+		pItem = pgdata->hashtable[ i ];
 		DEBUG_CHECKPOINT();
-		free( pItem->data.phoneSeq );
-		free( pItem->data.wordSeq );
-		free( pItem );
+		FreeHashItem( pItem );
 	}
-	pgdata->pHead = NULL;
 }
 
 int InitHash( ChewingData *pgdata )
