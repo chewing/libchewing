@@ -15,15 +15,15 @@
 #include <string.h>
 
 #define KEY_SLEFT 896
-#define KEY_SRIGHT 897	
+#define KEY_SRIGHT 897
 #define KEY_LEFT 898
-#define KEY_RIGHT 899	
+#define KEY_RIGHT 899
 #define KEY_UP 990 
 #define KEY_DOWN 991
 #define KEY_SPACE ' '
 #define KEY_ENTER 992
 #define KEY_BACKSPACE 993
-#define KEY_ESC	994
+#define KEY_ESC 994
 #define KEY_DELETE 995
 #define KEY_HOME 996
 #define KEY_END 997
