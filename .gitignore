@@ -39,3 +39,14 @@ src/chewing-definition.h
 src/tools/maketree
 src/tools/sort_dic
 src/tools/sort_word
+
+test/do-test.xml
+test/test.txt
+
+# gcov output
+*.gcda
+*.gcno
+*.gcov
+
+# cscope output
+cscope.*
