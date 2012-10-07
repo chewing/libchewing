@@ -670,11 +670,11 @@ int ZuinIsEntering( ZuinData *pZuin )
         if ( pZuin->kbtype >= KB_HANYU_PINYIN ) {
 	    if ( pZuin->pinYinData.keySeq[0] )
 		return 1;
-        } else {
+	} else {
 	    for ( i = 0; i < ZUIN_SIZE; i++ )
 		if ( pZuin->pho_inx[ i ] )
 		    return 1;
-        }
+	}
 	return 0;
 }
 
