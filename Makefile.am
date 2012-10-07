@@ -15,7 +15,6 @@ EXTRA_DIST = \
 	autogen.sh \
 	chewing.pc \
 	libchewing.spec \
-	Doxyfile \
 	$(NULL)
 
 AUTOMAKE_OPTIONS = foreign
@@ -60,16 +59,3 @@ noinst_HEADERS =\
 	include/internal/userphrase-private.h \
 	include/internal/zuin-private.h \
 	$(NULL)
-
-installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(prefix)/share/man/man3
-
-install-manpages: installdirs
-	$(INSTALL_DATA) man/man3/*.3 $(DESTDIR)$(prefix)/share/man/man3
-docs:
-	if [ -x "@DOXYGEN@" ]; then \
-		@DOXYGEN@ Doxyfile; \
-	fi
-clean-local:
-	rm -rf html
-	rm -rf man
