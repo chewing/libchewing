@@ -1,3 +1,13 @@
+# maintainer files
+
+.dir-locals.el
+ID
+TAGS
+GTAGS
+GPATH
+GRTAGS
+GSYMS
+
 # autotools generated
 Doxyfile
 INSTALL
@@ -39,3 +49,7 @@ src/chewing-definition.h
 src/tools/maketree
 src/tools/sort_dic
 src/tools/sort_word
+
+doc/libchewing.info
+doc/stamp-vti
+doc/version.texi

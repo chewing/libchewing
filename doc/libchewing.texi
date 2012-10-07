@@ -1,0 +1,762 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename libchewing.info
+@settitle libchewing
+@c %**end of header
+@include version.texi
+@copying
+This is the `libchewing Reference Manual' corresponding to libchewing
+version @value{VERSION}.
+
+Copyright @copyright{} 2012  libchewing Core Team
+
+@quotation
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+@end quotation
+
+The document was typeset with
+@uref{http://www.texinfo.org/, GNU Texinfo}.
+
+@end copying
+
+@titlepage
+@title libchewing Reference Manual
+@subtitle API collection of Chewing intelligent Chinese phonetic input method
+@author libchewing Core Team
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@c Output the table of the contents at the beginning.
+@contents
+
+@ifnottex
+@node Top, Overview, (dir), (dir)
+@top libchewing Reference Manual
+
+@insertcopying
+@end ifnottex
+
+@c Generate the nodes for this menu with `C-c C-u C-m'.
+@menu
+* Overview::
+* Glossary::
+* Setup::
+* Input Handling::
+* Layout Settings::
+* Operating Modes::
+* Candidates Selection::
+* Output Handling::
+* Global Settings::
+* Variable Index::
+* Function Index::
+* Concept Index::
+@end menu
+
+@c Update all node entries with `C-c C-u C-n'.
+@c Insert new nodes with `C-c C-c n'.
+@node Overview
+@chapter Overview
+
+@c TODO: Rewrite this paragraph
+As far as we expect, input method (in fact, the way for text input and
+output, especially in multi-lingual environments) implementations are
+becoming more and more complex in system integration.  The emerging
+standard for practical and flexible development cycles is required, so that
+we are facing the impacts from various Chinese input method implementations
+and the integration into existing framework or system designs.  At the
+result, Chewing Input Method (abbreviated as @dfn{Chewing}) attempts to be one
+of the approachesto solve and ease the problems with the inclusion of base
+classes, on the basis of cross-platform, and cross-operating-environment
+derivative classes, which are built as the abstract backbone of intelligent
+Chinese phonetic input method implementations.  From the perspectives,
+Chewing defines the abstract behavior how an intelligent phonetic IM should
+works via the common interface, and Chewing permits the extra parameters
+and properties for the input method implementations to extend their
+specific functionality.
+
+@deftypevr Marco char* LIBCHEWING_ENCODING
+@quotation Deprecated
+Not used anywhere. Will be removed soon.
+@end quotation
+
+Indicate the internal encoding of data processing.
+Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
+@end deftypevr
+
+@node Glossary
+@chapter Glassary
+
+@strong{TODO}
+
+@node Setup
+@chapter Setup
+
+@c TODO: Add some prose and examples to describe how to setup libchewing.
+
+@deftypefun int chewing_Init (const char *@var{dataPath}, const char *@var{hashPath})
+@quotation Deprecated
+The @code{chewing_Init} function uses a static buffer to save the
+paths, so it is not thread-safe. Do not use this function if
+thread-safety is important.
+@end quotation
+
+This function initializes the directory data used by the Chewing
+IM.
+
+The @var{dataPath} argument specifies the system path of the
+static data used by the Chewing IM. This directory could be
+read-only. The @var{hashPath} argument specifies the path where
+user-defined hash data stores. This path @emph{should} be writable by
+the user, or the Chewing IM will lose the ability to remember the
+learned phrases.
+
+The return value is @code{0} on success and @code{-1} on failure.
+@end deftypefun
+
+@deftp {Data Type} ChewingContext
+Context handle used for Chewing @acronym{IM} @acronym{API}s
+@end deftp
+
+@deftypefun ChewingContext* chewing_new ()
+The @code{chewing_new} function creates a new instance of the Chewing IM.
+
+The return value is a pointer to the new Chewing IM instance. See also
+the @code{chewing_delete} function.
+@end deftypefun
+
+@deftypefun void chewing_delete (ChewingContext *@var{ctx})
+This function releases the resources used by the given Chewing IM
+instance.
+@end deftypefun
+
+@deftp {Data Type} ChewingConfigData
+@quotation Deprecated
+Use the @code{chewing_set_*} function series to set parameters
+instead.
+@end quotation
+
+This data type stores some parameters used by the Chewing IM. See also
+function @code{chewing_Configure}.
+@end deftp
+
+@deftypefun int chewing_Configure (ChewingContext *@var{ctx}, ChewingConfigData *@var{pcd})
+@quotation Deprecated
+Use the @code{chewing_set_*} function series to set parameters
+instead.
+@end quotation
+
+This function sets the @code{selectAreaLen}, @code{maxChiSymbolLen} and
+@code{selKey} parameter from @var{pcd}.
+
+The @var{pcd} argument is a pointer to a Chewing configuration data
+structure. See also the @code{ChewingConfigData} data type.
+
+The return value is @code{0} on success and @code{-1} on failure.
+@end deftypefun
+
+@deftypefun int chewing_Reset (ChewingContext *@var{ctx})
+This function resets all settings in the given Chewing IM instance.
+
+The return value is @code{0} on success and @code{-1} on failure.
+@end deftypefun
+
+@deftypefun void chewing_free (void *@var{ptr})
+The @code{chewing_free} function releases the memory allocated by the
+Chewing IM and returned to the caller.
+
+There are functions returning pointers of strings or other data
+structures that are allocated on the heap. These memory @emph{must} be
+freed to avoid memory leak. To avoid memory allocator mismatch between
+the Chewing IM and the caller, use this function the free the resource.
+
+Do nothing if @var{ptr} is @code{NULL}.
+@end deftypefun
+
+@node Input Handling
+@chapter Input Handling
+
+Functions to handle key strokes. The return value of these functions
+is @code{0} on success and @code{-1} on failure.
+
+@c TODO: Add prose and examples to show how to use these functions.
+@c TODO: Sort functions by name and key type.
+
+@deftypefun int chewing_handle_Default (ChewingContext *@var{ctx}, int @var{key})
+This function handles the default key @var{key}.
+
+The value of of @var{key} should be in the range between
+@acronym{ASCII} character code from @code{a} to @code{z} and from
+@code{0} to @code{9}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Backspace (ChewingContext *@var{ctx})
+This function handles the input key @kbd{BS}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Capslock (ChewingContext *@var{ctx})
+This function handles the input key @kbd{CAPS}.
+@end deftypefun
+
+@deftypefun int chewing_handle_CtrlNum (ChewingContext *@var{ctx}, int @var{key})
+This function handles the input holding key @kbd{CTRL} and number key
+@var{key}.
+
+The value of @var{key} should be in the range between ASCII character
+code from @code{0} to @code{9}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Del (ChewingContext *@var{ctx})
+This function handles the input key @kbd{DELETE}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Enter (ChewingContext *@var{ctx})
+This function handles the input key @kbd{RET}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Esc (ChewingContext *@var{ctx})
+This function handles the input key @kbd{ESC}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Space (ChewingContext *@var{ctx})
+This function handles the input key @kbd{SPC}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Tab (ChewingContext *@var{ctx})
+This function handles the input key @kbd{TAB}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Home (ChewingContext *@var{ctx})
+This function handles the input key @kbd{HOME}.
+@end deftypefun
+
+@deftypefun int chewing_handle_End (ChewingContext *@var{ctx})
+This function handles the input key @kbd{END}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Left (ChewingContext *@var{ctx})
+This function handles the input key @kbd{LEFT}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Right (ChewingContext *@var{ctx})
+This function handles the input key @kbd{RIGHT}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Up (ChewingContext *@var{ctx})
+This function handles the input key @kbd{UP}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Down (ChewingContext *@var{ctx})
+This function handles the input key @kbd{DOWN}.
+@end deftypefun
+
+@deftypefun int chewing_handle_ShiftLeft (ChewingContext *@var{ctx})b
+This function handles the input key holding @kbd{SHIFT} and @kbd{LEFT} simultaneously.
+@end deftypefun
+
+@deftypefun int chewing_handle_ShiftRight (ChewingContext *@var{ctx})
+This function handles the input key holding @kbd{SHIFT} and @kbd{RIGHT} simultaneously.
+@end deftypefun
+
+@deftypefun int chewing_handle_ShiftSpace (ChewingContext *@var{ctx})
+This function handles the input key holding @kbd{SHIFT} and @kbd{SPC} simultaneously.
+@end deftypefun
+
+@deftypefun int chewing_handle_PageUp (ChewingContext *@var{ctx})
+This function handles the input key @kbd{PAGEUP}.
+@end deftypefun
+
+@deftypefun int chewing_handle_PageDown (ChewingContext *@var{ctx})
+This function handles the input key @kbd{PAGEDOWN}.
+@end deftypefun
+
+@deftypefun int chewing_handle_DblTab (ChewingContext *@var{ctx})
+This function handles the input key double @kbd{TAB}.
+@end deftypefun
+
+@deftypefun int chewing_handle_Numlock (ChewingContext *@var{ctx}, int @var{key})
+This function handles the input key when @var{key} is from keypad.
+
+The value of @var{key} should be in the range between ASCII character
+code from @code{0} to @code{9}.
+@end deftypefun
+
+@node Layout Settings
+@chapter Layout Settings
+
+@c This API is horrible, we should fix it.
+
+The Chewing IM supports many different keyboard layout and
+variants. Use @code{chewing_set_KBType} to set the current keyboard
+layout for the context.
+
+@deftypefun int chewing_set_KBType (ChewingContext *@var{ctx}, int @var{kbtype})
+This functions sets the current keyboard layout for @var{ctx}. The
+@var{kbtype} argument should be a value returned from function
+@code{chewing_KBStr2Num}.
+
+The return value is @code{0} on success and @code{-1} on failure.
+@end deftypefun
+
+@c Seems not very useful, no?
+@deftypefun int chewing_get_KBType (ChewingContext *@var{ctx})
+This functions gets the current keyboard layout index for
+@var{ctx}.
+
+The return value is the layout index.
+@end deftypefun
+
+@deftypefun char* chewing_get_KBString (ChewingContext *@var{ctx})
+This function returns the the current layout name string of @var{ctx}.
+
+The return value is the name of the current layout, see also function
+@code{chewing_get_KBStr2Num}. The returned pointer @emph{must} be
+freed by function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun int chewing_get_KBStr2Num (char @var{str}[])
+This function converts the keyboard layout name to corresponding
+layout index.
+
+The string @var{str} might be one of the following layouts:
+@itemize
+@item @code{KB_DEFAULT}
+@item @code{KB_HSU}
+@item @code{KB_IBM}
+@item @code{KB_GIN_YIEH}
+@item @code{KB_ET}
+@item @code{KB_ET26}
+@item @code{KB_DVORAK}
+@item @code{KB_DVORAK_HSU}
+@item @code{KB_DVORAK_CP26}
+@item @code{KB_HANYU_PINYIN}
+@end itemize
+
+See also the @code{chewing_kbtype_*} enumeration functions.
+@end deftypefun
+
+@deftypefun int chewing_kbtype_Total (ChewingContext *@var{ctx})
+This function returns the number of keyboard layouts supported by the
+Chewing IM.
+@end deftypefun
+
+@deftypefun void chewing_kbtype_Enumerate (ChewingContext *@var{ctx})
+This function starts the enumeration of the keyboard layouts.
+@end deftypefun
+
+@deftypefun int chewing_kbtype_hasNext (ChewingContext *@var{ctx})
+This function checks whether or not there are more keyboard layouts to
+enumerate.
+@end deftypefun
+
+@deftypefun char* chewing_kbtype_String (ChewingContext *@var{ctx})
+This function returns the current enumerated keyboard layout name.
+
+The returned value is a pointer to a character string. The memory
+@emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@node Operating Modes
+@chapter Operating Modes
+
+The Chewing IM can switch between Chinese input mode or English
+mode. The English mode supports input English characters
+directly. These functions set the current input mode.
+
+@c TODO: We should have ENGLISH_MODE, no?
+@deftypevr  Marco int CHINESE_MODE
+@deftypevrx Marco int SYMBOL_MODE
+Indicate whether the input mode is translating keystrokes to Chinese
+character or not.
+@end deftypevr
+
+@deftypefun void chewing_set_ChiEngMode (ChewingContext *@var{ctx}, int @var{mode})
+This function set the current Chinese/English mode.
+
+The @var{mode} argument is one of the @code{CHINESE_MODE} and
+@code{SYMBOL_MODE} macros.
+@end deftypefun
+
+@deftypefun int chewing_get_ChiEngMode (ChewingContext *@var{ctx})
+This function returns the current Chinese/English mode setting.
+@end deftypefun
+
+@deftypevr  Marco int FULLSHAPE_MODE
+@deftypevrx Marco int HALFSHAPE_MODE
+Indicate whether the input mode is translating the latin and
+punctuation characters to double-width characters or not.
+@end deftypevr
+
+@deftypefun void chewing_set_ShapeMode (ChewingContext *@var{ctx}, int @var{mode})
+This function set the current punctuation input mode.
+
+The @var{mode} argument is one of the @code{FULLSHAPE_MODE} and
+@code{HALFSHAPE_MODE} macros.
+@end deftypefun
+
+@deftypefun int chewing_get_ShapeMode (ChewingContext *@var{ctx})
+This function returns the current punctuation mode.
+@end deftypefun
+
+@node Candidates Selection
+@chapter Candidates Selection
+
+These are the functions to handle candidates selection. It means there
+are candidates when @code{chewing_cand_TotalPage} is greater than
+zero.
+
+@menu
+* Get Candidates::
+* Candidates Behavior::
+@end menu
+
+@node Get Candidates
+@section Get Candidates
+
+@deftypefun int chewing_cand_TotalPage (ChewingContext *@var{ctx})
+This function returns the number of pages of the candidates.
+
+If the return value is greater than zero, then the IM interface should
+popup a candidates selection window for the user to choose a
+candidate. Otherwise hide the selection window.
+@end deftypefun
+
+@deftypefun int chewing_cand_CurrentPage (ChewingContext *@var{ctx})
+This function returns the current candidate page number.
+
+For example the candidates pagination could be displayed as:
+
+@example
+sprintf(@var{buf}, "[%d / %d]",
+        chewing_cand_CurrentPage(@var{ctx}),
+        chewing_cand_TotalPage(@var{ctx}));
+@end example
+
+@end deftypefun
+
+@deftypefun int chewing_cand_ChoicePerPage (ChewingContext *@var{ctx})
+This function returns the number of the choices per page.
+
+See also the @code{chewing_set_candPerPage} function.
+@c API inconsistency.
+@end deftypefun
+
+@deftypefun int chewing_cand_TotalChoice (ChewingContext *@var{ctx})
+This function returns the number of the available choices.
+@end deftypefun
+
+@deftypefun void chewing_cand_Enumerate (ChewingContext *@var{ctx})
+This function starts the enumeration of the candidates starting from
+the first one in the current page.
+@end deftypefun
+
+@deftypefun int chewing_cand_hasNext (ChewingContext *@var{ctx})
+This function checks if there are more candidates to enumerate.
+
+@quotation Note
+The @code{chewing_cand_hasNext} function checks the end of total
+choices instead of the end of current page.
+@end quotation
+@end deftypefun
+
+@deftypefun char* chewing_cand_String (ChewingContext *@var{ctx})
+This function returns the current enumerated candidate string.
+
+The return value @emph{must} be freed by the @code{chewing_free}
+function.
+@end deftypefun
+
+@deftypefun int chewing_cand_CheckDone (ChewingContext *@var{ctx})
+@quotation Deprecated
+The @code{chewing_cand_TotalPage} function could achieve the same
+effect.
+@end quotation
+
+This function checks if the candidates selection has finished.
+@end deftypefun
+
+@node Candidates Behavior
+@section Candidates Behavior
+
+@deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
+This function sets the candidates per page to @var{n}.
+@end deftypefun
+
+@deftypefun int chewing_get_candPerPage (ChewingContext *@var{ctx})
+This function returns the candidates per page.
+@end deftypefun
+
+@deftypevr Marco int MAX_SELKEY
+The number of maximum candidates that are selectable via shortcut
+keys.
+@end deftypevr
+
+@deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, int *@var{selkeys}, int @var{len})
+This function sets the selection key to @var{selkeys}, an integer
+array of length @var{len}.
+
+For example the default selection key is @code{1234567890}.
+@end deftypefun
+
+@deftypefun int* chewing_get_selKey (ChewingContext *@var{ctx})
+This function returns the current selection key setting.
+
+The return value @emph{must} be freed by the @code{chewing_free}
+function.
+@end deftypefun
+
+@deftypevr  Marco int HSU_SELKEY_TYPE1
+@deftypevrx Marco int HSU_SELKEY_TYPE2
+Use `asdfjkl789' or `asdfzxcv89' as selection key.
+@end deftypevr
+
+@deftypefun void chewing_set_hsuSelKeyType (ChewingContext *@var{ctx}, int @var{mode})
+This function sets the hsu keyboard selection key settings to @var{mode}.
+@end deftypefun
+
+@deftypefun int chewing_get_hsuSelKeyType (ChewingContext *@var{ctx})
+This function returns the current hsu keyboard selection key setting.
+@end deftypefun
+
+@node Output Handling
+@chapter Output Handling
+
+@c TODO: The return value here is not consistent with the other APIs.
+
+@deftypefun int chewing_commit_Check (ChewingContext *@var{ctx})
+This function checks whether or not the commit buffer has a output to
+commit.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun char* chewing_commit_String (ChewingContext *@var{ctx})
+This function returns the string in the commit buffer and clears the
+buffer.
+
+The return value is a pointer to a character string. The memory
+@emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun int chewing_keystroke_CheckIgnore (ChewingContext *@var{ctx})
+This function checks whether the previous keystroke is ignored or not.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun int chewing_keystroke_CheckAbsorb (ChewingContext *@var{ctx})
+This function checks whether the previous keystroke is absorbed or
+not.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun int chewing_buffer_Check (ChewingContext *@var{ctx})
+This function checks whether there is output in the pre-edit buffer.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun int chewing_buffer_Len (ChewingContext *@var{ctx})
+This function returns the length of the string in current pre-edit
+buffer.
+@end deftypefun
+
+@deftypefun char* chewing_buffer_String (ChewingContext *@var{ctx})
+This function returns the current output in the pre-edit buffer.
+
+The return value is a pointer to a character string. The memory
+@emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun int chewing_zuin_Check (ChewingContext *@var{ctx})
+This function returns whether there are Zuin pre-edit string in the
+buffer.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
+This function returns the Zuin characters in the pre-edit buffer.
+
+The @var{zuin_count} argument is a output argument. It will contain
+the number of Zuin characters in the returned string.
+
+The return value is a pointer to a character string. The memory
+@emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun int chewing_cursor_Current (ChewingContext *@var{ctx})
+This function returns the current cursor position in the pre-edit
+buffer.
+@end deftypefun
+
+@deftp {Data Type} IntervalType
+The @code{IntervalType} type specifies the interval of a phrase
+segment in the pre-editng area and has following members:
+
+@table @code
+@item int @var{from}
+Starting position of certain interval.
+@item int @var{to}
+Ending position of certain interval.
+@end table
+@end deftp
+
+@deftypefun void chewing_interval_Enumerate (ChewingContext *@var{ctx})
+This function starts the enumeration of intervals of recognized phrases.
+@end deftypefun
+
+@deftypefun int chewing_interval_hasNext (ChewingContext *@var{ctx})
+This function checks whether there are more intervals or not.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun void chewing_interval_Get (ChewingContext *@var{ctx}, IntervalType *@var{it})
+This function returns the current enumerated interval.
+
+The @var{it} argument is a output argument. See also
+@code{IntervalType}.
+@end deftypefun
+
+@deftypefun int chewing_aux_Check (ChewingContext *@var{ctx})
+This function checks whether there is auxiliary string in the
+auxiliary buffer.
+
+The return value is @code{1} on success, @code{0} on failure.
+@end deftypefun
+
+@deftypefun int chewing_aux_Length (ChewingContext *@var{ctx})
+This function returns the length of the auxiliary string in the
+auxiliary buffer.
+@end deftypefun
+
+@deftypefun char* chewing_aux_String (ChewingContext *@var{ctx})
+This function returns the current auxiliary string.
+
+The return value is a pointer to a character string. The memory
+@emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun uint16* chewing_get_phoneSeq (ChewingContext *@var{ctx})
+This function returns the phonetic sequence in the Chewing IM internal
+state machine.
+
+The return value is a pointer to a @code{uint16} array. The values in
+the array is encoded Zuin phone. The memory @emph{must} be freed by
+the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun int chewing_get_phoneSeqLen (ChewingContext *@var{ctx})
+This function returns the length of the phonetic sequence in the
+Chewing IM internal state machine.
+@end deftypefun
+
+@node Global Settings
+@chapter Global Settings
+
+@c TODO: Document default settings.
+
+The Chewing IM could be customized in some small details. These
+functions provide the configuration interfaces to the front-end.
+
+@deftypefun void chewing_set_maxChiSymbolLen (ChewingContext *@var{ctx}, int @var{n})
+This function sets the maximum number of the Chinese characters in the
+pre-edit buffer. If the pre-edit string is longer than this number
+then the leading part will be committed automatically.
+@end deftypefun
+
+@deftypefun int chewing_get_maxChiSymbolLen (ChewingContext *@var{ctx})
+This function returns the maximum number of the Chinese characters in
+the pre-edit buffer.
+@end deftypefun
+
+@c TODO: The @var{direction} argument should use a enum.
+@deftypefun void chewing_set_addPhraseDirection (ChewingContext *@var{ctx}, int @var{direction})
+This function sets the direction to add new phrases when typing
+@kbd{CTRL}-@var{n}.
+
+The @var{direction} argument is @code{0} when the direction is
+backward and @code{1} when the direction is forward.
+@end deftypefun
+
+@deftypefun int chewing_get_addPhraseDirection (ChewingContext *@var{ctx})
+This function returns the direction to add new phrases when typing
+@kbd{CTRL}-@var{n}.
+
+The return value is @code{0} when the direction is backward and
+@code{1} when the direction is forward.
+@end deftypefun
+
+@deftypefun void chewing_set_spaceAsSelection (ChewingContext *@var{ctx}, int @var{mode})
+This function sets whether @kbd{SPC} key is treated as a selection
+key.
+
+When the @var{mode} argument is @code{1}, the @kbd{SPC} key will
+initiate the candidates selection mode.
+@end deftypefun
+
+@deftypefun int chewing_get_spaceAsSelection (ChewingContext *@var{ctx})
+This function returns the space as selection mode setting.
+@end deftypefun
+
+@deftypefun void chewing_set_escCleanAllBuf (ChewingContext *@var{ctx}, int @var{mode})
+This function sets whether @kbd{ESC} key will flush the current
+pre-edit buffer.
+
+When the @var{mode} argument is @code{1}, the @kbd{ESC} key will flush
+the pre-edit buffer.
+@end deftypefun
+
+@deftypefun int chewing_get_escCleanAllBuf (ChewingContext *@var{ctx})
+This function returns the @kbd{ESC} key setting.
+@end deftypefun
+
+@deftypefun void chewing_set_autoShiftCur (ChewingContext *@var{ctx}, int @var{mode})
+This function sets whether the Chewing IM will automatically shift
+cursor after selection.
+@end deftypefun
+
+@deftypefun int chewing_get_autoShiftCur (ChewingContext *@var{ctx})
+This function returns the auto shift cursor setting.
+@end deftypefun
+
+@deftypefun void chewing_set_easySymbolInput (ChewingContext *@var{ctx}, int @var{mode})
+@strong{TODO}: What does this mean?
+@end deftypefun
+
+@deftypefun int chewing_get_easySymbolInput (ChewingContext *@var{ctx})
+@strong{TODO}: What does this mean?
+@end deftypefun
+
+@deftypefun void chewing_set_phraseChoiceRearward (ChewingContext *@var{ctx}, int @var{mode})
+This function sets whether the phrase for candidates selection is
+before the cursor or after the cursor.
+@end deftypefun
+
+@deftypefun int chewing_get_phraseChoiceRearward (ChewingContext *@var{ctx})
+This function returns the phrase choice rearward setting.
+@end deftypefun
+
+@node Variable Index
+@unnumbered Variable Index
+
+@printindex vr
+
+@node Function Index
+@unnumbered Function Index
+
+@printindex fn
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
+
+@bye
+
+@c libchewing.texi ends here

@@ -18,7 +18,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/tools data src test
+SUBDIRS = src/tools data src test doc
 
 MAINTAINERCLEANFILES = \
 	Makefile.in \
