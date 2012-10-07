@@ -44,11 +44,6 @@
 FILE *fp_g = NULL;
 #endif
 
-void (*TerminateServices[ TerminateServicesNUM ])() = {
-	NULL
-};
-static int countTerminateService = 0;
-static int bTerminateCompleted = 0;
 static char libraryDataPath[PATH_MAX];
 
 char *kb_type_str[] = {
@@ -85,21 +80,6 @@ static void TerminateDebug()
 	}
 }               
 #endif
-
-int addTerminateService( callback_t callback )
-{
-	if ( callback ) {
-		int i;
-		for ( i = 0; i < countTerminateService; ++i ) {
-			/* Avoid redundant function pointer */
-			if ( TerminateServices[ i ] == callback )
-				return 1;
-		}
-		TerminateServices[ countTerminateService++ ] = callback;
-		return 0;
-	}
-	return 1;
-}
 
 static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
 {
@@ -216,11 +196,8 @@ CHEWING_API int chewing_Init(
 		}
 	}
 	/* register debug service */
-	if ( fp_g )
-		addTerminateService( TerminateDebug );
 }
 #endif
-	bTerminateCompleted = 0;
 	return 0;
 }
 
@@ -278,27 +255,9 @@ CHEWING_API char* chewing_get_KBString( ChewingContext *ctx )
 
 CHEWING_API void chewing_Terminate()
 {
-	int i;
-
-	/* No terminating services are registered. */
-	if ( bTerminateCompleted || countTerminateService == 0 )
-		return;
-
-	for ( i = 0; i < countTerminateService; i++ ) {
-		if ( TerminateServices[ i ] ) {
 #ifdef ENABLE_DEBUG
-			/* Can't output to debug file because it's about to close */
-			fprintf( stderr, 
-				EMPHASIZE( "Terminating service #%d / %d" ) ".\n",
-				i, countTerminateService );
+	TerminateDebug();
 #endif
-			(*TerminateServices[ i ])();
-		}
-	}
-	
-	/* XXX: should check if the services are really completed. */
-	bTerminateCompleted = 1;
-	return;
 }
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
