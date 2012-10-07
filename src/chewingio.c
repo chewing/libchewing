@@ -1492,8 +1492,3 @@ CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 {
 	return ctx->data->nPhoneSeq;
 }
-
-/* Local Variables: */
-/* c-indentation-style: linux */
-/* indent-tabs-mode: t */
-/* End: */

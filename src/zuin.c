@@ -677,10 +677,3 @@ int ZuinIsEntering( ZuinData *pZuin )
 	}
 	return 0;
 }
-
-
-/* Local Variables: */
-/* c-indentation-style: linux */
-/* c-basic-offset: 8 */
-/* indent-tabs-mode: t */
-/* End: */
