@@ -16,11 +16,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "global-private.h"
 #include "hanyupinyin-private.h"
 #include "hash-private.h"
 #include "private.h"
-
-static char PINYIN_TAB_NAME[] = "pinyin.tab";
 
 static keymap *hanyuInitialsMap, *hanyuFinalsMap;
 static int HANYU_INITIALS, HANYU_FINALS = 0;
