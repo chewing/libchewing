@@ -164,6 +164,11 @@ CHEWING_API ChewingContext *chewing_new()
 
 	ctx->cand_no = 0;
 
+	// FIXME: fill hash path
+	ret = InitSymbolTable( ctx->data, NULL );
+	if ( !ret )
+		InitSymbolTable( ctx->data, libraryDataPath );
+
 	return ctx;
 error:
 	chewing_delete( ctx );
@@ -182,8 +187,6 @@ CHEWING_API int chewing_Init(
 	}
 
 	/* initialize SymbolTable */
-	if ( ! InitSymbolTable( (char*) hashPath ) )
-		InitSymbolTable( (char*) dataPath );
 	if ( ! InitEasySymbolInput( (char *) hashPath ) )
 		InitEasySymbolInput( (char *) dataPath );
 
@@ -300,6 +303,8 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
 		if ( ctx->data ) {
+			TerminateEasySymbolTable( ctx->data );
+			TerminateSymbolTable( ctx->data );
 			TerminateHash( ctx->data );
 			TerminateDict( ctx->data );
 			TerminateChar( ctx->data );

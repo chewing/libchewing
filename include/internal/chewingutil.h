@@ -52,8 +52,11 @@ void RemoveSelectElement( int i, ChewingData *pgdata );
 int IsPreferIntervalConnted( int cursor, ChewingData *pgdata );
 int OpenSymbolChoice( ChewingData *pgdata );
 
-int InitSymbolTable( const char *prefix );
+int InitSymbolTable( ChewingData *pgdata, const char *prefix );
+void TerminateSymbolTable( ChewingData *pgdata );
+
 int InitEasySymbolInput( const char *prefix );
+void TerminateEasySymbolTable( ChewingData *pgdata );
 
 #endif
 
