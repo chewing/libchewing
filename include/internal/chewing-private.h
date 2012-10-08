@@ -31,6 +31,7 @@
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
+#define EASY_SYMBOL_KEY_TAB_LEN (36)
 
 #ifndef max
 #define max(a, b) \
@@ -197,6 +198,9 @@ typedef struct {
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
+
+	char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ];
+	int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ];
 } ChewingData;
 
 typedef struct {

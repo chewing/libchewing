@@ -37,17 +37,12 @@ static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
 
 static int FindSymbolKey( const char *symbol );
 
-static const char G_EASY_SYMBOL_KEY[] = {
+static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 	'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
 	'U', 'V', 'W', 'X', 'Y', 'Z'
 };
-
-#define EASY_SYMBOL_KEY_TAB_LEN \
-	sizeof( G_EASY_SYMBOL_KEY )
-static char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ] = { NULL };
-static int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ] = { 0 };
 
 static int FindEasySymbolIndex( char ch )
 {
@@ -317,9 +312,9 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 
 	_index = FindEasySymbolIndex( key );
 	if ( -1 != _index ) {
-		for ( loop = 0; loop < g_easy_symbol_num[ _index ]; ++loop ) {
+		for ( loop = 0; loop < pgdata->g_easy_symbol_num[ _index ]; ++loop ) {
 			ueStrNCpy( wordbuf, 
-				ueStrSeek( g_easy_symbol_value[ _index ],
+				ueStrSeek( pgdata->g_easy_symbol_value[ _index ],
 					loop),
 				1, 1 );
 			rtn = _Inner_InternalSpecialSymbol(
@@ -330,7 +325,7 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 
 	rtn = InternalSpecialSymbol( 
 			key, pgdata, nSpecial, 
-			G_EASY_SYMBOL_KEY, g_easy_symbol_value );
+			G_EASY_SYMBOL_KEY, pgdata->g_easy_symbol_value );
 	if ( rtn == ZUIN_IGNORE )
 		rtn = SpecialSymbolInput( key, pgdata );
 	return ( rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK );
@@ -1431,7 +1426,7 @@ void TerminateSymbolTable( ChewingData *pgdata )
 	}
 }
 
-int InitEasySymbolInput( const char *prefix )
+int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 {
 	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
 	FILE *file;
@@ -1479,11 +1474,11 @@ int InitEasySymbolInput( const char *prefix )
 		}
 		ueStrNCpy( symbol, &line[ 2 ], 9, 1 );
 
-		if ( NULL != g_easy_symbol_value[ _index] ) {
-			free( g_easy_symbol_value[ _index ] );
+		if ( NULL != pgdata->g_easy_symbol_value[ _index] ) {
+			free( pgdata->g_easy_symbol_value[ _index ] );
 		}
-		g_easy_symbol_value[ _index ] = symbol;
-		g_easy_symbol_num[ _index ] = len;
+		pgdata->g_easy_symbol_value[ _index ] = symbol;
+		pgdata->g_easy_symbol_num[ _index ] = len;
 	}
 	fclose( file );
 	return 1;
@@ -1493,11 +1488,11 @@ void TerminateEasySymbolTable( ChewingData *pgdata )
 {
 	unsigned int i;
 	for ( i = 0; i < EASY_SYMBOL_KEY_TAB_LEN / sizeof( char ); ++i ) {
-		if ( NULL != g_easy_symbol_value[ i ] ) {
-			free( g_easy_symbol_value[ i ] );
-			g_easy_symbol_value[ i ] = NULL;
+		if ( NULL != pgdata->g_easy_symbol_value[ i ] ) {
+			free( pgdata->g_easy_symbol_value[ i ] );
+			pgdata->g_easy_symbol_value[ i ] = NULL;
 		}
-		g_easy_symbol_num[ i ] = 0;
+		pgdata->g_easy_symbol_num[ i ] = 0;
 	}
 }
 

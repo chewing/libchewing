@@ -168,6 +168,11 @@ CHEWING_API ChewingContext *chewing_new()
 	ret = InitSymbolTable( ctx->data, NULL );
 	if ( !ret )
 		InitSymbolTable( ctx->data, libraryDataPath );
+	//
+	// FIXME: fill hash path
+	ret = InitEasySymbolInput( ctx->data, NULL );
+	if ( !ret )
+		InitEasySymbolInput( ctx->data, libraryDataPath );
 
 	return ctx;
 error:
@@ -185,10 +190,6 @@ CHEWING_API int chewing_Init(
 	if ( len + 1 <= sizeof(libraryDataPath) ) {
 		strcpy(libraryDataPath, dataPath );
 	}
-
-	/* initialize SymbolTable */
-	if ( ! InitEasySymbolInput( (char *) hashPath ) )
-		InitEasySymbolInput( (char *) dataPath );
 
 	/* initialize HanyuPinYin table */
 	if ( ! InitHanyuPinYin( hashPath ) )

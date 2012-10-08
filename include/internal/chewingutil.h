@@ -55,7 +55,7 @@ int OpenSymbolChoice( ChewingData *pgdata );
 int InitSymbolTable( ChewingData *pgdata, const char *prefix );
 void TerminateSymbolTable( ChewingData *pgdata );
 
-int InitEasySymbolInput( const char *prefix );
+int InitEasySymbolInput( ChewingData *pgdata, const char *prefix );
 void TerminateEasySymbolTable( ChewingData *pgdata );
 
 #endif
