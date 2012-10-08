@@ -42,6 +42,8 @@
 	( (a) < (b) ? (a) : (b) )
 #endif
 
+struct keymap;
+
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
 	wchar_t wch;
@@ -201,6 +203,11 @@ typedef struct {
 
 	char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ];
 	int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ];
+
+	struct keymap *hanyuInitialsMap;
+	struct keymap *hanyuFinalsMap;
+	int HANYU_INITIALS;
+	int HANYU_FINALS;
 } ChewingData;
 
 typedef struct {

@@ -581,7 +581,7 @@ static int PinYinInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 	}
 
 	if ( IsPinYinEndKey( key ) ) {
-		err = HanyuPinYinToZuin( pZuin->pinYinData.keySeq, zuinKeySeq );
+		err = HanyuPinYinToZuin( pgdata, pZuin->pinYinData.keySeq, zuinKeySeq );
 		if ( err ) {
 			pZuin->pinYinData.keySeq[ 0 ] = '\0';
 			return ZUIN_ABSORB;
