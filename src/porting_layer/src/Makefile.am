@@ -1,5 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 
+AM_CPPFLAGS="-D_XOPEN_SOURCE=500"
+
 INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
@@ -10,4 +12,6 @@ noinst_LTLIBRARIES = libporting_layer.la
 libporting_layer_la_SOURCES = \
 	plat_mmap_posix.c \
 	plat_mmap_windows.c \
+	plat_path_posix.c \
+	plat_path_windows.c \
 	$(NULL)
