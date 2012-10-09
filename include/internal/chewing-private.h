@@ -123,7 +123,7 @@ typedef struct _SymbolEntry {
 	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-typedef struct tag_HASH_ITEM HASH_ITEM;
+struct tag_HASH_ITEM;
 
 typedef struct {
 	AvailInfo availInfo;
@@ -193,7 +193,7 @@ typedef struct {
 	int chewing_lifetime;
 
 	char hashfilename[ 200 ];
-	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 } ChewingData;
 
 typedef struct {
