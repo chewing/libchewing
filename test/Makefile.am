@@ -86,6 +86,7 @@ test_case_SRC = \
 	test-utf8.c \
 	test-key2pho.c \
 	test-mmap.c \
+	test-path.c \
 	$(NULL)
 do_test_SOURCES = \
 	do-test.c \
