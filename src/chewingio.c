@@ -59,30 +59,30 @@ char *kb_type_str[] = {
 	"KB_HANYU_PINYIN"
 };
 
-const char *CHAR_FILES[] = {
+const char * const CHAR_FILES[] = {
 	CHAR_FILE,
 	CHAR_INDEX_BEGIN_FILE,
 	NULL,
 };
 
-const char *DICT_FILES[] = {
+const char * const DICT_FILES[] = {
 	DICT_FILE,
 	PH_INDEX_FILE,
 	PHONE_TREE_FILE,
 	NULL,
 };
 
-const char *SYMBOL_TABLE_FILES[] = {
+const char * const SYMBOL_TABLE_FILES[] = {
 	SYMBOL_TABLE_FILE,
 	NULL,
 };
 
-const char *EASY_SYMBOL_FILES[] = {
+const char * const EASY_SYMBOL_FILES[] = {
 	SOFTKBD_TABLE_FILE,
 	NULL,
 };
 
-const char *PINYIN_FILES[] = {
+const char * const PINYIN_FILES[] = {
 	PINYIN_TAB_NAME,
 	NULL,
 };

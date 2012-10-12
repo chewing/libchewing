@@ -12,7 +12,7 @@
 
 #include "plat_types.h"
 
-static int are_all_files_readable( const char *path, const char **files, char *output, size_t output_len )
+static int are_all_files_readable( const char *path, const char * const *files, char *output, size_t output_len )
 {
 	int i;
 
@@ -29,7 +29,7 @@ static int are_all_files_readable( const char *path, const char **files, char *o
 	return 1;
 }
 
-int find_path_by_files( const char *search_path, const char **files, char *output, size_t output_len )
+int find_path_by_files( const char *search_path, const char * const *files, char *output, size_t output_len )
 {
 	char buffer[PATH_MAX];
 	char *path;
