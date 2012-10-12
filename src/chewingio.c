@@ -46,8 +46,6 @@
 FILE *fp_g = NULL;
 #endif
 
-static char libraryDataPath[PATH_MAX];
-
 char *kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
@@ -231,13 +229,6 @@ CHEWING_API int chewing_Init(
 		const char *dataPath,
 		const char *hashPath )
 {
-	int len;
-
-	len = strlen( dataPath );
-	if ( len + 1 <= sizeof(libraryDataPath) ) {
-		strcpy(libraryDataPath, dataPath );
-	}
-
 #ifdef ENABLE_DEBUG
 {
 	char *dbg_path;
