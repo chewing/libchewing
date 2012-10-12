@@ -36,6 +36,8 @@
 #include "private.h"
 #include "chewingio.h"
 #include "mod_aux.h"
+#include "global-private.h"
+#include "plat_path.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
@@ -108,10 +110,37 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
+static void get_search_path( char * path, size_t path_len )
+{
+	char *tmp;
+
+	// FIXME: add $(prefix) to default data path
+	static const char DEFAULT_DATA_PATH[] = "$HOME/.chewing:/usr/local/lib/chewing:/usr/lib/chewing";
+
+	tmp = getenv( "CHEWING_DATA" );
+	if ( tmp ) {
+		strncpy( path, tmp, path_len );
+	} else {
+		strncpy( path, DEFAULT_DATA_PATH , path_len );
+	}
+
+	return;
+}
+
 CHEWING_API ChewingContext *chewing_new()
 {
+	static const char *CHAR_FILES[] = {
+		CHAR_FILE,
+		CHAR_INDEX_BEGIN_FILE,
+		NULL,
+	};
+
 	ChewingContext *ctx;
 	int ret;
+	char search_path[PATH_MAX];
+	char path[PATH_MAX];
+
+	get_search_path( search_path, sizeof( search_path ) );
 
 	ctx = ALC( ChewingContext, 1 );
 	if ( !ctx )
@@ -127,15 +156,19 @@ CHEWING_API ChewingContext *chewing_new()
 
 	chewing_Reset( ctx );
 
-	ret = InitTree( ctx->data, libraryDataPath );
+	ret = find_path_by_files( search_path, CHAR_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 
-	ret = InitChar( ctx->data, libraryDataPath );
+	ret = InitChar( ctx->data, path );
 	if ( ret )
 		goto error;
 
 	ret = InitDict( ctx->data, libraryDataPath );
+	if ( ret )
+		goto error;
+
+	ret = InitTree( ctx->data, libraryDataPath );
 	if ( ret )
 		goto error;
 
@@ -268,9 +301,9 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminateEasySymbolTable( ctx->data );
 			TerminateSymbolTable( ctx->data );
 			TerminateHash( ctx->data );
+			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
 			TerminateChar( ctx->data );
-			TerminateTree( ctx->data );
 			free( ctx->data );
 		}
 
