@@ -61,4 +61,18 @@ int find_path_by_files( const char *search_path, const char * const *files, char
 	return -1;
 }
 
+void get_search_path( char * path, size_t path_len )
+{
+	char *tmp;
+
+	tmp = getenv( "CHEWING_PATH" );
+	if ( tmp ) {
+		strncpy( path, tmp, path_len );
+	} else {
+		strncpy( path, "$HOME/.chewing:" LIBDIR "/chewing", path_len );
+	}
+
+	return;
+}
+
 #endif /* UNDER_POSIX */

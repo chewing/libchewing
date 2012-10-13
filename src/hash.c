@@ -517,7 +517,7 @@ int InitHash( ChewingData *pgdata )
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
-	const char *path = getenv( "CHEWING_PATH" );
+	const char *path = getenv( "CHEWING_USER_PATH" );
 
 	/* make sure of write permission */
 	if ( path && access( path, W_OK ) == 0 ) {

@@ -136,23 +136,6 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
-static void get_search_path( char * path, size_t path_len )
-{
-	char *tmp;
-
-	// FIXME: add $(prefix) to default data path
-	static const char DEFAULT_DATA_PATH[] = "$HOME/.chewing:/usr/local/lib/chewing:/usr/lib/chewing";
-
-	tmp = getenv( "CHEWING_DATA" );
-	if ( tmp ) {
-		strncpy( path, tmp, path_len );
-	} else {
-		strncpy( path, DEFAULT_DATA_PATH , path_len );
-	}
-
-	return;
-}
-
 CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
