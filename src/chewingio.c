@@ -61,6 +61,34 @@ char *kb_type_str[] = {
 	"KB_HANYU_PINYIN"
 };
 
+const char *CHAR_FILES[] = {
+	CHAR_FILE,
+	CHAR_INDEX_BEGIN_FILE,
+	NULL,
+};
+
+const char *DICT_FILES[] = {
+	DICT_FILE,
+	PH_INDEX_FILE,
+	PHONE_TREE_FILE,
+	NULL,
+};
+
+const char *SYMBOL_TABLE_FILES[] = {
+	SYMBOL_TABLE_FILE,
+	NULL,
+};
+
+const char *EASY_SYMBOL_FILES[] = {
+	SOFTKBD_TABLE_FILE,
+	NULL,
+};
+
+const char *PINYIN_FILES[] = {
+	PINYIN_TAB_NAME,
+	NULL,
+};
+
 CHEWING_API int chewing_KBStr2Num( char str[] )
 {
 	int i;
@@ -129,19 +157,6 @@ static void get_search_path( char * path, size_t path_len )
 
 CHEWING_API ChewingContext *chewing_new()
 {
-	static const char *CHAR_FILES[] = {
-		CHAR_FILE,
-		CHAR_INDEX_BEGIN_FILE,
-		NULL,
-	};
-
-	static const char *DICT_FILES[] = {
-		DICT_FILE,
-		PH_INDEX_FILE,
-		PHONE_TREE_FILE,
-		NULL,
-	};
-
 	ChewingContext *ctx;
 	int ret;
 	char search_path[PATH_MAX];
@@ -166,7 +181,6 @@ CHEWING_API ChewingContext *chewing_new()
 	ret = find_path_by_files( search_path, CHAR_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
-
 	ret = InitChar( ctx->data, path );
 	if ( ret )
 		goto error;
@@ -174,11 +188,9 @@ CHEWING_API ChewingContext *chewing_new()
 	ret = find_path_by_files( search_path, DICT_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
-
 	ret = InitDict( ctx->data, path );
 	if ( ret )
 		goto error;
-
 	ret = InitTree( ctx->data, path );
 	if ( ret )
 		goto error;
@@ -188,20 +200,26 @@ CHEWING_API ChewingContext *chewing_new()
 
 	ctx->cand_no = 0;
 
-	// FIXME: fill hash path
-	ret = InitSymbolTable( ctx->data, NULL );
+	ret = find_path_by_files( search_path, SYMBOL_TABLE_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitSymbolTable( ctx->data, path );
 	if ( !ret )
-		InitSymbolTable( ctx->data, libraryDataPath );
+		goto error;
 
-	// FIXME: fill hash path
-	ret = InitEasySymbolInput( ctx->data, NULL );
+	ret = find_path_by_files( search_path, EASY_SYMBOL_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitEasySymbolInput( ctx->data, path );
 	if ( !ret )
-		InitEasySymbolInput( ctx->data, libraryDataPath );
+		goto error;
 
-	// FIXME: fill hash path
-	ret = InitHanyuPinYin( ctx->data, NULL );
+	ret = find_path_by_files( search_path, PINYIN_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitHanyuPinYin( ctx->data, path );
 	if ( !ret )
-		InitHanyuPinYin( ctx->data, libraryDataPath );
+		goto error;
 
 	return ctx;
 error:
