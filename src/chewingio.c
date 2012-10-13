@@ -135,6 +135,13 @@ CHEWING_API ChewingContext *chewing_new()
 		NULL,
 	};
 
+	static const char *DICT_FILES[] = {
+		DICT_FILE,
+		PH_INDEX_FILE,
+		PHONE_TREE_FILE,
+		NULL,
+	};
+
 	ChewingContext *ctx;
 	int ret;
 	char search_path[PATH_MAX];
@@ -164,11 +171,15 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	ret = InitDict( ctx->data, libraryDataPath );
+	ret = find_path_by_files( search_path, DICT_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 
-	ret = InitTree( ctx->data, libraryDataPath );
+	ret = InitDict( ctx->data, path );
+	if ( ret )
+		goto error;
+
+	ret = InitTree( ctx->data, path );
 	if ( ret )
 		goto error;
 
