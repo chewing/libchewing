@@ -18,7 +18,7 @@ LIBCHEWING_CURRENT=3
 LIBCHEWING_REVISION=1
 
 # increment if any interfaces have been added; set to 0
-# if any interfaces have been removed. removal has 
+# if any interfaces have been removed. removal has
 # precedence over adding, so set to 0 if both happened.
 LIBCHEWING_AGE=0
 
@@ -46,7 +46,7 @@ AC_PREFIX_DEFAULT(/usr)
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
-AC_SUBST(LIBTOOL_EXPORT_OPTIONS) 
+AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
@@ -119,12 +119,12 @@ NCURSES_REQUIRED_VERSION=5.9
 
 # Checks for check unit test framework
 PKG_CHECK_MODULES(CHECK, check >= $CHECK_REQUIRED_VERSION,
-		  enable_check=yes, enable_check=no)
+                  enable_check=yes, enable_check=no)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
 PKG_CHECK_MODULES(NCURSESW, ncursesw >= $NCURSESW_REQUIRED_VERSION,
-		  enable_ncursesw=yes, enable_ncursesw=no)
+                  enable_ncursesw=yes, enable_ncursesw=no)
 AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 if test "$enable_ncursesw" = "yes"; then
     AC_DEFINE(HAVE_CURSES_H, 1, [ Define to 1 if you have the <curses.h> header file. ])
@@ -146,8 +146,8 @@ AC_ARG_ENABLE([debug],
               [LIBDEBUG="false"])
 
 if test x$LIBDEBUG = x"true"; then
-	AC_DEFINE(ENABLE_DEBUG, 1,
-		[Define to 1 if you want native library runtime debugging code enabled])
+        AC_DEFINE(ENABLE_DEBUG, 1,
+                [Define to 1 if you want native library runtime debugging code enabled])
 fi
 AC_SUBST(LIBDEBUG)
 
@@ -176,18 +176,18 @@ AC_MSG_RESULT($has_visibility)
 
 dnl binary form of chewing data
 AC_ARG_ENABLE([binary-data],
-		[AS_HELP_STRING([--enable-binary-data],
-				[Experimental use of binary data @<:@default=yes@:>@])],
-		[case "${enableval}" in
-		no)
-		binary_data="no"
-		;;
-		*)
-		binary_data="yes"
-		;;
-		esac],binary_data="yes")
+                [AS_HELP_STRING([--enable-binary-data],
+                                [Experimental use of binary data @<:@default=yes@:>@])],
+                [case "${enableval}" in
+                no)
+                binary_data="no"
+                ;;
+                *)
+                binary_data="yes"
+                ;;
+                esac],binary_data="yes")
 if test x$binary_data = "xyes"; then
-	AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
+        AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
 fi
 AC_SUBST(ENABLE_BINARY_DATA)
 AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
@@ -197,40 +197,40 @@ dnl What kind of system are we using?
 case $host_os in
 win*|mingw*)
         SYSTEM=windows
-	;;
+        ;;
 cygwin*)
         SYSTEM=unix
-	;;
+        ;;
 *)
         SYSTEM=unix
-	;;
+        ;;
 esac
 
 case $SYSTEM in
 win)
 AC_DEFINE(UNDER_WINDOWS, 1,
-	[Runtime is under Win32 environment])
-	;;
+        [Runtime is under Win32 environment])
+        ;;
 unix)
 AC_DEFINE(UNDER_POSIX, 1,
-	[Runtime is under POSIX environment])
-	;;
+        [Runtime is under POSIX environment])
+        ;;
 esac
 
 AC_SUBST(AM_CFLAGS)
 
 AC_OUTPUT([
-	Makefile 
-	data/Makefile 
-	src/Makefile
-	src/porting_layer/Makefile
-	src/porting_layer/src/Makefile
-	src/common/Makefile
-	src/tools/Makefile 
-	test/Makefile
-	chewing.pc 
-	libchewing.spec
-	Doxyfile
+        Makefile
+        chewing.pc
+        data/Makefile
+        doc/Makefile
+        libchewing.spec
+        src/Makefile
+        src/common/Makefile
+        src/porting_layer/Makefile
+        src/porting_layer/src/Makefile
+        src/tools/Makefile
+        test/Makefile
 ])
 
 AC_MSG_RESULT([

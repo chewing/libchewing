@@ -1,3 +1,13 @@
+# maintainer files
+
+.dir-locals.el
+ID
+TAGS
+GTAGS
+GPATH
+GRTAGS
+GSYMS
+
 # autotools generated
 Doxyfile
 INSTALL
@@ -40,6 +50,7 @@ src/tools/maketree
 src/tools/sort_dic
 src/tools/sort_word
 
+<<<<<<< HEAD
 test/do-test.xml
 test/test.txt
 
@@ -50,3 +61,9 @@ test/test.txt
 
 # cscope output
 cscope.*
+
+# info doc
+doc/libchewing.info
+doc/stamp-vti
+doc/version.texi
+

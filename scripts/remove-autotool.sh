@@ -25,4 +25,6 @@ rm -f \
 	autotools/install-sh \
 	autotools/ltmain.sh \
 	autotools/missing \
+	autotools/texinfo.tex \
+	autotools/mdate-sh \
 	include/config.h.in
