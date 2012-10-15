@@ -1,12 +1,19 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Improve the description of libchewing API
+* Add --enable-gcov to enable gcov coverage
+* Fix possible strncat() overflow
+* Support building with mingw32 toolchain
+* Internal structure refactoring
+* Read hash path from CHEWING_PATH environment variable
 * Fix GNU Hurd build
 * Fix the detection of ncursesw
 * Fix the usage of autotools
 * Update and tune symbols
 * Fix valgrind warning
+* Fix several compilation warnings
 * Fix GCC visibility availability for Darwin specific PIC code
-* Fix hash table initialization
+* Fix hash table initialization and its memory leakage
 * Fix Microsoft VC build
 * Fix Windows 64-bit build
 * Successful stories:
