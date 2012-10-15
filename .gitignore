@@ -50,7 +50,6 @@ src/tools/maketree
 src/tools/sort_dic
 src/tools/sort_word
 
-<<<<<<< HEAD
 test/do-test.xml
 test/test.txt
 
@@ -66,4 +65,16 @@ cscope.*
 doc/libchewing.info
 doc/stamp-vti
 doc/version.texi
-
+doc/libchewing.aux
+doc/libchewing.cp
+doc/libchewing.fn
+doc/libchewing.fns
+doc/libchewing.ky
+doc/libchewing.log
+doc/libchewing.pdf
+doc/libchewing.pg
+doc/libchewing.toc
+doc/libchewing.tp
+doc/libchewing.tps
+doc/libchewing.vr
+doc/libchewing.vrs
