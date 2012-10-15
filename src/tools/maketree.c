@@ -150,20 +150,23 @@ void Construct()
 	FILE *input = fopen( IN_FILE, "r" );
 	NODE *pointer, *tp;
 	uint16 key;
+	int ret;
 
 	if ( ! input ) {
 		fprintf( stderr, "Error opening " IN_FILE "\n" );
 		exit( 1 );
 	}
 	InitConstruct();
+
 	
 	while ( 1 ) {	
-		fscanf( input, "%hu", &key );
-		if ( feof( input ) )
+		ret = fscanf( input, "%hu", &key );
+		if ( ret != 1 || feof( input ) )
 			break;
+
 		pointer = root;
-		/* for each phone in a phone phrase */
-		for ( ; key != 0; fscanf( input, "%hu", &key ) ) {	
+
+		while ( key != 0 ) {
 			if ( ( tp = FindKey( pointer, key ) ) ) {
 				pointer = tp;
 			}
@@ -171,7 +174,14 @@ void Construct()
 				tp = Insert( pointer, key );
 				pointer = tp;
 			}
+
+			ret = fscanf( input, "%hu", &key );
+			if ( ret != 1 ) {
+				fprintf( stderr, "phrase does not end with 0 in " IN_FILE );
+				exit ( 1 );
+			}
 		}
+
 		pointer->phraseno = ph_count++;
 	}
 

@@ -146,6 +146,7 @@ int main(int argc, char* argv[])
 	FILE *cinfile;
 	char buf[ MAX_BUF_LEN ];
 	char *phone_cin;
+	char *ret;
 
 	if (argc < 2) {
 		fprintf( stderr, "Usage: sort_word <phone.cin>\n" );
@@ -160,12 +161,16 @@ int main(int argc, char* argv[])
 	}
 
 	do {
-		fgets( buf, MAX_BUF_LEN, cinfile );
+		ret = fgets( buf, MAX_BUF_LEN, cinfile );
+		if ( !ret ) {
+			fprintf( stderr, "Cannot find %s", CHARDEF_BEGIN );
+			return 1;
+		}
 	} while ( strncmp( buf, CHARDEF_BEGIN, strlen( CHARDEF_BEGIN ) ) );
 
 	for ( ; ; ) {
-		fgets( buf, MAX_BUF_LEN, cinfile );
-		if ( buf[ 0 ] == '%' )
+		ret = fgets( buf, MAX_BUF_LEN, cinfile );
+		if ( !ret || buf[ 0 ] == '%' )
 			break;
 		if ( DoWord( buf ) == DO_WORD_ERROR ) {
 			fprintf( stderr, "The file %s is corrupted!\n", phone_cin );

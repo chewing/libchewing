@@ -389,6 +389,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 	char oldname[ 256 ], *dump, *seekdump;
 	HASH_ITEM item;
 	int item_index, iret, tflen;
+	int ret;
 
 	/* allocate dump buffer */
 	txtfile = open_file_get_length( ofilename, "r", &tflen );
@@ -400,7 +401,10 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 		fclose( txtfile );
 		return 0;
 	}
-	fscanf( txtfile, "%d", &pgdata->chewing_lifetime );
+	ret = fscanf( txtfile, "%d", &pgdata->chewing_lifetime );
+	if ( ret != 1 ) {
+		return 0;
+	}
 
 	/* prepare the bin file */
 	seekdump = dump;
