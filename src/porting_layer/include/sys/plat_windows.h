@@ -15,9 +15,9 @@
 
 #include <windows.h>
 #include <stdio.h>
+#include <io.h>
 
 #if _MSC_VER > 1000
-#include <io.h>
 #include <direct.h>
 #define F_OK	00
 #define W_OK	02
