@@ -55,6 +55,7 @@ AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 
 # Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_LANG(C)
 AC_C_CONST
 
@@ -113,14 +114,8 @@ AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # optional modules
-CHECK_REQUIRED_VERSION=0.9.4
 NCURSESW_REQUIRED_VERSION=5.9
 NCURSES_REQUIRED_VERSION=5.9
-
-# Checks for check unit test framework
-PKG_CHECK_MODULES(CHECK, check >= $CHECK_REQUIRED_VERSION,
-                  enable_check=yes, enable_check=no)
-AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
 PKG_CHECK_MODULES(NCURSESW, ncursesw >= $NCURSESW_REQUIRED_VERSION,
@@ -242,7 +237,6 @@ Build options:
   Enable debug            $LIBDEBUG
   Enable gcov             $ENABLE_GCOV
   Enable binary data      $binary_data
-  Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
   Default CFLAGS          $AM_CFLAGS
 ])
