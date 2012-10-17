@@ -32,7 +32,7 @@ dist_noinst_DATA = \
 $(TESTDATA): $(DEFAULT_TESTDATA)
 	@if [ ! -f $(TESTDATA) ]; then cp $(DEFAULT_TESTDATA) $(TESTDATA) ; fi
 
-check: testchewing $(TESTDATA) $(CHEWINGDATA)
+check: testchewing$(EXEEXT) $(TESTDATA) $(CHEWINGDATA)
 	$(testdir)/testchewing < $(TESTDATA)
 if ENABLE_UNIT_TEST
 	$(testdir)/do-test
