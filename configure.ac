@@ -55,6 +55,7 @@ AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 
 # Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_LANG(C)
 AC_C_CONST
 
@@ -111,10 +112,6 @@ AC_C_CONST
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
-
-# Checks for check unit test framework
-AC_SEARCH_LIBS([srunner_create], [check], [enable_check=yes], [enable_check=no])
-AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$enable_check = "xyes")
 
 # Checks for ncursesw
 AC_SEARCH_LIBS([initscr], [ncursesw], [enable_ncursesw=yes], [enable_ncursesw=no])
@@ -235,7 +232,6 @@ Build options:
   Enable debug            $LIBDEBUG
   Enable gcov             $ENABLE_GCOV
   Enable binary data      $binary_data
-  Build Unit Test         $enable_check
   Build TextUI sample     $enable_ncursesw
   Default CFLAGS          $AM_CFLAGS
 ])
