@@ -66,7 +66,7 @@ AC_CHECK_HEADERS([fcntl.h])
 AC_FUNC_MMAP
 
 # gen_keystroke
-AC_CHECK_FUNCS([setenv])
+AC_CHECK_FUNCS([putenv])
 AC_CHECK_FUNCS([setlocale])
 AC_CHECK_HEADERS([locale.h])
 
