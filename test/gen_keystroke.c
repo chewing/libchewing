@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef HAVE_CURSES_H
-#include <curses.h>
+#include <ncursesw/curses.h>
 #else
 #error "There is no curses package found."
 #endif

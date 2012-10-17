@@ -114,10 +114,13 @@ AC_FUNC_MEMCMP
 AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # Checks for ncursesw
-AC_SEARCH_LIBS([initscr], [ncursesw], [enable_ncursesw=yes], [enable_ncursesw=no])
+AC_CHECK_LIB([ncursesw], [initscr], [enable_ncursesw=yes], [enable_ncursesw=no])
+AC_CHECK_HEADER([ncursesw/curses.h], [enable_ncursesw=yes], [enable_ncursesw=no])
 AM_CONDITIONAL(ENABLE_TEXT_UI, test x$enable_ncursesw = "xyes")
 if test "$enable_ncursesw" = "yes"; then
     AC_DEFINE(HAVE_CURSES_H, 1, [ Define to 1 if you have the <curses.h> header file. ])
+    NCURSESW_LIBS=-lncursesw
+    AC_SUBST(NCURSESW_LIBS)
 fi
 
 # Options

@@ -48,7 +48,6 @@ INCLUDES = \
 	-DCHEWING_DATA_PREFIX="\"$(top_srcdir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \
-	$(NCURSESW_CFLAGS) \
 	$(NULL)
 
 LDADD = \
