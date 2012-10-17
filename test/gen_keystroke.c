@@ -296,7 +296,7 @@ int main( int argc, char *argv[] )
 
 	/* Initialize libchewing */
 	/* for the sake of testing, we should not change existing hash data */
-	setenv( "CHEWING_PATH", TEST_HASH_DIR, 1 );
+	putenv( "CHEWING_PATH=" TEST_HASH_DIR );
 	chewing_Init( prefix, TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */
