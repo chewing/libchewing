@@ -93,8 +93,11 @@ In "Select Components" during installing, please select the following items:
 - MSYS Basic System
 
 After installing, execute <MinGW directory>\msys\1.0\msys.bat (default is
-C:\MinGW\msys\1.0\msys.bat). In MSYS shell, use the following commands to
-install necessary packages.
+C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
+
+If you get the source from the git repository you need additional step
+to make the source buildable; use the following commands to install
+necessary packages.
 
 - mingw-get install automake
 - mingw-get install autoconf
@@ -110,13 +113,19 @@ The easily way to do this is using git:
 
 Now you can run the following commands in MSYS shell to build libchewing:
 
+If you get the source from the git repository, run:
+
 - autogen.sh
+
+Then
+
 - configure
 - make
 
-If you use `make check', you will see the testchewing.exe cannot print the
-correct string. This is because testchewing.exe prints the UTF-8 string, while
-Windows cannot print it to console.
+If you run testchewing.exe (available after `make check') you will
+find that testchewing.exe cannot print the correct string. This is
+because testchewing.exe prints the UTF-8 string, while Windows cannot
+print it to console.
 
 
 [-] License
