@@ -1,7 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 AM_CPPFLAGS= \
-	-D_XOPEN_SOURCE=500 \
 	-DLIBDIR=\"@libdir@\" \
 	$(NULL)
 

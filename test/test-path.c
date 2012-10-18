@@ -17,7 +17,6 @@
 
 #include "test_harness.h"
 #include "global-private.h"
-#include "plat_types.h"
 #include "plat_path.h"
 
 #define ENV_NAME "CHEWING_PATH_TESTING_ENV"
@@ -59,31 +58,9 @@ void test_plat_path_cannot_find()
 	ok( ret != 0, "find_path_by_files shall not return 0" );
 }
 
-void test_find_path_env_expand()
-{
-	int ret;
-	char output[1024];
-
-	putenv( ENV_NAME "=" CHEWING_DATA_PREFIX );
-
-#ifdef UNDER_POSIX
-	ret = find_path_by_files( "$" ENV_NAME, FILES, output, sizeof( output ) );
-#elif defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
-#error not implemented
-#else
-#error not implement
-#endif
-
-	ok( ret == 0, "find_path_by_files shall return 0" );
-	ok( strcmp( output, CHEWING_DATA_PREFIX ) == 0, "output shall be " CHEWING_DATA_PREFIX );
-
-	unsetenv( ENV_NAME );
-}
-
 int main()
 {
 	test_plat_path_found();
 	test_plat_path_cannot_find();
-	test_find_path_env_expand();
 	return exit_status();
 }

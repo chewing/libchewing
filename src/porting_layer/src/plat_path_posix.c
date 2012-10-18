@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <wordexp.h>
 #include <string.h>
 
 #include "plat_types.h"
@@ -35,7 +34,6 @@ int find_path_by_files( const char *search_path, const char * const *files, char
 	char *path;
 	char *saveptr;
 	int ret;
-	wordexp_t word;
 
 	assert( search_path );
 	assert( files );
@@ -46,17 +44,11 @@ int find_path_by_files( const char *search_path, const char * const *files, char
 	strncpy( buffer, search_path, sizeof( buffer ) );
 
 	for ( path = strtok_r( buffer, ":", &saveptr ); path; path = strtok_r( NULL, ":", &saveptr )) {
-		// expand shell variable like $HOME
-		ret = wordexp( path, &word, 0 );
-		if ( ret == 0 && word.we_wordc == 1 ) {
-			ret = are_all_files_readable( word.we_wordv[0], files, output, output_len );
-			if ( ret ) {
-				snprintf( output, output_len, "%s", word.we_wordv[0] );
-				wordfree( &word );
-				return 0;
-			}
+		ret = are_all_files_readable( path, files, output, output_len );
+		if ( ret ) {
+			snprintf( output, output_len, "%s", path );
+			return 0;
 		}
-		wordfree( &word );
 	}
 	return -1;
 }
