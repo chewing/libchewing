@@ -85,7 +85,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 		*zuin_count = 0;
 	s = (char*) calloc(
 		1 + ZUIN_SIZE,
-		sizeof(char) * WCH_SIZE );
+		sizeof(ctx->output->zuinBuf[ 0 ].s) );
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
 		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );

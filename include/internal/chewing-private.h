@@ -19,7 +19,6 @@
 #include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
-#define WCH_SIZE 4
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
