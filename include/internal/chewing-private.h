@@ -16,7 +16,6 @@
 #endif
 
 #include "global.h"
-#include <wchar.h>
 #include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
@@ -43,8 +42,7 @@
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
-	wchar_t wch;
-	unsigned char padding[ 8 ]; /* Ensure this structure is aligned */
+	uint16 wch;
 } wch_t;
 
 typedef struct {
