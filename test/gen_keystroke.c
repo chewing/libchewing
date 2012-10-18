@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_CURSES_H
+#ifdef HAVE_NCURSESW_CURSES_H
 #include <ncursesw/curses.h>
 #else
 #error "There is no curses package found."
