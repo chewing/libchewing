@@ -159,14 +159,16 @@ CHEWING_API ChewingContext *chewing_new()
 
 	chewing_Reset( ctx );
 
-	ret = find_path_by_files( search_path, CHAR_FILES, path, sizeof( path ) );
+	ret = find_path_by_files(
+		search_path, CHAR_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 	ret = InitChar( ctx->data, path );
 	if ( ret )
 		goto error;
 
-	ret = find_path_by_files( search_path, DICT_FILES, path, sizeof( path ) );
+	ret = find_path_by_files(
+		search_path, DICT_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 	ret = InitDict( ctx->data, path );
@@ -181,21 +183,24 @@ CHEWING_API ChewingContext *chewing_new()
 
 	ctx->cand_no = 0;
 
-	ret = find_path_by_files( search_path, SYMBOL_TABLE_FILES, path, sizeof( path ) );
+	ret = find_path_by_files(
+		search_path, SYMBOL_TABLE_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 	ret = InitSymbolTable( ctx->data, path );
 	if ( !ret )
 		goto error;
 
-	ret = find_path_by_files( search_path, EASY_SYMBOL_FILES, path, sizeof( path ) );
+	ret = find_path_by_files(
+		search_path, EASY_SYMBOL_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 	ret = InitEasySymbolInput( ctx->data, path );
 	if ( !ret )
 		goto error;
 
-	ret = find_path_by_files( search_path, PINYIN_FILES, path, sizeof( path ) );
+	ret = find_path_by_files(
+		search_path, PINYIN_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
 	ret = InitHanyuPinYin( ctx->data, path );

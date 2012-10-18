@@ -13,7 +13,11 @@
 
 #define PATH_SEP ":"
 
-static int are_all_files_readable( const char *path, const char * const *files, char *output, size_t output_len )
+static int are_all_files_readable(
+	const char *path,
+	const char * const *files,
+	char *output,
+	size_t output_len )
 {
 	int i;
 
@@ -21,7 +25,8 @@ static int are_all_files_readable( const char *path, const char * const *files, 
 	assert( files );
 
 	for ( i = 0; files[i] != NULL; ++i ) {
-		snprintf( output, output_len, "%s" PLAT_SEPARATOR "%s", path, files[i] );
+		snprintf( output, output_len, "%s" PLAT_SEPARATOR "%s", path,
+				files[i] );
 		if ( access( output, R_OK ) != 0 ) {
 			return 0;
 		}
@@ -30,7 +35,11 @@ static int are_all_files_readable( const char *path, const char * const *files, 
 	return 1;
 }
 
-int find_path_by_files( const char *search_path, const char * const *files, char *output, size_t output_len )
+int find_path_by_files(
+	const char *search_path,
+	const char * const *files,
+	char *output,
+	size_t output_len )
 {
 	char buffer[PATH_MAX];
 	char *path;
@@ -45,7 +54,9 @@ int find_path_by_files( const char *search_path, const char * const *files, char
 	// strtok_r will modify its first parameter.
 	strncpy( buffer, search_path, sizeof( buffer ) );
 
-	for ( path = strtok_r( buffer, PATH_SEP, &saveptr ); path; path = strtok_r( NULL, PATH_SEP, &saveptr )) {
+	for ( path = strtok_r( buffer, PATH_SEP, &saveptr );
+		path; path = strtok_r( NULL, PATH_SEP, &saveptr ) ) {
+
 		ret = are_all_files_readable( path, files, output, output_len );
 		if ( ret ) {
 			snprintf( output, output_len, "%s", path );
@@ -66,7 +77,8 @@ void get_search_path( char * path, size_t path_len )
 	} else {
 		home = getenv( "HOME" );
 		if ( home ) {
-			snprintf( path, path_len, "%s/.chewing" PATH_SEP LIBDIR "/chewing", home );
+			snprintf( path, path_len, "%s/.chewing" PATH_SEP
+				LIBDIR "/chewing", home );
 		} else {
 			// No HOME ?
 			strncpy( path, PATH_SEP LIBDIR "/chewing", path_len );

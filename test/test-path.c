@@ -36,20 +36,21 @@ static const char *FILES[] = {
 void test_plat_path_found()
 {
 	int ret;
-	char output[1024];
+	char output[ PATH_MAX ];
 
 	ret = find_path_by_files(
-			CHEWING_DATA_PREFIX "_no_such_path:" CHEWING_DATA_PREFIX,
-			FILES, output, sizeof( output ) );
+		CHEWING_DATA_PREFIX "_no_such_path:"
+		CHEWING_DATA_PREFIX, FILES, output, sizeof( output ) );
 
 	ok( ret == 0, "find_path_by_files shall return 0" );
-	ok( strcmp( output, CHEWING_DATA_PREFIX ) == 0, "output shall be " CHEWING_DATA_PREFIX );
+	ok( strcmp( output, CHEWING_DATA_PREFIX ) == 0,
+		"output shall be " CHEWING_DATA_PREFIX );
 }
 
 void test_plat_path_cannot_find()
 {
 	int ret;
-	char output[1024];
+	char output[ PATH_MAX ];
 
 	ret = find_path_by_files(
 			CHEWING_DATA_PREFIX "_no_such_path",
