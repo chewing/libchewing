@@ -1,9 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.59])
 
-AC_INIT(libchewing, 0.3.3, chewing-devel@googlegroups.com)
-AC_CONFIG_AUX_DIR([autotools])
+AC_INIT([libchewing], [0.3.3], [chewing-devel@googlegroups.com])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -42,13 +42,12 @@ AM_SILENT_RULES([yes])
 AM_CONFIG_HEADER([include/config.h])
 
 # Init libtool
-AC_LIBTOOL_DLOPEN
+AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
-LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^[[^_]].*"'
-AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
+AC_SUBST(LIBTOOL_EXPORT_OPTIONS, ['-export-symbols-regex "^[[^_]].*"'])
 
 # Checks for programs.
 AC_PROG_CC
@@ -77,8 +76,7 @@ AC_CHECK_LIB([ncursesw], [initscr],
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$enable_ncursesw = "xyes"])
 if test "$enable_ncursesw" = "yes"; then
     AC_DEFINE(HAVE_NCURSESW_CURSES_H, 1, [ Define to 1 if you have the <ncursesw/curses.h> header file. ])
-    NCURSESW_LIBS=-lncursesw
-    AC_SUBST(NCURSESW_LIBS)
+    AC_SUBST(NCURSESW_LIBS, ['-lncursesw'])
 fi
 
 # Options
@@ -104,8 +102,8 @@ AC_SUBST(LIBDEBUG)
 
 dnl Enable gcov for coverage test
 AC_ARG_ENABLE([gcov],
-              AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@]),
-              AS_CASE([${enableval}], [yes], [ENABLE_GCOV="true"], [ENABLE_GCOV="false"]),
+              [AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@])],
+              [AS_CASE([${enableval}], [yes], [ENABLE_GCOV="true"], [ENABLE_GCOV="false"])],
               [ENABLE_GCOV="false"])
 AS_IF([test x$ENABLE_GCOV = x"true"], [AM_CFLAGS="$AM_CFLAGS --coverage"])
 
@@ -170,7 +168,7 @@ esac
 
 AC_SUBST(AM_CFLAGS)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
         Makefile
         chewing.pc
         data/Makefile
@@ -183,6 +181,7 @@ AC_OUTPUT([
         src/tools/Makefile
         test/Makefile
 ])
+AC_OUTPUT
 
 AC_MSG_RESULT([
 Build options:
