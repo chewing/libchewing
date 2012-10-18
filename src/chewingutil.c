@@ -108,12 +108,12 @@ int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
 	/* find the beginning index in the chiSymbolBuf */
 	for ( nChi = i = 0; i < pgdata->chiSymbolBufLen && nChi < begin; i++ )
 		/* it is Chinese word */
-		if ( pgdata->chiSymbolBuf[ i ].wch == (wchar_t) 0 )
+		if ( pgdata->chiSymbolBuf[ i ].wch == 0 )
 			nChi++;
 
 	for ( k = i + 1; k < pgdata->chiSymbolBufLen && k <= end; k++ )
 		/*  not a Chinese word */
-		if ( pgdata->chiSymbolBuf[ i ].wch != (wchar_t) 0 )
+		if ( pgdata->chiSymbolBuf[ i ].wch != 0 )
 			return 0;
 
 	return 1;
@@ -174,7 +174,7 @@ static int _Inner_InternalSpecialSymbol(
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
 			sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
+		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
 		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
 				chibuf, 1, 1);
 		/* Save Symbol Key */
@@ -401,7 +401,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
 				sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 		}
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
+		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
 		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
 				pgdata->choiceInfo.totalChoiceStr[ sel_i ], 1, 1);
 
@@ -440,7 +440,7 @@ int SymbolInput( int key, ChewingData *pgdata )
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
 			sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
+		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
 		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s[ 0 ] = (char) key;
 
 		/* Save Symbol Key */
@@ -712,7 +712,7 @@ int AddChi( uint16 phone, ChewingData *pgdata )
 		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ) ,
 		sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 	/* "0" means Chinese word */
-	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = (wchar_t) 0;
+	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
 	pgdata->chiSymbolBufLen++;
 	pgdata->chiSymbolCursor++;
 
@@ -909,9 +909,9 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 		chi_i = chiSymbol_i = 0; 
 		chiSymbol_i < pgdata->chiSymbolBufLen; 
 		chiSymbol_i ++ ) {
-		if ( pgdata->chiSymbolBuf[ chiSymbol_i ].wch == (wchar_t) 0 ) { 
+		if ( pgdata->chiSymbolBuf[ chiSymbol_i ].wch == 0 ) {
 			/* is Chinese, then copy from the PhrasingOutput "phrOut" */
-			pgo->chiSymbolBuf[ chiSymbol_i ].wch = (wchar_t) 0;
+			pgo->chiSymbolBuf[ chiSymbol_i ].wch = 0;
 			ueStrNCpy( (char *) pgo->chiSymbolBuf[ chiSymbol_i ].s,
 			           &( pgdata->phrOut.chiBuf[ chi_i ] ),
 			           1, 1 );
@@ -963,7 +963,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 				           1, 1);
 			}
 			else
-				pgo->zuinBuf[ i ].wch = (wchar_t) 0;
+				pgo->zuinBuf[ i ].wch = 0;
 		}
 	}
 
@@ -1045,7 +1045,7 @@ int ChewingIsChiAt( int chiSymbolCursor, ChewingData *pgdata )
 	return (
 		( chiSymbolCursor < pgdata->chiSymbolBufLen ) &&
 		( 0 <= chiSymbolCursor ) &&
-		(pgdata->chiSymbolBuf[ chiSymbolCursor ].wch == (wchar_t) 0 ) );
+		(pgdata->chiSymbolBuf[ chiSymbolCursor ].wch == 0 ) );
 }
 
 void RemoveSelectElement( int i, ChewingData *pgdata )

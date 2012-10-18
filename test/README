@@ -13,7 +13,7 @@ Here are the instructions:
 
 4. (Optional) Use your own test cases.
   # ./genkeystroke test.txt
-  # make check 
+  # cat test.txt | ./testchewing
 
 5. (Optional) Stress test for libchewing robustness.
   # ./randkeystroke | ./testchewing

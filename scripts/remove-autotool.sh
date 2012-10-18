@@ -19,10 +19,12 @@ rm -f \
 	libtool \
 	config.status \
 	mkinstalldirs \
-	autotools/config.guess \
-	autotools/config.sub \
-	autotools/depcomp \
-	autotools/install-sh \
-	autotools/ltmain.sh \
-	autotools/missing \
+	build-aux/config.guess \
+	build-aux/config.sub \
+	build-aux/depcomp \
+	build-aux/install-sh \
+	build-aux/ltmain.sh \
+	build-aux/missing \
+	build-aux/texinfo.tex \
+	build-aux/mdate-sh \
 	include/config.h.in

@@ -80,6 +80,54 @@ Example cross-build instructions:
 # make CC_FOR_BUILD=gcc
 
 
+[-] Build on Windows with MinGW
+
+To build libchewing on Windows, you need to setup MinGW and MSYS in your
+system. The installer of MinGW and MSYS is in the following link:
+
+http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
+
+In "Select Components" during installing, please select the following items:
+
+- MinGW Compiler Suite -> C Compiler
+- MSYS Basic System
+
+After installing, execute <MinGW directory>\msys\1.0\msys.bat (default is
+C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
+
+If you get the source from the git repository you need additional step
+to make the source buildable; use the following commands to install
+necessary packages.
+
+- mingw-get install automake
+- mingw-get install autoconf
+- mingw-get install libtool
+
+Now you have the build environment for libchewing. However, you need to check
+the line end of source code is LF instead of CR/LF before running autogen.sh.
+The easily way to do this is using git:
+
+- git config core.autocrlf input
+- rm -rf *
+- get reset --hard
+
+Now you can run the following commands in MSYS shell to build libchewing:
+
+If you get the source from the git repository, run:
+
+- autogen.sh
+
+Then
+
+- configure
+- make
+
+If you run testchewing.exe (available after `make check') you will
+find that testchewing.exe cannot print the correct string. This is
+because testchewing.exe prints the UTF-8 string, while Windows cannot
+print it to console.
+
+
 [-] License
 
 See "COPYING" for details.

@@ -16,7 +16,6 @@
 #endif
 
 #include "global.h"
-#include <wchar.h>
 #include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
@@ -42,12 +41,9 @@
 	( (a) < (b) ? (a) : (b) )
 #endif
 
-struct keymap;
-
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
-	wchar_t wch;
-	unsigned char padding[ 8 ]; /* Ensure this structure is aligned */
+	uint16 wch;
 } wch_t;
 
 typedef struct {
@@ -126,7 +122,7 @@ typedef struct _SymbolEntry {
 	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-typedef struct tag_HASH_ITEM HASH_ITEM;
+struct tag_HASH_ITEM;
 
 typedef struct {
 	AvailInfo availInfo;
@@ -196,7 +192,7 @@ typedef struct {
 	int chewing_lifetime;
 
 	char hashfilename[ 200 ];
-	HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;

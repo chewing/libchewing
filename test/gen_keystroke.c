@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_CURSES_H
-#include <curses.h>
+#ifdef HAVE_NCURSESW_CURSES_H
+#include <ncursesw/curses.h>
 #else
 #error "There is no curses package found."
 #endif
@@ -296,8 +296,8 @@ int main( int argc, char *argv[] )
 
 	/* Initialize libchewing */
 	/* for the sake of testing, we should not change existing hash data */
-	setenv( "CHEWING_PATH", CHEWING_DATA_PREFIX, 1 );
-	setenv( "CHEWING_USER_PATH", TEST_HASH_DIR, 1 );
+	putenv( "CHEWING_PATH=" TEST_HASH_DIR );
+	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 	chewing_Init( prefix, TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */

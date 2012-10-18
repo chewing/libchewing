@@ -1,3 +1,13 @@
+# maintainer files
+
+.dir-locals.el
+ID
+TAGS
+GTAGS
+GPATH
+GRTAGS
+GSYMS
+
 # autotools generated
 Doxyfile
 INSTALL
@@ -5,7 +15,7 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache
-autotools/
+build-aux/
 chewing.pc
 config.log
 config.status
@@ -50,3 +60,21 @@ test/test.txt
 
 # cscope output
 cscope.*
+
+# info doc
+doc/libchewing.info
+doc/stamp-vti
+doc/version.texi
+doc/libchewing.aux
+doc/libchewing.cp
+doc/libchewing.fn
+doc/libchewing.fns
+doc/libchewing.ky
+doc/libchewing.log
+doc/libchewing.pdf
+doc/libchewing.pg
+doc/libchewing.toc
+doc/libchewing.tp
+doc/libchewing.tps
+doc/libchewing.vr
+doc/libchewing.vrs
