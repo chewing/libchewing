@@ -51,6 +51,7 @@ AC_SUBST(LIBTOOL_EXPORT_OPTIONS, ['-export-symbols-regex "^[[^_]].*"'])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_LANG(C)
 
@@ -62,6 +63,9 @@ AC_FUNC_MMAP
 
 # chewing-utf8-util.h
 AC_TYPE_SIZE_T
+
+# chewing-private.h
+AC_C_INLINE
 
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)

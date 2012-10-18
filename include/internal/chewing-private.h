@@ -31,14 +31,15 @@
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
-#ifndef max
-#define max(a, b) \
-	( (a) > (b) ? (a) : (b) )
-#endif
-#ifndef min
-#define min(a, b) \
-	( (a) < (b) ? (a) : (b) )
-#endif
+static inline int max( int a, int b )
+{
+	return a > b ? a : b;
+}
+
+static inline int min( int a, int b )
+{
+	return a < b ? a : b;
+}
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
