@@ -141,6 +141,8 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		           ueStrSeek( (char *) ph_str, _index ), 
 			   1, 0);
 	}
+	pho = ueStrSeek( pho, len );
+	pho[0] = '\0';
 	return 1;
 }
 
