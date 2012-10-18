@@ -28,8 +28,18 @@
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
 	pData->phoneSeq = ALC( uint16, phonelen + 1 );
+	if ( !pData->phoneSeq )
+		goto error;
 	pData->wordSeq = ALC( char, wordlen + 1 );
-	return ( pData->phoneSeq && pData->wordSeq );
+	if ( !pData->wordSeq )
+		goto error;
+
+	return 1;
+
+error:
+	free( pData->phoneSeq );
+	free( pData->wordSeq );
+	return 0;
 }
 
 static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
@@ -87,7 +97,7 @@ HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16 phoneSeq[], const ch
 
 HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 {
-	int hashvalue, len;
+	int hashvalue;
 	HASH_ITEM *pItem;
 
 	pItem = HashFindEntry( pgdata, pData->phoneSeq, pData->wordSeq );
@@ -97,9 +107,6 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 	pItem = ALC( HASH_ITEM, 1 );
 	if ( ! pItem )
 		return NULL;  /* Error occurs */
-	len = ueStrLen( pData->wordSeq );
-	if ( ! AlcUserPhraseSeq( &( pItem->data ), len, strlen( pData->wordSeq ) ) )
-		return NULL; /* Error occurs */
 
 	hashvalue = HashFunc( pData->phoneSeq );
 	/* set the new element */
