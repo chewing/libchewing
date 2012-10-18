@@ -40,13 +40,10 @@ AM_MAINTAINER_MODE([enable])
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
 AM_CONFIG_HEADER([include/config.h])
-AC_PREFIX_DEFAULT(/usr)
 
 # Init libtool
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
-AC_SUBST(LIBTOOL_DEPS)
-AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
@@ -57,30 +54,14 @@ AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_LANG(C)
-AC_C_CONST
+
+# Checks for library functions.
+AC_FUNC_MALLOC
 
 # plat_mmap_posix
-AC_CHECK_FUNCS([getpagesize])
-AC_CHECK_FUNCS([munmap])
-AC_CHECK_HEADERS([fcntl.h])
 AC_FUNC_MMAP
 
-# gen_keystroke
-AC_CHECK_FUNCS([putenv])
-AC_CHECK_FUNCS([setlocale])
-AC_CHECK_HEADERS([locale.h])
-
-# chewingutil.c
-AC_CHECK_FUNCS([strcspn])
-
-# mod_aux.c
-AC_CHECK_FUNCS([strdup])
-
-# hash.c
-AC_CHECK_HEADERS([limits.h])
-
 # chewing-utf8-util.h
-AC_CHECK_HEADERS([wchar.h])
 AC_TYPE_SIZE_T
 
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
@@ -88,30 +69,6 @@ AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
 AM_CFLAGS="$CFLAGS -Wall"
-
-# Checks if doxygen is avaiable
-AC_PATH_PROG(DOXYGEN, doxygen, no)
-AM_CONDITIONAL(HAVE_DOXYGEN, test x$DOXYGEN != xno)
-AC_SUBST(DOXYGEN)
-
-# Checks if graphviz is available
-AC_CHECK_PROG(HAVE_GRAPHVIZ, dot, YES, NO)
-AC_PATH_PROG(DOT, dot)
-AC_SUBST(DOT)
-AC_PATH_PROG(PERL, perl)
-AC_SUBST(PERL)
-
-# Checks for libraries.
-AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_MEMCMP
-AC_CHECK_FUNCS([memchr memmove memset mkdir strchr strstr])
 
 # Checks for ncursesw
 AC_CHECK_LIB([ncursesw], [initscr],
