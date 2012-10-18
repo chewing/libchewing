@@ -18,6 +18,7 @@
 #include "test_harness.h"
 #include "global-private.h"
 #include "plat_path.h"
+#include "plat_types.h"
 
 #define ENV_NAME "CHEWING_PATH_TESTING_ENV"
 
