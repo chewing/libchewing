@@ -24,6 +24,8 @@
 #ifndef TEST_HARNESS_H
 #define TEST_HARNESS_H
 
+#include <stdio.h>
+
 static unsigned int _test_run_;
 static unsigned int _test_ok_;
 

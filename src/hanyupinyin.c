@@ -16,19 +16,15 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "global-private.h"
 #include "hanyupinyin-private.h"
 #include "hash-private.h"
 #include "private.h"
 
-static char PINYIN_TAB_NAME[] = "pinyin.tab";
-
-static keymap *hanyuInitialsMap, *hanyuFinalsMap;
-static int HANYU_INITIALS, HANYU_FINALS = 0;
-
-static void TerminateHanyuPinyin()
+void TerminateHanyuPinyin( ChewingData *pgdata )
 { 
-	free( hanyuInitialsMap );
-	free( hanyuFinalsMap );
+	free( pgdata->hanyuInitialsMap );
+	free( pgdata->hanyuFinalsMap );
 }
 
 #if 0
@@ -40,7 +36,7 @@ static int compkey( const void *k1, const void *k2 )
 }
 #endif
 
-int InitHanyuPinYin( const char *prefix )
+int InitHanyuPinYin( ChewingData *pgdata, const char *prefix )
 {
 	char filename[PATH_MAX];
 	int i;
@@ -56,33 +52,31 @@ int InitHanyuPinYin( const char *prefix )
 	if ( ! fd )
 		return 0;
 
-	addTerminateService( TerminateHanyuPinyin );
-
-	ret = fscanf( fd, "%d", &HANYU_INITIALS );
+	ret = fscanf( fd, "%d", &pgdata->HANYU_INITIALS );
 	if ( ret != 1 ) {
 		return 0;
 	}
-	++HANYU_INITIALS;
-	hanyuInitialsMap = ALC( keymap, HANYU_INITIALS );
-	for ( i = 0; i < HANYU_INITIALS - 1; i++ ) {
+	++pgdata->HANYU_INITIALS;
+	pgdata->hanyuInitialsMap = ALC( keymap, pgdata->HANYU_INITIALS );
+	for ( i = 0; i < pgdata->HANYU_INITIALS - 1; i++ ) {
 		ret = fscanf( fd, "%s %s",
-			hanyuInitialsMap[ i ].pinyin,
-			hanyuInitialsMap[ i ].zuin );
+			pgdata->hanyuInitialsMap[ i ].pinyin,
+			pgdata->hanyuInitialsMap[ i ].zuin );
 		if ( ret != 2 ) {
 			return 0;
 		}
 	}
 
-	ret = fscanf( fd, "%d", &HANYU_FINALS );
+	ret = fscanf( fd, "%d", &pgdata->HANYU_FINALS );
 	if ( ret != 1 ) {
 		return 0;
 	}
-	++HANYU_FINALS;
-	hanyuFinalsMap = ALC( keymap, HANYU_FINALS );
-	for ( i = 0; i < HANYU_FINALS - 1; i++ ) {
+	++pgdata->HANYU_FINALS;
+	pgdata->hanyuFinalsMap = ALC( keymap, pgdata->HANYU_FINALS );
+	for ( i = 0; i < pgdata->HANYU_FINALS - 1; i++ ) {
 		ret = fscanf( fd, "%s %s",
-			hanyuFinalsMap[ i ].pinyin,
-			hanyuFinalsMap[ i ].zuin );
+			pgdata->hanyuFinalsMap[ i ].pinyin,
+			pgdata->hanyuFinalsMap[ i ].zuin );
 		if ( ret != 2 ) {
 			return 0;
 		}
@@ -101,23 +95,23 @@ int InitHanyuPinYin( const char *prefix )
  * 
  * @retval 0 Success
  */
-int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
+int HanyuPinYinToZuin( ChewingData *pgdata, char *pinyinKeySeq, char *zuinKeySeq )
 {
 	char *p, *cursor = NULL;
 	char *initial = 0;
 	char *final = 0;
 	int i;
 
-	for ( i = 0; i < HANYU_INITIALS; i++ ) {
-		p = strstr( pinyinKeySeq, hanyuInitialsMap[ i ].pinyin );
+	for ( i = 0; i < pgdata->HANYU_INITIALS; i++ ) {
+		p = strstr( pinyinKeySeq, pgdata->hanyuInitialsMap[ i ].pinyin );
 		if ( p == pinyinKeySeq ) {
-			initial = hanyuInitialsMap[ i ].zuin;
+			initial = pgdata->hanyuInitialsMap[ i ].zuin;
 			cursor = pinyinKeySeq +
-				strlen( hanyuInitialsMap[ i ].pinyin );
+				strlen( pgdata->hanyuInitialsMap[ i ].pinyin );
 			break;
 		}
 	}
-	if ( i == HANYU_INITIALS ) {
+	if ( i == pgdata->HANYU_INITIALS ) {
 		/* No initials. might be ㄧㄨㄩ */
 		/* XXX: I NEED Implementation
 		   if(finalsKeySeq[0] != ) {
@@ -127,14 +121,14 @@ int HanyuPinYinToZuin( char *pinyinKeySeq, char *zuinKeySeq )
 	}
 
 	if ( cursor ) {
-		for ( i = 0; i < HANYU_FINALS; i++ ) {
-			p = strstr( cursor, hanyuFinalsMap[ i ].pinyin );
+		for ( i = 0; i < pgdata->HANYU_FINALS; i++ ) {
+			p = strstr( cursor, pgdata->hanyuFinalsMap[ i ].pinyin );
 			if ( p == cursor ) {
-				final = hanyuFinalsMap[ i ].zuin;
+				final = pgdata->hanyuFinalsMap[ i ].zuin;
 				break;
 			}
 		}
-		if ( i == HANYU_FINALS ){
+		if ( i == pgdata->HANYU_FINALS ){
 			return 2;
 		}
 	}
