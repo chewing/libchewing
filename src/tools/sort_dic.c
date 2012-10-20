@@ -23,6 +23,9 @@
  *  	  Output format : ( Sorted by zuin's uint16 number )
  *  	  phrase   frequency   zuin1 zuin2 zuin3 ... \n
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

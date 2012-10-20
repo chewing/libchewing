@@ -13,6 +13,9 @@
  */
 
 /* This file is encoded in UTF-8 */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <ctype.h>
 #include <string.h>

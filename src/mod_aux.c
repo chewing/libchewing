@@ -12,6 +12,9 @@
  * @file mod_aux.c
  * @brief Auxiliary module
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <string.h>
 #include <stdlib.h>

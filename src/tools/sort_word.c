@@ -11,6 +11,9 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

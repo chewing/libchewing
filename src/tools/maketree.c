@@ -27,6 +27,9 @@
  *		 int32 begin,end; //the children of this node(-1,-1 indicate a leaf node)
  *	  }\endcode
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

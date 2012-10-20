@@ -18,6 +18,9 @@
  * control keyboard mapping
  * include the definition of ZuinData structure
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <ctype.h>
 #include <stdio.h>
