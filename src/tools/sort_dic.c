@@ -72,7 +72,7 @@ void DataSetNum( long _index )
 	strcpy( buf, data[ _index ].str );
 	strtok( buf, " \n\t" );
 	data[ _index ].freq = atoi( strtok( NULL, " \n\t" ) );
-	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) ) 
+	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) )
 		data[ _index ].num[ i++ ] = UintFromPhone( p );
 }
 

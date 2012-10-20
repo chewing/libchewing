@@ -1375,6 +1375,7 @@ int InitSymbolTable( const char *prefix )
 	char *symbols, *symbol;
 	SymbolEntry* tmp_tab[ 100 ];
 	int len = 0, i;
+	char *saveptr;
 
 	n_symbol_entry = 0;
 	symbol_table = NULL;
@@ -1390,9 +1391,9 @@ int InitSymbolTable( const char *prefix )
 		if ( n_symbol_entry >=
 				(sizeof(tmp_tab) / sizeof( SymbolEntry * ) ) )
 			break;
-		category = strtok( line, "=\r\n" );
+		category = strtok_r( line, "=\r\n", &saveptr );
 		if ( category ) {
-			symbols = strtok( NULL, "\r\n" );
+			symbols = strtok_r( NULL, "\r\n", &saveptr );
 			if ( symbols ) {
 				len = ueStrLen( symbols );
 				tmp_tab[ n_symbol_entry ] = ALC(

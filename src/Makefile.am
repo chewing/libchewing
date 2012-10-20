@@ -1,5 +1,6 @@
 SUBDIRS = common porting_layer
 INCLUDES = \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
@@ -28,6 +29,7 @@ libchewing_la_SOURCES = \
 libchewing_la_LIBADD = \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
+	$(top_builddir)/lib/libgnu.la \
 	$(NULL)
 
 libchewing_la_LDFLAGS = \
