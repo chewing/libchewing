@@ -642,13 +642,13 @@ The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun uint16* chewing_get_phoneSeq (ChewingContext *@var{ctx})
+@deftypefun unsigned short* chewing_get_phoneSeq (ChewingContext *@var{ctx})
 This function returns the phonetic sequence in the Chewing IM internal
 state machine.
 
-The return value is a pointer to a @code{uint16} array. The values in
-the array is encoded Zuin phone. The memory @emph{must} be freed by
-the caller using function @code{chewing_free}.
+The return value is a pointer to a @code{unsigned short} array. The
+values in the array is encoded Zuin phone. The memory @emph{must} be
+freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
 @deftypefun int chewing_get_phoneSeqLen (ChewingContext *@var{ctx})

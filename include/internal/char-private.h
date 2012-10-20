@@ -22,7 +22,7 @@ typedef struct {
 	char word[ 7 ];
 } Word;
 
-int GetCharFirst( ChewingData *, Word *, uint16 );
+int GetCharFirst( ChewingData *, Word *, uint16_t );
 int GetCharNext ( ChewingData *, Word * );
 int InitChar( ChewingData *pgdata, const char * prefix );
 void TerminateChar( ChewingData *pgdata );

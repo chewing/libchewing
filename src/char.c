@@ -46,7 +46,7 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 }
 #endif
 
-static int CompUint16( const uint16 *pa, const uint16 *pb )
+static int CompUint16( const uint16_t *pa, const uint16_t *pb )
 {
 	return ( (*pa) - (*pb) );
 }
@@ -123,7 +123,7 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 	if ( file_size <= 0 )
 		return -1;
 
-	if ( pgdata->phone_num != file_size / sizeof( uint16 ))
+	if ( pgdata->phone_num != file_size / sizeof( uint16_t ))
 		return -1;
 
 	offset = 0;
@@ -177,7 +177,7 @@ static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 {
 #ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
-	uint16 sh;
+	uint16_t sh;
 
 	fgettab( buf, 1000, pgdata->charfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
@@ -193,13 +193,13 @@ static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 #endif
 }
 
-int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16 phoneid )
+int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
 {
-	uint16 *pinx;
+	uint16_t *pinx;
 
-	pinx = (uint16 *) bsearch(
+	pinx = (uint16_t *) bsearch(
 		&phoneid, pgdata->arrPhone, pgdata->phone_num,
-		sizeof( uint16 ), (CompFuncType) CompUint16 );
+		sizeof( uint16_t ), (CompFuncType) CompUint16 );
 	if ( ! pinx )
 		return 0;
 

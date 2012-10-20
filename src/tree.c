@@ -167,7 +167,7 @@ static int CheckBreakpoint( int from, int to, int bArrBrkpt[] )
 
 static int CheckUserChoose( 
 		ChewingData *pgdata,
-		uint16 *new_phoneSeq, int from , int to,
+		uint16_t *new_phoneSeq, int from , int to,
 		Phrase **pp_phr, 
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect )
@@ -293,7 +293,7 @@ static int CheckChoose(
 /** @brief search for the phrases have the same pronunciation.*/
 /* if phoneSeq[a] ~ phoneSeq[b] is a phrase, then add an interval
  * from (a) to (b+1) */
-int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16 *phoneSeq )
+int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq )
 {
 	int child, tree_p, i;
 
@@ -362,7 +362,7 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 
 static void FindInterval(
 		ChewingData *pgdata,
-		uint16 *phoneSeq, int nPhoneSeq, 
+		uint16_t *phoneSeq, int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], TreeDataType *ptd )
@@ -370,7 +370,7 @@ static void FindInterval(
 	int end, begin, pho_id;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
-	uint16 new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
 
 	for ( begin = 0; begin < nPhoneSeq; begin++ ) {
 		for ( end = begin; end < nPhoneSeq; end++ ) {
@@ -381,7 +381,7 @@ static void FindInterval(
 			memcpy( 
 				new_phoneSeq, 
 				&phoneSeq[ begin ], 
-				sizeof( uint16 ) * ( end - begin + 1 ) );
+				sizeof( uint16_t ) * ( end - begin + 1 ) );
 			new_phoneSeq[ end - begin + 1 ] = 0;
 			puserphrase = pdictphrase = NULL;
 			i_used_phrase = USED_PHRASE_NONE;
@@ -597,7 +597,7 @@ static void Discard2( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
-static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, uint16 phoneSeq[], int nPhoneSeq )
+static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, uint16_t phoneSeq[], int nPhoneSeq )
 {
 	int i;
 	Word word;
@@ -615,7 +615,7 @@ static void OutputRecordStr(
 		ChewingData *pgdata,
 		char *out_buf, int out_buf_len,
 		int *record, int nRecord, 
-		uint16 phoneSeq[], int nPhoneSeq, 
+		uint16_t phoneSeq[], int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[],
 		int nSelect, TreeDataType *ptd )
@@ -958,7 +958,7 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 
 int Phrasing(
 		ChewingData *pgdata, /* FIXME: Remove other parameters since they are all in pgdata. */
-		PhrasingOutput *ppo, uint16 phoneSeq[], int nPhoneSeq, 
+		PhrasingOutput *ppo, uint16_t phoneSeq[], int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
 		IntervalType selectInterval[], int nSelect, 
 		int bArrBrkpt[], int bUserArrCnnct[] ) 

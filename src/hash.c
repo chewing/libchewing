@@ -27,7 +27,7 @@
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
-	pData->phoneSeq = ALC( uint16, phonelen + 1 );
+	pData->phoneSeq = ALC( uint16_t, phonelen + 1 );
 	if ( !pData->phoneSeq )
 		goto error;
 	pData->wordSeq = ALC( char, wordlen + 1 );
@@ -42,7 +42,7 @@ error:
 	return 0;
 }
 
-static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
+static int PhoneSeqTheSame( const uint16_t p1[], const uint16_t p2[] )
 {
 	int i;
 	if ( ! p1 || ! p2 )	/* FIXME: should not happend. */
@@ -57,7 +57,7 @@ static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
 	return 1;
 }
 
-static unsigned int HashFunc( const uint16 phoneSeq[] )
+static unsigned int HashFunc( const uint16_t phoneSeq[] )
 {
 	int i, value = 0;
 
@@ -66,7 +66,7 @@ static unsigned int HashFunc( const uint16 phoneSeq[] )
 	return ( value & ( HASH_TABLE_SIZE - 1 ) );
 }
 
-HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16 phoneSeq[], HASH_ITEM *pItemLast )
+HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], HASH_ITEM *pItemLast )
 {
 	HASH_ITEM *pNow = pItemLast ?
 			pItemLast->next :
@@ -78,7 +78,7 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16 phoneSeq[], HA
 	return NULL;
 }
 
-HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] )
+HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	int hashvalue;
@@ -147,7 +147,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
-	uint16 *pshort;
+	uint16_t *pshort;
 	unsigned char *puc;
 
 	memset( str, 0, FIELD_SIZE );
@@ -166,7 +166,7 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	/* phone seq*/
 	phraselen = ueStrLen( pItem->data.wordSeq );
 	str[ 16 ] = phraselen;
-	pshort = (uint16 *) &str[ 17 ];
+	pshort = (uint16_t *) &str[ 17 ];
 	for ( i = 0; i < phraselen; i++ ) {
 		*pshort = pItem->data.phoneSeq[ i ];
 		pshort++;
@@ -248,7 +248,7 @@ static int ReadInt(unsigned char *addr)
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
 	int len, i;
-	uint16 *pshort;
+	uint16_t *pshort;
 	unsigned char recbuf[ FIELD_SIZE ], *puc;
 
 	memcpy( recbuf, srcbuf, FIELD_SIZE );
@@ -262,8 +262,8 @@ int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 
 	/* phone seq, length in num of chi words */
 	len = (int) recbuf[ 16 ];
-	pItem->data.phoneSeq = ALC( uint16, len + 1 );
-	pshort = (uint16 *) &recbuf[ 17 ];
+	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
+	pshort = (uint16_t *) &recbuf[ 17 ];
 	for ( i = 0; i < len; i++ ) {
 		pItem->data.phoneSeq[ i ] = *pshort;
 		++pshort;
@@ -323,7 +323,7 @@ int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
 
 	/* read phoneSeq */
 	len = ueStrLen( pItem->data.wordSeq );
-	pItem->data.phoneSeq = ALC( uint16, len + 1 );
+	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
 	for ( i = 0; i < len; i++ )
 		if ( fscanf( infile, "%hu", &( pItem->data.phoneSeq[ i ] ) ) != 1 )
 			return 0;
