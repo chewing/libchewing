@@ -20,6 +20,7 @@ chewing.pc
 config.log
 config.status
 configure
+lib
 libchewing.spec
 libtool
 m4

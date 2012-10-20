@@ -15,10 +15,11 @@ EXTRA_DIST = \
 	autogen.sh \
 	chewing.pc \
 	libchewing.spec \
+	m4/gnulib-cache.m4 \
 	$(NULL)
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/tools data src test doc
+SUBDIRS = lib src/tools data src test doc
 
 MAINTAINERCLEANFILES = \
 	Makefile.in \

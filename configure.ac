@@ -6,6 +6,7 @@ AC_INIT([libchewing], [0.3.3], [chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_SUBST(PACKAGE_VERSION)
 
@@ -51,6 +52,7 @@ AC_SUBST(LIBTOOL_EXPORT_OPTIONS, ['-export-symbols-regex "^[[^_]].*"'])
 
 # Checks for programs.
 AC_PROG_CC
+gl_EARLY
 AM_PROG_CC_C_O
 AC_LANG(C)
 
@@ -62,6 +64,8 @@ AC_FUNC_MMAP
 
 # chewing-utf8-util.h
 AC_TYPE_SIZE_T
+
+gl_INIT
 
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
@@ -180,6 +184,7 @@ AC_CONFIG_FILES([
         src/porting_layer/src/Makefile
         src/tools/Makefile
         test/Makefile
+        lib/Makefile
 ])
 AC_OUTPUT
 
