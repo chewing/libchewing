@@ -1368,8 +1368,8 @@ int InitSymbolTable( const char *prefix )
 	FILE *file;
 	char filename[ PATH_MAX ];
 	char line[512];
-	char *category;
-	char *symbols, *symbol;
+	char *category_end;
+	char *symbols, *symbols_end, *symbol;
 	SymbolEntry* tmp_tab[ 100 ];
 	int len = 0, i;
 
@@ -1387,38 +1387,41 @@ int InitSymbolTable( const char *prefix )
 		if ( n_symbol_entry >=
 				(sizeof(tmp_tab) / sizeof( SymbolEntry * ) ) )
 			break;
-		category = strtok( line, "=\r\n" );
-		if ( category ) {
-			symbols = strtok( NULL, "\r\n" );
-			if ( symbols ) {
+		category_end = strpbrk( line, "=\r\n" );
+		if ( category_end ) {
+			symbols = category_end + 1;
+			symbols_end = strpbrk( symbols, "\r\n" );
+			if ( symbols_end ) {
+				*symbols_end = '\0';
 				len = ueStrLen( symbols );
-				tmp_tab[ n_symbol_entry ] = ALC(
-						SymbolEntry,
-						sizeof( SymbolEntry ) +
+				tmp_tab[ n_symbol_entry ] =
+					ALC( SymbolEntry, sizeof( SymbolEntry ) +
 						(len - 1) * (MAX_UTF8_SIZE + 1) );
 				tmp_tab[ n_symbol_entry ]->nSymbols = len;
 				symbol = symbols;
 				for( i = 0; i < len; ++i ) {
 					ueStrNCpy(
-						tmp_tab[ n_symbol_entry ]->symbols[ i ], 
+						tmp_tab[ n_symbol_entry ]->symbols[ i ],
 						symbol, 1, 1 );
 					symbol += ueBytesFromChar( symbol[ 0 ] );
 				}
 			}
 			else {
-				tmp_tab[ n_symbol_entry ] = 
-					(SymbolEntry *) calloc( 1, 
-						sizeof( SymbolEntry ) - ( MAX_UTF8_SIZE + 1 ) );
+				tmp_tab[ n_symbol_entry ] =
+					ALC( SymbolEntry,
+						sizeof( SymbolEntry ) -
+						( MAX_UTF8_SIZE + 1 ) );
 				tmp_tab[ n_symbol_entry ]->nSymbols = 0;
 			}
+			*category_end = '\0';
 			ueStrNCpy(
-				tmp_tab[ n_symbol_entry ]->category, 
-				category, 
+				tmp_tab[ n_symbol_entry ]->category,
+				line,
 				MAX_PHRASE_LEN, 1 );
 			++n_symbol_entry;
 		}
 	}
-	symbol_table = (SymbolEntry **) calloc( n_symbol_entry, sizeof( SymbolEntry * ) );
+	symbol_table = ALC( SymbolEntry*,  n_symbol_entry );
 	memcpy( symbol_table, tmp_tab, n_symbol_entry * sizeof( SymbolEntry *) );
 	fclose( file );
 	addTerminateService( TerminateSymbolTable );
