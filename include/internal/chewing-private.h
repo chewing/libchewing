@@ -19,7 +19,6 @@
 #include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
-#define WCH_SIZE 4
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
@@ -32,14 +31,15 @@
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
 
-#ifndef max
-#define max(a, b) \
-	( (a) > (b) ? (a) : (b) )
-#endif
-#ifndef min
-#define min(a, b) \
-	( (a) < (b) ? (a) : (b) )
-#endif
+static inline int max( int a, int b )
+{
+	return a > b ? a : b;
+}
+
+static inline int min( int a, int b )
+{
+	return a < b ? a : b;
+}
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
