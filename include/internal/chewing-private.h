@@ -35,12 +35,15 @@
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
+#define EASY_SYMBOL_KEY_TAB_LEN (36)
 
+#undef max
 static inline int max( int a, int b )
 {
 	return a > b ? a : b;
 }
 
+#undef min
 static inline int min( int a, int b )
 {
 	return a < b ? a : b;
@@ -198,6 +201,17 @@ typedef struct {
 
 	char hashfilename[ 200 ];
 	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+
+	unsigned int n_symbol_entry;
+	SymbolEntry ** symbol_table;
+
+	char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ];
+	int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ];
+
+	struct keymap *hanyuInitialsMap;
+	struct keymap *hanyuFinalsMap;
+	int HANYU_INITIALS;
+	int HANYU_FINALS;
 } ChewingData;
 
 typedef struct {

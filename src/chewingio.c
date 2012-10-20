@@ -17,6 +17,7 @@
  * @brief Implement basic I/O routines for Chewing manipulation.
  */
 
+#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -36,6 +37,8 @@
 #include "private.h"
 #include "chewingio.h"
 #include "mod_aux.h"
+#include "global-private.h"
+#include "plat_path.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
@@ -43,13 +46,6 @@
 #define FAILSAFE_OUTPUT "/tmp/chewing-debug.out"
 FILE *fp_g = NULL;
 #endif
-
-void (*TerminateServices[ TerminateServicesNUM ])() = {
-	NULL
-};
-static int countTerminateService = 0;
-static int bTerminateCompleted = 0;
-static char libraryDataPath[PATH_MAX];
 
 char *kb_type_str[] = {
 	"KB_DEFAULT",
@@ -62,6 +58,34 @@ char *kb_type_str[] = {
 	"KB_DVORAK_HSU",
 	"KB_DACHEN_CP26",
 	"KB_HANYU_PINYIN"
+};
+
+const char * const CHAR_FILES[] = {
+	CHAR_FILE,
+	CHAR_INDEX_BEGIN_FILE,
+	NULL,
+};
+
+const char * const DICT_FILES[] = {
+	DICT_FILE,
+	PH_INDEX_FILE,
+	PHONE_TREE_FILE,
+	NULL,
+};
+
+const char * const SYMBOL_TABLE_FILES[] = {
+	SYMBOL_TABLE_FILE,
+	NULL,
+};
+
+const char * const EASY_SYMBOL_FILES[] = {
+	SOFTKBD_TABLE_FILE,
+	NULL,
+};
+
+const char * const PINYIN_FILES[] = {
+	PINYIN_TAB_NAME,
+	NULL,
 };
 
 CHEWING_API int chewing_KBStr2Num( char str[] )
@@ -85,21 +109,6 @@ static void TerminateDebug()
 	}
 }               
 #endif
-
-int addTerminateService( callback_t callback )
-{
-	if ( callback ) {
-		int i;
-		for ( i = 0; i < countTerminateService; ++i ) {
-			/* Avoid redundant function pointer */
-			if ( TerminateServices[ i ] == callback )
-				return 1;
-		}
-		TerminateServices[ countTerminateService++ ] = callback;
-		return 0;
-	}
-	return 1;
-}
 
 static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
 {
@@ -132,6 +141,8 @@ CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
 	int ret;
+	char search_path[PATH_MAX];
+	char path[PATH_MAX];
 
 	ctx = ALC( ChewingContext, 1 );
 	if ( !ctx )
@@ -147,15 +158,26 @@ CHEWING_API ChewingContext *chewing_new()
 
 	chewing_Reset( ctx );
 
-	ret = InitTree( ctx->data, libraryDataPath );
+	ret = get_search_path( search_path, sizeof( search_path ) );
+	if ( !ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, CHAR_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitChar( ctx->data, path );
 	if ( ret )
 		goto error;
 
-	ret = InitChar( ctx->data, libraryDataPath );
+	ret = find_path_by_files(
+		search_path, DICT_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
-
-	ret = InitDict( ctx->data, libraryDataPath );
+	ret = InitDict( ctx->data, path );
+	if ( ret )
+		goto error;
+	ret = InitTree( ctx->data, path );
 	if ( ret )
 		goto error;
 
@@ -163,6 +185,30 @@ CHEWING_API ChewingContext *chewing_new()
 	ret = InitHash( ctx->data );
 
 	ctx->cand_no = 0;
+
+	ret = find_path_by_files(
+		search_path, SYMBOL_TABLE_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitSymbolTable( ctx->data, path );
+	if ( !ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, EASY_SYMBOL_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitEasySymbolInput( ctx->data, path );
+	if ( !ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, PINYIN_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitHanyuPinYin( ctx->data, path );
+	if ( !ret )
+		goto error;
 
 	return ctx;
 error:
@@ -174,23 +220,6 @@ CHEWING_API int chewing_Init(
 		const char *dataPath,
 		const char *hashPath )
 {
-	int len;
-
-	len = strlen( dataPath );
-	if ( len + 1 <= sizeof(libraryDataPath) ) {
-		strcpy(libraryDataPath, dataPath );
-	}
-
-	/* initialize SymbolTable */
-	if ( ! InitSymbolTable( (char*) hashPath ) )
-		InitSymbolTable( (char*) dataPath );
-	if ( ! InitEasySymbolInput( (char *) hashPath ) )
-		InitEasySymbolInput( (char *) dataPath );
-
-	/* initialize HanyuPinYin table */
-	if ( ! InitHanyuPinYin( hashPath ) )
-		InitHanyuPinYin( dataPath );
-
 #ifdef ENABLE_DEBUG
 {
 	char *dbg_path;
@@ -211,11 +240,8 @@ CHEWING_API int chewing_Init(
 		}
 	}
 	/* register debug service */
-	if ( fp_g )
-		addTerminateService( TerminateDebug );
 }
 #endif
-	bTerminateCompleted = 0;
 	return 0;
 }
 
@@ -273,37 +299,22 @@ CHEWING_API char* chewing_get_KBString( ChewingContext *ctx )
 
 CHEWING_API void chewing_Terminate()
 {
-	int i;
-
-	/* No terminating services are registered. */
-	if ( bTerminateCompleted || countTerminateService == 0 )
-		return;
-
-	for ( i = 0; i < countTerminateService; i++ ) {
-		if ( TerminateServices[ i ] ) {
 #ifdef ENABLE_DEBUG
-			/* Can't output to debug file because it's about to close */
-			fprintf( stderr, 
-				EMPHASIZE( "Terminating service #%d / %d" ) ".\n",
-				i, countTerminateService );
+	TerminateDebug();
 #endif
-			(*TerminateServices[ i ])();
-		}
-	}
-	
-	/* XXX: should check if the services are really completed. */
-	bTerminateCompleted = 1;
-	return;
 }
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
 		if ( ctx->data ) {
+			TerminateHanyuPinyin( ctx->data );
+			TerminateEasySymbolTable( ctx->data );
+			TerminateSymbolTable( ctx->data );
 			TerminateHash( ctx->data );
+			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
 			TerminateChar( ctx->data );
-			TerminateTree( ctx->data );
 			free( ctx->data );
 		}
 
