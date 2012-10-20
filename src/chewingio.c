@@ -38,7 +38,7 @@
 #include "chewingio.h"
 #include "mod_aux.h"
 #include "global-private.h"
-#include "plat_path.h"
+#include "path-private.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
@@ -135,59 +135,6 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 		if ( ! pgdata->choiceInfo.isSymbol )
 			OpenSymbolChoice( pgdata );
 	}
-}
-
-static int are_all_files_readable(
-	const char *path,
-	const char * const *files,
-	char *output,
-	size_t output_len )
-{
-	int i;
-
-	assert( path );
-	assert( files );
-
-	for ( i = 0; files[i] != NULL; ++i ) {
-		snprintf( output, output_len, "%s" PLAT_SEPARATOR "%s", path,
-				files[i] );
-		if ( access( output, R_OK ) != 0 ) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-int find_path_by_files(
-	const char *search_path,
-	const char * const *files,
-	char *output,
-	size_t output_len )
-{
-	char buffer[PATH_MAX];
-	char *path;
-	char *saveptr;
-	int ret;
-
-	assert( search_path );
-	assert( files );
-	assert( output );
-	assert( output_len );
-
-	// strtok_r will modify its first parameter.
-	strncpy( buffer, search_path, sizeof( buffer ) );
-
-	for ( path = strtok_r( buffer, SEARCH_PATH_SEP, &saveptr );
-		path; path = strtok_r( NULL, SEARCH_PATH_SEP, &saveptr ) ) {
-
-		ret = are_all_files_readable( path, files, output, output_len );
-		if ( ret ) {
-			snprintf( output, output_len, "%s", path );
-			return 0;
-		}
-	}
-	return -1;
 }
 
 CHEWING_API ChewingContext *chewing_new()
