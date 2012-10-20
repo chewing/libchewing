@@ -22,6 +22,12 @@
 
 #define ENV_NAME "CHEWING_PATH_TESTING_ENV"
 
+int find_path_by_files(
+	const char *search_path,
+	const char * const *files,
+	char *output,
+	size_t output_len );
+
 static const char *FILES[] = {
 	CHAR_FILE,
 	CHAR_INDEX_BEGIN_FILE,
@@ -40,7 +46,7 @@ void test_plat_path_found()
 	char output[ PATH_MAX ];
 
 	ret = find_path_by_files(
-		CHEWING_DATA_PREFIX "_no_such_path:"
+		CHEWING_DATA_PREFIX "_no_such_path" SEARCH_PATH_SEP
 		CHEWING_DATA_PREFIX, FILES, output, sizeof( output ) );
 
 	ok( ret == 0, "find_path_by_files shall return 0" );
@@ -54,7 +60,8 @@ void test_plat_path_cannot_find()
 	char output[ PATH_MAX ];
 
 	ret = find_path_by_files(
-			CHEWING_DATA_PREFIX "_no_such_path",
+			CHEWING_DATA_PREFIX "_no_such_path_1" SEARCH_PATH_SEP
+			CHEWING_DATA_PREFIX "_no_such_path_2",
 			FILES, output, sizeof( output ) );
 
 	ok( ret != 0, "find_path_by_files shall not return 0" );
