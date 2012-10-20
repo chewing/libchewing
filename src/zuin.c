@@ -105,7 +105,7 @@ static int IsDefPhoEndKey( int key, int kbtype )
 
 static int EndKeyProcess( ChewingData *pgdata, ZuinData *pZuin, int key, int searchTimes )
 {
-	uint16 u16Pho;
+	uint16_t u16Pho;
 	Word tempword;
 	int pho_inx;
 

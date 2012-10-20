@@ -44,7 +44,7 @@ static int DeltaFreq( int recentTime )
 #endif
 
 /* load the orginal frequency from the static dict */
-static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[], int len )
+static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
 {
 	int pho_id;
 	int retval;
@@ -70,7 +70,7 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16 phoneSeq[], const
 }
 
 /* find the maximum frequency of the same phrase */
-static int LoadMaxFreq( ChewingData *pgdata, const uint16 phoneSeq[], int len )
+static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len )
 {
 	int pho_id;
 	Phrase *phrase = ALC( Phrase, 1 );
@@ -131,7 +131,7 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	}
 }
 
-int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char wordSeq[] )
+int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	UserPhraseData data;
@@ -171,7 +171,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16 phoneSeq[], const char w
 	}
 }
 
-UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16 phoneSeq[] )
+UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] )
 {
 	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, NULL );
 	if ( ! pItemLast ) 
@@ -179,7 +179,7 @@ UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16 phoneSeq[]
 	return &( pItemLast->data );
 }
 
-UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16 phoneSeq[] )
+UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16_t phoneSeq[] )
 {
 	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, pItemLast );
 	if ( ! pItemLast )

@@ -20,7 +20,7 @@
  *
  *	  Read dictionary format :
  *  	  phrase   frequency   zuin1 zuin2 zuin3 ... \n
- *  	  Output format : ( Sorted by zuin's uint16 number )
+ *  	  Output format : ( Sorted by zuin's uint16_t number )
  *  	  phrase   frequency   zuin1 zuin2 zuin3 ... \n
  */
 
@@ -42,7 +42,7 @@
 typedef struct {
 	char str[ MAXLEN ];
 	int freq;
-	uint16 num[ MAXZUIN ];
+	uint16_t num[ MAXZUIN ];
 } RECORD;
 
 RECORD data[ 420000L ];
@@ -59,7 +59,7 @@ const char user_msg[] =
 		"3." IN_FILE " \t-- intermediate file for make_tree \n";
 
 extern const char *ph_pho[];
-/*extern uint16 PhoneBg2Uint( const char *phone );*/
+/*extern uint16_t PhoneBg2Uint( const char *phone );*/
 
 void DataSetNum( long _index )
 {

@@ -32,8 +32,10 @@ AC_SUBST(LIBCHEWING_AGE)
 LIBCHEWING_BINARY_VERSION=1.0.0
 AC_SUBST(LIBCHEWING_BINARY_VERSION)
 
-AC_DEFINE_UNQUOTED(LIBCHEWING_BINARY_VERSION, "$LIBCHEWING_BINARY_VERSION", [The binary version of libchewing.])
-AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION, "$PACKAGE_VERSION", [The release version of libchewing.])
+AC_DEFINE_UNQUOTED(LIBCHEWING_BINARY_VERSION,
+        "$LIBCHEWING_BINARY_VERSION", [The binary version of libchewing.])
+AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION,
+        "$PACKAGE_VERSION", [The release version of libchewing.])
 
 # Init automake stuff
 AM_MAINTAINER_MODE([enable])
@@ -66,6 +68,7 @@ AC_TYPE_SIZE_T
 
 # chewing-private.h
 AC_C_INLINE
+AC_TYPE_UINT16_T
 
 CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
@@ -75,11 +78,13 @@ AM_CFLAGS="$CFLAGS -Wall"
 
 # Checks for ncursesw
 AC_CHECK_LIB([ncursesw], [initscr],
-             [AC_CHECK_HEADER([ncursesw/curses.h], [enable_ncursesw=yes], [enable_ncursesw=no])],
+             [AC_CHECK_HEADER([ncursesw/curses.h],
+                [enable_ncursesw=yes], [enable_ncursesw=no])],
              [enable_ncursesw=no])
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$enable_ncursesw = "xyes"])
 if test "$enable_ncursesw" = "yes"; then
-    AC_DEFINE(HAVE_NCURSESW_CURSES_H, 1, [ Define to 1 if you have the <ncursesw/curses.h> header file. ])
+        AC_DEFINE(HAVE_NCURSESW_CURSES_H, 1,
+                [ Define to 1 if you have the <ncursesw/curses.h> header file. ])
     AC_SUBST(NCURSESW_LIBS, ['-lncursesw'])
 fi
 
@@ -117,7 +122,7 @@ dnl Check for gcc4 or greater
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 void
 #if defined(__GNUC__) && (__GNUC__ >= 4)
-foo () {};                                                                                         
+foo () {};
 #endif
 ]], [[]])],[
   has_visibility=yes

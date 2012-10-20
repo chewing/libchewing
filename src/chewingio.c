@@ -1318,7 +1318,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int newPhraseLen;
 	int i;
-	uint16 addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	char addWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int phraseState;
 	int cursor;
@@ -1353,7 +1353,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor ],
-				        sizeof( uint16 ) * newPhraseLen );
+				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
@@ -1384,7 +1384,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
-				        sizeof( uint16 ) * newPhraseLen );
+				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
@@ -1491,11 +1491,11 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 	return 0;
 }
 
-CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx )
+CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx )
 {
-	uint16 *seq;
-	seq = ALC( uint16, ctx->data->nPhoneSeq );
-	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16)*ctx->data->nPhoneSeq );
+	uint16_t *seq;
+	seq = ALC( uint16_t, ctx->data->nPhoneSeq );
+	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16_t)*ctx->data->nPhoneSeq );
 	return seq;
 }
 

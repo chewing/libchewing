@@ -14,7 +14,7 @@
 
 /** 
  * @file key2pho.c
- * @brief map zuins to uint16 type according to different kb_type
+ * @brief map zuins to uint16_t type according to different kb_type
  */
 
 /* This file is encoded in UTF-8 */
@@ -91,7 +91,7 @@ static const char *key_str[ MAX_KBTYPE ] = {
  *
  * return the number it means
  */
-uint16 UintFromPhone( const char *zhuin )
+uint16_t UintFromPhone( const char *zhuin )
 {
 	char *iter, *pos;
 	char buf[ 7 ];
@@ -179,10 +179,10 @@ int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes )
 	return zhuin_tab_num[type] - ueStrLen(p);
 }
 
-uint16 UintFromPhoneInx( const int ph_inx[] )
+uint16_t UintFromPhoneInx( const int ph_inx[] )
 {
 	int i;
-	uint16 result = 0;
+	uint16_t result = 0;
 
 	for ( i = 0; i < ZUIN_SIZE; i++ )
 		result |= ph_inx[ i ] << shift[ i ];

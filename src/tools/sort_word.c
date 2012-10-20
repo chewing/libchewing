@@ -31,7 +31,7 @@
 #define MAX_BUF_LEN	(4096)
 
 typedef struct {
-	uint16 num;
+	uint16_t num;
 	char word[ 8 ];
 } WORD_DATA;
 
@@ -64,7 +64,7 @@ void Output()
 {
 	FILE *indexfile, *datafile, *configfile;
 	int i;
-	uint16 previous;
+	uint16_t previous;
 
 #ifdef USE_BINARY_DATA
 	int tmp;
@@ -91,7 +91,7 @@ void Output()
 #ifdef USE_BINARY_DATA
 			tmp = ftell( datafile );
 			fwrite( &tmp, sizeof(int), 1, indexfile );
-			fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+			fwrite( &previous, sizeof(uint16_t), 1, indexfile2 );
 #else
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
 #endif
@@ -109,7 +109,7 @@ void Output()
 	tmp = ftell( datafile );
 	fwrite( &tmp, sizeof(int), 1, indexfile );
 	previous = 0;
-	fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+	fwrite( &previous, sizeof(uint16_t), 1, indexfile2 );
 #else
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
 #endif

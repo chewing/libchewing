@@ -12,7 +12,13 @@
 #define _CHEWING_CORE_PRIVATE_H
 
 #ifdef HAVE_CONFIG_H
-  #include <config.h>
+#  include <config.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#elif defined HAVE_STDINT_H
+#  include <stdint.h>
 #endif
 
 #include "global.h"
@@ -43,11 +49,11 @@ static inline int min( int a, int b )
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
-	uint16 wch;
+	uint16_t wch;
 } wch_t;
 
 typedef struct {
-	uint16 phone_id;
+	uint16_t phone_id;
 	int phrase_id;
 	int child_begin, child_end;
 } TreeType;
@@ -67,7 +73,7 @@ typedef struct {
 typedef struct {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
-	uint16 phone;
+	uint16_t phone;
 	PinYinData pinYinData;
 } ZuinData;
 
@@ -139,7 +145,7 @@ typedef struct {
 	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
 	int showMsgLen;
 
-	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
@@ -161,7 +167,7 @@ typedef struct {
 	plat_mmap tree_mmap;
 #endif
 
-	uint16 *arrPhone;
+	uint16_t *arrPhone;
 	int *char_begin;
 	size_t phone_num;
 	void *char_;

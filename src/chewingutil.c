@@ -565,7 +565,7 @@ void CleanAllBuf( ChewingData *pgdata )
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 {
 	int throwEnd;
-	uint16 bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
+	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
 	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 
 	throwEnd = CountReleaseNum( pgdata );
@@ -579,8 +579,8 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 		WriteChiSymbolToBuf( pgo->commitStr, throwEnd, pgdata );
 
 		/* Add to userphrase */
-		memcpy( bufPhoneSeq, pgdata->phoneSeq, sizeof( uint16 ) * throwEnd );
-		bufPhoneSeq[ throwEnd ] = (uint16) 0;
+		memcpy( bufPhoneSeq, pgdata->phoneSeq, sizeof( uint16_t ) * throwEnd );
+		bufPhoneSeq[ throwEnd ] = (uint16_t) 0;
 		ueStrNCpy( bufWordSeq, pgdata->phrOut.chiBuf, throwEnd, 1 );
 		UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 
@@ -636,7 +636,7 @@ static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 
 void AutoLearnPhrase( ChewingData *pgdata )
 {
-	uint16 bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
+	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
 	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int i, from, len;
 	int prev_pos = 0;
@@ -646,8 +646,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
 		if ( len == 1 && ! ChewingIsBreakPoint( from, pgdata ) ) {
-			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
-			bufPhoneSeq[ prev_pos + len ] = (uint16) 0;
+			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
+			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
 			ueStrNCpy( ueStrSeek( bufWordSeq, prev_pos ),
 					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
 					len, 1);
@@ -660,8 +660,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 				prev_pos = 0;
 				pending = 0;
 			}
-			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16 ) * len );
-			bufPhoneSeq[ len ] = (uint16) 0;
+			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
+			bufPhoneSeq[ len ] = (uint16_t) 0;
 			ueStrNCpy( bufWordSeq,
 					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
 					len, 1);
@@ -675,7 +675,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	}
 }
 
-int AddChi( uint16 phone, ChewingData *pgdata )
+int AddChi( uint16_t phone, ChewingData *pgdata )
 {
 	int i;
 	int cursor = PhoneSeqCursor( pgdata );
@@ -702,7 +702,7 @@ int AddChi( uint16 phone, ChewingData *pgdata )
 	memmove(
 		&( pgdata->phoneSeq[ cursor + 1 ] ),
 		&( pgdata->phoneSeq[ cursor ] ) ,
-		sizeof( uint16 ) * ( pgdata->nPhoneSeq - cursor ) );
+		sizeof( uint16_t ) * ( pgdata->nPhoneSeq - cursor ) );
 	pgdata->phoneSeq[ cursor ] = phone;
 	pgdata->nPhoneSeq ++;
 
@@ -1111,7 +1111,7 @@ int ChewingKillChar(
 		memmove(
 			&( pgdata->phoneSeq[ cursorToKill ] ), 
 			&(pgdata->phoneSeq[ cursorToKill + 1 ] ),
-			(pgdata->nPhoneSeq - cursorToKill - 1) * sizeof( uint16 ) );
+			(pgdata->nPhoneSeq - cursorToKill - 1) * sizeof( uint16_t ) );
 		pgdata->nPhoneSeq--;
 	}
 	pgdata->symbolKeyBuf[ chiSymbolCursorToKill ] = 0;
@@ -1358,8 +1358,8 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	FILE *file;
 	char filename[ PATH_MAX ];
 	char line[512];
-	char *category;
-	char *symbols, *symbol;
+	char *category_end;
+	char *symbols, *symbols_end, *symbol;
 	SymbolEntry* tmp_tab[ 100 ];
 	int len = 0, i;
 
@@ -1377,14 +1377,15 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 		if ( pgdata->n_symbol_entry >=
 				(sizeof(tmp_tab) / sizeof( SymbolEntry * ) ) )
 			break;
-		category = strtok( line, "=\r\n" );
-		if ( category ) {
-			symbols = strtok( NULL, "\r\n" );
-			if ( symbols ) {
+		category_end = strpbrk( line, "=\r\n" );
+		if ( category_end ) {
+			symbols = category_end + 1;
+			symbols_end = strpbrk( symbols, "\r\n" );
+			if ( symbols_end ) {
+				*symbols_end = '\0';
 				len = ueStrLen( symbols );
-				tmp_tab[ pgdata->n_symbol_entry ] = ALC(
-						SymbolEntry,
-						sizeof( SymbolEntry ) +
+				tmp_tab[ pgdata->n_symbol_entry ] =
+					ALC( SymbolEntry, sizeof( SymbolEntry ) +
 						(len - 1) * (MAX_UTF8_SIZE + 1) );
 				tmp_tab[ pgdata->n_symbol_entry ]->nSymbols = len;
 				symbol = symbols;
@@ -1397,18 +1398,20 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 			}
 			else {
 				tmp_tab[ pgdata->n_symbol_entry ] =
-					(SymbolEntry *) calloc( 1,
-						sizeof( SymbolEntry ) - ( MAX_UTF8_SIZE + 1 ) );
+					ALC( SymbolEntry,
+						sizeof( SymbolEntry ) -
+						( MAX_UTF8_SIZE + 1 ) );
 				tmp_tab[ pgdata->n_symbol_entry ]->nSymbols = 0;
 			}
+			*category_end = '\0';
 			ueStrNCpy(
 				tmp_tab[ pgdata->n_symbol_entry ]->category,
-				category,
+				line,
 				MAX_PHRASE_LEN, 1 );
 			++pgdata->n_symbol_entry;
 		}
 	}
-	pgdata->symbol_table = (SymbolEntry **) calloc( pgdata->n_symbol_entry, sizeof( SymbolEntry * ) );
+	pgdata->symbol_table = ALC( SymbolEntry*,  pgdata->n_symbol_entry );
 	memcpy( pgdata->symbol_table, tmp_tab, pgdata->n_symbol_entry * sizeof( SymbolEntry *) );
 	fclose( file );
 	return 1;
