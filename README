@@ -103,6 +103,12 @@ necessary packages.
 - mingw-get install autoconf
 - mingw-get install libtool
 
+You also need gnulib-tool in your $PATH. The gnulib-tool can be get from git
+repository:
+
+- git clone git://git.savannah.gnu.org/gnulib.git
+- export PATH=$PATH:<path of gnulib>
+
 Now you have the build environment for libchewing. However, you need to check
 the line end of source code is LF instead of CR/LF before running autogen.sh.
 The easily way to do this is using git:
