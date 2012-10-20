@@ -1,5 +1,5 @@
 /**
- * path-private.h
+ * plat_path.h
  *
  * Copyright (c) 2012
  *	libchewing Core Team. See ChangeLog for details.
@@ -24,7 +24,7 @@
 #define SEARCH_PATH_SEP ";"
 
 #else
-#error Please defined SEARCH_PATH_SEP
+#error please define SEARCH_PATH_SEP
 #endif
 
 int get_search_path( char * path, size_t path_len );

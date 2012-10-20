@@ -1,5 +1,5 @@
 /**
- * path.c
+ * plat_path.c
  *
  * Copyright (c) 2012
  *	libchewing Core Team. See ChangeLog for details.
@@ -11,7 +11,7 @@
 #ifdef HAVE_CONFIG_H
   #include <config.h>
 #endif
-#include "path-private.h"
+#include "plat_path.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -21,6 +21,7 @@
 #include "plat_types.h"
 
 #ifdef UNDER_POSIX
+#define SEARCH_PATH_SEP ":"
 int get_search_path( char * path, size_t path_len )
 {
 	char *chewing_path;
@@ -44,6 +45,7 @@ int get_search_path( char * path, size_t path_len )
 }
 
 #elif defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+#define SEARCH_PATH_SEP ";"
 static char * strtok_r (char *s, const char *delim, char **save_ptr)
 {
 	char *token;

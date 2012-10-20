@@ -38,7 +38,7 @@
 #include "chewingio.h"
 #include "mod_aux.h"
 #include "global-private.h"
-#include "path-private.h"
+#include "plat_path.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
