@@ -85,7 +85,6 @@ int get_search_path( char * path, size_t path_len )
 		if ( appdata ) {
 			snprintf( path, path_len, "%s", appdata );
 		} else {
-			snprintf( path, path_len, "" );
 			return -1;
 		}
 	}
