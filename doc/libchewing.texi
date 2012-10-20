@@ -97,24 +97,31 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 
 @c TODO: Add some prose and examples to describe how to setup libchewing.
 
+@section Environment Variables
+
+@itemize
+@item
+The @env{CHEWING_PATH} environment variable is used to set the search path of
+static data used by the Chewing IM. The format of @env{CHEWING_PATH} is the same
+as @env{PATH}, which is multiple paths separated by `:' in UNIX platform, or
+separated by `;' in Windows platform. The directories in @env{CHEWING_PATH}
+could be read-only.
+
+@item
+The @env{CHEWING_USER_PATH} environment variable is used to specifies the path
+where user-defined hash data stores. This path @emph{should} be writable by the
+user, or the Chewing IM will lose the ability to remember the learned phrases.
+@end itemize
+
+@section API
+
 @deftypefun int chewing_Init (const char *@var{dataPath}, const char *@var{hashPath})
 @quotation Deprecated
-The @code{chewing_Init} function uses a static buffer to save the
-paths, so it is not thread-safe. Do not use this function if
-thread-safety is important.
+The @code{chewing_Init} function is no-op now. This function exists only for
+backword compatibility.
 @end quotation
 
-This function initializes the directory data used by the Chewing
-IM.
-
-The @var{dataPath} argument specifies the system path of the
-static data used by the Chewing IM. This directory could be
-read-only. The @var{hashPath} argument specifies the path where
-user-defined hash data stores. This path @emph{should} be writable by
-the user, or the Chewing IM will lose the ability to remember the
-learned phrases.
-
-The return value is @code{0} on success and @code{-1} on failure.
+The return value is always @code{0}.
 @end deftypefun
 
 @deftp {Data Type} ChewingContext
