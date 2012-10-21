@@ -40,6 +40,18 @@ static const char *FILES[] = {
 	NULL,
 };
 
+void test_plat_get_search_path()
+{
+	int ret;
+	char output[PATH_MAX];
+
+	putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+	ret = get_search_path( output, sizeof(output) );
+	ok (ret == 0, "get_search_path return 0");
+	ok (!strcmp(output, CHEWING_DATA_PREFIX), "get_search_path succes");
+	// TODO plat specific test
+}
+
 void test_plat_path_found()
 {
 	int ret;
@@ -70,6 +82,7 @@ void test_plat_path_cannot_find()
 
 int main()
 {
+	test_plat_get_search_path();
 	test_plat_path_found();
 	test_plat_path_cannot_find();
 	return exit_status();

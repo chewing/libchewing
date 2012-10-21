@@ -159,7 +159,7 @@ CHEWING_API ChewingContext *chewing_new()
 	chewing_Reset( ctx );
 
 	ret = get_search_path( search_path, sizeof( search_path ) );
-	if ( !ret )
+	if ( ret )
 		goto error;
 
 	ret = find_path_by_files(
