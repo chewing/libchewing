@@ -1117,7 +1117,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	int bQuickCommit = 0;
 
 	/* Update lifetime */
-	ctx->data->chewing_lifetime++;
+	ctx->data->static_data.chewing_lifetime++;
 
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {

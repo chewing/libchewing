@@ -70,7 +70,7 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], 
 {
 	HASH_ITEM *pNow = pItemLast ?
 			pItemLast->next :
-			pgdata->hashtable[ HashFunc( phoneSeq ) ];
+			pgdata->static_data.hashtable[ HashFunc( phoneSeq ) ];
 	
 	for ( ; pNow; pNow = pNow->next ) 
 		if ( PhoneSeqTheSame( pNow->data.phoneSeq, phoneSeq ) )
@@ -85,7 +85,7 @@ HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const 
 
 	hashvalue = HashFunc( phoneSeq );
 
-	for ( pItem = pgdata->hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
+	for ( pItem = pgdata->static_data.hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
 		if ( 
 			! strcmp( pItem->data.wordSeq, wordSeq ) && 
 			PhoneSeqTheSame( pItem->data.phoneSeq, phoneSeq ) ) {
@@ -110,13 +110,13 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 
 	hashvalue = HashFunc( pData->phoneSeq );
 	/* set the new element */
-	pItem->next = pgdata->hashtable[ hashvalue ];
+	pItem->next = pgdata->static_data.hashtable[ hashvalue ];
 
 	memcpy( &( pItem->data ), pData, sizeof( pItem->data ) );
 	pItem->item_index = -1;
 
 	/* set link to the new element */
-	pgdata->hashtable[ hashvalue ] = pItem;
+	pgdata->static_data.hashtable[ hashvalue ] = pItem;
 
 	return pItem;
 }
@@ -184,13 +184,13 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 	FILE *outfile;
 	char str[ FIELD_SIZE + 1 ];
 
-	outfile = fopen( pgdata->hashfilename, "r+b" );
+	outfile = fopen( pgdata->static_data.hashfilename, "r+b" );
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
-	fwrite( &pgdata->chewing_lifetime, 1, 4, outfile );
+	fwrite( &pgdata->static_data.chewing_lifetime, 1, 4, outfile );
 #ifdef ENABLE_DEBUG
-	sprintf( str, "%d", pgdata->chewing_lifetime );
+	sprintf( str, "%d", pgdata->static_data.chewing_lifetime );
 	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
 	DEBUG_FLUSH;
 #endif
@@ -408,7 +408,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 		fclose( txtfile );
 		return 0;
 	}
-	ret = fscanf( txtfile, "%d", &pgdata->chewing_lifetime );
+	ret = fscanf( txtfile, "%d", &pgdata->static_data.chewing_lifetime );
 	if ( ret != 1 ) {
 		return 0;
 	}
@@ -417,9 +417,9 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 	seekdump = dump;
 	memcpy( seekdump, BIN_HASH_SIG, strlen( BIN_HASH_SIG ) );
 	memcpy( seekdump + strlen( BIN_HASH_SIG ),
-	        &pgdata->chewing_lifetime,
-		sizeof(pgdata->chewing_lifetime) );
-	seekdump += strlen( BIN_HASH_SIG ) + sizeof(pgdata->chewing_lifetime);
+	        &pgdata->static_data.chewing_lifetime,
+		sizeof(pgdata->static_data.chewing_lifetime) );
+	seekdump += strlen( BIN_HASH_SIG ) + sizeof(pgdata->static_data.chewing_lifetime);
 
 	/* migrate */
 	item_index = 0;
@@ -516,7 +516,7 @@ void TerminateHash( ChewingData *pgdata )
 	HASH_ITEM *pItem;
 	int i;
 	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
-		pItem = pgdata->hashtable[ i ];
+		pItem = pgdata->static_data.hashtable[ i ];
 		DEBUG_CHECKPOINT();
 		FreeHashItem( pItem );
 	}
@@ -532,54 +532,54 @@ int InitHash( ChewingData *pgdata )
 
 	/* make sure of write permission */
 	if ( path && access( path, W_OK ) == 0 ) {
-		sprintf( pgdata->hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+		sprintf( pgdata->static_data.hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
 	} else {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
-				pgdata->hashfilename, "%s%s",
+				pgdata->static_data.hashfilename, "%s%s",
 				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
 			sprintf(
-				pgdata->hashfilename, "%s%s",
+				pgdata->static_data.hashfilename, "%s%s",
 				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
-		PLAT_MKDIR( pgdata->hashfilename );
-		strcat( pgdata->hashfilename, PLAT_SEPARATOR );
-		strcat( pgdata->hashfilename, HASH_FILE );
+		PLAT_MKDIR( pgdata->static_data.hashfilename );
+		strcat( pgdata->static_data.hashfilename, PLAT_SEPARATOR );
+		strcat( pgdata->static_data.hashfilename, HASH_FILE );
 	}
-	memset( pgdata->hashtable, 0, sizeof( pgdata->hashtable ) );
+	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
 
 open_hash_file:
-	dump = _load_hash_file( pgdata->hashfilename, &fsize );
-	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(pgdata->chewing_lifetime);
+	dump = _load_hash_file( pgdata->static_data.hashfilename, &fsize );
+	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(pgdata->static_data.chewing_lifetime);
 	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
 		FILE *outfile;
-		outfile = fopen( pgdata->hashfilename, "w+b" );
+		outfile = fopen( pgdata->static_data.hashfilename, "w+b" );
 		if ( ! outfile ) {
 			if ( dump ) {
 				free( dump );
 			}
 			return 0;
 		}
-		pgdata->chewing_lifetime = 0;
+		pgdata->static_data.chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-		fwrite( &pgdata->chewing_lifetime, 1,
-		                sizeof(pgdata->chewing_lifetime), outfile );
+		fwrite( &pgdata->static_data.chewing_lifetime, 1,
+		                sizeof(pgdata->static_data.chewing_lifetime), outfile );
 		fclose( outfile );
 	}
 	else {
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
-			if ( ! migrate_hash_to_bin( pgdata, pgdata->hashfilename ) ) {
+			if ( ! migrate_hash_to_bin( pgdata, pgdata->static_data.hashfilename ) ) {
 				return  0;
 			}
 			goto open_hash_file;
 		}
 
-		pgdata->chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
+		pgdata->static_data.chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
 		seekdump = dump + hdrlen;
 		fsize -= hdrlen;
 
@@ -614,11 +614,11 @@ open_hash_file:
 			pPool = pItem->next;
 
 			hashvalue = HashFunc( pItem->data.phoneSeq );
-			pItem->next = pgdata->hashtable[ hashvalue ];
-			pgdata->hashtable[ hashvalue ] = pItem;
+			pItem->next = pgdata->static_data.hashtable[ hashvalue ];
+			pgdata->static_data.hashtable[ hashvalue ] = pItem;
 			pItem->data.recentTime -= oldest;
 		}
-		pgdata->chewing_lifetime -= oldest;
+		pgdata->static_data.chewing_lifetime -= oldest;
 	}
 	return 1;
 }

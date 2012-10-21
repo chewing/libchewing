@@ -130,39 +130,7 @@ typedef struct _SymbolEntry {
 	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-struct tag_HASH_ITEM;
-
 typedef struct {
-	AvailInfo availInfo;
-	ChoiceInfo choiceInfo;
-	PhrasingOutput phrOut;
-	ZuinData zuinData;
-	ChewingConfigData config;
-    /** @brief current input buffer, content==0 means Chinese code */
-	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
-	int chiSymbolCursor;
-	int chiSymbolBufLen;
-	int PointStart;
-	int PointEnd;
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
-	int showMsgLen;
-
-	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
-	int nPhoneSeq;
-	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
-	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
-	int nSelect;
-	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
-	int nPrefer;
-	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN + 1 ];
-	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];   
-	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
-	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
-	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
-	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
-	/* Symbol Key buffer */
-	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
-
 	TreeType *tree;
 	size_t tree_size;
 #ifdef USE_BINARY_DATA
@@ -212,6 +180,42 @@ typedef struct {
 	struct keymap *hanyuFinalsMap;
 	int HANYU_INITIALS;
 	int HANYU_FINALS;
+} ChewingStaticData;
+
+struct tag_HASH_ITEM;
+
+typedef struct {
+	AvailInfo availInfo;
+	ChoiceInfo choiceInfo;
+	PhrasingOutput phrOut;
+	ZuinData zuinData;
+	ChewingConfigData config;
+    /** @brief current input buffer, content==0 means Chinese code */
+	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
+	int chiSymbolCursor;
+	int chiSymbolBufLen;
+	int PointStart;
+	int PointEnd;
+	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
+	int showMsgLen;
+
+	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	int nPhoneSeq;
+	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
+	int nSelect;
+	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
+	int nPrefer;
+	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN + 1 ];
+	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];   
+	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
+	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
+	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
+	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
+	/* Symbol Key buffer */
+	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
+
+	ChewingStaticData static_data;
 } ChewingData;
 
 typedef struct {

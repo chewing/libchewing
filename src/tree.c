@@ -90,11 +90,11 @@ static int GetIntersection( IntervalType in1, IntervalType in2, IntervalType *in
 void TerminateTree( ChewingData *pgdata )
 {
 #ifdef USE_BINARY_DATA
-		pgdata->tree = NULL;
-		plat_mmap_close( &pgdata->tree_mmap );
+		pgdata->static_data.tree = NULL;
+		plat_mmap_close( &pgdata->static_data.tree_mmap );
 #else
-		free( pgdata->tree );
-		pgdata->tree = NULL;
+		free( pgdata->static_data.tree );
+		pgdata->static_data.tree = NULL;
 #endif
 }
 
@@ -110,14 +110,14 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	if ( len + 1 > sizeof( filename ) )
 		return -1;
 
-	plat_mmap_set_invalid( &pgdata->tree_mmap );
-	pgdata->tree_size = plat_mmap_create( &pgdata->tree_mmap, filename, FLAG_ATTRIBUTE_READ );
-	if ( pgdata->tree_size <= 0 )
+	plat_mmap_set_invalid( &pgdata->static_data.tree_mmap );
+	pgdata->static_data.tree_size = plat_mmap_create( &pgdata->static_data.tree_mmap, filename, FLAG_ATTRIBUTE_READ );
+	if ( pgdata->static_data.tree_size <= 0 )
 		return -1;
 
 	offset = 0;
-	pgdata->tree = (TreeType *) plat_mmap_set_view( &pgdata->tree_mmap, &offset, &pgdata->tree_size );
-	if ( !pgdata->tree )
+	pgdata->static_data.tree = (TreeType *) plat_mmap_set_view( &pgdata->static_data.tree_mmap, &offset, &pgdata->static_data.tree_size );
+	if ( !pgdata->static_data.tree )
 		return -1;
 
 	return 0;
@@ -300,24 +300,24 @@ int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *pho
 	tree_p = 0;
 	for ( i = begin; i <= end; i++ ) {
 		for ( 
-			child = pgdata->tree[ tree_p ].child_begin;
-			child != -1 && child <= pgdata->tree[ tree_p ].child_end;
+			child = pgdata->static_data.tree[ tree_p ].child_begin;
+			child != -1 && child <= pgdata->static_data.tree[ tree_p ].child_end;
 			child++ ) {
 
 #ifdef USE_BINARY_DATA
-			assert(0 <= child && child * sizeof(TreeType) < pgdata->tree_size);
+			assert(0 <= child && child * sizeof(TreeType) < pgdata->static_data.tree_size);
 #endif
-			if ( pgdata->tree[ child ].phone_id == phoneSeq[ i ] )
+			if ( pgdata->static_data.tree[ child ].phone_id == phoneSeq[ i ] )
 				break;
 		}
 		/* if not found any word then fail. */
-		if ( child == -1 || child > pgdata->tree[ tree_p ].child_end )
+		if ( child == -1 || child > pgdata->static_data.tree[ tree_p ].child_end )
 			return -1;
 		else {
 			tree_p = child;
 		}
 	}
-	return pgdata->tree[ tree_p ].phrase_id;
+	return pgdata->static_data.tree[ tree_p ].phrase_id;
 }
 
 static void AddInterval(

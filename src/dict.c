@@ -44,15 +44,15 @@ static char *fgettab( char *buf, int maxlen, FILE *fp )
 void TerminateDict( ChewingData *pgdata )
 {
 #ifdef USE_BINARY_DATA
-	plat_mmap_close( &pgdata->index_mmap );
-	plat_mmap_close( &pgdata->dict_mmap );
+	plat_mmap_close( &pgdata->static_data.index_mmap );
+	plat_mmap_close( &pgdata->static_data.dict_mmap );
 #else
-	if ( pgdata->dictfile ) {
-		fclose( pgdata->dictfile );
-		pgdata->dictfile = NULL;
+	if ( pgdata->static_data.dictfile ) {
+		fclose( pgdata->static_data.dictfile );
+		pgdata->static_data.dictfile = NULL;
 	}
-	free( pgdata->dict_begin );
-	pgdata->dict_begin = NULL;
+	free( pgdata->static_data.dict_begin );
+	pgdata->static_data.dict_begin = NULL;
 #endif
 }
 
@@ -69,30 +69,30 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	if ( len + 1 > sizeof( filename ) )
 		return -1;
 
-	plat_mmap_set_invalid( &pgdata->dict_mmap );
-	file_size = plat_mmap_create( &pgdata->dict_mmap, filename, FLAG_ATTRIBUTE_READ );
+	plat_mmap_set_invalid( &pgdata->static_data.dict_mmap );
+	file_size = plat_mmap_create( &pgdata->static_data.dict_mmap, filename, FLAG_ATTRIBUTE_READ );
 	if ( file_size <= 0 )
 		return -1;
 
 	offset = 0;
 	csize = file_size;
-	pgdata->dict = plat_mmap_set_view( &pgdata->dict_mmap, &offset, &csize );
-	if ( !pgdata->dict )
+	pgdata->static_data.dict = plat_mmap_set_view( &pgdata->static_data.dict_mmap, &offset, &csize );
+	if ( !pgdata->static_data.dict )
 		return -1;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
 	if ( len + 1 > sizeof( filename ) )
 		return -1;
 
-	plat_mmap_set_invalid( &pgdata->index_mmap );
-	file_size = plat_mmap_create( &pgdata->index_mmap, filename, FLAG_ATTRIBUTE_READ );
+	plat_mmap_set_invalid( &pgdata->static_data.index_mmap );
+	file_size = plat_mmap_create( &pgdata->static_data.index_mmap, filename, FLAG_ATTRIBUTE_READ );
 	if ( file_size <= 0 )
 		return -1;
 
 	offset = 0;
 	csize = file_size;
-	pgdata->dict_begin = plat_mmap_set_view( &pgdata->index_mmap, &offset, &csize );
-	if ( !pgdata->dict_begin )
+	pgdata->static_data.dict_begin = plat_mmap_set_view( &pgdata->static_data.index_mmap, &offset, &csize );
+	if ( !pgdata->static_data.dict_begin )
 		return -1;
 
 	return 0;
@@ -137,16 +137,16 @@ static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
 #ifndef USE_BINARY_DATA
 	char buf[ 1000 ];
 
-	fgettab( buf, 1000, pgdata->dictfile );
+	fgettab( buf, 1000, pgdata->static_data.dictfile );
 	sscanf( buf, "%[^ ] %d", phr_ptr->phrase, &( phr_ptr->freq ) );
 #else
 	unsigned char size;
-	size = *(unsigned char *) pgdata->dict_cur_pos;
-	pgdata->dict_cur_pos = (unsigned char *)pgdata->dict_cur_pos + sizeof(unsigned char);
-	memcpy( phr_ptr->phrase, pgdata->dict_cur_pos, size );
-	pgdata->dict_cur_pos = (unsigned char *)pgdata->dict_cur_pos + size;
-	phr_ptr->freq = *(int *) pgdata->dict_cur_pos;
-	pgdata->dict_cur_pos = (unsigned char *)pgdata->dict_cur_pos + sizeof(int);
+	size = *(unsigned char *) pgdata->static_data.dict_cur_pos;
+	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(unsigned char);
+	memcpy( phr_ptr->phrase, pgdata->static_data.dict_cur_pos, size );
+	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + size;
+	phr_ptr->freq = *(int *) pgdata->static_data.dict_cur_pos;
+	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(int);
 	phr_ptr->phrase[ size ] = '\0';
 #endif
 }
@@ -156,11 +156,11 @@ int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id )
 	assert( ( 0 <= phone_phr_id ) && ( phone_phr_id < PHONE_PHRASE_NUM ) );
 
 #ifndef USE_BINARY_DATA
-	fseek( pgdata->dictfile, pgdata->dict_begin[ phone_phr_id ], SEEK_SET );
+	fseek( pgdata->static_data.dictfile, pgdata->static_data.dict_begin[ phone_phr_id ], SEEK_SET );
 #else
-	pgdata->dict_cur_pos = (unsigned char *)pgdata->dict + pgdata->dict_begin[ phone_phr_id ];
+	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict + pgdata->static_data.dict_begin[ phone_phr_id ];
 #endif
-	pgdata->dict_end_pos = pgdata->dict_begin[ phone_phr_id + 1 ];
+	pgdata->static_data.dict_end_pos = pgdata->static_data.dict_begin[ phone_phr_id + 1 ];
 	Str2Phrase( pgdata, phr_ptr );
 	return 1;
 }
@@ -171,7 +171,7 @@ int GetPhraseNext( ChewingData *pgdata, Phrase *phr_ptr )
 	if ( ftell( pgdata->dictfile ) >= pgdata->dict_end_pos )
 		return 0;
 #else
-	if ( (unsigned char *)pgdata->dict_cur_pos >= (unsigned char *)pgdata->dict + pgdata->dict_end_pos )
+	if ( (unsigned char *)pgdata->static_data.dict_cur_pos >= (unsigned char *)pgdata->static_data.dict + pgdata->static_data.dict_end_pos )
 		return 0;
 #endif
 	Str2Phrase( pgdata, phr_ptr );
