@@ -177,6 +177,12 @@ esac
 
 AC_SUBST(AM_CFLAGS)
 
+AC_CONFIG_LINKS([
+	data/pinyin.tab:data/pinyin.tab
+	data/swkb.dat:data/swkb.dat
+	data/symbols.dat:data/symbols.dat
+])
+
 AC_CONFIG_FILES([
         Makefile
         chewing.pc

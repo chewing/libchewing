@@ -47,7 +47,8 @@ void test_plat_path_found()
 
 	ret = find_path_by_files(
 		CHEWING_DATA_PREFIX "_no_such_path" SEARCH_PATH_SEP
-		CHEWING_DATA_PREFIX, FILES, output, sizeof( output ) );
+		CHEWING_DATA_PREFIX,
+		FILES, output, sizeof( output ) );
 
 	ok( ret == 0, "find_path_by_files shall return 0" );
 	ok( strcmp( output, CHEWING_DATA_PREFIX ) == 0,

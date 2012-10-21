@@ -21,10 +21,7 @@ dist_noinst_DATA = \
 	NOTE \
 	phone.cin \
 	phone.cin-CNS11643-complete.patch \
-	pinyin.tab \
 	svnrev \
-	swkb.dat \
-	symbols.dat \
 	tsi.src \
 	$(NULL)
 
