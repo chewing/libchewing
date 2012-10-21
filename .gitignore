@@ -52,6 +52,8 @@ test/test-mmap
 test/test-mmap.exe
 test/test-path
 test/test-path.exe
+test/test-reset
+test/test-reset.exe
 test/test-utf8
 test/test-utf8.exe
 

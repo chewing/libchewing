@@ -18,6 +18,7 @@ NATIVE_TESTS = \
 	test-utf8 \
 	test-mmap \
 	test-path \
+	test-reset \
 	$(NULL)
 
 check_HEADERS = \
