@@ -34,8 +34,10 @@ void test_UnitFromPlatMmap()
 		csize = idx;
 		data_buf = (char *) plat_mmap_set_view(&m_mmap, &offset, &csize);
 		for (i = 0; i < 26; i++) {
-			ok (data_buf[i] == hard_copy[i], "plat_mmap_set_view");
+			if (data_buf[i] != hard_copy[i])
+				break;
 		}
+		ok (i == 26, "plat_mmap_set_view");
 	}
 	plat_mmap_close( &m_mmap );
 }
