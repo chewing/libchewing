@@ -25,7 +25,8 @@ dist_noinst_DATA = \
 	tsi.src \
 	$(NULL)
 
-pkgdata_DATA = \
+chewing_datadir = $(pkglibdir)
+chewing_data_DATA = \
 	$(static_tables) \
 	$(datas) \
 	$(NULL)
