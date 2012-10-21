@@ -9,7 +9,6 @@ GRTAGS
 GSYMS
 
 # autotools generated
-Doxyfile
 INSTALL
 Makefile
 Makefile.in
