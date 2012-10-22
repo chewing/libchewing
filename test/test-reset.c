@@ -47,6 +47,7 @@ void test_reset_shall_not_clean_static_data()
 	ok( strcmp( buf, EXPECTED ) == 0, "output shall match expected string" );
 
 	chewing_free( buf );
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
