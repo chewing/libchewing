@@ -46,6 +46,8 @@ test/simulate
 test/simulate.exe
 test/testchewing
 test/testchewing.exe
+test/test-easy-symbol
+test/test-easy-symbol.exe
 test/test-key2pho
 test/test-key2pho.exe
 test/test-mmap

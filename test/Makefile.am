@@ -14,11 +14,12 @@ dist_noinst_DATA = \
 
 TESTS = $(NATIVE_TESTS)
 NATIVE_TESTS = \
+	test-easy-symbol \
 	test-key2pho \
-	test-utf8 \
 	test-mmap \
 	test-path \
 	test-reset \
+	test-utf8 \
 	$(NULL)
 
 check_HEADERS = \
