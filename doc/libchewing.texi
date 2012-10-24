@@ -70,7 +70,7 @@ standard for practical and flexible development cycles is required, so that
 we are facing the impacts from various Chinese input method implementations
 and the integration into existing framework or system designs.  At the
 result, Chewing Input Method (abbreviated as @dfn{Chewing IM}) attempts to
-be one of the approachesto solve and ease the problems with the inclusion
+be one of the approaches to solve and ease the problems with the inclusion
 of base classes, on the basis of cross-platform, and
 cross-operating-environment derivative classes, which are built as the
 abstract backbone of intelligent Chinese phonetic input method
@@ -429,7 +429,7 @@ zero.
 This function returns the number of pages of the candidates.
 
 If the return value is greater than zero, then the IM interface should
-popup a candidates selection window for the user to choose a
+display a selection window of the candidates for the user to choose a
 candidate. Otherwise hide the selection window.
 @end deftypefun
 
