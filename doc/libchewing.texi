@@ -582,17 +582,20 @@ The return value is a pointer to a character string. The memory
 @end deftypefun
 
 @deftypefun int chewing_zuin_Check (ChewingContext *@var{ctx})
-This function returns whether there are Zuin pre-edit string in the
-buffer.
+This function returns whether there are phonetic pre-edit string in the
+buffer.  Here "zuin" means bopomofo, a phonetic system for transcribing
+Chinese, especially Mandarin.
 
 The return value is @code{1} on success, @code{0} on failure.
 @end deftypefun
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
-This function returns the Zuin characters in the pre-edit buffer.
+This function returns the phonetic characters in the pre-edit buffer.
+Here "zuin" means bopomofo, a phonetic system for transcribing Chinese,
+especially Mandarin.
 
 The @var{zuin_count} argument is a output argument. It will contain
-the number of Zuin characters in the returned string.
+the number of phonetic characters in the returned string.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
@@ -656,7 +659,7 @@ This function returns the phonetic sequence in the Chewing IM internal
 state machine.
 
 The return value is a pointer to a @code{unsigned short} array. The
-values in the array is encoded Zuin phone. The memory @emph{must} be
+values in the array is encoded Bopomofo phone. The memory @emph{must} be
 freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
