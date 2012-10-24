@@ -62,21 +62,22 @@ The document was typeset with
 @chapter Overview
 
 @c TODO: Rewrite this paragraph
+@cindex Chewing IM
 As far as we expect, input method (in fact, the way for text input and
 output, especially in multi-lingual environments) implementations are
 becoming more and more complex in system integration.  The emerging
 standard for practical and flexible development cycles is required, so that
 we are facing the impacts from various Chinese input method implementations
 and the integration into existing framework or system designs.  At the
-result, Chewing Input Method (abbreviated as @dfn{Chewing}) attempts to be one
-of the approachesto solve and ease the problems with the inclusion of base
-classes, on the basis of cross-platform, and cross-operating-environment
-derivative classes, which are built as the abstract backbone of intelligent
-Chinese phonetic input method implementations.  From the perspectives,
-Chewing defines the abstract behavior how an intelligent phonetic IM should
-works via the common interface, and Chewing permits the extra parameters
-and properties for the input method implementations to extend their
-specific functionality.
+result, Chewing Input Method (abbreviated as @dfn{Chewing IM}) attempts to
+be one of the approachesto solve and ease the problems with the inclusion
+of base classes, on the basis of cross-platform, and
+cross-operating-environment derivative classes, which are built as the
+abstract backbone of intelligent Chinese phonetic input method
+implementations.  From the perspectives, Chewing defines the abstract
+behavior how an intelligent phonetic IM should works via the common
+interface, and Chewing permits the extra parameters and properties for the
+input method implementations to extend their specific functionality.
 
 @deftypevr Marco char* LIBCHEWING_ENCODING
 @quotation Deprecated
@@ -101,11 +102,12 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 
 @itemize
 @item
-The @env{CHEWING_PATH} environment variable is used to set the search path of
-static data used by the Chewing IM. The format of @env{CHEWING_PATH} is the same
-as @env{PATH}, which is multiple paths separated by `:' in UNIX platform, or
-separated by `;' in Windows platform. The directories in @env{CHEWING_PATH}
-could be read-only.
+The @env{CHEWING_PATH} environment variable is used to set the search
+path of static data used by the Chewing IM. The format of
+@env{CHEWING_PATH} is the same as @env{PATH}, which is multiple paths
+separated by `:' on POSIX and Unix-like platforms, or separated by `;'
+on Windows platform. The directories in @env{CHEWING_PATH} could be
+read-only.
 
 @item
 The @env{CHEWING_USER_PATH} environment variable is used to specifies the path
@@ -649,7 +651,7 @@ The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun unsigned short* chewing_get_phoneSeq (ChewingContext *@var{ctx})
+@deftypefun {unsigned short*} chewing_get_phoneSeq (ChewingContext *@var{ctx})
 This function returns the phonetic sequence in the Chewing IM internal
 state machine.
 
