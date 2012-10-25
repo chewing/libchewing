@@ -103,12 +103,31 @@ Mandarin.
 @node Setup
 @chapter Setup
 
-@c TODO: Add some prose and examples to describe how to setup libchewing.
+Most of the Chewing IM APIs require a @code{ChewingContext}. To create
+a @code{ChewingContext} you must use the @code{chewing_new}
+function. For example,
+
+@example
+#include <chewing.h>
+int main(int argc, char *argv[])
+@{
+    ChewingContext *ctx = chewing_new();
+
+    /* do something */
+
+    chewing_delete( ctx );
+
+    return 0;
+@}
+@end example
+
+@noindent
+creates the context and deletes it after use.
 
 @section Environment Variables
 
-@itemize
-@item
+@table @env
+@item CHEWING_PATH
 The @env{CHEWING_PATH} environment variable is used to set the search
 path of static data used by the Chewing IM. The format of
 @env{CHEWING_PATH} is the same as @env{PATH}, which is multiple paths
@@ -116,11 +135,11 @@ separated by `:' on POSIX and Unix-like platforms, or separated by `;'
 on Windows platform. The directories in @env{CHEWING_PATH} could be
 read-only.
 
-@item
+@item CHEWING_USER_PATH
 The @env{CHEWING_USER_PATH} environment variable is used to specifies the path
 where user-defined hash data stores. This path @emph{should} be writable by the
 user, or the Chewing IM will lose the ability to remember the learned phrases.
-@end itemize
+@end table
 
 @section API
 
