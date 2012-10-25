@@ -61,6 +61,11 @@ int get_keystroke()
 			flag = 1;
 			ch = getchar();
 			switch ( ch ) {
+				case '<':
+				case '>':
+					if ( getchar() == '>' )
+						return result = ch;
+					break;
 				case 'L':
 					result = KEY_LEFT;
 					break;

@@ -405,7 +405,10 @@ int main( int argc, char *argv[] )
 				break;
 			default:
 				chewing_handle_Default( ctx, (char) ch );
-				fprintf( fout, "%c", (char) ch );
+				if ( ch != '<' && ch != '>' )
+					fprintf( fout, "%c", (char) ch );
+				else
+					fprintf( fout, "<%c>", (char) ch );
 				break;
 		}
 		drawline( 0, 0 );
