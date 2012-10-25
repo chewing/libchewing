@@ -74,6 +74,8 @@ test/test.txt
 *.gcda
 *.gcno
 *.gcov
+/coverage.info
+/coveragereport
 
 # cscope output
 cscope.*
