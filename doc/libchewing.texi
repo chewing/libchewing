@@ -5,7 +5,7 @@
 @c %**end of header
 @include version.texi
 @copying
-This is the `libchewing Reference Manual' corresponding to libchewing
+This is the ``libchewing Reference Manual'' corresponding to libchewing
 version @value{VERSION}.
 
 Copyright @copyright{} 2012  libchewing Core Team
@@ -91,7 +91,14 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 @node Glossary
 @chapter Glassary
 
-@strong{TODO}
+@table @dfn
+@item zuin
+@cindex zuin, Zhuyin
+@cindex Bopomofo
+The word ``zuin'' is obsolete. Here ``zuin'' means ``Zhuyin'' or
+``Bopomofo'', a phonetic system for transcribing Chinese, especially
+Mandarin.
+@end table
 
 @node Setup
 @chapter Setup
@@ -583,7 +590,7 @@ The return value is a pointer to a character string. The memory
 
 @deftypefun int chewing_zuin_Check (ChewingContext *@var{ctx})
 This function returns whether there are phonetic pre-edit string in the
-buffer.  Here "zuin" means bopomofo, a phonetic system for transcribing
+buffer.  Here ``zuin'' means bopomofo, a phonetic system for transcribing
 Chinese, especially Mandarin.
 
 The return value is @code{1} on success, @code{0} on failure.
@@ -591,7 +598,7 @@ The return value is @code{1} on success, @code{0} on failure.
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
 This function returns the phonetic characters in the pre-edit buffer.
-Here "zuin" means bopomofo, a phonetic system for transcribing Chinese,
+Here ``zuin'' means bopomofo, a phonetic system for transcribing Chinese,
 especially Mandarin.
 
 The @var{zuin_count} argument is a output argument. It will contain
