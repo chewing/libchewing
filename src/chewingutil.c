@@ -626,7 +626,7 @@ static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 		ueStrNCpy( buf,
 				ueStrSeek( (char *) &pgdata->phrOut.chiBuf, cursor ),
 				1, 1 );
-		for ( i = 0; i < sizeof(break_word) / sizeof(break_word[0]); i++ ) {
+		for ( i = 0; (size_t) i < sizeof(break_word) / sizeof(break_word[0]); i++ ) {
 			if ( ! strcmp ( buf, break_word[ i ] ) )
 				return 1;
 		}

@@ -103,7 +103,7 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 {
 #ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
-	int len;
+	size_t len;
 	size_t offset;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PHONE_TREE_FILE );

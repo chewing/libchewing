@@ -85,7 +85,7 @@ const char *ueStrStr( const char *str, size_t lstr,
 	if ( lstr < lsub )
 		return NULL;
 	ub = lstr - lsub;
-	for ( ; p-str <= ub; p++ ) {
+	for ( ; (size_t) ( p - str ) <= ub; p++ ) {
 		if ( !strncmp( p, substr, lsub ) )
 			return p;
 	}

@@ -60,7 +60,7 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 {
 #ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
-	int len;
+	size_t len;
 	size_t offset;
 	size_t file_size;
 	size_t csize;
