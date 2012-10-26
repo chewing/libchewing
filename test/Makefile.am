@@ -29,6 +29,7 @@ NATIVE_TESTS = \
 	test-mmap \
 	test-path \
 	test-reset \
+	test-symbol \
 	test-utf8 \
 	$(NULL)
 
