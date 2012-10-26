@@ -288,7 +288,7 @@ This function handles the input key @kbd{UP}.
 This function handles the input key @kbd{DOWN}.
 @end deftypefun
 
-@deftypefun int chewing_handle_ShiftLeft (ChewingContext *@var{ctx})b
+@deftypefun int chewing_handle_ShiftLeft (ChewingContext *@var{ctx})
 This function handles the input key holding @kbd{SHIFT} and @kbd{LEFT} simultaneously.
 @end deftypefun
 
@@ -345,16 +345,21 @@ The return value is the layout index.
 @end deftypefun
 
 @deftypefun char* chewing_get_KBString (ChewingContext *@var{ctx})
-This function returns the the current layout name string of @var{ctx}.
+This function returns the the current layout name string of @var{ctx}. This
+function returns @code{NULL} when no memory.
 
 The return value is the name of the current layout, see also function
 @code{chewing_get_KBStr2Num}. The returned pointer @emph{must} be
 freed by function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun int chewing_get_KBStr2Num (char @var{str}[])
+@deftypefun int chewing_KBStr2Num (char @var{str}[])
 This function converts the keyboard layout name to corresponding
-layout index.
+layout index. If the string does not match any layout, this function returns
+@code{KB_DEFAULT}.
+
+@c Call cannot know if the string of keyboard layout is KB_DEFAULT, or no such
+@c layout. We shall fix it.
 
 The string @var{str} might be one of the following layouts:
 @itemize
@@ -388,7 +393,9 @@ enumerate.
 @end deftypefun
 
 @deftypefun char* chewing_kbtype_String (ChewingContext *@var{ctx})
-This function returns the current enumerated keyboard layout name.
+This function returns the current enumerated keyboard layout name. The returnd
+string is emtpy string when enumeration is over. This function returns
+@code{NULL} when no memory.
 
 The returned value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
@@ -499,7 +506,7 @@ choices instead of the end of current page.
 
 @deftypefun char* chewing_cand_String (ChewingContext *@var{ctx})
 This function returns the current enumerated candidate string. This function
-might return @code{NULL} if no memory.
+returns @code{NULL} when no memory.
 
 The return value @emph{must} be freed by the @code{chewing_free}
 function.
@@ -571,7 +578,7 @@ The return value is @code{1} on success, @code{0} on failure.
 
 @deftypefun char* chewing_commit_String (ChewingContext *@var{ctx})
 This function returns the string in the commit buffer and clears the
-buffer.
+buffer. This function returns @code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
@@ -602,7 +609,8 @@ buffer.
 @end deftypefun
 
 @deftypefun char* chewing_buffer_String (ChewingContext *@var{ctx})
-This function returns the current output in the pre-edit buffer.
+This function returns the current output in the pre-edit buffer. This function
+returns @code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
@@ -622,10 +630,12 @@ Here ``zuin'' means bopomofo, a phonetic system for transcribing Chinese,
 especially Mandarin.
 
 The @var{zuin_count} argument is a output argument. It will contain
-the number of phonetic characters in the returned string.
+the number of phonetic characters in the returned string. This function returns
+code{NULL} when no memory.
 
-The return value is a pointer to a character string. The memory
-@emph{must} be freed by the caller using function @code{chewing_free}.
+The return value is a pointer to a character string. This function returns
+@code{NULL} when no memory. The memory @emph{must} be freed by the caller using
+function @code{chewing_free}.
 @end deftypefun
 
 @deftypefun int chewing_cursor_Current (ChewingContext *@var{ctx})
