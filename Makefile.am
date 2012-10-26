@@ -1,39 +1,13 @@
 ACLOCAL_AMFLAGS = -I m4
+AUTOMAKE_OPTIONS = foreign
 
-AUX_DIST = \
-	$(ac_aux_dir)/config.guess \
-	$(ac_aux_dir)/config.sub \
-	$(ac_aux_dir)/compile \
-	$(ac_aux_dir)/depcomp \
-	$(ac_aux_dir)/install-sh \
-	$(ac_aux_dir)/ltconfig \
-	$(ac_aux_dir)/ltmain.sh \
-	$(ac_aux_dir)/missing \
-	$(NULL)
+SUBDIRS = src/tools data src test doc
 
 EXTRA_DIST = \
 	autogen.sh \
-	chewing.pc \
-	libchewing.spec \
 	$(NULL)
-
-AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/tools data src test doc
-
-MAINTAINERCLEANFILES = \
-	Makefile.in \
-	aclocal.m4 \
-	configure \
-	config.h.in \
-	$(AUX_DIST) \
-	$(NULL)
-
-DISTCLEANFILES = chewing.pc
-
-CLEANFILES = *.bak 
 
 pkgconfigdir = $(libdir)/pkgconfig
-
 pkgconfig_DATA = chewing.pc
 
 chewing_includedir = $(includedir)/chewing

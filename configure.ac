@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.59])
+AC_PREREQ([2.67])
 
-AC_INIT([libchewing], [0.3.3], [chewing-devel@googlegroups.com])
+AC_INIT([libchewing],[0.3.3],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -41,11 +41,10 @@ AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION,
 AM_MAINTAINER_MODE([enable])
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
-AM_CONFIG_HEADER([include/config.h])
+AC_CONFIG_HEADERS([include/config.h])
 
 # Init libtool
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT([win32-dll])
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
