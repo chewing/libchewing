@@ -13,6 +13,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "chewing.h"
 #include "test.h"
@@ -318,6 +319,22 @@ static const TestData SYMBOL[] = {
 	{ .token = "`<R>3<R><R>7<E>", .expected = "＼" },
 };
 
+static const char *CAND[] = {
+	"…",
+	"※",
+	"常用符號",
+	"左右括號",
+	"上下括號",
+	"希臘字母",
+	"數學符號",
+	"特殊圖形",
+	"Unicode",
+	"單線框",
+	"雙線框",
+	"填色方塊",
+	"線段",
+};
+
 void test_type_symbol()
 {
 	chewing_Init( NULL, NULL );
@@ -337,12 +354,50 @@ void test_type_symbol()
 	chewing_Terminate();
 }
 
+void test_symbol_cand_page()
+{
+	char *buf;
+
+	chewing_Init( NULL, NULL );
+
+	ChewingContext *ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	chewing_set_selKey( ctx, SELECT_KEY, ARRAY_SIZE( SELECT_KEY ) );
+	chewing_set_candPerPage( ctx, 10 );
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	chewing_handle_Default( ctx, '`' );
+	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
+	ok( chewing_cand_TotalPage( ctx ) == 2, "total page shall be 2" );
+
+	chewing_cand_Enumerate( ctx );
+	for (int i = 0; i < ARRAY_SIZE( CAND ); ++i ) {
+		ok( chewing_cand_hasNext( ctx ), "shall has next candidate" );
+		buf = chewing_cand_String( ctx );
+		ok( strcmp( buf, CAND[i] ) == 0,
+			"candidate string shall match expected value");
+		chewing_free( buf );
+	}
+
+	buf = chewing_cand_String( ctx );
+	ok( strcmp( buf, "" ) == 0,
+		"cand string shall be empty when out of range");
+	chewing_free( buf );
+
+	ok( !chewing_cand_hasNext( ctx ), "shall not have next candidate" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 int main ()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
 	test_type_symbol();
+	test_symbol_cand_page();
 
 	return exit_status();
 }
