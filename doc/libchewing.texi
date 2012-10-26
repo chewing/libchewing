@@ -498,7 +498,8 @@ choices instead of the end of current page.
 @end deftypefun
 
 @deftypefun char* chewing_cand_String (ChewingContext *@var{ctx})
-This function returns the current enumerated candidate string.
+This function returns the current enumerated candidate string. This function
+might return @code{NULL} if no memory.
 
 The return value @emph{must} be freed by the @code{chewing_free}
 function.
