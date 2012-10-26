@@ -33,7 +33,7 @@
 #define ARRAY_SIZE(array) ( sizeof(array) / sizeof(array[0] ) )
 
 #define ok(test, message) \
-	internal_ok(!!test, #test, message, __FILE__, __LINE__)
+	internal_ok(!!(test), #test, message, __FILE__, __LINE__)
 #define verify_keystoke(ctx, key, expected) \
 	internal_verify_keystoke( ctx, key, expected, __FILE__, __LINE__)
 
