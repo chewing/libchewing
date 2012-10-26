@@ -217,8 +217,8 @@ error:
 }
 
 CHEWING_API int chewing_Init(
-		const char *dataPath,
-		const char *hashPath )
+		const char *dataPath UNUSED,
+		const char *hashPath UNUSED)
 {
 #ifdef ENABLE_DEBUG
 {

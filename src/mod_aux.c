@@ -210,7 +210,7 @@ CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 	return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 
-CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx )
+CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx UNUSED )
 {
 	return KB_TYPE_NUM;
 }
