@@ -9,6 +9,7 @@
  */
 
 #include "chewing.h"
+#include "test.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,79 +46,12 @@ int failed_word_count = 0;
 
 static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
-int get_keystroke()
+static int get_char( void *param )
 {
-	char ch;
-	int result = END;
-	int flag = 0;
-	while ( ( ch = getchar() ) != EOF ) {
-		if ( ( ch != '<' ) && ( flag != 1 ) )
-			return (int) ch;
-		else if ( ch == '>' ) {
-			flag = 0;
-			return result;
-		}
-		else {
-			flag = 1;
-			ch = getchar();
-			switch ( ch ) {
-				case '<':
-				case '>':
-					if ( getchar() == '>' )
-						return result = ch;
-					break;
-				case 'L':
-					result = KEY_LEFT;
-					break;
-				case 'R':
-					result = KEY_RIGHT;
-					break;
-				case 'U':
-					result = KEY_UP;
-					break;
-				case 'D':
-					if ( ( ch = getchar() ) == '>' )
-						return result = KEY_DOWN;
-					else {
-						getchar();
-						return result = KEY_DELETE;
-					}
-					break;
-				case 'E':
-					if ( ( ch = getchar() ) == '>' )
-						return result = KEY_ENTER;
-					else if ( ch == 'E' )
-						result = KEY_ESC;
-					else
-						result = KEY_END;
-					break;
-				case 'C':
-					if ( ( ch = getchar() ) != '>' ) {
-						if ( ch == 'B' )
-							result = ( KEY_CAPSLOCK );
-						else
-							result = ( KEY_CTRL_BASE + ch );
-					}
-					break;
-				case 'B':
-					result = KEY_BACKSPACE;
-					break;
-				case 'H':
-					result = KEY_HOME;
-					break;
-				case 'S':
-					if ( ( ch = getchar() ) == 'L' )
-						result = KEY_SLEFT;
-					else
-						result = KEY_SRIGHT;
-					break;
-				case 'T':
-					result = KEY_TAB;
-					break;
-			}
-		}
-	}
-	return result = END;
+	int ch = getchar();
+	if ( ch == EOF )
+		return END;
+	return ch;
 }
 
 void commit_string( ChewingContext *ctx )
@@ -193,7 +127,7 @@ int main( int argc, char *argv[] )
 	chewing_set_spaceAsSelection( ctx, 1 );
 
 	while ( 1 ) {
-		i = get_keystroke();
+		i = get_keystroke( get_char, NULL );
 		switch ( i ) {
 			case KEY_LEFT:
 				chewing_handle_Left( ctx );
