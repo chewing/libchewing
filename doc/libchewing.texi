@@ -631,7 +631,7 @@ especially Mandarin.
 
 The @var{zuin_count} argument is a output argument. It will contain
 the number of phonetic characters in the returned string. This function returns
-code{NULL} when no memory.
+@code{NULL} when no memory.
 
 The return value is a pointer to a character string. This function returns
 @code{NULL} when no memory. The memory @emph{must} be freed by the caller using
