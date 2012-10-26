@@ -20,8 +20,8 @@
 
 void test_reset_shall_not_clean_static_data()
 {
-	const char TOKEN[] = "hk4g4<E>";
-	const char EXPECTED[] = "測試";
+	char TOKEN[] = "hk4g4<E>";
+	char EXPECTED[] = "測試";
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
