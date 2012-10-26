@@ -56,6 +56,8 @@ test/test-path
 test/test-path.exe
 test/test-reset
 test/test-reset.exe
+test/test-symbol
+test/test-symbol.exe
 test/test-utf8
 test/test-utf8.exe
 
