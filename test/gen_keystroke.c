@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_CURSES_H
-#include <curses.h>
+#ifdef HAVE_NCURSESW_CURSES_H
+#include <ncursesw/curses.h>
 #else
 #error "There is no curses package found."
 #endif
@@ -263,7 +263,6 @@ int main( int argc, char *argv[] )
 	FILE *fout;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
-	int width, height;
 	int add_phrase_length;
 
 	if ( argc < 2 ) {
@@ -291,13 +290,14 @@ int main( int argc, char *argv[] )
 	cbreak();
 	noecho();
 	keypad( stdscr, 1 );
-	getmaxyx( stdscr, height, width );
 	start_color();
 	clear();
 	refresh();
 
 	/* Initialize libchewing */
+	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	/* for the sake of testing, we should not change existing hash data */
+	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 	chewing_Init( prefix, TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */
@@ -405,7 +405,10 @@ int main( int argc, char *argv[] )
 				break;
 			default:
 				chewing_handle_Default( ctx, (char) ch );
-				fprintf( fout, "%c", (char) ch );
+				if ( ch != '<' && ch != '>' )
+					fprintf( fout, "%c", (char) ch );
+				else
+					fprintf( fout, "<%c>", (char) ch );
 				break;
 		}
 		drawline( 0, 0 );

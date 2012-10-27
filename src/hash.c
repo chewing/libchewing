@@ -25,19 +25,24 @@
 #include "private.h"
 #include "global.h"
 
-int chewing_lifetime;
-
-static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-static char hashfilename[ 200 ];
-
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
-	pData->phoneSeq = ALC( uint16, phonelen + 1 );
+	pData->phoneSeq = ALC( uint16_t, phonelen + 1 );
+	if ( !pData->phoneSeq )
+		goto error;
 	pData->wordSeq = ALC( char, wordlen + 1 );
-	return ( pData->phoneSeq && pData->wordSeq );
+	if ( !pData->wordSeq )
+		goto error;
+
+	return 1;
+
+error:
+	free( pData->phoneSeq );
+	free( pData->wordSeq );
+	return 0;
 }
 
-static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
+static int PhoneSeqTheSame( const uint16_t p1[], const uint16_t p2[] )
 {
 	int i;
 	if ( ! p1 || ! p2 )	/* FIXME: should not happend. */
@@ -52,7 +57,7 @@ static int PhoneSeqTheSame( const uint16 p1[], const uint16 p2[] )
 	return 1;
 }
 
-static unsigned int HashFunc( const uint16 phoneSeq[] )
+static unsigned int HashFunc( const uint16_t phoneSeq[] )
 {
 	int i, value = 0;
 
@@ -61,11 +66,11 @@ static unsigned int HashFunc( const uint16 phoneSeq[] )
 	return ( value & ( HASH_TABLE_SIZE - 1 ) );
 }
 
-HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pItemLast )
+HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], HASH_ITEM *pItemLast )
 {
 	HASH_ITEM *pNow = pItemLast ?
 			pItemLast->next :
-			hashtable[ HashFunc( phoneSeq ) ];
+			pgdata->static_data.hashtable[ HashFunc( phoneSeq ) ];
 	
 	for ( ; pNow; pNow = pNow->next ) 
 		if ( PhoneSeqTheSame( pNow->data.phoneSeq, phoneSeq ) )
@@ -73,14 +78,14 @@ HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pItemLast )
 	return NULL;
 }
 
-HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] )
+HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
 	int hashvalue;
 
 	hashvalue = HashFunc( phoneSeq );
 
-	for ( pItem = hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
+	for ( pItem = pgdata->static_data.hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
 		if ( 
 			! strcmp( pItem->data.wordSeq, wordSeq ) && 
 			PhoneSeqTheSame( pItem->data.phoneSeq, phoneSeq ) ) {
@@ -90,31 +95,28 @@ HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] )
 	return NULL;
 }
 
-HASH_ITEM *HashInsert( UserPhraseData *pData )
+HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 {
-	int hashvalue, len;
+	int hashvalue;
 	HASH_ITEM *pItem;
 
-	pItem = HashFindEntry( pData->phoneSeq, pData->wordSeq );
+	pItem = HashFindEntry( pgdata, pData->phoneSeq, pData->wordSeq );
 	if ( pItem != NULL )
 		return pItem;
 
 	pItem = ALC( HASH_ITEM, 1 );
 	if ( ! pItem )
 		return NULL;  /* Error occurs */
-	len = ueStrLen( pData->wordSeq );
-	if ( ! AlcUserPhraseSeq( &( pItem->data ), len, strlen( pData->wordSeq ) ) )
-		return NULL; /* Error occurs */
 
 	hashvalue = HashFunc( pData->phoneSeq );
 	/* set the new element */
-	pItem->next = hashtable[ hashvalue ];
+	pItem->next = pgdata->static_data.hashtable[ hashvalue ];
 
 	memcpy( &( pItem->data ), pData, sizeof( pItem->data ) );
 	pItem->item_index = -1;
 
 	/* set link to the new element */
-	hashtable[ hashvalue ] = pItem;
+	pgdata->static_data.hashtable[ hashvalue ] = pItem;
 
 	return pItem;
 }
@@ -145,7 +147,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
-	uint16 *pshort;
+	uint16_t *pshort;
 	unsigned char *puc;
 
 	memset( str, 0, FIELD_SIZE );
@@ -164,7 +166,7 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	/* phone seq*/
 	phraselen = ueStrLen( pItem->data.wordSeq );
 	str[ 16 ] = phraselen;
-	pshort = (uint16 *) &str[ 17 ];
+	pshort = (uint16_t *) &str[ 17 ];
 	for ( i = 0; i < phraselen; i++ ) {
 		*pshort = pItem->data.phoneSeq[ i ];
 		pshort++;
@@ -177,18 +179,18 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	pItem->data.wordSeq[ (int) *puc ] = '\0';
 }
 
-void HashModify( HASH_ITEM *pItem )
+void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 {
 	FILE *outfile;
 	char str[ FIELD_SIZE + 1 ];
 
-	outfile = fopen( hashfilename, "r+b" );
+	outfile = fopen( pgdata->static_data.hashfilename, "r+b" );
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
-	fwrite( &chewing_lifetime, 1, 4, outfile );
+	fwrite( &pgdata->static_data.chewing_lifetime, 1, 4, outfile );
 #ifdef ENABLE_DEBUG
-	sprintf( str, "%d", chewing_lifetime );
+	sprintf( str, "%d", pgdata->static_data.chewing_lifetime );
 	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
 	DEBUG_FLUSH;
 #endif
@@ -230,6 +232,13 @@ static int isValidChineseString( char *str )
 	return 1;
 }
 
+static int ReadInt(unsigned char *addr)
+{
+	/* TODO: Use bit-wise operation to read */
+	int *p = (void*)addr;
+	return *p;
+}
+
 /**
  * @return 1, 0 or -1
  * retval 0	end of file
@@ -239,22 +248,22 @@ static int isValidChineseString( char *str )
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
 	int len, i;
-	uint16 *pshort;
+	uint16_t *pshort;
 	unsigned char recbuf[ FIELD_SIZE ], *puc;
 
 	memcpy( recbuf, srcbuf, FIELD_SIZE );
 	memset( pItem, 0, sizeof(HASH_ITEM) );
 
 	/* freq info */
-	pItem->data.userfreq = *(int *) &recbuf[ 0 ];
-	pItem->data.recentTime = *(int *) &recbuf[ 4 ];
-	pItem->data.maxfreq = *(int *) &recbuf[ 8 ];
-	pItem->data.origfreq = *(int *) &recbuf[ 12 ];
+	pItem->data.userfreq	= ReadInt(&recbuf[ 0 ]);
+	pItem->data.recentTime	= ReadInt(&recbuf[ 4 ]);
+	pItem->data.maxfreq	= ReadInt(&recbuf[ 8 ]);
+	pItem->data.origfreq	= ReadInt(&recbuf[ 12 ]);
 
 	/* phone seq, length in num of chi words */
 	len = (int) recbuf[ 16 ];
-	pItem->data.phoneSeq = ALC( uint16, len + 1 );
-	pshort = (uint16 *) &recbuf[ 17 ];
+	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
+	pshort = (uint16_t *) &recbuf[ 17 ];
 	for ( i = 0; i < len; i++ ) {
 		pItem->data.phoneSeq[ i ] = *pshort;
 		++pshort;
@@ -314,7 +323,7 @@ int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
 
 	/* read phoneSeq */
 	len = ueStrLen( pItem->data.wordSeq );
-	pItem->data.phoneSeq = ALC( uint16, len + 1 );
+	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
 	for ( i = 0; i < len; i++ )
 		if ( fscanf( infile, "%hu", &( pItem->data.phoneSeq[ i ] ) ) != 1 )
 			return 0;
@@ -380,12 +389,14 @@ err_load_file:
 	return NULL;
 }
 
-static int migrate_hash_to_bin( const char *ofilename )
+// FIXME: Remove ofliename
+static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 {
 	FILE *txtfile;
 	char oldname[ 256 ], *dump, *seekdump;
 	HASH_ITEM item;
 	int item_index, iret, tflen;
+	int ret;
 
 	/* allocate dump buffer */
 	txtfile = open_file_get_length( ofilename, "r", &tflen );
@@ -397,15 +408,18 @@ static int migrate_hash_to_bin( const char *ofilename )
 		fclose( txtfile );
 		return 0;
 	}
-	fscanf( txtfile, "%d", &chewing_lifetime );
+	ret = fscanf( txtfile, "%d", &pgdata->static_data.chewing_lifetime );
+	if ( ret != 1 ) {
+		return 0;
+	}
 
 	/* prepare the bin file */
 	seekdump = dump;
 	memcpy( seekdump, BIN_HASH_SIG, strlen( BIN_HASH_SIG ) );
 	memcpy( seekdump + strlen( BIN_HASH_SIG ),
-	        &chewing_lifetime, 
-		sizeof(chewing_lifetime) );
-	seekdump += strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
+	        &pgdata->static_data.chewing_lifetime,
+		sizeof(pgdata->static_data.chewing_lifetime) );
+	seekdump += strlen( BIN_HASH_SIG ) + sizeof(pgdata->static_data.chewing_lifetime);
 
 	/* migrate */
 	item_index = 0;
@@ -484,79 +498,88 @@ static int ComputeChewingLifeTime()
 }
 #endif
 
-static HASH_ITEM *pHead = NULL;
-
-static void TerminateHash()
+static void FreeHashItem( HASH_ITEM *aItem )
 {
-	HASH_ITEM *pItem;
-	while ( pHead ) {
-		pItem = pHead;
-		pHead = pItem->next;
-		DEBUG_CHECKPOINT();
-		free( pItem->data.phoneSeq );
-		free( pItem->data.wordSeq );
-		free( pItem );
+	if ( aItem ) {
+		HASH_ITEM *pItem = aItem->next;
+		free( aItem->data.phoneSeq );
+		free( aItem->data.wordSeq );
+		free( aItem );
+		if ( pItem ) {
+			FreeHashItem( pItem );
+		}
 	}
-	pHead = NULL;
 }
 
-int InitHash( const char *path )
+void TerminateHash( ChewingData *pgdata )
+{
+	HASH_ITEM *pItem;
+	int i;
+	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
+		pItem = pgdata->static_data.hashtable[ i ];
+		DEBUG_CHECKPOINT();
+		FreeHashItem( pItem );
+	}
+}
+
+int InitHash( ChewingData *pgdata )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
+	const char *path = getenv( "CHEWING_USER_PATH" );
+
 	/* make sure of write permission */
-	if ( access( path, W_OK ) != 0 ) {
+	if ( path && access( path, W_OK ) == 0 ) {
+		sprintf( pgdata->static_data.hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+	} else {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
-				hashfilename, "%s%s", 
+				pgdata->static_data.hashfilename, "%s%s",
 				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
 			sprintf(
-				hashfilename, "%s%s",
+				pgdata->static_data.hashfilename, "%s%s",
 				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
-		PLAT_MKDIR( hashfilename );
-		strcat( hashfilename, PLAT_SEPARATOR );
-		strcat( hashfilename, HASH_FILE );
-	} else {
-		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+		PLAT_MKDIR( pgdata->static_data.hashfilename );
+		strcat( pgdata->static_data.hashfilename, PLAT_SEPARATOR );
+		strcat( pgdata->static_data.hashfilename, HASH_FILE );
 	}
-	memset( hashtable, 0, sizeof(hashtable) );
+	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
 
 open_hash_file:
-	dump = _load_hash_file( hashfilename, &fsize );
-	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
+	dump = _load_hash_file( pgdata->static_data.hashfilename, &fsize );
+	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(pgdata->static_data.chewing_lifetime);
 	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
 		FILE *outfile;
-		outfile = fopen( hashfilename, "w+b" );
+		outfile = fopen( pgdata->static_data.hashfilename, "w+b" );
 		if ( ! outfile ) {
 			if ( dump ) {
 				free( dump );
 			}
 			return 0;
 		}
-		chewing_lifetime = 0;
+		pgdata->static_data.chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-		fwrite( &chewing_lifetime, 1,
-		                sizeof(chewing_lifetime), outfile );
+		fwrite( &pgdata->static_data.chewing_lifetime, 1,
+		                sizeof(pgdata->static_data.chewing_lifetime), outfile );
 		fclose( outfile );
 	}
 	else {
-		static int is_set_pHead = 0;
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
-			if ( ! migrate_hash_to_bin( hashfilename ) ) {
+			if ( ! migrate_hash_to_bin( pgdata, pgdata->static_data.hashfilename ) ) {
 				return  0;
 			}
 			goto open_hash_file;
 		}
 
-		chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
+		pgdata->static_data.chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
 		seekdump = dump + hdrlen;
 		fsize -= hdrlen;
 
@@ -576,10 +599,6 @@ open_hash_file:
 			memcpy( pItem, &item, sizeof( HASH_ITEM ) );
 			pItem->next = pPool;
 			pPool = pItem;
-			if ( ! is_set_pHead ) {
-				pHead = pItem;
-				is_set_pHead = 1;
-			}
 
 			if ( oldest > pItem->data.recentTime ) {
 				oldest = pItem->data.recentTime;
@@ -595,13 +614,12 @@ open_hash_file:
 			pPool = pItem->next;
 
 			hashvalue = HashFunc( pItem->data.phoneSeq );
-			pItem->next = hashtable[ hashvalue ];
-			hashtable[ hashvalue ] = pItem;
+			pItem->next = pgdata->static_data.hashtable[ hashvalue ];
+			pgdata->static_data.hashtable[ hashvalue ] = pItem;
 			pItem->data.recentTime -= oldest;
 		}
-		chewing_lifetime -= oldest;
+		pgdata->static_data.chewing_lifetime -= oldest;
 	}
-	addTerminateService( TerminateHash );
 	return 1;
 }
 

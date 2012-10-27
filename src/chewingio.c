@@ -17,6 +17,7 @@
  * @brief Implement basic I/O routines for Chewing manipulation.
  */
 
+#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -36,6 +37,8 @@
 #include "private.h"
 #include "chewingio.h"
 #include "mod_aux.h"
+#include "global-private.h"
+#include "plat_path.h"
 
 #ifdef ENABLE_DEBUG
 #include <stdio.h>
@@ -43,14 +46,6 @@
 #define FAILSAFE_OUTPUT "/tmp/chewing-debug.out"
 FILE *fp_g = NULL;
 #endif
-
-extern int chewing_lifetime;
-
-void (*TerminateServices[ TerminateServicesNUM ])() = {
-	NULL
-};
-static int countTerminateService = 0;
-static int bTerminateCompleted = 0;
 
 char *kb_type_str[] = {
 	"KB_DEFAULT",
@@ -63,6 +58,34 @@ char *kb_type_str[] = {
 	"KB_DVORAK_HSU",
 	"KB_DACHEN_CP26",
 	"KB_HANYU_PINYIN"
+};
+
+const char * const CHAR_FILES[] = {
+	CHAR_FILE,
+	CHAR_INDEX_BEGIN_FILE,
+	NULL,
+};
+
+const char * const DICT_FILES[] = {
+	DICT_FILE,
+	PH_INDEX_FILE,
+	PHONE_TREE_FILE,
+	NULL,
+};
+
+const char * const SYMBOL_TABLE_FILES[] = {
+	SYMBOL_TABLE_FILE,
+	NULL,
+};
+
+const char * const EASY_SYMBOL_FILES[] = {
+	SOFTKBD_TABLE_FILE,
+	NULL,
+};
+
+const char * const PINYIN_FILES[] = {
+	PINYIN_TAB_NAME,
+	NULL,
 };
 
 CHEWING_API int chewing_KBStr2Num( char str[] )
@@ -86,21 +109,6 @@ static void TerminateDebug()
 	}
 }               
 #endif
-
-int addTerminateService( callback_t callback )
-{
-	if ( callback ) {
-		int i;
-		for ( i = 0; i < countTerminateService; ++i ) {
-			/* Avoid redundant function pointer */
-			if ( TerminateServices[ i ] == callback )
-				return 1;
-		}
-		TerminateServices[ countTerminateService++ ] = callback;
-		return 0;
-	}
-	return 1;
-}
 
 static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
 {
@@ -132,51 +140,89 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 CHEWING_API ChewingContext *chewing_new()
 {
 	ChewingContext *ctx;
-	
-	ChewingData *internal_data = ALC( ChewingData, 1 );
-	ChewingOutput *internal_output = ALC( ChewingOutput, 1 );
+	int ret;
+	char search_path[PATH_MAX];
+	char path[PATH_MAX];
+
 	ctx = ALC( ChewingContext, 1 );
-	if ( ctx && internal_data && internal_output ) {
-		ctx->data = internal_data;
-		ctx->output = internal_output;
-		ctx->cand_no = 0;
+	if ( !ctx )
+		goto error;
 
-		/* handle configuration */
-		chewing_Reset( ctx );
+	ctx->output = ALC ( ChewingOutput, 1 );
+	if ( !ctx->output )
+		goto error;
 
-		return ctx;
-	} else {
-		return NULL;
-	}
+	ctx->data = ALC ( ChewingData, 1 );
+	if ( !ctx->data )
+		goto error;
+
+	chewing_Reset( ctx );
+
+	ret = get_search_path( search_path, sizeof( search_path ) );
+	if ( ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, CHAR_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitChar( ctx->data, path );
+	if ( ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, DICT_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitDict( ctx->data, path );
+	if ( ret )
+		goto error;
+	ret = InitTree( ctx->data, path );
+	if ( ret )
+		goto error;
+
+	// FIXME: Which return code indicate error?
+	ret = InitHash( ctx->data );
+
+	ctx->cand_no = 0;
+
+	ret = find_path_by_files(
+		search_path, SYMBOL_TABLE_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitSymbolTable( ctx->data, path );
+	if ( !ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, EASY_SYMBOL_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitEasySymbolInput( ctx->data, path );
+	if ( !ret )
+		goto error;
+
+	ret = find_path_by_files(
+		search_path, PINYIN_FILES, path, sizeof( path ) );
+	if ( ret )
+		goto error;
+	ret = InitHanyuPinYin( ctx->data, path );
+	if ( !ret )
+		goto error;
+
+	return ctx;
+error:
+	chewing_delete( ctx );
+	return NULL;
 }
 
 CHEWING_API int chewing_Init(
-		const char *dataPath,
-		const char *hashPath )
+		const char *dataPath UNUSED,
+		const char *hashPath UNUSED)
 {
-	/* initialize Tree, Char, and Dict */
-	/* FIXME: check the validation of dataPath */
-	InitTree( dataPath );
-	InitChar( dataPath );
-	InitDict( dataPath );
-
-	/* initialize Hash */
-	/* FIXME: check the validation of hashPath */
-	InitHash( hashPath );
-
-	/* initialize SymbolTable */
-	if ( ! InitSymbolTable( (char*) hashPath ) )
-		InitSymbolTable( (char*) dataPath );
-	if ( ! InitEasySymbolInput( (char *) hashPath ) )
-		InitEasySymbolInput( (char *) dataPath );
-
-	/* initialize HanyuPinYin table */
-	if ( ! InitHanyuPinYin( hashPath ) )
-		InitHanyuPinYin( dataPath );
-
 #ifdef ENABLE_DEBUG
 {
-        char *dbg_path;
+	char *dbg_path;
 	int failsafe = 1;
 	dbg_path = getenv( "CHEWING_DEBUG" );
 	if ( dbg_path ) {
@@ -194,23 +240,23 @@ CHEWING_API int chewing_Init(
 		}
 	}
 	/* register debug service */
-	if ( fp_g )
-		addTerminateService( TerminateDebug );
 }
 #endif
-	bTerminateCompleted = 0;
 	return 0;
 }
 
 CHEWING_API int chewing_Reset( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
+	ChewingStaticData static_data;
 	ChewingConfigData old_config;
 
 	/* Backup old config and restore it after clearing pgdata structure. */
 	old_config = pgdata->config;
+	static_data = pgdata->static_data;
 	memset( pgdata, 0, sizeof( ChewingData ) );
 	pgdata->config = old_config;
+	pgdata->static_data = static_data;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
@@ -256,37 +302,29 @@ CHEWING_API char* chewing_get_KBString( ChewingContext *ctx )
 
 CHEWING_API void chewing_Terminate()
 {
-	int i;
-
-	/* No terminating services are registered. */
-	if ( bTerminateCompleted || countTerminateService == 0 )
-		return;
-
-	for ( i = 0; i < countTerminateService; i++ ) {
-		if ( TerminateServices[ i ] ) {
 #ifdef ENABLE_DEBUG
-			/* Can't output to debug file because it's about to close */
-			fprintf( stderr, 
-				EMPHASIZE( "Terminating service #%d / %d" ) ".\n",
-				i, countTerminateService );
+	TerminateDebug();
 #endif
-			(*TerminateServices[ i ])();
-		}
-	}
-	
-	/* XXX: should check if the services are really completed. */
-	bTerminateCompleted = 1;
-	return;
 }
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
-	if ( ctx->data )
-		free( ctx->data);
-	if ( ctx->output )
-		free( ctx->output);
-	if ( ctx )
+	if ( ctx ) {
+		if ( ctx->data ) {
+			TerminateHanyuPinyin( ctx->data );
+			TerminateEasySymbolTable( ctx->data );
+			TerminateSymbolTable( ctx->data );
+			TerminateHash( ctx->data );
+			TerminateTree( ctx->data );
+			TerminateDict( ctx->data );
+			TerminateChar( ctx->data );
+			free( ctx->data );
+		}
+
+		if ( ctx->output )
+			free( ctx->output);
 		free( ctx );
+	}
 	return;
 }
 
@@ -563,7 +601,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 		}
 	}
 	else {
-		rtn = ZuinPhoInput( &( pgdata->zuinData ), ' ' );
+		rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), ' ' );
 		switch ( rtn ) {
 			case ZUIN_ABSORB:
 				keystrokeRtn = KEYSTROKE_ABSORB;
@@ -1082,7 +1120,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	int bQuickCommit = 0;
 
 	/* Update lifetime */
-	chewing_lifetime++;
+	ctx->data->static_data.chewing_lifetime++;
 
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {
@@ -1163,7 +1201,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				goto End_KeyDefault;
 			}
 
-			rtn = ZuinPhoInput( &( pgdata->zuinData ), key );
+			rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), key );
 			DEBUG_OUT(
 				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
@@ -1283,7 +1321,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	int keystrokeRtn = KEYSTROKE_ABSORB;
 	int newPhraseLen;
 	int i;
-	uint16 addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t addPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	char addWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	int phraseState;
 	int cursor;
@@ -1318,7 +1356,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor ],
-				        sizeof( uint16 ) * newPhraseLen );
+				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
@@ -1326,7 +1364,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				           newPhraseLen, 1);
 
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 
@@ -1349,14 +1387,14 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
-				        sizeof( uint16 ) * newPhraseLen );
+				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 				ueStrNCpy( addWordSeq,
 				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
 				           cursor - newPhraseLen ),
 				           newPhraseLen, 1);
 
-				phraseState = UserUpdatePhrase( addPhoneSeq, addWordSeq );
+				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg( 
 					pgdata, 
 					addWordSeq, 
@@ -1456,11 +1494,11 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 	return 0;
 }
 
-CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx )
+CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx )
 {
-	uint16 *seq;
-	seq = ALC( uint16, ctx->data->nPhoneSeq );
-	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16)*ctx->data->nPhoneSeq );
+	uint16_t *seq;
+	seq = ALC( uint16_t, ctx->data->nPhoneSeq );
+	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16_t)*ctx->data->nPhoneSeq );
 	return seq;
 }
 
@@ -1468,8 +1506,3 @@ CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 {
 	return ctx->data->nPhoneSeq;
 }
-
-/* Local Variables: */
-/* c-indentation-style: linux */
-/* indent-tabs-mode: t */
-/* End: */

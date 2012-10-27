@@ -9,21 +9,22 @@
  */
 
 #include "chewing.h"
+#include "test.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define KEY_SLEFT 896
-#define KEY_SRIGHT 897	
+#define KEY_SRIGHT 897
 #define KEY_LEFT 898
-#define KEY_RIGHT 899	
+#define KEY_RIGHT 899
 #define KEY_UP 990 
 #define KEY_DOWN 991
 #define KEY_SPACE ' '
 #define KEY_ENTER 992
 #define KEY_BACKSPACE 993
-#define KEY_ESC	994
+#define KEY_ESC 994
 #define KEY_DELETE 995
 #define KEY_HOME 996
 #define KEY_END 997
@@ -45,74 +46,12 @@ int failed_word_count = 0;
 
 static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
-int get_keystroke()
+static int get_char( void *param )
 {
-	char ch;
-	int result;
-	int flag = 0;
-	while ( ( ch = getchar() ) != EOF ) {
-		if ( ( ch != '<' ) && ( flag != 1 ) )
-			return (int) ch;
-		else if ( ch == '>' ) {
-			flag = 0;
-			return result;
-		}
-		else {
-			flag = 1;
-			ch = getchar();
-			switch ( ch ) {
-				case 'L':
-					result = KEY_LEFT;
-					break;
-				case 'R':
-					result = KEY_RIGHT;
-					break;
-				case 'U':
-					result = KEY_UP;
-					break;
-				case 'D':
-					if ( ( ch = getchar() ) == '>' )
-						return result = KEY_DOWN;
-					else {
-						getchar();
-						return result = KEY_DELETE;
-					}
-					break;
-				case 'E':
-					if ( ( ch = getchar() ) == '>' )
-						return result = KEY_ENTER;
-					else if ( ch == 'E' )
-						result = KEY_ESC;
-					else
-						result = KEY_END;
-					break;
-				case 'C':
-					if ( ( ch = getchar() ) != '>' ) {
-						if ( ch == 'B' )
-							result = ( KEY_CAPSLOCK );
-						else
-							result = ( KEY_CTRL_BASE + ch );
-					}
-					break;
-				case 'B':
-					result = KEY_BACKSPACE;
-					break;
-				case 'H':
-					result = KEY_HOME;
-					break;
-				case 'S':
-					if ( ( ch = getchar() ) == 'L' )
-						result = KEY_SLEFT;
-					else
-						result = KEY_SRIGHT;
-					break;
-				case 'T':
-					result = KEY_TAB;
-					break;
-			}
-		}
-	}
-	return result = END;
+	int ch = getchar();
+	if ( ch == EOF )
+		return END;
+	return ch;
 }
 
 void commit_string( ChewingContext *ctx )
@@ -170,7 +109,9 @@ int main( int argc, char *argv[] )
 	int ctrl_shifted;
 
 	/* Initialize libchewing */
+	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	/* for the sake of testing, we should not change existing hash data */
+	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 	chewing_Init( prefix, TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */
@@ -186,7 +127,7 @@ int main( int argc, char *argv[] )
 	chewing_set_spaceAsSelection( ctx, 1 );
 
 	while ( 1 ) {
-		i = get_keystroke();
+		i = get_keystroke( get_char, NULL );
 		switch ( i ) {
 			case KEY_LEFT:
 				chewing_handle_Left( ctx );

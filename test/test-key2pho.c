@@ -10,42 +10,41 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <check.h>
+
+#include "test.h"
+#include "global.h"
 #include "chewing-utf8-util.h"
+#include "key2pho-private.h"
 
-START_TEST(test_UintFromPhone)
+int main (int argc, char *argv[])
 {
-	char *u8phone = "ㄆㄣ";
-	fail_if(UintFromPhone(u8phone) != 1104, NULL);
+	char *u8phone;
+
+	u8phone = "ㄆㄣ";
+	ok (UintFromPhone(u8phone) == 1104, "UintFromPhone");
+
 	u8phone = "ㄊㄧㄢ";
-	fail_if(UintFromPhone(u8phone) != 3272, NULL);
+	ok (UintFromPhone(u8phone) == 3272, "UintFromPhone");
+
 	u8phone = "ㄒㄧㄚˋ";
-	fail_if(UintFromPhone(u8phone) != 7308, NULL);
-}
-END_TEST
+	ok (UintFromPhone(u8phone) == 7308, "UintFromPhone");
 
-START_TEST(test_PhoneFromKey)
-{
 	char rt[10];
-	PhoneFromKey( rt, "dj", 0, 1 );
-	fail_if( strcmp(rt, "ㄎㄨ"), NULL);
-	PhoneFromKey( rt, "dj6", 0, 1 );
-	fail_if( strcmp(rt, "ㄎㄨˊ"), NULL);
-	PhoneFromKey( rt, "dj3", 0, 1 );
-	fail_if( strcmp(rt, "ㄎㄨˇ"), NULL);
-	PhoneFromKey( rt, "dj4", 0, 1 );
-	fail_if( strcmp(rt, "ㄎㄨˋ"), NULL);
-	PhoneFromKey( rt, "dj7", 0, 1 );
-	fail_if( strcmp(rt, "ㄎㄨ˙"), NULL);
-}
-END_TEST
 
-Suite *key2pho_suite (void)
-{
-	Suite *s = suite_create("key2pho.c");
-	TCase *tc_core = tcase_create("Core");
-	suite_add_tcase (s, tc_core);
-	tcase_add_test (tc_core, test_UintFromPhone);
-	tcase_add_test (tc_core, test_PhoneFromKey);
-	return s;
+	PhoneFromKey( rt, "dj", 0, 1 );
+	ok (!strcmp(rt, "ㄎㄨ"), "dj");
+
+	PhoneFromKey( rt, "dj6", 0, 1 );
+	ok (!strcmp(rt, "ㄎㄨˊ"), "dj6");
+
+	PhoneFromKey( rt, "dj3", 0, 1 );
+	ok (!strcmp(rt, "ㄎㄨˇ"), "dj3");
+
+	PhoneFromKey( rt, "dj4", 0, 1 );
+	ok (!strcmp(rt, "ㄎㄨˋ"), "dj4");
+
+	PhoneFromKey( rt, "dj7", 0, 1 );
+	ok (!strcmp(rt, "ㄎㄨ˙"), "dj7");
+
+	return exit_status();
 }

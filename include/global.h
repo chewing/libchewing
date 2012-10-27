@@ -84,8 +84,6 @@ typedef struct {
 	/*@}*/
 } IntervalType;
 
-typedef unsigned short uint16;
-
 /** @brief context handle used for Chewing IM APIs
  */
 typedef struct _ChewingContext ChewingContext;

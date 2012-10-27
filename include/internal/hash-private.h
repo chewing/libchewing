@@ -21,10 +21,8 @@
 #endif
 
 #define FIELD_SIZE (125)
-#define N_HASH_BIT (14)
 #define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "uhash.dat"
-#define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 
 typedef struct tag_HASH_ITEM {
 	int item_index;
@@ -32,13 +30,14 @@ typedef struct tag_HASH_ITEM {
 	struct tag_HASH_ITEM *next;
 } HASH_ITEM;
 
-HASH_ITEM *HashFindPhone( const uint16 phoneSeq[] );
-HASH_ITEM *HashFindEntry( const uint16 phoneSeq[], const char wordSeq[] );
-HASH_ITEM *HashInsert( UserPhraseData *pData );
-HASH_ITEM *HashFindPhonePhrase( const uint16 phoneSeq[], HASH_ITEM *pHashLast );
-void HashModify( HASH_ITEM *pItem );
+HASH_ITEM *HashFindPhone( const uint16_t phoneSeq[] );
+HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
+HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData );
+HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], HASH_ITEM *pHashLast );
+void HashModify( ChewingData *pgdata, HASH_ITEM *pItem );
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen );
-int InitHash( const char *path );
+int InitHash( ChewingData *ctx );
+void TerminateHash( ChewingData *pgdata );
 void FreeHashTable( void );
 
 #endif

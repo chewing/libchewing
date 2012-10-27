@@ -31,7 +31,7 @@
 #define MAX_BUF_LEN	(4096)
 
 typedef struct {
-	uint16 num;
+	uint16_t num;
 	char word[ 8 ];
 } WORD_DATA;
 
@@ -64,7 +64,7 @@ void Output()
 {
 	FILE *indexfile, *datafile, *configfile;
 	int i;
-	uint16 previous;
+	uint16_t previous;
 
 #ifdef USE_BINARY_DATA
 	int tmp;
@@ -91,7 +91,7 @@ void Output()
 #ifdef USE_BINARY_DATA
 			tmp = ftell( datafile );
 			fwrite( &tmp, sizeof(int), 1, indexfile );
-			fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+			fwrite( &previous, sizeof(uint16_t), 1, indexfile2 );
 #else
 			fprintf( indexfile, "%hu %ld\n", previous, ftell( datafile ) );
 #endif
@@ -109,7 +109,7 @@ void Output()
 	tmp = ftell( datafile );
 	fwrite( &tmp, sizeof(int), 1, indexfile );
 	previous = 0;
-	fwrite( &previous, sizeof(uint16), 1, indexfile2 );
+	fwrite( &previous, sizeof(uint16_t), 1, indexfile2 );
 #else
 	fprintf( indexfile, "0 %ld\n", ftell( datafile ) );
 #endif
@@ -146,6 +146,7 @@ int main(int argc, char* argv[])
 	FILE *cinfile;
 	char buf[ MAX_BUF_LEN ];
 	char *phone_cin;
+	char *ret;
 
 	if (argc < 2) {
 		fprintf( stderr, "Usage: sort_word <phone.cin>\n" );
@@ -160,12 +161,16 @@ int main(int argc, char* argv[])
 	}
 
 	do {
-		fgets( buf, MAX_BUF_LEN, cinfile );
+		ret = fgets( buf, MAX_BUF_LEN, cinfile );
+		if ( !ret ) {
+			fprintf( stderr, "Cannot find %s", CHARDEF_BEGIN );
+			return 1;
+		}
 	} while ( strncmp( buf, CHARDEF_BEGIN, strlen( CHARDEF_BEGIN ) ) );
 
 	for ( ; ; ) {
-		fgets( buf, MAX_BUF_LEN, cinfile );
-		if ( buf[ 0 ] == '%' )
+		ret = fgets( buf, MAX_BUF_LEN, cinfile );
+		if ( !ret || buf[ 0 ] == '%' )
 			break;
 		if ( DoWord( buf ) == DO_WORD_ERROR ) {
 			fprintf( stderr, "The file %s is corrupted!\n", phone_cin );

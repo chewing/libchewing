@@ -11,8 +11,18 @@
 #ifndef _CHEWING_KEY2PHO_PRIVATE_H
 #define _CHEWING_KEY2PHO_PRIVATE_H
 
-uint16 UintFromPhone( const char *phone );
-uint16 UintFromPhoneInx( const int ph_inx[] );
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#elif defined HAVE_STDINT_H
+#  include <stdint.h>
+#endif
+
+uint16_t UintFromPhone( const char *phone );
+uint16_t UintFromPhoneInx( const int ph_inx[] );
 int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes );
 int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes );
 

@@ -85,7 +85,7 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 		*zuin_count = 0;
 	s = (char*) calloc(
 		1 + ZUIN_SIZE,
-		sizeof(char) * WCH_SIZE );
+		sizeof(ctx->output->zuinBuf[ 0 ].s) );
 	for ( i = 0; i < ZUIN_SIZE; i++ ) {
 		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
 			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
@@ -148,8 +148,7 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 {
 	char *s;
-	if ( chewing_cand_hasNext( ctx ) ||
-	     (ctx->cand_no < ctx->output->pci->nTotalChoice) ) {
+	if ( chewing_cand_hasNext( ctx ) ) {
 		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
 		ctx->cand_no++;
 	} else {
@@ -211,7 +210,7 @@ CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 	return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 
-CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx )
+CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx UNUSED )
 {
 	return KB_TYPE_NUM;
 }

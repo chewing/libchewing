@@ -11,11 +11,20 @@
 #ifndef _CHEWING_CORE_PRIVATE_H
 #define _CHEWING_CORE_PRIVATE_H
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#elif defined HAVE_STDINT_H
+#  include <stdint.h>
+#endif
+
 #include "global.h"
-#include <wchar.h>
+#include "plat_mmap.h"
 
 #define MAX_KBTYPE 11
-#define WCH_SIZE 4
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
@@ -24,24 +33,29 @@
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */
+#define N_HASH_BIT (14)
+#define HASH_TABLE_SIZE (1<<N_HASH_BIT)
+#define EASY_SYMBOL_KEY_TAB_LEN (36)
 
-#ifndef max
-#define max(a, b) \
-	( (a) > (b) ? (a) : (b) )
-#endif
-#ifndef min
-#define min(a, b) \
-	( (a) < (b) ? (a) : (b) )
-#endif
+#undef max
+static inline int max( int a, int b )
+{
+	return a > b ? a : b;
+}
+
+#undef min
+static inline int min( int a, int b )
+{
+	return a < b ? a : b;
+}
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
-	wchar_t wch;
-	unsigned char padding[ 8 ]; /* Ensure this structure is aligned */
+	uint16_t wch;
 } wch_t;
 
 typedef struct {
-	uint16 phone_id;
+	uint16_t phone_id;
 	int phrase_id;
 	int child_begin, child_end;
 } TreeType;
@@ -61,7 +75,7 @@ typedef struct {
 typedef struct {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
-	uint16 phone;
+	uint16_t phone;
 	PinYinData pinYinData;
 } ZuinData;
 
@@ -117,6 +131,60 @@ typedef struct _SymbolEntry {
 } SymbolEntry;
 
 typedef struct {
+	TreeType *tree;
+	size_t tree_size;
+#ifdef USE_BINARY_DATA
+	plat_mmap tree_mmap;
+#endif
+
+	uint16_t *arrPhone;
+	int *char_begin;
+	size_t phone_num;
+	void *char_;
+	void *char_cur_pos;
+	int char_end_pos;
+#ifdef USE_BINARY_DATA
+	plat_mmap char_mmap;
+	plat_mmap char_begin_mmap;
+	plat_mmap char_phone_mmap;
+#else
+	FILE *charfile;
+#endif
+
+	int *dict_begin;
+	void *dict_cur_pos;
+	int dict_end_pos;
+
+	void *dict;
+
+#ifdef USE_BINARY_DATA
+	plat_mmap dict_mmap;
+	plat_mmap index_mmap;
+#else
+	FILE *dictfile;
+#endif
+
+
+	int chewing_lifetime;
+
+	char hashfilename[ 200 ];
+	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+
+	unsigned int n_symbol_entry;
+	SymbolEntry ** symbol_table;
+
+	char *g_easy_symbol_value[ EASY_SYMBOL_KEY_TAB_LEN ];
+	int g_easy_symbol_num[ EASY_SYMBOL_KEY_TAB_LEN ];
+
+	struct keymap *hanyuInitialsMap;
+	struct keymap *hanyuFinalsMap;
+	int HANYU_INITIALS;
+	int HANYU_FINALS;
+} ChewingStaticData;
+
+struct tag_HASH_ITEM;
+
+typedef struct {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
@@ -131,7 +199,7 @@ typedef struct {
 	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
 	int showMsgLen;
 
-	uint16 phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
@@ -146,6 +214,8 @@ typedef struct {
 	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
+
+	ChewingStaticData static_data;
 } ChewingData;
 
 typedef struct {

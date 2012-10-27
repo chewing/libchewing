@@ -17,12 +17,12 @@
  *
  * @brief Phone phrase tree generator.\n
  *
- *	  This program reads in a dictionary with phone phrases(in uint16 form).\n
+ *	  This program reads in a dictionary with phone phrases(in uint16_t form).\n
  *	  Output a database file which indicates a phone phrase tree.\n
  *	  Each node represents a single phone.\n
  *	  The output file was a random access file, a record was defined:\n\code
  *	  { 
- *		 uint16 key; the phone data
+ *		 uint16_t key; the phone data
  *		 int32 phraseno; 
  *		 int32 begin,end; //the children of this node(-1,-1 indicate a leaf node)
  *	  }\endcode
@@ -52,7 +52,7 @@ struct _tLISTNODE;
 
 typedef struct _tNODE {
 	struct _tLISTNODE *childList;
-	uint16 key;
+	uint16_t key;
 	int32 phraseno,nodeno;
 } NODE;
 
@@ -93,7 +93,7 @@ int QueueEmpty()
 	return ( head == tail );
 }
 
-NODE *NewNode( uint16 key )
+NODE *NewNode( uint16_t key )
 {
 	NODE *pnew = (NODE *) malloc( sizeof( NODE ) );
 	pnew->key = key;
@@ -109,7 +109,7 @@ void InitConstruct()
 	root = NewNode( 0 );
 }
 
-NODE* FindKey( NODE *pN, uint16 key )
+NODE* FindKey( NODE *pN, uint16_t key )
 {
 	LISTNODE *p;
 
@@ -120,7 +120,7 @@ NODE* FindKey( NODE *pN, uint16 key )
 	return NULL;
 }
 
-NODE* Insert( NODE *pN, uint16 key )
+NODE* Insert( NODE *pN, uint16_t key )
 {
 	LISTNODE *prev, *p;
 	LISTNODE *pnew = (LISTNODE *) malloc( sizeof( LISTNODE ) );
@@ -149,21 +149,24 @@ void Construct()
 {
 	FILE *input = fopen( IN_FILE, "r" );
 	NODE *pointer, *tp;
-	uint16 key;
+	uint16_t key;
+	int ret;
 
 	if ( ! input ) {
 		fprintf( stderr, "Error opening " IN_FILE "\n" );
 		exit( 1 );
 	}
 	InitConstruct();
+
 	
 	while ( 1 ) {	
-		fscanf( input, "%hu", &key );
-		if ( feof( input ) )
+		ret = fscanf( input, "%hu", &key );
+		if ( ret != 1 || feof( input ) )
 			break;
+
 		pointer = root;
-		/* for each phone in a phone phrase */
-		for ( ; key != 0; fscanf( input, "%hu", &key ) ) {	
+
+		while ( key != 0 ) {
 			if ( ( tp = FindKey( pointer, key ) ) ) {
 				pointer = tp;
 			}
@@ -171,7 +174,14 @@ void Construct()
 				tp = Insert( pointer, key );
 				pointer = tp;
 			}
+
+			ret = fscanf( input, "%hu", &key );
+			if ( ret != 1 ) {
+				fprintf( stderr, "phrase does not end with 0 in " IN_FILE );
+				exit ( 1 );
+			}
 		}
+
 		pointer->phraseno = ph_count++;
 	}
 

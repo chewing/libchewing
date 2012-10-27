@@ -14,7 +14,7 @@
 
 /** 
  * @file key2pho.c
- * @brief map zuins to uint16 type according to different kb_type
+ * @brief map zuins to uint16_t type according to different kb_type
  */
 
 /* This file is encoded in UTF-8 */
@@ -73,7 +73,7 @@ static const char *ph_str =
 		/* ㄢㄣㄤㄥㄦ */
 	"\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B" ;
 		/* ˙ˊˇˋ */
-static char *key_str[ MAX_KBTYPE ] = {
+static const char *key_str[ MAX_KBTYPE ] = {
 	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* standard kb */
 	 "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",		/* hsu */
 	 "1234567890-qwertyuiopasdfghjkl;zxcvbn/m,.",		/* IBM */
@@ -91,7 +91,7 @@ static char *key_str[ MAX_KBTYPE ] = {
  *
  * return the number it means
  */
-uint16 UintFromPhone( const char *zhuin )
+uint16_t UintFromPhone( const char *zhuin )
 {
 	char *iter, *pos;
 	char buf[ 7 ];
@@ -120,7 +120,7 @@ uint16 UintFromPhone( const char *zhuin )
 int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 {
 	int len = strlen( inputkey ), i, s;
-	char *pTarget;
+	const char *pTarget;
 
 	pho[ 0 ] = '\0';
 	for ( i = 0; i < len; i++ ) {
@@ -141,8 +141,8 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		           ueStrSeek( (char *) ph_str, _index ), 
 			   1, 0);
 	}
-	pTarget = ueStrSeek( pho, len );
-	pTarget[0] = '\0';
+	pho = ueStrSeek( pho, len );
+	pho[0] = '\0';
 	return 1;
 }
 
@@ -179,10 +179,10 @@ int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes )
 	return zhuin_tab_num[type] - ueStrLen(p);
 }
 
-uint16 UintFromPhoneInx( const int ph_inx[] )
+uint16_t UintFromPhoneInx( const int ph_inx[] )
 {
 	int i;
-	uint16 result = 0;
+	uint16_t result = 0;
 
 	for ( i = 0; i < ZUIN_SIZE; i++ )
 		result |= ph_inx[ i ] << shift[ i ];

@@ -1,11 +1,20 @@
+# maintainer files
+
+.dir-locals.el
+ID
+TAGS
+GTAGS
+GPATH
+GRTAGS
+GSYMS
+
 # autotools generated
-Doxyfile
 INSTALL
 Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache
-autotools/
+build-aux/
 chewing.pc
 config.log
 config.status
@@ -29,13 +38,64 @@ include/config.h
 include/config.h.in
 include/stamp-h1
 
-test/do-test
 test/genkeystroke
+test/genkeystroke.exe
 test/randkeystroke
+test/randkeystroke.exe
 test/simulate
+test/simulate.exe
 test/testchewing
+test/testchewing.exe
+test/test-easy-symbol
+test/test-easy-symbol.exe
+test/test-key2pho
+test/test-key2pho.exe
+test/test-mmap
+test/test-mmap.exe
+test/test-path
+test/test-path.exe
+test/test-reset
+test/test-reset.exe
+test/test-symbol
+test/test-symbol.exe
+test/test-utf8
+test/test-utf8.exe
 
 src/chewing-definition.h
 src/tools/maketree
+src/tools/maketree.exe
 src/tools/sort_dic
+src/tools/sort_dic.exe
 src/tools/sort_word
+src/tools/sort_word.exe
+
+test/do-test.xml
+test/test.txt
+
+# gcov output
+*.gcda
+*.gcno
+*.gcov
+/coverage.info
+/coveragereport
+
+# cscope output
+cscope.*
+
+# info doc
+doc/libchewing.info
+doc/stamp-vti
+doc/version.texi
+doc/libchewing.aux
+doc/libchewing.cp
+doc/libchewing.fn
+doc/libchewing.fns
+doc/libchewing.ky
+doc/libchewing.log
+doc/libchewing.pdf
+doc/libchewing.pg
+doc/libchewing.toc
+doc/libchewing.tp
+doc/libchewing.tps
+doc/libchewing.vr
+doc/libchewing.vrs

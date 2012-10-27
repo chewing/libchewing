@@ -14,10 +14,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <check.h>
+
+#include "test.h"
 #include "plat_mmap.h"
 
-START_TEST(test_UnitFromPlatMmap)
+void test_UnitFromPlatMmap()
 {
 	unsigned int idx;
 	plat_mmap m_mmap;
@@ -27,25 +28,22 @@ START_TEST(test_UnitFromPlatMmap)
 	char hard_copy[] = "ji3cp3vu3cj0 vup dj4up <E>";
 	int i;
 	
-	idx = plat_mmap_create(&m_mmap, "default-test.txt", FLAG_ATTRIBUTE_READ);
-	fail_if(idx != 28);
+	idx = plat_mmap_create(&m_mmap, TESTDATA, FLAG_ATTRIBUTE_READ);
+	ok (idx == 28, "plat_mmap_create");
 	if (idx > 0) {
 		csize = idx;
 		data_buf = (char *) plat_mmap_set_view(&m_mmap, &offset, &csize);
 		for (i = 0; i < 26; i++) {
-			fail_if(data_buf[i] != hard_copy[i]);
+			if (data_buf[i] != hard_copy[i])
+				break;
 		}
+		ok (i == 26, "plat_mmap_set_view");
 	}
 	plat_mmap_close( &m_mmap );
 }
-END_TEST
 
-
-Suite *mmap_suite (void)
+int main (int argc, char *argv[])
 {
-	Suite *s = suite_create("plat_mmap");
-	TCase *tc_core = tcase_create("Core");
-	suite_add_tcase (s, tc_core);
-	tcase_add_test (tc_core, test_UnitFromPlatMmap);
-	return s;
+	test_UnitFromPlatMmap();
+	return exit_status();
 }

@@ -24,8 +24,8 @@
 #define USER_UPDATE_MODIFY (2)
 #define USER_UPDATE_IGNORE (8)
 
-typedef struct {
-	uint16 *phoneSeq;
+typedef struct tag_UserPhraseData {
+	uint16_t *phoneSeq;
 	char *wordSeq;
 	int userfreq;
 	int recentTime;
@@ -44,7 +44,7 @@ typedef struct {
  * @retval USER_UPDATE_INSERT Sequence is new, add new entry.
  * @retval USER_UPDATE_MODIFY Sequence is existing, update it's data.
  */
-int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] );
+int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
 /**
  * @brief Read the first phrase of the phone in user phrase database.
@@ -53,7 +53,7 @@ int UserUpdatePhrase( const uint16 phoneSeq[], const char wordSeq[] );
  * 
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] );
+UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] );
 
 /**
  * @brief Read the next phrase of the phone in user phrase database.
@@ -62,6 +62,6 @@ UserPhraseData *UserGetPhraseFirst( const uint16 phoneSeq[] );
  *
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseNext( const uint16 phoneSeq[] );
+UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16_t phoneSeq[] );
 
 #endif
