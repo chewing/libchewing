@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "test_harness.h"
+#include "test.h"
 #include "global-private.h"
 #include "plat_path.h"
 #include "plat_types.h"

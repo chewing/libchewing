@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "test_harness.h"
+#include "test.h"
 #include "plat_mmap.h"
 
 void test_UnitFromPlatMmap()

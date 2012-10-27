@@ -16,11 +16,11 @@
 #include <string.h>
 
 #include "chewing.h"
-#include "test_harness.h"
+#include "test.h"
 
 void test_reset_shall_not_clean_static_data()
 {
-	const char TOKEN[] = "hk4g4";
+	const char TOKEN[] = "hk4g4<E>";
 	const char EXPECTED[] = "測試";
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -37,16 +37,8 @@ void test_reset_shall_not_clean_static_data()
 
 	chewing_Reset( ctx );
 
-	for ( int i = 0; i < sizeof( TOKEN ) / sizeof( TOKEN[0] ); ++i ) {
-		chewing_handle_Default( ctx, TOKEN[i] );
-	}
-	chewing_handle_Enter( ctx );
+	verify_keystoke( ctx, TOKEN, EXPECTED );
 
-	char * buf = chewing_commit_String( ctx );
-
-	ok( strcmp( buf, EXPECTED ) == 0, "output shall match expected string" );
-
-	chewing_free( buf );
 	chewing_delete( ctx );
 	chewing_Terminate();
 }

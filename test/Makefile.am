@@ -35,7 +35,6 @@ NATIVE_TESTS = \
 
 check_HEADERS = \
 	test.h \
-	test_harness.h \
 	$(NULL)
 
 check_PROGRAMS = \

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "test_harness.h"
+#include "test.h"
 #include "chewing-utf8-util.h"
 
 int main (int argc, char *argv[])
