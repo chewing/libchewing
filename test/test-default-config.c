@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <string.h>
+
 #include "chewing.h"
 #include "test.h"
 
