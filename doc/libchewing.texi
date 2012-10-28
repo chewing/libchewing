@@ -545,7 +545,8 @@ For example the default selection key is @code{1234567890}.
 @end deftypefun
 
 @deftypefun int* chewing_get_selKey (ChewingContext *@var{ctx})
-This function returns the current selection key setting.
+This function returns the current selection key setting. This function returns
+@code{NULL} when no memory.
 
 The return value @emph{must} be freed by the @code{chewing_free}
 function.

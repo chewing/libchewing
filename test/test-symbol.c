@@ -18,9 +18,6 @@
 #include "chewing.h"
 #include "test.h"
 
-static int SELECT_KEY[] = {
-	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
-
 static const TestData SYMBOL[] = {
 	{ .token = "`1<E>", .expected = "…" },
 	{ .token = "`2<E>", .expected = "※" },
@@ -342,7 +339,6 @@ void test_type_symbol()
 	ChewingContext *ctx = chewing_new();
 	ok( ctx, "chewing_new shall not return NULL" );
 
-	chewing_set_selKey( ctx, SELECT_KEY, ARRAY_SIZE( SELECT_KEY ) );
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -363,7 +359,6 @@ void test_symbol_cand_page()
 	ChewingContext *ctx = chewing_new();
 	ok( ctx, "chewing_new shall not return NULL" );
 
-	chewing_set_selKey( ctx, SELECT_KEY, ARRAY_SIZE( SELECT_KEY ) );
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
