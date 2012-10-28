@@ -55,6 +55,7 @@
 #endif
 #endif
 
+#define MIN_SELKEY 1
 #define MAX_SELKEY 10
 
 /**

@@ -140,6 +140,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 static ChewingData * allocate_ChewingData()
 {
 	static const ChewingConfigData DEFAULT_CONFIG = {
+		.candPerPage = MAX_SELKEY,
 		.selKey = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' },
 	};
 
@@ -366,7 +367,8 @@ CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
 
 CHEWING_API void chewing_set_candPerPage( ChewingContext *ctx, int n )
 {
-	ctx->data->config.candPerPage = n;
+	if ( MIN_SELKEY <= n && n <= MAX_SELKEY )
+		ctx->data->config.candPerPage = n;
 }
 
 CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx )

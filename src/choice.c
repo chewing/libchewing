@@ -317,8 +317,6 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 	/* magic number */
 	pci->nChoicePerPage = candPerPage;
-	if ( pci->nChoicePerPage > MAX_SELKEY )
-		pci->nChoicePerPage = MAX_SELKEY;
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
 }

@@ -24,7 +24,7 @@ libtest_la_LIBADD = \
 
 TESTS = $(NATIVE_TESTS)
 NATIVE_TESTS = \
-	test-default-config \
+	test-config \
 	test-easy-symbol \
 	test-key2pho \
 	test-mmap \

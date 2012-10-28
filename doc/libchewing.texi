@@ -525,7 +525,9 @@ This function checks if the candidates selection has finished.
 @section Candidates Behavior
 
 @deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
-This function sets the candidates per page to @var{n}.
+This function sets the candidates per page to @var{n}. If MIN_SELKEY @leq{}
+@var{n} @leq{} MAX_SELKEY is not true, the @var{n} will be ignored. The default
+candidates per page is MAX_SELKEY.
 @end deftypefun
 
 @deftypefun int chewing_get_candPerPage (ChewingContext *@var{ctx})
@@ -534,6 +536,10 @@ This function returns the candidates per page.
 
 @deftypevr Marco int MAX_SELKEY
 The number of maximum candidates that are selectable via shortcut
+keys.
+@end deftypevr
+@deftypevr Marco int MIN_SELKEY
+The number of minimum candidates that are selectable via shortcut
 keys.
 @end deftypevr
 
