@@ -21,6 +21,7 @@ What's New in libchewing GIT
  . UCIMF supports Chewing IM
  . Fcitx supports Chewing IM
  . mozc (IM framework maintained by Google) provides Chewing support
+ . JMCCE (reworked version) supports libchewing
 
 
 What's New in libchewing 0.3.3
@@ -115,7 +116,7 @@ What's New in libchewing 0.3.0
 * Merge phone and phrase from CNS11643.
 * Reduce the amount for the expose for internal symbols.
 * Improved Han-Yu PinYin to use table-lookup implementation.
-* Experimental frequency-evaluation. (re-compute chewing 
+* Experimental frequency-evaluation. (re-compute chewing
   lifetime)
 * Implement the choice mechanism for pair symbols.
 * Improved Tab handling to allow the switching over different
@@ -131,7 +132,7 @@ What's New in libchewing 0.3.0
   . New Win32-Chewing subproject to provide efficient input
     method solution on Microsoft Windows platforms.
 
-    
+
 What's New in libchewing 0.2.7
 ----------------------------------------------------------
 * Fix the keyboard type state changing bug.
@@ -152,7 +153,7 @@ What's New in libchewing 0.2.6
 * SegFault workaround after libtabe's tsi.src merge.
 * Add the facility to input symbols.
 * Successful stories:
-  . Chewing becomes one of the built-in input methods in Sun 
+  . Chewing becomes one of the built-in input methods in Sun
     Java Desktop System (JDS).
 
 
