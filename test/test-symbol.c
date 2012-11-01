@@ -343,7 +343,7 @@ void test_type_symbol()
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	for (int i = 0; i < ARRAY_SIZE(SYMBOL); ++i ) {
-		verify_keystoke( ctx, SYMBOL[i].token, SYMBOL[i].expected );
+		ok_keystoke( ctx, SYMBOL[i].token, SYMBOL[i].expected );
 	}
 
 	chewing_delete( ctx );

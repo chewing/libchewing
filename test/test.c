@@ -200,7 +200,7 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	}
 }
 
-void internal_verify_keystoke( ChewingContext *ctx, char *key, char *expected,
+void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
 	const char *file, int line )
 {
 	assert( ctx );

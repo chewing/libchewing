@@ -60,7 +60,7 @@ void test_type_easy_symbol()
 	chewing_set_easySymbolInput( ctx, 1 );
 
 	for ( int i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
-		verify_keystoke( ctx,
+		ok_keystoke( ctx,
 			EASY_SYMBOL[i].token, EASY_SYMBOL[i].expected );
 	}
 
@@ -77,13 +77,13 @@ void test_mode_change()
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	verify_keystoke( ctx, CHINESE.token, CHINESE.expected );
+	ok_keystoke( ctx, CHINESE.token, CHINESE.expected );
 
 	chewing_set_easySymbolInput( ctx, 1 );
-	verify_keystoke( ctx, EASY_SYMBOL[0].token, EASY_SYMBOL[0].expected );
+	ok_keystoke( ctx, EASY_SYMBOL[0].token, EASY_SYMBOL[0].expected );
 
 	chewing_set_easySymbolInput( ctx, 0 );
-	verify_keystoke( ctx, CHINESE.token, CHINESE.expected );
+	ok_keystoke( ctx, CHINESE.token, CHINESE.expected );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

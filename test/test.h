@@ -34,8 +34,8 @@
 
 #define ok(test, fmt, ...) \
 	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
-#define verify_keystoke(ctx, key, expected) \
-	internal_verify_keystoke( ctx, key, expected, __FILE__, __LINE__)
+#define ok_keystoke(ctx, key, expected) \
+	internal_ok_keystoke( ctx, key, expected, __FILE__, __LINE__)
 
 typedef struct {
 	char * token;
@@ -49,7 +49,7 @@ int exit_status();
 
 // The internal_xxx function shall be used indirectly by macro in order to
 // get correct __FILE__ and __LINE__ information.
-void internal_verify_keystoke( ChewingContext *ctx, char *key, char *expected,
+void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
 	const char *file, int line );
 void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
