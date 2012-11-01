@@ -10,6 +10,7 @@
 #include "test.h"
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -173,16 +174,29 @@ static int get_char_by_string( void * param )
 	return ch;
 }
 
-void internal_ok( int test, const char * test_txt, const char *message,
-	const char *file, int line )
+void internal_ok( const char *file, int line, int test, const char * test_txt,
+	const char *fmt, ...)
 {
 	++test_run;
 	if ( test ) {
 		++test_ok;
-		printf( "ok %d %s\n", test_run, message );
+		printf( "ok %d ", test_run);
+
+		va_list ap;
+		va_start( ap, fmt );
+		vprintf( fmt, ap );
+		va_end( ap );
+
+		printf("\n");
 	} else {
-		printf( "not ok %d %s\n", test_run, message );
-		printf( "# %s failed in %s:%d\n", test_txt, file, line );
+		printf( "not ok %d ", test_run);
+
+		va_list ap;
+		va_start( ap, fmt );
+		vprintf( fmt, ap );
+		va_end( ap );
+
+		printf( "\n# %s failed in %s:%d\n", test_txt, file, line );
 	}
 }
 
@@ -195,8 +209,8 @@ void internal_verify_keystoke( ChewingContext *ctx, char *key, char *expected,
         type_keystoke( ctx, get_char_by_string, &key );
 
 	char *buf = chewing_commit_String( ctx );
-	internal_ok( !strcmp( buf, expected ), "!strcmp( buf, expected )",
-		"output shall be expected value", file, line );
+	internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
+		"`%s' shall be `%s'", buf, expected );
 	chewing_free( buf );
 }
 
