@@ -127,7 +127,7 @@ typedef struct _SymbolEntry {
 	 * This is an char[] array of variable length.
 	 * When nSymbols = 0, this array is not allocated.
 	 */
-	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
+	char symbols[][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
 typedef struct {

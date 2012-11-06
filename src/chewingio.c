@@ -206,7 +206,7 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 	ret = InitSymbolTable( ctx->data, path );
-	if ( !ret )
+	if ( ret )
 		goto error;
 
 	ret = find_path_by_files(
