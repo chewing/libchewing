@@ -1375,6 +1375,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	line = malloc( LINE_LEN );
 	if ( !line )
 		goto end;
+	memset( line, 0, LINE_LEN );
 
 	entry = calloc( sizeof( *entry ), MAX_SYMBOL_ENTRY );
 	if ( !entry )
@@ -1483,6 +1484,7 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 	line = malloc( LINE_LEN );
 	if ( !line )
 		goto end;
+	memset( line, 0, LINE_LEN );
 
 	while ( fgets( line, LINE_LEN, file ) ) {
 		if ( ' ' != line[ 1 ] )
