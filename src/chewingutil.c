@@ -1424,60 +1424,64 @@ void TerminateSymbolTable( ChewingData *pgdata )
 
 int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 {
-	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
-	FILE *file;
-	char filename[ PATH_MAX ];
-	char line[ 512 ];
-	char *symbol;
-	int len = 0, _index;
+	static const int MAX_EASY_SYMBOL_LEN = 10;
+	static const size_t LINE_LEN = 512; // shall be long enough?
 
-	memset(line, 0, 512);
+	FILE *file = NULL;
+	char *filename = NULL;
+	char *line = NULL;
+	int ret = -1;
 
-	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SOFTKBD_TABLE_FILE );
+	int filename_len = snprintf( NULL, 0, "%s" PLAT_SEPARATOR "%s",
+		prefix, SOFTKBD_TABLE_FILE );
+	filename = malloc( filename_len + 1 );
+	if ( !filename )
+		goto end;
+
+	snprintf( filename, filename_len + 1, "%s" PLAT_SEPARATOR "%s",
+		prefix, SOFTKBD_TABLE_FILE );
+
 	file = fopen( filename, "r" );
+	if ( !file )
+		goto end;
 
-	if ( ! file )
-		return 0;
+	line = malloc( LINE_LEN );
+	if ( !line )
+		goto end;
 
-	line[ 0 ] = '\0';
-	while ( fgets( line, sizeof( line ) / sizeof( char ), file ) ) {
-		if ( '\0' == line[ 0 ] ) {
-			break;
-		}
-
-		line[ sizeof( line ) / sizeof( char ) - 1] = '\0';
-		if ( ' ' != line[ 1 ] ) {
+	while ( fgets( line, LINE_LEN, file ) ) {
+		if ( ' ' != line[ 1 ] )
 			continue;
-		}
 
-		len = strcspn( line, "\r\n\0" );
+		// Remove tailing \n
+		int len = strcspn( line, "\r\n" );
+
 		line[ len ] = '\0';
 
-		line[ 0 ] = toupper( line[ 0 ] );
-		_index = FindEasySymbolIndex( line[ 0 ] );
-		if ( -1 == _index ) {
+		int _index = FindEasySymbolIndex( line[ 0 ] );
+		if ( -1 == _index )
 			continue;
-		}
 
 		len = ueStrLen( &line[ 2 ] );
-		if ( 0 == len || 10 <= len ) {
+		if ( 0 == len || len > MAX_EASY_SYMBOL_LEN )
 			continue;
-		}
 
-		symbol = ALC( char, 6 * 10 );
-		if ( NULL == symbol ) {
-			break;
-		}
-		ueStrNCpy( symbol, &line[ 2 ], 9, 1 );
+		char *symbol = malloc( strlen( &line[2] ) + 1 );
+		if ( !symbol )
+			goto end;
 
-		if ( NULL != pgdata->static_data.g_easy_symbol_value[ _index] ) {
-			free( pgdata->static_data.g_easy_symbol_value[ _index ] );
-		}
+		ueStrNCpy( symbol, &line[ 2 ], len, 1 );
+
+		free( pgdata->static_data.g_easy_symbol_value[ _index ] );
 		pgdata->static_data.g_easy_symbol_value[ _index ] = symbol;
 		pgdata->static_data.g_easy_symbol_num[ _index ] = len;
 	}
+	ret = 0;
+end:
+	free( line );
 	fclose( file );
-	return 1;
+	free ( filename );
+	return ret;
 }
 
 void TerminateEasySymbolTable( ChewingData *pgdata )
