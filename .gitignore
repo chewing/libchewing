@@ -51,6 +51,8 @@ test/test-config
 test/test-config.exe
 test/test-easy-symbol
 test/test-easy-symbol.exe
+test/test-fullshape
+test/test-fullshape.exe
 test/test-key2pho
 test/test-key2pho.exe
 test/test-mmap

@@ -26,6 +26,7 @@ TESTS = $(NATIVE_TESTS)
 NATIVE_TESTS = \
 	test-config \
 	test-easy-symbol \
+	test-fullshape \
 	test-key2pho \
 	test-mmap \
 	test-path \
