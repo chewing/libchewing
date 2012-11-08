@@ -46,6 +46,30 @@ int get_search_path( char * path, size_t path_len )
 
 #elif defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 #define SEARCH_PATH_SEP ";"
+int get_search_path( char * path, size_t path_len )
+{
+	char *chewing_path;
+	char *appdata;
+
+	chewing_path = getenv( "CHEWING_PATH" );
+	if ( chewing_path ) {
+		strncpy( path, chewing_path, path_len );
+	} else {
+		appdata = getenv( "APPDATA" );
+		if ( appdata ) {
+			snprintf( path, path_len, "%s", appdata );
+		} else {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+#else
+#error please implement get_search_path
+#endif
+
+#if !HAVE_STRTOK_R
 static char * strtok_r (char *s, const char *delim, char **save_ptr)
 {
 	char *token;
@@ -73,28 +97,6 @@ static char * strtok_r (char *s, const char *delim, char **save_ptr)
 	}
 	return token;
 }
-
-int get_search_path( char * path, size_t path_len )
-{
-	char *chewing_path;
-	char *appdata;
-
-	chewing_path = getenv( "CHEWING_PATH" );
-	if ( chewing_path ) {
-		strncpy( path, chewing_path, path_len );
-	} else {
-		appdata = getenv( "APPDATA" );
-		if ( appdata ) {
-			snprintf( path, path_len, "%s", appdata );
-		} else {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-#else
-#error please implement get_search_path
 #endif
 
 static int are_all_files_readable(

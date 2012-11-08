@@ -58,6 +58,7 @@ AC_LANG(C)
 
 # Checks for library functions.
 AC_FUNC_MALLOC
+AC_CHECK_FUNCS([strtok_r])
 
 # plat_mmap_posix
 AC_FUNC_MMAP
