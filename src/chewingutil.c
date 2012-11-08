@@ -13,6 +13,9 @@
  */
 
 /* This file is encoded in UTF-8 */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <ctype.h>
 #include <string.h>
@@ -29,6 +32,12 @@
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "private.h"
+
+#if HAVE_ASPRINTF
+#include <stdio.h>
+#else
+#include "plat_path.h"
+#endif
 
 extern const char *zhuin_tab[]; 
 static void MakePreferInterval( ChewingData *pgdata );
@@ -1359,14 +1368,10 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	pgdata->static_data.n_symbol_entry = 0;
 	pgdata->static_data.symbol_table = NULL;
 
-	int filename_len = snprintf( NULL, 0, "%s" PLAT_SEPARATOR "%s",
+	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
 		prefix, SYMBOL_TABLE_FILE );
-	filename = ALC( char, filename_len + 1 );
-	if ( !filename )
+	if ( ret == -1 )
 		goto end;
-
-	snprintf( filename, filename_len + 1, "%s" PLAT_SEPARATOR "%s",
-		prefix, SYMBOL_TABLE_FILE );
 
 	file = fopen( filename, "r" );
 	if ( !file )
@@ -1467,14 +1472,10 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 	char *line = NULL;
 	int ret = -1;
 
-	int filename_len = snprintf( NULL, 0, "%s" PLAT_SEPARATOR "%s",
-		prefix, SOFTKBD_TABLE_FILE );
-	filename = ALC( char, filename_len + 1 );
-	if ( !filename )
+	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
+			prefix, SOFTKBD_TABLE_FILE );
+	if ( ret == -1 )
 		goto end;
-
-	snprintf( filename, filename_len + 1, "%s" PLAT_SEPARATOR "%s",
-		prefix, SOFTKBD_TABLE_FILE );
 
 	file = fopen( filename, "r" );
 	if ( !file )

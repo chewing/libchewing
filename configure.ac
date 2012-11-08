@@ -58,7 +58,7 @@ AC_LANG(C)
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([strtok_r])
+AC_CHECK_FUNCS([strtok_r asprintf])
 
 # plat_mmap_posix
 AC_FUNC_MMAP
@@ -75,6 +75,9 @@ AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
 AM_CFLAGS="$CFLAGS -Wall"
+AS_IF([test x$ac_cv_func_asprintf == xyes],
+      [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
+
 
 AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
@@ -166,6 +169,7 @@ AC_DEFINE(UNDER_POSIX, 1,
 esac
 
 AC_SUBST(AM_CFLAGS)
+AC_SUBST(AM_CPPFLAGS)
 
 AC_CONFIG_LINKS([
 	data/pinyin.tab:data/pinyin.tab
