@@ -369,7 +369,7 @@ char *_load_hash_file( const char *filename, int *size )
 	if ( tf == NULL ) {
 		goto err_load_file;
 	}
-	pd = (char *) malloc( flen );
+	pd = ALC( char, flen );
 	if ( pd == NULL ) {
 		goto err_load_file;
 	}
@@ -403,7 +403,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 	if ( txtfile == NULL ) {
 		return 0;
 	}
-	dump = (char *) malloc( tflen * 2 );
+	dump = ALC( char, tflen * 2 );
 	if ( dump == NULL ) {
 		fclose( txtfile );
 		return 0;

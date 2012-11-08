@@ -1361,7 +1361,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 
 	int filename_len = snprintf( NULL, 0, "%s" PLAT_SEPARATOR "%s",
 		prefix, SYMBOL_TABLE_FILE );
-	filename = malloc( filename_len + 1 );
+	filename = ALC( char, filename_len + 1 );
 	if ( !filename )
 		goto end;
 
@@ -1372,12 +1372,11 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	if ( !file )
 		goto end;
 
-	line = malloc( LINE_LEN );
+	line = ALC( char, LINE_LEN );
 	if ( !line )
 		goto end;
-	memset( line, 0, LINE_LEN );
 
-	entry = calloc( sizeof( *entry ), MAX_SYMBOL_ENTRY );
+	entry = ALC( SymbolEntry* , MAX_SYMBOL_ENTRY );
 	if ( !entry )
 		goto end;
 
@@ -1394,7 +1393,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 			int len = ueStrLen( symbols );
 
 			entry[ pgdata->static_data.n_symbol_entry ] =
-				malloc( sizeof ( entry[0][0] ) +
+				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) +
 					sizeof( entry[0][0].symbols[0] ) * len);
 			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
 				goto end;
@@ -1414,7 +1413,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 
 		} else {
 			entry[ pgdata->static_data.n_symbol_entry ] =
-				malloc( sizeof ( entry[0][0] ) );
+				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) );
 			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
 				goto end;
 
@@ -1432,7 +1431,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 
 	size_t size = sizeof( *pgdata->static_data.symbol_table ) *
 		pgdata->static_data.n_symbol_entry;
-	pgdata->static_data.symbol_table = malloc( size );
+	pgdata->static_data.symbol_table = ( SymbolEntry ** ) malloc( size );
 	if ( !pgdata->static_data.symbol_table )
 		goto end;
 	memcpy( pgdata->static_data.symbol_table, entry, size );
@@ -1470,7 +1469,7 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 
 	int filename_len = snprintf( NULL, 0, "%s" PLAT_SEPARATOR "%s",
 		prefix, SOFTKBD_TABLE_FILE );
-	filename = malloc( filename_len + 1 );
+	filename = ALC( char, filename_len + 1 );
 	if ( !filename )
 		goto end;
 
@@ -1481,10 +1480,9 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 	if ( !file )
 		goto end;
 
-	line = malloc( LINE_LEN );
+	line = ALC( char, LINE_LEN );
 	if ( !line )
 		goto end;
-	memset( line, 0, LINE_LEN );
 
 	while ( fgets( line, LINE_LEN, file ) ) {
 		if ( ' ' != line[ 1 ] )
@@ -1503,7 +1501,7 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 		if ( 0 == len || len > MAX_EASY_SYMBOL_LEN )
 			continue;
 
-		char *symbol = malloc( strlen( &line[2] ) + 1 );
+		char *symbol = ALC( char, strlen( &line[2] ) + 1 );
 		if ( !symbol )
 			goto end;
 
