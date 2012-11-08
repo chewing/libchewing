@@ -541,110 +541,20 @@ static int DoSelect( ChewingData *pgdata, int num )
 CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
-	ChewingOutput *pgo = ctx->output;
-	int keystrokeRtn = KEYSTROKE_ABSORB;
-	int toSelect = 0;
-	int rtn, key_buf_cursor;
-	int bQuickCommit = 0;
 
 	/* check if Old Chewing style */
-	if ( ! pgdata->config.bSpaceAsSelection ) {
+	if ( !pgdata->config.bSpaceAsSelection
+	     || pgdata->bChiSym != CHINESE_MODE ) {
 		return chewing_handle_Default( ctx, ' ' );
 	}
 
 	CheckAndResetRange( pgdata );
 
 	if ( pgdata->bSelect ) {
-		if ( pgdata->choiceInfo.pageNo < ( pgdata->choiceInfo.nPage - 1 ) ) {
-			return chewing_handle_Right( ctx );
-		}
+		return chewing_handle_Right( ctx );
+	} else {
+		return chewing_handle_Down( ctx );
 	}
-
-	if ( ! ChewingIsEntering( pgdata ) ) {
-		if ( pgdata->bFullShape ) {
-			rtn = FullShapeSymbolInput( ' ', pgdata );
-		}
-		else {
-			rtn = SymbolInput( ' ', pgdata );
-		}
-		pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
-		pgo->nCommitStr = 1;
-		pgdata->chiSymbolBufLen = 0;
-		pgdata->chiSymbolCursor = 0;
-		keystrokeRtn = KEYSTROKE_COMMIT;
-	} 
-	else if ( pgdata->bChiSym != CHINESE_MODE ) {
-		/* see if buffer contains nothing */
-		if ( pgdata->chiSymbolBufLen == 0 ) {
-			bQuickCommit = 1;
-		}
-
-		if ( pgdata->bFullShape ) {
-			rtn = FullShapeSymbolInput( ' ', pgdata );
-		}
-		else {
-			rtn = SymbolInput( ' ', pgdata );
-		}
-
-		keystrokeRtn = KEYSTROKE_ABSORB;
-		if ( rtn == SYMBOL_KEY_ERROR ) {
-			keystrokeRtn = KEYSTROKE_IGNORE;
-			/*
-			 * If the key is not a printable symbol, 
-			 * then it's wrong to commit it.
-			 */
-			bQuickCommit = 0;
-		} 
-		else {
-			keystrokeRtn = KEYSTROKE_ABSORB;
-		}
-
-		if ( ! bQuickCommit ) {
-			CallPhrasing( pgdata );
-			if( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
-				keystrokeRtn = KEYSTROKE_COMMIT;
-		}
-		/* Quick commit */
-		else {
-			DEBUG_OUT(
-				"\t\tQuick commit buf[0]=%c\n", 
-				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ]; 
-			pgo->nCommitStr = 1;
-			pgdata->chiSymbolBufLen = 0;
-			pgdata->chiSymbolCursor = 0;
-			keystrokeRtn = KEYSTROKE_COMMIT;
-		}
-	}
-	else {
-		rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), ' ' );
-		switch ( rtn ) {
-			case ZUIN_ABSORB:
-				keystrokeRtn = KEYSTROKE_ABSORB;
-				break;
-			case ZUIN_COMMIT:
-				AddChi( pgdata->zuinData.phone, pgdata );
-				CallPhrasing( pgdata );
-				break;
-			case ZUIN_NO_WORD:
-				keystrokeRtn = KEYSTROKE_BELL | KEYSTROKE_ABSORB;
-				break;
-			case ZUIN_KEY_ERROR:
-			case ZUIN_IGNORE:
-				key_buf_cursor = pgdata->chiSymbolCursor;
-				if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
-					key_buf_cursor--;
-
-				/* see if to select */
-				if ( ChewingIsChiAt( key_buf_cursor, pgdata ) )
-					toSelect = 1;
-
-				chooseCandidate( ctx, toSelect, key_buf_cursor );
-				break;
-		}
-	}
-
-	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
 
