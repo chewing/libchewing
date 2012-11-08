@@ -102,7 +102,7 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	int len;
 	int i;
 
-	pgdata->dict_begin = calloc( PHONE_PHRASE_NUM + 1, sizeof( *pgdata->dict_begin ) );
+	pgdata->dict_begin = ALC( int, PHONE_PHRASE_NUM + 1 );
 	if ( !pgdata->dict_begin )
 		return -1;
 

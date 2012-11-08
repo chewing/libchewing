@@ -141,11 +141,11 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 
 	pgdata->phone_num = PHONE_NUM;
 
-	pgdata->arrPhone = calloc( pgdata->phone_num, sizeof( *pgdata->arrPhone ) );
+	pgdata->arrPhone = ALC( uint16_t, pgdata->phone_num );
 	if ( !pgdata->arrPhone )
 	    return -1;
 
-	pgdata->char_begin = calloc( pgdata->phone_num, sizeof( *pgdata->char_begin ) );
+	pgdata->char_begin = ALC( int, pgdata->phone_num );
 	if ( !pgdata->char_begin )
 	    return -1;
 

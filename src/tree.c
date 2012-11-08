@@ -135,7 +135,7 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	if ( !infile )
 		return -1;
 
-	pgdata->tree = calloc( sizeof(*pgdata->tree), TREE_SIZE );
+	pgdata->tree = ALC( TreeType, TREE_SIZE );
 	if ( !pgdata->tree ) {
 		fclose( infile );
 		return -1;
