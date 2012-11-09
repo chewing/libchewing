@@ -200,13 +200,18 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	}
 }
 
-void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
-	const char *file, int line )
+void type_keystoke_by_string( ChewingContext *ctx, const char* keystoke )
+{
+	return type_keystoke( ctx, get_char_by_string, &keystoke );
+}
+
+void internal_ok_keystoke( const char *file, int line,
+	ChewingContext *ctx, const char *key, const char *expected )
 {
 	assert( ctx );
 	assert( key );
 
-        type_keystoke( ctx, get_char_by_string, &key );
+	type_keystoke_by_string( ctx, key );
 
 	char *buf = chewing_commit_String( ctx );
 	internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
@@ -238,7 +243,8 @@ void internal_ok_candidate( const char *file, int line,
 	buf = chewing_cand_String( ctx );
 
 	internal_ok( file, line, strcmp( buf, "" ) == 0, __func__,
-			"candidate string shall be empty when out of range" );
+		"candndate `%s' shall be `%s'", buf, "" );
+
 	chewing_free( buf );
 }
 

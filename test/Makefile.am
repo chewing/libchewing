@@ -24,6 +24,7 @@ libtest_la_LIBADD = \
 
 TESTS = $(NATIVE_TESTS)
 NATIVE_TESTS = \
+	test-bopomofo \
 	test-config \
 	test-easy-symbol \
 	test-fullshape \

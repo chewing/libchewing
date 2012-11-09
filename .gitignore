@@ -47,6 +47,8 @@ test/simulate
 test/simulate.exe
 test/testchewing
 test/testchewing.exe
+test/test-bopomofo
+test/test-bopomofo.exe
 test/test-config
 test/test-config.exe
 test/test-easy-symbol

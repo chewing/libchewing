@@ -37,7 +37,7 @@
 #define ok(test, fmt, ...) \
 	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
 #define ok_keystoke(ctx, key, expected) \
-	internal_ok_keystoke( ctx, key, expected, __FILE__, __LINE__)
+	internal_ok_keystoke( __FILE__, __LINE__, ctx, key, expected )
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
 
@@ -49,12 +49,13 @@ typedef struct {
 typedef int (*get_char_func) ( void *param );
 
 int get_keystroke( get_char_func get_char, void *param );
+void type_keystoke_by_string( ChewingContext *ctx, const char* keystoke );
 int exit_status();
 
 // The internal_xxx function shall be used indirectly by macro in order to
 // get correct __FILE__ and __LINE__ information.
-void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
-	const char *file, int line );
+void internal_ok_keystoke( const char *file, int line,
+	ChewingContext *ctx, const char *key, const char *expected );
 void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
