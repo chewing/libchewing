@@ -10,6 +10,8 @@
 #include <config.h>
 #endif
 
+#include <stddef.h>
+
 #include "chewing.h"
 
 #define KEY_SLEFT 896
@@ -36,6 +38,8 @@
 	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
 #define ok_keystoke(ctx, key, expected) \
 	internal_ok_keystoke( ctx, key, expected, __FILE__, __LINE__)
+#define ok_candidate(ctx, cand, cand_len) \
+	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
 
 typedef struct {
 	char * token;
@@ -53,3 +57,5 @@ void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
 	const char *file, int line );
 void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
+void internal_ok_candidate( const char *file, int line,
+	ChewingContext *ctx, const char *cand[], size_t cand_len );

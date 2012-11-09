@@ -214,6 +214,34 @@ void internal_ok_keystoke( ChewingContext *ctx, char *key, char *expected,
 	chewing_free( buf );
 }
 
+void internal_ok_candidate( const char *file, int line,
+	ChewingContext *ctx, const char *cand[], size_t cand_len )
+{
+	int i;
+	char *buf;
+
+	assert( ctx );
+	assert( cand );
+
+	chewing_cand_Enumerate( ctx );
+	for ( i = 0; i < cand_len; ++i ) {
+		internal_ok( file, line, chewing_cand_hasNext( ctx ), __func__,
+			"shall has next candidate" );
+		buf = chewing_cand_String( ctx );
+		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
+			"candndate `%s' shall be `%s'", buf, cand[i] );
+		chewing_free( buf );
+	}
+
+	internal_ok( file, line , !chewing_cand_hasNext( ctx ), __func__,
+			"shall not have next candidate" );
+	buf = chewing_cand_String( ctx );
+
+	internal_ok( file, line, strcmp( buf, "" ) == 0, __func__,
+			"candidate string shall be empty when out of range" );
+	chewing_free( buf );
+}
+
 int exit_status()
 {
 	return test_run == test_ok ? 0 : -1;
