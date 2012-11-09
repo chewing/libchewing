@@ -542,9 +542,15 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
 
-	/* check if Old Chewing style */
+	/*
+	 * Use chewing_handle_Default( ctx, ' ' ) to handle space when:
+	 * - "space as selection" mode is disable
+	 * - mode is not CHINESE_MODE
+	 * - has incompleted bopomofo (space is needed to complete it)
+	 */
 	if ( !pgdata->config.bSpaceAsSelection
-	     || pgdata->bChiSym != CHINESE_MODE ) {
+	     || pgdata->bChiSym != CHINESE_MODE
+	     || ZuinIsEntering( &ctx->data->zuinData ) ) {
 		return chewing_handle_Default( ctx, ' ' );
 	}
 
