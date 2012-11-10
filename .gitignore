@@ -65,6 +65,8 @@ test/test-reset
 test/test-reset.exe
 test/test-symbol
 test/test-symbol.exe
+test/test-special-symbol
+test/test-special-symbol.exe
 test/test-utf8
 test/test-utf8.exe
 

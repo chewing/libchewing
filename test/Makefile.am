@@ -33,6 +33,7 @@ NATIVE_TESTS = \
 	test-path \
 	test-reset \
 	test-symbol \
+	test-special-symbol \
 	test-utf8 \
 	$(NULL)
 
