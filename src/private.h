@@ -46,6 +46,7 @@ __forceinline void DEBUG_OUT( char* str, ... ){ }
 	(type *) calloc( size, sizeof( type ) )
 
 #define STATIC_ASSERT( exp, name ) typedef int STATIC_ASSERT_##name [ ( exp ) ? 1 : -1 ];
+#define ARRAY_SIZE( array ) ( sizeof(array) / sizeof(array[0] ) )
 
 typedef int (*CompFuncType)( const void *, const void * );
 

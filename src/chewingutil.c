@@ -245,8 +245,9 @@ int SpecialSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBC\x9B"
 			/* "；" */
 	};
-	static int nSpecial = 29;
-	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+
+	return InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 }
 
 int FullShapeSymbolInput( int key, ChewingData *pgdata )
@@ -302,8 +303,9 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBD\x9D","\xEF\xBC\x8B","\xEF\xBC\x8D"
 			/* "｝","＋","－" */
 	};
-	static int nSpecial = sizeof( keybuf ) / sizeof( char );
-	rtn = InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+
+	rtn = InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 	if ( rtn == ZUIN_IGNORE )
 		rtn = SpecialSymbolInput( key, pgdata );
 	return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
@@ -630,7 +632,7 @@ static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 		ueStrNCpy( buf,
 				ueStrSeek( (char *) &pgdata->phrOut.chiBuf, cursor ),
 				1, 1 );
-		for ( i = 0; (size_t) i < sizeof(break_word) / sizeof(break_word[0]); i++ ) {
+		for ( i = 0; (size_t) i < ARRAY_SIZE( break_word ); i++ ) {
 			if ( ! strcmp ( buf, break_word[ i ] ) )
 				return 1;
 		}
@@ -1310,7 +1312,7 @@ static int FindSymbolKey( const char *symbol )
 
 int OpenSymbolChoice( ChewingData *pgdata )
 {
-	int i, symbol_buf_len = sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] );
+	int i, symbol_buf_len = ARRAY_SIZE( symbol_buf );
 	char **pBuf;
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;

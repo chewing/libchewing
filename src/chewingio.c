@@ -92,7 +92,7 @@ CHEWING_API int chewing_KBStr2Num( char str[] )
 {
 	int i;
 
-	STATIC_ASSERT( KB_TYPE_NUM == sizeof(kb_type_str)/sizeof(kb_type_str[0]), kb_type_str_needs_update);
+	STATIC_ASSERT( KB_TYPE_NUM == ARRAY_SIZE( kb_type_str ), kb_type_str_needs_update);
 	for ( i = 0; i < KB_TYPE_NUM; i++) {
 		if ( ! strcmp( str, kb_type_str[ i ] ) )
 			return i;
@@ -1032,9 +1032,11 @@ static int dvorak_convert( int key )
 		'k','K','l','L',';',':','\'','\"',
 		'z','Z','x','X','c','C','v','V','b','B','n','N','m','M',
 		',','<','.','>','/','?'};
-	int i = 0, Total = 67;
+	int i = 0;
 
-	for ( i = 0; i < Total; i++ ) {
+	STATIC_ASSERT( ARRAY_SIZE( dkey ) == ARRAY_SIZE( qkey ), update_dkey_and_qkey );
+
+	for ( i = 0; i < ARRAY_SIZE( dkey ); i++ ) {
 		if ( key == qkey[ i ] ) {
 			key = dkey[ i ];
 			return key;
