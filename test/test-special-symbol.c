@@ -19,45 +19,45 @@
 #include "test.h"
 
 static const TestData SPECIAL_SYMBOL_TABLE[] = {
-	{ .token = "[<E>", .expected = "「" },
-	{ .token = "]<E>", .expected = "」" },
-	{ .token = "{<E>", .expected = "『" },
-	{ .token = "}<E>", .expected = "』"},
-	{ .token = "'<E>", .expected = "、" },
-	{ .token = "<<><E>", .expected = "，" },
-	{ .token = ":<E>", .expected = "：" },
-	{ .token = "\"<E>", .expected = "；" },
-	{ .token = "><E>", .expected = "。" },
-	{ .token = "~<E>", .expected = "～" },
-	{ .token = "!<E>", .expected = "！" },
-	{ .token = "@<E>", .expected = "＠" },
-	{ .token = "#<E>", .expected = "＃" },
-	{ .token = "$<E>", .expected = "＄" },
-	{ .token = "%<E>", .expected = "％" },
-	{ .token = "^<E>", .expected = "︿" },
-	{ .token = "&<E>", .expected = "＆" },
-	{ .token = "*<E>", .expected = "＊" },
-	{ .token = "(<E>", .expected = "（" },
-	{ .token = ")<E>", .expected = "）" },
-	{ .token = "_<E>", .expected = "﹍" },
-	{ .token = "+<E>", .expected = "＋" },
-	{ .token = "=<E>", .expected = "＝" },
-	{ .token = "\\<E>", .expected = "＼" },
-	{ .token = "|<E>", .expected = "｜" },
-	{ .token = "?<E>", .expected = "？" },
-	{ .token = ",<E>", .expected = "，" },
-	{ .token = ".<E>", .expected = "。" },
-	{ .token = ";<E>", .expected = "；" },
+	{ .token = "[", .expected = "「" },
+	{ .token = "]", .expected = "」" },
+	{ .token = "{", .expected = "『" },
+	{ .token = "}", .expected = "』"},
+	{ .token = "'", .expected = "、" },
+	{ .token = "<<>", .expected = "，" },
+	{ .token = ":", .expected = "：" },
+	{ .token = "\"", .expected = "；" },
+	{ .token = ">", .expected = "。" },
+	{ .token = "~", .expected = "～" },
+	{ .token = "!", .expected = "！" },
+	{ .token = "@", .expected = "＠" },
+	{ .token = "#", .expected = "＃" },
+	{ .token = "$", .expected = "＄" },
+	{ .token = "%", .expected = "％" },
+	{ .token = "^", .expected = "︿" },
+	{ .token = "&", .expected = "＆" },
+	{ .token = "*", .expected = "＊" },
+	{ .token = "(", .expected = "（" },
+	{ .token = ")", .expected = "）" },
+	{ .token = "_", .expected = "﹍" },
+	{ .token = "+", .expected = "＋" },
+	{ .token = "=", .expected = "＝" },
+	{ .token = "\\", .expected = "＼" },
+	{ .token = "|", .expected = "｜" },
+	{ .token = "?", .expected = "？" },
+	{ .token = ",", .expected = "，" },
+	{ .token = ".", .expected = "。" },
+	{ .token = ";", .expected = "；" },
 };
 
 int is_bopomofo_collision_key( const char *key )
 {
 	static const char *COLLISION_KEY[] = {
-		"<<><E>",
-		"><E>",
-		";<E>",
-		",<E>",
-		".<E>",
+		"<<>",
+		">",
+		";",
+		",",
+		".",
 	};
 
 	for ( int i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {
@@ -84,6 +84,7 @@ void test_in_chinese_mode()
 			continue;
 
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		type_keystoke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 
@@ -103,6 +104,7 @@ void test_in_easy_symbol_mode()
 
 	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		type_keystoke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 
@@ -113,18 +115,18 @@ void test_in_easy_symbol_mode()
 int is_fullshape_collision_key( const char *key )
 {
 	static const char *COLLISION_KEY[] = {
-		"\"<E>",
-		"'<E>",
-		"/<E>",
-		"<<><E>",
-		"><E>",
-		"`<E>",
-		"[<E>",
-		"]<E>",
-		"{<E>",
-		"}<E>",
-		"+<E>",
-		"-<E>",
+		"\"",
+		"'",
+		"/",
+		"<<>",
+		">",
+		"`",
+		"[",
+		"]",
+		"{",
+		"}",
+		"+",
+		"-",
 	};
 
 	for ( int i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {

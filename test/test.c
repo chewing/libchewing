@@ -18,8 +18,7 @@ static unsigned int test_run;
 static unsigned int test_ok;
 
 BufferType COMMIT_BUFFER = {
-// XXX: Do not verify chewing_commit_Check now because it is buggy.
-//	.check = chewing_commit_Check,
+	.check = chewing_commit_Check,
 	.get_string = chewing_commit_String,
 };
 
