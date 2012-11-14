@@ -28,7 +28,7 @@
  */
 CHEWING_API int chewing_commit_Check( ChewingContext *ctx )
 {
-	return (ctx->output->keystrokeRtn & KEYSTROKE_COMMIT);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_COMMIT);
 }
 
 /**
