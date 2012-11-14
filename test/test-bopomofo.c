@@ -58,7 +58,8 @@ void test_select_candidate()
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
 	// select 移上來
-	ok_keystoke( ctx, "<D><D>2<E>", CAND_1[1] );
+	type_keystoke_by_string( ctx, "<D><D>2<E>" );
+	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_Terminate();
 }
@@ -103,7 +104,8 @@ void test_select_candidate_phrase_choice_rearward()
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
 	// select 移上來
-	ok_keystoke( ctx, "<D><D>2<E>", CAND_1[1] );
+	type_keystoke_by_string( ctx, "<D><D>2<E>" );
+	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_Terminate();
 }

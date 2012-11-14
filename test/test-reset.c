@@ -37,7 +37,8 @@ void test_reset_shall_not_clean_static_data()
 
 	chewing_Reset( ctx );
 
-	ok_keystoke( ctx, TOKEN, EXPECTED );
+	type_keystoke_by_string( ctx, TOKEN );
+	ok_commit_buffer( ctx, EXPECTED );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

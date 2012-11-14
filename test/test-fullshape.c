@@ -106,12 +106,14 @@ void test_fullshape_input()
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
 
 	for ( int i = 0; i < ARRAY_SIZE( FULLSHAPE_DATA ); ++i ) {
-		ok_keystoke( ctx,
-			FULLSHAPE_DATA[i].token, FULLSHAPE_DATA[i].expected );
+		type_keystoke_by_string( ctx,
+			FULLSHAPE_DATA[i].token  );
+		ok_commit_buffer( ctx, FULLSHAPE_DATA[i].expected );
 	}
 
 	chewing_set_spaceAsSelection( ctx, 1 );
-	ok_keystoke( ctx, " <E>", "　" );
+	type_keystoke_by_string( ctx, " <E>" );
+	ok_commit_buffer( ctx,  "　" );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

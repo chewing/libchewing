@@ -17,6 +17,29 @@
 static unsigned int test_run;
 static unsigned int test_ok;
 
+BufferType COMMIT_BUFFER = {
+// XXX: Do not verify chewing_commit_Check now because it is buggy.
+//	.check = chewing_commit_Check,
+	.get_string = chewing_commit_String,
+};
+
+BufferType PREEDIT_BUFFER = {
+	.check = chewing_buffer_Check,
+	.get_length = chewing_buffer_Len,
+	.get_string = chewing_buffer_String,
+};
+
+BufferType ZUIN_BUFFER = {
+	.check = chewing_zuin_Check,
+	.get_string_alt = chewing_zuin_String,
+};
+
+BufferType AUX_BUFFER = {
+	.check = chewing_aux_Check,
+	.get_length = chewing_aux_Length,
+	.get_string = chewing_aux_String,
+};
+
 int get_keystroke( get_char_func get_char, void * param )
 {
 	int ch;
@@ -205,18 +228,53 @@ void type_keystoke_by_string( ChewingContext *ctx, const char* keystoke )
 	return type_keystoke( ctx, get_char_by_string, &keystoke );
 }
 
-void internal_ok_keystoke( const char *file, int line,
-	ChewingContext *ctx, const char *key, const char *expected )
+void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
+	const char *expected, const BufferType *buffer )
 {
+	char *buf;
+	int actual_ret;
+	int expected_ret;
+	int expected_len;
+
 	assert( ctx );
-	assert( key );
+	assert( expected );
+	assert( buffer );
 
-	type_keystoke_by_string( ctx, key );
+	expected_len = strlen( expected );
 
-	char *buf = chewing_commit_String( ctx );
-	internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
-		"`%s' shall be `%s'", buf, expected );
-	chewing_free( buf );
+	if ( buffer->check ) {
+		actual_ret = buffer->check( ctx );
+		expected_ret = !!expected_len;
+		internal_ok( file, line, actual_ret == expected_ret,
+			"actual_ret == expected_ret",
+			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+	}
+
+	if ( buffer->get_length ) {
+		actual_ret = buffer->get_length( ctx );
+		expected_ret = expected_len;
+		internal_ok( file, line, actual_ret == expected_ret,
+			"actual_ret == expected_ret",
+			"get length function returned `%d' shall be `%d'", actual_ret, expected_ret );
+	}
+
+	if ( buffer->get_string ) {
+		buf = buffer->get_string( ctx );
+		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
+			"string function returned `%s' shall be `%s'", buf, expected );
+		chewing_free( buf );
+	}
+
+	if ( buffer->get_string_alt ) {
+		buf = buffer->get_string_alt( ctx, &actual_ret );
+		expected_ret = expected_len;
+		internal_ok( file, line, actual_ret == expected_ret,
+			"actual_ret == expected_ret",
+			"string function returned parameter `%d' shall be `%d'", actual_ret, expected_ret );
+		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
+			"string function returned `%s' shall be `%s'", buf, expected );
+		chewing_free( buf );
+	}
 }
 
 void internal_ok_candidate( const char *file, int line,

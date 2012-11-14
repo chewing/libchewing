@@ -83,8 +83,8 @@ void test_in_chinese_mode()
 		if ( is_bopomofo_collision_key( SPECIAL_SYMBOL_TABLE[i].token ) )
 			continue;
 
-		ok_keystoke( ctx, SPECIAL_SYMBOL_TABLE[i].token,
-			SPECIAL_SYMBOL_TABLE[i].expected );
+		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 
 	chewing_delete( ctx );
@@ -102,8 +102,8 @@ void test_in_easy_symbol_mode()
 	chewing_set_easySymbolInput( ctx, 1 );
 
 	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
-		ok_keystoke( ctx, SPECIAL_SYMBOL_TABLE[i].token,
-			SPECIAL_SYMBOL_TABLE[i].expected );
+		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 
 	chewing_delete( ctx );
@@ -152,8 +152,8 @@ void test_in_fullshape_mode()
 		if ( is_fullshape_collision_key( SPECIAL_SYMBOL_TABLE[i].token ) )
 			continue;
 
-		ok_keystoke( ctx, SPECIAL_SYMBOL_TABLE[i].token,
-			SPECIAL_SYMBOL_TABLE[i].expected );
+		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 
 	chewing_delete( ctx );

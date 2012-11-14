@@ -36,8 +36,14 @@
 
 #define ok(test, fmt, ...) \
 	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
-#define ok_keystoke(ctx, key, expected) \
-	internal_ok_keystoke( __FILE__, __LINE__, ctx, key, expected )
+#define ok_commit_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &COMMIT_BUFFER)
+#define ok_preedit_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &PREEDIT_BUFFER)
+#define ok_zuin_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &ZUIN_BUFFER)
+#define ok_aux_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
 
@@ -45,6 +51,18 @@ typedef struct {
 	char * token;
 	char * expected;
 } TestData;
+
+typedef struct {
+	int (*check)(ChewingContext *ctx);
+	int (*get_length)(ChewingContext *ctx);
+	char * (*get_string)(ChewingContext *ctx);
+	char * (*get_string_alt)(ChewingContext *ctx, int *len);
+} BufferType;
+
+extern BufferType COMMIT_BUFFER;
+extern BufferType PREEDIT_BUFFER;
+extern BufferType ZUIN_BUFFER;
+extern BufferType AUX_BUFFER;
 
 typedef int (*get_char_func) ( void *param );
 
@@ -54,8 +72,8 @@ int exit_status();
 
 // The internal_xxx function shall be used indirectly by macro in order to
 // get correct __FILE__ and __LINE__ information.
-void internal_ok_keystoke( const char *file, int line,
-	ChewingContext *ctx, const char *key, const char *expected );
+void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
+	const char *expected, const BufferType *buffer );
 void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
