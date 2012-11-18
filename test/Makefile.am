@@ -76,4 +76,6 @@ LDADD = \
 	$(top_builddir)/test/libtest.la \
 	$(NULL)
 
+AM_LDFLAGS = -static
+
 CLEANFILES = uhash.dat materials.txt-random test.txt
