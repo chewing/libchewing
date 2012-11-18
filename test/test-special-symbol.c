@@ -84,6 +84,7 @@ void test_in_chinese_mode()
 			continue;
 
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_preedit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 		type_keystoke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
@@ -104,6 +105,7 @@ void test_in_easy_symbol_mode()
 
 	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_preedit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 		type_keystoke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
@@ -155,6 +157,7 @@ void test_in_fullshape_mode()
 			continue;
 
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
+		ok_preedit_buffer( ctx, "" );
 		ok_commit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 	}
 

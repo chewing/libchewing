@@ -19,32 +19,32 @@
 #include "test.h"
 
 static const TestData EASY_SYMBOL[] = {
-	{ .token = "Q<E>", .expected = "〔" },
-	{ .token = "W<E>", .expected = "〕" },
-	{ .token = "A<E>", .expected = "【" },
-	{ .token = "S<E>", .expected = "】" },
-	{ .token = "Z<E>", .expected = "《" },
-	{ .token = "X<E>", .expected = "》" },
-	{ .token = "E<E>", .expected = "｛" },
-	{ .token = "R<E>", .expected = "｝" },
-	{ .token = "D<E>", .expected = "「" },
-	{ .token = "F<E>", .expected = "」" },
-	{ .token = "C<E>", .expected = "『" },
-	{ .token = "V<E>", .expected = "』" },
-	{ .token = "T<E>", .expected = "‘" },
-	{ .token = "Y<E>", .expected = "’" },
-	{ .token = "G<E>", .expected = "“" },
-	{ .token = "H<E>", .expected = "”" },
-	{ .token = "B<E>", .expected = "〝" },
-	{ .token = "N<E>", .expected = "〞" },
-	{ .token = "U<E>", .expected = "＋" },
-	{ .token = "I<E>", .expected = "－" },
-	{ .token = "O<E>", .expected = "×" },
-	{ .token = "P<E>", .expected = "÷" },
-	{ .token = "J<E>", .expected = "≠" },
-	{ .token = "K<E>", .expected = "≒" },
-	{ .token = "L<E>", .expected = "Orz" },
-	{ .token = "M<E>", .expected = "…" },
+	{ .token = "Q", .expected = "〔" },
+	{ .token = "W", .expected = "〕" },
+	{ .token = "A", .expected = "【" },
+	{ .token = "S", .expected = "】" },
+	{ .token = "Z", .expected = "《" },
+	{ .token = "X", .expected = "》" },
+	{ .token = "E", .expected = "｛" },
+	{ .token = "R", .expected = "｝" },
+	{ .token = "D", .expected = "「" },
+	{ .token = "F", .expected = "」" },
+	{ .token = "C", .expected = "『" },
+	{ .token = "V", .expected = "』" },
+	{ .token = "T", .expected = "‘" },
+	{ .token = "Y", .expected = "’" },
+	{ .token = "G", .expected = "“" },
+	{ .token = "H", .expected = "”" },
+	{ .token = "B", .expected = "〝" },
+	{ .token = "N", .expected = "〞" },
+	{ .token = "U", .expected = "＋" },
+	{ .token = "I", .expected = "－" },
+	{ .token = "O", .expected = "×" },
+	{ .token = "P", .expected = "÷" },
+	{ .token = "J", .expected = "≠" },
+	{ .token = "K", .expected = "≒" },
+	{ .token = "L", .expected = "Orz" },
+	{ .token = "M", .expected = "…" },
 };
 
 static const TestData CHINESE = { .token = "hk4g4<E>", .expected = "測試" };
@@ -61,6 +61,8 @@ void test_type_easy_symbol()
 
 	for ( int i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
 		type_keystoke_by_string( ctx, EASY_SYMBOL[i].token );
+		ok_preedit_buffer( ctx, EASY_SYMBOL[i].expected );
+		type_keystoke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, EASY_SYMBOL[i].expected );
 	}
 
@@ -82,6 +84,7 @@ void test_mode_change()
 
 	chewing_set_easySymbolInput( ctx, 1 );
 	type_keystoke_by_string( ctx, EASY_SYMBOL[0].token );
+	type_keystoke_by_string( ctx, "<E>" );
 	ok_commit_buffer( ctx, EASY_SYMBOL[0].expected );
 
 	chewing_set_easySymbolInput( ctx, 0 );

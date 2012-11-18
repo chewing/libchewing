@@ -344,6 +344,7 @@ void test_type_symbol()
 
 	for (int i = 0; i < ARRAY_SIZE(SYMBOL); ++i ) {
 		type_keystoke_by_string( ctx, SYMBOL[i].token );
+		ok_preedit_buffer( ctx, "" );
 		ok_commit_buffer( ctx, SYMBOL[i].expected );
 	}
 

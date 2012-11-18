@@ -94,6 +94,7 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
 	type_keystoke_by_string( ctx, "u6g;4x96" ); // ㄧˊㄕㄤˋㄌㄞˊ
+	ok_preedit_buffer( ctx, CAND_1[0] );
 
 	// ㄧˊㄕㄤˋㄌㄞˊ
 	type_keystoke_by_string( ctx, "<D>" );
