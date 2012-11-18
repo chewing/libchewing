@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "chewing-utf8-util.h"
+
 static unsigned int test_run;
 static unsigned int test_ok;
 
@@ -239,7 +241,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 	assert( expected );
 	assert( buffer );
 
-	expected_len = strlen( expected );
+	expected_len = ueStrLen( expected );
 
 	if ( buffer->check ) {
 		actual_ret = buffer->check( ctx );
