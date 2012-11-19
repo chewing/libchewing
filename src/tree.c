@@ -956,12 +956,7 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
-int Phrasing(
-		ChewingData *pgdata, /* FIXME: Remove other parameters since they are all in pgdata. */
-		PhrasingOutput *ppo, uint16_t phoneSeq[], int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
-		IntervalType selectInterval[], int nSelect, 
-		int bArrBrkpt[], int bUserArrCnnct[] ) 
+int Phrasing( ChewingData *pgdata )
 {
 	TreeDataType treeData;
 
@@ -969,15 +964,15 @@ int Phrasing(
 
 	FindInterval( 
 		pgdata,
-		phoneSeq, nPhoneSeq, selectStr, selectInterval, nSelect, 
-		bArrBrkpt, &treeData );
-	SetInfo( nPhoneSeq, &treeData );
+		pgdata->phoneSeq, pgdata->nPhoneSeq, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect,
+		pgdata->bArrBrkpt, &treeData );
+	SetInfo( pgdata->nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
 	SaveList( &treeData );
-	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
+	CountMatchCnnct( &treeData, pgdata->bUserArrCnnct, pgdata->nPhoneSeq );
 	SortListByScore( &treeData );
-	NextCut( &treeData, ppo );
+	NextCut( &treeData, &pgdata->phrOut );
 
 #ifdef ENABLE_DEBUG
 	ShowList( &treeData );
@@ -987,13 +982,13 @@ int Phrasing(
 	/* set phrasing output */
 	OutputRecordStr(
 		pgdata,
-		ppo->chiBuf, sizeof(ppo->chiBuf),
+		pgdata->phrOut.chiBuf, sizeof(pgdata->phrOut.chiBuf),
 		( treeData.phList )->arrIndex, 
 		( treeData.phList )->nInter, 
-		phoneSeq, 
-		nPhoneSeq, 
-		selectStr, selectInterval, nSelect, &treeData );
-	SaveDispInterval( ppo, &treeData );
+		pgdata->phoneSeq,
+		pgdata->nPhoneSeq,
+		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, &treeData );
+	SaveDispInterval( &pgdata->phrOut, &treeData );
 
 	/* free "phrase" */
 	CleanUpMem( &treeData );

@@ -807,10 +807,7 @@ int CallPhrasing( ChewingData *pgdata )
 #endif
 
 	/* then phrasing */
-	Phrasing( pgdata,
-		&( pgdata->phrOut ), pgdata->phoneSeq, pgdata->nPhoneSeq,
-		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, 
-		pgdata->bArrBrkpt, pgdata->bUserArrCnnct );
+	Phrasing( pgdata );
 
 	/* and then make prefer interval */
 	MakePreferInterval( pgdata );

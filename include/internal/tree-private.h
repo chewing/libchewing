@@ -17,10 +17,7 @@
 int InitTree( ChewingData *pgdata, const char *prefix );
 void TerminateTree( ChewingData *pgdata );
 
-int Phrasing( ChewingData *pgdata, PhrasingOutput *ppo, uint16_t phoneSeq[], int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
-		IntervalType selectInterval[], int nSelect, 
-		int bArrBrkpt[], int bUserArrCnnct[] );
+int Phrasing( ChewingData *pgdata );
 int IsIntersect( IntervalType in1, IntervalType in2 );
 
 int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq );
