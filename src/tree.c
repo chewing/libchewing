@@ -360,27 +360,22 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 	}
 }
 
-static void FindInterval(
-		ChewingData *pgdata,
-		uint16_t *phoneSeq, int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
-		IntervalType selectInterval[], int nSelect, 
-		int bArrBrkpt[], TreeDataType *ptd )
+static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 {
 	int end, begin, pho_id;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
 
-	for ( begin = 0; begin < nPhoneSeq; begin++ ) {
-		for ( end = begin; end < nPhoneSeq; end++ ) {
-			if ( ! CheckBreakpoint( begin, end + 1, bArrBrkpt ) )
+	for ( begin = 0; begin < pgdata->nPhoneSeq; begin++ ) {
+		for ( end = begin; end < pgdata->nPhoneSeq; end++ ) {
+			if ( ! CheckBreakpoint( begin, end + 1, pgdata->bArrBrkpt ) )
 				continue;
 
 			/* set new_phoneSeq */
 			memcpy( 
-				new_phoneSeq, 
-				&phoneSeq[ begin ], 
+				new_phoneSeq,
+				&pgdata->phoneSeq[ begin ],
 				sizeof( uint16_t ) * ( end - begin + 1 ) );
 			new_phoneSeq[ end - begin + 1 ] = 0;
 			puserphrase = pdictphrase = NULL;
@@ -389,19 +384,19 @@ static void FindInterval(
 			/* check user phrase */
 			if ( UserGetPhraseFirst( pgdata, new_phoneSeq ) &&
 					CheckUserChoose( pgdata, new_phoneSeq, begin, end + 1,
-					&p_phrase, selectStr, selectInterval, nSelect ) ) {
+					&p_phrase, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect ) ) {
 				puserphrase = p_phrase;
 			}
 
 			/* check dict phrase */
-			pho_id = TreeFindPhrase( pgdata, begin, end, phoneSeq );
+			pho_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
 			if ( 
 				( pho_id != -1 ) && 
 				CheckChoose( 
 					pgdata,
 					pho_id, begin, end + 1, 
-					&p_phrase, selectStr, 
-					selectInterval, nSelect ) ) {
+					&p_phrase, pgdata->selectStr,
+					pgdata->selectInterval, pgdata->nSelect ) ) {
 				pdictphrase = p_phrase;
 			}
 
@@ -962,10 +957,7 @@ int Phrasing( ChewingData *pgdata )
 
 	InitPhrasing( &treeData );
 
-	FindInterval( 
-		pgdata,
-		pgdata->phoneSeq, pgdata->nPhoneSeq, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect,
-		pgdata->bArrBrkpt, &treeData );
+	FindInterval( pgdata, &treeData );
 	SetInfo( pgdata->nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
