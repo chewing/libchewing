@@ -33,21 +33,21 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
 [-] Status
 
 1. bridge integration
-  - works with xcin.
-  - works with JMCCE.
-  - works with IIIMF.
-  - works with SCIM.
-  - works with MacOS X (SpaceChewing).
-  - works with Sun's Java Desktop System Input Method Framework.
-  - works with OpenVanilla Input Method Framework.
-  - works as standalone Microsoft Windows 32/64-bit (windows-chewing).
-  - works with OXIM.
-  - works with UIM.
-  - works with ibus.
-  - works with UCIMF.
-  - works with mozc.
-  - works with gcin/HIME.
-  - works with fcitx.
+  - xcin
+  - JMCCE
+  - IIIMF
+  - SCIM
+  - MacOS X (SpaceChewing)
+  - Sun's Java Desktop System Input Method Framework
+  - OpenVanilla Input Method Framework (previous than version 1.0)
+  - standalone Microsoft Windows 32/64-bit (windows-chewing)
+  - OXIM
+  - UIM
+  - ibus
+  - UCIMF
+  - mozc
+  - gcin/HIME
+  - fcitx
 
 2. support phonetic keyboard layout
   - Hsu
