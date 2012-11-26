@@ -109,7 +109,7 @@ The easily way to do this is using git:
 
 - git config core.autocrlf input
 - rm -rf *
-- get reset --hard
+- git reset --hard
 
 Now you can run the following commands in MSYS shell to build libchewing:
 
