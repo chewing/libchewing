@@ -503,6 +503,13 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 }
 
 
+/*
+ * Remove the interval containing in another interval.
+ *
+ * Example:
+ * 國民大會 has three interval: 國民, 大會, 國民大會. This function removes
+ * 國名, 大會 becasue 國民大會 contains 國民 and 大會.
+ */
 static void Discard1( TreeDataType *ptd )
 {
 	int a, b;
@@ -558,6 +565,17 @@ static void Discard1( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
+/*
+ * Remove the interval that cannot connect to head or tail by other intervals.
+ *
+ * Example:
+ * The input string length is 5
+ * The available intervals are [1,1], [1,2], [2,3], [2,4], [5,5], [3,5].
+ *
+ * The possible connection from head to tail are [1,2][3,5], and
+ * [1,1][2,4][5,5]. Since [2,3] cannot connect to head or tail, it is removed
+ * by this function.
+ */
 static void Discard2( TreeDataType *ptd )
 {
 	int i, j;
