@@ -202,12 +202,12 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 { 
-	return (ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
 } 
 
 CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 { 
-	return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 
 CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx UNUSED )
