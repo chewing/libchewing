@@ -301,7 +301,7 @@ CHEWING_API int chewing_set_KBType( ChewingContext *ctx, int kbtype )
 		return 0;
 	} else {
 		ctx->data->zuinData.kbtype = KB_DEFAULT;
-		return 1;
+		return -1;
 	}
 }
 

@@ -57,6 +57,8 @@ test/test-fullshape
 test/test-fullshape.exe
 test/test-key2pho
 test/test-key2pho.exe
+test/test-keyboard
+test/test-keyboard.exe
 test/test-mmap
 test/test-mmap.exe
 test/test-path

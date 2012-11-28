@@ -29,6 +29,7 @@ NATIVE_TESTS = \
 	test-easy-symbol \
 	test-fullshape \
 	test-key2pho \
+	test-keyboard \
 	test-mmap \
 	test-path \
 	test-reset \
