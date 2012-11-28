@@ -32,7 +32,11 @@
 #define KEY_CTRL_BASE 1000
 #define END 2000
 
-#define ARRAY_SIZE(array) ( sizeof(array) / sizeof(array[0] ) )
+#ifdef __GNUC__
+#define ARRAY_SIZE( array ) ( sizeof(array) / sizeof(((typeof(array)){})[0]) )
+#else
+#define ARRAY_SIZE( array ) ( sizeof(array) / sizeof(array[0] ) )
+#endif
 
 #define ok(test, fmt, ...) \
 	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
