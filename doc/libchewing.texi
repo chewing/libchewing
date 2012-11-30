@@ -535,12 +535,12 @@ This function returns the candidates per page.
 @end deftypefun
 
 @deftypevr Marco int MAX_SELKEY
-The number of maximum candidates that are selectable via shortcut
-keys.
+The number of maximum candidates that are selectable via shortcut keys. Its
+value is @code{10}.
 @end deftypevr
 @deftypevr Marco int MIN_SELKEY
-The number of minimum candidates that are selectable via shortcut
-keys.
+The number of minimum candidates that are selectable via shortcut keys. Its
+value is @code{1}.
 @end deftypevr
 
 @deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, int *@var{selkeys}, int @var{len})
