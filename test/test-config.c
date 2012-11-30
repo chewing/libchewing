@@ -78,6 +78,24 @@ void test_set_select_key()
 	chewing_Terminate();
 }
 
+void test_hsu_select_key()
+{
+	ChewingContext *ctx;
+	int type;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
+	type = chewing_get_hsuSelKeyType( ctx );
+	ok( type == HSU_SELKEY_TYPE1, "`%d' shall be `%d'", type, HSU_SELKEY_TYPE1 );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_cand_per_page()
 {
 	chewing_Init( 0, 0 );
@@ -107,6 +125,9 @@ int main()
 
 	test_default_select_key();
 	test_set_select_key();
+
+	test_hsu_select_key();
+
 	test_cand_per_page();
 
 	return exit_status();

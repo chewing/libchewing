@@ -564,11 +564,15 @@ Use `asdfjkl789' or `asdfzxcv89' as selection key.
 @end deftypevr
 
 @deftypefun void chewing_set_hsuSelKeyType (ChewingContext *@var{ctx}, int @var{mode})
-This function sets the hsu keyboard selection key settings to @var{mode}.
+@quotation Deprecated
+This function is no-op now. Use @code{chewing_set_selKey} instead.
+@end quotation
 @end deftypefun
 
 @deftypefun int chewing_get_hsuSelKeyType (ChewingContext *@var{ctx})
-This function returns the current hsu keyboard selection key setting.
+@quotation Deprecated
+This function is no-op now. Use @code{chewing_get_selKey} instead.
+@end quotation
 @end deftypefun
 
 @node Output Handling

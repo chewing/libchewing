@@ -71,11 +71,7 @@ typedef struct {
 	int bAutoShiftCur;
 	int bEasySymbolInput;
 	int bPhraseChoiceRearward;
-	/** @brief
-            HSU_SELKEY_TYPE1 = asdfjkl789,
-            HSU_SELKEY_TYPE2 = asdfzxcv89.
-         */
-	int hsuSelKeyType;
+	int hsuSelKeyType; // Deprecated.
 } ChewingConfigData;
 
 typedef struct {
