@@ -526,8 +526,8 @@ This function checks if the candidates selection has finished.
 
 @deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
 This function sets the candidates per page to @var{n}. If MIN_SELKEY @leq{}
-@var{n} @leq{} MAX_SELKEY is not true, the @var{n} will be ignored. The default
-candidates per page is MAX_SELKEY.
+@var{n} @leq{} @code{MAX_SELKEY} is not true, the @var{n} will be ignored. The
+default candidates per page is @code{MAX_SELKEY}.
 @end deftypefun
 
 @deftypefun int chewing_get_candPerPage (ChewingContext *@var{ctx})
@@ -544,8 +544,8 @@ value is @code{1}.
 @end deftypevr
 
 @deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, int *@var{selkeys}, int @var{len})
-This function sets the selection key to @var{selkeys}, an integer
-array of length @var{len}.
+This function sets the selection key to @var{selkeys}, an integer array of
+length @code{MAX_SELKEY}. The @var{len} is ignored by this function.
 
 For example the default selection key is @code{1234567890}.
 @end deftypefun
