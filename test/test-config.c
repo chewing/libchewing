@@ -110,6 +110,25 @@ void test_set_select_key()
 	chewing_Terminate();
 }
 
+void test_set_maxChiSymbolLen()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
+		"maxChiSymbolLen shall be 16" );
+
+	// XXX: test if new maxChiSymbolLen works as expect
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_hsu_select_key()
 {
 	ChewingContext *ctx;
@@ -158,6 +177,7 @@ int main()
 	test_default_value();
 
 	test_set_select_key();
+	test_set_maxChiSymbolLen();
 	test_hsu_select_key();
 
 	test_cand_per_page();
