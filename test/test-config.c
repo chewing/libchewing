@@ -137,24 +137,6 @@ void test_set_maxChiSymbolLen()
 	chewing_Terminate();
 }
 
-void test_hsu_select_key()
-{
-	ChewingContext *ctx;
-	int type;
-
-	chewing_Init( 0, 0 );
-
-	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
-
-	chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
-	type = chewing_get_hsuSelKeyType( ctx );
-	ok( type == HSU_SELKEY_TYPE1, "`%d' shall be `%d'", type, HSU_SELKEY_TYPE1 );
-
-	chewing_delete( ctx );
-	chewing_Terminate();
-}
-
 void test_cand_per_page()
 {
 	chewing_Init( 0, 0 );
@@ -177,6 +159,27 @@ void test_cand_per_page()
 	chewing_Terminate();
 }
 
+void test_deprecated()
+{
+	ChewingContext *ctx;
+	int type;
+	ChewingConfigData configure;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
+	type = chewing_get_hsuSelKeyType( ctx );
+	ok( type == HSU_SELKEY_TYPE1, "`%d' shall be `%d'", type, HSU_SELKEY_TYPE1 );
+
+	chewing_Configure( ctx, &configure );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -186,9 +189,10 @@ int main()
 
 	test_set_select_key();
 	test_set_maxChiSymbolLen();
-	test_hsu_select_key();
 
 	test_cand_per_page();
+
+	test_deprecated();
 
 	return exit_status();
 }
