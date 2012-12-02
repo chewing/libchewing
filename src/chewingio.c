@@ -408,9 +408,8 @@ CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_addPhraseDirection( ChewingContext *ctx, int direction )
 {
-	ctx->data->config.bAddPhraseForward = direction;
-	if ( (ctx->data->config.bAddPhraseForward != 0) && (ctx->data->config.bAddPhraseForward != 1) )
-		ctx->data->config.bAddPhraseForward = 0;
+	if ( direction == 0 || direction == 1 )
+		ctx->data->config.bAddPhraseForward = direction;
 }
 
 CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx )
@@ -420,9 +419,8 @@ CHEWING_API int chewing_get_addPhraseDirection( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_spaceAsSelection( ChewingContext *ctx, int mode )
 {
-	ctx->data->config.bSpaceAsSelection = mode;
-	if ( (ctx->data->config.bSpaceAsSelection != 0) && (ctx->data->config.bSpaceAsSelection != 1) )
-		ctx->data->config.bSpaceAsSelection = 1;
+	if ( mode == 0 || mode == 1 )
+		ctx->data->config.bSpaceAsSelection = mode;
 }
 
 CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx )
@@ -432,9 +430,8 @@ CHEWING_API int chewing_get_spaceAsSelection( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_escCleanAllBuf( ChewingContext *ctx, int mode )
 {
-	ctx->data->config.bEscCleanAllBuf = mode;
-	if ( (ctx->data->config.bEscCleanAllBuf != 0) && (ctx->data->config.bEscCleanAllBuf != 1) )
-		ctx->data->config.bEscCleanAllBuf = 0;
+	if ( mode == 0 || mode == 1 )
+		ctx->data->config.bEscCleanAllBuf = mode;
 }
 
 CHEWING_API int chewing_get_escCleanAllBuf( ChewingContext *ctx )
@@ -456,7 +453,8 @@ CHEWING_API int chewing_get_hsuSelKeyType( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_autoShiftCur( ChewingContext *ctx, int mode )
 {
-	ctx->data->config.bAutoShiftCur = mode;
+	if ( mode == 0 || mode == 1 )
+		ctx->data->config.bAutoShiftCur = mode;
 }
 
 CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx )
@@ -466,7 +464,8 @@ CHEWING_API int chewing_get_autoShiftCur( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_easySymbolInput( ChewingContext *ctx, int mode )
 {
-	ctx->data->config.bEasySymbolInput = mode;
+	if ( mode == 0 || mode == 1 )
+		ctx->data->config.bEasySymbolInput = mode;
 }
 
 CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx )
@@ -476,7 +475,8 @@ CHEWING_API int chewing_get_easySymbolInput( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_phraseChoiceRearward( ChewingContext *ctx, int mode )
 {
-	ctx->data->config.bPhraseChoiceRearward = mode;
+	if ( mode == 0 || mode == 1 )
+		ctx->data->config.bPhraseChoiceRearward = mode;
 }
 
 CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx )
@@ -486,7 +486,8 @@ CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
-	ctx->data->bChiSym = ( mode == CHINESE_MODE ? 1 : 0 );
+	if ( mode == CHINESE_MODE || mode == SYMBOL_MODE )
+		ctx->data->bChiSym = mode;
 }
 
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx ) 
@@ -496,7 +497,8 @@ CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode )
 {
-	ctx->data->bFullShape = (mode == FULLSHAPE_MODE ? 1 : 0);
+	if ( mode == HALFSHAPE_MODE || mode == FULLSHAPE_MODE )
+		ctx->data->bFullShape = mode;
 }
 
 CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx ) 

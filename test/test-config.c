@@ -21,6 +21,7 @@
 static const int MIN_CAND_PER_PAGE = 1;
 static const int MAX_CAND_PER_PAGE = 10;
 static const int DEFAULT_CAND_PER_PAGE = 10;
+static const int MAX_CHI_SYMBOL_LEN = 50; // MAX_PHONE_SEQ_LEN + 1
 
 static const int DEFAULT_SELECT_KEY[] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
@@ -119,7 +120,7 @@ void test_set_maxChiSymbolLen()
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
 		"maxChiSymbolLen shall not change" );
 
-	chewing_set_maxChiSymbolLen( ctx, 51 /* MAX_PHONE_SEQ_LEN + 1 */ );
+	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN + 1 );
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
 		"maxChiSymbolLen shall not change" );
 
@@ -159,6 +160,274 @@ void test_set_selKey()
 	chewing_Terminate();
 }
 
+void test_set_addPhraseDirection()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_addPhraseDirection( ctx, value );
+		mode = chewing_get_addPhraseDirection( ctx );
+		ok( mode == value,
+			"addPhraseDirection `%d' shall be `%d'", mode, value );
+
+		chewing_set_addPhraseDirection( ctx, -1 );
+		mode = chewing_get_addPhraseDirection( ctx );
+		ok( mode == value,
+			"addPhraseDirection `%d' shall be `%d'", mode, value );
+
+		chewing_set_addPhraseDirection( ctx, 2 );
+		mode = chewing_get_addPhraseDirection( ctx );
+		ok( mode == value,
+			"addPhraseDirection `%d' shall be `%d'", mode, value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_spaceAsSelection()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_spaceAsSelection( ctx, value );
+		mode = chewing_get_spaceAsSelection( ctx );
+		ok( mode == value,
+			"spaceAsSelection `%d' shall be `%d'", mode, value );
+
+		chewing_set_spaceAsSelection( ctx, -1 );
+		mode = chewing_get_spaceAsSelection( ctx );
+		ok( mode == value,
+			"spaceAsSelection `%d' shall be `%d'", mode, value );
+
+		chewing_set_spaceAsSelection( ctx, 2 );
+		mode = chewing_get_spaceAsSelection( ctx );
+		ok( mode == value,
+			"spaceAsSelection `%d' shall be `%d'", mode, value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_escCleanAllBuf()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_escCleanAllBuf( ctx, value );
+		mode = chewing_get_escCleanAllBuf( ctx );
+		ok( mode == value,
+			"escCleanAllBuf shall be `%d'", value );
+
+		chewing_set_escCleanAllBuf( ctx, -1 );
+		mode = chewing_get_escCleanAllBuf( ctx );
+		ok( mode == value,
+			"escCleanAllBuf shall be `%d'", value );
+
+		chewing_set_escCleanAllBuf( ctx, 2 );
+		mode = chewing_get_escCleanAllBuf( ctx );
+		ok( mode == value,
+			"escCleanAllBuf shall be `%d'", value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_autoShiftCur()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_autoShiftCur( ctx, value );
+		mode = chewing_get_autoShiftCur( ctx );
+		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+			"autoShiftCur shall be `%d'", value );
+
+		chewing_set_autoShiftCur( ctx, -1 );
+		mode = chewing_get_autoShiftCur( ctx );
+		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+			"autoShiftCur shall be `%d'", value );
+
+		chewing_set_autoShiftCur( ctx, 2 );
+		mode = chewing_get_autoShiftCur( ctx );
+		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+			"autoShiftCur shall be `%d'", value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_easySymbolInput()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_easySymbolInput( ctx, value );
+		mode = chewing_get_easySymbolInput( ctx );
+		ok( mode == value,
+			"easySymbolInput `%d', shall be `%d'", mode, value );
+
+		chewing_set_easySymbolInput( ctx, -1 );
+		mode = chewing_get_easySymbolInput( ctx );
+		ok( mode == value,
+			"easySymbolInput `%d', shall be `%d'", mode, value );
+
+		chewing_set_easySymbolInput( ctx, 2 );
+		mode = chewing_get_easySymbolInput( ctx );
+		ok( mode == value,
+			"easySymbolInput `%d', shall be `%d'", mode, value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_phraseChoiceRearward()
+{
+	ChewingContext *ctx;
+	int value;
+	int mode;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( value = 0; value < 2; ++value ) {
+		chewing_set_phraseChoiceRearward( ctx, value );
+		mode = chewing_get_phraseChoiceRearward( ctx );
+		ok(  mode == value,
+			"phraseChoiceRearward `%d' shall be `%d'", mode, value );
+
+		chewing_set_phraseChoiceRearward( ctx, -1 );
+		mode = chewing_get_phraseChoiceRearward( ctx );
+		ok(  mode == value,
+			"phraseChoiceRearward `%d' shall be `%d'", mode, value );
+
+		chewing_set_phraseChoiceRearward( ctx, 2 );
+		mode = chewing_get_phraseChoiceRearward( ctx );
+		ok(  mode == value,
+			"phraseChoiceRearward `%d' shall be `%d'", mode, value );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_ChiEngMode()
+{
+	const int VALUE[] = {
+		CHINESE_MODE,
+		SYMBOL_MODE,
+	};
+
+	const int INVALID_VALUE[] = {
+		-1,
+		2,
+	};
+
+	ChewingContext *ctx;
+	int i;
+	int j;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
+		chewing_set_ChiEngMode( ctx, VALUE[i] );
+		ok( chewing_get_ChiEngMode( ctx ) == VALUE[i],
+			"ChiEngMode shall be `%d'", VALUE[i] );
+
+		for ( j = 0; j < ARRAY_SIZE( INVALID_VALUE ); ++j ) {
+			// mode shall not change when set mode has invalid value.
+			chewing_set_ChiEngMode( ctx, INVALID_VALUE[j] );
+			ok( chewing_get_ChiEngMode( ctx ) == VALUE[i],
+				"ChiEngMode shall be `%d'", VALUE[i] );
+		}
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_set_ShapeMode()
+{
+	const int VALUE[] = {
+		HALFSHAPE_MODE,
+		FULLSHAPE_MODE,
+	};
+
+	const int INVALID_VALUE[] = {
+		-1,
+		2,
+	};
+
+	ChewingContext *ctx;
+	int i;
+	int j;
+
+	chewing_Init( 0, 0 );
+
+	ctx = chewing_new();
+	ok( ctx, "chewing_new shall not return NULL" );
+
+	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
+		chewing_set_ShapeMode( ctx, VALUE[i] );
+		ok( chewing_get_ShapeMode( ctx ) == VALUE[i],
+			"ShapeMode shall be `%d'", VALUE[i] );
+
+		for ( j = 0; j < ARRAY_SIZE( INVALID_VALUE ); ++j ) {
+			// mode shall not change when set mode has invalid value.
+			chewing_set_ShapeMode( ctx, INVALID_VALUE[j] );
+			ok( chewing_get_ShapeMode( ctx ) == VALUE[i],
+				"ShapeMode shall be `%d'", VALUE[i] );
+		}
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_deprecated()
 {
 	ChewingContext *ctx;
@@ -190,6 +459,14 @@ int main()
 	test_set_candPerPage();
 	test_set_maxChiSymbolLen();
 	test_set_selKey();
+	test_set_addPhraseDirection();
+	test_set_spaceAsSelection();
+	test_set_escCleanAllBuf();
+	test_set_autoShiftCur();
+	test_set_easySymbolInput();
+	test_set_phraseChoiceRearward();
+	test_set_ChiEngMode();
+	test_set_ShapeMode();
 
 	test_deprecated();
 
