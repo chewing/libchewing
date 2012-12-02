@@ -123,6 +123,14 @@ void test_set_maxChiSymbolLen()
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
 		"maxChiSymbolLen shall be 16" );
 
+	chewing_set_maxChiSymbolLen( ctx, -1 );
+	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
+		"maxChiSymbolLen shall not change" );
+
+	chewing_set_maxChiSymbolLen( ctx, 51 /* MAX_PHONE_SEQ_LEN + 1 */ );
+	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
+		"maxChiSymbolLen shall not change" );
+
 	// XXX: test if new maxChiSymbolLen works as expect
 
 	chewing_delete( ctx );
