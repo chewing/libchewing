@@ -30,19 +30,51 @@ static int ALTERNATE_SELECT_KEY[] = {
 
 const TestData DATA = { .token = "`a", .expected = "…" };
 
-void test_default_select_key()
+void test_default_value()
 {
+	int *select_key;
+
 	chewing_Init( 0, 0 );
 
 	ChewingContext *ctx = chewing_new();
 	ok( ctx, "chewing_new shall not return NULL" );
 
-	int *select_key = chewing_get_selKey( ctx );
+	select_key = chewing_get_selKey( ctx );
 	ok( select_key, "chewing_get_selKey shall not return NULL" );
 	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
 		sizeof( DEFAULT_SELECT_KEY )),
 		"select key shall be default value");
 	chewing_free( select_key );
+
+	ok( chewing_get_maxChiSymbolLen( ctx ) == 0,
+		"maxChiSymbolLen shall be 0" );
+
+	ok( chewing_get_addPhraseDirection( ctx ) == 0,
+		"addPhraseDirection shall be 0" );
+
+	ok( chewing_get_spaceAsSelection( ctx ) == 0,
+		"spaceAsSelection shall be 0" );
+
+	ok( chewing_get_escCleanAllBuf( ctx ) == 0,
+		"escCleanAllBuf shall be 0" );
+
+	ok( chewing_get_hsuSelKeyType( ctx ) == 0,
+		"hsuSelKeyType shall be 0" );
+
+	ok( chewing_get_autoShiftCur( ctx ) == 0,
+		"autoShiftCur shall be 0" );
+
+	ok( chewing_get_easySymbolInput( ctx ) == 0,
+		"easySymbolInput shall be 0" );
+
+	ok( chewing_get_phraseChoiceRearward( ctx ) == 0,
+		"phraseChoiceRearward shall be 0" );
+
+	ok( chewing_get_ChiEngMode( ctx ) == CHINESE_MODE,
+		"ChiEngMode shall be CHINESE_MODE" );
+
+	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
+		"ShapeMode shall be HALFSHAPE_MODE" );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -123,9 +155,9 @@ int main()
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
-	test_default_select_key();
-	test_set_select_key();
+	test_default_value();
 
+	test_set_select_key();
 	test_hsu_select_key();
 
 	test_cand_per_page();
