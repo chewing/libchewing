@@ -285,7 +285,6 @@ void internal_ok_candidate( const char *file, int line,
 	char *buf;
 
 	assert( ctx );
-	assert( cand );
 
 	chewing_cand_Enumerate( ctx );
 	for ( i = 0; i < cand_len; ++i ) {
@@ -305,6 +304,30 @@ void internal_ok_candidate( const char *file, int line,
 		"candndate `%s' shall be `%s'", buf, "" );
 
 	chewing_free( buf );
+}
+
+void internal_ok_keystoke_rtn( const char *file, int line,
+	ChewingContext *ctx, int rtn )
+{
+	const struct {
+		int rtn;
+		int (*func)(ChewingContext* ctx);
+	} TABLE[] = {
+		{ .rtn = KEYSTROKE_IGNORE, .func = chewing_keystroke_CheckIgnore },
+		{ .rtn = KEYSTROKE_COMMIT, .func = chewing_commit_Check },
+		// No function to check KEYSTROKE_BELL
+		{ .rtn = KEYSTROKE_ABSORB, .func = chewing_keystroke_CheckAbsorb },
+	};
+	int i;
+	int ret;
+
+	assert( ctx );
+
+	for ( i = 0; i < ARRAY_SIZE( TABLE ); ++i ) {
+		ret = TABLE[i].func( ctx );
+		internal_ok( file, line, ret == !!( rtn & TABLE[i].rtn ),
+			__func__, "keystroke rtn error" );
+	}
 }
 
 int exit_status()

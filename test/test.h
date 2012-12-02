@@ -13,6 +13,7 @@
 #include <stddef.h>
 
 #include "chewing.h"
+#include "chewingio.h"
 
 #define KEY_SLEFT 896
 #define KEY_SRIGHT 897
@@ -50,6 +51,8 @@
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
+#define ok_keystoke_rtn(ctx, rtn) \
+	internal_ok_keystoke_rtn(__FILE__, __LINE__, ctx, rtn)
 
 typedef struct {
 	char * token;
@@ -82,3 +85,5 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len );
+void internal_ok_keystoke_rtn( const char *file, int line,
+	ChewingContext *ctx, int rtn );
