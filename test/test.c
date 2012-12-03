@@ -327,14 +327,17 @@ void internal_ok_keystoke_rtn( const char *file, int line,
 		{ .rtn = KEYSTROKE_ABSORB, .func = chewing_keystroke_CheckAbsorb },
 	};
 	int i;
-	int ret;
+	int actual;
+	int expected;
 
 	assert( ctx );
 
 	for ( i = 0; i < ARRAY_SIZE( TABLE ); ++i ) {
-		ret = TABLE[i].func( ctx );
-		internal_ok( file, line, ret == !!( rtn & TABLE[i].rtn ),
-			__func__, "keystroke rtn error" );
+		actual = TABLE[i].func( ctx );
+		expected = !!( rtn & TABLE[i].rtn );
+
+		internal_ok( file, line, actual == expected,
+			__func__, "keystroke rtn `%d' shall be `%d'", actual, expected );
 	}
 }
 
