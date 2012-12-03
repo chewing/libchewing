@@ -290,6 +290,24 @@ void test_Up()
 	// XXX: What is spec of Up?
 }
 
+void test_Down_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<D>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_Down()
+{
+	test_Down_not_entering_chewing();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -300,6 +318,7 @@ int main()
 	test_Del();
 	test_Backspace();
 	test_Up();
+	test_Down();
 
 	return exit_status();
 }
