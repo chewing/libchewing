@@ -100,7 +100,6 @@ void test_fullshape_input()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
@@ -121,7 +120,6 @@ void test_set_fullshape()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
 		"default is HALFSHAPE_MODE" );

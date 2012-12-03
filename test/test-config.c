@@ -38,7 +38,6 @@ void test_default_value()
 	chewing_Init( 0, 0 );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	select_key = chewing_get_selKey( ctx );
 	ok( select_key, "chewing_get_selKey shall not return NULL" );
@@ -86,7 +85,6 @@ void test_set_candPerPage()
 	chewing_Init( 0, 0 );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
 		"candPerPage shall be default value" );
@@ -110,7 +108,6 @@ void test_set_maxChiSymbolLen()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
@@ -138,7 +135,6 @@ void test_set_selKey()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -169,7 +165,6 @@ void test_set_addPhraseDirection()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_addPhraseDirection( ctx, value );
@@ -201,7 +196,6 @@ void test_set_spaceAsSelection()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_spaceAsSelection( ctx, value );
@@ -233,7 +227,6 @@ void test_set_escCleanAllBuf()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_escCleanAllBuf( ctx, value );
@@ -265,7 +258,6 @@ void test_set_autoShiftCur()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_autoShiftCur( ctx, value );
@@ -297,7 +289,6 @@ void test_set_easySymbolInput()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_easySymbolInput( ctx, value );
@@ -329,7 +320,6 @@ void test_set_phraseChoiceRearward()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_phraseChoiceRearward( ctx, value );
@@ -371,7 +361,6 @@ void test_set_ChiEngMode()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
 		chewing_set_ChiEngMode( ctx, VALUE[i] );
@@ -409,7 +398,6 @@ void test_set_ShapeMode()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
 		chewing_set_ShapeMode( ctx, VALUE[i] );
@@ -437,7 +425,6 @@ void test_deprecated()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
 	type = chewing_get_hsuSelKeyType( ctx );

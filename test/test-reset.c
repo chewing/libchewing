@@ -29,7 +29,6 @@ void test_reset_shall_not_clean_static_data()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 

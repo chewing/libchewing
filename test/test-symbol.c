@@ -337,7 +337,6 @@ void test_type_symbol()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -357,7 +356,6 @@ void test_symbol_cand_page()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );

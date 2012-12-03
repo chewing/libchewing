@@ -54,7 +54,6 @@ void test_type_easy_symbol()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
@@ -75,7 +74,6 @@ void test_mode_change()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 

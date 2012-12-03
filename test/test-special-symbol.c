@@ -73,7 +73,6 @@ void test_in_chinese_mode()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -98,7 +97,6 @@ void test_in_easy_symbol_mode()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
@@ -144,7 +142,6 @@ void test_in_fullshape_mode()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );

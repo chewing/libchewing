@@ -43,7 +43,6 @@ void test_select_candidate_no_phrase_choice_rearward()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -88,7 +87,6 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_Init( NULL, NULL );
 
 	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );

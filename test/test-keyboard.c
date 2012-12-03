@@ -43,7 +43,6 @@ void test_set_keyboard_type()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	keyboard_string = chewing_get_KBString( ctx );
 	ok( strcmp( keyboard_string, KEYBOARD_STRING[KEYBOARD_DEFAULT_TYPE] ) == 0,
@@ -102,7 +101,6 @@ void test_enumerate_keyboard_type()
 	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
 
 	ok( chewing_kbtype_Total( ctx ) == ARRAY_SIZE( KEYBOARD_STRING ),
 		"total keyboard_string type shall be %d", ARRAY_SIZE( KEYBOARD_STRING ) );
