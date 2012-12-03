@@ -715,9 +715,11 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 	}
 
 	key_buf_cursor = pgdata->chiSymbolCursor;
+	// FIXME: when pgdata->chiSymbolBufLen == 0, key_buf_cursor will be -1.
 	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
 		key_buf_cursor--;
 
+	// XXX: Why close symbol choice list, but not word choice list.
 	if ( ! pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
 		/* Close Symbol Choice List */
 		chewing_handle_Esc(ctx);

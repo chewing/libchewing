@@ -160,6 +160,7 @@ void test_Esc()
 	test_Esc_not_entering_chewing();
 	test_Esc_in_select();
 	test_Esc_entering_zuin();
+	// XXX: Test escCleanAllBuf here
 }
 
 void test_Del_not_entering_chewing()
@@ -272,6 +273,25 @@ void test_Backspace()
 	test_Backspace_word();
 }
 
+void test_Up_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<U>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_Up()
+{
+	test_Up_not_entering_chewing();
+	// XXX: What is spec of Up?
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -281,6 +301,7 @@ int main()
 	test_Esc();
 	test_Del();
 	test_Backspace();
+	test_Up();
 
 	return exit_status();
 }
