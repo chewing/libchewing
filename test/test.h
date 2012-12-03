@@ -61,6 +61,7 @@ typedef struct {
 
 typedef struct {
 	int (*check)(ChewingContext *ctx);
+	int (*check_alt)(ChewingContext *ctx);
 	int (*get_length)(ChewingContext *ctx);
 	char * (*get_string)(ChewingContext *ctx);
 	char * (*get_string_alt)(ChewingContext *ctx, int *len);

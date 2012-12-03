@@ -632,7 +632,12 @@ This function returns whether there are phonetic pre-edit string in the
 buffer.  Here ``zuin'' means bopomofo, a phonetic system for transcribing
 Chinese, especially Mandarin.
 
-The return value is @code{1} on success, @code{0} on failure.
+The return value is @code{0} when there are phonetic pre-edit string, @code{1}
+otherwise.
+
+@strong{CAUTION}: The return value of this function is different from
+@code{chewing_commit_Check}, @code{chewing_buffer_Check}, and
+@code{chewing_aux_Check}.
 @end deftypefun
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})

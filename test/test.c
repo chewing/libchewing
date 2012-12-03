@@ -31,7 +31,7 @@ BufferType PREEDIT_BUFFER = {
 };
 
 BufferType ZUIN_BUFFER = {
-	.check = chewing_zuin_Check,
+	.check_alt = chewing_zuin_Check,
 	.get_string_alt = chewing_zuin_String,
 };
 
@@ -246,6 +246,14 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 	if ( buffer->check ) {
 		actual_ret = buffer->check( ctx );
 		expected_ret = !!expected_len;
+		internal_ok( file, line, actual_ret == expected_ret,
+			"actual_ret == expected_ret",
+			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+	}
+
+	if ( buffer->check_alt ) {
+		actual_ret = buffer->check_alt( ctx );
+		expected_ret = !expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
 			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
