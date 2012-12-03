@@ -46,6 +46,9 @@ void test_default_value()
 		"select key shall be default value");
 	chewing_free( select_key );
 
+	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
+		"candPerPage shall be default value" );
+
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 0,
 		"maxChiSymbolLen shall be 0" );
 
@@ -82,20 +85,36 @@ void test_default_value()
 
 void test_set_candPerPage()
 {
+	const int VALUE[] = {
+		MIN_CAND_PER_PAGE,
+		MAX_CAND_PER_PAGE,
+	};
+
+	const int INVALID_VALUE[] = {
+		MIN_CAND_PER_PAGE - 1,
+		MAX_CAND_PER_PAGE + 1,
+	};
+
+	ChewingContext *ctx;
+	int i;
+	int j;
+
 	chewing_Init( 0, 0 );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
-	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
-		"candPerPage shall be default value" );
+	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
+		chewing_set_candPerPage( ctx, VALUE[i] );
+		ok( chewing_get_candPerPage( ctx ) == VALUE[i],
+			"candPerPage shall be `%d'", VALUE[i] );
 
-	chewing_set_candPerPage( ctx, MIN_CAND_PER_PAGE - 1 );
-	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
-		"candPerPage shall not change" );
-
-	chewing_set_candPerPage( ctx, MAX_CAND_PER_PAGE + 1 );
-	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
-		"candPerPage shall not change" );
+		for ( j = 0; j < ARRAY_SIZE( INVALID_VALUE ); ++j ) {
+			// mode shall not change when set mode has invalid value.
+			chewing_set_candPerPage( ctx, INVALID_VALUE[j] );
+			ok( chewing_get_candPerPage( ctx ) == VALUE[i],
+				"candPerPage shall be `%d'", VALUE[i] );
+		}
+	}
 
 	chewing_delete( ctx );
 	chewing_Terminate();
