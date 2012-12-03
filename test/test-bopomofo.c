@@ -20,7 +20,7 @@
 #include "hash-private.h"
 #include "test.h"
 
-void test_select_candidate()
+void test_select_candidate_no_phrase_choice_rearward()
 {
 	// The following phrases are in dict
 	// 一上來
@@ -111,13 +111,176 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_Terminate();
 }
 
+void test_select_candidate() {
+	test_select_candidate_no_phrase_choice_rearward();
+	test_select_candidate_phrase_choice_rearward();
+}
+
+void test_Esc_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<EE>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_Esc_in_select()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "`<EE>" );
+	ok_candidate( ctx, NULL, 0 );
+
+	chewing_Terminate();
+}
+
+void test_Esc_entering_zuin()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "hk<EE>" );
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_Terminate();
+}
+
+void test_Esc()
+{
+	test_Esc_not_entering_chewing();
+	test_Esc_in_select();
+	test_Esc_entering_zuin();
+}
+
+void test_Del_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<DC>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_Del_in_select()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "`<DC>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
+
+	chewing_Terminate();
+}
+
+void test_Del_word()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
+	ok_commit_buffer( ctx, "測試" );
+
+	chewing_Terminate();
+}
+
+void test_Del()
+{
+	test_Del_not_entering_chewing();
+	test_Del_in_select();
+	test_Del_word();
+}
+
+void test_Backspace_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<B>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_Backspace_in_select()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "`<B>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
+
+	chewing_Terminate();
+}
+
+void test_Backspace_remove_bopomofo()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "hk<B>" );
+	ok_zuin_buffer( ctx, "ㄘ" );
+
+	chewing_Terminate();
+}
+
+void test_Backspace_word()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4u g4<L><B><E>" );
+	ok_commit_buffer( ctx, "測試" );
+
+	chewing_Terminate();
+}
+
+void test_Backspace()
+{
+	test_Backspace_not_entering_chewing();
+	test_Backspace_in_select();
+	test_Backspace_remove_bopomofo();
+	test_Backspace_word();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
 	test_select_candidate();
-	test_select_candidate_phrase_choice_rearward();
+	test_Esc();
+	test_Del();
+	test_Backspace();
 
 	return exit_status();
 }
