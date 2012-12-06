@@ -60,6 +60,7 @@ void test_select_candidate_no_phrase_choice_rearward()
 	type_keystoke_by_string( ctx, "<D><D>2<E>" );
 	ok_commit_buffer( ctx, CAND_1[1] );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -106,6 +107,7 @@ void test_select_candidate_phrase_choice_rearward()
 	type_keystoke_by_string( ctx, "<D><D>2<E>" );
 	ok_commit_buffer( ctx, CAND_1[1] );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -124,6 +126,7 @@ void test_Esc_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<EE>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -137,6 +140,7 @@ void test_Esc_in_select()
 	type_keystoke_by_string( ctx, "`<EE>" );
 	ok_candidate( ctx, NULL, 0 );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -150,6 +154,7 @@ void test_Esc_entering_zuin()
 	type_keystoke_by_string( ctx, "hk<EE>" );
 	ok_zuin_buffer( ctx, "" );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -171,6 +176,7 @@ void test_Del_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<DC>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -184,6 +190,7 @@ void test_Del_in_select()
 	type_keystoke_by_string( ctx, "`<DC>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -199,6 +206,7 @@ void test_Del_word()
 	type_keystoke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
 	ok_commit_buffer( ctx, "測試" );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -219,6 +227,7 @@ void test_Backspace_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<B>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -232,6 +241,7 @@ void test_Backspace_in_select()
 	type_keystoke_by_string( ctx, "`<B>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -245,6 +255,7 @@ void test_Backspace_remove_bopomofo()
 	type_keystoke_by_string( ctx, "hk<B>" );
 	ok_zuin_buffer( ctx, "ㄘ" );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -260,6 +271,7 @@ void test_Backspace_word()
 	type_keystoke_by_string( ctx, "hk4u g4<L><B><E>" );
 	ok_commit_buffer( ctx, "測試" );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -281,6 +293,7 @@ void test_Up_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<U>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -300,6 +313,7 @@ void test_Down_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<D>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -318,6 +332,7 @@ void test_ShiftLeft_not_entering_chewing()
 	type_keystoke_by_string( ctx, "<SL>" );
 	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
@@ -345,6 +360,7 @@ void test_ShiftLeft_add_userphrase()
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 1,
 		"`%s' shall be in userphrase", phrase );
 
+	chewing_delete( ctx );
 	chewing_Terminate();
 }
 
