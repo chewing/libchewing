@@ -12,9 +12,13 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "chewing-private.h"
 #include "chewing-utf8-util.h"
+#include "hash-private.h"
+#include "key2pho-private.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;
@@ -339,6 +343,49 @@ void internal_ok_keystoke_rtn( const char *file, int line,
 		internal_ok( file, line, actual == expected,
 			__func__, "keystroke rtn `%d' shall be `%d'", actual, expected );
 	}
+}
+
+int internal_has_userphrase( const char *file, int line,
+	ChewingContext *ctx, const char *bopomofo, const char *phrase )
+{
+	uint16_t *phone = NULL;
+	char *bopomofo_buf = NULL;
+	int i;
+	char *p;
+	char *save_ptr = NULL;
+	HASH_ITEM *item = NULL;
+	int ret = 0;
+
+	phone = calloc( MAX_PHONE_SEQ_LEN, sizeof (*phone) );
+	if ( !phone ) {
+		fprintf( stderr, "calloc fails at %s:%d", __FILE__, __LINE__ );
+		goto end;
+	}
+
+	bopomofo_buf = strdup( bopomofo );
+	if ( !bopomofo_buf ) {
+		fprintf( stderr, "strdup fails at %s:%d", __FILE__, __LINE__ );
+		goto end;
+	}
+
+	for ( i = 0, p = strtok_r( bopomofo_buf, " ", &save_ptr );
+		i < MAX_PHONE_SEQ_LEN && p;
+		++i, p = strtok_r( NULL, " ", &save_ptr) ) {
+		phone[i] = UintFromPhone( p );
+	}
+
+	while ( ( item = HashFindPhonePhrase( ctx->data, phone, item ) ) != NULL ) {
+		if ( strcmp( item->data.wordSeq, phrase ) == 0 ) {
+			ret = 1;
+			goto end;
+		}
+	}
+
+end:
+	free( bopomofo_buf );
+	free( phone );
+
+	return ret;
 }
 
 int exit_status()

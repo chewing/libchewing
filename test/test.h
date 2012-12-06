@@ -53,6 +53,8 @@
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
 #define ok_keystoke_rtn(ctx, rtn) \
 	internal_ok_keystoke_rtn(__FILE__, __LINE__, ctx, rtn)
+#define has_userphrase(ctx, bopomofo, phrase) \
+	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
 
 typedef struct {
 	char * token;
@@ -88,3 +90,5 @@ void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len );
 void internal_ok_keystoke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn );
+int internal_has_userphrase( const char *file, int line,
+	ChewingContext *ctx, const char *bopomofo, const char *phrase );
