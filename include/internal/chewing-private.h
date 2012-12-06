@@ -215,6 +215,7 @@ typedef struct {
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
+	struct tag_HASH_ITEM *prev_userphrase;
 	ChewingStaticData static_data;
 } ChewingData;
 

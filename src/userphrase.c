@@ -24,8 +24,6 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-static HASH_ITEM *pItemLast;
-
 #if 0
 static int DeltaFreq( int recentTime )
 {
@@ -173,17 +171,17 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 
 UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] )
 {
-	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, NULL );
-	if ( ! pItemLast ) 
+	pgdata->prev_userphrase = HashFindPhonePhrase( pgdata, phoneSeq, NULL );
+	if ( ! pgdata->prev_userphrase )
 		return NULL;
-	return &( pItemLast->data );
+	return &( pgdata->prev_userphrase->data );
 }
 
 UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16_t phoneSeq[] )
 {
-	pItemLast = HashFindPhonePhrase( pgdata, phoneSeq, pItemLast );
-	if ( ! pItemLast )
+	pgdata->prev_userphrase = HashFindPhonePhrase( pgdata, phoneSeq, pgdata->prev_userphrase );
+	if ( ! pgdata->prev_userphrase )
 		return NULL;
-	return &( pItemLast->data );
+	return &( pgdata->prev_userphrase->data );
 }
 
