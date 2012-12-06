@@ -33,6 +33,7 @@ NATIVE_TESTS = \
 	test-mmap \
 	test-path \
 	test-reset \
+	test-regression \
 	test-symbol \
 	test-special-symbol \
 	test-utf8 \
