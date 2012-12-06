@@ -308,6 +308,52 @@ void test_Down()
 	test_Down_not_entering_chewing();
 }
 
+void test_ShiftLeft_not_entering_chewing()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	type_keystoke_by_string( ctx, "<SL>" );
+	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+
+	chewing_Terminate();
+}
+
+void test_ShiftLeft_add_userphrase()
+{
+	static const char phrase[] = "測試";
+	static const char bopomofo[] = "ㄘㄜˋ ㄕˋ";
+	int cursor;
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
+		"`%s' shall not be in userphrase", phrase );
+
+	type_keystoke_by_string( ctx, "hk4g4<SL><SL><E>" );
+	ok_preedit_buffer( ctx, phrase );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 0, "cursor position `%d' shall be 2", cursor );
+	ok( has_userphrase( ctx, bopomofo, phrase ) == 1,
+		"`%s' shall be in userphrase", phrase );
+
+	chewing_Terminate();
+}
+
+void test_ShiftLeft()
+{
+	test_ShiftLeft_not_entering_chewing();
+	test_ShiftLeft_add_userphrase();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -319,6 +365,7 @@ int main()
 	test_Backspace();
 	test_Up();
 	test_Down();
+	test_ShiftLeft();
 
 	return exit_status();
 }
