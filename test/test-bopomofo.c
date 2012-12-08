@@ -27,7 +27,6 @@ void test_select_candidate_no_phrase_choice_rearward()
 	// 上來
 	// 移上來
 	// 移上
-	// 快上
 
 	static const char *CAND_1[] = {
 		"一上來",
@@ -80,7 +79,6 @@ void test_select_candidate_phrase_choice_rearward()
 
 	static const char *CAND_2[] = {
 		"上來",
-		"快上", // XXX: bug?
 	};
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
