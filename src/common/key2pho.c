@@ -146,24 +146,28 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 	return 1;
 }
 
-#if 0
-int PhoneFromUint( char *phone, long seq )
+int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 {
-    int i, j, k;
-    char *pos;
-    char buffer[7];
-    for ( i = 0, j = 0; i < 4; i++) {
-        k = ((seq >> shift[ i ]) & sb[ i ] ) - 1;
-        if ( k >= 0 && (pos = ueStrSeek( (char*)zhuin_tab[ i ], k )) )
-        {
-			ueStrNCpy(buffer, pos, 1, 1);
-            strcat(phone, buffer);
-            j++;
-        }
-    }
-    return j;
+	int i;
+	int index;
+	char *pos;
+	char tmp[ MAX_UTF8_SIZE + 1 ];
+	char buffer[ MAX_UTF8_SIZE * ZUIN_SIZE + 1 ] = { 0 };
+
+	for ( i = 0; i < ZUIN_SIZE; ++i ) {
+		// The first two characters in zhuin_tab are space, so we need
+		// to add 1 here.
+		index = ((phone_num >> shift[ i ]) & sb[ i ]) + 1;
+		if ( index >= 2 ) {
+			// FIXME: ueStrSeek shall accept const char *
+			pos = ueStrSeek( (char *) zhuin_tab[ i ], index );
+			ueStrNCpy( tmp, pos, 1, 1 );
+			strcat( buffer, tmp );
+		}
+	}
+	strncpy( phone, buffer, phone_len );
+	return 0;
 }
-#endif
 
 int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes )
 {

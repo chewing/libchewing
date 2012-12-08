@@ -32,10 +32,14 @@
 #include "global-private.h"
 #include "key2pho-private.h"
 #include "config.h"
+#include "chewing-utf8-util.h"
+#include "chewing-private.h"
 
 #define MAXLEN		149
 #define MAXZUIN		9
 #define MAX_FILE_NAME	(256)
+#define MAX_UTF8_LEN    (4)
+#define DATA_LEN        (420000)
 
 #define IN_FILE		"phoneid.dic"
 
@@ -45,8 +49,16 @@ typedef struct {
 	uint16_t num[ MAXZUIN ];
 } RECORD;
 
-RECORD data[ 420000L ];
+RECORD data[ DATA_LEN ];
 long nData;
+
+typedef struct {
+	char word[ MAX_UTF8_LEN + 1 ];
+	uint16_t phone;
+} WORD;
+
+WORD wordData[ DATA_LEN ];
+int nWordData;
 
 const char user_msg[] = 
 	"sort_dic -- read chinese phrase input and generate data file for chewing\n" \
@@ -132,6 +144,64 @@ int CompUint( long a, long b )
 	return 0;
 }
 
+static void WordAdd( long index )
+{
+	if ( ueStrLen( data[ index ].str ) == 1 ) {
+		strncpy( wordData[ nWordData ].word, data[ index ].str, sizeof( wordData[ nWordData ].word ) );
+		wordData[ nWordData ].phone = data[ index ].num[0];
+		++nWordData;
+	}
+}
+
+int CompWord( const void *a, const void *b )
+{
+	const WORD *x = (const WORD *) a;
+	const WORD *y = (const WORD *) b;
+	int cmp;
+
+	cmp = strcmp( x->word, y->word );
+	if ( cmp == 0 ) {
+		cmp = x->phone - y->phone;
+	}
+
+	return cmp;
+}
+
+static void VerifyData()
+{
+	int i;
+	int j;
+	WORD word;
+	char bopomofo[ MAX_UTF8_LEN * ZUIN_SIZE + 1 ];
+	int phrase_len;
+	int phone_len;
+
+	qsort( wordData, nWordData, sizeof( wordData[0] ), CompWord );
+
+	for ( i = 0; i < nData; ++i ) {
+		phrase_len = ueStrLen( data[ i ].str );
+
+		for ( phone_len = 0; data[ i ].num[ phone_len ] != 0; ++phone_len ) {
+		}
+
+		if ( phrase_len != phone_len ) {
+			fprintf( stderr, "Problem in phrase `%s'. ", data[ i ].str );
+			fprintf( stderr, "Phrase length and bopomofo length mismatch.\n", data[ i ].str );
+			continue;
+		}
+
+		for ( j = 0; j < phrase_len; ++j ) {
+			ueStrNCpy( word.word, ueStrSeek( data[ i ].str, j ), 1, 1);
+			word.phone = data[ i ].num[ j ];
+			if ( bsearch( &word, wordData, nWordData, sizeof( word ), CompWord ) == NULL ) {
+				PhoneFromUint( bopomofo, sizeof( bopomofo ), word.phone );
+				fprintf( stderr, "Problem in phrase `%s'. ", data[ i ].str );
+				fprintf( stderr, "Word `%s' has no phone %d (%s).\n", word.word, word.phone, bopomofo );
+			}
+		}
+	}
+}
+
 int main( int argc, char *argv[] )
 {
 	FILE *infile;
@@ -176,8 +246,11 @@ int main( int argc, char *argv[] )
 			continue;
 		DataSetNum( nData );
 		DataStripAll( nData );
+		WordAdd( nData );
 		nData++;
 	}
+	VerifyData();
+
 	qsort( data, nData, sizeof( RECORD ), CompRecord );
 
 	for ( i = 0; i < nData - 1; i++ ) {
