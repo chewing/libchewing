@@ -1440,7 +1440,8 @@ CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx )
 {
 	uint16_t *seq;
 	seq = ALC( uint16_t, ctx->data->nPhoneSeq );
-	memcpy( seq, ctx->data->phoneSeq, sizeof(uint16_t)*ctx->data->nPhoneSeq );
+	if ( seq )
+		memcpy( seq, ctx->data->phoneSeq, sizeof(uint16_t)*ctx->data->nPhoneSeq );
 	return seq;
 }
 

@@ -418,6 +418,34 @@ void test_ShiftRight()
 	test_ShiftRight_add_userphrase();
 }
 
+void test_get_phoneSeq()
+{
+	static const unsigned short PHONE[] = { 10268, 8708 };
+	ChewingContext *ctx;
+	unsigned short *phone;
+	int len;
+	int i;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4g4" );
+
+	len = chewing_get_phoneSeqLen( ctx );
+	ok( len == ARRAY_SIZE( PHONE ), "phoneSeqLen `%d' shall be `%d'", len, ARRAY_SIZE( PHONE ) );
+
+	phone = chewing_get_phoneSeq( ctx );
+	for ( i = 0; i < len; ++i ) {
+		ok( phone[i] == PHONE[i], "phone in position %d is `%d', shall be `%d'", i, phone[i], PHONE[i] );
+	}
+	chewing_free( phone );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -431,6 +459,8 @@ int main()
 	test_Down();
 	test_ShiftLeft();
 	test_ShiftRight();
+
+	test_get_phoneSeq();
 
 	return exit_status();
 }
