@@ -36,7 +36,7 @@
 #include "chewing-private.h"
 
 #define MAXLEN		149
-#define MAXZUIN		9
+#define MAXZUIN		11
 #define MAX_FILE_NAME	(256)
 #define MAX_UTF8_LEN    (4)
 #define DATA_LEN        (420000)
