@@ -527,6 +527,22 @@ void test_Tab()
 	test_Tab_at_the_end();
 }
 
+void test_Capslock()
+{
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+
+	type_keystoke_by_string( ctx, "<CB>" );
+	ok( chewing_get_ChiEngMode( ctx ) == SYMBOL_MODE,
+		"mode shall change to SYMBOL_MODE" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_get_phoneSeq()
 {
 	static const unsigned short PHONE[] = { 10268, 8708 };
@@ -569,6 +585,7 @@ int main()
 	test_ShiftLeft();
 	test_ShiftRight();
 	test_Tab();
+	test_Capslock();
 
 	test_get_phoneSeq();
 
