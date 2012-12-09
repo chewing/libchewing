@@ -416,6 +416,117 @@ void test_ShiftRight()
 	test_ShiftRight_add_userphrase();
 }
 
+void test_Tab_insert_breakpoint_between_word()
+{
+	ChewingContext *ctx;
+	IntervalType it;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4g4<L>" );
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 0 && it.to == 2, "interval (%d, %d) shall be (0, 2)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	// inserts a breakpoint between 測 and 試
+	type_keystoke_by_string( ctx, "<T>" );
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 0 && it.to == 1, "interval (%d, %d) shall be (0, 1)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 1 && it.to == 2, "interval (%d, %d) shall be (1, 2)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_Tab_connect_word()
+{
+	ChewingContext *ctx;
+	IntervalType it;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "u -4<L>" );
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 0 && it.to == 1, "interval (%d, %d) shall be (0, 1)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 1 && it.to == 2, "interval (%d, %d) shall be (1, 2)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	// connect 一 and 二
+	type_keystoke_by_string( ctx, "<T>" );
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 0 && it.to == 2, "interval (%d, %d) shall be (0, 2)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_Tab_at_the_end()
+{
+	ChewingContext *ctx;
+	IntervalType it;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4<T>g4" );
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 0 && it.to == 2, "interval (%d, %d) shall be (0, 2)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_Tab()
+{
+	test_Tab_insert_breakpoint_between_word();
+	test_Tab_connect_word();
+	test_Tab_at_the_end();
+}
+
 void test_get_phoneSeq()
 {
 	static const unsigned short PHONE[] = { 10268, 8708 };
@@ -457,6 +568,7 @@ int main()
 	test_Down();
 	test_ShiftLeft();
 	test_ShiftRight();
+	test_Tab();
 
 	test_get_phoneSeq();
 
