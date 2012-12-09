@@ -766,10 +766,9 @@ static void ShowChewingData( ChewingData *pgdata )
 	DEBUG_OUT( "\n" );
 
 	DEBUG_OUT( 
-		"bChiSym : %d , bSelect : %d , bCaseChange : %d\n",
+		"bChiSym : %d , bSelect : %d\n",
 		pgdata->bChiSym, 
-		pgdata->bSelect, 
-		pgdata->bCaseChange );
+		pgdata->bSelect );
 }
 #endif
 

@@ -946,7 +946,6 @@ CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx )
 	ChewingOutput *pgo = ctx->output;
 
 	pgdata->bChiSym = 1 - pgdata->bChiSym;
-	pgdata->bCaseChange = ( pgdata->bChiSym == CHINESE_MODE ? 0 : 1 );
 	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_ABSORB );
 	return 0;
 }
