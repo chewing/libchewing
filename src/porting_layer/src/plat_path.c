@@ -73,7 +73,7 @@ int get_search_path( char * path, size_t path_len )
 #endif
 
 #if !HAVE_STRTOK_R
-static char * strtok_r (char *s, const char *delim, char **save_ptr)
+char * strtok_r (char *s, const char *delim, char **save_ptr)
 {
 	char *token;
 

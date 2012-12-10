@@ -1,7 +1,7 @@
 /*
  * plat_posix.h
  *
- * Copyright (c) 2010, 2011
+ * Copyright (c) 2010, 2011, 2012
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -40,6 +40,14 @@
 	MoveFile(oldpath, newpath)
 #define PLAT_UNLINK(path) \
 	_unlink(path)
+
+/* strtok_s is simply the Windows version of strtok_r which is standard
+   everywhere else.
+   FIXME: use strtok_s instead of our own implementation.
+ */
+#if !HAVE_STRTOK_R
+char * strtok_r( char *s, const char *delim, char **save_ptr );
+#endif
 
 #ifdef __cplusplus
 extern "C"
