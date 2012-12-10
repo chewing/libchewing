@@ -8,38 +8,61 @@
 libchewing - The intelligent phonetic input method library
   http://chewing.csie.net/
 
+[-] Summary
+
+The Chewing (酷音) input method is an intelligent phonetic (Zhuyin/Bopomofo)
+input method. It is one of the most popular input methods among Traditional
+Chinese users.  Chewing was inspired by other proprietary intelligent Zhuyin
+input methods under Microsoft Windows, namely, Wang-Xin by Eten, Microsoft New
+Zhuyin, and Nature Zhuyin.
+
+The Chewing core team extended their work and actively maintains the project
+as full open source efforts.
+
+
 [-] History
 
-libchewing is derived from Chewing input method, a xcin module
-focusing on intelligent phonetic processing by Lu-chuan Kung
-(lckung) and Kang-pen Chen (kpchen) during 1999-2001. However,
-the original authors of Chewing dropped its development, and
-Chewing was highly coupled with xcin, which prevents from
-comprehensive applications.
+libchewing is derived from Chewing input method, a xcin module focusing on
+intelligent phonetic (Bopomofo/Zhuyin) processing by Lu-chuan Kung (lckung)
+and Kang-pen Chen (kpchen) sponsored by Tsan-sheng Hsu from Academia Sinica
+during 1999-2001.  However, the original authors of Chewing dropped its
+development, and Chewing was highly coupled with xcin, which prevents from
+comprehensive applications.  There was a similar input method, bimsphone,
+which was bundled in XCIN server. However, it did not provide a convenient
+API for further development, either.
 
 
 [-] Motivation
 
-Jim Huang started to separate core algorithm and logic layer
-of Chewing since 2002, and he integrated his efforts into a
-Chinese terminal named JMCCE as a part of its input method
-modules. Also, in 2004, he attempts to let more applications
-adapt these collaborated efforts, so that new contributors
-(mentioned in file AUTHORS) created brand new Chewing Project
-as the infrastructure and wrote serveral new bridges among
-IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
+Jim Huang, et al. formed the Chewing core team and extended Kung and Chen's
+work since 2002.  The chewing core team renamed the project as "new" chewing
+to differentiate their work from the original.  Nevertheless, the English name
+has remained "chewing", which is identified by various input method framework
+as well.
+
+In 2004, Chewing core team successfully ported the input method to several
+platforms and framework along with community collaboration.
+
+
+[-] Development Goal of libchewing
+
+- Split logic and view.
+- Support multiple operating systems, and input framework.
+- Provide a universal API for input framework and further development.
 
 
 [-] Status
 
-1. bridge integration
-  - xcin
+1. System bridge integration
+
+Chewing has been adopted by various input frameworks in Unix-like systems and
+even Microsoft Windows.  On these systems, the chewing package is usually
+split into two parts: libchewing, which handles the actual character selection
+logic; and input framework interface for display and preference setting.
+
+The active integration:
   - JMCCE
-  - IIIMF
   - SCIM
-  - MacOS X (SpaceChewing)
-  - Sun's Java Desktop System Input Method Framework
-  - OpenVanilla Input Method Framework (previous than version 1.0)
   - standalone Microsoft Windows 32/64-bit (windows-chewing)
   - OXIM
   - UIM
@@ -48,6 +71,14 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
   - mozc
   - gcin/HIME
   - fcitx
+
+The inactive one:
+  - xcin
+  - IIIMF
+  - MacOS X (SpaceChewing)
+  - Sun's Java Desktop System Input Method Framework
+  - OpenVanilla Input Method Framework (previous than version 1.0)
+  - OXIM
 
 2. support phonetic keyboard layout
   - Hsu
