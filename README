@@ -270,8 +270,11 @@ Right         chewing_handle_Right       Next page of candidates
 = Bypass mode =
 
 This mode is on whenever the preedit buffer is empty. This allows you to use
-movement keys (such as cursor keys and page up/page down) and popular key binding
-(Ctrl-A, Ctrl-S).
+movement keys (such as cursor keys and page up/page down) and popular key
+binding (Ctrl-A, Ctrl-S).
+
+For the brief usage of libchewing APIs, please check the simplified example
+implemented in file contrib/simple-select.c
 
 *1 http://en.wikipedia.org/wiki/Bopomofo
 *2 http://en.wikipedia.org/wiki/Pinyin
