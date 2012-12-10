@@ -38,6 +38,9 @@ $(datas): gendata_stamp
 checkdata_stamp: phone.cin tsi.src
 	@echo "timestamp" > $@
 
+LOCALE_RESET= \
+export LC_ALL=C
+
 gendata_stamp:
 	-if test -f $(generated_header); then \
 		echo "chewing-definition.h exists."; \
@@ -48,7 +51,7 @@ gendata_stamp:
 
 gendata:
 	$(tooldir)/sort_word$(EXEEXT) $(top_srcdir)/data/phone.cin
-	$(tooldir)/sort_dic$(EXEEXT) $(top_srcdir)/data/tsi.src
+	$(shell $(LOCALE_RESET) ; $(tooldir)/sort_dic$(EXEEXT) $(top_srcdir)/data/tsi.src)
 	$(tooldir)/maketree$(EXEEXT)
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
