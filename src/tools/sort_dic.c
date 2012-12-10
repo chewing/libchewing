@@ -55,9 +55,9 @@ long nData;
 typedef struct {
 	char word[ MAX_UTF8_LEN + 1 ];
 	uint16_t phone;
-} WORD;
+} CWORD;
 
-WORD wordData[ DATA_LEN ];
+CWORD wordData[ DATA_LEN ];
 int nWordData;
 
 const char user_msg[] = 
@@ -152,8 +152,8 @@ static void WordAdd( long index )
 
 int CompWord( const void *a, const void *b )
 {
-	const WORD *x = (const WORD *) a;
-	const WORD *y = (const WORD *) b;
+	const CWORD *x = (const CWORD *) a;
+	const CWORD *y = (const CWORD *) b;
 	int cmp;
 
 	cmp = strcmp( x->word, y->word );
@@ -168,7 +168,7 @@ static void VerifyData()
 {
 	int i;
 	int j;
-	WORD word;
+	CWORD word;
 	char bopomofo[ MAX_UTF8_LEN * ZUIN_SIZE + 1 ];
 	int phrase_len;
 	int phone_len;
