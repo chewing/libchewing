@@ -183,7 +183,7 @@ static void VerifyData()
 
 		if ( phrase_len != phone_len ) {
 			fprintf( stderr, "Problem in phrase `%s'. ", data[ i ].str );
-			fprintf( stderr, "Phrase length and bopomofo length mismatch.\n", data[ i ].str );
+			fprintf( stderr, "Phrase length and bopomofo length mismatch.\n" );
 			continue;
 		}
 
