@@ -1,11 +1,17 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 * Improve the description of libchewing API
+* Revise libchewing API. Check the documentation for details
+* Reimplementation of unit test framework. No external 'check' required
+* Fix several phrase errors
 * Add --enable-gcov to enable gcov coverage
 * Fix possible strncat() overflow
+* Handle incomplete bopomofo with space key properly
 * Support building with mingw32 toolchain
 * Internal structure refactoring
 * Read hash path from CHEWING_PATH environment variable
+* Make libchewing thread-safe
+* Fix IM crash by changing default candidate per page to 10
 * Fix GNU Hurd build
 * Fix the detection of ncursesw
 * Fix the usage of autotools
