@@ -543,6 +543,50 @@ void test_Capslock()
 	chewing_Terminate();
 }
 
+void test_Home()
+{
+	ChewingContext *ctx;
+	int cursor;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4g4" );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
+
+	type_keystoke_by_string( ctx, "<H>" );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 0, "cursor `%d' shall be 0", cursor );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_End()
+{
+	ChewingContext *ctx;
+	int cursor;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	type_keystoke_by_string( ctx, "hk4g4<L><L>" );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 0, "cursor `%d' shall be 0", cursor );
+
+	type_keystoke_by_string( ctx, "<EN>" );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_get_phoneSeq()
 {
 	static const unsigned short PHONE[] = { 10268, 8708 };
@@ -586,6 +630,8 @@ int main()
 	test_ShiftRight();
 	test_Tab();
 	test_Capslock();
+	test_Home();
+	test_End();
 
 	test_get_phoneSeq();
 
