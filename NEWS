@@ -30,7 +30,7 @@ What's New in libchewing GIT
  . JMCCE (reworked version) supports libchewing
 
 
-What's New in libchewing 0.3.3
+What's New in libchewing 0.3.3 (Feb 27, 2011)
 ---------------------------------------------------------
 * Fix memory access violation.
 * Improved Python binding.
@@ -46,7 +46,7 @@ What's New in libchewing 0.3.3
   . MeeGo platform provides built-in Chewing IM support
 
 
-What's New in libchewing 0.3.2
+What's New in libchewing 0.3.2 (Dec 1, 2008)
 ---------------------------------------------------------
 * Add gcc visibility support to hide private APIs.
 * APIs and Headers refactoring.
@@ -70,7 +70,7 @@ What's New in libchewing 0.3.2
   . UIM-chewing leveraging libchewing 0.3.x development branch.
 
 
-What's New in libchewing 0.3.1
+What's New in libchewing 0.3.1 (Oct 1, 2008)
 ----------------------------------------------------------
 * New keyboard layout DACHEN_CP26.
 * Add key '`' to open symbol table.
@@ -100,7 +100,7 @@ What's New in libchewing 0.3.1
 * Added bEasySymbolInput.
 
 
-What's New in libchewing 0.3.0
+What's New in libchewing 0.3.0 (May 15, 2006)
 ----------------------------------------------------------
 * This is a new development branch differing a lot from
   0.2.x series, and breaks API/ABI for new features.
@@ -139,7 +139,7 @@ What's New in libchewing 0.3.0
     method solution on Microsoft Windows platforms.
 
 
-What's New in libchewing 0.2.7
+What's New in libchewing 0.2.7 (Aug 8, 2005)
 ----------------------------------------------------------
 * Fix the keyboard type state changing bug.
 * Add new function to specify the space as the selection
@@ -152,7 +152,7 @@ What's New in libchewing 0.2.7
     Win32 port of OpenVanilla Input Method Framework).
 
 
-What's New in libchewing 0.2.6
+What's New in libchewing 0.2.6 (Feb 28, 2005)
 ----------------------------------------------------------
 * Experimental feature -- HanYu PinYing Keyboard layout.
 * Proper $HOME env handling.
@@ -163,7 +163,7 @@ What's New in libchewing 0.2.6
     Java Desktop System (JDS).
 
 
-What's New in libchewing 0.2.5
+What's New in libchewing 0.2.5 (Dec 28, 2004)
 ----------------------------------------------------------
 * Merge SpaceChewing's frequency tweaking from zonble.
 * Minor fixes for building process and zuin core.
