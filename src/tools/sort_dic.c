@@ -164,10 +164,30 @@ int CompWord( const void *a, const void *b )
 	return cmp;
 }
 
+static int IsExceptionPhrase( const RECORD *record )
+{
+	static const RECORD EXCEPTION[] = {
+		{ .str = "好萊塢", .num = { 5691, 4138, 256 } }, // ㄏㄠˇ ㄌㄞˊ ㄨ
+	};
+
+	int i;
+
+	for ( i = 0; i < sizeof( EXCEPTION ) / sizeof( EXCEPTION[ 0 ] ); ++i ) {
+		if ( strcmp( record->str, EXCEPTION[ i ].str ) == 0 &&
+			memcmp( record->num, EXCEPTION[ i ].num, sizeof( record->num ) ) == 0 ) {
+			return 1;
+		}
+	}
+
+	return 0;
+
+}
+
 static void VerifyData()
 {
 	int i;
 	int j;
+	int k;
 	CWORD word;
 	char bopomofo[ MAX_UTF8_LEN * ZUIN_SIZE + 1 ];
 	int phrase_len;
@@ -190,9 +210,15 @@ static void VerifyData()
 		for ( j = 0; j < phrase_len; ++j ) {
 			ueStrNCpy( word.word, ueStrSeek( data[ i ].str, j ), 1, 1);
 			word.phone = data[ i ].num[ j ];
-			if ( bsearch( &word, wordData, nWordData, sizeof( word ), CompWord ) == NULL ) {
+			if ( bsearch( &word, wordData, nWordData, sizeof( word ), CompWord ) == NULL &&
+				! IsExceptionPhrase(&data[ i ]) ) {
 				PhoneFromUint( bopomofo, sizeof( bopomofo ), word.phone );
-				fprintf( stderr, "Problem in phrase `%s'. ", data[ i ].str );
+				fprintf( stderr, "Problem in phrase `%s' ", data[ i ].str );
+				fprintf( stderr, "(%d", data[ i ].num[ 0 ] );
+				for ( k = 1; data[ i ].num[ k ] != 0; ++k ) {
+					fprintf( stderr, ", %d", data[ i ].num[ k ] );
+				}
+				fprintf( stderr, "). " );
 				fprintf( stderr, "Word `%s' has no phone %d (%s).\n", word.word, word.phone, bopomofo );
 			}
 		}
