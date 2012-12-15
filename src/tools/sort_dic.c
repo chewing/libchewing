@@ -168,6 +168,7 @@ static int IsExceptionPhrase( const RECORD *record )
 {
 	static const RECORD EXCEPTION[] = {
 		{ .str = "好萊塢", .num = { 5691, 4138, 256 } }, // ㄏㄠˇ ㄌㄞˊ ㄨ
+		{ .str = "成日家", .num = { 8290, 9220, 6281 } }, // ㄔㄥˊ ㄖˋ ㄐㄧㄚ˙
 	};
 
 	int i;
