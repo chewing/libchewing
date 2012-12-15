@@ -532,9 +532,12 @@ static int DoSelect( ChewingData *pgdata, int num )
 				if ( pgdata->config.bAutoShiftCur != 0 &&
 				     /* if cursor at end of string, do not shift the cursor. */
 				     pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
-					int len = pgdata->availInfo.avail[
-						pgdata->availInfo.currentAvail ].len;
-					pgdata->chiSymbolCursor += len;
+					if ( pgdata->config.bPhraseChoiceRearward ) {
+						++pgdata->chiSymbolCursor;
+					} else {
+						pgdata->chiSymbolCursor +=
+							pgdata->availInfo.avail[ pgdata->availInfo.currentAvail ].len;
+					}
 				}
 			}
 			return 1;
