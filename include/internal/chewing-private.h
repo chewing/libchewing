@@ -37,6 +37,7 @@
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
 
+#ifndef _MSC_VER
 #undef max
 static inline int max( int a, int b )
 {
@@ -48,6 +49,7 @@ static inline int min( int a, int b )
 {
 	return a < b ? a : b;
 }
+#endif
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
