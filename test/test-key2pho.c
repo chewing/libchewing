@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "test.h"
+#include "testhelper.h"
 #include "global.h"
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"

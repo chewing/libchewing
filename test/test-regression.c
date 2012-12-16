@@ -18,7 +18,7 @@
 #include "chewing.h"
 #include "plat_types.h"
 #include "hash-private.h"
-#include "test.h"
+#include "testhelper.h"
 
 void test_libchewing_issue_30()
 {

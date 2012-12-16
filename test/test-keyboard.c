@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 static char *KEYBOARD_STRING[] = {
 	"KB_DEFAULT",

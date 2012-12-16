@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 static const TestData EASY_SYMBOL[] = {
 	{ .token = "Q", .expected = "〔" },

@@ -12,13 +12,13 @@ dist_noinst_DATA = \
 	default-test.txt \
 	$(NULL)
 
-noinst_LTLIBRARIES = libtest.la
+noinst_LTLIBRARIES = libtesthelper.la
 
-libtest_la_SOURCES = \
-	test.c \
+libtesthelper_la_SOURCES = \
+	testhelper.c \
 	$(NULL)
 
-libtest_la_LIBADD = \
+libtesthelper_la_LIBADD = \
 	$(top_builddir)/src/libchewing.la \
 	$(NULL)
 
@@ -40,7 +40,7 @@ NATIVE_TESTS = \
 	$(NULL)
 
 check_HEADERS = \
-	test.h \
+	testhelper.h \
 	$(NULL)
 
 check_PROGRAMS = \
@@ -75,7 +75,7 @@ LDADD = \
 	$(top_builddir)/src/libchewing.la \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
-	$(top_builddir)/test/libtest.la \
+	$(top_builddir)/test/libtesthelper.la \
 	$(NULL)
 
 AM_LDFLAGS = -static

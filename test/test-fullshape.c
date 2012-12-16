@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 static const TestData FULLSHAPE_DATA[] = {
 	{ .token = "0", .expected = "０" },

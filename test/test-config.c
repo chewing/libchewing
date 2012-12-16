@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 static const int MIN_CAND_PER_PAGE = 1;
 static const int MAX_CAND_PER_PAGE = 10;

@@ -1,5 +1,5 @@
 /**
- * test.h
+ * testhelper.h
  * * Copyright (c) 2012
  *	libchewing Core Team. See ChangeLog for details.
  *

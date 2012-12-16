@@ -1,5 +1,5 @@
 /**
- * test.c
+ * testhelper.c
  *
  * Copyright (c) 2012
  *	libchewing Core Team. See ChangeLog for details.
@@ -7,7 +7,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-#include "test.h"
+#include "testhelper.h"
 
 #include <assert.h>
 #include <stdarg.h>
