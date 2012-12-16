@@ -139,14 +139,12 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 
 static ChewingData * allocate_ChewingData()
 {
-	static const ChewingConfigData DEFAULT_CONFIG = {
-		.candPerPage = MAX_SELKEY,
-		.selKey = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' },
-	};
+	static const int DEFAULT_SELKEY[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
 
 	ChewingData *data = ALC( ChewingData, 1 );
 	if ( data ) {
-		data->config = DEFAULT_CONFIG;
+		data->config.candPerPage = MAX_SELKEY;
+		memcpy( data->config.selKey, DEFAULT_SELKEY, sizeof( data->config.selKey ) );
 	}
 
 	return data;

@@ -1354,13 +1354,20 @@ int OpenSymbolChoice( ChewingData *pgdata )
 
 int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 {
-	static const int MAX_SYMBOL_ENTRY = 100;
+	static const unsigned int MAX_SYMBOL_ENTRY = 100;
 	static const size_t LINE_LEN = 512; // shall be long enough?
 
 	char *filename = NULL;
 	FILE *file = NULL;
 	char *line = NULL;
 	SymbolEntry **entry = NULL;
+	char *category_end;
+	char *symbols;
+	char *symbols_end;
+	char *symbol;
+	int i;
+	int len;
+	size_t size;
 	int ret = -1;
 
 	pgdata->static_data.n_symbol_entry = 0;
@@ -1386,14 +1393,14 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	while ( fgets( line, LINE_LEN, file ) &&
 		pgdata->static_data.n_symbol_entry < MAX_SYMBOL_ENTRY ) {
 
-		char *category_end = strpbrk( line, "=\r\n" );
+		category_end = strpbrk( line, "=\r\n" );
 		if ( !category_end )
 			goto end;
 
-		char *symbols = category_end + 1;
-		char *symbols_end = strpbrk( symbols, "\r\n" );
+		symbols = category_end + 1;
+		symbols_end = strpbrk( symbols, "\r\n" );
 		if ( symbols_end ) {
-			int len = ueStrLen( symbols );
+			len = ueStrLen( symbols );
 
 			entry[ pgdata->static_data.n_symbol_entry ] =
 				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) +
@@ -1403,9 +1410,9 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 			entry[ pgdata->static_data.n_symbol_entry ]
 				->nSymbols = len;
 
-			char *symbol = symbols;
+			symbol = symbols;
 
-			for ( int i = 0; i < len; ++i ) {
+			for ( i = 0; i < len; ++i ) {
 				ueStrNCpy(
 					entry[ pgdata->static_data.n_symbol_entry ]->symbols[ i ],
 					symbol, 1, 1 );
@@ -1432,7 +1439,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 		++pgdata->static_data.n_symbol_entry;
 	}
 
-	size_t size = sizeof( *pgdata->static_data.symbol_table ) *
+	size = sizeof( *pgdata->static_data.symbol_table ) *
 		pgdata->static_data.n_symbol_entry;
 	pgdata->static_data.symbol_table = ( SymbolEntry ** ) malloc( size );
 	if ( !pgdata->static_data.symbol_table )
@@ -1468,6 +1475,9 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 	FILE *file = NULL;
 	char *filename = NULL;
 	char *line = NULL;
+	int len;
+	int _index;
+	char *symbol;
 	int ret = -1;
 
 	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
@@ -1488,11 +1498,11 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 			continue;
 
 		// Remove tailing \n
-		int len = strcspn( line, "\r\n" );
+		len = strcspn( line, "\r\n" );
 
 		line[ len ] = '\0';
 
-		int _index = FindEasySymbolIndex( line[ 0 ] );
+		_index = FindEasySymbolIndex( line[ 0 ] );
 		if ( -1 == _index )
 			continue;
 
@@ -1500,7 +1510,7 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 		if ( 0 == len || len > MAX_EASY_SYMBOL_LEN )
 			continue;
 
-		char *symbol = ALC( char, strlen( &line[2] ) + 1 );
+		symbol = ALC( char, strlen( &line[2] ) + 1 );
 		if ( !symbol )
 			goto end;
 
