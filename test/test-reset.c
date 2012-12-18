@@ -20,15 +20,15 @@
 
 void test_reset_shall_not_clean_static_data()
 {
-	char TOKEN[] = "hk4g4<E>";
-	char EXPECTED[] = "測試";
+	const TestData DATA = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ };
+	ChewingContext *ctx;
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
@@ -36,8 +36,8 @@ void test_reset_shall_not_clean_static_data()
 
 	chewing_Reset( ctx );
 
-	type_keystoke_by_string( ctx, TOKEN );
-	ok_commit_buffer( ctx, EXPECTED );
+	type_keystoke_by_string( ctx, DATA.token );
+	ok_commit_buffer( ctx, DATA.expected );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

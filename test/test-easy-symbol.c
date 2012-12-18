@@ -19,46 +19,49 @@
 #include "testhelper.h"
 
 static const TestData EASY_SYMBOL[] = {
-	{ .token = "Q", .expected = "〔" },
-	{ .token = "W", .expected = "〕" },
-	{ .token = "A", .expected = "【" },
-	{ .token = "S", .expected = "】" },
-	{ .token = "Z", .expected = "《" },
-	{ .token = "X", .expected = "》" },
-	{ .token = "E", .expected = "｛" },
-	{ .token = "R", .expected = "｝" },
-	{ .token = "D", .expected = "「" },
-	{ .token = "F", .expected = "」" },
-	{ .token = "C", .expected = "『" },
-	{ .token = "V", .expected = "』" },
-	{ .token = "T", .expected = "‘" },
-	{ .token = "Y", .expected = "’" },
-	{ .token = "G", .expected = "“" },
-	{ .token = "H", .expected = "”" },
-	{ .token = "B", .expected = "〝" },
-	{ .token = "N", .expected = "〞" },
-	{ .token = "U", .expected = "＋" },
-	{ .token = "I", .expected = "－" },
-	{ .token = "O", .expected = "×" },
-	{ .token = "P", .expected = "÷" },
-	{ .token = "J", .expected = "≠" },
-	{ .token = "K", .expected = "≒" },
-	{ .token = "L", .expected = "Orz" },
-	{ .token = "M", .expected = "…" },
+	{ "Q", "\xE3\x80\x94" /* 〔 */ },
+	{ "W", "\xE3\x80\x95" /* 〕 */ },
+	{ "A", "\xE3\x80\x90" /* 【 */ },
+	{ "S", "\xE3\x80\x91" /* 】 */ },
+	{ "Z", "\xE3\x80\x8A" /* 《 */ },
+	{ "X", "\xE3\x80\x8B" /* 》 */ },
+	{ "E", "\xEF\xBD\x9B" /* ｛ */ },
+	{ "R", "\xEF\xBD\x9D" /* ｝ */ },
+	{ "D", "\xE3\x80\x8C" /* 「 */ },
+	{ "F", "\xE3\x80\x8D" /* 」 */ },
+	{ "C", "\xE3\x80\x8E" /* 『 */ },
+	{ "V", "\xE3\x80\x8F" /* 』 */ },
+	{ "T", "\xE2\x80\x98" /* ‘ */ },
+	{ "Y", "\xE2\x80\x99" /* ’ */ },
+	{ "G", "\xE2\x80\x9C" /* “ */ },
+	{ "H", "\xE2\x80\x9D" /* ” */ },
+	{ "B", "\xE3\x80\x9D" /* 〝 */ },
+	{ "N", "\xE3\x80\x9E" /* 〞 */ },
+	{ "U", "\xEF\xBC\x8B" /* ＋ */ },
+	{ "I", "\xEF\xBC\x8D" /* － */ },
+	{ "O", "\xC3\x97" /* × */ },
+	{ "P", "\xC3\xB7" /* ÷ */ },
+	{ "J", "\xE2\x89\xA0" /* ≠ */ },
+	{ "K", "\xE2\x89\x92" /* ≒ */ },
+	{ "L", "Orz" },
+	{ "M", "\xE2\x80\xA6" /* … */ },
 };
 
-static const TestData CHINESE = { .token = "hk4g4<E>", .expected = "測試" };
+static const TestData CHINESE = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ };
 
 void test_type_easy_symbol()
 {
+	ChewingContext *ctx;
+	int i;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
 
-	for ( int i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
 		type_keystoke_by_string( ctx, EASY_SYMBOL[i].token );
 		ok_preedit_buffer( ctx, EASY_SYMBOL[i].expected );
 		type_keystoke_by_string( ctx, "<E>" );
@@ -71,9 +74,11 @@ void test_type_easy_symbol()
 
 void test_mode_change()
 {
+	ChewingContext *ctx;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 

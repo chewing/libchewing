@@ -23,26 +23,37 @@
 static unsigned int test_run;
 static unsigned int test_ok;
 
+/* We cannot use designated initializer here due to Visual Studio */
 BufferType COMMIT_BUFFER = {
-	.check = chewing_commit_Check,
-	.get_string = chewing_commit_String,
+	chewing_commit_Check,
+	0,
+	0,
+	chewing_commit_String,
+	0,
 };
 
 BufferType PREEDIT_BUFFER = {
-	.check = chewing_buffer_Check,
-	.get_length = chewing_buffer_Len,
-	.get_string = chewing_buffer_String,
+	chewing_buffer_Check,
+	0,
+	chewing_buffer_Len,
+	chewing_buffer_String,
+	0,
 };
 
 BufferType ZUIN_BUFFER = {
-	.check_alt = chewing_zuin_Check,
-	.get_string_alt = chewing_zuin_String,
+	0,
+	chewing_zuin_Check,
+	0,
+	0,
+	chewing_zuin_String,
 };
 
 BufferType AUX_BUFFER = {
-	.check = chewing_aux_Check,
-	.get_length = chewing_aux_Length,
-	.get_string = chewing_aux_String,
+	chewing_aux_Check,
+	0,
+	chewing_aux_Length,
+	chewing_aux_String,
+	0,
 };
 
 int get_keystroke( get_char_func get_char, void * param )
@@ -189,15 +200,16 @@ static void type_keystoke( ChewingContext *ctx, get_char_func get_char, void *pa
 
 static int get_char_by_string( void * param )
 {
-	assert( param );
-
 	char **ptr = param;
+	char ch;
+
+	assert( param );
 
 	if ( **ptr == 0 ) {
 		return END;
 	}
 
-	char ch = **ptr;
+	ch = **ptr;
 	++*ptr;
 	return ch;
 }
@@ -205,12 +217,13 @@ static int get_char_by_string( void * param )
 void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *fmt, ...)
 {
+	va_list ap;
+
 	++test_run;
 	if ( test ) {
 		++test_ok;
 		printf( "ok %d ", test_run);
 
-		va_list ap;
 		va_start( ap, fmt );
 		vprintf( fmt, ap );
 		va_end( ap );
@@ -219,7 +232,6 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	} else {
 		printf( "not ok %d ", test_run);
 
-		va_list ap;
 		va_start( ap, fmt );
 		vprintf( fmt, ap );
 		va_end( ap );
@@ -228,9 +240,9 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	}
 }
 
-void type_keystoke_by_string( ChewingContext *ctx, const char* keystoke )
+void type_keystoke_by_string( ChewingContext *ctx, char* keystoke )
 {
-	return type_keystoke( ctx, get_char_by_string, &keystoke );
+	type_keystoke( ctx, get_char_by_string, &keystoke );
 }
 
 void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
@@ -293,7 +305,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len )
 {
-	int i;
+	size_t i;
 	char *buf;
 
 	assert( ctx );
@@ -325,10 +337,10 @@ void internal_ok_keystoke_rtn( const char *file, int line,
 		int rtn;
 		int (*func)(ChewingContext* ctx);
 	} TABLE[] = {
-		{ .rtn = KEYSTROKE_IGNORE, .func = chewing_keystroke_CheckIgnore },
-		{ .rtn = KEYSTROKE_COMMIT, .func = chewing_commit_Check },
+		{ KEYSTROKE_IGNORE, chewing_keystroke_CheckIgnore },
+		{ KEYSTROKE_COMMIT, chewing_commit_Check },
 		// No function to check KEYSTROKE_BELL
-		{ .rtn = KEYSTROKE_ABSORB, .func = chewing_keystroke_CheckAbsorb },
+		{ KEYSTROKE_ABSORB, chewing_keystroke_CheckAbsorb },
 	};
 	int i;
 	int actual;

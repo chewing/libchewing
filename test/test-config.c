@@ -29,15 +29,16 @@ static const int DEFAULT_SELECT_KEY[] = {
 static int ALTERNATE_SELECT_KEY[] = {
 	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';' };
 
-const TestData DATA = { .token = "`a", .expected = "…" };
+const TestData DATA = { "`a", "\xE2\x80\xA6" /* … */ };
 
 void test_default_value()
 {
 	int *select_key;
+	ChewingContext *ctx;
 
 	chewing_Init( 0, 0 );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	select_key = chewing_get_selKey( ctx );
 	ok( select_key, "chewing_get_selKey shall not return NULL" );

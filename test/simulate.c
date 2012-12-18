@@ -10,7 +10,11 @@
 
 #define USED_IN_SIMULATION
 #include "testchewing.c"
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#else
+#include "plat_types.h"
+#endif
 
 #define FN_MATERIALS "materials.txt"
 

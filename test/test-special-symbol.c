@@ -19,35 +19,35 @@
 #include "testhelper.h"
 
 static const TestData SPECIAL_SYMBOL_TABLE[] = {
-	{ .token = "[", .expected = "「" },
-	{ .token = "]", .expected = "」" },
-	{ .token = "{", .expected = "『" },
-	{ .token = "}", .expected = "』"},
-	{ .token = "'", .expected = "、" },
-	{ .token = "<<>", .expected = "，" },
-	{ .token = ":", .expected = "：" },
-	{ .token = "\"", .expected = "；" },
-	{ .token = ">", .expected = "。" },
-	{ .token = "~", .expected = "～" },
-	{ .token = "!", .expected = "！" },
-	{ .token = "@", .expected = "＠" },
-	{ .token = "#", .expected = "＃" },
-	{ .token = "$", .expected = "＄" },
-	{ .token = "%", .expected = "％" },
-	{ .token = "^", .expected = "︿" },
-	{ .token = "&", .expected = "＆" },
-	{ .token = "*", .expected = "＊" },
-	{ .token = "(", .expected = "（" },
-	{ .token = ")", .expected = "）" },
-	{ .token = "_", .expected = "﹍" },
-	{ .token = "+", .expected = "＋" },
-	{ .token = "=", .expected = "＝" },
-	{ .token = "\\", .expected = "＼" },
-	{ .token = "|", .expected = "｜" },
-	{ .token = "?", .expected = "？" },
-	{ .token = ",", .expected = "，" },
-	{ .token = ".", .expected = "。" },
-	{ .token = ";", .expected = "；" },
+	{ "[", "\xE3\x80\x8C" /* 「 */ },
+	{ "]", "\xE3\x80\x8D" /* 」 */ },
+	{ "{", "\xE3\x80\x8E" /* 『 */ },
+	{ "}", "\xE3\x80\x8F" /* 』 */ },
+	{ "'", "\xE3\x80\x81" /* 、 */ },
+	{ "<<>", "\xEF\xBC\x8C" /* ， */ },
+	{ ":", "\xEF\xBC\x9A" /* ： */ },
+	{ "\"", "\xEF\xBC\x9B" /* ； */ },
+	{ ">", "\xE3\x80\x82" /* 。 */ },
+	{ "~", "\xEF\xBD\x9E" /* ～ */ },
+	{ "!", "\xEF\xBC\x81" /* ！ */ },
+	{ "@", "\xEF\xBC\xA0" /* ＠ */ },
+	{ "#", "\xEF\xBC\x83" /* ＃ */ },
+	{ "$", "\xEF\xBC\x84" /* ＄ */ },
+	{ "%", "\xEF\xBC\x85" /* ％ */ },
+	{ "^", "\xEF\xB8\xBF" /* ︿ */ },
+	{ "&", "\xEF\xBC\x86" /* ＆ */ },
+	{ "*", "\xEF\xBC\x8A" /* ＊ */ },
+	{ "(", "\xEF\xBC\x88" /* （ */ },
+	{ ")", "\xEF\xBC\x89" /* ） */ },
+	{ "_", "\xEF\xB9\x8D" /* ﹍ */ },
+	{ "+", "\xEF\xBC\x8B" /* ＋ */ },
+	{ "=", "\xEF\xBC\x9D" /* ＝ */ },
+	{ "\\", "\xEF\xBC\xBC" /* ＼ */ },
+	{ "|", "\xEF\xBD\x9C" /* ｜ */ },
+	{ "?", "\xEF\xBC\x9F" /* ？ */ },
+	{ ",", "\xEF\xBC\x8C" /* ， */ },
+	{ ".", "\xE3\x80\x82" /* 。 */ },
+	{ ";", "\xEF\xBC\x9B" /* ； */ },
 };
 
 int is_bopomofo_collision_key( const char *key )
@@ -59,8 +59,9 @@ int is_bopomofo_collision_key( const char *key )
 		",",
 		".",
 	};
+	int i;
 
-	for ( int i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {
 		if ( strcmp( key, COLLISION_KEY[i] ) == 0 ) {
 			return 1;
 		}
@@ -70,13 +71,16 @@ int is_bopomofo_collision_key( const char *key )
 
 void test_in_chinese_mode()
 {
+	ChewingContext *ctx;
+	int i;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
 		// If bopomofo symbol is collided with special symbol, use
 		// bopomofo symbol
 		if ( is_bopomofo_collision_key( SPECIAL_SYMBOL_TABLE[i].token ) )
@@ -94,14 +98,17 @@ void test_in_chinese_mode()
 
 void test_in_easy_symbol_mode()
 {
+	ChewingContext *ctx;
+	int i;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
 
-	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
 		type_keystoke_by_string( ctx, SPECIAL_SYMBOL_TABLE[i].token );
 		ok_preedit_buffer( ctx, SPECIAL_SYMBOL_TABLE[i].expected );
 		type_keystoke_by_string( ctx, "<E>" );
@@ -128,8 +135,9 @@ int is_fullshape_collision_key( const char *key )
 		"+",
 		"-",
 	};
+	int i;
 
-	for ( int i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( COLLISION_KEY ); ++i ) {
 		if ( strcmp( key, COLLISION_KEY[i] ) == 0 ) {
 			return 1;
 		}
@@ -139,15 +147,18 @@ int is_fullshape_collision_key( const char *key )
 
 void test_in_fullshape_mode()
 {
+	ChewingContext *ctx;
+	int i;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
 
-	for ( int i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( SPECIAL_SYMBOL_TABLE ); ++i ) {
 		// If fullshape symbol is collided with special symbol, use
 		// fullshape symbol
 		if ( is_fullshape_collision_key( SPECIAL_SYMBOL_TABLE[i].token ) )

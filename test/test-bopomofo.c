@@ -22,41 +22,42 @@
 
 void test_select_candidate_no_phrase_choice_rearward()
 {
-	// The following phrases are in dict
-	// 一上來
-	// 上來
-	// 移上來
-	// 移上
+	/*
+	 * The following phrases are in dict
+	 * 一上來
+	 * 上來
+	 * 移上來
+	 * 移上
+	 */
 
 	static const char *CAND_1[] = {
-		"一上來",
-		"移上來",
+		"\xE4\xB8\x80\xE4\xB8\x8A\xE4\xBE\x86" /* 一上來 */,
+		"\xE7\xA7\xBB\xE4\xB8\x8A\xE4\xBE\x86" /* 移上來 */,
 	};
 
 	static const char *CAND_2[] = {
-		"移上",
+		"\xE7\xA7\xBB\xE4\xB8\x8A" /* 移上 */,
 	};
+
+	ChewingContext *ctx;
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "u6g;4x96<L><L><L>" ); // ㄧˊㄕㄤˋㄌㄞˊ
+	type_keystoke_by_string( ctx, "u6g;4x96<L><L><L>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 
-	// ㄧˊㄕㄤˋㄌㄞˊ
-	type_keystoke_by_string( ctx, "<D>" );
+	type_keystoke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_1, ARRAY_SIZE( CAND_1 ) );
 
-	// ㄕㄤˋㄌㄞˊ
-	type_keystoke_by_string( ctx, "<D>" );
+	type_keystoke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
-	// select 移上來
-	type_keystoke_by_string( ctx, "<D><D>2<E>" );
+	type_keystoke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
@@ -65,44 +66,43 @@ void test_select_candidate_no_phrase_choice_rearward()
 
 void test_select_candidate_phrase_choice_rearward()
 {
-	// The following phrases are in dict
-	// 一上來
-	// 上來
-	// 移上來
-	// 移上
-	// 快上
+	/*
+	 * The following phrases are in dict
+	 * 一上來
+	 * 上來
+	 * 移上來
+	 * 移上
+	 */
 
 	static const char *CAND_1[] = {
-		"一上來",
-		"移上來",
+		"\xE4\xB8\x80\xE4\xB8\x8A\xE4\xBE\x86" /* 一上來 */,
+		"\xE7\xA7\xBB\xE4\xB8\x8A\xE4\xBE\x86" /* 移上來 */,
 	};
 
 	static const char *CAND_2[] = {
-		"上來",
+		"\xE4\xB8\x8A\xE4\xBE\x86" /* 上來 */,
 	};
+	ChewingContext *ctx;
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
-	type_keystoke_by_string( ctx, "u6g;4x96" ); // ㄧˊㄕㄤˋㄌㄞˊ
+	type_keystoke_by_string( ctx, "u6g;4x96" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_preedit_buffer( ctx, CAND_1[0] );
 
-	// ㄧˊㄕㄤˋㄌㄞˊ
-	type_keystoke_by_string( ctx, "<D>" );
+	type_keystoke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_1, ARRAY_SIZE( CAND_1 ) );
 
-	// ㄕㄤˋㄌㄞˊ
-	type_keystoke_by_string( ctx, "<D>" );
+	type_keystoke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
-	// select 移上來
-	type_keystoke_by_string( ctx, "<D><D>2<E>" );
+	type_keystoke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
@@ -161,7 +161,7 @@ void test_Esc()
 	test_Esc_not_entering_chewing();
 	test_Esc_in_select();
 	test_Esc_entering_zuin();
-	// XXX: Test escCleanAllBuf here
+	/* XXX: Test escCleanAllBuf here */
 }
 
 void test_Del_not_entering_chewing()
@@ -186,7 +186,7 @@ void test_Del_in_select()
 
 	ctx = chewing_new();
 	type_keystoke_by_string( ctx, "`<DC>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
+	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -237,7 +237,7 @@ void test_Backspace_in_select()
 
 	ctx = chewing_new();
 	type_keystoke_by_string( ctx, "`<B>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); // XXX: shall be ignore?
+	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -251,7 +251,7 @@ void test_Backspace_remove_bopomofo()
 
 	ctx = chewing_new();
 	type_keystoke_by_string( ctx, "hk<B>" );
-	ok_zuin_buffer( ctx, "ㄘ" );
+	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -267,7 +267,7 @@ void test_Backspace_word()
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystoke_by_string( ctx, "hk4u g4<L><B><E>" );
-	ok_commit_buffer( ctx, "測試" );
+	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -298,7 +298,7 @@ void test_Up_not_entering_chewing()
 void test_Up()
 {
 	test_Up_not_entering_chewing();
-	// XXX: What is spec of Up?
+	/* XXX: What is spec of Up? */
 }
 
 void test_Down_not_entering_chewing()
@@ -336,8 +336,8 @@ void test_ShiftLeft_not_entering_chewing()
 
 void test_ShiftLeft_add_userphrase()
 {
-	static const char phrase[] = "測試";
-	static const char bopomofo[] = "ㄘㄜˋ ㄕˋ";
+	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
 	int cursor;
 	ChewingContext *ctx;
 
@@ -384,8 +384,8 @@ void test_ShiftRight_not_entering_chewing()
 
 void test_ShiftRight_add_userphrase()
 {
-	static const char phrase[] = "測試";
-	static const char bopomofo[] = "ㄘㄜˋ ㄕˋ";
+	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
 	int cursor;
 	ChewingContext *ctx;
 
@@ -436,7 +436,7 @@ void test_Tab_insert_breakpoint_between_word()
 
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
-	// inserts a breakpoint between 測 and 試
+	/* inserts a breakpoint between 測 and 試 */
 	type_keystoke_by_string( ctx, "<T>" );
 	chewing_interval_Enumerate( ctx );
 
@@ -481,7 +481,7 @@ void test_Tab_connect_word()
 
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
-	// connect 一 and 二
+	/* connect 一 and 二 */
 	type_keystoke_by_string( ctx, "<T>" );
 	chewing_interval_Enumerate( ctx );
 

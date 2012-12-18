@@ -45,10 +45,7 @@ void test_libchewing_issue_30()
 
 void test_libchewing_data_issue_1()
 {
-	const TestData DATA = {
-		.token = "e03y.3",
-		.expected = "趕走",
-	};
+	const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走*/ };
 	ChewingContext *ctx;
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
