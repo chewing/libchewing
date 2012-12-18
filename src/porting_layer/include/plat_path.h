@@ -34,7 +34,7 @@ int find_path_by_files(
 	char *output,
 	size_t output_len );
 
-#if !HAVE_ASPRINTF
+#ifdef HAVE_ASPRINTF
 int asprintf( char **strp, const char *fmt, ... );
 #endif
 

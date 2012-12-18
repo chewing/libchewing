@@ -33,7 +33,7 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-#if HAVE_ASPRINTF
+#ifdef HAVE_ASPRINTF
 #include <stdio.h>
 #else
 #include "plat_path.h"

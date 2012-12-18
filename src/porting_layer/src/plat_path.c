@@ -13,7 +13,7 @@
 #endif
 #include "plat_path.h"
 
-#if !HAVE_ASPRINTF
+#ifndef HAVE_ASPRINTF
 #include <stdarg.h>
 #endif
 #include <assert.h>
@@ -72,7 +72,7 @@ int get_search_path( char * path, size_t path_len )
 #error please implement get_search_path
 #endif
 
-#if !HAVE_STRTOK_R
+#ifndef HAVE_STRTOK_R
 char * strtok_r (char *s, const char *delim, char **save_ptr)
 {
 	char *token;
@@ -102,7 +102,7 @@ char * strtok_r (char *s, const char *delim, char **save_ptr)
 }
 #endif
 
-#if !HAVE_ASPRINTF
+#ifndef HAVE_ASPRINTF
 int asprintf( char **strp, const char *fmt, ... )
 {
 	char *buf;
