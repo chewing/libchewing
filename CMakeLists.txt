@@ -41,8 +41,11 @@ endif()
 # automake compatibility
 add_definitions(-DHAVE_CONFIG_H=1)
 
-# binary data
-add_definitions(-DUSE_BINARY_DATA=1)
+# binary data representation
+option(USE_BINARY_DATA "Use binary representation for internal data manipulation" true)
+if (USE_BINARY_DATA)
+	add_definitions(-DUSE_BINARY_DATA=1)
+endif()
 
 # Feature probe
 include(CheckTypeSize)
