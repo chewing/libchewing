@@ -38,8 +38,11 @@ if(${FVISIBILITY_HIDDEN})
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 endif()
 
-# FIXME: Need to provide an option for USE_BINARY_DATA?
-add_definitions(-DHAVE_CONFIG_H=1 -DUSE_BINARY_DATA=1)
+# automake compatibility
+add_definitions(-DHAVE_CONFIG_H=1)
+
+# binary data
+add_definitions(-DUSE_BINARY_DATA=1)
 
 # Feature probe
 include(CheckTypeSize)
