@@ -94,17 +94,17 @@ static const char *key_str[ MAX_KBTYPE ] = {
 uint16_t UintFromPhone( const char *zhuin )
 {
 	char *iter, *pos;
-	char buf[ 7 ];
+	char buf[ MAX_UTF8_SIZE + 1 ];
 	int len, result = 0;
 	int i;
 
 	iter = (char*) zhuin;
 	/* Here the constant 4 is the number
 	   of zhuin_tab and zhuin_tab_num */
-	for ( i = 0; i < 4; i++ ) {
+	for ( i = 0; i < ZUIN_SIZE; i++ ) {
 		/* Should be less than 4, how do we handle this? */
 		len = ueBytesFromChar( iter[ 0 ] );
-		strncpy( buf, iter, len );
+		strncpy( buf, iter, sizeof( buf ) );
 		buf[len] = '\0';
 		if (! buf[0])
 			continue;
