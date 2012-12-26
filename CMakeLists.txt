@@ -11,23 +11,23 @@ if(ENABLE_DEBUG)
 endif()
 
 if(${UNIX})
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2 -Wall -fPIC")
+	set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
 	add_definitions(-DUNDER_POSIX -DPIC)
 endif()
 
 if(${CMAKE_COMPILER_IS_GNUCC})
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+	set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
 	add_definitions(-D_GNU_SOURCE)
 	option(ENABLE_GCOV "Coverage support" false)
 	if(ENABLE_GCOV)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -coverage")
+		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
 	endif()
 elseif(${MSVC})
 	# /wd4819
 	# Without BOM, Visual Studio does not treat source file as UTF-8
 	# encoding, thus it will complain about invalid character. Use
 	# /wd4819 can suppress this warning.
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4819")
+	set(CMAKE_C_FLAGS "/wd4819 ${CMAKE_C_FLAGS}")
 	add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE)
 	add_definitions(/Dsnprintf=_snprintf /D__func__=__FUNCTION__)
 endif()
@@ -35,7 +35,7 @@ endif()
 include(CheckCCompilerFlag)
 check_c_compiler_flag(-fvisibility=hidden FVISIBILITY_HIDDEN)
 if(${FVISIBILITY_HIDDEN})
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+	set(CMAKE_C_FLAGS "-fvisibility=hidden ${CMAKE_C_FLAGS}")
 endif()
 
 # automake compatibility
