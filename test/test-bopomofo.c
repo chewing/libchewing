@@ -202,7 +202,7 @@ void test_Del_word()
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystoke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
-	ok_commit_buffer( ctx, "測試" );
+	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
