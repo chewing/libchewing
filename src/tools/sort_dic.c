@@ -74,12 +74,20 @@ void DataSetNum( long _index )
 {
 	char buf[ MAXLEN ], *p;
 	int i = 0;
+	int phone;
 
 	strcpy( buf, data[ _index ].str );
 	strtok( buf, " \n\t" );
 	data[ _index ].freq = atoi( strtok( NULL, " \n\t" ) );
-	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) ) 
-		data[ _index ].num[ i++ ] = UintFromPhone( p );
+	for ( p = strtok( NULL, " \n\t" ); p; p = strtok( NULL, " \n\t" ) )  {
+		phone = UintFromPhone( p );
+		if ( phone == 0 ) {
+			fprintf( stderr, "Invalid bopomofo `%s' in `%s'\n",
+				p, data[ _index ].str );
+			exit( -1 );
+		}
+		data[ _index ].num[ i++ ] = phone;
+	}
 }
 
 void DataStripSpace( long _index )
