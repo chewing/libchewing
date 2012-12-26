@@ -44,7 +44,7 @@ int ueBytesFromChar( unsigned char b )
 	return utf8len_tab[ b ];
 }
 
-/* Return byets of a UTF-8 string until n position */
+/* Return bytes of a UTF-8 string until n position */
 int ueStrNBytes( const char *str, int n )
 {
 	int i = 0, len = 0;

@@ -89,30 +89,34 @@ static const char *key_str[ MAX_KBTYPE ] = {
 /* 
  * Read one zhuin string,
  *
- * return the number it means
+ * return the number it means. 0 means error.
  */
 uint16_t UintFromPhone( const char *zhuin )
 {
 	char *iter, *pos;
 	char buf[ MAX_UTF8_SIZE + 1 ];
 	int len, result = 0;
-	int i;
+	int zhuin_index = 0;
 
 	iter = (char*) zhuin;
-	/* Here the constant 4 is the number
-	   of zhuin_tab and zhuin_tab_num */
-	for ( i = 0; i < ZUIN_SIZE; i++ ) {
-		/* Should be less than 4, how do we handle this? */
-		len = ueBytesFromChar( iter[ 0 ] );
-		strncpy( buf, iter, sizeof( buf ) );
-		buf[len] = '\0';
-		if (! buf[0])
-			continue;
-		pos = strstr( zhuin_tab[ i ], buf );
-		if ( pos ) {
-			result |= (zhuin_tab_num[ i ] - ueStrLen( pos )) << shift[ i ];
-			iter += len;
+
+	while ( *iter ) {
+		len = ueStrNCpy( buf, iter, 1, STRNCPY_CLOSE );
+
+		for (; zhuin_index < ZUIN_SIZE; ++zhuin_index ) {
+			pos = strstr( zhuin_tab[ zhuin_index ], buf );
+			if ( pos ) {
+				break;
+			}
 		}
+
+		if ( zhuin_index >= ZUIN_SIZE ) {
+			return 0;
+		}
+
+		result |= (zhuin_tab_num[ zhuin_index ] - ueStrLen( pos )) << shift[ zhuin_index ];
+		++zhuin_index;
+		iter += len;
 	}
 	return result;
 }
