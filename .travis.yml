@@ -1,11 +1,22 @@
 language: c
+
 compiler:
  - gcc
  - clang
-script: ./autogen.sh && ./configure && make && make check
+
+env:
+  - BUILD=autotools
+  - BUILD=cmake
+
+script:
+  - if [ $BUILD == "autotools" ]; then ./autogen.sh && ./configure && make && make check; fi
+  - if [ $BUILD == "cmake" ]; then cmake . && make && make test; fi
+
 before_install:
- - sudo apt-get update -qq
- - sudo apt-get install -qq texinfo
+  - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq texinfo cmake
+
 notifications:
  email:
   recipients:
