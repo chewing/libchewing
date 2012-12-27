@@ -1,8 +1,12 @@
 language: c
 compiler:
-  - gcc
-  - clang
+ - gcc
+ - clang
 script: ./autogen.sh && ./configure && make && make check
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq texinfo
+notifications:
+ email:
+  recipients:
+   - chewing-devel@googlegroups.com
