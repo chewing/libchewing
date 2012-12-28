@@ -1376,26 +1376,26 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
 		prefix, SYMBOL_TABLE_FILE );
 	if ( ret == -1 )
-		goto end;
+		goto error;
 
 	file = fopen( filename, "r" );
 	if ( !file )
-		goto end;
+		goto error;
 
 	line = ALC( char, LINE_LEN );
 	if ( !line )
-		goto end;
+		goto error;
 
 	entry = ALC( SymbolEntry* , MAX_SYMBOL_ENTRY );
 	if ( !entry )
-		goto end;
+		goto error;
 
 	while ( fgets( line, LINE_LEN, file ) &&
 		pgdata->static_data.n_symbol_entry < MAX_SYMBOL_ENTRY ) {
 
 		category_end = strpbrk( line, "=\r\n" );
 		if ( !category_end )
-			goto end;
+			goto error;
 
 		symbols = category_end + 1;
 		symbols_end = strpbrk( symbols, "\r\n" );
@@ -1406,7 +1406,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) +
 					sizeof( entry[0][0].symbols[0] ) * len);
 			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
-				goto end;
+				goto error;
 			entry[ pgdata->static_data.n_symbol_entry ]
 				->nSymbols = len;
 
@@ -1425,7 +1425,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 			entry[ pgdata->static_data.n_symbol_entry ] =
 				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) );
 			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
-				goto end;
+				goto error;
 
 			entry[ pgdata->static_data.n_symbol_entry ]
 				->nSymbols = 0;
@@ -1443,7 +1443,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 		pgdata->static_data.n_symbol_entry;
 	pgdata->static_data.symbol_table = ( SymbolEntry ** ) malloc( size );
 	if ( !pgdata->static_data.symbol_table )
-		goto end;
+		goto error;
 	memcpy( pgdata->static_data.symbol_table, entry, size );
 
 	ret = 0;
@@ -1453,6 +1453,12 @@ end:
 	fclose( file );
 	free ( filename );
 	return ret;
+
+error:
+	for ( i = 0; i < pgdata->static_data.n_symbol_entry; ++i ) {
+		free( entry[ i ] );
+	}
+	goto end;
 }
 
 void TerminateSymbolTable( ChewingData *pgdata )
