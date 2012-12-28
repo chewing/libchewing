@@ -224,7 +224,7 @@ add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
 # library
 add_library(chewing_obj OBJECT
 	${SRC_DIR}/chewingio.c
-	${SRC_DIR}/hanyupinyin.c
+	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/tree.c
 	${SRC_DIR}/userphrase.c
 	${SRC_DIR}/zuin.c

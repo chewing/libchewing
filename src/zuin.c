@@ -28,7 +28,7 @@
 #include "zuin-private.h"
 #include "char-private.h"
 #include "key2pho-private.h"
-#include "hanyupinyin-private.h"
+#include "pinyin-private.h"
 #include "private.h"
 
 /*

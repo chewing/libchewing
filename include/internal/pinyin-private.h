@@ -1,5 +1,5 @@
 /**
- * hanyupinyin-private.h 
+ * pinyin-private.h
  *
  * Copyright (c) 2008
  *      libchewing Core Team. See ChangeLog for details.
@@ -8,11 +8,11 @@
  * of this file.
  */
 
-/* @(#)hanyupinyin-private.h
+/* @(#)pinyin-private.h
  */
 
-#ifndef _CHEWING_HANYUPINYIN_PRIVATE_H
-#define _CHEWING_HANYUPINYIN_PRIVATE_H
+#ifndef _CHEWING_PINYIN_PRIVATE_H
+#define _CHEWING_PINYIN_PRIVATE_H
 
 #include "chewing-private.h"
 

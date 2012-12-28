@@ -33,7 +33,7 @@
 #include "char-private.h"
 #include "hash-private.h"
 #include "tree-private.h"
-#include "hanyupinyin-private.h"
+#include "pinyin-private.h"
 #include "private.h"
 #include "chewingio.h"
 #include "mod_aux.h"

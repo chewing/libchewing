@@ -1,5 +1,5 @@
 /**
- * hanyupinyin.c
+ * pinyin.c
  *
  * Copyright (c) 2005, 2006, 2008
  *	libchewing Core Team. See ChangeLog for details.
@@ -8,7 +8,7 @@
  * of this file.
  */
 
-/* @(#)hanyupinyin.c
+/* @(#)pinyin.c
  */
 
 #include <stdio.h>
@@ -17,7 +17,7 @@
 #include <stdlib.h>
 
 #include "global-private.h"
-#include "hanyupinyin-private.h"
+#include "pinyin-private.h"
 #include "hash-private.h"
 #include "private.h"
 
