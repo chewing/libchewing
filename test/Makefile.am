@@ -3,7 +3,7 @@ valgrind-check: testchewing test.txt
 	libtool --mode=execute valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
-		testchewing < test.txt
+		./testchewing < test.txt
 
 test.txt: default-test.txt
 	@if [ ! -f test.txt ]; then cp $(srcdir)/default-test.txt test.txt ; fi
