@@ -237,9 +237,13 @@ set_target_properties(chewing_obj PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
 
-add_library(chewing_shared SHARED $<TARGET_OBJECTS:chewing_obj>)
+if (NOT "${MSVC}")
+	add_library(chewing_shared SHARED $<TARGET_OBJECTS:chewing_obj>)
+	list(APPEND LIBS chewing_shared)
+endif()
+
 add_library(chewing_static STATIC $<TARGET_OBJECTS:chewing_obj>)
-set (LIBS chewing_shared chewing_static)
+list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing
