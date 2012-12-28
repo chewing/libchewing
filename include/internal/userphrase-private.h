@@ -11,7 +11,15 @@
 #ifndef _CHEWING_USERPHRASE_PRIVATE_H
 #define _CHEWING_USERPHRASE_PRIVATE_H
 
-#include "chewing-private.h"
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#elif defined HAVE_STDINT_H
+#  include <stdint.h>
+#endif
 
 #define FREQ_INIT_VALUE (1)
 #define SHORT_INCREASE_FREQ (10)
@@ -23,6 +31,10 @@
 #define USER_UPDATE_INSERT (1)
 #define USER_UPDATE_MODIFY (2)
 #define USER_UPDATE_IGNORE (8)
+
+/* Forward declaration */
+struct tag_ChewingData;
+typedef struct tag_ChewingData ChewingData;
 
 typedef struct tag_UserPhraseData {
 	uint16_t *phoneSeq;

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "chewing-private.h"
 #include "chewing-utf8-util.h"
 #include "chewing-definition.h"
 #include "userphrase-private.h"

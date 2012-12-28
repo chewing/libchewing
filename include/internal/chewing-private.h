@@ -186,7 +186,7 @@ typedef struct {
 
 struct tag_HASH_ITEM;
 
-typedef struct {
+typedef struct tag_ChewingData {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;

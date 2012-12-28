@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "chewing-private.h"
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
 #include "private.h"
