@@ -1,18 +1,23 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 * Improve the description of libchewing API
+  - Simplified examples to illustrate the usage are added
 * Revise libchewing API. Check the documentation for details
-* Reimplementation of unit test framework. No external 'check' required
+* Reimplementation of unit test framework. No external 'check' package
+  is required
 * Fix several phrase errors
+  - Add exceptional phrase as well
+* Improved developer and user guide
+* Introduce CMake based build system, which is convenient to MS-Windows
+  based environments.
 * Add --enable-gcov to enable gcov coverage
 * Fix possible strncat() overflow
+* Consistent checks for bopomofo sequence internally
 * Handle incomplete bopomofo with space key properly
-* Support building with mingw32 toolchain
 * Internal structure refactoring
 * Read hash path from CHEWING_PATH environment variable
 * Make libchewing thread-safe
 * Fix IM crash by changing default candidate per page to 10
-* Fix GNU Hurd build
 * Fix the detection of ncursesw
 * Fix the usage of autotools
 * Update and tune symbols
@@ -20,8 +25,11 @@ What's New in libchewing GIT
 * Fix several compilation warnings
 * Fix GCC visibility availability for Darwin specific PIC code
 * Fix hash table initialization and its memory leakage
+* Support building with mingw32 toolchain
+* Fix GNU Hurd build
 * Fix Microsoft VC build
 * Fix Windows 64-bit build
+* Fix mingw32/64 + WINE build
 * Successful stories:
  . GCIN supports experimental Chewing IM support since version 1.6.4
  . UCIMF supports Chewing IM
