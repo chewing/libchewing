@@ -440,7 +440,7 @@ void test_deprecated()
 {
 	ChewingContext *ctx;
 	int type;
-	ChewingConfigData configure;
+	ChewingConfigData configure = { 0 };
 
 	chewing_Init( 0, 0 );
 
