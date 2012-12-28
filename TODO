@@ -3,9 +3,6 @@ For developers, please add new entry for your plans.
 * Follow the idea from kcwu to adapt some routines of libtabe, and
    seek for better way to share resources.
   a) support same phrase in different phones.
-* Perform optimization on libchewing in the following aspects:
-    a-1) Follow kcwu's pack-chewing-dat.txt for compacting.
-  b) support memory-limited applications.
 * Support platform independent binary data.
   a) Support data versioning.
   b) Explicit data struct size.
