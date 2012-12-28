@@ -194,6 +194,13 @@ foreach(target ${ALL_TESTCASES})
 	add_test(${target} ${TEST_BIN_DIR}/${target})
 endforeach()
 
+find_program(VALGRIND valgrind)
+if(EXISTS ${VALGRIND})
+	foreach(target ${ALL_TESTCASES})
+		add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
+	endforeach()
+endif()
+
 foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
 endforeach()
