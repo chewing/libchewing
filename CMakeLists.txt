@@ -201,15 +201,27 @@ set(ALL_TESTTOOLS
 #		set(ALL_TESTTOOLS ${ALL_TESTTOOLS} gen_keystroke)
 #	endif()
 
+enable_testing()
+
+# test-memory-fail needs libdl and RTLD_NEXT to do fault injection.
+if (CMAKE_DL_LIBS)
+	set(CMAKE_REQUIRED_FLAGS -D_GNU_SOURCE)
+	include(CheckSymbolExists)
+	check_symbol_exists(RTLD_NEXT dlfcn.h RTLD_NEXT_EXISTS)
+	if (RTLD_NEXT_EXISTS)
+		list(APPEND ALL_TESTCASES test-memory-fail)
+		set(HAVE_TEST_MEMORY_FAIL true)
+	endif()
+endif()
+
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
-enable_testing()
 foreach(target ${ALL_TESTCASES})
 	add_test(${target} ${TEST_BIN_DIR}/${target})
 endforeach()
 
 find_program(VALGRIND valgrind)
-if(EXISTS ${VALGRIND})
+if(VALGRIND)
 	foreach(target ${ALL_TESTCASES})
 		add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
 	endforeach()
@@ -231,6 +243,9 @@ set_target_properties(${ALL_TESTS} PROPERTIES
 foreach(target ${ALL_TESTS})
 	target_link_libraries(${target} testhelper common)
 endforeach()
+if ("${HAVE_TEST_MEMORY_FAIL}")
+	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
+endif()
 
 # data
 add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
@@ -258,7 +273,7 @@ set_target_properties(chewing_obj PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
 
-if (NOT "${MSVC}")
+if (NOT MSVC)
 	add_library(chewing_shared SHARED $<TARGET_OBJECTS:chewing_obj>)
 	list(APPEND LIBS chewing_shared)
 endif()

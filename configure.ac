@@ -59,6 +59,12 @@ AC_LANG(C)
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strtok_r asprintf])
+AC_CHECK_DECLS([RTLD_NEXT], [HAVE_DECL_RTLD_NEXT=yes], [HAVE_DECL_RTLD_NEXT=no], [
+        #define _GNU_SOURCE
+        #include <dlfcn.h>
+])
+AS_IF([test x$HAVE_DECL_RTLD_NEXT == xyes], [AC_SEARCH_LIBS([dlsym], [dl])])
+AM_CONDITIONAL([HAVE_TEST_MEMORY_FAIL], [test x$HAVE_DECL_RTLD_NEXT == xyes])
 
 # plat_mmap_posix
 AC_FUNC_MMAP
@@ -75,9 +81,8 @@ AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
 AM_CFLAGS="$CFLAGS -Wall"
-AS_IF([test x$ac_cv_func_asprintf == xyes],
+AS_IF([test x$ac_cv_func_asprintf == xyes -o x$HAVE_DECL_RTLD_NEXT == xyes],
       [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
-
 
 AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
