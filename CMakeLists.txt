@@ -10,19 +10,25 @@ if(ENABLE_DEBUG)
 	add_definitions(-DENABLE_DEBUG=1)
 endif()
 
-if(${UNIX})
+if(UNIX)
 	set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
 	add_definitions(-DUNDER_POSIX -DPIC)
 endif()
 
-if(${CMAKE_COMPILER_IS_GNUCC})
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
 	add_definitions(-D_GNU_SOURCE)
 	option(ENABLE_GCOV "Coverage support" false)
 	if(ENABLE_GCOV)
 		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
 	endif()
-elseif(${MSVC})
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	add_definitions(-D_GNU_SOURCE)
+	option(ENABLE_GCOV "Coverage support" false)
+	if(ENABLE_GCOV)
+		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
+	endif()
+elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	# /wd4819
 	# Without BOM, Visual Studio does not treat source file as UTF-8
 	# encoding, thus it will complain about invalid character. Use
