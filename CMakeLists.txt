@@ -141,9 +141,8 @@ if(${OUT_OF_SOURCE})
 endif()
 
 # tools
-set(ALL_TOOLS sort_word sort_dic maketree)
-add_executable(sort_word ${TOOLS_SRC_DIR}/sort_word.c)
-add_executable(sort_dic ${TOOLS_SRC_DIR}/sort_dic.c)
+set(ALL_TOOLS sort maketree)
+add_executable(sort ${TOOLS_SRC_DIR}/sort.c)
 add_executable(maketree ${TOOLS_SRC_DIR}/maketree.c)
 set_target_properties(${ALL_TOOLS} PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
@@ -160,8 +159,7 @@ add_custom_command(
 		${ALL_DATA}
 		${PROJECT_BINARY_DIR}/chewing-definition.h
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort_word ${DATA_SRC_DIR}/phone.cin
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort_dic ${DATA_SRC_DIR}/tsi.src
+	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
 	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/maketree ${DATA_BIN_DIR}/phoneid.dic
 	COMMAND ${CMAKE_COMMAND} -E copy ${DATA_BIN_DIR}/chewing-definition.h ${PROJECT_BINARY_DIR}/chewing-definition.h
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${DATA_BIN_DIR}/chewing-definition.h ${DATA_BIN_DIR}/phoneid.dic
