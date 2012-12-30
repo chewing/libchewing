@@ -32,7 +32,8 @@ What's New in libchewing GIT
 * Fix Windows 64-bit build
 * Fix mingw32/64 + WINE build
 * Successful stories:
- . GCIN supports experimental Chewing IM support since version 1.6.4
+ . GCIN supports experimental Chewing IM since version 1.6.4
+ . HIME supports Chewing IM
  . UCIMF supports Chewing IM
  . Fcitx supports Chewing IM
  . mozc (IM framework maintained by Google) provides Chewing support
