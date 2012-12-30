@@ -1,16 +1,21 @@
 language: c
 
-compiler:
- - gcc
- - clang
+compiler: gcc
+env: BUILD=autotools
 
-env:
-  - BUILD=autotools
-  - BUILD=cmake
+matrix:
+  include:
+    - compiler: gcc
+      env: BUILD=autotools USE_BINARY_DATA=no
+    - compiler: clang
+      env: BUILD=autotools
+    - compiler: gcc
+      env: BUILD=cmake
 
 script:
-  - if [ $BUILD == "autotools" ]; then ./autogen.sh && ./configure && make && make check; fi
-  - if [ $BUILD == "cmake" ]; then cmake . && make && make test; fi
+  - if [ x$BUILD == xautotools -a x$USE_BINARY_DATA != xno ]; then ./autogen.sh && ./configure && make && make check; fi
+  - if [ x$BUILD == xautotools -a x$USE_BINARY_DATA == xno ]; then ./autogen.sh && ./configure --disable-binary-data && make && make check; fi
+  - if [ x$BUILD == xcmake ]; then cmake . && make && make test; fi
 
 before_install:
   - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9
