@@ -31,23 +31,19 @@ chewing_data_DATA = \
 	$(datas) \
 	$(NULL)
 
-all: checkdata_stamp $(datas)
+all: $(datas)
 
 $(datas): gendata_stamp
-
-checkdata_stamp: phone.cin tsi.src
-	@echo "timestamp" > $@
 
 LOCALE_RESET= \
 export LC_ALL=C
 
-gendata_stamp:
+gendata_stamp: phone.cin tsi.src
 	-if test -f $(generated_header); then \
 		echo "chewing-definition.h exists."; \
-	else \
-		$(MAKE) gendata; \
 	fi
-	@echo "timestamp" > $@
+	$(MAKE) gendata && \
+	touch "timestamp" > $@
 
 gendata:
 	$(tooldir)/sort_word$(EXEEXT) $(top_srcdir)/data/phone.cin
@@ -56,4 +52,4 @@ gendata:
 	-rm -f phoneid.dic
 	-mv -f chewing-definition.h $(top_builddir)/src/
 
-CLEANFILES = $(datas) gendata_stamp checkdata_stamp $(generated_header)
+CLEANFILES = $(datas) gendata_stamp $(generated_header)
