@@ -50,6 +50,6 @@ gendata:
 	$(shell $(LOCALE_RESET) ; $(tooldir)/sort_dic$(EXEEXT) $(top_srcdir)/data/tsi.src)
 	$(tooldir)/maketree$(EXEEXT)
 	-rm -f phoneid.dic
-	-mv -f chewing-definition.h $(top_builddir)/src/
+	-mv -f chewing-definition.h $(generated_header)
 
 CLEANFILES = $(datas) gendata_stamp $(generated_header)
