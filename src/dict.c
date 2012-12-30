@@ -102,16 +102,16 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	int len;
 	int i;
 
-	pgdata->dict_begin = ALC( int, PHONE_PHRASE_NUM + 1 );
-	if ( !pgdata->dict_begin )
+	pgdata->static_data.dict_begin = ALC( int, PHONE_PHRASE_NUM + 1 );
+	if ( !pgdata->static_data.dict_begin )
 		return -1;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, DICT_FILE );
 	if ( len + 1 > sizeof( filename ) )
 		return -1;
 
-	pgdata->dictfile = fopen( filename, "r" );
-	if ( !pgdata->dictfile )
+	pgdata->static_data.dictfile = fopen( filename, "r" );
+	if ( !pgdata->static_data.dictfile )
 		return -1;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
@@ -125,7 +125,7 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	i = 0;
 	/* FIXME: check if begin is big enough to store all data. */
 	while ( !feof( indexfile ) )
-		fscanf( indexfile, "%d", &pgdata->dict_begin[ i++ ] );
+		fscanf( indexfile, "%d", &pgdata->static_data.dict_begin[ i++ ] );
 	fclose( indexfile );
 
 	return 0;
@@ -168,7 +168,7 @@ int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id )
 int GetPhraseNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
 #ifndef USE_BINARY_DATA
-	if ( ftell( pgdata->dictfile ) >= pgdata->dict_end_pos )
+	if ( ftell( pgdata->static_data.dictfile ) >= pgdata->static_data.dict_end_pos )
 		return 0;
 #else
 	if ( (unsigned char *)pgdata->static_data.dict_cur_pos >= (unsigned char *)pgdata->static_data.dict + pgdata->static_data.dict_end_pos )

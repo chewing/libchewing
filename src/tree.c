@@ -136,8 +136,8 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	if ( !infile )
 		return -1;
 
-	pgdata->tree = ALC( TreeType, TREE_SIZE );
-	if ( !pgdata->tree ) {
+	pgdata->static_data.tree = ALC( TreeType, TREE_SIZE );
+	if ( !pgdata->static_data.tree ) {
 		fclose( infile );
 		return -1;
 	}
@@ -145,10 +145,10 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	/* XXX: What happen if infile contains more than TREE_SIZE data? */
 	for ( i = 0; i < TREE_SIZE; i++ ) {
 		if ( fscanf( infile, "%hu%d%d%d",
-					&pgdata->tree[ i ].phone_id,
-					&pgdata->tree[ i ].phrase_id,
-					&pgdata->tree[ i ].child_begin,
-					&pgdata->tree[ i ].child_end ) != 4 )
+					&pgdata->static_data.tree[ i ].phone_id,
+					&pgdata->static_data.tree[ i ].phrase_id,
+					&pgdata->static_data.tree[ i ].child_begin,
+					&pgdata->static_data.tree[ i ].child_end ) != 4 )
 			break;
 	}
 
