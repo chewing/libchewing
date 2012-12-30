@@ -32,7 +32,7 @@
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
-#define MAX_PHRASE_LEN 10
+#define MAX_PHRASE_LEN 11
 #define MAX_PHONE_SEQ_LEN 50
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
