@@ -46,7 +46,7 @@
 typedef struct {
 	char str[ MAXLEN ];
 	int freq;
-	uint16_t num[ MAXZUIN ];
+	uint16_t num[ MAXZUIN + 1 ];
 } RECORD;
 
 RECORD data[ DATA_LEN ];
