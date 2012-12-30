@@ -3,6 +3,7 @@ What's New in libchewing GIT
 * Improve the description of libchewing API
   - Simplified examples to illustrate the usage are added
 * Revise libchewing API. Check the documentation for details
+* Support THL (Taiwan Huayu Luomapinyin) and MPS2 Pinyin keyboard layout
 * Reimplementation of unit test framework. No external 'check' package
   is required
 * Fix several phrase errors
