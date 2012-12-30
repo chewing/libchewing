@@ -5,7 +5,7 @@
  *      Lu-chuan Kung and Kang-pen Chen.
  *      All rights reserved.
  *
- * Copyright (c) 2004-2006, 2008-2010
+ * Copyright (c) 2004-2006, 2008-2010, 2012
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -105,7 +105,7 @@ static int IsDefPhoEndKey( int key, int kbtype )
 
 static int EndKeyProcess( ChewingData *pgdata, ZuinData *pZuin, int key, int searchTimes )
 {
-	uint16_t u16Pho;
+	uint16_t u16Pho, u16PhoAlt;
 	Word tempword;
 	int pho_inx;
 
@@ -126,19 +126,35 @@ static int EndKeyProcess( ChewingData *pgdata, ZuinData *pZuin, int key, int sea
 	pho_inx = PhoneInxFromKey( key, 3, pZuin->kbtype, searchTimes );
 	if ( pZuin->pho_inx[ 3 ] == 0 ) {
 		pZuin->pho_inx[ 3 ] = pho_inx;
+		pZuin->pho_inx_alt[ 3 ] = pho_inx;
 	}
 	else if ( key != ' ' ) {
 		pZuin->pho_inx[ 3 ] = pho_inx;
+		pZuin->pho_inx_alt[ 3 ] = pho_inx;
 		return ZUIN_NO_WORD;
 	}
+
 	u16Pho = UintFromPhoneInx( pZuin->pho_inx );
 	if ( GetCharFirst( pgdata, &tempword, u16Pho ) == 0 ) {
 		ZuinRemoveAll( pZuin );
 		return ZUIN_NO_WORD;
 	}
-	
+
 	pZuin->phone = u16Pho;
+
+	if ( pZuin->pho_inx_alt[ 0 ] == 0 &&
+	     pZuin->pho_inx_alt[ 1 ] == 0 &&
+	     pZuin->pho_inx_alt[ 2 ] == 0 ) {
+		/* no alternative phone, copy from default as alt */
+		pZuin->phoneAlt = u16Pho;
+	}
+	else {
+		u16PhoAlt = UintFromPhoneInx( pZuin->pho_inx_alt );
+		pZuin->phoneAlt = u16PhoAlt;
+	}
+
 	memset( pZuin->pho_inx, 0, sizeof( pZuin->pho_inx ) );
+	memset( pZuin->pho_inx_alt, 0, sizeof( pZuin->pho_inx_alt ) );
 	return ZUIN_COMMIT;
 }
 
@@ -158,7 +174,7 @@ static int DefPhoInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 	else {
 		pZuin->pho_inx[ 3 ] = 0;
 	}
-		
+
 	/* decide if the key is a phone */
 	for ( type = 0; type <= 3; type++ ) {
 		inx = PhoneInxFromKey( key, type, pZuin->kbtype, 1 );
@@ -170,7 +186,7 @@ static int DefPhoInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 	if ( type > 3 ) {
 		return ZUIN_KEY_ERROR;
 	}
-	
+
 	/* fill the key into the phone buffer */
 	pZuin->pho_inx[ type ] = inx;
 	return ZUIN_ABSORB;
@@ -570,9 +586,9 @@ static int IsSymbolKey(int key)
 static int PinYinInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 	/* FIXME: Remove pZuin parameter */
 {
-	int err = 0, status;
+	int err = 0;
 	unsigned int i;
-	char zuinKeySeq[ 5 ], buf[ 2 ];
+	char zuinKeySeq[ 5 ], zuinKeySeqAlt[ 5 ], buf[ 2 ];
 
 	DEBUG_CHECKPOINT();
 
@@ -581,18 +597,52 @@ static int PinYinInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 	}
 
 	if ( IsPinYinEndKey( key ) ) {
-		err = HanyuPinYinToZuin( pgdata, pZuin->pinYinData.keySeq, zuinKeySeq );
+		err = PinyinToZuin( pgdata, pZuin->pinYinData.keySeq,
+		                    zuinKeySeq, zuinKeySeqAlt );
 		if ( err ) {
 			pZuin->pinYinData.keySeq[ 0 ] = '\0';
 			return ZUIN_ABSORB;
 		}
 
 		DEBUG_OUT( "zuinKeySeq: %s\n", zuinKeySeq );
+		DEBUG_OUT( "zuinKeySeqAlt: %s\n", zuinKeySeqAlt );
+
 		for ( i = 0; i < strlen( zuinKeySeq ); i++ ) {
-			status = DefPhoInput( pgdata, pZuin, zuinKeySeq[ i ] );
-			if ( status != ZUIN_ABSORB )
+			int type = 0, inx = 0;
+			for ( type = 0; type <= 3; type++ ) {
+				inx = PhoneInxFromKey( zuinKeySeq[ i ],
+				                       type, pZuin->kbtype, 1 );
+				if ( inx )
+					break;
+			}
+
+			/* the key is NOT a phone */
+			if ( type > 3 ) {
 				return ZUIN_KEY_ERROR;
+			}
+
+			pZuin->pho_inx[ type ] = inx;
+
 		}
+
+		for ( i = 0; i < strlen( zuinKeySeqAlt ); i++ ) {
+			int type = 0, inx = 0;
+			for ( type = 0; type <= 3; type++ ) {
+				inx = PhoneInxFromKey( zuinKeySeqAlt[ i ],
+				                       type, pZuin->kbtype, 1 );
+				if ( inx )
+					break;
+			}
+
+			/* the key is NOT a phone */
+			if ( type > 3 ) {
+				return ZUIN_KEY_ERROR;
+			}
+
+			pZuin->pho_inx_alt[ type ] = inx;
+
+		}
+
 		switch ( key ) {
 			case '1':
 				key = ' ';
@@ -630,6 +680,8 @@ int ZuinPhoInput( ChewingData *pgdata, ZuinData *pZuin, int key )
 			return DACHENCP26PhoInput( pgdata, pZuin, key );
 			break;
 		case KB_HANYU_PINYIN:
+		case KB_THL_PINYIN:
+		case KB_MPS2_PINYIN:
 			return PinYinInput( pgdata, pZuin, key );
 			break;
 		default:

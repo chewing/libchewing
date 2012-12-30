@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004-2006, 2008, 2010
+ * Copyright (c) 2004-2006, 2008, 2010, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -83,7 +83,10 @@ static const char *key_str[ MAX_KBTYPE ] = {
 	 "1'a;2,oq.ejpuk5yixfdbghm8ctw9rnv0lsz[7634",		/* Dvorak */
 	 "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",		/* Dvorak Hsu */
 	 "qqazwwsxedcrfvttgbyhnujmuikbiolmoplnpyerd",		/* DACHEN-CP26 */
-	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* Hanyu Pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* Luoma Pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* secondary Bopomofo Pinyin */
+
 } ;
 
 /* 

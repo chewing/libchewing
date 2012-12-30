@@ -27,8 +27,8 @@ struct keymap {
 };
 typedef struct keymap keymap;
 
-int HanyuPinYinToZuin( ChewingData *pgdata, char *pinyinKeySeq, char *zuinKeySeq );
-int InitHanyuPinYin( ChewingData *pgdata, const char * );
-void TerminateHanyuPinyin( ChewingData *pgdata );
+int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq, char *zuinKeySeq, char *zuinKeySeqAlt);
+int InitPinyin( ChewingData *pgdata, const char * );
+void TerminatePinyin( ChewingData *pgdata );
 
 #endif

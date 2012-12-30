@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004-2008, 2010, 2011
+ * Copyright (c) 2004-2008, 2010, 2011, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -58,7 +58,9 @@ char *kb_type_str[] = {
 	"KB_DVORAK",
 	"KB_DVORAK_HSU",
 	"KB_DACHEN_CP26",
-	"KB_HANYU_PINYIN"
+	"KB_HANYU_PINYIN",
+	"KB_THL_PINYIN",
+	"KB_MPS2_PINYIN"
 };
 
 const char * const CHAR_FILES[] = {
@@ -225,7 +227,7 @@ CHEWING_API ChewingContext *chewing_new()
 		search_path, PINYIN_FILES, path, sizeof( path ) );
 	if ( ret )
 		goto error;
-	ret = InitHanyuPinYin( ctx->data, path );
+	ret = InitPinyin( ctx->data, path );
 	if ( !ret )
 		goto error;
 
@@ -330,7 +332,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 {
 	if ( ctx ) {
 		if ( ctx->data ) {
-			TerminateHanyuPinyin( ctx->data );
+			TerminatePinyin( ctx->data );
 			TerminateEasySymbolTable( ctx->data );
 			TerminateSymbolTable( ctx->data );
 			TerminateHash( ctx->data );
@@ -1163,7 +1165,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					keystrokeRtn = KEYSTROKE_ABSORB;
 					break;
 				case ZUIN_COMMIT:
-					AddChi( pgdata->zuinData.phone, pgdata );
+					AddChi( pgdata->zuinData.phone, pgdata->zuinData.phoneAlt, pgdata );
 					break;
 				case ZUIN_NO_WORD:
 					keystrokeRtn = KEYSTROKE_BELL | KEYSTROKE_ABSORB;

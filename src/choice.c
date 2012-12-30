@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004-2008, 2010, 2011
+ * Copyright (c) 2004-2008, 2010, 2011, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -193,6 +193,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	AvailInfo *pai = &( pgdata->availInfo );
 	uint16_t *phoneSeq = pgdata->phoneSeq;
+	uint16_t *phoneSeqAlt = pgdata->phoneSeqAlt;
 	int cursor = PhoneSeqCursor( pgdata );
 	int candPerPage = pgdata->config.candPerPage;
 
@@ -206,7 +207,12 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 	/* secondly, read tree phrase */
 	if ( len == 1 ) { /* single character */
-		ChoiceInfoAppendChi( pgdata, pci, phoneSeq[cursor] );
+		ChoiceInfoAppendChi( pgdata, pci, phoneSeq[ cursor ] );
+
+		if ( phoneSeq[ cursor ] != phoneSeqAlt[ cursor ] ) {
+			ChoiceInfoAppendChi( pgdata, pci, phoneSeqAlt[ cursor ] );
+		}
+
 		if ( pgdata->zuinData.kbtype == KB_HSU ||
 		     pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
 			switch ( phoneSeq[ cursor ] ) {

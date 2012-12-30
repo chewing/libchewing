@@ -29,6 +29,8 @@ static char *KEYBOARD_STRING[] = {
 	"KB_DVORAK_HSU",
 	"KB_DACHEN_CP26",
 	"KB_HANYU_PINYIN",
+	"KB_THL_PINYIN",
+	"KB_MPS2_PINYIN",
 };
 
 static const int KEYBOARD_DEFAULT_TYPE = 0;

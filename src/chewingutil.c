@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2008, 2010, 2011
+ * Copyright (c) 2004, 2005, 2006, 2008, 2010, 2011, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -681,7 +681,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	}
 }
 
-int AddChi( uint16_t phone, ChewingData *pgdata )
+int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 {
 	int i;
 	int cursor = PhoneSeqCursor( pgdata );
@@ -710,6 +710,11 @@ int AddChi( uint16_t phone, ChewingData *pgdata )
 		&( pgdata->phoneSeq[ cursor ] ) ,
 		sizeof( uint16_t ) * ( pgdata->nPhoneSeq - cursor ) );
 	pgdata->phoneSeq[ cursor ] = phone;
+	memmove(
+		&( pgdata->phoneSeqAlt[ cursor + 1 ] ),
+		&( pgdata->phoneSeqAlt[ cursor ] ) ,
+		sizeof( uint16_t ) * ( pgdata->nPhoneSeq - cursor ) );
+	pgdata->phoneSeqAlt[ cursor ] = phoneAlt;
 	pgdata->nPhoneSeq ++;
 
 	/* add to chiSymbolBuf */
