@@ -2,7 +2,7 @@
 
 AC_PREREQ([2.67])
 
-AC_INIT([libchewing],[0.3.3],[chewing-devel@googlegroups.com])
+AC_INIT([libchewing],[0.3.4],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
