@@ -3,8 +3,14 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = src/tools data src test doc
 
+CMAKE_FILES = \
+	CMakeLists.txt \
+	cmake_config.h.in \
+	include/cmake_config.h.in
+
 EXTRA_DIST = \
 	autogen.sh \
+	$(CMAKE_FILES) \
 	$(NULL)
 
 pkgconfigdir = $(libdir)/pkgconfig

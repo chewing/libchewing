@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
-set(LIBCHEWING_VERSION 0.3.3)
+set(LIBCHEWING_VERSION 0.3.4)
 
 string(COMPARE NOTEQUAL ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} OUT_OF_SOURCE)
 
