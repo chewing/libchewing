@@ -5,8 +5,8 @@ SUBDIRS = src/tools data src test doc
 
 CMAKE_FILES = \
 	CMakeLists.txt \
-	cmake_config.h.in \
-	include/cmake_config.h.in
+	include/cmake_config.h.in \
+	$(NULL)
 
 EXTRA_DIST = \
 	autogen.sh \
