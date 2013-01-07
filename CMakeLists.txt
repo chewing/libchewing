@@ -150,16 +150,13 @@ endif()
 
 # tools
 set(ALL_TOOLS sort maketree)
-add_executable(sort ${TOOLS_SRC_DIR}/sort.c)
+add_executable(sort ${TOOLS_SRC_DIR}/sort.c $<TARGET_OBJECTS:common>)
 add_executable(maketree ${TOOLS_SRC_DIR}/maketree.c)
 set_target_properties(${ALL_TOOLS} PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
 		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
 		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TOOLS_BIN_DIR}
 )
-foreach(target ${ALL_TOOLS})
-	target_link_libraries(${target} common)
-endforeach()
 
 # tools command
 add_custom_command(
@@ -233,7 +230,11 @@ foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
 endforeach()
 
-add_library(testhelper STATIC ${TEST_SRC_DIR}/testhelper.c $<TARGET_OBJECTS:chewing_obj>)
+add_library(testhelper STATIC
+	${TEST_SRC_DIR}/testhelper.c
+	$<TARGET_OBJECTS:chewing>
+	$<TARGET_OBJECTS:common>
+)
 
 set_target_properties(${ALL_TESTS} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
@@ -243,7 +244,7 @@ set_target_properties(${ALL_TESTS} PROPERTIES
 		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
 )
 foreach(target ${ALL_TESTS})
-	target_link_libraries(${target} testhelper common)
+	target_link_libraries(${target} testhelper)
 endforeach()
 if ("${HAVE_TEST_MEMORY_FAIL}")
 	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
@@ -253,7 +254,7 @@ endif()
 add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
 
 # library
-add_library(chewing_obj OBJECT
+add_library(chewing OBJECT
 	${SRC_DIR}/chewingio.c
 	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/tree.c
@@ -270,17 +271,23 @@ add_library(chewing_obj OBJECT
 	${SRC_DIR}/mod_aux.c
 )
 add_custom_target(chewing-definition DEPENDS ${PROJECT_BINARY_DIR}/chewing-definition.h)
-add_dependencies(chewing_obj chewing-definition)
-set_target_properties(chewing_obj PROPERTIES
+add_dependencies(chewing chewing-definition)
+set_target_properties(chewing PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
 
 if (NOT MSVC)
-	add_library(chewing_shared SHARED $<TARGET_OBJECTS:chewing_obj>)
+	add_library(chewing_shared SHARED
+		$<TARGET_OBJECTS:chewing_obj>
+		$<TARGET_OBJECTS:common>
+	)
 	list(APPEND LIBS chewing_shared)
 endif()
 
-add_library(chewing_static STATIC $<TARGET_OBJECTS:chewing_obj>)
+add_library(chewing_static STATIC
+	$<TARGET_OBJECTS:chewing>
+	$<TARGET_OBJECTS:common>
+)
 list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
@@ -288,11 +295,8 @@ set_target_properties(${LIBS} PROPERTIES
 	SOVERSION 3
 	VERSION 3.0.1
 )
-foreach(target ${LIBS})
-	target_link_libraries(${target} common)
-endforeach()
 
-add_library(common STATIC
+add_library(common OBJECT
 	${SRC_DIR}/common/key2pho.c
 	${SRC_DIR}/common/chewing-utf8-util.c
 )
