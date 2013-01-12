@@ -52,15 +52,15 @@ int get_search_path( char * path, size_t path_len )
 int get_search_path( char * path, size_t path_len )
 {
 	char *chewing_path;
-	char *appdata;
+	char *windir;
 
 	chewing_path = getenv( "CHEWING_PATH" );
 	if ( chewing_path ) {
 		strncpy( path, chewing_path, path_len );
 	} else {
-		appdata = getenv( "APPDATA" );
-		if ( appdata ) {
-			snprintf( path, path_len, "%s", appdata );
+		windir = getenv( "WINDIR" );
+		if ( windir ) {
+			snprintf( path, path_len, "%s\\%s", windir, "chewing" );
 		} else {
 			return -1;
 		}
