@@ -257,20 +257,39 @@ add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
 
 # library
 add_library(chewing OBJECT
+	${ALL_INC}
+	${INC_DIR}/internal/char-private.h
+	${INC_DIR}/internal/chewing-private.h
+	${INC_DIR}/internal/chewingutil.h
+	${INC_DIR}/internal/choice-private.h
+	${INC_DIR}/internal/dict-private.h
+	${INC_DIR}/internal/global-private.h
+	${INC_DIR}/internal/hash-private.h
+	${INC_DIR}/internal/pinyin-private.h
+	${INC_DIR}/internal/tree-private.h
+	${INC_DIR}/internal/userphrase-private.h
+	${INC_DIR}/internal/zuin-private.h
+
+	${SRC_DIR}/char.c
 	${SRC_DIR}/chewingio.c
-	${SRC_DIR}/pinyin.c
-	${SRC_DIR}/tree.c
-	${SRC_DIR}/userphrase.c
-	${SRC_DIR}/zuin.c
 	${SRC_DIR}/chewingutil.c
 	${SRC_DIR}/choice.c
-	${SRC_DIR}/char.c
 	${SRC_DIR}/dict.c
+	${SRC_DIR}/hash.c
+	${SRC_DIR}/mod_aux.c
+	${SRC_DIR}/pinyin.c
+	${SRC_DIR}/porting_layer/include/plat_mmap.h
+	${SRC_DIR}/porting_layer/include/plat_path.h
+	${SRC_DIR}/porting_layer/include/plat_types.h
+	${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+	${SRC_DIR}/porting_layer/include/sys/plat_windows.h
 	${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
 	${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
 	${SRC_DIR}/porting_layer/src/plat_path.c
-	${SRC_DIR}/hash.c
-	${SRC_DIR}/mod_aux.c
+	${SRC_DIR}/private.h
+	${SRC_DIR}/tree.c
+	${SRC_DIR}/userphrase.c
+	${SRC_DIR}/zuin.c
 )
 add_custom_target(chewing-definition DEPENDS ${PROJECT_BINARY_DIR}/chewing-definition.h)
 add_dependencies(chewing chewing-definition)
@@ -299,8 +318,11 @@ set_target_properties(${LIBS} PROPERTIES
 )
 
 add_library(common OBJECT
-	${SRC_DIR}/common/key2pho.c
+	${INC_DIR}/internal/chewing-utf8-util.h
+	${INC_DIR}/internal/key2pho-private.h
+
 	${SRC_DIR}/common/chewing-utf8-util.c
+	${SRC_DIR}/common/key2pho.c
 )
 
 # install
