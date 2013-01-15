@@ -186,6 +186,8 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 	char str[ FIELD_SIZE + 1 ];
 
 	outfile = fopen( pgdata->static_data.hashfilename, "r+b" );
+	if ( !outfile )
+		return;
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
