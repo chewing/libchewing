@@ -32,7 +32,7 @@ extern "C" {
  * we are facing the impacts from various Chinese input method implementations
  * and the integration into existing framework or system designs.  At the
  * result, Chewing Input Method (abbreviated as "Chewing") attempts to be one
- * of the approachesto solve and ease the problems with the inclusion of base
+ * of the approaches to solve and ease the problems with the inclusion of base
  * classes, on the basis of cross-platform, and cross-operating-environment
  * derivative classes, which are built as the abstract backbone of intelligent
  * Chinese phonetic input method implementations.  From the perspectives,
