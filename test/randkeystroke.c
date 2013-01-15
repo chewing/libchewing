@@ -36,10 +36,6 @@ static char* other_keys[] = {
 
 #define n_nkeys (sizeof(normal_keys) / sizeof(normal_keys[0]))
 #define n_okeys (sizeof(other_keys) / sizeof(other_keys[0]))
-#define n_tab1 (sizeof(zhuin_tab[0]) / sizeof(zhuin_tab[0][0]))
-#define n_tab2 (sizeof(zhuin_tab[1]) / sizeof(zhuin_tab[1][0]))
-#define n_tab3 (sizeof(zhuin_tab[2]) / sizeof(zhuin_tab[2][0]))
-#define n_tab4 (sizeof(zhuin_tab[3]) / sizeof(zhuin_tab[3][0]))
 
 void usage()
 {
@@ -55,6 +51,10 @@ int main( int argc, char *argv[] )
 	int nk = 100;
 	int total_random = 0;
 	int i, n;
+	int n_tab1 = strlen(zhuin_tab[0]);
+	int n_tab2 = strlen(zhuin_tab[1]);
+	int n_tab3 = strlen(zhuin_tab[2]);
+	int n_tab4 = strlen(zhuin_tab[3]);
 
 	srand( time( NULL ) );
 
