@@ -299,7 +299,7 @@ set_target_properties(chewing PROPERTIES
 
 if (NOT MSVC)
 	add_library(chewing_shared SHARED
-		$<TARGET_OBJECTS:chewing_obj>
+		$<TARGET_OBJECTS:chewing>
 		$<TARGET_OBJECTS:common>
 	)
 	list(APPEND LIBS chewing_shared)
