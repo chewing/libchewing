@@ -20,6 +20,22 @@
 #include "hash-private.h"
 #include "testhelper.h"
 
+void test_libchewing_googlecode_issue_472()
+{
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_autoShiftCur( ctx, 1 );
+
+	type_keystoke_by_string( ctx, "<T>|&Wt<H>mrJY)G<C2>OqJ<H><H>Yl<R>p0<EE>QE[^<C1>k" );
+
+	chewing_Reset( ctx );
+	type_keystoke_by_string( ctx, "+F<C9>hQ$UIICMr!X8/9<C3>(N<T>yU2!-LUI<D>`CS<D>jShm9SF}<EN>[`QYu<C8>k" );
+
+	chewing_delete( ctx );
+}
+
 void test_libchewing_issue_30()
 {
 	ChewingContext *ctx;
@@ -68,6 +84,7 @@ int main()
 
 	test_libchewing_data_issue_1();
 	test_libchewing_issue_30();
+	test_libchewing_googlecode_issue_472();
 
 	return exit_status();
 }
