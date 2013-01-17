@@ -162,19 +162,20 @@ static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t phone )
 {
 	Word tempWord;
-	GetCharFirst( pgdata, &tempWord, phone );
-	do {
-		if ( ChoiceTheSame( pci, tempWord.word,
-		                    ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) ) )
-			continue;
-		memcpy( 
-			pci->totalChoiceStr[ pci->nTotalChoice ],
-			tempWord.word, ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) );
-		assert( pci->nTotalChoice <= MAX_CHOICE );
-		pci->totalChoiceStr[ pci->nTotalChoice ]
-		                   [ ueBytesFromChar( tempWord.word[ 0 ] ) ] = '\0';
-		pci->nTotalChoice++;
-	} while ( GetCharNext( pgdata, &tempWord ) );
+	if ( GetCharFirst( pgdata, &tempWord, phone ) ) {
+		do {
+			if ( ChoiceTheSame( pci, tempWord.word,
+					    ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) ) )
+				continue;
+			memcpy(
+				pci->totalChoiceStr[ pci->nTotalChoice ],
+				tempWord.word, ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) );
+			assert( pci->nTotalChoice <= MAX_CHOICE );
+			pci->totalChoiceStr[ pci->nTotalChoice ]
+					   [ ueBytesFromChar( tempWord.word[ 0 ] ) ] = '\0';
+			pci->nTotalChoice++;
+		} while ( GetCharNext( pgdata, &tempWord ) );
+	}
 }
 
 /** @brief Loading all possible phrases of certain length.
