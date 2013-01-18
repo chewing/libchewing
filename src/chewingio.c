@@ -522,6 +522,7 @@ static void CheckAndResetRange( ChewingData *pgdata )
 
 static int DoSelect( ChewingData *pgdata, int num )
 {
+	assert( pgdata->choiceInfo.pageNo >= 0 );
 	if ( num >= 0 ) {
 		num += pgdata->choiceInfo.pageNo * pgdata->choiceInfo.nChoicePerPage;
 		/* Note: if num is larger than the total, there will be big troubles. */
@@ -810,6 +811,7 @@ CHEWING_API int chewing_handle_Left( ChewingContext *ctx )
 	}
 
 	if ( pgdata->bSelect ) {
+		assert( pgdata->choiceInfo.nPage > 0 );
 		if ( pgdata->choiceInfo.pageNo > 0 )
 			pgdata->choiceInfo.pageNo--;
 		else

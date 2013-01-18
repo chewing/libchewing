@@ -162,6 +162,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 	pai->nAvail = 1;
 	pai->currentAvail = 0;
 	pci->nChoicePerPage = candPerPage;
+	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
 	pci->isSymbol = 1;
@@ -395,6 +396,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		pai->nAvail = 1;
 		pai->currentAvail = 0;
 		pci->nChoicePerPage = pgdata->config.candPerPage;
+		assert( pci->nTotalChoice > 0 );
 		pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 		pci->pageNo = 0;
 		pci->isSymbol = 2;
@@ -1345,6 +1347,7 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	}
 
 	pci->nChoicePerPage = pgdata->config.candPerPage;
+	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
 	pci->isSymbol = 3;
