@@ -22,16 +22,22 @@
 
 void test_libchewing_googlecode_issue_472()
 {
+	/* FIXME: Add const cause gcc warning */
+	static char *INPUT[] = {
+		"<T>|&Wt<H>mrJY)G<C2>OqJ<H><H>Yl<R>p0<EE>QE[^<C1>k",
+		"+F<C9>hQ$UIICMr!X8/9<C3>(N<T>yU2!-LUI<D>`CS<D>jShm9SF}<EN>[`QYu<C8>k",
+	};
+	int i;
 	ChewingContext *ctx;
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
 
-	type_keystoke_by_string( ctx, "<T>|&Wt<H>mrJY)G<C2>OqJ<H><H>Yl<R>p0<EE>QE[^<C1>k" );
-
-	chewing_Reset( ctx );
-	type_keystoke_by_string( ctx, "+F<C9>hQ$UIICMr!X8/9<C3>(N<T>yU2!-LUI<D>`CS<D>jShm9SF}<EN>[`QYu<C8>k" );
+	for (i = 0; i < ARRAY_SIZE(INPUT); ++i) {
+		chewing_Reset( ctx );
+		type_keystoke_by_string( ctx, INPUT[i] );
+	}
 
 	chewing_delete( ctx );
 }
