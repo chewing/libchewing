@@ -3,8 +3,6 @@ project(libchewing)
 
 set(LIBCHEWING_VERSION 0.3.4)
 
-string(COMPARE NOTEQUAL ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} OUT_OF_SOURCE)
-
 option(ENABLE_DEBUG "Debug support" false)
 if(ENABLE_DEBUG)
 	add_definitions(-DENABLE_DEBUG=1)
@@ -101,12 +99,6 @@ set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/lib/libchewing)
 set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 
-set(ALL_STATIC_DATA
-	${DATA_BIN_DIR}/pinyin.tab
-	${DATA_BIN_DIR}/swkb.dat
-	${DATA_BIN_DIR}/symbols.dat
-)
-
 set(ALL_DATA
 	${DATA_BIN_DIR}/dict.dat
 	${DATA_BIN_DIR}/fonetree.dat
@@ -133,20 +125,14 @@ set(ALL_INC
 	${INC_DIR}/mod_aux.h
 )
 
-# out of source
-if(${OUT_OF_SOURCE})
-	set(TABLE pinyin.tab swkb.dat symbols.dat)
-	foreach(target ${TABLE})
-		add_custom_command(
-			OUTPUT
-				${DATA_BIN_DIR}/${target}
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-			COMMAND ${CMAKE_COMMAND} -E copy ${DATA_SRC_DIR}/${target} ${DATA_BIN_DIR}/${target}
-			DEPENDS
-				${DATA_SRC_DIR}/${target}
-		)
-	endforeach()
-endif()
+# static target
+# We need to copy static data to binary tree when using out of tree build.
+set(ALL_STATIC_DATA pinyin.tab swkb.dat symbols.dat)
+foreach(target ${ALL_STATIC_DATA})
+	add_custom_target(${target} ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/${target} ${DATA_BIN_DIR}/${target}
+	)
+endforeach()
 
 # tools
 set(ALL_TOOLS sort maketree)
@@ -250,7 +236,7 @@ if ("${HAVE_TEST_MEMORY_FAIL}")
 endif()
 
 # data
-add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
+add_custom_target(data ALL DEPENDS ${ALL_DATA})
 
 # library
 add_library(chewing_obj OBJECT
