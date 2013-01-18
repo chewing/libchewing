@@ -1118,7 +1118,11 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					}
 					CheckAndResetRange( pgdata );
 					pgdata->chiSymbolCursor--;
-					ChoiceFirstAvail( pgdata );
+					if ( ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
+						ChoiceFirstAvail( pgdata );
+					else
+						OpenSymbolChoice( pgdata );
+
 				}
 				goto End_Paging;
 			case 'k':
@@ -1129,7 +1133,10 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					}
 					CheckAndResetRange( pgdata );
 					pgdata->chiSymbolCursor++;
-					ChoiceFirstAvail( pgdata );
+					if ( ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
+						ChoiceFirstAvail( pgdata );
+					else
+						OpenSymbolChoice( pgdata );
 				}
 				goto End_Paging;
 			default:
