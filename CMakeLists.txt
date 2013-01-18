@@ -134,6 +134,13 @@ foreach(target ${ALL_STATIC_DATA})
 	)
 endforeach()
 
+set(ALL_STATIC_TEST stresstest.py)
+foreach(target ${ALL_STATIC_TEST})
+	add_custom_target(${target} ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TEST_SRC_DIR}/${target} ${TEST_BIN_DIR}/${target}
+	)
+endforeach()
+
 # tools
 set(ALL_TOOLS sort maketree)
 add_executable(sort ${TOOLS_SRC_DIR}/sort.c)
