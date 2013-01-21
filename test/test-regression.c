@@ -27,6 +27,8 @@ void test_libchewing_googlecode_issue_472()
 		"<T>|&Wt<H>mrJY)G<C2>OqJ<H><H>Yl<R>p0<EE>QE[^<C1>k",
 		"+F<C9>hQ$UIICMr!X8/9<C3>(N<T>yU2!-LUI<D>`CS<D>jShm9SF}<EN>[`QYu<C8>k",
 		"hk4`2<D>jk",
+		"hk4`j 0",
+		"hk4<C0>j 0",
 	};
 	int i;
 	ChewingContext *ctx;

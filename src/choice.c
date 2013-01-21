@@ -327,6 +327,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
+	pci->isSymbol = 0;
 }
 
 /*
