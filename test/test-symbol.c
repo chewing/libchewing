@@ -345,7 +345,7 @@ void test_type_symbol()
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	for (i = 0; i < ARRAY_SIZE(SYMBOL); ++i ) {
-		type_keystoke_by_string( ctx, SYMBOL[i].token );
+		type_keystroke_by_string( ctx, SYMBOL[i].token );
 		ok_preedit_buffer( ctx, "" );
 		ok_commit_buffer( ctx, SYMBOL[i].expected );
 	}

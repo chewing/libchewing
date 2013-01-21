@@ -108,7 +108,7 @@ void test_fullshape_input()
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
 
 	for ( i = 0; i < ARRAY_SIZE( FULLSHAPE_DATA ); ++i ) {
-		type_keystoke_by_string( ctx, FULLSHAPE_DATA[i].token );
+		type_keystroke_by_string( ctx, FULLSHAPE_DATA[i].token );
 		// fullshape symbol does not present in preedit buffer.
 		ok_preedit_buffer( ctx, "" );
 		ok_commit_buffer( ctx, FULLSHAPE_DATA[i].expected );

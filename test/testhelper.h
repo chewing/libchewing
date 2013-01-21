@@ -51,8 +51,8 @@
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
-#define ok_keystoke_rtn(ctx, rtn) \
-	internal_ok_keystoke_rtn(__FILE__, __LINE__, ctx, rtn)
+#define ok_keystroke_rtn(ctx, rtn) \
+	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
 	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
 
@@ -77,7 +77,7 @@ extern BufferType AUX_BUFFER;
 typedef int (*get_char_func) ( void *param );
 
 int get_keystroke( get_char_func get_char, void *param );
-void type_keystoke_by_string( ChewingContext *ctx, char* keystoke );
+void type_keystroke_by_string( ChewingContext *ctx, char* keystroke );
 int exit_status();
 
 // The internal_xxx function shall be used indirectly by macro in order to
@@ -88,7 +88,7 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len );
-void internal_ok_keystoke_rtn( const char *file, int line,
+void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn );
 int internal_has_userphrase( const char *file, int line,
 	ChewingContext *ctx, const char *bopomofo, const char *phrase );

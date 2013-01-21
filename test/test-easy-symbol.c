@@ -62,9 +62,9 @@ void test_type_easy_symbol()
 	chewing_set_easySymbolInput( ctx, 1 );
 
 	for ( i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
-		type_keystoke_by_string( ctx, EASY_SYMBOL[i].token );
+		type_keystroke_by_string( ctx, EASY_SYMBOL[i].token );
 		ok_preedit_buffer( ctx, EASY_SYMBOL[i].expected );
-		type_keystoke_by_string( ctx, "<E>" );
+		type_keystroke_by_string( ctx, "<E>" );
 		ok_commit_buffer( ctx, EASY_SYMBOL[i].expected );
 	}
 
@@ -82,16 +82,16 @@ void test_mode_change()
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, CHINESE.token );
+	type_keystroke_by_string( ctx, CHINESE.token );
 	ok_commit_buffer( ctx, CHINESE.expected );
 
 	chewing_set_easySymbolInput( ctx, 1 );
-	type_keystoke_by_string( ctx, EASY_SYMBOL[0].token );
-	type_keystoke_by_string( ctx, "<E>" );
+	type_keystroke_by_string( ctx, EASY_SYMBOL[0].token );
+	type_keystroke_by_string( ctx, "<E>" );
 	ok_commit_buffer( ctx, EASY_SYMBOL[0].expected );
 
 	chewing_set_easySymbolInput( ctx, 0 );
-	type_keystoke_by_string( ctx, CHINESE.token );
+	type_keystroke_by_string( ctx, CHINESE.token );
 	ok_commit_buffer( ctx, CHINESE.expected );
 
 	chewing_delete( ctx );

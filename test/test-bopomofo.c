@@ -49,15 +49,15 @@ void test_select_candidate_no_phrase_choice_rearward()
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "u6g;4x96<L><L><L>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "u6g;4x96<L><L><L>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 
-	type_keystoke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_1, ARRAY_SIZE( CAND_1 ) );
 
-	type_keystoke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
-	type_keystoke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
+	type_keystroke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
@@ -93,16 +93,16 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
-	type_keystoke_by_string( ctx, "u6g;4x96" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "u6g;4x96" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_preedit_buffer( ctx, CAND_1[0] );
 
-	type_keystoke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "<D>" ); /* ㄧˊㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_1, ARRAY_SIZE( CAND_1 ) );
 
-	type_keystoke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
+	type_keystroke_by_string( ctx, "<D>" ); /* ㄕㄤˋㄌㄞˊ */
 	ok_candidate( ctx, CAND_2, ARRAY_SIZE( CAND_2 ) );
 
-	type_keystoke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
+	type_keystroke_by_string( ctx, "<D><D>2<E>" ); /* select 移上來 */
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
@@ -121,8 +121,8 @@ void test_Esc_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<EE>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<EE>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -135,7 +135,7 @@ void test_Esc_in_select()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "`<EE>" );
+	type_keystroke_by_string( ctx, "`<EE>" );
 	ok_candidate( ctx, NULL, 0 );
 
 	chewing_delete( ctx );
@@ -149,7 +149,7 @@ void test_Esc_entering_zuin()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "hk<EE>" );
+	type_keystroke_by_string( ctx, "hk<EE>" );
 	ok_zuin_buffer( ctx, "" );
 
 	chewing_delete( ctx );
@@ -171,8 +171,8 @@ void test_Del_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<DC>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<DC>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -185,8 +185,8 @@ void test_Del_in_select()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "`<DC>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
+	type_keystroke_by_string( ctx, "`<DC>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -201,7 +201,7 @@ void test_Del_word()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
+	type_keystroke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
 	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
@@ -222,8 +222,8 @@ void test_Backspace_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<B>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<B>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -236,8 +236,8 @@ void test_Backspace_in_select()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "`<B>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
+	type_keystroke_by_string( ctx, "`<B>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -250,7 +250,7 @@ void test_Backspace_remove_bopomofo()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "hk<B>" );
+	type_keystroke_by_string( ctx, "hk<B>" );
 	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
 	chewing_delete( ctx );
@@ -266,7 +266,7 @@ void test_Backspace_word()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4u g4<L><B><E>" );
+	type_keystroke_by_string( ctx, "hk4u g4<L><B><E>" );
 	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
@@ -288,8 +288,8 @@ void test_Up_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<U>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<U>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -308,8 +308,8 @@ void test_Down_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<D>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<D>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -327,8 +327,8 @@ void test_ShiftLeft_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<SL>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<SL>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -351,7 +351,7 @@ void test_ShiftLeft_add_userphrase()
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
 		"`%s' shall not be in userphrase", phrase );
 
-	type_keystoke_by_string( ctx, "hk4g4<SL><SL><E>" );
+	type_keystroke_by_string( ctx, "hk4g4<SL><SL><E>" );
 	ok_preedit_buffer( ctx, phrase );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 0, "cursor position `%d' shall be 0", cursor );
@@ -375,8 +375,8 @@ void test_ShiftRight_not_entering_chewing()
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
-	type_keystoke_by_string( ctx, "<SR>" );
-	ok_keystoke_rtn( ctx, KEYSTROKE_IGNORE );
+	type_keystroke_by_string( ctx, "<SR>" );
+	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -399,7 +399,7 @@ void test_ShiftRight_add_userphrase()
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
 		"`%s' shall not be in userphrase", phrase );
 
-	type_keystoke_by_string( ctx, "hk4g4<L><L><SR><SR><E>" );
+	type_keystroke_by_string( ctx, "hk4g4<L><L><SR><SR><E>" );
 	ok_preedit_buffer( ctx, phrase );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 2, "cursor position `%d' shall be 2", cursor );
@@ -426,7 +426,7 @@ void test_Tab_insert_breakpoint_between_word()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4g4<L>" );
+	type_keystroke_by_string( ctx, "hk4g4<L>" );
 	chewing_interval_Enumerate( ctx );
 
 	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
@@ -437,7 +437,7 @@ void test_Tab_insert_breakpoint_between_word()
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
 	/* inserts a breakpoint between 測 and 試 */
-	type_keystoke_by_string( ctx, "<T>" );
+	type_keystroke_by_string( ctx, "<T>" );
 	chewing_interval_Enumerate( ctx );
 
 	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
@@ -466,7 +466,7 @@ void test_Tab_connect_word()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "u -4<L>" );
+	type_keystroke_by_string( ctx, "u -4<L>" );
 	chewing_interval_Enumerate( ctx );
 
 	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
@@ -482,7 +482,7 @@ void test_Tab_connect_word()
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
 	/* connect 一 and 二 */
-	type_keystoke_by_string( ctx, "<T>" );
+	type_keystroke_by_string( ctx, "<T>" );
 	chewing_interval_Enumerate( ctx );
 
 	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
@@ -506,7 +506,7 @@ void test_Tab_at_the_end()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4<T>g4" );
+	type_keystroke_by_string( ctx, "hk4<T>g4" );
 	chewing_interval_Enumerate( ctx );
 
 	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
@@ -535,7 +535,7 @@ void test_Capslock()
 
 	ctx = chewing_new();
 
-	type_keystoke_by_string( ctx, "<CB>" );
+	type_keystroke_by_string( ctx, "<CB>" );
 	ok( chewing_get_ChiEngMode( ctx ) == SYMBOL_MODE,
 		"mode shall change to SYMBOL_MODE" );
 
@@ -553,11 +553,11 @@ void test_Home()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4g4" );
+	type_keystroke_by_string( ctx, "hk4g4" );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
-	type_keystoke_by_string( ctx, "<H>" );
+	type_keystroke_by_string( ctx, "<H>" );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 0, "cursor `%d' shall be 0", cursor );
 
@@ -575,11 +575,11 @@ void test_End()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4g4<L><L>" );
+	type_keystroke_by_string( ctx, "hk4g4<L><L>" );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 0, "cursor `%d' shall be 0", cursor );
 
-	type_keystoke_by_string( ctx, "<EN>" );
+	type_keystroke_by_string( ctx, "<EN>" );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
@@ -600,7 +600,7 @@ void test_get_phoneSeq()
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystoke_by_string( ctx, "hk4g4" );
+	type_keystroke_by_string( ctx, "hk4g4" );
 
 	len = chewing_get_phoneSeqLen( ctx );
 	ok( len == ARRAY_SIZE( PHONE ), "phoneSeqLen `%d' shall be `%d'", len, ARRAY_SIZE( PHONE ) );

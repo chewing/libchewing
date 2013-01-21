@@ -36,7 +36,7 @@ void test_reset_shall_not_clean_static_data()
 
 	chewing_Reset( ctx );
 
-	type_keystoke_by_string( ctx, DATA.token );
+	type_keystroke_by_string( ctx, DATA.token );
 	ok_commit_buffer( ctx, DATA.expected );
 
 	chewing_delete( ctx );

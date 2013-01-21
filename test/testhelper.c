@@ -134,7 +134,7 @@ int get_keystroke( get_char_func get_char, void * param )
 	return result = END;
 }
 
-static void type_keystoke( ChewingContext *ctx, get_char_func get_char, void *param )
+static void type_keystroke( ChewingContext *ctx, get_char_func get_char, void *param )
 {
 	int ch;
 	int ctrl_shifted;
@@ -240,9 +240,9 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	}
 }
 
-void type_keystoke_by_string( ChewingContext *ctx, char* keystoke )
+void type_keystroke_by_string( ChewingContext *ctx, char* keystroke )
 {
-	type_keystoke( ctx, get_char_by_string, &keystoke );
+	type_keystroke( ctx, get_char_by_string, &keystroke );
 }
 
 void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
@@ -330,7 +330,7 @@ void internal_ok_candidate( const char *file, int line,
 	chewing_free( buf );
 }
 
-void internal_ok_keystoke_rtn( const char *file, int line,
+void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn )
 {
 	const struct {

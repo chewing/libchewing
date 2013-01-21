@@ -37,7 +37,7 @@ void test_libchewing_googlecode_issue_472()
 
 	for (i = 0; i < ARRAY_SIZE(INPUT); ++i) {
 		chewing_Reset( ctx );
-		type_keystoke_by_string( ctx, INPUT[i] );
+		type_keystroke_by_string( ctx, INPUT[i] );
 	}
 
 	chewing_delete( ctx );
@@ -58,7 +58,7 @@ void test_libchewing_issue_30()
 	chewing_set_spaceAsSelection( ctx, 1 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
-	type_keystoke_by_string( ctx, "hk4g4<H> 3 1" );
+	type_keystroke_by_string( ctx, "hk4g4<H> 3 1" );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 2, "cursor position `%d' shall be `2'", cursor);
 
@@ -77,7 +77,7 @@ void test_libchewing_data_issue_1()
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
-	type_keystoke_by_string( ctx, DATA.token );
+	type_keystroke_by_string( ctx, DATA.token );
 	ok_preedit_buffer( ctx, DATA.expected );
 
 	chewing_delete( ctx );

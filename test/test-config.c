@@ -167,7 +167,7 @@ void test_set_selKey()
 		sizeof( ALTERNATE_SELECT_KEY )),
 		"select key shall be ALTERNATE_SELECT_KEY");
 
-	type_keystoke_by_string( ctx, DATA.token );
+	type_keystroke_by_string( ctx, DATA.token );
 	ok_preedit_buffer( ctx, DATA.expected );
 
 	chewing_free( select_key );
