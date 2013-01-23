@@ -15,22 +15,27 @@
 #include "chewing.h"
 #include "chewingio.h"
 
-#define KEY_SLEFT 896
-#define KEY_SRIGHT 897
-#define KEY_LEFT 898
-#define KEY_RIGHT 899
-#define KEY_UP 990
-#define KEY_DOWN 991
-#define KEY_SPACE ' '
-#define KEY_ENTER 992
-#define KEY_BACKSPACE 993
-#define KEY_ESC 994
-#define KEY_DELETE 995
-#define KEY_HOME 996
-#define KEY_END 997
-#define KEY_TAB 998
-#define KEY_CAPSLOCK 999
-#define KEY_CTRL_BASE 1000
+#define KEY_DBLTAB	892 // <TT>
+#define KEY_SSPACE	893 // <SS>
+#define KEY_PPAGE	894 // <PU>
+#define KEY_NPAGE	895 // <PD>
+#define KEY_SLEFT	896 // <SL>
+#define KEY_SRIGHT	897 // <SR>
+#define KEY_LEFT	898 // <L>
+#define KEY_RIGHT	899 // <R>
+#define KEY_UP		990 // <U>
+#define KEY_DOWN	991 // <D>
+#define KEY_SPACE	' '
+#define KEY_ENTER	992 // <E>
+#define KEY_BACKSPACE	993 // <B>
+#define KEY_ESC		994 // <EE>
+#define KEY_DELETE	995 // <DC>
+#define KEY_HOME	996 // <H>
+#define KEY_END		997 // <EN>
+#define KEY_TAB		998 // <T>
+#define KEY_CAPSLOCK	999 // <CB>
+#define KEY_CTRL_BASE	1000 // <C0>..<C9>
+#define KEY_NUMPAD_BASE	1100 // <N0>..<N9>,<N+>,<N->,<N*>,<N/>,<N.>
 #define END 2000
 
 #ifdef __GNUC__

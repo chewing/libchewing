@@ -30,9 +30,11 @@ static char normal_keys[] = "abcdefghijklmnopqrstuvwxyz" \
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "`1234567890[]/=-?+_|!@#$%^&*(){} ";
 static char* other_keys[] = {
-    "<L>", "<SL>", "<R>", "<U>", "<D>", "<E>", "<B>", "<EE>", "<DC>", "<H>",
+    "<L>", "<SL>", "<R>", "<SR>", "<U>", "<D>", "<E>", "<B>", "<EE>", "<DC>", "<H>",
     "<EN>", "<T>", "<C0>", "<C1>", "<C2>", "<C3>", "<C4>", "<C5>", "<C6>",
-    "<C7>", "<C8>", "<C9>", "<CB>" };
+    "<C7>", "<C8>", "<C9>", "<CB>", "<PU>", "<PD>", "<SS>", "<TT>",
+    "<N0>", "<N1>", "<N2>", "<N3>", "<N4>", "<N5>", "<N6>", "<N7>", "<N8>", "<N9>",
+    "<N+>", "<N->", "<N*>", "<N/>", "<N.>"};
 
 #define n_nkeys (sizeof(normal_keys) / sizeof(normal_keys[0]))
 #define n_okeys (sizeof(other_keys) / sizeof(other_keys[0]))

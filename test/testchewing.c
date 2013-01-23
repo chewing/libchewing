@@ -15,24 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define KEY_SLEFT 896
-#define KEY_SRIGHT 897
-#define KEY_LEFT 898
-#define KEY_RIGHT 899
-#define KEY_UP 990 
-#define KEY_DOWN 991
-#define KEY_SPACE ' '
-#define KEY_ENTER 992
-#define KEY_BACKSPACE 993
-#define KEY_ESC 994
-#define KEY_DELETE 995
-#define KEY_HOME 996
-#define KEY_END 997
-#define KEY_TAB 998
-#define KEY_CAPSLOCK 999
-#define KEY_CTRL_BASE 1000
-#define END 2000
-
 #ifdef USED_IN_SIMULATION
 #define MAXLEN 149
 char commit_string_buf[ MAXLEN ];
@@ -174,15 +156,27 @@ int main( int argc, char *argv[] )
 			case KEY_CAPSLOCK:
 				chewing_handle_Capslock( ctx );
 				break;
+			case KEY_NPAGE:
+				chewing_handle_PageDown( ctx );
+				break;
+			case KEY_PPAGE:
+				chewing_handle_PageUp( ctx );
+				break;
+			case KEY_SSPACE:
+				chewing_handle_ShiftSpace( ctx );
+				break;
+			case KEY_DBLTAB:
+				chewing_handle_DblTab( ctx );
+				break;
 			case END:
 				goto end;
 			default:
-				ctrl_shifted = ( i - KEY_CTRL_BASE );
-				if ( ( ctrl_shifted >= '0' ) && ( ctrl_shifted <= '9' ) ) {
-					chewing_handle_CtrlNum( ctx, ctrl_shifted );
-				} else {
+				if ( KEY_CTRL_BASE <= i && i < KEY_NUMPAD_BASE)
+					chewing_handle_CtrlNum( ctx, i - KEY_CTRL_BASE );
+				else if ( KEY_NUMPAD_BASE <= i )
+					chewing_handle_Numlock( ctx, i - KEY_NUMPAD_BASE );
+				else
 					chewing_handle_Default( ctx, (char) i );
-				}
 				break;
 		}
 		commit_string( ctx );

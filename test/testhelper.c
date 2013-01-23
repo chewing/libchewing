@@ -122,11 +122,26 @@ int get_keystroke( get_char_func get_char, void * param )
 				case 'S':
 					if ( ( ch = get_char( param ) ) == 'L' )
 						result = KEY_SLEFT;
-					else
+					else if ( ch == 'R' )
 						result = KEY_SRIGHT;
+					else
+						result = KEY_SSPACE;
 					break;
 				case 'T':
-					result = KEY_TAB;
+					if ( ( ch = get_char( param ) ) == '>' )
+						return result = KEY_TAB;
+					else
+						result = KEY_DBLTAB;
+					break;
+				case 'P':
+					if ( ( ch = get_char( param ) ) == 'D' )
+						result = KEY_NPAGE;
+					else
+						result = KEY_PPAGE;
+					break;
+				case 'N':
+					ch = get_char( param );
+					result = KEY_NUMPAD_BASE + ch;
 					break;
 			}
 		}
