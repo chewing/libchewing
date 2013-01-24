@@ -413,11 +413,11 @@ int main( int argc, char *argv[] )
 				break;
 			case KEY_NPAGE:
 				chewing_handle_PageDown( ctx );
-				fprintf( fout, "<PD>"):
+				fprintf( fout, "<PD>");
 				break;
 			case KEY_PPAGE:
 				chewing_handle_PageUp( ctx );
-				fprintf( fout, "<PU>"):
+				fprintf( fout, "<PU>");
 				break;
 			default:
 				chewing_handle_Default( ctx, (char) ch );
