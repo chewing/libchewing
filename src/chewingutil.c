@@ -404,6 +404,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 	else { /* level 2 symbol or OpenSymbolChoice */
 		/* TODO: FIXME, this part is buggy! */
 		if ( symbol_type == 2 ) {
+			assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 			memmove(
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
@@ -443,6 +444,7 @@ int SymbolInput( int key, ChewingData *pgdata )
 {
 	if ( isprint( (char) key ) && /* other character was ignored */
 	     (pgdata->chiSymbolBufLen < MAX_PHONE_SEQ_LEN) ) { /* protect the buffer */
+		assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 		memmove(
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),

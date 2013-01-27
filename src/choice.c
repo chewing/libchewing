@@ -408,6 +408,7 @@ int ChoiceEndChoice( ChewingData *pgdata )
 	if ( pgdata->choiceInfo.isSymbol != 1 || pgdata->choiceInfo.isSymbol != 2 ) {
 		/* return to the old chiSymbolCursor position */
 		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
+		assert ( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 	}
 	pgdata->choiceInfo.isSymbol = 0;
 	return 0;
