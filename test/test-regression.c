@@ -45,6 +45,30 @@ void test_libchewing_googlecode_issue_472()
 	chewing_delete( ctx );
 }
 
+void test_libchewing_googlecode_issue_473()
+{
+	/* FIXME: Add const cause gcc warning */
+	static char *INPUT[] = {
+		"t<N->_ M1<N+>H[Ls3<L><N1>PL+Z]4<C1>&(^H*H<TT>Sc<N->P]!|<CB>-<C6>S<H><N1><C0>U<B>d}P!f<EN><N.><C7>V!U!w|4-=S<C1>b<N2>Q",
+	};
+	int i;
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_autoShiftCur( ctx, 1 );
+	chewing_set_candPerPage( ctx, 9 );
+	chewing_set_addPhraseDirection( ctx, 1 );
+	chewing_set_spaceAsSelection( ctx, 1 );
+
+	for (i = 0; i < ARRAY_SIZE(INPUT); ++i) {
+		chewing_Reset( ctx );
+		type_keystroke_by_string( ctx, INPUT[i] );
+	}
+
+	chewing_delete( ctx );
+}
+
 void test_libchewing_issue_30()
 {
 	ChewingContext *ctx;
@@ -94,6 +118,7 @@ int main()
 	test_libchewing_data_issue_1();
 	test_libchewing_issue_30();
 	test_libchewing_googlecode_issue_472();
+	test_libchewing_googlecode_issue_473();
 
 	return exit_status();
 }

@@ -1449,6 +1449,8 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 		DoSelect( pgdata, num );
 	}
 	CallPhrasing( pgdata );
+	if ( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
+		keystrokeRtn = KEYSTROKE_COMMIT;
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
