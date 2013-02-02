@@ -621,7 +621,7 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 	else if ( pgdata->PointStart > -1 ) {
 		int buf = pgdata->chiSymbolCursor;
 		int key;
-		if ( pgdata->PointEnd > 0 ) {
+		if ( pgdata->PointEnd > 1 ) {
 			if ( ! pgdata->config.bAddPhraseForward ) {
 				pgdata->chiSymbolCursor = pgdata->PointStart;
 				key = '0' + pgdata->PointEnd;
@@ -630,10 +630,11 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 				pgdata->chiSymbolCursor = pgdata->PointStart + pgdata->PointEnd;
 				key = '0' + pgdata->PointEnd;
 			}
+
 			chewing_handle_CtrlNum( ctx, key );
 			pgdata->chiSymbolCursor = buf;
 		}
-		else if ( pgdata->PointEnd < 0 ) {
+		else if ( pgdata->PointEnd < 1 ) {
 			if ( pgdata->config.bAddPhraseForward )
 				pgdata->chiSymbolCursor = buf - pgdata->PointEnd;
 			key = '0' - pgdata->PointEnd;
