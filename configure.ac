@@ -38,7 +38,6 @@ AC_DEFINE_UNQUOTED(LIBCHEWING_VERSION,
         "$PACKAGE_VERSION", [The release version of libchewing.])
 
 # Init automake stuff
-AM_MAINTAINER_MODE([enable])
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS([include/config.h])
