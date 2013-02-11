@@ -327,7 +327,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
-	pci->isSymbol = 0;
+	pci->isSymbol = WORD_CHOICE;
 }
 
 /*
@@ -382,7 +382,7 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 int ChoicePrevAvail( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
-	if (pgdata->choiceInfo.isSymbol) return 0;
+	if (pgdata->choiceInfo.isSymbol != WORD_CHOICE) return 0;
 	if ( ++( pgdata->availInfo.currentAvail ) >= pgdata->availInfo.nAvail )
 		pgdata->availInfo.currentAvail = 0;
 	SetChoiceInfo( pgdata );
@@ -405,12 +405,12 @@ int ChoiceEndChoice( ChewingData *pgdata )
 	pgdata->choiceInfo.nTotalChoice = 0;
 	pgdata->choiceInfo.nPage = 0;
 
-	if ( pgdata->choiceInfo.isSymbol != 1 || pgdata->choiceInfo.isSymbol != 2 ) {
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE || pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_INSERT ) {
 		/* return to the old chiSymbolCursor position */
 		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
 		assert ( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 	}
-	pgdata->choiceInfo.isSymbol = 0;
+	pgdata->choiceInfo.isSymbol = WORD_CHOICE;
 	return 0;
 }
 

@@ -41,6 +41,12 @@
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
 
+/* For isSymbol */
+#define WORD_CHOICE            (0)
+#define SYMBOL_CATEGORY_CHOICE (1)
+#define SYMBOL_CHOICE_INSERT   (2)
+#define SYMBOL_CHOICE_UPDATE   (3)
+
 #ifndef _MSC_VER
 #undef max
 static inline int max( int a, int b )

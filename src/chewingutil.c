@@ -130,7 +130,7 @@ int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
 
 int ChewingIsEntering( ChewingData *pgdata )
 {
-	if ( pgdata->choiceInfo.isSymbol )
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE )
 		return 1;
 	return (
 		pgdata->chiSymbolBufLen != 0 || 
@@ -165,7 +165,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
-	pci->isSymbol = 1;
+	pci->isSymbol = SYMBOL_CATEGORY_CHOICE;
 	return ZUIN_ABSORB;
 }
 
@@ -370,17 +370,17 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 	int symbol_type;
 	int key;
 
-	if ( ! pgdata->static_data.symbol_table && pgdata->choiceInfo.isSymbol != 3 )
+	if ( ! pgdata->static_data.symbol_table && pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_UPDATE )
 		return ZUIN_ABSORB;
 
-	if ( pgdata->choiceInfo.isSymbol == 1 && 
+	if ( pgdata->choiceInfo.isSymbol == SYMBOL_CATEGORY_CHOICE &&
 			0 == pgdata->static_data.symbol_table[sel_i]->nSymbols )
-		symbol_type = 2;
+		symbol_type = SYMBOL_CHOICE_INSERT;
 	else
 		symbol_type = pgdata->choiceInfo.isSymbol;
 
 	/* level one, symbol category */
-	if ( symbol_type == 1 ) {
+	if ( symbol_type == SYMBOL_CATEGORY_CHOICE ) {
 		ChoiceInfo* pci = &pgdata->choiceInfo;
 		AvailInfo* pai = &pgdata->availInfo;
 
@@ -399,11 +399,11 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		assert( pci->nTotalChoice > 0 );
 		pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 		pci->pageNo = 0;
-		pci->isSymbol = 2;
+		pci->isSymbol = SYMBOL_CHOICE_INSERT;
 	}
 	else { /* level 2 symbol or OpenSymbolChoice */
 		/* TODO: FIXME, this part is buggy! */
-		if ( symbol_type == 2 ) {
+		if ( symbol_type == SYMBOL_CHOICE_INSERT ) {
 			assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 			memmove(
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
@@ -435,7 +435,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		else if ( symbol_type == 3 ) { /* OpenSymbolChoice */
 			/* No action */
 		}
-		pgdata->choiceInfo.isSymbol = 0;
+		pgdata->choiceInfo.isSymbol = WORD_CHOICE;
 	}
 	return ZUIN_ABSORB;
 }
@@ -1352,7 +1352,7 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
-	pci->isSymbol = 3;
+	pci->isSymbol = SYMBOL_CHOICE_UPDATE;
 
 	pgdata->bSelect = 1;
 	pgdata->availInfo.nAvail = 1;

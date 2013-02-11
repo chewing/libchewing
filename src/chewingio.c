@@ -140,7 +140,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 		}
 	} else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
 		/* Open Symbol Choice List */
-		if ( ! pgdata->choiceInfo.isSymbol )
+		if ( pgdata->choiceInfo.isSymbol == WORD_CHOICE )
 			OpenSymbolChoice( pgdata );
 	}
 }
@@ -527,7 +527,7 @@ static int DoSelect( ChewingData *pgdata, int num )
 		num += pgdata->choiceInfo.pageNo * pgdata->choiceInfo.nChoicePerPage;
 		/* Note: if num is larger than the total, there will be big troubles. */
 		if ( num < pgdata->choiceInfo.nTotalChoice ) {
-			if ( pgdata->choiceInfo.isSymbol ) {
+			if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) {
 				SymbolChoice( pgdata, num );
 			}
 			else { 
