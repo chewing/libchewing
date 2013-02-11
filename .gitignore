@@ -39,6 +39,10 @@ include/config.h
 include/config.h.in
 include/stamp-h1
 
+# cmake generated files
+config.h
+chewing-definition.h
+
 test/genkeystroke
 test/genkeystroke.exe
 test/randkeystroke
@@ -59,6 +63,8 @@ test/test-key2pho
 test/test-key2pho.exe
 test/test-keyboard
 test/test-keyboard.exe
+test/test-memory-fail
+test/test-memory-fail.exe
 test/test-mmap
 test/test-mmap.exe
 test/test-path
@@ -77,10 +83,8 @@ test/test-utf8.exe
 src/chewing-definition.h
 src/tools/maketree
 src/tools/maketree.exe
-src/tools/sort_dic
-src/tools/sort_dic.exe
-src/tools/sort_word
-src/tools/sort_word.exe
+src/tools/sort
+src/tools/sort.exe
 
 test/do-test.xml
 test/test.txt
