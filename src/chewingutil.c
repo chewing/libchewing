@@ -1306,7 +1306,7 @@ static int FindSymbolKey( const char *symbol )
 {
 	unsigned int i;
 	char **buf;
-	for ( i = 0; i < sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( symbol_buf ); ++i ) {
 		for ( buf = symbol_buf[ i ]; *buf; ++buf )	{
 			if (  0 == strcmp( *buf, symbol ) )
 				return *symbol_buf[ i ][ 0 ];
