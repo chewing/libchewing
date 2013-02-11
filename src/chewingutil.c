@@ -425,16 +425,11 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
 		pgdata->zuinData.kbtype = kbtype;
 
-		if ( symbol_type == 2 ) {
+		if ( symbol_type == SYMBOL_CHOICE_INSERT ) {
 			pgdata->chiSymbolBufLen++;
 			pgdata->chiSymbolCursor ++ ; 
-			if ( ! pgdata->config.bAutoShiftCur ) {
-				/* No action */
-			}
 		}
-		else if ( symbol_type == 3 ) { /* OpenSymbolChoice */
-			/* No action */
-		}
+
 		pgdata->choiceInfo.isSymbol = WORD_CHOICE;
 	}
 	return ZUIN_ABSORB;
