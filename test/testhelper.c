@@ -417,7 +417,7 @@ int internal_has_userphrase( const char *file, int line,
 	}
 
 	while ( ( item = HashFindPhonePhrase( ctx->data, phone, item ) ) != NULL ) {
-		if ( strcmp( item->data.wordSeq, phrase ) == 0 ) {
+		if ( phrase == NULL || strcmp( item->data.wordSeq, phrase ) == 0 ) {
 			ret = 1;
 			goto end;
 		}
