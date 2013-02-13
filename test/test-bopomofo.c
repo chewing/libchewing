@@ -705,9 +705,70 @@ void test_ShiftSpace()
 	/* FIXME: Implement this. */
 }
 
+void test_Numlock_numeric_input()
+{
+	const TestData NUMLOCK_INPUT[] = {
+		{ "<N0>", "0" },
+		{ "<N1>", "1" },
+		{ "<N2>", "2" },
+		{ "<N3>", "3" },
+		{ "<N4>", "4" },
+		{ "<N5>", "5" },
+		{ "<N6>", "6" },
+		{ "<N7>", "7" },
+		{ "<N8>", "8" },
+		{ "<N9>", "9" },
+		{ "<N+>", "+" },
+		{ "<N->", "-" },
+		{ "<N*>", "*" },
+		{ "<N/>", "/" },
+		{ "<N.>", "." },
+	};
+	int i;
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	for ( i = 0; i < ARRAY_SIZE( NUMLOCK_INPUT ); ++i ) {
+		type_keystroke_by_string( ctx, NUMLOCK_INPUT[i].token );
+		/* FIXME: Current buggy here */
+		/* ok_commit_buffer( ctx, NUMLOCK_INPUT[i].expected ); */
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_Numlock_select_candidate()
+{
+	const TestData NUMLOCK_SELECT[] = {
+		{ "hk4<D><N3><E>", "\xE6\xB8\xAC" /* 測 */ },
+		{ "`<N1><E>", "\xE2\x80\xA6" /* … */ },
+	};
+	int i;
+	ChewingContext *ctx;
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+
+	for ( i = 0; i < ARRAY_SIZE( NUMLOCK_SELECT ); ++i ) {
+		type_keystroke_by_string( ctx, NUMLOCK_SELECT[ i ].token );
+		ok_commit_buffer( ctx, NUMLOCK_SELECT[i].expected );
+	}
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_Numlock()
 {
-	/* FIXME: Implement this. */
+	test_Numlock_numeric_input();
+	test_Numlock_select_candidate();
 }
 
 void test_get_phoneSeq()
