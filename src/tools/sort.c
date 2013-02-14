@@ -7,6 +7,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,10 +67,38 @@ const struct PhraseData EXCEPTION_PHRASE[] = {
 	{ "\xE7\xB5\x90\xE5\xB7\xB4" /* 結巴 */ , 0, { 6304, 521 } /*  ㄐㄧㄝ ㄅㄚ˙ */ },
 };
 
-int store_word(const char *line)
+void strip(char *line)
+{
+	char *end;
+	int i;
+
+	/* remove comment */
+	for (i = 0; i < strlen(line); ++i) {
+		if (line[i] == '#') {
+			line[i] = 0;
+			break;
+		}
+	}
+
+	/* remove tailing space */
+	end = line + strlen(line) - 1;
+	while (isspace(*end)) {
+		*end = 0;
+		--end;
+	}
+}
+
+void store_word(const char *line)
 {
 	char phone_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 	char key_buf[ZUIN_SIZE + 1];
+	char buf[MAX_LINE_LEN];
+
+	strncpy(buf, line, sizeof(buf));
+
+	strip(buf);
+	if (strlen(buf) == 0)
+		return;
 
 	if (num_word_data >= MAX_WORD_DATA) {
 		fprintf(stderr, "Need to increase MAX_WORD_DATA to process\n");
@@ -77,15 +106,15 @@ int store_word(const char *line)
 	}
 
 	/* FIXME: Hope the buffers are sufficient. */
-	sscanf(line, "%s %s", key_buf, word_data[num_word_data].word);
+	sscanf(buf, "%s %s", key_buf, word_data[num_word_data].word);
 
-	if (strlen(key_buf) > ZUIN_SIZE)
-		return -1;
+	if (strlen(key_buf) > ZUIN_SIZE) {
+		fprintf(stderr, "Error reading line `%s'\n", line);
+		exit(-1);
+	}
 	PhoneFromKey(phone_buf, key_buf, KB_DEFAULT, 1);
 	word_data[num_word_data].phone = UintFromPhone(phone_buf);
 	++num_word_data;
-
-	return 0;
 }
 
 int compare_word_by_phone(const void *x, const void *y)
@@ -165,10 +194,7 @@ void read_phone_cin(const char *filename)
 		if (!ret || buf[0] == '%')
 			break;
 
-		if (store_word(buf) != 0) {
-			fprintf(stderr,"The line `%s' in `%s' is corrupted!\n", buf, filename);
-			exit(-1);
-		}
+		store_word(buf);
 	}
 	fclose(phone_cin);
 
@@ -287,12 +313,16 @@ void store_phrase(const char *line)
 	struct WordData word;
 	char bopomofo_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 
+	strncpy(buf, line, sizeof(buf));
+
+	strip(buf);
+	if (strlen(buf) == 0)
+		return;
+
 	if (num_phrase_data >= MAX_PHRASE_DATA) {
 		fprintf(stderr, "Need to increase MAX_PHRASE_DATA to process\n");
 		exit(-1);
 	}
-
-	strncpy(buf, line, sizeof(buf));
 
 	/* read phrase */
 	phrase = strtok(buf, DELIM);
