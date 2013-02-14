@@ -65,6 +65,8 @@ const struct PhraseData EXCEPTION_PHRASE[] = {
 	{ "\xE5\xA5\xBD\xE8\x90\x8A\xE5\xA1\xA2" /* 好萊塢 */ , 0, { 5691, 4138, 256 } /* ㄏㄠˇ ㄌㄞˊ ㄨ */ },
 	{ "\xE6\x88\x90\xE6\x97\xA5\xE5\xAE\xB6" /* 成日家 */ , 0, { 8290, 9220, 6281 } /* ㄔㄥˊ ㄖˋ ㄐㄧㄚ˙ */ },
 	{ "\xE7\xB5\x90\xE5\xB7\xB4" /* 結巴 */ , 0, { 6304, 521 } /*  ㄐㄧㄝ ㄅㄚ˙ */ },
+	{ "\xE4\xBF\xBE\xE5\x80\xAA" /* 俾倪 */ , 0, { 644, 3716 } /* ㄅㄧˋ ㄋㄧˋ */ },
+	{ "\xE5\x85\xAC\xE5\x85\xAC"/* 公公 */ , 0, {4960, 4961} /* ㄍㄨㄥ ㄍㄨㄥ˙ */ },
 };
 
 void strip(char *line)
