@@ -413,8 +413,8 @@ int compare_phrase(const void *x, const void *y)
 	}
 
 	if (a->freq == b->freq) {
-		fprintf(stderr, "Phrase `%s' and `%s' have the same phone and frequency (%d).\n", a->phrase, b->phrase, a->freq);
 		/* FIXME: shall exit(-1) when tsi.src is fixed */
+		//fprintf(stderr, "Phrase `%s' and `%s' have the same phone and frequency (%d).\n", a->phrase, b->phrase, a->freq);
 		//exit(-1);
 	}
 
