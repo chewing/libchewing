@@ -379,13 +379,21 @@ void store_phrase(const char *line)
 
 			PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), word.phone);
 
-			fprintf(stderr, "Error in phrase `%s' ", phrase_data[num_phrase_data].phrase);
-			fprintf(stderr, "{%d", phrase_data[num_phrase_data].phone[0]);
+			fprintf(stderr, "Error in phrase `%s'. Word `%s' has no phone %d (%s).", phrase_data[num_phrase_data].phrase ,word.word, word.phone, bopomofo_buf);
+			fprintf(stderr, " // { \"");
+			for (j = 0; j < strlen(phrase_data[num_phrase_data].phrase); ++j) {
+				fprintf(stderr, "\\x%02X", (unsigned char)phrase_data[num_phrase_data].phrase[j]);
+			}
+			fprintf(stderr, "\" /* %s */ , 0, { %d", phrase_data[num_phrase_data].phrase, phrase_data[num_phrase_data].phone[0]);
 			for (j = 1; j < phrase_len; ++j) {
 				fprintf(stderr, ", %d", phrase_data[num_phrase_data].phone[j]);
 			}
-			fprintf(stderr, "}. ");
-			fprintf(stderr, "Word `%s' has no phone %d (%s).\n", word.word, word.phone, bopomofo_buf);
+			fprintf(stderr, " } /* ");
+			for (j = 0; j < phrase_len; ++j) {
+				PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), phrase_data[num_phrase_data].phone[j]);
+				fprintf(stderr, "%s ", bopomofo_buf);
+			}
+			fprintf(stderr, "*/ },\n");
 			/* FIXME: shall exit(-1) when tsi.src is fixed */
 			//exit(-1);
 		}
