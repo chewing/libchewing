@@ -289,13 +289,37 @@ void sort_word_for_dictionary()
 	qsort(word_data, num_word_data, sizeof(word_data[0]), compare_word_no_duplicated);
 }
 
-int is_exception_phrase(struct PhraseData *phrase) {
+int is_exception_phrase(struct PhraseData *phrase, int pos) {
 	int i;
 
+	/*
+	 * Check if the phrase is an exception phrase.
+	 */
 	for (i = 0; i < sizeof(EXCEPTION_PHRASE) / sizeof(EXCEPTION_PHRASE[0]); ++i) {
 		if (strcmp(phrase->phrase, EXCEPTION_PHRASE[i].phrase) == 0 &&
 			memcmp(phrase->phone, EXCEPTION_PHRASE[i].phone, sizeof(phrase->phone)) == 0) {
 			return 1;
+		}
+	}
+
+	/*
+	 * If the same word appears continuous in a phrase (疊字), the second
+	 * word can change to light tone.
+	 * ex:
+	 * 爸爸 -> ㄅㄚˋ ㄅㄚ˙
+	 */
+	if (pos > 0) {
+		char first[MAX_UTF8_SIZE + 1];
+		char second[MAX_UTF8_SIZE + 1];
+
+		ueStrNCpy(first, ueStrSeek(phrase->phrase, pos - 1), 1, 1);
+		ueStrNCpy(second, ueStrSeek(phrase->phrase, pos), 1, 1);
+
+
+		if (strcmp(first, second) == 0) {
+			if (((phrase->phone[pos - 1] & ~0x7) | 0x1) == phrase->phone[pos]) {
+				return 1;
+			}
 		}
 	}
 
@@ -375,7 +399,7 @@ void store_phrase(const char *line)
 		word.phone = phrase_data[num_phrase_data].phone[i];
 
 		if (bsearch(&word, word_data, num_word_data, sizeof(word), compare_word) == NULL &&
-			!is_exception_phrase(&phrase_data[num_phrase_data])) {
+			!is_exception_phrase(&phrase_data[num_phrase_data], i)) {
 
 			PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), word.phone);
 
