@@ -64,9 +64,20 @@ int num_phrase_data = 0;
 const struct PhraseData EXCEPTION_PHRASE[] = {
 	{ "\xE5\xA5\xBD\xE8\x90\x8A\xE5\xA1\xA2" /* 好萊塢 */ , 0, { 5691, 4138, 256 } /* ㄏㄠˇ ㄌㄞˊ ㄨ */ },
 	{ "\xE6\x88\x90\xE6\x97\xA5\xE5\xAE\xB6" /* 成日家 */ , 0, { 8290, 9220, 6281 } /* ㄔㄥˊ ㄖˋ ㄐㄧㄚ˙ */ },
-	{ "\xE7\xB5\x90\xE5\xB7\xB4" /* 結巴 */ , 0, { 6304, 521 } /*  ㄐㄧㄝ ㄅㄚ˙ */ },
 	{ "\xE4\xBF\xBE\xE5\x80\xAA" /* 俾倪 */ , 0, { 644, 3716 } /* ㄅㄧˋ ㄋㄧˋ */ },
-	{ "\xE5\x85\xAC\xE5\x85\xAC"/* 公公 */ , 0, {4960, 4961} /* ㄍㄨㄥ ㄍㄨㄥ˙ */ },
+	{ "\xE6\x8F\xA9\xE6\xB2\xB9" /* 揩油 */ , 0, { 5128, 194 } /* ㄎㄚ ㄧㄡˊ */ },
+	{ "\xE6\x95\x81\xE6\x95\xAA" /* 敁敪 */ , 0, { 2760, 2833 } /* ㄉㄧㄢ ㄉㄨㄛ˙ */ },
+};
+
+/*
+ * Some word changes its phone in certain phrases. If it is difficult to list
+ * all the phrases to exception phrase list, put the word here so that this
+ * won't cause check error.
+ */
+const struct WordData EXCEPTION_WORD[] = {
+	{ 11025 /* ㄙㄨㄛ˙ */ , "\xE5\x97\xA6" /* 嗦 */ },
+	{ 521 /* ㄅㄚ˙ */ , "\xE5\xB7\xB4" /* 巴 */ },
+	{ 5905 /* ㄏㄨㄛ˙ */ , "\xE4\xBC\x99" /* 伙 */ },
 };
 
 void strip(char *line)
@@ -291,6 +302,9 @@ void sort_word_for_dictionary()
 
 int is_exception_phrase(struct PhraseData *phrase, int pos) {
 	int i;
+	char word[MAX_UTF8_SIZE + 1];
+
+	ueStrNCpy(word, ueStrSeek(phrase->phrase, pos), 1, 1);
 
 	/*
 	 * Check if the phrase is an exception phrase.
@@ -303,20 +317,27 @@ int is_exception_phrase(struct PhraseData *phrase, int pos) {
 	}
 
 	/*
+	 * Check if the word in phrase is an exception word.
+	 */
+	for (i = 0; i < sizeof(EXCEPTION_WORD) / sizeof(EXCEPTION_WORD[0]); ++i) {
+		if (strcmp(word, EXCEPTION_WORD[i].word) == 0 &&
+			phrase->phone[pos] == EXCEPTION_WORD[i].phone) {
+			return 1;
+		}
+	}
+
+	/*
 	 * If the same word appears continuous in a phrase (疊字), the second
 	 * word can change to light tone.
 	 * ex:
 	 * 爸爸 -> ㄅㄚˋ ㄅㄚ˙
 	 */
 	if (pos > 0) {
-		char first[MAX_UTF8_SIZE + 1];
-		char second[MAX_UTF8_SIZE + 1];
+		char previous[MAX_UTF8_SIZE + 1];
 
-		ueStrNCpy(first, ueStrSeek(phrase->phrase, pos - 1), 1, 1);
-		ueStrNCpy(second, ueStrSeek(phrase->phrase, pos), 1, 1);
+		ueStrNCpy(previous, ueStrSeek(phrase->phrase, pos - 1), 1, 1);
 
-
-		if (strcmp(first, second) == 0) {
+		if (strcmp(previous, word) == 0) {
 			if (((phrase->phone[pos - 1] & ~0x7) | 0x1) == phrase->phone[pos]) {
 				return 1;
 			}
