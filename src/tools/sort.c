@@ -444,8 +444,7 @@ void store_phrase(const char *line)
 				fprintf(stderr, "%s ", bopomofo_buf);
 			}
 			fprintf(stderr, "*/ },\n");
-			/* FIXME: shall exit(-1) when tsi.src is fixed */
-			//exit(-1);
+			exit(-1);
 		}
 	}
 
