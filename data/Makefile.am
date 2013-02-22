@@ -40,7 +40,7 @@ gendata_stamp: phone.cin tsi.src
 		echo "chewing-definition.h exists."; \
 	fi
 	$(MAKE) gendata && \
-	touch "timestamp" > $@
+	touch $@
 
 gendata:
 	env LC_ALL=C $(tooldir)/sort$(EXEEXT) $(top_srcdir)/data/phone.cin $(top_srcdir)/data/tsi.src
