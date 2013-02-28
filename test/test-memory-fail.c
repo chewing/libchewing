@@ -20,24 +20,25 @@
 
 #include "chewing.h"
 
-void *(*libc_malloc)( size_t size );
-void *(*libc_calloc)( size_t nmemb, size_t size );
 int fail_countdown;
 
-void* malloc( size_t size )
+void *__real_malloc( size_t size );
+void *__real_calloc( size_t nmemb, size_t size );
+
+void *__wrap_malloc( size_t size )
 {
 	if ( fail_countdown ) {
 		--fail_countdown;
-		return libc_malloc( size );
+		return __real_malloc( size );
 	}
 	return NULL;
 }
 
-void *calloc( size_t nmemb, size_t size )
+void *__wrap_calloc( size_t nmemb, size_t size )
 {
 	if ( fail_countdown ) {
 		--fail_countdown;
-		return libc_calloc( nmemb, size );
+		return __real_calloc( nmemb, size );
 	}
 	return NULL;
 }
@@ -63,9 +64,6 @@ int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
-
-	libc_malloc = dlsym( RTLD_NEXT, "malloc" );
-	libc_calloc = dlsym( RTLD_NEXT, "calloc" );
 
 	test_chewing_new();
 

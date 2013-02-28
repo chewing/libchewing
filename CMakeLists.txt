@@ -197,15 +197,10 @@ set(ALL_TESTTOOLS
 
 enable_testing()
 
-# test-memory-fail needs libdl and RTLD_NEXT to do fault injection.
-if (CMAKE_DL_LIBS)
-	set(CMAKE_REQUIRED_FLAGS -D_GNU_SOURCE)
-	include(CheckSymbolExists)
-	check_symbol_exists(RTLD_NEXT dlfcn.h RTLD_NEXT_EXISTS)
-	if (RTLD_NEXT_EXISTS)
-		list(APPEND ALL_TESTCASES test-memory-fail)
-		set(HAVE_TEST_MEMORY_FAIL true)
-	endif()
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
+	CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	list(APPEND ALL_TESTCASES test-memory-fail)
+	set(HAVE_TEST_MEMORY_FAIL true)
 endif()
 
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
@@ -243,6 +238,7 @@ foreach(target ${ALL_TESTS})
 endforeach()
 if ("${HAVE_TEST_MEMORY_FAIL}")
 	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
+	set_target_properties(test-memory-fail PROPERTIES LINK_FLAGS "-Wl,--wrap=malloc,--wrap=calloc")
 endif()
 
 # data

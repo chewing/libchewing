@@ -43,6 +43,7 @@ if HAVE_TEST_MEMORY_FAIL
 NATIVE_TESTS += \
 	test-memory-fail \
 	$(NULL)
+test_memory_fail_LDFLAGS=-Wl,--wrap=malloc,--wrap=calloc -static
 endif
 
 check_HEADERS = \
@@ -78,7 +79,6 @@ INCLUDES = \
 	$(NULL)
 
 LDADD = \
-	$(top_builddir)/src/libchewing.la \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
 	$(top_builddir)/test/libtesthelper.la \
