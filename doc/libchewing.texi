@@ -4,6 +4,10 @@
 @settitle libchewing
 @c %**end of header
 @include version.texi
+@dircategory Localization
+@direntry
+* libchewing: (libchewing).           The libchewing reference manual.
+@end direntry
 @copying
 This is the ``libchewing Reference Manual'' corresponding to libchewing
 version @value{VERSION}.
