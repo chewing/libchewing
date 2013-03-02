@@ -9,9 +9,16 @@ CMAKE_FILES = \
 	cmake_chewing.pc.in \
 	$(NULL)
 
+CONTRIB_FILES = \
+	contrib/python/test.py \
+	contrib/python/chewing.py \
+	contrib/simple-select.c \
+	contrib/Makefile-simple-select
+
 EXTRA_DIST = \
 	autogen.sh \
 	$(CMAKE_FILES) \
+	$(CONTRIB_FILES) \
 	$(NULL)
 
 pkgconfigdir = $(libdir)/pkgconfig
