@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
 set(LIBCHEWING_VERSION 0.3.4)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(ENABLE_DEBUG "Debug support" false)
 if(ENABLE_DEBUG)
@@ -57,6 +58,7 @@ endif()
 include(CheckTypeSize)
 check_type_size(uint16_t UINT16_T)
 
+set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
 include(CheckFunctionExists)
@@ -190,10 +192,10 @@ set(ALL_TESTTOOLS
 	simulate
 	testchewing
 )
-# FIXME
-#	if(${CURSES_FOUND})
-#		set(ALL_TESTTOOLS ${ALL_TESTTOOLS} gen_keystroke)
-#	endif()
+
+if(${CURSES_FOUND})
+	set(ALL_TESTTOOLS ${ALL_TESTTOOLS} gen_keystroke)
+endif()
 
 enable_testing()
 
@@ -236,6 +238,10 @@ set_target_properties(${ALL_TESTS} PROPERTIES
 foreach(target ${ALL_TESTS})
 	target_link_libraries(${target} testhelper)
 endforeach()
+
+if (${CURSES_FOUND})
+	target_link_libraries(gen_keystroke ${CURSES_LIBRARIES})
+endif()
 if ("${HAVE_TEST_MEMORY_FAIL}")
 	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
 	set_target_properties(test-memory-fail PROPERTIES LINK_FLAGS "-Wl,--wrap=malloc,--wrap=calloc")

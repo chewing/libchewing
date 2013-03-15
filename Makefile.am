@@ -7,6 +7,7 @@ CMAKE_FILES = \
 	CMakeLists.txt \
 	include/cmake_config.h.in \
 	cmake_chewing.pc.in \
+	cmake/FindCurses.cmake \
 	$(NULL)
 
 CONTRIB_FILES = \
