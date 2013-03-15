@@ -4,10 +4,10 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/tools data src test doc
 
 CMAKE_FILES = \
-	CMakeLists.txt \
-	include/cmake_config.h.in \
-	cmake_chewing.pc.in \
+	cmake/chewing.pc.in \
+	cmake/config.h.in \
 	cmake/FindCurses.cmake \
+	CMakeLists.txt \
 	$(NULL)
 
 CONTRIB_FILES = \

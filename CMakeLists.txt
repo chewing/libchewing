@@ -69,12 +69,12 @@ include(CheckIncludeFiles)
 check_include_files(unistd.h HAVE_UNISTD_H)
 
 configure_file(
-	${PROJECT_SOURCE_DIR}/include/cmake_config.h.in
+	${PROJECT_SOURCE_DIR}/cmake/config.h.in
 	${PROJECT_BINARY_DIR}/config.h
 )
 
 configure_file(
-	${PROJECT_SOURCE_DIR}/cmake_chewing.pc.in
+	${PROJECT_SOURCE_DIR}/cmake/chewing.pc.in
 	${PROJECT_BINARY_DIR}/chewing.pc
 	@ONLY
 )
