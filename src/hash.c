@@ -445,7 +445,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 
 	/* backup as *.old */
 	strncpy( oldname, ofilename, sizeof(oldname) );
-	strncat( oldname, ".old", sizeof(oldname) );
+	strncat( oldname, ".old", sizeof(oldname) - strlen(oldname) - 1 );
 	oldname[ sizeof(oldname) - 1 ] = '\0';
 	PLAT_UNLINK( oldname );
 	PLAT_RENAME( ofilename, oldname );
