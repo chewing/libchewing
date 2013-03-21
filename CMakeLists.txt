@@ -79,6 +79,11 @@ configure_file(
 	@ONLY
 )
 
+configure_file(
+	${PROJECT_SOURCE_DIR}/cmake/version.texi.in
+	${PROJECT_BINARY_DIR}/doc/version.texi
+)
+
 include_directories(
 	${PROJECT_BINARY_DIR}
 	${PROJECT_SOURCE_DIR}/include
@@ -100,6 +105,9 @@ set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include/chewing)
 set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/lib/libchewing)
 set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
+
+set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
+set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
 
 set(ALL_DATA
 	${DATA_BIN_DIR}/dict.dat
@@ -126,6 +134,26 @@ set(ALL_INC
 	${INC_DIR}/global.h
 	${INC_DIR}/mod_aux.h
 )
+
+# info page
+find_program(MAKEINFO makeinfo)
+if (MAKEINFO)
+	add_custom_command(
+		OUTPUT
+			${INFO_BIN}
+		COMMAND ${MAKEINFO} ${INFO_SRC} -o ${INFO_BIN} -I ${PROJECT_BINARY_DIR}/doc
+		DEPENDS
+			${INFO_SRC}
+	)
+	add_custom_target(INFO ALL DEPENDS ${INFO_BIN})
+
+	find_program(INSTALL_INFO NAMES ginstall-info install-info)
+	if (INSTALL_INFO)
+		install(FILES ${INFO_BIN} DESTINATION ${INSTALL_INFO_DIR})
+		install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${INSTALL_INFO_DIR} ${INFO_BIN})")
+	endif()
+endif()
+
 
 # static target
 # We need to copy static data to binary tree when using out of tree build.
