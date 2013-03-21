@@ -100,7 +100,7 @@ void strip(char *line)
 
 	/* remove tailing space */
 	end = line + strlen(line) - 1;
-	while (end >= line && isspace(*end)) {
+	while (end >= line && isspace((unsigned char)*end)) {
 		*end = 0;
 		--end;
 	}
