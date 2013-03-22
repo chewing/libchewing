@@ -77,6 +77,8 @@ test/test-symbol
 test/test-symbol.exe
 test/test-special-symbol
 test/test-special-symbol.exe
+test/test-userphrase
+test/test-userphrase.exe
 test/test-utf8
 test/test-utf8.exe
 

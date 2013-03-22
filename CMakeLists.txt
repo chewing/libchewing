@@ -213,6 +213,7 @@ set(ALL_TESTCASES
 	test-reset
 	test-special-symbol
 	test-symbol
+	test-userphrase
 	test-utf8
 )
 set(ALL_TESTTOOLS

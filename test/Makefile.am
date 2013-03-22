@@ -36,6 +36,7 @@ NATIVE_TESTS = \
 	test-regression \
 	test-symbol \
 	test-special-symbol \
+	test-userphrase \
 	test-utf8 \
 	$(NULL)
 
