@@ -57,6 +57,9 @@ void TerminateSymbolTable( ChewingData *pgdata );
 
 int InitEasySymbolInput( ChewingData *pgdata, const char *prefix );
 void TerminateEasySymbolTable( ChewingData *pgdata );
+void copyStringFromPreeditBuf(
+	ChewingData *pgdata, int pos, int len,
+	char *output, int output_len );
 
 #endif
 

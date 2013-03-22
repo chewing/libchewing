@@ -1231,8 +1231,10 @@ End_keyproc:
 	else {
 		DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n",
-				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-		pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
+				pgdata->preeditBuf[ 0 ].char_ );
+		strncpy( ( char * ) pgo->commitStr[ 0 ].s,
+			pgdata->preeditBuf[ 0 ].char_,
+			sizeof( pgo->commitStr[ 0 ].s ) );
 		pgo->nCommitStr = 1;
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
@@ -1299,11 +1301,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				        &pgdata->phoneSeq[ cursor ],
 				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy( addWordSeq,
-				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				                      cursor ),
-				           newPhraseLen, 1);
 
+				copyStringFromPreeditBuf( pgdata, cursor, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
 
 				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg(
@@ -1330,10 +1329,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
 				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy( addWordSeq,
-				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				           cursor - newPhraseLen ),
-				           newPhraseLen, 1);
+
+				copyStringFromPreeditBuf( pgdata, cursor - newPhraseLen, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
 
 				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg(
@@ -1388,7 +1385,9 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		}
 		else if ( QuickCommit ) {
-			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
+			strncpy( ( char * ) pgo->commitStr[ 0 ].s,
+				pgdata->preeditBuf[ 0 ].char_,
+				sizeof( pgo->commitStr[ 0 ].s ) );
 			pgo->nCommitStr = 1;
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
