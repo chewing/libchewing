@@ -213,6 +213,61 @@ void test_CtrlNum()
 	test_CtrlNum_add_phrase_symbol_in_between();
 }
 
+void test_userphrase_auto_learn()
+{
+	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+        chewing_set_addPhraseDirection( ctx, 1 );
+
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo );
+
+	type_keystroke_by_string( ctx, "dk dk <E>" );
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_userphrase_auto_learn_hardcode_break()
+{
+	/* 的 is a hardcode break point, see ChewingIsBreakPoint */
+	static const char phrase[] = "\xE7\x9A\x84\xE7\x9A\x84" /* 的的 */;
+	static const char bopomofo[] = "\xE3\x84\x89\xE3\x84\x9C\xCB\x99 \xE3\x84\x89\xE3\x84\x9C\xCB\x99" /* ㄉㄜ˙ ㄉㄜ˙ */;
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_addPhraseDirection( ctx, 1 );
+
+	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
+		"`%s' shall not be in userphrase", phrase );
+
+	type_keystroke_by_string( ctx, "2k72k7<E>" );
+	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
+		"`%s' shall not be in userphrase", phrase );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_userphrase()
+{
+	test_userphrase_auto_learn();
+	test_userphrase_auto_learn_hardcode_break();
+}
 
 int main()
 {
@@ -222,6 +277,7 @@ int main()
 	test_ShiftLeft();
 	test_ShiftRight();
 	test_CtrlNum();
+	test_userphrase();
 
 	return exit_status();
 }
