@@ -194,6 +194,17 @@ typedef struct {
 
 struct tag_HASH_ITEM;
 
+typedef enum tag_Category {
+	CHEWING_NONE,
+	CHEWING_CHINESE,
+	CHEWING_SYMBOL,
+} Category;
+
+typedef struct tag_PreeditBuf {
+	Category category;
+	char char_[ MAX_UTF8_SIZE + 1 ];
+} PreeditBuf;
+
 typedef struct tag_ChewingData {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
@@ -202,6 +213,7 @@ typedef struct tag_ChewingData {
 	ChewingConfigData config;
     /** @brief current input buffer, content==0 means Chinese code */
 	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
+	PreeditBuf preeditBuf[ MAX_PHONE_SEQ_LEN ];
 	int chiSymbolCursor;
 	int chiSymbolBufLen;
 	int PointStart;
