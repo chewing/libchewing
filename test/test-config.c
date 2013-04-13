@@ -21,7 +21,8 @@
 static const int MIN_CAND_PER_PAGE = 1;
 static const int MAX_CAND_PER_PAGE = 10;
 static const int DEFAULT_CAND_PER_PAGE = 10;
-static const int MAX_CHI_SYMBOL_LEN = 50; // MAX_PHONE_SEQ_LEN + 1
+static const int MIN_CHI_SYMBOL_LEN = 0;
+static const int MAX_CHI_SYMBOL_LEN = 49;
 
 static const int DEFAULT_SELECT_KEY[] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
@@ -124,6 +125,7 @@ void test_set_candPerPage()
 void test_set_maxChiSymbolLen()
 {
 	ChewingContext *ctx;
+	int i;
 
 	chewing_Init( 0, 0 );
 
@@ -133,15 +135,32 @@ void test_set_maxChiSymbolLen()
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
 		"maxChiSymbolLen shall be 16" );
 
-	chewing_set_maxChiSymbolLen( ctx, -1 );
+	chewing_set_maxChiSymbolLen( ctx, MIN_CHI_SYMBOL_LEN - 1 );
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
-		"maxChiSymbolLen shall not change" );
+		"maxChiSymbolLen shall not change when set to %d",
+		MIN_CHI_SYMBOL_LEN - 1 );
 
 	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN + 1 );
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
-		"maxChiSymbolLen shall not change" );
+		"maxChiSymbolLen shall not change when set to %d",
+		MAX_CHI_SYMBOL_LEN + 1 );
 
-	// XXX: test if new maxChiSymbolLen works as expect
+
+	// Test auto commit
+	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN );
+
+	// In boundary
+	for ( i = 0; i < MAX_CHI_SYMBOL_LEN; ++i )
+		type_keystroke_by_string( ctx, "hk4" );
+	ok( chewing_commit_Check( ctx ) == 0,
+		"auto commit shall not be triggered when entering %d symbols",
+		MAX_CHI_SYMBOL_LEN );
+
+	// Out of boundary
+	type_keystroke_by_string( ctx, "hk4" );
+	ok( chewing_commit_Check( ctx ) == 1,
+		"auto commit shall be triggered when entering %d symbols",
+		MAX_CHI_SYMBOL_LEN + 1);
 
 	chewing_delete( ctx );
 	chewing_Terminate();

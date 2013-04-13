@@ -508,8 +508,8 @@ static int CountReleaseNum( ChewingData *pgdata )
 	int remain, i;
 
 	/* reserve ZUIN_SIZE positions for Zuin */
-	remain = pgdata->config.maxChiSymbolLen - (pgdata->chiSymbolBufLen + ZUIN_SIZE);
-	if ( remain > 0 )
+	remain = pgdata->config.maxChiSymbolLen - pgdata->chiSymbolBufLen;
+	if ( remain >= 0 )
 		return 0;
 
 	qsort(

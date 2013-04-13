@@ -736,7 +736,8 @@ functions provide the configuration interfaces to the front-end.
 @deftypefun void chewing_set_maxChiSymbolLen (ChewingContext *@var{ctx}, int @var{n})
 This function sets the maximum number of the Chinese characters in the
 pre-edit buffer. If the pre-edit string is longer than this number
-then the leading part will be committed automatically.
+then the leading part will be committed automatically. The range of @var{n}
+shall between @code{0} and @code{MAX_PHONE_SEQ_LEN - 1}.
 @end deftypefun
 
 @deftypefun int chewing_get_maxChiSymbolLen (ChewingContext *@var{ctx})
