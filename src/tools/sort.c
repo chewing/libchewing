@@ -45,6 +45,7 @@ const char USAGE[] =
 ;
 
 struct WordData {
+	int index; /* Used for stable sort */
 	uint16_t phone;
 	char word[MAX_UTF8_SIZE];
 };
@@ -80,9 +81,9 @@ const struct PhraseData EXCEPTION_PHRASE[] = {
  * won't cause check error.
  */
 const struct WordData EXCEPTION_WORD[] = {
-	{ 11025 /* ㄙㄨㄛ˙ */ , "\xE5\x97\xA6" /* 嗦 */ },
-	{ 521 /* ㄅㄚ˙ */ , "\xE5\xB7\xB4" /* 巴 */ },
-	{ 5905 /* ㄏㄨㄛ˙ */ , "\xE4\xBC\x99" /* 伙 */ },
+	{ 0, 11025 /* ㄙㄨㄛ˙ */ , "\xE5\x97\xA6" /* 嗦 */ },
+	{ 0, 521 /* ㄅㄚ˙ */ , "\xE5\xB7\xB4" /* 巴 */ },
+	{ 0, 5905 /* ㄏㄨㄛ˙ */ , "\xE4\xBC\x99" /* 伙 */ },
 };
 
 void strip(char *line)
@@ -132,6 +133,7 @@ void store_word(const char *line)
 	}
 	PhoneFromKey(phone_buf, key_buf, KB_DEFAULT, 1);
 	word_data[num_word_data].phone = UintFromPhone(phone_buf);
+	word_data[num_word_data].index = num_word_data;
 	++num_word_data;
 }
 
@@ -143,12 +145,8 @@ int compare_word_by_phone(const void *x, const void *y)
 	if (a->phone != b->phone)
 		return a->phone - b->phone;
 
-	/* Compare address for stable sort */
-	if (a < b)
-		return -1;
-	if (a > b)
-		return 1;
-	return 0;
+	/* Compare original index for stable sort */
+	return a->index - b->index;
 }
 
 int compare_word(const void *x, const void *y)
