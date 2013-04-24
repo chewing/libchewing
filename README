@@ -167,6 +167,26 @@ because testchewing.exe prints the UTF-8 string, while Windows cannot
 print it to console.
 
 
+[-] Build with CMake
+
+libchewing supports cmake (http://www.cmake.org/) build system. You can use the
+following command to build with cmake:
+
+- cmake .
+- make
+
+cmake is also the preferred way to build libchewing on Windows platform due to
+better Windows integrated. You can use the following command to create Visual
+Studio project in 32-bits Windows platform:
+
+- cmake . -G "Visual Studio 11"
+
+or the following command to create Visual Studio project in 64-bits Windows
+platform:
+
+- cmake . -G "Visual Studio 11 Win64" (64-bits Windows)
+
+
 [-] Usage
 
 ( modified from http://code.google.com/p/ibus/wiki/ChewingUserGuide )
