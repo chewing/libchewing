@@ -1,5 +1,5 @@
 /**
- * testchewing.c
+ * testhelper.hewing.c
  *
  * Copyright (c) 2004, 2005, 2008, 2011
  *	libchewing Core Team. See ChangeLog for details.
@@ -9,29 +9,11 @@
  */
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define KEY_SLEFT 896
-#define KEY_SRIGHT 897
-#define KEY_LEFT 898
-#define KEY_RIGHT 899
-#define KEY_UP 990 
-#define KEY_DOWN 991
-#define KEY_SPACE ' '
-#define KEY_ENTER 992
-#define KEY_BACKSPACE 993
-#define KEY_ESC 994
-#define KEY_DELETE 995
-#define KEY_HOME 996
-#define KEY_END 997
-#define KEY_TAB 998
-#define KEY_CAPSLOCK 999
-#define KEY_CTRL_BASE 1000
-#define END 2000
 
 #ifdef USED_IN_SIMULATION
 #define MAXLEN 149
@@ -106,7 +88,6 @@ int main( int argc, char *argv[] )
 	ChewingContext *ctx;
 	char *prefix = CHEWING_DATA_PREFIX;
 	int i;
-	int ctrl_shifted;
 
 	/* Initialize libchewing */
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -128,63 +109,9 @@ int main( int argc, char *argv[] )
 
 	while ( 1 ) {
 		i = get_keystroke( get_char, NULL );
-		switch ( i ) {
-			case KEY_LEFT:
-				chewing_handle_Left( ctx );
-				break;
-			case KEY_SLEFT:
-				chewing_handle_ShiftLeft( ctx );
-				break;
-			case KEY_RIGHT:
-				chewing_handle_Right( ctx );
-				break;
-			case KEY_SRIGHT:
-				chewing_handle_ShiftRight( ctx );
-				break;
-			case KEY_UP:
-				chewing_handle_Up( ctx );
-				break;
-			case KEY_DOWN:
-				chewing_handle_Down( ctx );
-				break;
-			case KEY_SPACE:
-				chewing_handle_Space( ctx );
-				break;
-			case KEY_ENTER:
-				chewing_handle_Enter( ctx );
-				break;
-			case KEY_BACKSPACE:
-				chewing_handle_Backspace( ctx );
-				break;
-			case KEY_ESC:
-				chewing_handle_Esc( ctx );
-				break;
-			case KEY_DELETE:
-				chewing_handle_Del( ctx );
-				break;
-			case KEY_HOME:
-				chewing_handle_Home( ctx );
-				break;
-			case KEY_END:
-				chewing_handle_End( ctx );
-				break;
-			case KEY_TAB:
-				chewing_handle_Tab( ctx );
-				break;			
-			case KEY_CAPSLOCK:
-				chewing_handle_Capslock( ctx );
-				break;
-			case END:
-				goto end;
-			default:
-				ctrl_shifted = ( i - KEY_CTRL_BASE );
-				if ( ( ctrl_shifted >= '0' ) && ( ctrl_shifted <= '9' ) ) {
-					chewing_handle_CtrlNum( ctx, ctrl_shifted );
-				} else {
-					chewing_handle_Default( ctx, (char) i );
-				}
-				break;
-		}
+		if ( i == END )
+			goto end;
+                type_single_keystroke( ctx, i );
 		commit_string( ctx );
 #ifdef USED_IN_SIMULATION
 		if ( i == KEY_ENTER )

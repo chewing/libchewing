@@ -1,0 +1,2816 @@
+2011-02-27  Jim Huang  <jserv@0xlab.org>
+
+	* configure.ac: Bump version to 0.3.3
+	* NEWS: ditto.
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
+	* configure.ac,
+	src/tools/Makefile.am: Fix tools to run on the host system during
+	cross-compile.
+	Patched by Zach Kuznia <zork@chromium.org>
+	Review URL: http://codereview.chromium.org/2640005
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingio.c: Add inclusion for aux function.
+
+	* test/testchewing.c (get_keystroke),
+	test/simulate.c (fake_getchar) (fini_sim): Fix compilation warnings by
+	clang.
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
+	* data/tsi.src: Merged with libchewing-data.
+	* data/svnrev: Bump merged rev to r455
+	* NEWS: Ditto
+
+2011-02-20  Jim Huang  <jserv@0xlab.org>
+
+	* scripts/gendiff-from-libchewingdata.sh: Explicit use 'bash'
+
+2010-11-15  Jim Huang  <jserv@0xlab.org>
+
+	* test/simulate.c (init_sim),
+	test/simulate.sh: Support randomize testing key sequence.
+
+	* test/Makefile.am: clean materials.txt-random
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
+	* src/choice.c (SetAvailInfo): Refactored for parameter passing.
+	(ChoiceFirstAvail): Ditto.
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
+	* scripts/remove-autotool.sh: Remove include/config.h.in
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingio.c (chooseCandidate): New helper function.
+	(chewing_handle_Space) (chewing_handle_Down): Revise phrase choice
+	from rearward logic.
+
+	* src/choice.c (SeekPhraseHead): New helper function.
+	(SetAvailInfo) (ChoiceFirstAvail): Ditto.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+
+2010-11-13  Jim Huang  <jserv@0xlab.org>
+
+	* data/tsi.src: Add some entries to work around improper '不' cases.
+
+	* test/materials.txt: Update test cases.
+
+2010-11-10  Jim Huang  <jserv@0xlab.org>
+
+	* include/internal/chewing-private.h (wch_t): Ensure this structure is
+	aligned.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+	https://bugzilla.redhat.com/show_bug.cgi?id=625980
+
+2010-11-09  Jim Huang  <jserv@0xlab.org>
+
+	* src/common/key2pho.c,
+	src/common/chewing-utf8-util.c,
+	src/hanyupinyin.c,
+	src/char.c,
+	src/tools/sort_dic.c,
+	src/chewingutil.c,
+	src/zuin.c: Fix compilation warning with gcc-4.5
+
+2010-11-09  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingutil.c (EasySymbolInput),
+	include/internal/chewingutil.h: Shrink parameter.
+
+	* src/chewingio.c (chewing_handle_Default): Ditto.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingutil.c (HaninSymbolInput): Refactoring.  Simplify
+	prototype.
+	(OpenSymbolChoice): Ditto.
+	include/internal/chewingutil.h: Ditto.
+
+	* src/chewingio.c (chewing_handle_Default) (chewing_handle_CtrlNum):
+	Changed accordinly.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingio.c (addTerminateService),
+	src/private.h: Add typedef to simplify prototype.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* src/chewingutil.c (SymbolChoice): Fix unexpected candidate disorder
+	when doing symbol choice.
+
+	* src/hash.c (isValidChineseString): Avoid dangling pointer.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* src/common/key2pho.c (key_str),
+	src/chewingio.c (qkey),
+	src/zuin.c (IsDvorakHsuPhoEndKey) (IsET26PhoEndKey) (HsuPhoInput):
+	DvorakHsu tone mark should be same with Hsu's mark after conversion.
+
+	* src/choice.c (ChoiceInfoAppendChi): New helper function.
+	(SetChoiceInfo): Issue 10.  Fix the handling of phonetic symbols in
+	Hsu and Dvorak Hsu keyboard.  Refactoring.
+	(ChoiceFirstAvail) (ChoicePrevAvail) (ChoiceNextAvail): Refactoring.
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>
+
+	* include/internal/choice-private.h: Ditto.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* src/tools/sort_word.c (Output): Fix file descriptor leak
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* configure.ac: Properly add LIBTOOL_EXPORT_OPTIONS
+	patched by openSUSE.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* scripts/gendiff-from-libchewingdata.sh: Don't gendiff if given
+	svnrev <= original svnrev.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* data/phone.cin,
+	data/tsi.src: Merged with libchewing-data.
+	Changes:
+	- Remove incomplete lines to avoid tool from crashing
+	- Eliminate incorrect single character mapping
+
+	* data/svnrev: Bump merged rev to r454
+	* NEWS: Ditto
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* scripts/gendiff-from-libchewingdata.sh: Use LABEL instead of file
+	name during patch generation.
+
+2010-11-08  Jim Huang  <jserv@0xlab.org>
+
+	* data/svnrev: New file. Store the SVN revision number of last merge.
+
+	* data/NOTE: After merging changing from libchewing-data project,
+	please do update Subversion revision number in file "data/svnrev".
+
+	* scripts/gendiff-from-libchewingdata.sh: New file.  Used for
+	generting the diff files from libchewingdata between certain svnver
+	and last merge one.
+
+2010-11-07  Jim Huang  <jserv@0xlab.org>
+
+	* src/porting_layer/include/sys/plat_win32.h: Renamed
+	to src/porting_layer/include/sys/plat_windows.h
+	Platform transition from 'win32' to 'windows' for generic
+	win32, win64, and (possibly) wince support.
+
+	* src/porting_layer/src/plat_mmap_win32.c: Ditto.
+	Rename to src/porting_layer/src/plat_mmap_windows.c
+
+	* src/porting_layer/include/plat_types.h,
+	src/porting_layer/src/Makefile.am,
+	configure.ac: Changed accordingly.
+
+2010-11-07  Jim Huang  <jserv@0xlab.org>
+
+	* darwin/: Removed since ports maintainer would take care.
+
+2010-11-07  Jim Huang  <jserv@0xlab.org>
+
+	* src/tree.c (InitTree): Validate tree_size in binary data.
+
+2010-08-26  Jim Huang  <jserv@0xlab.org>
+
+	* src/hanyupinyin.c (InitHanyuPinYin): Ensure the explicit return
+	value when initialization process is done.
+
+2010-08-26  Jim Huang  <jserv@0xlab.org>
+
+	* src/choice.c: Fix implicit declaration of function 'ChoiceEndChoice'
+
+2009-10-01  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/mod_aux.c (chewing_zuin_String): issue 352, zuin_count should
+	return the number of zhuyin symbols. Thank dingyichen's report and fix.
+
+2009-02-01  Kuang-che Wu  <kcwu@csie.org>
+
+	* scripts/gen-tabe-diff.sh, scripts/tsi-chewing.diff,
+	scripts/cvsup-tsi-src.sh: Removed.
+
+2009-01-29  Jim Huang  <jserv.tw@gmail.com>
+
+	* python/chewing.py: Added cand_String, zuin_String and aux_String for
+	convenience.
+	Revised the removal of handle_Default.argtypes because handle_Default
+	accepts	(void *, int) instead of (void *, char).
+	Patched by Ding-Yi Chen <dingyichen@gmail.com>.
+	
+2009-01-24  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/tree.c (TreeFindPhrase): Fix memory access violation, the case
+	of leaf node (index value -1) was not handled.
+
+2008-12-08  Kuang-che Wu  <kcwu@csie.org>
+
+	* test/randkeystroke.c: Fix random key range, avoid genetate chr(0)
+	incorrectly. Provide random seed argument. Fix vim mode line.
+
+2008-12-04  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/private.h: Fix compile error if --enable-debug
+
+2008-12-01  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump version to 0.3.2 .
+
+	* TODO: Add new entry.
+
+	* NEWS: Update.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c: Fix build due to previous changes.
+
+2008-12-01  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/internal/tree-private.h (IS_USER_PHRASE) (IS_DICT_PHRASE): Hide
+	internal macro.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hash.c (TerminateHash): Release internal memory allocations.
+	`make -C test vcheck` dumps reasonable results:
+	==30989== LEAK SUMMARY:
+	==30989==    definitely lost: 0 bytes in 0 blocks.
+	==30989==      possibly lost: 0 bytes in 0 blocks.
+	==30989==    still reachable: 8,570 bytes in 582 blocks.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/gen_keystroke.c (main),
+	test/testchewing.c (main): Use refined chewing_delete() with IM
+	context instead of chewing_free.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* Doxyfile.in: To improve API documentation, enable the following
+	options:
+	  - INLINE_SOURCES
+	  - HAVE_DOT
+	  - CALL_GRAPH
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingio.h,
+	include/mod_aux.h,
+	include/global.h,
+	include/chewing.h,
+	include/internal/chewing-utf8-util.h,
+	src/mod_aux.c: Improve Doxygen-friendly text.
+	Take care about @param[in] and @param[out] and name group.
+
+2008-12-01  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h,
+	include/internal/chewing-private.h,
+	include/internal/chewing-utf8-util.h,
+	src/hanyupinyin.c,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/hash.c: Remove the inclusion of header <stdlib.h> and <stdio.h> in
+	Chewing API headers.  Place them in implementation C source files
+	instead.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingio.h,
+	include/global.h,
+	include/chewing.h: Improve Doxygen-friendly text.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* Doxyfile.in: Update with doxygen 1.5.7.1 -u.  Switch lang to
+	English.
+
+	* include/chewing.h: Initially documented for high level descriptions.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/Makefile.am: Launch valgrind via libtool.  Avoid linkage
+	problems.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/zuin.h: Removed.  We only need high level definitions so
+	far.
+
+	* include/internal/zuin-private.h: Merged the defintions orginally in
+	file include/zuin.h.
+
+	* include/chewing.h,
+	src/chewingio.c,
+	src/tools/sort_word.c,
+	src/chewingutil.c,
+	src/zuin.c,
+	Makefile.am: Ditto.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* Doxyfile.in: Ignore src/ directory since we refine APIs in headers.
+
+2008-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingio.h,
+	include/mod_aux.h,
+	include/global.h,
+	include/chewing.h,
+	include/zuin.h: Make Doxygen-friendly.
+
+2008-11-27  Kanru Chen  <kanru@kanru.info>
+
+	* include/chewingio.h,
+	src/chewingio.c (chewing_get_KBString): New API for retrieving kbtype in
+	string format.
+
+2008-11-27  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingio.c (chewing_get_KBType): Check kbtype's validity.
+
+2008-11-23  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingio.h,
+	src/chewingio.c (chewing_get_phoneSeq) (chewing_get_phoneSeqLen):
+	Globally defined.  No more Win32 specific.  Considering the usage of
+	chewing-utils, the two APIs are useful.
+
+2008-11-23  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hash.c (TerminateHash): New terminating service function
+	to free allocated hash entries.
+	(PhoneSeqTheSame): Avoid invalid memory access.
+	(InitHash): Hook TerminateHash and prepare hash list entry.
+	NOTE: there are still several memleaks.  Use "make -C test vcheck" to
+	digg.
+
+2008-11-22  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump version to 0.3.1.901 .
+
+2008-11-22  Kanru Chen  <kanru@kanru.info>
+
+	* include/chewingio.h,
+	src/chewingio.c (chewing_free) (chewing_delete): Renamed.
+	(chewing_free): Used to free memory allocated by chewing.
+	(chewing_get_phoneSeq) (chewing_get_phoneSeqLen):
+	Win32 needs this two function.
+
+	* src/hash.c (HashItem2Binary) (_load_hash_file): Exported for
+	internal use.
+
+2008-11-19  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/dict.c: mmap use original file size.
+
+2008-11-19  Kanru Chen  <kanru@kanru.info>
+
+	* src/mod_aux.c: Only return by argument if the pointer is not NULL.
+
+2008-11-16  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h (struct ChewingConfigData)
+	include/chewingio.h: Added bPhraseChoiceRearward.
+
+	* src/chewingio.c (chewing_Configure)
+	(chewing_set_phraseChoiceRearward) (chewing_get_phraseChoiceRearward):
+	Ditto
+
+	* src/choice.c (ChoiceFirstAvail): bPhraseChoiceRearward indicates the
+	behavior for phrase choice to be rearward or not.
+
+	* test/gen_keystroke.c (main): Initialize configurations with
+	chewing_set_autoShiftCur and chewing_set_phraseChoiceRearward.
+
+2008-11-14  Kanru Chen  <kanru@kanru.info>
+
+	* src/private.h: Add STATIC_ASSERT macro.
+
+	* include/internal/zuin-private.h,
+	include/zuin.h,
+	src/tools/sort_word.c: Convert KB_* macros to enum.
+
+	* include/internal/chewing-private.h,
+	include/mod_aux.h,
+	src/chewingio.c,
+	src/mod_aux.c: New APIs to enumerate supported keyboard types.
+
+2008-11-14  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/internal/chewing-private.h: Move bAutoShiftCur and
+	bEasySymbolInput from ChewingData to ChewingConfigData.
+
+	* include/chewingio.h,
+	src/chewingio.c,
+	src/chewingutil.c: Add set/get function of bAutoShiftCur and
+	bEasySymbolInput attribute.
+
+2008-11-14  Kanru Chen  <kanru@kanru.info>
+
+	* NEWS: Update.
+
+2008-11-08  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/dict.c: Don't do void pointer arithmetic.
+
+2008-11-03  Kanru Chen  <kanru@kanru.info>
+
+	* src/choice.c (ChoiceFirstAvail): Catch the zero phrase case.
+
+2008-10-28  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingutil.c (AutoLearnPhrase): Fix the last phrase is new phrase
+	case.
+
+2008-10-28  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingutil.c (ChewingIsBreakPoint) (AutoLearnPhrase): Add
+	experimental auto new phrase learning based on heuristic rules mentioned
+	in "port bimsphone algorithm to libchewing".
+
+2008-10-26  Kanru Chen  <kanru@kanru.info>
+
+	* include/internal/chewing-utf8-util.h,
+	src/common/chewing-utf8-util.c (ueStrNBytes): New helper function.
+
+	* src/chewingio.c,
+	src/tree.c: Don't ignore length parameter when comparing two strings.
+
+2008-10-26  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingio.c,
+	src/chewingutil.c,
+	src/choice.c,
+	src/tree.c,
+	src/userphrase.c: Fix improper use of MAX_UTF8_SIZE. This is a serious
+	bug that can lead to wrong phrasing result.
+
+2008-10-25  Kanru Chen  <kanru@kanru.info>
+
+	* src/tree.c (FindInterval): Cleanup duplicated codes.
+
+2008-10-25  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingio.c: Check memory allocation before using it.
+
+2008-10-25  Kanru Chen  <kanru@kanru.info>
+
+	* include/internal/chewingutil.h (CountSymbols) (PhoneSeqCursor): New
+	function for calculating phone cursor position.
+
+	* include/internal/char-private.h,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/choice.c: Remove cursor field, replaced by PhoneSeqCursor function.
+
+	* src/choice.c (ChoiceFirstAvail): Use preferInterval instead of
+	phrOut.dispInterval to calculate phrase position.
+
+	* test/gen_keystroke.c: Show all interval.
+
+2008-10-24  Jim Huang  <jserv.tw@gmail.com>
+
+	* README: Update integration status and descriptions.
+	Put the logo generated by figlet.
+
+2008-10-23  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/common/key2pho.c (zhuin_tab) (zhuin_tab_num),
+	src/chewingutil.c (SetUpdatePhraseMsg) (SpecialSymbolInput)
+	(symbol_buf): Added human readable comments around the HEX values.
+	The reason why we convert string literal to hex representation is for
+	the sake of portability, that avoids some buggy or faulty environment
+	like Microsoft VC9 to misinterpret the string.
+
+2008-10-23  Kanru Chen  <kanru@kanru.info>
+
+	* Makefile.am: We no longer ship hanyupinyin.h, so remove it.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
+	* src/common/key2pho.c,
+	src/chewingutil.c: Convert string literal to hex representation for
+	maximum portability.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
+	* src/chewingio.c (chewing_handle_Esc): Remove the hack of
+	SemiSymbolInput since SemiSymbolInput no longer exists.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/chewingutil.c,
+	src/dict.c,
+	src/tree.c: Use PATH_MAX.
+
+2008-10-22  Kanru Chen  <kanru@kanru.info>
+
+	* include/internal/hanyupinyin-private.h,
+	src/chewingio.c,
+	src/hanyupinyin.c: Use consistent API to load hanyupinyin table.
+
+	* include/hanyupinyin.h: Removed.
+
+	* include/chewing.h,
+	src/zuin.c: Fix including.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Add PATH_MAX definition.
+
+2008-10-22  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c (chewing_Init): Touch bTerminateCompleted after
+	initialization.
+
+	* src/private.h (TerminateServicesNUM): Fix limit of terminating
+	service number since new services are added.
+
+	* test/simulate.c (FILE *fp): Properly init to NULL.
+
+2008-10-21  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/simulate.c: New file.  Rewrite bacth simulating script in C to
+	gain more features such as high-lighting difference and statistics.
+	The reference output:
+	[ Report ]
+	Checks: 385 words,  Failures: 34 words
+	Ratio: 91.17%
+
+	* test/simulate.sh: Wrapper to executable "simulate".
+
+	* test/testchewing.c
+	(commit_string) (main): Used in simulate.c file.
+	(compare_per_run): New function.  Simply compare two UTF-8 character
+	between expected and committed string.
+
+	* test/Makefile.am: Added "simulate" program.
+
+2008-10-20  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (internal_release_Phrase) (FindInterval): Use distinct
+	enumeration for used phrase type instead of numbers.
+
+2008-10-20  Kanru Chen  <kanru@kanru.info>
+
+	* python/chewing.py,
+	python/test.py: Add initial python binding code.
+
+2008-10-20  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/materials.txt: Added test cases from academic papers and
+	discussions.
+
+2008-10-19  Kanru Chen  <kanru@kanru.info>
+
+	* src/hanyupinyin.c,
+	src/mod_aux.c,
+	src/tools/maketree.c,
+	src/tools/sort_word.c,
+	src/tree.c,
+	test/gen_keystroke.c,
+	test/testchewing.c: Misc. cleanup.
+
+2008-10-19  Kanru Chen  <kanru@kanru.info>
+
+	* src/tree.c: Combine mmseg and chewing algorithm into score based
+	algorithm.
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/materials.txt: Imported some test cases from rt.openfoundry.org
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/debug-chewing-shell.sh: New script to automake the actions to
+	debug genkeystroke via gdb.
+
+	* test/README: Mentioned debug-chewing-shell.sh
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/simulate.sh,
+	test/materials.txt: New batch simulating script.  It makes use of
+	program "testchewing" from test suite and compare with the expected
+	string correspondingly defined in file materials.txt.  The reference
+	output:
+	[Committed] 就平常交鋼琴
+	[Expected]  就平常教鋼琴
+
+	* test/README: Mentioned simulate.sh
+
+	* test/Makefile.am: Default test data should point to
+	$(top_srcdir)/test instead of $(top_builddir)/test.
+
+2008-10-19  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (InitTree),
+	src/char.c (InitChar),
+	src/dict.c (InitDict): Properly initialize plat_mmap instances and
+	verify them by plat_mmap_is_valid().
+
+	* src/porting_layer/src/plat_mmap_posix.c (plat_mmap_is_valid): Fix
+	faulty implementation on verifying file descriptor.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/README: Mentioned randkeystroke as the stress test for
+	libchewing robustness.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (struct smart_com) (rule_largest_sum)
+	(rule_largest_avgwordlen) (rule_smallest_lenvariance)
+	(rule_largest_freqsum) (filter_by_rule) (add_comb)
+	(DetermineFirstTsi): New functions.  Implemented the algorithm used
+	in bimsphone, which is based on mmseg:
+	http://technology.chtsai.org/mmseg/
+	This work was done by Kuang-che Wu  <kcwu@csie.org>.
+
+	* src/tree.c (Phrasing): Switching to mmseg based algorithm when all
+	phrases in interval exist and number of phonetic sequence > 3.
+	NOTE: we will need to improve test suite to check the performance and
+	accuracy.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/README: Added the information about debugging genkeystroke.
+	The way to debug genkeystroke via gdb is a bit tricky since it uses
+	ncurses library.  We use two X terminals to do this.
+
+2008-10-18  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/tsi.src: Merged with libchewing-data project.
+	Last change: r342 | sky008888 | 2008-07-04 23:09:07 +0800
+
+	* data/phone.cin: Cherry pick from libchewing-data.
+
+	* data/phone.cin-CNS11643-complete.patch: Split the phone-word pair
+	that CJKUnifont doesn't display from data/phone.cin .
+
+2008-10-16  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h,
+	configure.ac: Disable GCC visibility support on gcc 3.x .
+	Although there are several gcc patches included in some gcc 3
+	distributions, they are somehow buggy until gcc4 finally releases.
+	Also, visibility is enabled on gcc4 by default.
+
+2008-10-15  Kanru Chen  <kanru@kanru.info>
+
+	* src/char.c,
+	src/tools/sort_word.c: Enable us_freq.dat binary format.
+
+2008-10-15  Kanru Chen  <kanru@kanru.info>
+	
+	* data/Makefile.am,
+	include/internal/global-private.h,
+	src/char.c,
+	src/tools/Makefile.am,
+	src/tools/dat2bin.c,
+	src/tools/maketree.c,
+	src/tools/sort_dic.c,
+	src/tools/sort_word.c,
+	test/Makefile.am: Generate binary data in place.
+
+2008-10-15  Kanru Chen  <kanru@kanru.info>
+
+	* src/dict.c (TerminateDict) (InitDict) (Str2Phrase): Rewrite dict
+	binary data manipulation by using mmap.
+
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (OutputRecordStr): clean up dead code.
+
+	* src/chewingio.c,
+	src/zuin.c,
+	src/choice.c: Proper inclusion.
+
+	* src/dict.c (fgettab): Conditional build.
+
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/internal/hash-private.h,
+	include/internal/tree-private.h,
+	src/tree.c,
+	src/hash.c,
+	src/chewingio.c (chewing_Init): Consistent naming for internal APIs.
+	Rename from ReadHash to InitHash.  Rename from ReadTree to InitTree.
+
+2008-10-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (TerminateTree) (ReadTree),
+	src/char.c (TerminateChar) (InitChar),
+	src/dict.c (TerminateDict) (InitDict): Rewrite binary data
+	manipulation by using mmap (memory mapped, provided by porting_layer).
+	Expected to dramatically reduce loading	time.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* src/dict.c,
+	src/tools/sort_dic.c: Make sort_dic produce binary data.
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/Makefile.am: Quiet copy default test data.
+
+	* src/tree.c (ShowList),
+	src/chewingutil.c (ShowChewingData): Debug output tweaking.
+
+	* src/chewingutil.c (CallPhrasing): Dump chewing data internals when
+	debug mode.
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/choice.c,
+	src/tree.c: Move the declaration of [TreeType] tree from ... to ...
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hash.c (formatstring): Removed since it does nothing readable.
+	(HashModify): Simplified hash output text.
+
+2008-10-14  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Refactor enabling rules.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* test/Makefile.am,
+	test/randkeystroke.c: Add randkeystroke test program.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+	
+	* include/mod_aux.h (chewing_cursor_Current): Correct return type.
+
+	* test/gen_keystroke.c: Add back cursor position.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/internal/chewing-private.h: Expose InternalType.
+
+	* include/mod_aux.h,
+	src/mod_aux.c (chewing_interval_Enumerate) (chewing_interval_hasNext)
+	(chewing_interval_Get): New API to enumerate intervals.
+
+	* test/gen_keystroke.c: Use new API to display intervals.
+
+2008-10-14  Kanru Chen  <kanru@kanru.info>
+
+	* src/mod_aux.c (cand_no_max): Remove unnecessary static variable.
+
+	* include/internal/chewing-private.h,
+	src/tree.c (PhraseIntervalType): Move from ... to ...
+
+	* include/global.h,
+	include/internal/tree-private.h (ReadTree): Ditto.
+
+	* include/hanyupinyin.h,
+	include/internal/hanyupinyin-private.h,
+	src/hanyupinyin.c: Hide private structure.
+
+2008-10-13  Kanru Chen  <kanru@kanru.info>
+
+	* test/gen_keystroke.c (set_cursor): Removed.
+
+2008-10-12  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h: Added macro UNUSED = __attribute__((unused)).
+
+	* include/internal/chewingutil.h: Removed static functions.
+
+	* src/tree.c (ReadTree): Added terminating service: TerminateTree.
+
+	* src/hanyupinyin.c (chewing_set_PinYinMethod): Confirming vaild
+	PinYin method type.
+	(HanyuPinYinToZuin): Eliminate compiler warning.
+
+	* src/chewingio.c (chewing_Configure)
+	(chewing_set_selKey) (chewing_handle_Up) (chewing_handle_ShiftSpac):
+	Mark UNUSED parameters.
+
+	* src/tools/dat2bin.c (main): Properly initialize TreeType.
+
+	* src/chewingutil.c (HaninSymbolInput) (_Inner_InternalSpecialSymbol)
+	(EasySymbolInput): Mark UNUSED parameters.
+	(FindSymbolKey) (TerminateSymbolTable) (TerminateEasySymbolTable):
+	Eliminate compiler warning.
+
+	* src/hash.c (HashItem2String): Conditional build with ENABLE_DEBUG.
+	(HashItem2Binary) (ReadHashItem_bin) (migrate_hash_to_bin): Eliminate
+	compiler warning.
+
+	* src/tools/sort_word.c,
+	src/tools/sort_dic.c,
+	src/userphrase.c,
+	src/chewingutil.c,
+	src/zuin.c: Proper inclusion for internal headers.
+
+	* configure.ac: Refactor --enable-debug detection.
+
+2008-10-11  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h,
+	include/internal/global-private.h: Move filename definitions to the
+	later.  Not necessary to expose chewing data filename information.
+
+	* src/tree.c,
+	src/char.c,
+	src/tools/sort_word.c,
+	src/tools/sort_dic.c,
+	src/tools/maketree.c,
+	src/chewingutil.c,
+	src/dict.c: Ditto.  Proper inclusion.
+
+	* Makefile.am: Remove internal headers.
+
+2008-10-11  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tree.c (ReadTree),
+	src/char.c (InitChar),
+	src/dict.c (InitDict),
+	src/tools/Makefile.am,
+	data/Makefile.am,
+	configure.ac: Enable binary data representation.  Default: enabled.
+
+2008-10-10  Kanru Chen  <kanru@kanru.info>
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c: Add public interfaces to set/get configs.
+
+2008-10-09  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Add gcc visibility support.
+
+	* include/char.h,
+	include/chewing-utf8-util.h,
+	include/chewing.h,
+	include/dict.h,
+	include/global.h,
+	include/hash.h,
+	include/mod_aux.h,
+	include/userphrase.h,
+	include/zuin.h: Remove internal interfaces.
+
+	* include/internal/char-private.h,
+	include/internal/chewing-private.h,
+	include/internal/chewing-utf8-util.h,
+	include/internal/chewingutil.h,
+	include/internal/choice-private.h,
+	include/internal/dict-private.h,
+	include/internal/hash-private.h,
+	include/internal/key2pho-private.h,
+	include/internal/tree-private.h,
+	include/internal/userphrase-private.h,
+	include/internal/zuin-private.h: Put internal interfaces here.
+
+	* src/Makefile.am,
+	src/char.c,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/chewingutil.h,
+	src/choice.c,
+	src/common/Makefile.am,
+	src/common/key2pho.c,
+	src/dict.c,
+	src/hash.c,
+	src/mod_aux.c,
+	src/porting_layer/src/Makefile.am,
+	src/tools/Makefile.am,
+	src/tools/sort_word.c,
+	src/tree.c,
+	src/userphrase.c,
+	src/zuin.c,
+	test/Makefile.am,
+	test/gen_keystroke.c: Adjust including path.
+
+2008-10-01  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac:
+	Migrate check module to use pkg-config.
+	Bump version to 0.3.1
+
+	* chewing.pc.in: Add --datarootdir.
+
+2008-09-23  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac:	Change ABI version to 3.1.0
+	libchewing 0.3 stands for development branch.  We intend to break
+	API/ABI at the stage.  As the result, there would not be major version
+	change in library.
+
+	* NEWS: Updated.
+
+2008-09-20  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump version to 0.3.0.902
+
+2008-09-20  Kanru Chen  <kanru@kanru.info>
+
+	* configure.ac: Bump ABI version to 4.0.0
+
+2008-07-07  Kanru Chen  <kanru@kanru.info>
+
+	* test/gen_keystroke.c:	Fix choice buffer output.
+
+	* src/mod_aux.c (chewing_cand_String): Kill memory leak.
+
+2008-07-04  Kanru Chen  <kanru@kanru.info>
+
+	* include/global.h,
+	include/zuin.h,
+	src/chewingio.c,
+	src/common/key2pho.c,
+	src/zuin.c: Apply DACHEN_CP26 patch, thanks Paul Liu.
+
+2008-04-28  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c:
+	Refactorized chewing_get_ChiEngMode( ChewingContext *ctx ).
+
+2008-04-02  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/chewingio.c,
+	src/chewingutil.c,
+	src/chewingutil.h: SemiSymbolInput() is useless.
+
+2008-03-30  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/zuin.c:
+	 Type symbols easily for PinYin input.
+
+2008-02-11  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/choice.c: 
+	 Behaivor changed: Doing select at the end of edit buffer works on the
+	 last phrase (interval).
+
+2008-02-08  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Make use of AC_CONFIG_AUX_DIR.
+
+	* autotools: New directory containing files generated by autotools.
+
+	* scripts/remove-autotool.sh: Likewise.
+
+2008-02-07  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c,
+	src/hash.c,
+	src/choice.c,
+	src/porting_layer/include/plat_mmap.h,
+	src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c: Update copyright date.
+
+2008-02-07  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/tsi.src: Sync with libchewingdata project.
+
+	* test/Makefile.am: Added uhash.dat in CLEANFILES.
+
+2008-02-05  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/chewingio.c
+	(chewing_handle_Default) (chewing_handle_CtrlNum):
+	When users cancel symbol table by "ESC" key, it causes system to step
+	into wrong state.
+	Openning symbol table needs to invoke semi-symbol input.
+
+2008-01-16  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h:
+	Correct the API documentation of chewing_get_ChiEngMode and
+	chewing_get_KBType.
+
+	* include/global.h:
+	Fix the missing plusses, thanks Bell Kin <kinbell4@gmail.com>.
+	* include/global.h:
+	Remove redundant definition of keyboard types.
+
+2008-01-08  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c,
+	src/porting_layer/src/plat_mmap_posix.c,
+	include/global.h,
+	include/chewingio.h: Keyboard layout toggle button on toolbar.
+	( Added a button for keyboard type change. It won't save to config 
+	but just for input a character occasionally if such combination keys
+	are suddenly forgotten. )
+
+2007-10-22  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/hash.c (ReadHash): Fix user's hash.dat not functional.
+
+2007-04-20  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c: Closes candidate window when user pressed Up key.
+	(Compared to Down key for opening candidate window implemented 
+	currently.)
+
+2007-01-03  Caius Chance  <cchance@redhat.com>
+
+	* src/choice.c: Clear previous cnadidates before population of new 
+	candidates. (Re-fixed as changes made on 2006-12-18 was not 
+	effective.)
+
+2006-12-29  Jim Huang  <jserv.tw@gmail.com>
+
+	Merge from the latest libchewingdata
+
+	* data/tsi.src: Sync with libchewingdata project.
+	There are some missing glyph shown in rxvt-unicode, so omitted at the
+	moment.
+
+2006-12-18  Jim Huang  <jserv.tw@gmail.com>
+
+	Erase candidate and reset its length when Esc key is handled.
+
+	* src/chewingio.c (chewing_handle_Esc): Adjust the number of output
+	commit string according to chiSymbolBufLen.
+	Suggested by Caius Chance  <cchance@redhat.com>.
+
+2006-12-05  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Search $prefix/{include,lib} path first while checking
+	ncurses/ncursesw libraries. This is useful to cross-build.
+
+	* test/gen_keystroke.c: Add conditional include of ncurses.
+
+2006-12-05  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/chewingutil.c (CleanAllBuf): nPrefer should also be cleaned when
+	clean all bufffer. Otherwise the status of candidate is incorrect
+	(after press "Enter" commit).
+
+2006-12-04  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix portability issues on FreeBSD.
+	* autogen.sh: FreeBSD sh only support = for test, not ==.  Variable
+	setting should be properly quoted.
+
+	* configure.ac test/gen_keystroke.c: widec version of ncurses.h is in
+	/usr/local/include/ncurses on FreeBSD. And library in /usr/local/lib.
+
+	* test/Makefile.am: Remove libncurses dependency for testchewing.c.
+	It's no longer needed.
+
+	* test/testchewing.c: support ShiftLeft and ShiftRight key.
+
+2006-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	Fix errors in EasySymbolInput while previous merge.
+
+	* src/chewingutil.c (InitSymbolTable) (InitEasySymbolInput): Replace
+	malloc with ALC macro.
+	(InitEasySymbolInput): Fix wrong string calls.
+
+2006-11-30  Jim Huang  <jserv.tw@gmail.com>
+
+	Most window systems bind ctrl- combination keys to specific system
+	functions, which makes chewing_handle_CtrlOption API being less
+	useful. So, just removed.
+
+	* include/chewingio.h,
+	src/chewingio.c (chewing_handle_CtrlOption): Remove unused API
+	function.
+
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c (chewing_handle_CtrlNum): Return while selecting.
+	Invoke symbol input with Ctrl-[01].
+
+	* src/chewingutil.c,
+	src/chewingutil.h (SpecialEtenSymbolInput): Remove unused function.
+
+	* data/Makefile.am: Fixlet to install-data-local list.
+
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/Makefile.am: Link to internal libraries to avoid unresolved
+	symbols.
+
+2006-11-28  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/tools/sort_dic.c (main): Fix typo in fclose.
+
+	* src/hash.c (migrate_hash_to_bin): Avoid memory leak.
+	(ReadHash): recalculate	chewing_lifetime.
+
+	* src/Makefile.am: Replace $(LIBTOOL_EXPORT_OPTIONS) with
+	`-export-symbols-regex "^(chewing)_"' to make sure exporting the right
+	Chewing API.
+
+	* data/Makefile.am: Move swkb.dat and symbols.dat to
+	install-data-local instead of datas section.
+
+2006-11-26  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/chewingutil.c (SetUpdatePhraseMsg): Ticket #15025. Improve
+	message text.
+
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix bug: When insert symbol via '`' and trigger auto commit, Chewing
+	may crash.
+
+	* src/chewingio.c (chewing_handle_Default): The saved cursor position
+	is incorrect due to auto commit. Defer auto-commit until selection.
+
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix bug: When insert character in front of buffer and trigger auto
+	commit, Chewing may crash.
+
+	* src/chewingutil.c (ChewingKillChar): Don't allow cursor move left
+	beyond 0.
+
+2006-11-25  Kuang-che Wu  <kcwu@csie.org>
+
+	Fix bug: Chewing won't auto commit the string in buffer even string is
+	too long.  This may lead buffer overflow and crash.
+
+	* src/chewingutil.c (CountReleaseNum): When 1st character in buffer is
+	not Zi and 2nd is, the number ready to commit is 1, not 0.  Fix the
+	number off by 1.
+
+2006-11-22  Caius Chance  <cchance@redhat.com>
+
+	Release Page Up / Page Down key event to running applications.
+	(Fixed Page Up / Page Down key doesn't work when Chewing is activated.)
+
+	* src/chewingio.c
+	(chewing_handle_PageUp): Codes cloned from chewing_handle_Home().
+	(chewing_handle_PageDown): Same as above.
+	* include/chewingio.h
+	(chewing_handle_PageUp): Same as above.
+	(chewing_handle_PageDown): Same as above.
+
+2006-11-16  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingutil.c (InitEasySymbolInput): Fixlet to invalid
+	pointer.
+
+2006-11-16  Jim Huang  <jserv.tw@gmail.com>
+
+	Merge win32-utf8 branch and fix incorrect initialization.
+
+	* include/global.h
+	(struct SymbolEntry): New structure as entry of symbol table.
+	(struct ChewingData): Rename selectAreaLen to candPerPage. Added
+	bEasySymbolInput.
+
+	* src/chewingio.c
+	(chewing_Init): initialize Symbol Table.
+	(chewing_Reset): Backup old config and restore it after clearing
+	pgdata structure. This is important to avoid crash when switching
+	different IM engines.
+	(chewing_Configure): Rename selectAreaLen to candPerPage.
+	(chewing_handle_Esc): Modify symbol checking rule.
+	(chewing_handle_Default): Added bEasySymbolInput checks, and see if
+	EasySymbolInput should be invoked.
+	Added key '`' to open symbol table.
+	(chewing_handle_CtrlNum): Since we are using key '`' for open symbol
+	table, ctrl-[01] action is turned off. However, it could still be
+	implemented for customized tables later.
+
+	* src/tools/sort_dic.c (SetNewline2Zero) (main): Ignore '#' comment
+	in tsi.src .
+	Here are enumerations:
+	  1. # comment with first character '#'
+	  2. # comment after some spaces
+	  3. data ... # comment after data
+	  4. allow blank line in tsi.src
+
+	* src/chewingutil.c (symbol_table) (n_symbol_entry)
+	(g_easy_symbol_key) (g_easy_symbol_value) (g_easy_symbol_num)
+	(symbol_buf): New variables for new symbol table handling.
+	(FindEasySymbolIndex): New helper function. Find out Easy symbol index
+	using binary search.
+	(SetUpdatePhraseMsg): Separate internal table and look up
+	symbol_table.
+	(_Inner_InternalSpecialSymbol): New helper function.
+	(InternalSpecialSymbol): Reimplemented using
+	_Inner_InternalSpecialSymbol.
+	(EasySymbolInput): New function for help user to input symbols easily.
+	(InitSymbolTable): Ditto.
+	(InitEasySymbolInput): Ditto.
+	(SymbolChoice): Reimplemented. Support multi-level symbol choosing.
+	(OpenSymbolChoice): Ditto.
+	(CountReleaseNum): Count symbol as well.
+	(FindSymbolKey): New helper function.
+	(TerminateSymbolTable) (TerminateEasySymbolTable): New helper function
+	registered in terminating serivces.
+
+	* src/chewingutil.h: Likewise.
+
+	* src/hash.c (ComputeChewingLifeTime): Removed.
+	(ReadHash): Fix bug of re-base recentTime.
+
+	* src/choice.c (SetChoiceInfo) (ChoicePrevAvail) (ChoiceNextAvail):
+	Rename selectAreaLen to candPerPage.
+	(ChoiceEndChoice): Added symbol check.
+
+	* data/symbols.dat,
+	data/swkb.dat: New files. Used for symbol input.
+
+	* data/Makefile.am,
+	test/Makefile.am: Ditto.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Fix for naming.
+
+	* configure.ac: Bump version to 0.3.091 .
+
+	* AUTHORS: Updated.
+
+2006-11-08  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/choice.c (SetAvailInfo):
+	Fix bug, when list available phrases to choice, user's own phrases are
+	not included.  This was fixed by Andy Horng <andyhorng168@gmail.com>
+	in r537 win32 branch.
+
+2006-11-04  Kuang-che Wu  <kcwu@csie.org>
+
+	* src/tree.c (NextCut): Fix memory leak. (ticket #20818)
+
+2006-10-30  Caius Chance  <cchance@redhat.com>
+
+	* src/chewingio.c (chewing_handle_ShiftSpace):
+	Fixed chewing switch between Full/Half mode and cursor moves one 
+	space in gedit.
+	(Shift + Space should just only trigger between Full-width and Half-
+	width.)
+
+2006-06-19  Jeff Chen  <wiz.chen@gmail.com>
+
+	* data/pinyin.tab:
+	A new HanYu-PinYin mapping table contributed by Alexander Beels.
+
+	* src/hanyupinyin.h (chewing_set_PinYinMethod),
+	src/hanyupinyin.c:
+	Adding a new API --- "chewing_set_PinYinMethod" to support multiple
+	PinYin methods. 
+	Using the implementation of 0.2.x instead of current one.
+
+	* src/zuin.c (IsSymbolKey):
+	Adding "IsSymbolKey" function to make PinYin method support symbol
+	input.
+
+2006-05-20  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/char.c (Str2Word),
+	src/dict.c (Str2Phrase): Clarify the retrieval from char/dict data.
+	In the previous revision, sscanf with %s was used, and isspace(0xa0)
+	returns 1 on some BSD libc implementations due to the sematics of non
+	breaking space, that is platform-dependent.
+	Patched by Rong-En Fan <rafan@infor.org>.
+
+2006-05-20  Jeff Chen  <wiz.chen@gmail.com>
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin):
+	  The return value of HanyuPinYinToZuin should not be zero when
+	  looking up table failed.
+
+	* src/zuin.c (PinYinInput):
+	  It should clean the buffer of PinYin data and return "ZUIN_ABSORB"
+	  to ignore the current key when converting failed.
+
+2006-05-19  Jeff Chen  <wiz.chen@gmail.com>
+
+	* data/pinyin.tab (fix key order): put "shun" before "shuo".
+	
+	* src/hanyupinyin.c (InitMap): The upper limit of for-loop should 
+	be N_TOTAL not (N_TOTAL - 1).
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Bump version to 0.3.0 (final).
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Bump ABI major version.
+
+	* data/Makefile.am,
+	src/tools/Makefile.am,
+	configure.ac: Disable --enable-binary-data option.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Fill chewing-devel@googlegroups.com as contact
+	address.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c (chewing_handle_Default): Update lifetime.
+
+2006-05-15  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/phone.cin-CNS11643-complete.patch: New file. Extract all entries
+	that CJKUnifont doesn't contain from data/phone.cin .
+	Used for reference only.
+
+	* data/phone.cin: Hugely reduced.
+	Chewing could output most of Unihan (Extension A and B).
+
+2006-05-11  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hash.c (HashModify) (ReadHash):
+	Initiate variable at correct location and fix incorrect record locate
+	expression to avoid crashes if users don't have their own hash.dat .
+	Patched by James Huang <seamxr@gmail.com>.
+
+2006-05-10  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/hanyupinyin.c (FreeMap) (InitMap): Fix incorrect file operation.
+
+2006-05-10  Jim Huang  <jserv.tw@gmail.com>
+
+	* configure.ac: Bump version to 0.2.94 .
+
+2006-05-10  Jim Huang  <jserv.tw@gmail.com>
+
+	* debian/*: Removed. Debian@Taiwan maintains the packaging.
+
+2006-05-09  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/Makefile.am,
+	src/tools/dat2bin.c,
+	src/tools/maketree.c,
+	src/sort_word.c: Fix binary data build process.
+
+2006-05-08  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c (chewing_handle_Default): Ignore non-printable
+	input to avoid unexpected behavior.
+
+2006-05-08  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/userphrase.h (UserGetPhraseFirst),
+	src/userphrase.c (UserGetPhraseFirst): Removed since unused.
+
+	* include/hash.h (HASH_FILE): Redefine from "hash.dat" to "uhash.dat".
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin): Fixlet and insert
+	DEBUG_CHECKPOINT for future handling.
+
+	* src/private.h (DEBUG_CHECKPOINT): Added filename information.
+
+	* data/Makefile.am: Install pinyin.dat .
+
+2006-05-06  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/Makefile.am,
+	src/common/Makefile.am: Fixlet to distclean.
+
+	* Makefile.am: Fixlet to installed headers.
+
+	* configure.ac: Bump version to 0.2.93 .
+
+2006-05-06  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/chewingutil.h,
+	src/chewingutil.h: Move from ... to ...
+
+	* include/global.h,
+	src/tree.c (IsContain),
+	src/chewingutil.c (FindIntervalFrom) (CountReleaseNum) (KillFromLeft)
+	(ShowChewingData) (ChewingKillSelectIntervalAcross)
+	(KillCharInSelectIntervalAndBrkpt): Marked as static.
+
+	* data/Makefile.am: Improved time stamp handling for data generation.
+
+	* data/NOTE: Added constant-calculating information.
+	
+2006-05-04  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* Makefile.am,
+	data/Makefile.am,
+	include/char.h,
+	include/global.h,
+	src/Makefile.am,
+	src/char.c,
+	src/choice.c,
+	src/tools/maketree.c,
+	src/tools/sort_word.c,
+	src/tree.c:
+	Automatically generate "src/chewing-definition.h" which contains
+	definition of TREE_SIZE and PHONE_NUM.
+			  
+2006-05-02  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/char.h,
+	include/global.h: Adjust MAGIC constant size.
+
+2006-05-02  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/private.h,
+	src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Clean up private.h .
+	
+2006-05-02  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/hash.h
+	(BIN_HASH_SIG): New macro. Used for new binary-based hash data
+	signature.
+	(AlcUserPhraseSeq): Change prototype to assign phonelen and wordlen.
+
+	* src/userphrase.c (UserUpdatePhrase): Fix buggy memory allocation.
+
+	* src/hash.c
+	(AlcUserPhraseSeq) (HashInsert) (HashItem2String): Ditto.
+	(HashItem2Binary): New helper function. Convert Hash items to binary
+	form.
+	(HashModify): Handle hash storage via HashItem2Binary.
+	(isValidChineseString): New helper function. Check if input is a valid
+	Chinese string.
+	(ReadHashItem_bin) (ReadHashItem_txt): New helper function. Separate
+	ReadHashItem to two functions for binary and text-based form.
+	(open_file_get_length) (_load_hash_file) (migrate_hash_to_bin): New
+	helper functions. Used for binary hash file format and workaround for
+	hash corruption.
+	(ReadHash): Make use of the above new changes.
+	Taken from win32-utf8 branch, and modified with porting_layer.
+	Patched by James Huang (seamxr) <seamxr@gmail.com>.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h (PLAT_RENAME)
+	(PLAT_UNLINK): New macros. Wrapper for rename / unlink.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* data/tsi.src: Remove all suffix <CR>.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/gen_keystroke.c (main): Call curses::clear() to turn off the
+	annoying messages when debug enabled.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingio.c: Remove redundant WIN32 definitions since we have
+	porting_layer.
+
+	* src/hash.c (ReadHash): Clean up platform-dependent implementation.
+
+	* src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h: Define platform-dependent
+	tmp_dir / mkdir.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/common/key2pho.c (zhuin_tab): Add prefix space to distinguish
+	zhuin type to fix MakeOutput errors.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* test/gen_keystroke.c (show_edit_buffer): Fixlet to wrong casting.
+
+	* include/hash.h (ReadHash),
+	src/hash.c (ReadHash): Change prototype from char * to const char *.
+
+	* include/chewing-utf8-util.h (ueStrNCpy),
+	src/common/chewing-utf8-util.c (ueStrNCpy): Change prototype from char
+	dest* to char dest[].
+
+	* src/tree.c (GetIntersection) (CompLen) (CompLenDescend) (CompFrom):
+	Removed since unused.
+
+	* src/hanyupinyin.c (HanyuPinYinToZuin): Use strdup instead of
+	sprintf.
+
+	* src/char.c (Str2Word): Fixlet to assert.
+
+	* src/userphrase.c (DeltaFreq): Removed since unused.
+
+	* src/mod_aux.c (chewing_cand_String): Add return value.
+
+	* README,
+	NEWS: Update OXIM bridge information.
+
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/chewingutil.c (MakeOutput):
+	Fixes in KB_HANYU_PINYIN to avoid wrong Unicode transformation.
+	Patched by hialan <hialan.liu@hotmail.com>
+	http://hialan.twbbs.org/ .
+	
+2006-04-30  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h (struct ChewingConfigData::bEscCleanAllBuf):
+	New member. Add bEscCleanAllBuf option.
+
+	* src/chewingio.c
+	(chewing_Configure): Initialize bEscCleanAllBuf.
+	(chewing_handle_Esc): CleanAllBuf when bEscCleanAllBuf is true.
+	
+	* src/tree.c
+	(LoadChar): Modify prototype to accept specific buffer length.
+	(OutputRecordStr): Likewise.
+	(Phrasing): Passing the length of chiBuf to OutputRecordStr.
+	The changes should be able to fix previous wrong behavior.
+	Taken from win32-utf8 branch.
+
+	* src/common/key2pho.c (PhoneFromUint): Removed since unused.
+
+2006-04-29  Jim Huang  <jserv.tw@gmail.com>
+
+	* include/global.h
+	(struct PhrasingOutput::nNumCut): New member. Indicate the number to
+	be cut-off while phrasing.
+	(struct ChewingData::symbolKeyBuf): New member. Used as symbol key
+	buffer.
+
+	* include/chewingutil.h (OpenSymbolChoice): New function.
+
+	* src/tree.c
+	(struct TreeDataType::nPhListLen): New member. Indicate the length of
+	phrase list.
+	(SortListByFreq): Update nPhListLen.
+	(NextCut): New helper function. Calculate the next cut-off node.
+	(Phrasing): Invoke NextCut after frequency-evaluation is done.
+
+	* src/chewingio.c
+	(chewing_Reset): Initialize nNumCut.
+	(DoSelect): change the checking rule for isSymbol since the semantics
+	of isSymbol is extended for the following values: (TODO: it should be
+	renamed for better readability)
+	  1: traditional Hanin symbols.
+	  2: pair symbols for OpenSymbolChoice.
+	(chewing_handle_Space) (chewing_handle_Down): Simplify the handling
+	of Chinese symbol cursor. Add new feature to invoke OpenSymbolChoice
+	for pair symbols.
+	(chewing_handle_Enter): Disable the call of CallPhrasing.
+	(chewing_handle_Tab): Adjust nNumCut while Tab triggered.
+	(chewing_handle_Default): Reset nNumCut = 0 and update user phrase
+	interval while everything got done.
+
+	* src/chewingutil.c
+	(InternalSpecialSymbol) (SymbolInput): Perform the storage of symbol
+	keys, that is required by OpenSymbolChoice.
+	(SymbolChoice): Handle different type of isSymbol.
+	(CleanAllBuf): Clean symbolKeyBuf.
+	(ChewingKillChar): ditto.
+	(OpenSymbolChoice): New function. Implement the choice mechanism for
+	pair symbols.
+
+	* src/hash.c
+	(ComputeChewingLifeTime): New helper function. Attempt to re-compute
+	chewing lifetime.
+	(ReadHash): Invoke ComputeChewingLifeTime.
+
+	* src/choice.c (ChoiceEndChoice): Handle different type of isSymbol.
+	The above changes are based on the hard work from
+	Andy Horng  <andyhorng168@gmail.com>.
+	
+	* configure.ac: Bump version to 0.2.92 .
+
+	* AUTHORS: Updated.
+	
+2006-04-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Correctly output include/config.h.in
+	Export LIBTOOL_EXPORT_OPTIONS to Makefile.
+	
+	* include/config.h.in:
+	Removed.
+
+2006-04-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/pinyin.tab,
+	include/chewing.h,
+	include/global.h,
+	include/hanyupinyin.h,
+	include/zuin.h,
+	src/Makefile.am,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/hanyupinyin.c,
+	src/zuin.c:
+	Change KB_HANYUPINYIN (renamed to KB_HANYU_PINYIN) to table-lookup
+	implementation.
+	Rename all `pinying' to `pinyin'.
+
+2006-03-23  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/Makefile.am: Trivial change for libtool symbols.
+
+2006-03-15  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/chewingutil.c (HaninSymbolInput),
+	src/choice.c (ChoicePrevAvail) (ChoiceNextAvail):
+	Correct symbol choice handling.
+
+2006-03-13  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src: Add 噹 ㄉㄧㄤ to avoid crash.
+
+2006-03-05  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/choice.c (SetChoiceInfo): Fix wrong word length check.
+
+2005-12-17  James Huang (seamxr) <seamxr@gmail.com>
+
+	* src/aux.c,
+	src/Makefile.am,
+	include/aux.h,
+	include/chewing.h:
+	Rename "aux.?" to "mod_aux.?". "aux" is a reserved keyword of win32 system.
+
+2005-12-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* test/testchewing.c (commit_string),
+	test/gen_keystroke.c (show_edit_buffer) (showZuin)
+	(show_userphrase) (show_choose_buffer):
+	Correctly free allocated memory.
+
+2005-12-17  Jim Huang  <jserv.tw@gmail.com>
+
+	* src/aux.c,
+	include/aux.h: New files. Introduced Auxiliary APIs.
+
+	* test/testchewing.c (get_keystroke) (main),
+	test/gen_keystroke.c (show_edit_buffer) (show_interval_buffer)
+	(showZuin) (show_zuin_buffer) (show_userphrase) (show_choose_buffer)
+	(show_commit_string) (set_cursor) (main): Use new APIs.
+	NOTE: show_commit_string needs better output handling.
+
+	* test/Makefile.am,
+	src/Makefile.am,
+	include/global.h (struct ChewingContext),
+	include/chewing.h,
+	src/chewingio.c (chewing_new): Likewise.
+
+2005-12-07  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/global.h,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/hash.c,
+	src/tools/sort_word.c,
+	src/tree.c,
+	src/userphrase.c:
+	Enlarge all buffer size so that can contain at most 6 byte utf8 word.
+
+2005-12-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c:
+	ConfigData rename to ChewingConfigData.
+
+	* src/chewingutil.c,
+	src/choice.c:
+	Change measure of selectAreaLen to number of word
+	that can be displayed.
+
+2005-12-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h,
+	src/chewingio.c
+	(chewing_Init) (chewing_Terminate):
+	Only initialize/terminate global data.
+	(chewing_new): Allocate and initialize internal data.
+	(chewing_free): New API.
+	Deallocate internal data.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Use the new API.
+
+2005-12-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/test-mmap.c: New file. Unit test for mmap implementation in
+	porting_layer.
+
+	* test/do-test.c,
+	test/Makefile.am: Likewise.
+
+	* src/hash.c: Remove redundant macro.
+
+	* data/Makefile.am: Fixlet to binary-data generation when enabled.
+
+2005-12-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am,
+	configure.ac: Conditional compilation for genkeystroke
+	if ncursesw is found.
+
+2005-12-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am,
+	configure.ac: Check for check unit test framework.
+	http://check.sourceforge.net/
+	Conditional compilation if enable built-in unit tests.
+
+	* test/test-key2pho.c,
+	test/test-utf8.c,
+	test/do-test.c: Touched. Add copyright note.
+
+	* include/chewingutil.h,
+	src/chewingutil.c (MakeOutput): marked as static.
+
+	* README: Update win32-chewing information.
+
+2005-12-03  Jim Huang  <jserv@kaffe.org>
+
+	* test/gen_keystroke.c (show_full_shape) (main):
+	Tweaking for new API.
+
+2005-12-03  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	src/chewingio.c (OnKeySpace) (OnKeyEsc) (OnKeyEnter) (OnKeyDel)
+	(OnKeyBackspace) (OnKeyTab) (OnKeyShiftLeft) (OnKeyLeft)
+	(OnKeyShiftRight) (OnKeyRight) (OnKeyUp) (OnKeyHome) (OnKeyEnd)
+	(OnKeyDown) (OnKeyCapslock) (OnKeyDefault) (OnKeyCtrlNum)
+	(OnKeyCtrlOption) (OnKeyShiftSpace) (OnKeyDblTab) (OnKeyNumlock):
+	API renamed with chewing_ prefix.
+	(SetConfig): Renamed to chewing_Configure.
+	(chewing_new): New function. Create handle to ChewingContext.
+	(InitChewing): Renamed to chewing_Init.
+	In addition, wrap InitChar, InitDict, and ReadTree.
+	(ChewingReset): Renamed to chewing_Reset.
+	(ChewingSetKBType): Renamed to chewing_set_KBType.
+	(TerminateChewing): Renamed to chewing_Terminate.
+	In addition, release internal data structure.
+	(SetChiEngMode): Renamed to chewing_set_ChiEngMode.
+	(GetChiEngMode): Renamed to chewing_get_ChiEngMode.
+	(SetShapeMode): Renamed to chewing_set_ShapeMode.
+	(GetShapeMode): Renamed to chewing_get_ShapeMode.
+	(KBStr2Num): Renamed to chewing_KBStr2Num.
+	(SetKBType): Removed (in chewing_KBStr2Num).
+
+	* include/global.h
+	(#define CHEWING_API): New macro. Indicate the exact API.
+	(struct ChewingContext): New structure to wrap ChewingData and
+	ChewingOutput.
+
+	* test/testchewing.c (main),
+	test/gen_keystroke.c (main): Use the new API.
+	
+2005-12-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Bump version to 0.2.91 .
+	0.2.9x series are experimental versions.
+
+	* include/chewingio.h,
+	include/global.h,
+	src/chewingio.c:
+	API change: InitChewing, new API ChewingReset, ChewingSetKBType.
+	Drop obsolete struct ChewingConf.
+
+2005-11-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/common/key2pho.c
+	(UintFromPhone) (PhoneFromUint) (PhoneInxFromKey):
+	Adjust buffer size.
+
+2005-11-26  Hong Jen Yee (PCMan)  <pcman.tw@gmail.com>
+
+	* data/tsi.src:
+	Merged with new data from libchewing-data project.
+	Fix a lot of prolems caused by encoding conversion.
+
+	* src/chewingio.c (OnKeySpace) (OnKeyDefault) (OnKeyNumlock):
+	Copy UTF-8 encoded string in chiSymbolBuf to commitStr correctly.
+
+	* src/chewingutil.c (WriteChiSymbolToBuf) (MakeOutput):
+	Copy UTF-8 encoded string in chiSymbolBuf correctly.
+
+	* src/hash.c,
+	src/common/key2pho.c,
+	src/private.h,
+	include/hash.h:
+	Add some conditional compilation and missing header includes for Win32
+	to enhance portability.
+
+2005-11-11  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Merge phone and phrase from CNS11643.
+	Source:
+	http://rt.openfoundry.org/Foundry/Project/Tracker/Display.html?Queue=436&id=15263
+
+	* src/char.c (Str2Word):
+	Only read 6 bytes to wrd_ptr->word avoid buffer overflow.
+
+	* src/tools/sort_word.c:
+	Adjust MAX_WORD from 20000 to 60000.
+
+	* include/char.h:
+	Adjust Word.word size from 10 bytes to 7 bytes.
+
+	* include/dict.h:
+	Adjust PHONE_PHRASE_NUM from 149233 to 162244.
+
+	* include/global.h:
+	Adjust TREE_SIZE from 153251 to 153341.
+	Adjust MAX_CHOICE from 250 to 567.
+
+2005-11-10  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* src/hash.c,
+	src/tree.c:
+	Use ueStrLen to count wordSeq.
+
+2005-11-13  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h: Added POSIX's <unistd.h> and Win32's <io.h> include.
+
+	* src/hanyupinying.c,
+	src/hash.c: Move <unistd.h> include to private.h for
+	platform-indepedency.
+
+2005-11-12  Jim Huang  <jserv@kaffe.org>
+
+	* src/hash.c (ReadHash): Add an workaround if illegal data exist in
+	hash.dat. Merged from win32 branch.
+
+	* data/tsi.src: Fix typo in wrong phone of "明基".
+
+2005-11-06  Jim Huang  <jserv@kaffe.org>
+
+	* src/tree.c (PhraseIntervalContain) (GetIntersection)
+	(CheckBreakpoint) (CheckUserChoose) (CheckChoose) (AddInterval)
+	(FindInterval) (SetInfo) (CompLen) (CompLenDescend) (CompFrom)
+	(CompRecord) (Discard1) (Discard2) (LoadChar) (OutputRecordStr)
+	(LoadPhraseAndCountFreq) (IsRecContain) (SortListByFreq) (SaveRecord)
+	(RecursiveSave) (SaveList) (InitPhrasing) (SaveDispInterval)
+	(CleanUpMem) (CountMatchCnnct) (ShowList): Marked as static.
+	(internal_release_Phrase): Internal phrase memory management
+	routines. Free the one not used to avoid memory leak.
+	(FindInterval): Make use of internal_release_Phrase.
+	Patched by Sea Monster <seamxr@gmail.com>.
+
+	* src/char.c (CompUint16) (Str2Word): Marked as static.
+	(InitChar): Fix the wrong operation when USE_BINARY_DATA enabled.
+
+	* src/userphrase.c (DeltaFreq) (LoadOriginalFreq) (LoadMaxFreq)
+	(UpdateFreq): Marked as static.
+	(LoadOriginalFreq): Fix memory leak.
+	(UpdateLifetime): Dummy implementation.
+	TODO: we should introduce smarter approaches to update lifetime.
+
+	* src/dict.c (fgettab) (Str2Phrase),
+	src/zuin.c (IsDvorakHsuPhoEndKey) (IsHsuPhoEndKey) (IsET26PhoEndKey)
+	(IsDefPhoEndKey) (EndKeyProcess) (DefPhoInput) (HsuPhoInput)
+	(ET26PhoInput) (IsPinYingEndKey) (PinYingInput),
+	src/choice.c (ChangeSelectIntervalAndBreakpoint) (SetAvailInfo)
+	(ChoiceTheSame) (SetChoiceInfo) (ChangeUserData): Marked as static.
+
+	* src/tools/sort_word.c (main),
+	src/tools/sort_dic.c (main),
+	src/tools/maketree.c (main): Added conditional compilation to allow to
+	be used in dat2bin.c
+
+	* src/tools/dat2bin.c: New file. Convert text-based dat to binary
+	form.
+
+	* src/tools/Makefile.am: Likewise
+
+	* configure.ac: Define AM_CONDITIONAL ENABLE_BINARY_DATA.
+
+2005-11-01  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/porting_layer/include/sys/plat_win32.h:
+	Adjustment of API naming.
+
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
+	* src/tree.c (ReadTree),
+	src/char.c (InitChar),
+	src/dict.c (InitDict): Fixlet to consistent porting layer API.
+
+	* src/Makefile.am: Introduce porting layer library.
+
+	* src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c: Fixlet to missing include
+	of config.h, and minor adjustment of API naming.
+	
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
+	* src/tree.c: Fixlet to missing include of plat_mmap.h .
+
+	* src/dict.c (InitDict): Minor fixes to mmap handle.
+
+	* src/porting_layer/include/plat_mmap.h: Use macros to present
+	FLAG_ATTRIBUTE_READ / FLAG_ATTRIBUTE_WRITE for portability.
+
+	* configure.ac: New option --enable-binary-data to indicate the use
+	experimental binary data support.
+	Auto-detect $host_os via autoconf.
+
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (DoSelect):
+	Fix a overrun bug that could crush the lib when we advance the cursor
+	automatically.
+	Patched by Sea Monster <seamxr@gmail.com>.
+	
+2005-10-31  Jim Huang  <jserv@kaffe.org>
+
+	* src/porting_layer/src/Makefile.am,
+	src/porting_layer/src/plat_mmap_win32.c,
+	src/porting_layer/src/plat_mmap_posix.c,
+	src/porting_layer/Makefile.am,
+	src/porting_layer/include/sys/plat_posix.h,
+	src/porting_layer/include/sys/plat_win32.h,
+	src/porting_layer/include/plat_mmap.h,
+	src/porting_layer/include/plat_types.h:
+	New files. Porting layer for libchewing.
+	Initial implementation of MMap for POSIX and Win32.
+
+	* include/global.h (ChewingData::bAutoShiftCur):
+	New member. Automatically shift the cursor to next phrase.
+
+	* src/tree.c
+	(TerminateTree): New function dedicated to USE_BINARY_DATA.
+	(ReadTree) (CheckBreakpoint),
+	src/chewingutil.c (HaninSymbolInput) (HaninSymbolInput),
+	src/dict.c (TerminateDict) (InitDict),
+	src/hash.c (ReadHash),
+	src/zuin.c (EndKeyProcess),
+	src/choice.c,
+	src/chewingio.c (DoSelect) (OnKeySpace) (OnKeyDefault) (OnKeyNumlock),
+	src/char.c (TerminateChar) (InitChar) (TerminateChar):
+	Merged USE_BINARY_DATA support and Zuin fixes from win32 branch by
+	PCMan and Sea Monster. Reimplement the original win32 routines with
+	the porting_layer.
+	
+	* src/private.h: Introduced the porting layer definitions.
+	Fixlet to Win32 DEBUG_OUT.
+	
+	* src/Makefile.am,
+	configure.ac: Add platform-dependent declarations.
+	NOTE: UNDER_POSIX is hard-coded at the moment.
+	
+2005-10-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/phone.cin,
+	data/tsi.src:
+	Convert to using UTF-8 encoding.
+
+	* src/common/chewing-utf8-util.c,
+	include/chewing-utf8-util.h:
+	New routine to handle utf8 strings.
+
+	* src/common/key2pho.c:
+	PhoneBg2Uint() rename to UintFromPhone, modify Key2Pho() to handle utf8
+	string.
+
+	* src/common/Makefile.am:
+	Add chewing-utf8-util.c to source list.
+	
+	* src/hash.c,
+	src/tree.c,
+	src/zuin.c,
+	src/userphrase.c,
+	src/choice.c,
+	src/chewingio.c,
+	src/chewingutil.c:
+	Modify to using new utf8 routine.
+
+	* include/char.h,
+	include/chewing.h,
+	include/global.h:
+	Enlarge buffer size to satisfy utf8 string.
+
+	* test/gen_keystroke.c,
+	test/Makefile.am:
+	Using ncursesw to show proper utf8 output.
+
+	* configure.ac,
+	test/do-test.c,
+	test/test-key2pho.c,
+	test/test-utf8.c,
+	test/xhtml.xsl,
+	test/test.css,
+	test/showhide.js:
+	Add unit test using 'check' framework.
+
+2005-10-18  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
+
+	* libchewing/trunk/src/chewingio.c (OnKeyNumlock):
+	Fix an error causing buffer overflow.
+	  
+2005-10-15  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingutil.c (SymbolInput),
+	src/chewingio.c (OnKeySpace):
+	Workaround to tricky crash issue.
+	That is the internal buffer in core library would be overwritten if
+	the input reaches more then 50 space characters in Chinese input mode,
+	Patched by: Sea Monster <seamxr@gmail.com>.
+
+2005-10-15  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h (SetShapeMode) (GetShapeMode): New functions.
+	Set / get full-shape mode.
+	
+	* include/global.h (ChewingData): New member data. bFullShape.
+
+	* include/chewingutil.h (FullShapeSymbolInput),
+	src/chewingutil.c (FullShapeSymbolInput): New function.
+	Provide full-shape symbol input mechanism.
+
+	* src/chewingio.c (InitChewing): Initialize bFullShape to
+	HALFSHAPE_MODE.
+	(SetShapeMode) (GetShapeMode): Implemented.
+	(OnKeySpace): Handle space input behavior in full/half-shape mode.
+	(OnKeyDefault): Likewise.
+	Patched by: Hong Jen Yee (PCMan) <hzysoft@sina.com.tw>.
+
+	* test/gen_keystroke.c (show_full_shape): New function to update
+	full/half-shape status.
+	(main): Add Ctrl-k to emulate Shift (toggle full/half-shape mode) in
+	test case.
+
+2005-10-13  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c
+	(addTerminateService): Fix previous compilation error.
+	(OnKeyDefault):
+	Support key 'j' / 'k' for paging in selection mode.
+	Patched by: Tiberius Teng <tiberiusteng@msn.com>.
+
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (addTerminateService):
+	Avoid redundant function pointer.
+	Reported by: Hong Jen Yee (PCMan) <hzysoft@sina.com.tw>.
+
+2005-10-10  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing): Remove unsafe atexit.
+	Note: TerminateChewing is now required.
+
+	* test/testchewing.c: likewise.
+
+2005-09-30  Hong Jen Yee (PCMan)  <hzysoft@sina.com.tw>
+
+	* src/hanyupinying.c (InitialsMap), (FinalsMap):
+	Declaration of variables should be put at the beginning of function
+	definition.
+
+2005-08-08  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac: Bump version to 0.2.7 .
+
+	* NEWS,
+	README: Updated.
+
+2005-08-08  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src:
+	Add one missing phrase "的". Delete one non-big5 phrase "游錫堃".
+
+2005-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* src/hanyupinying.c (InitMap):
+	Add failback routines. 
+
+	* src/Makefile.am:
+	Add CHEWING_DATADIR macro.
+
+	* data/Makefile.am:
+	Remove pinyin.tab from CLEANFILES.
+
+2005-04-07  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/zuin.c (PinYinInput),
+	src/chewingio.c (TerminateChewing) (OnKeyDefault):
+	More improved debug macros.
+
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/private.h,
+	src/tree.c,
+	src/chewingutil.c,
+	src/hash.c,
+	src/zuin.c,
+	src/chewingio.c:
+	Improved debug macro definitions.
+	
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h
+	src/chewingio.c (TerminateChewing):
+	New function dedicated to terminate Chewing's internal
+	routines.
+
+	* src/private.h
+	src/chewingio.c (addTerminateService):
+	New private function to register the terminate services.
+
+	* src/hanyupinying.c (InitMap):
+	Use addTerminateService instead of atexit.
+
+	* src/dict.c (TerminateDict) (InitDict),
+	src/char.c (TerminateChar) (InitChar),
+	src/chewingio.c (TerminateDebug) (InitChewing):
+	Register corresponding terminate routines. (close the
+	data file I/O stream)
+	NOTE: atexit(3) is used.
+
+2005-04-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (InitChewing):
+	Remove improper exit function call, which causes
+	unexpected closing.
+
+2005-04-03  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+
+	* src/hanyupinying.c (FinalsMap),
+	data/pinyin.tab:
+	Add "uei" and "uen" to PinYing-Zuin Map.
+
+2005-04-02  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	src/private.h:
+	Clean up. Move CompFuncType and ALC to private.
+
+	* src/hanyupinying.c (HanyuPinYingToZuin):
+	Avoid potential compiler-undefined behavior.
+
+2005-04-01  Jeff Chen  <u6191488@mail.cs.tku.edu.tw>
+
+	* src/hanyupinying.c
+	(InitialsMap) (FinalsMap) (FreeMap) (InitMap): New helper function
+	to construct the PinYin mapping.
+	(HanyuPinYingToZuin): Add support for customized PinYin table.
+
+	* src/zuin.c (IsPinYingEndKey):
+	Fix "space key to select" of PinYin.
+
+	* data/pinyin.tab,
+	data/Makefile.am:
+	New PinYin table. Put it in $HOME/.chewing.
+
+2005-03-29  Jim Huang  <jserv@kaffe.org>
+
+	* src/hanyupinying.c
+	(hanyuInitialsMap) (hanyuFinalsMap): Adapt reference table from
+	Lin Yu-Tang.
+	(HanyuPinYingToZuin): Add "jo" detection.
+	Provided by Jeff Chen  <u6191488@mail.cs.tku.edu.tw>.
+
+2005-03-22  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h,
+	test/testchewing.c,
+	test/gen_keystroke.c,
+	src/tree.c,
+	src/private.h,
+	src/chewingutil.c,
+	src/hash.c:
+	Move redundant debug macro into private.h .
+
+2005-03-21  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac,
+	autogen.sh:
+	Use autoheader.
+
+	* src/private.h:
+	New file. Define private internal macros.
+
+	* src/tree.c,
+	src/chewingutil.c,
+	src/hanyupinying.c,
+	src/hash.c,
+	src/zuin.c,
+	src/chewingio.c:
+	Adjust DEBUG macro name and include private.h .
+
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
+	* include/global.h (ConfigData):
+	Add bSpaceAsSelection option.
+
+	* src/chewingio.c
+	(SetConfig): Set bSpaceAsSelection.
+	Failback to default values if out-of-range.
+	(OnKeySpace): Perform old space key behavior when
+	bSpaceAsSelection disabled.
+
+2005-03-20  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am:
+	Add vcheck to perform valgrind memory checking on the built-in
+	test suite.
+
+	* test/testchewing.c,
+	src/tree.c:
+	Minor free routines.
+
+2005-03-18  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/chewingutil.c (InternalSpecialSymbol) (SymbolChoice):
+	Don't forget to keep the kbtype value.
+
+2005-02-28  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac:
+	Bump version to 0.2.6.
+	Bump ABI major version.
+
+2005-02-27  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/char.h:
+	Adjust PHONE_NUM from 1319 to 1320.
+
+2005-02-25  Kang-min Liu  <gugod@gugod.org>
+
+	* src/chewingutil.c,
+	src/zuin.c:
+	More HanYu PinYing support routines.
+
+2005-02-24  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* src/chewingio.c
+	(OnKeyESC): Remove unused string made by SemiSymbolInput when
+	press ESC.
+	(OnKeyCtrlNum): Should not call MakeOutputAddMsgAndCleanInterval.
+
+2005-02-23  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	include/global.h,
+	include/chewingutil.h,
+	include/hanyupinying.h,
+	include/dict.h,
+	include/zuin.h,
+	src/chewingutil.c,
+	src/hash.c,
+	src/chewingio.c:
+	Bump copyright date.
+
+2005-02-20  Kang-min Liu  <gugod@gugod.org>
+
+	* include/global.h (ConfigData):
+	Add an extra field 'hsuSelKeyType' to indicate
+	the two different kind of hsu-keyboard selection key.
+	
+2005-02-19  Jim Huang  <jserv@kaffe.org>
+
+	* src/hash.c (ReadHash):
+	Apply the patch from Mike FABIAN <mfabian@suse.de> to
+	prevent $HOME environment variable from getting changed.
+
+2005-02-19  Kang-min Liu  <gugod@gugod.org>
+
+	* include/hanyupinying.h,
+	src/hanyupinying.c,
+	include/global.h,
+	include/zuin.h:
+	Experimental feature -- HanYu PinYing Keyboard layout.
+
+2005-02-08  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src:
+	Add missing phrase(編輯器).
+
+	* include/dict.h,
+	include/global.h:
+	Adjust PHONE_PHRASE_NUM from 130000 to 149233.
+	TREE_SIZE from 149339 to 153251.
+	Avoid SegFault.
+
+2005-01-29  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* src/chewingio.c (OnKeyShiftSpace):
+	Rename SpaceSymbolInput to SemiSymbolInput since SpaceSymbolInput
+	did not exist anymore.
+	
+2005-01-01  Kang-min Liu <gugod@gugod.org>
+
+	* include/chewingio.h
+	include/chewingutil.h,
+	src/chewingio.c,
+	src/chewingutil.c:
+	Add the facility to input symbols.(Ctrl-0 and Ctrl-1)
+	Make the NumLock keypad work just right
+
+2004-12-28  Jim Huang  <jserv@kaffe.org>
+
+	* include/dict.h:
+	Adjust PHONE_PHRASE_NUM from 120000 to 130000.
+	Avoid SegFault.
+	Reported by: Wei-zhong Yang <wz.yang@msa.hinet.net>
+
+2004-12-28  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac,
+	README:
+	Bump version to 0.2.5.
+	Update the status of integration.
+
+2004-12-26  Jim Huang  <jserv@kaffe.org>
+
+	* deabin/README.Debian,
+	README,
+	libchewing.spec.in:
+	Update web information.
+
+2004-12-19  Kang-min Liu  <gugod@gugod.org>
+
+	* libchewing/data/tsi.src:
+	Merge SpaceChewing's frequency tweaking from zonble.
+
+2004-12-12  Kang-min Liu  <gugod@gugod.org>
+
+	* libchewing/trunk/src/zuin.c:
+	Special handle for space key (Indeed very special one).  
+	Un-break the situation that OnKeySpace() is not called, 
+	hence the Candidate window doesn't show up, because 
+	ZUIN_NO_WORD is returned.
+
+2004-10-13  Jim Huang  <jserv@kaffe.org>
+
+	* src/tools/sort_word.c,
+	src/tools/sort_dic.c,
+	src/tools/maketree.c,
+	src/tools/Makefile.am:
+	Remove redundant macro, definition, and typedef.
+	Make use of src/common.
+
+2004-10-13  Jim Huang  <jserv@kaffe.org>
+
+	* remove-autotool.sh,
+	src/tools/Makefile.am,
+	src/Makefile.am,
+	trunk/configure.ac,
+	trunk/autogen.sh:
+	Adjust autotool for newly-added src/common.
+	
+	* src/key2pho.c,
+	src/common,
+	src/common/key2pho.c,
+	src/common/Makefile.am:
+	Move key2pho.c from src to src/common.
+
+2004-10-07  Jim Huang  <jserv@kaffe.org>
+
+	Tag 0.2.4 stable release as libchewing_production.
+
+2004-10-05  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac:
+	Bump version to 0.2.4.
+	Bump ABI major version.
+
+2004-10-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/gen_keystroke.c (show_userphrase),
+	src/hash.c (ReadHash):
+	bzero is deprecated, use memset in new programs.
+
+2004-10-03  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/chewingutil.c
+	(WriteChiSymbolToBuf):
+	Workaround to avoid different initialization behavior among
+	Win32 and Unix-like OSs.
+			 
+2004-09-29  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac:
+	Revert. Don't bother CFLAGS even if debugging is disabled.
+
+2004-09-06  Kuang-che Wu  <kcwu@csie.org>
+
+	* test/Makefile.am:
+	Fix automake error message about += before any = operation.
+
+	* autogen.sh:
+	Respect to autotools environment variable for using different
+	versions of autotools.
+	Avoid the use of pushd and popd because tranditional /bin/sh
+	doesn't have them.
+
+2004-08-31  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* include/global.h (ConfigData):
+	Add bAddPhraseForward option.
+
+	* src/chewingio.c
+	(SetConfig): Set bAddPhraseForward.
+	(OnKeyCtrlNum) (OnKeyEnter): Make them work correctly when
+	bAddPhraseForward disabled.
+
+2004-08-31  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* test/gen_keystroke.c,
+	testchewing.c:
+	Make use of OnKeyShiftLeft, OnKeyShiftRight.
+
+2004-08-30  Jim Huang  <jserv@kaffe.org>
+
+	* scripts/cvsup-tsi-src.sh:
+	Automatically cvs checkout libtabe, and generate tabe-tsi.src.
+	Use it as ./scripts/cvsup-tsi-src.sh in top directory.
+	
+	* scripts/gen-tabe-diff.sh:
+	Generate the diff between existing tsi.src and tabe-tsi.src.
+	Use it as ./scripts/gen-tabe-diff.sh in top directory.
+
+2004-08-30  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* include/global.h:
+	Enlarge TREE_SIZE from (112500) to (149339).
+	* include/dict.h:
+	Enlarge PHONE_PHRASE_NUM from (94000) to (120000).
+	
+	* src/tree.c (TreeType tree): Marked as extern.
+	
+	* src/hash.c (ReadHash): Initialize hash table.
+	
+	* src/choice.c (TreeType tree): Declare its size as TREE_SIZE.
+	
+	* data/tsi.src:
+	Update tsi.src to latest version.
+
+2004-08-30  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (CheckAndResetRange): marked as static.
+	(DoSelect): New helper function for valid word selection.
+	(OnKeySpace): Adapt DoSelect.
+
+2004-08-23  Jim Huang  <jserv@kaffe.org>
+
+	* include/zuin.h,
+	src/key2pho.c,
+	src/chewingutil.c:
+	Add Dvorak Hsu keyboard layout from SpaceChewing.
+	
+	* src/zuin.c
+	(IsDvorakHsuPhoEndKey): New helper function to check Dvorak Hsu
+	key sequence.
+	(IsHsuPhoEndKey): Introduce Dvorak Hsu keyboard layout.
+
+	* src/chewingio.c
+	(dvorak_convert): New helper function to handle Dvorak <--> Qwerty
+	keyboard layout.
+	(OnKeyDefault): Introduce Dvorak Hsu keyboard layout.
+	
+2004-08-20  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	src/chewingio.c
+	(OnKeyShiftLeft) (OnKeyShiftRight) (OnKeyShiftSpace): New functions.
+	Introduce Hanin style support from SpaceChewing.
+	(CheckAndResetRange): Check the boundary of ChewingData instance.
+
+	* include/chewingutil.h (SymbolChoice):
+	New function. Provide generic symbol choice routine.
+	
+	* src/chewingutil.c (SymbolChoice) (SpaceSymbolInput):
+	New functions.
+
+	* include/global.h (struct ChewingData) (struct ChewingOutput):
+	New members, PointStart and PointEnd. Necessary information for
+	Hanin style.
+
+	* src/zuin.c (HsuPhoInput):
+	Fix phonetic index in Hsu keyboard, and do fuzzy "g e" to "j e"
+	convertion.
+	
+	* src/choice.c
+	(SetChoiceInfo): Make sure users' phone sequence was allocated
+	and set already.
+	(ChoiceEndChoice): Check if it's a symbol before return to the
+	old cursor and Chinese symbol cursor position.
+
+	* autogen.sh:
+	Remove automake cache.
+	
+2004-08-17  Jim Huang  <jserv@kaffe.org>
+
+	* test/testchewing.c,
+	test/gen_keystroke.c:
+	Use Ctrl-B to switch English/Chinese mode to avoid screen
+	usage.
+	
+2004-08-09  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Updated to avoid removing wrong CFLAGS.
+
+	Reported by: Palatis  <palatis@gentoo.org.tw>.
+
+2004-08-09  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* Doxyfile.in,
+	configure.ac,
+	Makefile.am:
+	Added file Doxyfile.in, use 'make docs' to generate docs.
+
+2004-08-07  Jim Huang  <jserv@kaffe.org>
+
+	* libchewing.spec.in,
+	configure.ac,
+	Makefile.am:
+	RPM spec contributed by Shiva Huang  <blueshiva@giga.net.tw>.
+	
+2004-08-06  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewing.h:
+	New file. Include all Chewing headers here.
+	Add extern chewing_lifetime symbol.
+	
+	* src/hash.c,
+	src/userphrase.c:
+	Rename lifetime to chewing_lifetime.
+	
+	* test/testchewing.c,
+	test/gen_keystroke.c:
+	Use brief include and write instructions for user-
+	defined phrase addition.
+	
+2004-08-05  Jim Huang  <jserv@kaffe.org>
+
+	* chewing.pc.in,
+	configure.ac,
+	Makefile.am:
+	Support pkg-config.
+
+2004-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c:
+	Introduce new enviornment variable CHEWING_DEBUG to
+	point out the file to put debug information.
+	
+2004-08-04  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* Makefile.am:
+	Add entry 'install-manpages'.
+
+2004-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac:
+	Bump version to 0.2.3.
+	
+2004-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/gen_keystroke.c,
+	test/testchewing.c:
+	Implement user phrase addition and some fancy rendering.
+
+2004-08-04  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/choice.c (SetAvailInfo):
+	Fix wrong nAvail increase.
+
+2004-08-04  Jim Huang  <jserv@kaffe.org>
+
+	* test/gen_keystroke.c,
+	test/testchewing.c:
+	Support input behavior of SpaceChewing.
+	Add space key for selecting candidate phrases.
+	
+2004-08-03  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* data/tsi.src:
+	Add mising zuin symbols to avoid unexpected problems.
+
+2004-08-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/choice.c (ChangeSelectIntervalAndBreakpoint):
+	Perform boundary check.
+	
+2004-08-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c:
+	Fix debug routines.
+
+	* src/choice.c:
+	Do available candidate phrases initialization.
+
+	Reported by: Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+2004-08-03  Jim Huang  <jserv@kaffe.org>
+
+	* test/.cvsignore,
+	test/Makefile.am,
+	test/gen_keystroke.c,
+	test/testchewing.c:
+	Limit the prefix path test suite only ought to use,
+	the hash data included.
+	
+2004-08-03  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* test/gen_keystroke.c,
+	test/testchewing.c:
+	Remove unused variables.
+	Use .dat files in data.
+
+	* data/Makefile.am:
+	Generate .dat files when make all.
+
+2004-08-03  Jim Huang  <jserv@kaffe.org>
+
+	* src/chewingio.c (OnKeyDefault):
+	Fix the wrong ignoring key handler behavior.
+
+2004-08-03  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* test/gen_keystroke.c,
+	test/testchewing.c:
+	Fix some bugs.
+
+2004-08-02  Jim Huang  <jserv@kaffe.org>
+
+	* test/Makefile.am:
+	Better test generation routines.
+	
+	* test/testchewing.c,
+	test/gen_keystroke.c:
+	Add missing lifetime.
+
+	* test/README:
+	Brief usage.
+
+2004-08-02  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+	
+	* test/gen_keystroke.c,
+	testchewing.c,
+	test.txt,
+	README:
+	Initial built-in test suite.
+
+2004-07-31  Jim Huang  <jserv@kaffe.org>
+
+	* include/chewingio.h,
+	src/chewingio.c (OnKeySpace) (OnKeyCtrlOption):
+	New function. Make use of space key for most
+	operations, Eten special symbol input included.
+
+	* include/chewingutil.h,
+	src/chewingutil.c
+	(SpecialEtenSymbolInput): New function.
+	Introduce Eten special symbols.
+	(SpecialSymbolInput): Move its routines to InternalSpecialSymbol.
+
+	* src/hash.c:
+	Make lifetime with extern modifier.
+	
+2004-07-31  Jim Huang  <jserv@kaffe.org>
+
+	* include/hash.h,
+	src/hash.c:
+	Initial support for MacOSX.
+	
+2004-07-29  Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* src/tools/sort_dic.c:
+	Fix the broken encoding.
+
+2004-07-23  Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h:
+	Add some comment.
+
+2004-07-21  Kanru Chen <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* configure.ac:
+	Fix --disable-debug option, remove '-g' flag.
+
+2004-07-20  Jim Huang  <jserv@kaffe.org>
+
+	* configure.ac:
+	Add --enable-debug support and detection for doxygen.
+
+2004-07-20  Jim Huang  <jserv@kaffe.org>
+
+	* include/char.h,
+	include/chewingutil.h,
+	include/global.h,
+	include/userphrase.h,
+	include/chewingio.h,
+	include/dict.h,
+	include/hash.h,
+	include/zuin.h:
+	Indent and remove the "GOING" naming not to be misunderstood.
+	
+2004-07-19  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* include/chewingio.h,
+	include/global.h,
+	include/hash.h,
+	include/userphrase.h,
+	include/zuin.h,
+	src/char.c,
+	src/chewingio.c,
+	src/chewingutil.c,
+	src/choice.c,
+	src/hash.c,
+	src/tree.c,
+	src/userphrase.c,
+	src/zuin.c,
+	src/tools/maketree.c,
+	src/tools/sort_dic.c:
+	Add some doxygen format comments and modify
+	all C++ style comments(//) to C style comments(/**/).
+
+2004-07-17  Jim Huang  <jserv@kaffe.org>
+
+	* README:
+	Add keyboard support information entries.
+	
+	* TODO:
+	For developers only. Please write down plans 
+	and on-going note here.
+
+2004-07-17  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* debian/shlibs.local:
+	Updated Debian package information.
+
+	* include/zuin.h,
+	src/chewingio.c,
+	src/key2pho.c:
+	Add Dvorak keyboard support.
+
+2004-07-17  Jim Huang  <jserv@kaffe.org>
+
+	* src/tools/maketree.c,
+	src/tools/sort_dic.c,
+	src/tools/sort_word.c:
+	Indent coding style.
+	
+2004-07-06  Jim Huang  <jserv@kaffe.org>
+
+	* src/char.c,
+	src/chewingutil.c,
+	src/dict.c,
+	src/key2pho.c,
+	src/userphrase.c,
+	src/chewingio.c,
+	src/choice.c,
+	src/hash.c,
+	src/tree.c,
+	src/zuin.c:
+	Indent and do more comments against the core.
+	
+2004-07-06  Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* debian/changelog,
+	debian/libchewing0-dev.dirs,
+	debian/libchewing0-dev.install,
+	debian/libchewing-dev.dirs,
+	debian/libchewing-dev.install:
+	Updated Debian package information.
+	
+2004-07-05  Jim Huang  <jserv@kaffe.org>
+
+	* autogen.sh,
+	configure.ac,
+	Makefile.am,
+	src/tools/Makefile.am,
+	src/Makefile.am,
+	data/Makefile.am:
+	Adapt autotoolized patch from
+	Kanru Chen  <kanru.96@stu.csie.ncnu.edu.tw>
+
+	* COPYING: Specify LGPL.
+	* debian: Debianized information.
+
+2004-05-27  Jim Huang  <jserv@kaffe.org>
+
+	* src/hash.c: refactor its data structure.
+	* src/chewingio.c: fix memory leak and fix syntax compatibility.
+	* src/char.c: wide scope support.
+	* key2pho.c: fix syntax compatibility.
+	* data/tsi.src: fix some typo and errors.
+
+2004-03-25  Jim Huang  <jserv@kaffe.org>
+
+	* Initial release of libchewing.

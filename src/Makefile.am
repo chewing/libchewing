@@ -21,7 +21,7 @@ libchewing_la_SOURCES = \
 	tree.c \
 	userphrase.c \
 	zuin.c \
-	hanyupinyin.c \
+	pinyin.c \
 	mod_aux.c \
 	$(NULL)
 

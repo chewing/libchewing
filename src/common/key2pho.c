@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004-2006, 2008, 2010
+ * Copyright (c) 2004-2006, 2008, 2010, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -83,36 +83,43 @@ static const char *key_str[ MAX_KBTYPE ] = {
 	 "1'a;2,oq.ejpuk5yixfdbghm8ctw9rnv0lsz[7634",		/* Dvorak */
 	 "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",		/* Dvorak Hsu */
 	 "qqazwwsxedcrfvttgbyhnujmuikbiolmoplnpyerd",		/* DACHEN-CP26 */
-	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* Hanyu Pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* Luoma Pinyin */
+	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",           /* secondary Bopomofo Pinyin */
+
 } ;
 
 /* 
  * Read one zhuin string,
  *
- * return the number it means
+ * return the number it means. 0 means error.
  */
 uint16_t UintFromPhone( const char *zhuin )
 {
 	char *iter, *pos;
-	char buf[ 7 ];
+	char buf[ MAX_UTF8_SIZE + 1 ];
 	int len, result = 0;
-	int i;
+	int zhuin_index = 0;
 
 	iter = (char*) zhuin;
-	/* Here the constant 4 is the number
-	   of zhuin_tab and zhuin_tab_num */
-	for ( i = 0; i < 4; i++ ) {
-		/* Should be less than 4, how do we handle this? */
-		len = ueBytesFromChar( iter[ 0 ] );
-		strncpy( buf, iter, len );
-		buf[len] = '\0';
-		if (! buf[0])
-			continue;
-		pos = strstr( zhuin_tab[ i ], buf );
-		if ( pos ) {
-			result |= (zhuin_tab_num[ i ] - ueStrLen( pos )) << shift[ i ];
-			iter += len;
+
+	while ( *iter ) {
+		len = ueStrNCpy( buf, iter, 1, STRNCPY_CLOSE );
+
+		for (; zhuin_index < ZUIN_SIZE; ++zhuin_index ) {
+			pos = strstr( zhuin_tab[ zhuin_index ], buf );
+			if ( pos ) {
+				break;
+			}
 		}
+
+		if ( zhuin_index >= ZUIN_SIZE ) {
+			return 0;
+		}
+
+		result |= (zhuin_tab_num[ zhuin_index ] - ueStrLen( pos )) << shift[ zhuin_index ];
+		++zhuin_index;
+		iter += len;
 	}
 	return result;
 }
@@ -146,24 +153,28 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 	return 1;
 }
 
-#if 0
-int PhoneFromUint( char *phone, long seq )
+int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 {
-    int i, j, k;
-    char *pos;
-    char buffer[7];
-    for ( i = 0, j = 0; i < 4; i++) {
-        k = ((seq >> shift[ i ]) & sb[ i ] ) - 1;
-        if ( k >= 0 && (pos = ueStrSeek( (char*)zhuin_tab[ i ], k )) )
-        {
-			ueStrNCpy(buffer, pos, 1, 1);
-            strcat(phone, buffer);
-            j++;
-        }
-    }
-    return j;
+	int i;
+	int index;
+	char *pos;
+	char tmp[ MAX_UTF8_SIZE + 1 ];
+	char buffer[ MAX_UTF8_SIZE * ZUIN_SIZE + 1 ] = { 0 };
+
+	for ( i = 0; i < ZUIN_SIZE; ++i ) {
+		// The first two characters in zhuin_tab are space, so we need
+		// to add 1 here.
+		index = ((phone_num >> shift[ i ]) & sb[ i ]) + 1;
+		if ( index >= 2 ) {
+			// FIXME: ueStrSeek shall accept const char *
+			pos = ueStrSeek( (char *) zhuin_tab[ i ], index );
+			ueStrNCpy( tmp, pos, 1, 1 );
+			strcat( buffer, tmp );
+		}
+	}
+	strncpy( phone, buffer, phone_len );
+	return 0;
 }
-#endif
 
 int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes )
 {

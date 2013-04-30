@@ -8,16 +8,10 @@ INCLUDES = \
 CC = $(CC_FOR_BUILD)
 AM_CFLAGS = $(CFLAGS_FOR_BUILD)
 
-noinst_PROGRAMS = sort_word sort_dic maketree
+noinst_PROGRAMS = sort maketree
 
-sort_word_SOURCES = \
-	sort_word.c \
-	$(top_builddir)/src/common/key2pho.c \
-	$(top_builddir)/src/common/chewing-utf8-util.c \
-	$(NULL)
-
-sort_dic_SOURCES = \
-	sort_dic.c \
+sort_SOURCES = \
+	sort.c \
 	$(top_builddir)/src/common/key2pho.c \
 	$(top_builddir)/src/common/chewing-utf8-util.c \
 	$(NULL)

@@ -21,7 +21,8 @@ config.status
 configure
 libchewing.spec
 libtool
-m4
+/m4/libtool.m4
+/m4/lt*.m4
 
 # compiling output
 *.dat
@@ -38,6 +39,10 @@ include/config.h
 include/config.h.in
 include/stamp-h1
 
+# cmake generated files
+config.h
+chewing-definition.h
+
 test/genkeystroke
 test/genkeystroke.exe
 test/randkeystroke
@@ -46,28 +51,42 @@ test/simulate
 test/simulate.exe
 test/testchewing
 test/testchewing.exe
+test/test-bopomofo
+test/test-bopomofo.exe
+test/test-config
+test/test-config.exe
 test/test-easy-symbol
 test/test-easy-symbol.exe
+test/test-fullshape
+test/test-fullshape.exe
 test/test-key2pho
 test/test-key2pho.exe
+test/test-keyboard
+test/test-keyboard.exe
+test/test-memory-fail
+test/test-memory-fail.exe
 test/test-mmap
 test/test-mmap.exe
 test/test-path
 test/test-path.exe
 test/test-reset
 test/test-reset.exe
+test/test-regression
+test/test-regression.exe
 test/test-symbol
 test/test-symbol.exe
+test/test-special-symbol
+test/test-special-symbol.exe
+test/test-userphrase
+test/test-userphrase.exe
 test/test-utf8
 test/test-utf8.exe
 
 src/chewing-definition.h
 src/tools/maketree
 src/tools/maketree.exe
-src/tools/sort_dic
-src/tools/sort_dic.exe
-src/tools/sort_word
-src/tools/sort_word.exe
+src/tools/sort
+src/tools/sort.exe
 
 test/do-test.xml
 test/test.txt
@@ -88,6 +107,7 @@ doc/stamp-vti
 doc/version.texi
 doc/libchewing.aux
 doc/libchewing.cp
+doc/libchewing.cps
 doc/libchewing.fn
 doc/libchewing.fns
 doc/libchewing.ky
@@ -99,3 +119,26 @@ doc/libchewing.tp
 doc/libchewing.tps
 doc/libchewing.vr
 doc/libchewing.vrs
+
+# cmake
+/CTestTestfile.cmake
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
+
+# Visual Studio
+*.pdb
+*.vcxproj*
+*.sln
+*.sdf
+*.suo
+*.dir
+*.ilk
+# Visual studio
+*.pdb
+*.vcxproj*
+*.sln
+*.sdf
+*.suo
+*.dir
+*.ilk

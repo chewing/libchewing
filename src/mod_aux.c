@@ -28,7 +28,7 @@
  */
 CHEWING_API int chewing_commit_Check( ChewingContext *ctx )
 {
-	return (ctx->output->keystrokeRtn & KEYSTROKE_COMMIT);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_COMMIT);
 }
 
 /**
@@ -43,8 +43,10 @@ CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 	char *s = (char *) calloc(
 		1 + ctx->output->nCommitStr,
 		sizeof(char) * MAX_UTF8_SIZE );
-	for ( i = 0; i < ctx->output->nCommitStr; i++ ) {
-		strcat( s, (char *) (ctx->output->commitStr[ i ].s) );
+	if ( s ) {
+		for ( i = 0; i < ctx->output->nCommitStr; i++ ) {
+			strcat( s, (char *) (ctx->output->commitStr[ i ].s) );
+		}
 	}
 	return s;
 }
@@ -65,8 +67,10 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 	char *s = (char *) calloc(
 		1 + ctx->output->chiSymbolBufLen,
 		sizeof(char) * MAX_UTF8_SIZE );
-	for ( i = 0; i < ctx->output->chiSymbolBufLen; i++ ) {
-		strcat( s, (char *) (ctx->output->chiSymbolBuf[ i ].s) );
+	if ( s ) {
+		for ( i = 0; i < ctx->output->chiSymbolBufLen; i++ ) {
+			strcat( s, (char *) (ctx->output->chiSymbolBuf[ i ].s) );
+		}
 	}
 	return s;
 }
@@ -86,11 +90,13 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 	s = (char*) calloc(
 		1 + ZUIN_SIZE,
 		sizeof(ctx->output->zuinBuf[ 0 ].s) );
-	for ( i = 0; i < ZUIN_SIZE; i++ ) {
-		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
-			strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
-			if ( zuin_count )
-				(*zuin_count)++;
+	if ( s ) {
+		for ( i = 0; i < ZUIN_SIZE; i++ ) {
+			if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
+				strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
+				if ( zuin_count )
+					(*zuin_count)++;
+			}
 		}
 	}
 	return s;
@@ -194,20 +200,22 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 	char *msg = (char *) calloc(
 		1 + ctx->output->showMsgLen,
 		sizeof(char) * MAX_UTF8_SIZE );
-	for ( i = 0; i < ctx->output->showMsgLen; ++i )
-		strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
+	if ( msg ) {
+		for ( i = 0; i < ctx->output->showMsgLen; ++i )
+			strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
+	}
 	return msg;
 
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 { 
-	return (ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
 } 
 
 CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 { 
-	return (ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
+	return !!(ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 
 CHEWING_API int chewing_kbtype_Total( ChewingContext *ctx UNUSED )

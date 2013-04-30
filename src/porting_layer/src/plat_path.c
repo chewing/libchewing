@@ -13,6 +13,9 @@
 #endif
 #include "plat_path.h"
 
+#ifndef HAVE_ASPRINTF
+#include <stdarg.h>
+#endif
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,10 +37,10 @@ int get_search_path( char * path, size_t path_len )
 		home = getenv( "HOME" );
 		if ( home ) {
 			snprintf( path, path_len, "%s/.chewing" SEARCH_PATH_SEP
-				LIBDIR "/chewing", home );
+				LIBDIR "/libchewing", home );
 		} else {
 			// No HOME ?
-			strncpy( path, SEARCH_PATH_SEP LIBDIR "/chewing", path_len );
+			strncpy( path, SEARCH_PATH_SEP LIBDIR "/libchewing", path_len );
 		}
 	}
 
@@ -46,7 +49,31 @@ int get_search_path( char * path, size_t path_len )
 
 #elif defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 #define SEARCH_PATH_SEP ";"
-static char * strtok_r (char *s, const char *delim, char **save_ptr)
+int get_search_path( char * path, size_t path_len )
+{
+	char *chewing_path;
+	char *windir;
+
+	chewing_path = getenv( "CHEWING_PATH" );
+	if ( chewing_path ) {
+		strncpy( path, chewing_path, path_len );
+	} else {
+		windir = getenv( "WINDIR" );
+		if ( windir ) {
+			snprintf( path, path_len, "%s\\%s", windir, "chewing" );
+		} else {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+#else
+#error please implement get_search_path
+#endif
+
+#ifndef HAVE_STRTOK_R
+char * strtok_r (char *s, const char *delim, char **save_ptr)
 {
 	char *token;
 
@@ -73,28 +100,31 @@ static char * strtok_r (char *s, const char *delim, char **save_ptr)
 	}
 	return token;
 }
+#endif
 
-int get_search_path( char * path, size_t path_len )
+#ifndef HAVE_ASPRINTF
+int asprintf( char **strp, const char *fmt, ... )
 {
-	char *chewing_path;
-	char *appdata;
+	char *buf;
+	size_t len;
+	va_list ap;
 
-	chewing_path = getenv( "CHEWING_PATH" );
-	if ( chewing_path ) {
-		strncpy( path, chewing_path, path_len );
-	} else {
-		appdata = getenv( "APPDATA" );
-		if ( appdata ) {
-			snprintf( path, path_len, "%s", appdata );
-		} else {
-			return -1;
-		}
-	}
+	va_start( ap, fmt );
+	len = vsnprintf( NULL, 0, fmt, ap );
+	va_end( ap );
 
-	return 0;
+	buf = (char *) malloc( len + 1 );
+	if ( !buf )
+		return -1;
+
+	va_start( ap, fmt );
+	len = vsnprintf( buf, len + 1, fmt, ap );
+	va_end( ap );
+
+	*strp = buf;
+
+	return len;
 }
-#else
-#error please implement get_search_path
 #endif
 
 static int are_all_files_readable(

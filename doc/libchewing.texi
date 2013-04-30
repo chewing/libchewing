@@ -4,6 +4,10 @@
 @settitle libchewing
 @c %**end of header
 @include version.texi
+@dircategory Localization
+@direntry
+* libchewing: (libchewing).           The libchewing reference manual.
+@end direntry
 @copying
 This is the ``libchewing Reference Manual'' corresponding to libchewing
 version @value{VERSION}.
@@ -525,7 +529,9 @@ This function checks if the candidates selection has finished.
 @section Candidates Behavior
 
 @deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
-This function sets the candidates per page to @var{n}.
+This function sets the candidates per page to @var{n}. If MIN_SELKEY @leq{}
+@var{n} @leq{} @code{MAX_SELKEY} is not true, the @var{n} will be ignored. The
+default candidates per page is @code{MAX_SELKEY}.
 @end deftypefun
 
 @deftypefun int chewing_get_candPerPage (ChewingContext *@var{ctx})
@@ -533,19 +539,24 @@ This function returns the candidates per page.
 @end deftypefun
 
 @deftypevr Marco int MAX_SELKEY
-The number of maximum candidates that are selectable via shortcut
-keys.
+The number of maximum candidates that are selectable via shortcut keys. Its
+value is @code{10}.
+@end deftypevr
+@deftypevr Marco int MIN_SELKEY
+The number of minimum candidates that are selectable via shortcut keys. Its
+value is @code{1}.
 @end deftypevr
 
 @deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, int *@var{selkeys}, int @var{len})
-This function sets the selection key to @var{selkeys}, an integer
-array of length @var{len}.
+This function sets the selection key to @var{selkeys}, an integer array of
+length @code{MAX_SELKEY}. The @var{len} is ignored by this function.
 
 For example the default selection key is @code{1234567890}.
 @end deftypefun
 
 @deftypefun int* chewing_get_selKey (ChewingContext *@var{ctx})
-This function returns the current selection key setting.
+This function returns the current selection key setting. This function returns
+@code{NULL} when no memory.
 
 The return value @emph{must} be freed by the @code{chewing_free}
 function.
@@ -557,11 +568,15 @@ Use `asdfjkl789' or `asdfzxcv89' as selection key.
 @end deftypevr
 
 @deftypefun void chewing_set_hsuSelKeyType (ChewingContext *@var{ctx}, int @var{mode})
-This function sets the hsu keyboard selection key settings to @var{mode}.
+@quotation Deprecated
+This function is no-op now. Use @code{chewing_set_selKey} instead.
+@end quotation
 @end deftypefun
 
 @deftypefun int chewing_get_hsuSelKeyType (ChewingContext *@var{ctx})
-This function returns the current hsu keyboard selection key setting.
+@quotation Deprecated
+This function is no-op now. Use @code{chewing_get_selKey} instead.
+@end quotation
 @end deftypefun
 
 @node Output Handling
@@ -621,7 +636,12 @@ This function returns whether there are phonetic pre-edit string in the
 buffer.  Here ``zuin'' means bopomofo, a phonetic system for transcribing
 Chinese, especially Mandarin.
 
-The return value is @code{1} on success, @code{0} on failure.
+The return value is @code{0} when there are phonetic pre-edit string, @code{1}
+otherwise.
+
+@strong{CAUTION}: The return value of this function is different from
+@code{chewing_commit_Check}, @code{chewing_buffer_Check}, and
+@code{chewing_aux_Check}.
 @end deftypefun
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
@@ -716,7 +736,8 @@ functions provide the configuration interfaces to the front-end.
 @deftypefun void chewing_set_maxChiSymbolLen (ChewingContext *@var{ctx}, int @var{n})
 This function sets the maximum number of the Chinese characters in the
 pre-edit buffer. If the pre-edit string is longer than this number
-then the leading part will be committed automatically.
+then the leading part will be committed automatically. The range of @var{n}
+shall between @code{0} and @code{MAX_PHONE_SEQ_LEN - 1}.
 @end deftypefun
 
 @deftypefun int chewing_get_maxChiSymbolLen (ChewingContext *@var{ctx})

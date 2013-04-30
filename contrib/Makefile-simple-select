@@ -1,0 +1,11 @@
+TARGET = simple-select
+
+all: $(TARGET)
+
+$(TARGET): $(TARGET).c
+	$(CC) -o $(TARGET) $(TARGET).c \
+		-I ../include \
+		-L ../src/.libs -lchewing
+
+clean:
+	rm -f $(TARGET) uhash.dat

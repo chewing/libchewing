@@ -1,7 +1,7 @@
 /**
  * zuin-private.h
  *
- * Copyright (c) 2008
+ * Copyright (c) 2008, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -33,6 +33,8 @@ enum {
 	KB_DVORAK_HSU,
 	KB_DACHEN_CP26,
 	KB_HANYU_PINYIN,
+	KB_THL_PINYIN,
+	KB_MPS2_PINYIN,
 	KB_TYPE_NUM
 };
 
@@ -40,5 +42,5 @@ int ZuinPhoInput( ChewingData *, ZuinData *,int key );  /* assume `key' is "asci
 int ZuinRemoveLast( ZuinData * );
 int ZuinRemoveAll( ZuinData * );
 int ZuinIsEntering( ZuinData * );
-         
+
 #endif

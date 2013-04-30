@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "chewing-private.h"
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
 #include "private.h"
@@ -185,6 +186,8 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 	char str[ FIELD_SIZE + 1 ];
 
 	outfile = fopen( pgdata->static_data.hashfilename, "r+b" );
+	if ( !outfile )
+		return;
 
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
@@ -369,7 +372,7 @@ char *_load_hash_file( const char *filename, int *size )
 	if ( tf == NULL ) {
 		goto err_load_file;
 	}
-	pd = (char *) malloc( flen );
+	pd = ALC( char, flen );
 	if ( pd == NULL ) {
 		goto err_load_file;
 	}
@@ -403,7 +406,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 	if ( txtfile == NULL ) {
 		return 0;
 	}
-	dump = (char *) malloc( tflen * 2 );
+	dump = ALC( char, tflen * 2 );
 	if ( dump == NULL ) {
 		fclose( txtfile );
 		return 0;
@@ -442,7 +445,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 
 	/* backup as *.old */
 	strncpy( oldname, ofilename, sizeof(oldname) );
-	strncat( oldname, ".old", sizeof(oldname) );
+	strncat( oldname, ".old", sizeof(oldname) - strlen(oldname) - 1 );
 	oldname[ sizeof(oldname) - 1 ] = '\0';
 	PLAT_UNLINK( oldname );
 	PLAT_RENAME( ofilename, oldname );

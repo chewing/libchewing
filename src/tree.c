@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "chewing-private.h"
 #include "chewing-utf8-util.h"
 #include "chewing-definition.h"
 #include "userphrase-private.h"
@@ -135,8 +136,8 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	if ( !infile )
 		return -1;
 
-	pgdata->tree = calloc( sizeof(*pgdata->tree), TREE_SIZE );
-	if ( !pgdata->tree ) {
+	pgdata->static_data.tree = ALC( TreeType, TREE_SIZE );
+	if ( !pgdata->static_data.tree ) {
 		fclose( infile );
 		return -1;
 	}
@@ -144,10 +145,10 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 	/* XXX: What happen if infile contains more than TREE_SIZE data? */
 	for ( i = 0; i < TREE_SIZE; i++ ) {
 		if ( fscanf( infile, "%hu%d%d%d",
-					&pgdata->tree[ i ].phone_id,
-					&pgdata->tree[ i ].phrase_id,
-					&pgdata->tree[ i ].child_begin,
-					&pgdata->tree[ i ].child_end ) != 4 )
+					&pgdata->static_data.tree[ i ].phone_id,
+					&pgdata->static_data.tree[ i ].phrase_id,
+					&pgdata->static_data.tree[ i ].child_begin,
+					&pgdata->static_data.tree[ i ].child_end ) != 4 )
 			break;
 	}
 
@@ -360,27 +361,22 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 	}
 }
 
-static void FindInterval(
-		ChewingData *pgdata,
-		uint16_t *phoneSeq, int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
-		IntervalType selectInterval[], int nSelect, 
-		int bArrBrkpt[], TreeDataType *ptd )
+static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 {
 	int end, begin, pho_id;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
 
-	for ( begin = 0; begin < nPhoneSeq; begin++ ) {
-		for ( end = begin; end < nPhoneSeq; end++ ) {
-			if ( ! CheckBreakpoint( begin, end + 1, bArrBrkpt ) )
+	for ( begin = 0; begin < pgdata->nPhoneSeq; begin++ ) {
+		for ( end = begin; end < pgdata->nPhoneSeq; end++ ) {
+			if ( ! CheckBreakpoint( begin, end + 1, pgdata->bArrBrkpt ) )
 				continue;
 
 			/* set new_phoneSeq */
 			memcpy( 
-				new_phoneSeq, 
-				&phoneSeq[ begin ], 
+				new_phoneSeq,
+				&pgdata->phoneSeq[ begin ],
 				sizeof( uint16_t ) * ( end - begin + 1 ) );
 			new_phoneSeq[ end - begin + 1 ] = 0;
 			puserphrase = pdictphrase = NULL;
@@ -389,19 +385,19 @@ static void FindInterval(
 			/* check user phrase */
 			if ( UserGetPhraseFirst( pgdata, new_phoneSeq ) &&
 					CheckUserChoose( pgdata, new_phoneSeq, begin, end + 1,
-					&p_phrase, selectStr, selectInterval, nSelect ) ) {
+					&p_phrase, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect ) ) {
 				puserphrase = p_phrase;
 			}
 
 			/* check dict phrase */
-			pho_id = TreeFindPhrase( pgdata, begin, end, phoneSeq );
+			pho_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
 			if ( 
 				( pho_id != -1 ) && 
 				CheckChoose( 
 					pgdata,
 					pho_id, begin, end + 1, 
-					&p_phrase, selectStr, 
-					selectInterval, nSelect ) ) {
+					&p_phrase, pgdata->selectStr,
+					pgdata->selectInterval, pgdata->nSelect ) ) {
 				pdictphrase = p_phrase;
 			}
 
@@ -508,6 +504,13 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 }
 
 
+/*
+ * Remove the interval containing in another interval.
+ *
+ * Example:
+ * 國民大會 has three interval: 國民, 大會, 國民大會. This function removes
+ * 國名, 大會 becasue 國民大會 contains 國民 and 大會.
+ */
 static void Discard1( TreeDataType *ptd )
 {
 	int a, b;
@@ -563,6 +566,17 @@ static void Discard1( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
+/*
+ * Remove the interval that cannot connect to head or tail by other intervals.
+ *
+ * Example:
+ * The input string length is 5
+ * The available intervals are [1,1], [1,2], [2,3], [2,4], [5,5], [3,5].
+ *
+ * The possible connection from head to tail are [1,2][3,5], and
+ * [1,1][2,4][5,5]. Since [2,3] cannot connect to head or tail, it is removed
+ * by this function.
+ */
 static void Discard2( TreeDataType *ptd )
 {
 	int i, j;
@@ -956,28 +970,20 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
-int Phrasing(
-		ChewingData *pgdata, /* FIXME: Remove other parameters since they are all in pgdata. */
-		PhrasingOutput *ppo, uint16_t phoneSeq[], int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ], 
-		IntervalType selectInterval[], int nSelect, 
-		int bArrBrkpt[], int bUserArrCnnct[] ) 
+int Phrasing( ChewingData *pgdata )
 {
 	TreeDataType treeData;
 
 	InitPhrasing( &treeData );
 
-	FindInterval( 
-		pgdata,
-		phoneSeq, nPhoneSeq, selectStr, selectInterval, nSelect, 
-		bArrBrkpt, &treeData );
-	SetInfo( nPhoneSeq, &treeData );
+	FindInterval( pgdata, &treeData );
+	SetInfo( pgdata->nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
 	SaveList( &treeData );
-	CountMatchCnnct( &treeData, bUserArrCnnct, nPhoneSeq );
+	CountMatchCnnct( &treeData, pgdata->bUserArrCnnct, pgdata->nPhoneSeq );
 	SortListByScore( &treeData );
-	NextCut( &treeData, ppo );
+	NextCut( &treeData, &pgdata->phrOut );
 
 #ifdef ENABLE_DEBUG
 	ShowList( &treeData );
@@ -987,13 +993,13 @@ int Phrasing(
 	/* set phrasing output */
 	OutputRecordStr(
 		pgdata,
-		ppo->chiBuf, sizeof(ppo->chiBuf),
+		pgdata->phrOut.chiBuf, sizeof(pgdata->phrOut.chiBuf),
 		( treeData.phList )->arrIndex, 
 		( treeData.phList )->nInter, 
-		phoneSeq, 
-		nPhoneSeq, 
-		selectStr, selectInterval, nSelect, &treeData );
-	SaveDispInterval( ppo, &treeData );
+		pgdata->phoneSeq,
+		pgdata->nPhoneSeq,
+		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, &treeData );
+	SaveDispInterval( &pgdata->phrOut, &treeData );
 
 	/* free "phrase" */
 	CleanUpMem( &treeData );

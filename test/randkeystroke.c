@@ -30,16 +30,14 @@ static char normal_keys[] = "abcdefghijklmnopqrstuvwxyz" \
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "`1234567890[]/=-?+_|!@#$%^&*(){} ";
 static char* other_keys[] = {
-    "<L>", "<SL>", "<R>", "<U>", "<D>", "<E>", "<B>", "<EE>", "<DC>", "<H>",
+    "<L>", "<SL>", "<R>", "<SR>", "<U>", "<D>", "<E>", "<B>", "<EE>", "<DC>", "<H>",
     "<EN>", "<T>", "<C0>", "<C1>", "<C2>", "<C3>", "<C4>", "<C5>", "<C6>",
-    "<C7>", "<C8>", "<C9>", "<CB>" };
+    "<C7>", "<C8>", "<C9>", "<CB>", "<PU>", "<PD>", "<SS>", "<TT>",
+    "<N0>", "<N1>", "<N2>", "<N3>", "<N4>", "<N5>", "<N6>", "<N7>", "<N8>", "<N9>",
+    "<N+>", "<N->", "<N*>", "<N/>", "<N.>"};
 
 #define n_nkeys (sizeof(normal_keys) / sizeof(normal_keys[0]))
 #define n_okeys (sizeof(other_keys) / sizeof(other_keys[0]))
-#define n_tab1 (sizeof(zhuin_tab[0]) / sizeof(zhuin_tab[0][0]))
-#define n_tab2 (sizeof(zhuin_tab[1]) / sizeof(zhuin_tab[1][0]))
-#define n_tab3 (sizeof(zhuin_tab[2]) / sizeof(zhuin_tab[2][0]))
-#define n_tab4 (sizeof(zhuin_tab[3]) / sizeof(zhuin_tab[3][0]))
 
 void usage()
 {
@@ -55,6 +53,10 @@ int main( int argc, char *argv[] )
 	int nk = 100;
 	int total_random = 0;
 	int i, n;
+	int n_tab1 = strlen(zhuin_tab[0]);
+	int n_tab2 = strlen(zhuin_tab[1]);
+	int n_tab3 = strlen(zhuin_tab[2]);
+	int n_tab4 = strlen(zhuin_tab[3]);
 
 	srand( time( NULL ) );
 

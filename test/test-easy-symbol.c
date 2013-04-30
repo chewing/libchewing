@@ -16,52 +16,56 @@
 #include <string.h>
 
 #include "chewing.h"
-#include "test.h"
+#include "testhelper.h"
 
 static const TestData EASY_SYMBOL[] = {
-	{ .token = "Q<E>", .expected = "〔" },
-	{ .token = "W<E>", .expected = "〕" },
-	{ .token = "A<E>", .expected = "【" },
-	{ .token = "S<E>", .expected = "】" },
-	{ .token = "Z<E>", .expected = "《" },
-	{ .token = "X<E>", .expected = "》" },
-	{ .token = "E<E>", .expected = "｛" },
-	{ .token = "R<E>", .expected = "｝" },
-	{ .token = "D<E>", .expected = "「" },
-	{ .token = "F<E>", .expected = "」" },
-	{ .token = "C<E>", .expected = "『" },
-	{ .token = "V<E>", .expected = "』" },
-	{ .token = "T<E>", .expected = "‘" },
-	{ .token = "Y<E>", .expected = "’" },
-	{ .token = "G<E>", .expected = "“" },
-	{ .token = "H<E>", .expected = "”" },
-	{ .token = "B<E>", .expected = "〝" },
-	{ .token = "N<E>", .expected = "〞" },
-	{ .token = "U<E>", .expected = "＋" },
-	{ .token = "I<E>", .expected = "－" },
-	{ .token = "O<E>", .expected = "×" },
-	{ .token = "P<E>", .expected = "÷" },
-	{ .token = "J<E>", .expected = "≠" },
-	{ .token = "K<E>", .expected = "≒" },
-	{ .token = "L<E>", .expected = "Orz" },
-	{ .token = "M<E>", .expected = "…" },
+	{ "Q", "\xE3\x80\x94" /* 〔 */ },
+	{ "W", "\xE3\x80\x95" /* 〕 */ },
+	{ "A", "\xE3\x80\x90" /* 【 */ },
+	{ "S", "\xE3\x80\x91" /* 】 */ },
+	{ "Z", "\xE3\x80\x8A" /* 《 */ },
+	{ "X", "\xE3\x80\x8B" /* 》 */ },
+	{ "E", "\xEF\xBD\x9B" /* ｛ */ },
+	{ "R", "\xEF\xBD\x9D" /* ｝ */ },
+	{ "D", "\xE3\x80\x8C" /* 「 */ },
+	{ "F", "\xE3\x80\x8D" /* 」 */ },
+	{ "C", "\xE3\x80\x8E" /* 『 */ },
+	{ "V", "\xE3\x80\x8F" /* 』 */ },
+	{ "T", "\xE2\x80\x98" /* ‘ */ },
+	{ "Y", "\xE2\x80\x99" /* ’ */ },
+	{ "G", "\xE2\x80\x9C" /* “ */ },
+	{ "H", "\xE2\x80\x9D" /* ” */ },
+	{ "B", "\xE3\x80\x9D" /* 〝 */ },
+	{ "N", "\xE3\x80\x9E" /* 〞 */ },
+	{ "U", "\xEF\xBC\x8B" /* ＋ */ },
+	{ "I", "\xEF\xBC\x8D" /* － */ },
+	{ "O", "\xC3\x97" /* × */ },
+	{ "P", "\xC3\xB7" /* ÷ */ },
+	{ "J", "\xE2\x89\xA0" /* ≠ */ },
+	{ "K", "\xE2\x89\x92" /* ≒ */ },
+	{ "L", "Orz" },
+	{ "M", "\xE2\x80\xA6" /* … */ },
 };
 
-static const TestData CHINESE = { .token = "hk4g4<E>", .expected = "測試" };
+static const TestData CHINESE = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ };
 
 void test_type_easy_symbol()
 {
+	ChewingContext *ctx;
+	int i;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
 
-	for ( int i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
-		verify_keystoke( ctx,
-			EASY_SYMBOL[i].token, EASY_SYMBOL[i].expected );
+	for ( i = 0; i < ARRAY_SIZE( EASY_SYMBOL ); ++i ) {
+		type_keystroke_by_string( ctx, EASY_SYMBOL[i].token );
+		ok_preedit_buffer( ctx, EASY_SYMBOL[i].expected );
+		type_keystroke_by_string( ctx, "<E>" );
+		ok_commit_buffer( ctx, EASY_SYMBOL[i].expected );
 	}
 
 	chewing_delete( ctx );
@@ -70,20 +74,25 @@ void test_type_easy_symbol()
 
 void test_mode_change()
 {
+	ChewingContext *ctx;
+
 	chewing_Init( NULL, NULL );
 
-	ChewingContext *ctx = chewing_new();
-	ok( ctx, "chewing_new shall not return NULL" );
+	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	verify_keystoke( ctx, CHINESE.token, CHINESE.expected );
+	type_keystroke_by_string( ctx, CHINESE.token );
+	ok_commit_buffer( ctx, CHINESE.expected );
 
 	chewing_set_easySymbolInput( ctx, 1 );
-	verify_keystoke( ctx, EASY_SYMBOL[0].token, EASY_SYMBOL[0].expected );
+	type_keystroke_by_string( ctx, EASY_SYMBOL[0].token );
+	type_keystroke_by_string( ctx, "<E>" );
+	ok_commit_buffer( ctx, EASY_SYMBOL[0].expected );
 
 	chewing_set_easySymbolInput( ctx, 0 );
-	verify_keystoke( ctx, CHINESE.token, CHINESE.expected );
+	type_keystroke_by_string( ctx, CHINESE.token );
+	ok_commit_buffer( ctx, CHINESE.expected );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

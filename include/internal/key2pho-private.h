@@ -24,6 +24,7 @@
 uint16_t UintFromPhone( const char *phone );
 uint16_t UintFromPhoneInx( const int ph_inx[] );
 int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes );
+int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num );
 int PhoneInxFromKey( int key, int type, int kbtype, int searchTimes );
 
 #endif

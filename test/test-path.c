@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "test.h"
+#include "testhelper.h"
 #include "global-private.h"
 #include "plat_path.h"
 #include "plat_types.h"
@@ -30,7 +30,12 @@ int find_path_by_files(
 
 static const char *FILES[] = {
 	CHAR_FILE,
+#ifdef USE_BINARY_DATA
 	CHAR_INDEX_BEGIN_FILE,
+	CHAR_INDEX_PHONE_FILE,
+#else
+	CHAR_INDEX_FILE,
+#endif
 	DICT_FILE,
 	PH_INDEX_FILE,
 	PHONE_TREE_FILE,

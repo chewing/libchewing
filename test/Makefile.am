@@ -3,7 +3,7 @@ valgrind-check: testchewing test.txt
 	libtool --mode=execute valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
-		testchewing < test.txt
+		./testchewing < test.txt
 
 test.txt: default-test.txt
 	@if [ ! -f test.txt ]; then cp $(srcdir)/default-test.txt test.txt ; fi
@@ -12,29 +12,43 @@ dist_noinst_DATA = \
 	default-test.txt \
 	$(NULL)
 
-noinst_LTLIBRARIES = libtest.la
+noinst_LTLIBRARIES = libtesthelper.la
 
-libtest_la_SOURCES = \
-	test.c \
+libtesthelper_la_SOURCES = \
+	testhelper.c \
 	$(NULL)
 
-libtest_la_LIBADD = \
+libtesthelper_la_LIBADD = \
 	$(top_builddir)/src/libchewing.la \
 	$(NULL)
 
 TESTS = $(NATIVE_TESTS)
 NATIVE_TESTS = \
+	test-bopomofo \
+	test-config \
 	test-easy-symbol \
+	test-fullshape \
 	test-key2pho \
+	test-keyboard \
 	test-mmap \
 	test-path \
 	test-reset \
+	test-regression \
 	test-symbol \
+	test-special-symbol \
+	test-userphrase \
 	test-utf8 \
 	$(NULL)
 
+if HAVE_TEST_MEMORY_FAIL
+NATIVE_TESTS += \
+	test-memory-fail \
+	$(NULL)
+test_memory_fail_LDFLAGS=-Wl,--wrap=malloc,--wrap=calloc -static
+endif
+
 check_HEADERS = \
-	test.h \
+	testhelper.h \
 	$(NULL)
 
 check_PROGRAMS = \
@@ -50,7 +64,7 @@ test_mmap_CPPFLAGS = -DTESTDATA="\"$(srcdir)/default-test.txt\""
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke
 genkeystroke_SOURCES = gen_keystroke.c
-genkeystroke_LDADD = $(LDADD) $(NCURSESW_LIBS)
+genkeystroke_LDADD = $(LDADD) @CURSES_LIB@
 else
 TEXT_UI_BIN=
 endif
@@ -66,10 +80,11 @@ INCLUDES = \
 	$(NULL)
 
 LDADD = \
-	$(top_builddir)/src/libchewing.la \
 	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
-	$(top_builddir)/test/libtest.la \
+	$(top_builddir)/test/libtesthelper.la \
 	$(NULL)
+
+AM_LDFLAGS = -static
 
 CLEANFILES = uhash.dat materials.txt-random test.txt

@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2008, 2010, 2011
+ * Copyright (c) 2004, 2005, 2006, 2008, 2010, 2011, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -13,6 +13,9 @@
  */
 
 /* This file is encoded in UTF-8 */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <ctype.h>
 #include <string.h>
@@ -29,6 +32,12 @@
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "private.h"
+
+#ifdef HAVE_ASPRINTF
+#include <stdio.h>
+#else
+#include "plat_path.h"
+#endif
 
 extern const char *zhuin_tab[]; 
 static void MakePreferInterval( ChewingData *pgdata );
@@ -121,7 +130,7 @@ int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
 
 int ChewingIsEntering( ChewingData *pgdata )
 {
-	if ( pgdata->choiceInfo.isSymbol )
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE )
 		return 1;
 	return (
 		pgdata->chiSymbolBufLen != 0 || 
@@ -153,12 +162,10 @@ int HaninSymbolInput( ChewingData *pgdata )
 	pai->nAvail = 1;
 	pai->currentAvail = 0;
 	pci->nChoicePerPage = candPerPage;
-	if ( pci->nChoicePerPage > MAX_SELKEY ) {
-		pci->nChoicePerPage = MAX_SELKEY;
-	}
+	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
-	pci->isSymbol = 1;
+	pci->isSymbol = SYMBOL_CATEGORY_CHOICE;
 	return ZUIN_ABSORB;
 }
 
@@ -239,8 +246,9 @@ int SpecialSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBC\x9B"
 			/* "；" */
 	};
-	static int nSpecial = 29;
-	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+
+	return InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 }
 
 int FullShapeSymbolInput( int key, ChewingData *pgdata )
@@ -296,8 +304,9 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBD\x9D","\xEF\xBC\x8B","\xEF\xBC\x8D"
 			/* "｝","＋","－" */
 	};
-	static int nSpecial = sizeof( keybuf ) / sizeof( char );
-	rtn = InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+
+	rtn = InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 	if ( rtn == ZUIN_IGNORE )
 		rtn = SpecialSymbolInput( key, pgdata );
 	return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
@@ -361,17 +370,17 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 	int symbol_type;
 	int key;
 
-	if ( ! pgdata->static_data.symbol_table && pgdata->choiceInfo.isSymbol != 3 )
+	if ( ! pgdata->static_data.symbol_table && pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_UPDATE )
 		return ZUIN_ABSORB;
 
-	if ( pgdata->choiceInfo.isSymbol == 1 && 
+	if ( pgdata->choiceInfo.isSymbol == SYMBOL_CATEGORY_CHOICE &&
 			0 == pgdata->static_data.symbol_table[sel_i]->nSymbols )
-		symbol_type = 2;
+		symbol_type = SYMBOL_CHOICE_INSERT;
 	else
 		symbol_type = pgdata->choiceInfo.isSymbol;
 
 	/* level one, symbol category */
-	if ( symbol_type == 1 ) {
+	if ( symbol_type == SYMBOL_CATEGORY_CHOICE ) {
 		ChoiceInfo* pci = &pgdata->choiceInfo;
 		AvailInfo* pai = &pgdata->availInfo;
 
@@ -387,15 +396,15 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		pai->nAvail = 1;
 		pai->currentAvail = 0;
 		pci->nChoicePerPage = pgdata->config.candPerPage;
-		if ( pci->nChoicePerPage > MAX_SELKEY )
-			pci->nChoicePerPage = MAX_SELKEY;
+		assert( pci->nTotalChoice > 0 );
 		pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 		pci->pageNo = 0;
-		pci->isSymbol = 2;
+		pci->isSymbol = SYMBOL_CHOICE_INSERT;
 	}
 	else { /* level 2 symbol or OpenSymbolChoice */
 		/* TODO: FIXME, this part is buggy! */
-		if ( symbol_type == 2 ) {
+		if ( symbol_type == SYMBOL_CHOICE_INSERT ) {
+			assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 			memmove(
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
@@ -416,17 +425,12 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 		memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
 		pgdata->zuinData.kbtype = kbtype;
 
-		if ( symbol_type == 2 ) {
+		if ( symbol_type == SYMBOL_CHOICE_INSERT ) {
 			pgdata->chiSymbolBufLen++;
 			pgdata->chiSymbolCursor ++ ; 
-			if ( ! pgdata->config.bAutoShiftCur ) {
-				/* No action */
-			}
 		}
-		else if ( symbol_type == 3 ) { /* OpenSymbolChoice */
-			/* No action */
-		}
-		pgdata->choiceInfo.isSymbol = 0;
+
+		pgdata->choiceInfo.isSymbol = WORD_CHOICE;
 	}
 	return ZUIN_ABSORB;
 }
@@ -435,6 +439,7 @@ int SymbolInput( int key, ChewingData *pgdata )
 {
 	if ( isprint( (char) key ) && /* other character was ignored */
 	     (pgdata->chiSymbolBufLen < MAX_PHONE_SEQ_LEN) ) { /* protect the buffer */
+		assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 		memmove(
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
@@ -503,8 +508,8 @@ static int CountReleaseNum( ChewingData *pgdata )
 	int remain, i;
 
 	/* reserve ZUIN_SIZE positions for Zuin */
-	remain = pgdata->config.maxChiSymbolLen - (pgdata->chiSymbolBufLen + ZUIN_SIZE);
-	if ( remain > 0 )
+	remain = pgdata->config.maxChiSymbolLen - pgdata->chiSymbolBufLen;
+	if ( remain >= 0 )
 		return 0;
 
 	qsort(
@@ -626,7 +631,7 @@ static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 		ueStrNCpy( buf,
 				ueStrSeek( (char *) &pgdata->phrOut.chiBuf, cursor ),
 				1, 1 );
-		for ( i = 0; (size_t) i < sizeof(break_word) / sizeof(break_word[0]); i++ ) {
+		for ( i = 0; (size_t) i < ARRAY_SIZE( break_word ); i++ ) {
 			if ( ! strcmp ( buf, break_word[ i ] ) )
 				return 1;
 		}
@@ -675,7 +680,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	}
 }
 
-int AddChi( uint16_t phone, ChewingData *pgdata )
+int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 {
 	int i;
 	int cursor = PhoneSeqCursor( pgdata );
@@ -704,6 +709,11 @@ int AddChi( uint16_t phone, ChewingData *pgdata )
 		&( pgdata->phoneSeq[ cursor ] ) ,
 		sizeof( uint16_t ) * ( pgdata->nPhoneSeq - cursor ) );
 	pgdata->phoneSeq[ cursor ] = phone;
+	memmove(
+		&( pgdata->phoneSeqAlt[ cursor + 1 ] ),
+		&( pgdata->phoneSeqAlt[ cursor ] ) ,
+		sizeof( uint16_t ) * ( pgdata->nPhoneSeq - cursor ) );
+	pgdata->phoneSeqAlt[ cursor ] = phoneAlt;
 	pgdata->nPhoneSeq ++;
 
 	/* add to chiSymbolBuf */
@@ -760,10 +770,9 @@ static void ShowChewingData( ChewingData *pgdata )
 	DEBUG_OUT( "\n" );
 
 	DEBUG_OUT( 
-		"bChiSym : %d , bSelect : %d , bCaseChange : %d\n",
+		"bChiSym : %d , bSelect : %d\n",
 		pgdata->bChiSym, 
-		pgdata->bSelect, 
-		pgdata->bCaseChange );
+		pgdata->bSelect );
 }
 #endif
 
@@ -801,10 +810,7 @@ int CallPhrasing( ChewingData *pgdata )
 #endif
 
 	/* then phrasing */
-	Phrasing( pgdata,
-		&( pgdata->phrOut ), pgdata->phoneSeq, pgdata->nPhoneSeq,
-		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, 
-		pgdata->bArrBrkpt, pgdata->bUserArrCnnct );
+	Phrasing( pgdata );
 
 	/* and then make prefer interval */
 	MakePreferInterval( pgdata );
@@ -1295,7 +1301,7 @@ static int FindSymbolKey( const char *symbol )
 {
 	unsigned int i;
 	char **buf;
-	for ( i = 0; i < sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] ); ++i ) {
+	for ( i = 0; i < ARRAY_SIZE( symbol_buf ); ++i ) {
 		for ( buf = symbol_buf[ i ]; *buf; ++buf )	{
 			if (  0 == strcmp( *buf, symbol ) )
 				return *symbol_buf[ i ][ 0 ];
@@ -1306,7 +1312,7 @@ static int FindSymbolKey( const char *symbol )
 
 int OpenSymbolChoice( ChewingData *pgdata )
 {
-	int i, symbol_buf_len = sizeof( symbol_buf ) / sizeof( symbol_buf[ 0 ] );
+	int i, symbol_buf_len = ARRAY_SIZE( symbol_buf );
 	char **pBuf;
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;
@@ -1338,11 +1344,10 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	}
 
 	pci->nChoicePerPage = pgdata->config.candPerPage;
-	if ( pci->nChoicePerPage > MAX_SELKEY )
-		pci->nChoicePerPage = MAX_SELKEY;
+	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
-	pci->isSymbol = 3;
+	pci->isSymbol = SYMBOL_CHOICE_UPDATE;
 
 	pgdata->bSelect = 1;
 	pgdata->availInfo.nAvail = 1;
@@ -1354,67 +1359,111 @@ int OpenSymbolChoice( ChewingData *pgdata )
 
 int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 {
-	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
-	FILE *file;
-	char filename[ PATH_MAX ];
-	char line[512];
+	static const unsigned int MAX_SYMBOL_ENTRY = 100;
+	static const size_t LINE_LEN = 512; // shall be long enough?
+
+	char *filename = NULL;
+	FILE *file = NULL;
+	char *line = NULL;
+	SymbolEntry **entry = NULL;
 	char *category_end;
-	char *symbols, *symbols_end, *symbol;
-	SymbolEntry* tmp_tab[ 100 ];
-	int len = 0, i;
+	char *symbols;
+	char *symbols_end;
+	char *symbol;
+	int i;
+	int len;
+	size_t size;
+	int ret = -1;
 
 	pgdata->static_data.n_symbol_entry = 0;
 	pgdata->static_data.symbol_table = NULL;
-	memset(line, 0, 512);
 
-	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SYMBOL_TABLE_FILE );
+	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
+		prefix, SYMBOL_TABLE_FILE );
+	if ( ret == -1 )
+		goto error;
+
 	file = fopen( filename, "r" );
+	if ( !file )
+		goto error;
 
-	if ( ! file )
-		return 0;
+	line = ALC( char, LINE_LEN );
+	if ( !line )
+		goto error;
 
-	while ( fgets( line, ( sizeof( line ) / sizeof( char ) ), file ) ) {
-		if ( pgdata->static_data.n_symbol_entry >=
-				(sizeof(tmp_tab) / sizeof( SymbolEntry * ) ) )
-			break;
+	entry = ALC( SymbolEntry* , MAX_SYMBOL_ENTRY );
+	if ( !entry )
+		goto error;
+
+	while ( fgets( line, LINE_LEN, file ) &&
+		pgdata->static_data.n_symbol_entry < MAX_SYMBOL_ENTRY ) {
+
 		category_end = strpbrk( line, "=\r\n" );
-		if ( category_end ) {
-			symbols = category_end + 1;
-			symbols_end = strpbrk( symbols, "\r\n" );
-			if ( symbols_end ) {
-				*symbols_end = '\0';
-				len = ueStrLen( symbols );
-				tmp_tab[ pgdata->static_data.n_symbol_entry ] =
-					ALC( SymbolEntry, sizeof( SymbolEntry ) +
-						(len - 1) * (MAX_UTF8_SIZE + 1) );
-				tmp_tab[ pgdata->static_data.n_symbol_entry ]->nSymbols = len;
-				symbol = symbols;
-				for( i = 0; i < len; ++i ) {
-					ueStrNCpy(
-						tmp_tab[ pgdata->static_data.n_symbol_entry ]->symbols[ i ],
-						symbol, 1, 1 );
-					symbol += ueBytesFromChar( symbol[ 0 ] );
-				}
+		if ( !category_end )
+			goto error;
+
+		symbols = category_end + 1;
+		symbols_end = strpbrk( symbols, "\r\n" );
+		if ( symbols_end ) {
+			len = ueStrLen( symbols );
+
+			entry[ pgdata->static_data.n_symbol_entry ] =
+				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) +
+					sizeof( entry[0][0].symbols[0] ) * len);
+			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
+				goto error;
+			entry[ pgdata->static_data.n_symbol_entry ]
+				->nSymbols = len;
+
+			symbol = symbols;
+
+			for ( i = 0; i < len; ++i ) {
+				ueStrNCpy(
+					entry[ pgdata->static_data.n_symbol_entry ]->symbols[ i ],
+					symbol, 1, 1 );
+				// FIXME: What if symbol is combining sequences.
+				symbol += ueBytesFromChar( symbol[0] );
 			}
-			else {
-				tmp_tab[ pgdata->static_data.n_symbol_entry ] =
-					ALC( SymbolEntry,
-						sizeof( SymbolEntry ) -
-						( MAX_UTF8_SIZE + 1 ) );
-				tmp_tab[ pgdata->static_data.n_symbol_entry ]->nSymbols = 0;
-			}
-			*category_end = '\0';
-			ueStrNCpy(
-				tmp_tab[ pgdata->static_data.n_symbol_entry ]->category,
-				line,
-				MAX_PHRASE_LEN, 1 );
-			++pgdata->static_data.n_symbol_entry;
+
+
+		} else {
+			entry[ pgdata->static_data.n_symbol_entry ] =
+				( SymbolEntry* ) malloc( sizeof ( entry[0][0] ) );
+			if ( !entry[ pgdata->static_data.n_symbol_entry ] )
+				goto error;
+
+			entry[ pgdata->static_data.n_symbol_entry ]
+				->nSymbols = 0;
 		}
+
+		*category_end = 0;
+		ueStrNCpy(
+			entry[pgdata->static_data.n_symbol_entry]->category,
+			line, MAX_PHRASE_LEN, 1);
+
+		++pgdata->static_data.n_symbol_entry;
 	}
-	pgdata->static_data.symbol_table = ALC( SymbolEntry*,  pgdata->static_data.n_symbol_entry );
-	memcpy( pgdata->static_data.symbol_table, tmp_tab, pgdata->static_data.n_symbol_entry * sizeof( SymbolEntry *) );
+
+	size = sizeof( *pgdata->static_data.symbol_table ) *
+		pgdata->static_data.n_symbol_entry;
+	pgdata->static_data.symbol_table = ( SymbolEntry ** ) malloc( size );
+	if ( !pgdata->static_data.symbol_table )
+		goto error;
+	memcpy( pgdata->static_data.symbol_table, entry, size );
+
+	ret = 0;
+end:
+	free( entry );
+	free( line );
 	fclose( file );
-	return 1;
+	free ( filename );
+	return ret;
+
+error:
+	for ( i = 0; i < pgdata->static_data.n_symbol_entry; ++i ) {
+		free( entry[ i ] );
+	}
+	goto end;
 }
 
 void TerminateSymbolTable( ChewingData *pgdata )
@@ -1431,60 +1480,63 @@ void TerminateSymbolTable( ChewingData *pgdata )
 
 int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 {
-	const char DIRPATH_SEP_FILENAME[] = "%s" PLAT_SEPARATOR "%s";
-	FILE *file;
-	char filename[ PATH_MAX ];
-	char line[ 512 ];
+	static const int MAX_EASY_SYMBOL_LEN = 10;
+	static const size_t LINE_LEN = 512; // shall be long enough?
+
+	FILE *file = NULL;
+	char *filename = NULL;
+	char *line = NULL;
+	int len;
+	int _index;
 	char *symbol;
-	int len = 0, _index;
+	int ret = -1;
 
-	memset(line, 0, 512);
+	ret = asprintf( &filename, "%s" PLAT_SEPARATOR "%s",
+			prefix, SOFTKBD_TABLE_FILE );
+	if ( ret == -1 )
+		goto end;
 
-	sprintf( filename, DIRPATH_SEP_FILENAME, prefix, SOFTKBD_TABLE_FILE );
 	file = fopen( filename, "r" );
+	if ( !file )
+		goto end;
 
-	if ( ! file )
-		return 0;
+	line = ALC( char, LINE_LEN );
+	if ( !line )
+		goto end;
 
-	line[ 0 ] = '\0';
-	while ( fgets( line, sizeof( line ) / sizeof( char ), file ) ) {
-		if ( '\0' == line[ 0 ] ) {
-			break;
-		}
-
-		line[ sizeof( line ) / sizeof( char ) - 1] = '\0';
-		if ( ' ' != line[ 1 ] ) {
+	while ( fgets( line, LINE_LEN, file ) ) {
+		if ( ' ' != line[ 1 ] )
 			continue;
-		}
 
-		len = strcspn( line, "\r\n\0" );
+		// Remove tailing \n
+		len = strcspn( line, "\r\n" );
+
 		line[ len ] = '\0';
 
-		line[ 0 ] = toupper( line[ 0 ] );
 		_index = FindEasySymbolIndex( line[ 0 ] );
-		if ( -1 == _index ) {
+		if ( -1 == _index )
 			continue;
-		}
 
 		len = ueStrLen( &line[ 2 ] );
-		if ( 0 == len || 10 <= len ) {
+		if ( 0 == len || len > MAX_EASY_SYMBOL_LEN )
 			continue;
-		}
 
-		symbol = ALC( char, 6 * 10 );
-		if ( NULL == symbol ) {
-			break;
-		}
-		ueStrNCpy( symbol, &line[ 2 ], 9, 1 );
+		symbol = ALC( char, strlen( &line[2] ) + 1 );
+		if ( !symbol )
+			goto end;
 
-		if ( NULL != pgdata->static_data.g_easy_symbol_value[ _index] ) {
-			free( pgdata->static_data.g_easy_symbol_value[ _index ] );
-		}
+		ueStrNCpy( symbol, &line[ 2 ], len, 1 );
+
+		free( pgdata->static_data.g_easy_symbol_value[ _index ] );
 		pgdata->static_data.g_easy_symbol_value[ _index ] = symbol;
 		pgdata->static_data.g_easy_symbol_num[ _index ] = len;
 	}
+	ret = 0;
+end:
+	free( line );
 	fclose( file );
-	return 1;
+	free ( filename );
+	return ret;
 }
 
 void TerminateEasySymbolTable( ChewingData *pgdata )

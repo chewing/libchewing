@@ -139,22 +139,22 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 	int i;
 	FILE *indexfile = NULL;
 
-	pgdata->phone_num = PHONE_NUM;
+	pgdata->static_data.phone_num = PHONE_NUM;
 
-	pgdata->arrPhone = calloc( pgdata->phone_num, sizeof( *pgdata->arrPhone ) );
-	if ( !pgdata->arrPhone )
+	pgdata->static_data.arrPhone = ALC( uint16_t, pgdata->static_data.phone_num );
+	if ( !pgdata->static_data.arrPhone )
 	    return -1;
 
-	pgdata->char_begin = calloc( pgdata->phone_num, sizeof( *pgdata->char_begin ) );
-	if ( !pgdata->char_begin )
+	pgdata->static_data.char_begin = ALC( int, pgdata->static_data.phone_num );
+	if ( !pgdata->static_data.char_begin )
 	    return -1;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
 	if ( len + 1 > sizeof( filename ) )
 		return -1;
 
-	pgdata->charfile = fopen( filename, "r" );
-	if ( !pgdata->charfile )
+	pgdata->static_data.charfile = fopen( filename, "r" );
+	if ( !pgdata->static_data.charfile )
 		return -1;
 
 	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
@@ -165,8 +165,8 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 	if ( !indexfile )
 		return -1;
 
-	for ( i = 0; i < pgdata->phone_num; ++i )
-		fscanf( indexfile, "%hu %d", &pgdata->arrPhone[i], &pgdata->char_begin[i] );
+	for ( i = 0; i < pgdata->static_data.phone_num; ++i )
+		fscanf( indexfile, "%hu %d", &pgdata->static_data.arrPhone[i], &pgdata->static_data.char_begin[i] );
 
 	fclose( indexfile );
 	return 0;
@@ -179,7 +179,7 @@ static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 	char buf[ 1000 ];
 	uint16_t sh;
 
-	fgettab( buf, 1000, pgdata->charfile );
+	fgettab( buf, 1000, pgdata->static_data.charfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
 	assert( wrd_ptr->word != '\0' );
@@ -204,7 +204,7 @@ int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
 		return 0;
 
 #ifndef USE_BINARY_DATA
-	fseek( pgdata->charfile, pgdata->char_begin[ pinx - pgdata->arrPhone ], SEEK_SET );
+	fseek( pgdata->static_data.charfile, pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone ], SEEK_SET );
 #else
 	pgdata->static_data.char_cur_pos = (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone ];
 #endif
@@ -216,7 +216,7 @@ int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
 int GetCharNext( ChewingData *pgdata, Word *wrd_ptr )
 {
 #ifndef USE_BINARY_DATA
-	if ( ftell( pgdata->charfile ) >= pgdata->char_end_pos )
+	if ( ftell( pgdata->static_data.charfile ) >= pgdata->static_data.char_end_pos )
 		return 0;
 #else
 	if ( (unsigned char*)pgdata->static_data.char_cur_pos >= (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_end_pos )

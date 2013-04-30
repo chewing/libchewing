@@ -1,12 +1,27 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+
+What's New in libchewing 0.3.4 (Dec 31, 2012)
+---------------------------------------------------------
 * Improve the description of libchewing API
+  - Simplified examples to illustrate the usage are added
+* Revise libchewing API. Check the documentation for details
+* Support THL (Taiwan Huayu Luomapinyin) and MPS2 Pinyin keyboard layout
+* Reimplementation of unit test framework. No external 'check' package
+  is required
+* Fix several phrase errors
+  - Add exceptional phrase as well
+* Improved developer and user guide
+* Introduce CMake based build system, which is convenient to MS-Windows
+  based environments.
 * Add --enable-gcov to enable gcov coverage
 * Fix possible strncat() overflow
-* Support building with mingw32 toolchain
+* Consistent checks for bopomofo sequence internally
+* Handle incomplete bopomofo with space key properly
 * Internal structure refactoring
 * Read hash path from CHEWING_PATH environment variable
-* Fix GNU Hurd build
+* Make libchewing thread-safe
+* Fix IM crash by changing default candidate per page to 10
 * Fix the detection of ncursesw
 * Fix the usage of autotools
 * Update and tune symbols
@@ -14,16 +29,21 @@ What's New in libchewing GIT
 * Fix several compilation warnings
 * Fix GCC visibility availability for Darwin specific PIC code
 * Fix hash table initialization and its memory leakage
+* Support building with mingw32 toolchain
+* Fix GNU Hurd build
 * Fix Microsoft VC build
 * Fix Windows 64-bit build
+* Fix mingw32/64 + WINE build
 * Successful stories:
- . GCIN supports experimental Chewing IM support since version 1.6.4
+ . GCIN supports experimental Chewing IM since version 1.6.4
+ . HIME supports Chewing IM
  . UCIMF supports Chewing IM
  . Fcitx supports Chewing IM
  . mozc (IM framework maintained by Google) provides Chewing support
+ . JMCCE (reworked version) supports libchewing
 
 
-What's New in libchewing 0.3.3
+What's New in libchewing 0.3.3 (Feb 27, 2011)
 ---------------------------------------------------------
 * Fix memory access violation.
 * Improved Python binding.
@@ -39,7 +59,7 @@ What's New in libchewing 0.3.3
   . MeeGo platform provides built-in Chewing IM support
 
 
-What's New in libchewing 0.3.2
+What's New in libchewing 0.3.2 (Dec 1, 2008)
 ---------------------------------------------------------
 * Add gcc visibility support to hide private APIs.
 * APIs and Headers refactoring.
@@ -63,7 +83,7 @@ What's New in libchewing 0.3.2
   . UIM-chewing leveraging libchewing 0.3.x development branch.
 
 
-What's New in libchewing 0.3.1
+What's New in libchewing 0.3.1 (Oct 1, 2008)
 ----------------------------------------------------------
 * New keyboard layout DACHEN_CP26.
 * Add key '`' to open symbol table.
@@ -93,7 +113,7 @@ What's New in libchewing 0.3.1
 * Added bEasySymbolInput.
 
 
-What's New in libchewing 0.3.0
+What's New in libchewing 0.3.0 (May 15, 2006)
 ----------------------------------------------------------
 * This is a new development branch differing a lot from
   0.2.x series, and breaks API/ABI for new features.
@@ -115,7 +135,7 @@ What's New in libchewing 0.3.0
 * Merge phone and phrase from CNS11643.
 * Reduce the amount for the expose for internal symbols.
 * Improved Han-Yu PinYin to use table-lookup implementation.
-* Experimental frequency-evaluation. (re-compute chewing 
+* Experimental frequency-evaluation. (re-compute chewing
   lifetime)
 * Implement the choice mechanism for pair symbols.
 * Improved Tab handling to allow the switching over different
@@ -131,8 +151,8 @@ What's New in libchewing 0.3.0
   . New Win32-Chewing subproject to provide efficient input
     method solution on Microsoft Windows platforms.
 
-    
-What's New in libchewing 0.2.7
+
+What's New in libchewing 0.2.7 (Aug 8, 2005)
 ----------------------------------------------------------
 * Fix the keyboard type state changing bug.
 * Add new function to specify the space as the selection
@@ -145,18 +165,18 @@ What's New in libchewing 0.2.7
     Win32 port of OpenVanilla Input Method Framework).
 
 
-What's New in libchewing 0.2.6
+What's New in libchewing 0.2.6 (Feb 28, 2005)
 ----------------------------------------------------------
 * Experimental feature -- HanYu PinYing Keyboard layout.
 * Proper $HOME env handling.
 * SegFault workaround after libtabe's tsi.src merge.
 * Add the facility to input symbols.
 * Successful stories:
-  . Chewing becomes one of the built-in input methods in Sun 
+  . Chewing becomes one of the built-in input methods in Sun
     Java Desktop System (JDS).
 
 
-What's New in libchewing 0.2.5
+What's New in libchewing 0.2.5 (Dec 28, 2004)
 ----------------------------------------------------------
 * Merge SpaceChewing's frequency tweaking from zonble.
 * Minor fixes for building process and zuin core.

@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004-2008, 2010, 2011
+ * Copyright (c) 2004-2008, 2010, 2011, 2012
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -162,19 +162,20 @@ static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t phone )
 {
 	Word tempWord;
-	GetCharFirst( pgdata, &tempWord, phone );
-	do {
-		if ( ChoiceTheSame( pci, tempWord.word,
-		                    ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) ) )
-			continue;
-		memcpy( 
-			pci->totalChoiceStr[ pci->nTotalChoice ],
-			tempWord.word, ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) );
-		assert( pci->nTotalChoice <= MAX_CHOICE );
-		pci->totalChoiceStr[ pci->nTotalChoice ]
-		                   [ ueBytesFromChar( tempWord.word[ 0 ] ) ] = '\0';
-		pci->nTotalChoice++;
-	} while ( GetCharNext( pgdata, &tempWord ) );
+	if ( GetCharFirst( pgdata, &tempWord, phone ) ) {
+		do {
+			if ( ChoiceTheSame( pci, tempWord.word,
+					    ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) ) )
+				continue;
+			memcpy(
+				pci->totalChoiceStr[ pci->nTotalChoice ],
+				tempWord.word, ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) );
+			assert( pci->nTotalChoice <= MAX_CHOICE );
+			pci->totalChoiceStr[ pci->nTotalChoice ]
+					   [ ueBytesFromChar( tempWord.word[ 0 ] ) ] = '\0';
+			pci->nTotalChoice++;
+		} while ( GetCharNext( pgdata, &tempWord ) );
+	}
 }
 
 /** @brief Loading all possible phrases of certain length.
@@ -193,6 +194,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	AvailInfo *pai = &( pgdata->availInfo );
 	uint16_t *phoneSeq = pgdata->phoneSeq;
+	uint16_t *phoneSeqAlt = pgdata->phoneSeqAlt;
 	int cursor = PhoneSeqCursor( pgdata );
 	int candPerPage = pgdata->config.candPerPage;
 
@@ -206,7 +208,12 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 	/* secondly, read tree phrase */
 	if ( len == 1 ) { /* single character */
-		ChoiceInfoAppendChi( pgdata, pci, phoneSeq[cursor] );
+		ChoiceInfoAppendChi( pgdata, pci, phoneSeq[ cursor ] );
+
+		if ( phoneSeq[ cursor ] != phoneSeqAlt[ cursor ] ) {
+			ChoiceInfoAppendChi( pgdata, pci, phoneSeqAlt[ cursor ] );
+		}
+
 		if ( pgdata->zuinData.kbtype == KB_HSU ||
 		     pgdata->zuinData.kbtype == KB_DVORAK_HSU ) {
 			switch ( phoneSeq[ cursor ] ) {
@@ -317,10 +324,10 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 	/* magic number */
 	pci->nChoicePerPage = candPerPage;
-	if ( pci->nChoicePerPage > MAX_SELKEY )
-		pci->nChoicePerPage = MAX_SELKEY;
+	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
+	pci->isSymbol = WORD_CHOICE;
 }
 
 /*
@@ -375,7 +382,7 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 int ChoicePrevAvail( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;
-	if (pgdata->choiceInfo.isSymbol) return 0;
+	if (pgdata->choiceInfo.isSymbol != WORD_CHOICE) return 0;
 	if ( ++( pgdata->availInfo.currentAvail ) >= pgdata->availInfo.nAvail )
 		pgdata->availInfo.currentAvail = 0;
 	SetChoiceInfo( pgdata );
@@ -398,11 +405,12 @@ int ChoiceEndChoice( ChewingData *pgdata )
 	pgdata->choiceInfo.nTotalChoice = 0;
 	pgdata->choiceInfo.nPage = 0;
 
-	if ( pgdata->choiceInfo.isSymbol != 1 || pgdata->choiceInfo.isSymbol != 2 ) {
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE || pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_INSERT ) {
 		/* return to the old chiSymbolCursor position */
 		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
+		assert ( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
 	}
-	pgdata->choiceInfo.isSymbol = 0;
+	pgdata->choiceInfo.isSymbol = WORD_CHOICE;
 	return 0;
 }
 

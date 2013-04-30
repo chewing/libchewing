@@ -21,14 +21,18 @@
 #  include <stdint.h>
 #endif
 
+#ifndef USE_BINARY_DATA
+#include <stdio.h>
+#endif
+
 #include "global.h"
 #include "plat_mmap.h"
 
-#define MAX_KBTYPE 11
+#define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 6
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
-#define MAX_PHRASE_LEN 10
+#define MAX_PHRASE_LEN 11
 #define MAX_PHONE_SEQ_LEN 50
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
@@ -37,6 +41,13 @@
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
 
+/* For isSymbol */
+#define WORD_CHOICE            (0)
+#define SYMBOL_CATEGORY_CHOICE (1)
+#define SYMBOL_CHOICE_INSERT   (2)
+#define SYMBOL_CHOICE_UPDATE   (3)
+
+#ifndef _MSC_VER
 #undef max
 static inline int max( int a, int b )
 {
@@ -48,6 +59,7 @@ static inline int min( int a, int b )
 {
 	return a < b ? a : b;
 }
+#endif
 
 typedef union {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
@@ -75,7 +87,9 @@ typedef struct {
 typedef struct {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
+	int pho_inx_alt[ ZUIN_SIZE ];
 	uint16_t phone;
+	uint16_t phoneAlt;
 	PinYinData pinYinData;
 } ZuinData;
 
@@ -127,7 +141,7 @@ typedef struct _SymbolEntry {
 	 * This is an char[] array of variable length.
 	 * When nSymbols = 0, this array is not allocated.
 	 */
-	char symbols[ 1 ][ MAX_UTF8_SIZE + 1 ];
+	char symbols[][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
 typedef struct {
@@ -184,7 +198,7 @@ typedef struct {
 
 struct tag_HASH_ITEM;
 
-typedef struct {
+typedef struct tag_ChewingData {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
@@ -200,6 +214,7 @@ typedef struct {
 	int showMsgLen;
 
 	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	uint16_t phoneSeqAlt[ MAX_PHONE_SEQ_LEN ];
 	int nPhoneSeq;
 	char selectStr[ MAX_PHONE_SEQ_LEN ][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	IntervalType selectInterval[ MAX_PHONE_SEQ_LEN ];
@@ -211,10 +226,11 @@ typedef struct {
 	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
-	int bChiSym, bSelect, bCaseChange, bFirstKey, bFullShape;
+	int bChiSym, bSelect, bFirstKey, bFullShape;
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
+	struct tag_HASH_ITEM *prev_userphrase;
 	ChewingStaticData static_data;
 } ChewingData;
 
