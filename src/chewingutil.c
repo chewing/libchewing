@@ -694,6 +694,7 @@ int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 	}
 
 	/* shift the Brkpt */
+	assert( pgdata->nPhoneSeq >= cursor );
 	memmove( 
 		&( pgdata->bUserArrBrkpt[ cursor + 2 ] ),
 		&( pgdata->bUserArrBrkpt[ cursor + 1 ] ),
@@ -717,6 +718,7 @@ int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 	pgdata->nPhoneSeq ++;
 
 	/* add to chiSymbolBuf */
+	assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
 	memmove(
 		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ) ,
@@ -1089,7 +1091,8 @@ static int KillCharInSelectIntervalAndBrkpt( ChewingData *pgdata, int cursorToKi
 			pgdata->selectInterval[ i ].from--; 
 			pgdata->selectInterval[ i ].to--; 
 		} 
-	} 
+	}
+	assert ( pgdata->nPhoneSeq >= cursorToKill );
 	memmove( 
 		&( pgdata->bUserArrBrkpt[ cursorToKill ] ),
 		&( pgdata->bUserArrBrkpt[ cursorToKill + 1 ] ),
@@ -1114,6 +1117,7 @@ int ChewingKillChar(
 	pgdata->chiSymbolCursor = tmp;
 	if ( ChewingIsChiAt( chiSymbolCursorToKill, pgdata ) ) {
 		KillCharInSelectIntervalAndBrkpt(pgdata, cursorToKill);
+		assert( pgdata->nPhoneSeq - cursorToKill - 1 >= 0 );
 		memmove(
 			&( pgdata->phoneSeq[ cursorToKill ] ), 
 			&(pgdata->phoneSeq[ cursorToKill + 1 ] ),
@@ -1121,6 +1125,7 @@ int ChewingKillChar(
 		pgdata->nPhoneSeq--;
 	}
 	pgdata->symbolKeyBuf[ chiSymbolCursorToKill ] = 0;
+	assert( pgdata->chiSymbolBufLen - chiSymbolCursorToKill );
 	memmove( 
 		& pgdata->chiSymbolBuf[ chiSymbolCursorToKill ],
 		& pgdata->chiSymbolBuf[ chiSymbolCursorToKill + 1 ], 
