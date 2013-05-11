@@ -176,6 +176,7 @@ static int _Inner_InternalSpecialSymbol(
 	int kbtype;
 
 	if ( key == symkey && NULL != chibuf ) {
+		assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
 		memmove( 
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
 			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
