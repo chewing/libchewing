@@ -166,6 +166,29 @@ void test_set_maxChiSymbolLen()
 	chewing_Terminate();
 }
 
+void test_maxChiSymbolLen()
+{
+	ChewingContext *ctx;
+	int i;
+
+	chewing_Init( 0, 0 );
+	ctx = chewing_new();
+
+	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN );
+
+	for ( i = 0; i < MAX_CHI_SYMBOL_LEN; ++i ) {
+		type_keystroke_by_string( ctx, "hk4" );
+	}
+
+	// Use easy symbol 'Orz' as last input for worst case scenario.
+	chewing_set_easySymbolInput( ctx, 1 );
+	// FIXME: Current buggy here
+	// type_keystroke_by_string( ctx, "L" );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_set_selKey()
 {
 	ChewingContext *ctx;
@@ -484,6 +507,7 @@ int main()
 
 	test_set_candPerPage();
 	test_set_maxChiSymbolLen();
+	test_maxChiSymbolLen();
 	test_set_selKey();
 	test_set_addPhraseDirection();
 	test_set_spaceAsSelection();
