@@ -737,8 +737,16 @@ functions provide the configuration interfaces to the front-end.
 This function sets the maximum number of the Chinese characters in the
 pre-edit buffer. If the pre-edit string is longer than this number
 then the leading part will be committed automatically. The range of @var{n}
-shall between @code{0} and @code{MAX_PHONE_SEQ_LEN - 1}.
+shall between @code{0} and @code{MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN}.
 @end deftypefun
+
+@deftypevr Marco int MAX_PHONE_SEQ_LEN
+The size of internal buffer for preedit buffer. Its value is @code{50}.
+@end deftypevr
+
+@deftypevr Marco int MAX_PHRASE_LEN
+The maximum phrase size. Its value is @code{11}.
+@end deftypevr
 
 @deftypefun int chewing_get_maxChiSymbolLen (ChewingContext *@var{ctx})
 This function returns the maximum number of the Chinese characters in

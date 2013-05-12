@@ -22,7 +22,7 @@ static const int MIN_CAND_PER_PAGE = 1;
 static const int MAX_CAND_PER_PAGE = 10;
 static const int DEFAULT_CAND_PER_PAGE = 10;
 static const int MIN_CHI_SYMBOL_LEN = 0;
-static const int MAX_CHI_SYMBOL_LEN = 49;
+static const int MAX_CHI_SYMBOL_LEN = 39;
 
 static const int DEFAULT_SELECT_KEY[] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
@@ -182,8 +182,7 @@ void test_maxChiSymbolLen()
 
 	// Use easy symbol 'Orz' as last input for worst case scenario.
 	chewing_set_easySymbolInput( ctx, 1 );
-	// FIXME: Current buggy here
-	// type_keystroke_by_string( ctx, "L" );
+	type_keystroke_by_string( ctx, "L" );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

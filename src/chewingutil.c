@@ -1486,7 +1486,6 @@ void TerminateSymbolTable( ChewingData *pgdata )
 
 int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 {
-	static const int MAX_EASY_SYMBOL_LEN = 10;
 	static const size_t LINE_LEN = 512; // shall be long enough?
 
 	FILE *file = NULL;
@@ -1524,7 +1523,7 @@ int InitEasySymbolInput( ChewingData *pgdata, const char *prefix )
 			continue;
 
 		len = ueStrLen( &line[ 2 ] );
-		if ( 0 == len || len > MAX_EASY_SYMBOL_LEN )
+		if ( 0 == len || len > MAX_PHRASE_LEN )
 			continue;
 
 		symbol = ALC( char, strlen( &line[2] ) + 1 );

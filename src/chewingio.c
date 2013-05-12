@@ -384,7 +384,7 @@ CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n )
 {
-	if ( 0 <= n && n < MAX_PHONE_SEQ_LEN )
+	if ( 0 <= n && n <= ( MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN ) )
 		ctx->data->config.maxChiSymbolLen = n;
 }
 
