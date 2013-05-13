@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "chewing.h"
 #include "plat_types.h"
@@ -613,27 +614,39 @@ void test_Numlock()
 
 void test_get_phoneSeq()
 {
-	static const unsigned short PHONE[] = { 10268, 8708 };
+	static const struct {
+		char *token;
+		unsigned short phone[5];
+	} DATA[] = {
+		{ "hk4g4", { 10268, 8708, 0 } },
+		{ "hk4g4`31hk4g4", { 10268, 8708, 10268, 8708, 0 } },
+		{ "`31`31", { 0 } },
+	};
 	ChewingContext *ctx;
-	unsigned short *phone;
-	int len;
 	int i;
+	int expected_len;
+	int len;
+	unsigned short *phone;
 
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystroke_by_string( ctx, "hk4g4" );
+	for ( i = 0; i < ARRAY_SIZE( DATA ); ++i ) {
+		chewing_Reset( ctx );
+		type_keystroke_by_string( ctx, DATA[i].token );
 
-	len = chewing_get_phoneSeqLen( ctx );
-	ok( len == ARRAY_SIZE( PHONE ), "phoneSeqLen `%d' shall be `%d'", len, ARRAY_SIZE( PHONE ) );
+		expected_len = 0;
+		while ( DATA[i].phone[expected_len] != 0 )
+			++expected_len;
+		len = chewing_get_phoneSeqLen( ctx );
+		ok( len == expected_len, "phoneSeqLen `%d' shall be `%d'", len, expected_len );
 
-	phone = chewing_get_phoneSeq( ctx );
-	for ( i = 0; i < len; ++i ) {
-		ok( phone[i] == PHONE[i], "phone in position %d is `%d', shall be `%d'", i, phone[i], PHONE[i] );
+		phone = chewing_get_phoneSeq( ctx );
+		ok ( memcmp( phone, DATA[i].phone, sizeof( phone[0] ) * expected_len ) == 0, "phoneSeq shall be expected value" );
+		chewing_free( phone );
 	}
-	chewing_free( phone );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
