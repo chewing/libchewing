@@ -110,9 +110,40 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_Terminate();
 }
 
+void test_select_candidate_4_bytes_utf8()
+{
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+	chewing_set_autoShiftCur( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "2k62k6" ); /* ㄉㄜˊ ㄉㄜˊ */
+	ok_preedit_buffer( ctx, "\xE5\xBE\x97\xE5\xBE\x97" /* 得得 */ );
+
+	type_keystroke_by_string( ctx, "<H>" );
+
+	type_keystroke_by_string( ctx, "<D>8" );
+	ok_preedit_buffer( ctx, "\xF0\xA2\x94\xA8\xE5\xBE\x97" /* 𢔨得 */ );
+
+	type_keystroke_by_string( ctx, "<D>8" );
+
+	ok_preedit_buffer( ctx, "\xF0\xA2\x94\xA8\xF0\xA2\x94\xA8" /* 𢔨𢔨 */ );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_select_candidate() {
 	test_select_candidate_no_phrase_choice_rearward();
 	test_select_candidate_phrase_choice_rearward();
+	test_select_candidate_4_bytes_utf8();
 }
 
 void test_Esc_not_entering_chewing()
