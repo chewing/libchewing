@@ -129,7 +129,7 @@ void test_CtrlNum_add_phrase_right()
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
-        chewing_set_addPhraseDirection( ctx, 0 );
+	chewing_set_addPhraseDirection( ctx, 0 );
 
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
 		"`%s' shall not be in userphrase", phrase );
@@ -186,7 +186,7 @@ void test_CtrlNum_add_phrase_symbol_in_between()
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
-        chewing_set_addPhraseDirection( ctx, 1 );
+	chewing_set_addPhraseDirection( ctx, 1 );
 
 	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
 		"`%s' shall not be in userphrase", bopomofo );
@@ -224,7 +224,7 @@ void test_userphrase_auto_learn()
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
-        chewing_set_addPhraseDirection( ctx, 1 );
+	chewing_set_addPhraseDirection( ctx, 1 );
 
 	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
 		"`%s' shall not be in userphrase", bopomofo );
