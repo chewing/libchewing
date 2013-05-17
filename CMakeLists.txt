@@ -54,6 +54,9 @@ if (USE_BINARY_DATA)
 	add_definitions(-DUSE_BINARY_DATA=1)
 endif()
 
+# Use valgrind when testing
+option(USE_VALGRIND "Use valgrind when testing" true)
+
 # Feature probe
 include(CheckTypeSize)
 check_type_size(uint16_t UINT16_T)
@@ -240,11 +243,13 @@ foreach(target ${ALL_TESTCASES})
 	add_test(${target} ${TEST_BIN_DIR}/${target})
 endforeach()
 
-find_program(VALGRIND valgrind)
-if(VALGRIND)
-	foreach(target ${ALL_TESTCASES})
-		add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
-	endforeach()
+if(USE_VALGRIND)
+	find_program(VALGRIND valgrind)
+	if(VALGRIND)
+		foreach(target ${ALL_TESTCASES})
+			add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
+		endforeach()
+	endif()
 endif()
 
 foreach(target ${ALL_TESTS})
