@@ -45,7 +45,20 @@ __forceinline void DEBUG_OUT( char* str, ... ){ }
 #define ALC(type, size) \
 	(type *) calloc( size, sizeof( type ) )
 
-#define STATIC_ASSERT( exp, name ) typedef int STATIC_ASSERT_##name [ ( exp ) ? 1 : -1 ];
+#define ASSERT_CONCAT_(a, b) a##b
+#define ASSERT_CONCAT(a, b) ASSERT_CONCAT_(a, b)
+#ifdef __COUNTER__
+  #define STATIC_ASSERT(e,m) \
+    { enum { ASSERT_CONCAT(static_assert_, __COUNTER__) = 1/(!!(e)) }; }
+#else
+  /* This can't be used twice on the same line so ensure if using in headers
+   * that the headers are not included twice (by wrapping in #ifndef...#endif)
+   * Note it doesn't cause an issue when used on same line of separate modules
+   * compiled with gcc -combine -fwhole-program.  */
+  #define STATIC_ASSERT(e,m) \
+    { enum { ASSERT_CONCAT(assert_line_, __LINE__) = 1/(!!(e)) }; }
+#endif
+
 #ifdef __GNUC__
 #define ARRAY_SIZE( array ) ( sizeof(array) / sizeof(((typeof(array)){})[0]) )
 #else
