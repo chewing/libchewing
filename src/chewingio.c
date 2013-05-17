@@ -1310,9 +1310,9 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 			newPhraseLen >= 1 && 
 			cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq ) {
 			if ( NoSymbolBetween( 
-				pgdata, 
-				cursor, 
-				cursor + newPhraseLen - 1 ) ) {
+				pgdata,
+				cursor,
+				cursor + newPhraseLen ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor ],
@@ -1341,9 +1341,9 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 		if ( 
 			newPhraseLen >= 1 && 
 			cursor - newPhraseLen >= 0 ) {
-			if ( NoSymbolBetween( pgdata, 
-			                      cursor, 
-			                      cursor - newPhraseLen ) ) {
+			if ( NoSymbolBetween( pgdata,
+				cursor - newPhraseLen,
+				cursor ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
 				        &pgdata->phoneSeq[ cursor - newPhraseLen ],

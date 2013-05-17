@@ -174,7 +174,35 @@ void test_CtrlNum_add_phrase_left()
 	chewing_Terminate();
 }
 
-void test_CtrlNum_add_phrase_symbol_in_between()
+void test_CtrlNum_add_phrase_right_symbol_in_between()
+{
+	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
+	int cursor;
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_addPhraseDirection( ctx, 0 );
+
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo );
+
+	type_keystroke_by_string( ctx, "hk4`1g4<H><C2>" );
+	cursor = chewing_cursor_Current( ctx );
+	ok( cursor == 0, "cursor position `%d' shall be 0", cursor );
+
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
+void test_CtrlNum_add_phrase_left_symbol_in_between()
 {
 	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
 	int cursor;
@@ -195,12 +223,8 @@ void test_CtrlNum_add_phrase_symbol_in_between()
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 3, "cursor position `%d' shall be 3", cursor );
 
-	/*
-	 * FIXME: Current buggy here. User phrase shall not be added when there
-	 * is a symbol in between.
-	 */
-	/* ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
-		"`%s' shall not be in userphrase", bopomofo ); */
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
@@ -210,7 +234,8 @@ void test_CtrlNum()
 {
 	test_CtrlNum_add_phrase_right();
 	test_CtrlNum_add_phrase_left();
-	test_CtrlNum_add_phrase_symbol_in_between();
+	test_CtrlNum_add_phrase_right_symbol_in_between();
+	test_CtrlNum_add_phrase_left_symbol_in_between();
 }
 
 void test_userphrase_auto_learn()

@@ -112,19 +112,12 @@ void SetUpdatePhraseMsg(
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
 {
-	int i, nChi, k;
+	int i;
+	end = min( end, pgdata->chiSymbolBufLen );
 
-	/* find the beginning index in the chiSymbolBuf */
-	for ( nChi = i = 0; i < pgdata->chiSymbolBufLen && nChi < begin; i++ )
-		/* it is Chinese word */
-		if ( pgdata->chiSymbolBuf[ i ].wch == 0 )
-			nChi++;
-
-	for ( k = i + 1; k < pgdata->chiSymbolBufLen && k <= end; k++ )
-		/*  not a Chinese word */
+	for ( i = begin; i < end; ++i )
 		if ( pgdata->chiSymbolBuf[ i ].wch != 0 )
 			return 0;
-
 	return 1;
 }
 
