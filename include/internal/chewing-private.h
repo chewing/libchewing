@@ -34,6 +34,8 @@
 #define PINYIN_SIZE 10
 #define MAX_PHRASE_LEN 11
 #define MAX_PHONE_SEQ_LEN 50
+#define MIN_CHI_SYMBOL_LEN 0
+#define MAX_CHI_SYMBOL_LEN (MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN)
 #define MAX_INTERVAL ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 #define MAX_CHOICE (567)
 #define MAX_CHOICE_BUF (50)                   /* max length of the choise buffer */

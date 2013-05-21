@@ -501,7 +501,6 @@ static int CountReleaseNum( ChewingData *pgdata )
 {
 	int remain, i;
 
-	/* reserve ZUIN_SIZE positions for Zuin */
 	remain = pgdata->config.maxChiSymbolLen - pgdata->chiSymbolBufLen;
 	if ( remain >= 0 )
 		return 0;

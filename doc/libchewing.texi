@@ -737,11 +737,20 @@ functions provide the configuration interfaces to the front-end.
 This function sets the maximum number of the Chinese characters in the
 pre-edit buffer. If the pre-edit string is longer than this number
 then the leading part will be committed automatically. The range of @var{n}
-shall between @code{0} and @code{MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN}.
+shall between @code{MIN_CHI_SYMBOL_LEN} and @code{MAX_CHI_SYMBOL_LEN}.
 @end deftypefun
 
+@deftypevr Marco int MIN_CHI_SYMBOL_LEN
+The minimal size of pre-edit buffer. Its value is @code{0}.
+@end deftypevr
+
+@deftypevr Marco int MAX_CHI_SYMBOL_LEN
+The maximum size of pre-edit buffer. Its value is
+@code{MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN}.
+@end deftypevr
+
 @deftypevr Marco int MAX_PHONE_SEQ_LEN
-The size of internal buffer for preedit buffer. Its value is @code{50}.
+The size of internal buffer for pre-edit buffer. Its value is @code{50}.
 @end deftypevr
 
 @deftypevr Marco int MAX_PHRASE_LEN

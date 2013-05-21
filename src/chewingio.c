@@ -152,6 +152,7 @@ static ChewingData * allocate_ChewingData()
 	ChewingData *data = ALC( ChewingData, 1 );
 	if ( data ) {
 		data->config.candPerPage = MAX_SELKEY;
+		data->config.maxChiSymbolLen = MAX_CHI_SYMBOL_LEN;
 		memcpy( data->config.selKey, DEFAULT_SELKEY, sizeof( data->config.selKey ) );
 	}
 
@@ -384,7 +385,7 @@ CHEWING_API int chewing_get_candPerPage( ChewingContext *ctx )
 
 CHEWING_API void chewing_set_maxChiSymbolLen( ChewingContext *ctx, int n )
 {
-	if ( 0 <= n && n <= ( MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN ) )
+	if ( MIN_CHI_SYMBOL_LEN <= n && n <= MAX_CHI_SYMBOL_LEN )
 		ctx->data->config.maxChiSymbolLen = n;
 }
 

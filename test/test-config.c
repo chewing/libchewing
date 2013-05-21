@@ -51,8 +51,8 @@ void test_default_value()
 	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
 		"default candPerPage shall be %d", DEFAULT_CAND_PER_PAGE );
 
-	ok( chewing_get_maxChiSymbolLen( ctx ) == 0,
-		"default maxChiSymbolLen shall be 0" );
+	ok( chewing_get_maxChiSymbolLen( ctx ) == MAX_CHI_SYMBOL_LEN,
+		"default maxChiSymbolLen shall be %d", MAX_CHI_SYMBOL_LEN );
 
 	ok( chewing_get_addPhraseDirection( ctx ) == 0,
 		"default addPhraseDirection shall be 0" );
