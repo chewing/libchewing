@@ -45,41 +45,41 @@ void test_default_value()
 	ok( select_key, "chewing_get_selKey shall not return NULL" );
 	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
 		sizeof( DEFAULT_SELECT_KEY )),
-		"select key shall be default value");
+		"default select key shall be default value" );
 	chewing_free( select_key );
 
 	ok( chewing_get_candPerPage( ctx ) == DEFAULT_CAND_PER_PAGE,
-		"candPerPage shall be default value" );
+		"default candPerPage shall be %d", DEFAULT_CAND_PER_PAGE );
 
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 0,
-		"maxChiSymbolLen shall be 0" );
+		"default maxChiSymbolLen shall be 0" );
 
 	ok( chewing_get_addPhraseDirection( ctx ) == 0,
-		"addPhraseDirection shall be 0" );
+		"default addPhraseDirection shall be 0" );
 
 	ok( chewing_get_spaceAsSelection( ctx ) == 0,
-		"spaceAsSelection shall be 0" );
+		"default spaceAsSelection shall be 0" );
 
 	ok( chewing_get_escCleanAllBuf( ctx ) == 0,
-		"escCleanAllBuf shall be 0" );
+		"default escCleanAllBuf shall be 0" );
 
 	ok( chewing_get_hsuSelKeyType( ctx ) == 0,
-		"hsuSelKeyType shall be 0" );
+		"default hsuSelKeyType shall be 0" );
 
 	ok( chewing_get_autoShiftCur( ctx ) == 0,
-		"autoShiftCur shall be 0" );
+		"default autoShiftCur shall be 0" );
 
 	ok( chewing_get_easySymbolInput( ctx ) == 0,
-		"easySymbolInput shall be 0" );
+		"default easySymbolInput shall be 0" );
 
 	ok( chewing_get_phraseChoiceRearward( ctx ) == 0,
-		"phraseChoiceRearward shall be 0" );
+		"default phraseChoiceRearward shall be 0" );
 
 	ok( chewing_get_ChiEngMode( ctx ) == CHINESE_MODE,
-		"ChiEngMode shall be CHINESE_MODE" );
+		"default ChiEngMode shall be CHINESE_MODE" );
 
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
-		"ShapeMode shall be HALFSHAPE_MODE" );
+		"default ShapeMode shall be HALFSHAPE_MODE" );
 
 	chewing_delete( ctx );
 	chewing_Terminate();
