@@ -1,7 +1,6 @@
 #cmakedefine ENABLE_DEBUG 1
 #cmakedefine HAVE_SYS_TYPES_H 1
 #cmakedefine HAVE_STDINT_H 1
-#cmakedefine HAVE_STDDEF_H 1
 #cmakedefine HAVE_STRTOK_R 1
 #cmakedefine HAVE_ASPRINTF 1
 #cmakedefine HAVE_UNISTD_H 1

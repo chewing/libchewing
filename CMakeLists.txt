@@ -70,6 +70,7 @@ check_function_exists(asprintf HAVE_ASPRINTF)
 
 include(CheckIncludeFiles)
 check_include_files(unistd.h HAVE_UNISTD_H)
+check_include_files(stdint.h HAVE_STDINT_H)
 
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/config.h.in
