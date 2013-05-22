@@ -63,6 +63,8 @@ test/test-key2pho
 test/test-key2pho.exe
 test/test-keyboard
 test/test-keyboard.exe
+test/test-logger
+test/test-logger.exe
 test/test-memory-fail
 test/test-memory-fail.exe
 test/test-mmap

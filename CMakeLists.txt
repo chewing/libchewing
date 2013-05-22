@@ -206,6 +206,7 @@ set(ALL_TESTCASES
 	test-fullshape
 	test-key2pho
 	test-keyboard
+	test-logger
 	test-mmap
 	test-path
 	test-regression
