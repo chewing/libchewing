@@ -87,25 +87,6 @@ AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
 
 # Options
-dnl Debugging switch
-AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-                              [Turn on debugging support @<:@default=no@:>@])],
-              [case "${enableval}" in
-               yes)
-               LIBDEBUG="true"
-               ;;
-               *)
-               ;;
-               esac],
-              [LIBDEBUG="false"])
-
-if test x$LIBDEBUG = x"true"; then
-        AC_DEFINE(ENABLE_DEBUG, 1,
-                [Define to 1 if you want native library runtime debugging code enabled])
-fi
-AC_SUBST(LIBDEBUG)
-
 dnl Enable gcov for coverage test
 AC_ARG_ENABLE([gcov],
               [AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@])],
@@ -203,7 +184,6 @@ Build options:
   Host OS                 $host_os
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
-  Enable debug            $LIBDEBUG
   Enable gcov             $ENABLE_GCOV
   Enable binary data      $binary_data
   Build TextUI sample     $ax_cv_ncursesw

@@ -914,8 +914,7 @@ static void CountMatchCnnct( TreeDataType *ptd, int *bUserArrCnnct, int nPhoneSe
 	}
 }
 
-#ifdef ENABLE_DEBUG
-static void ShowList( TreeDataType *ptd )
+static void ShowList( ChewingData *pgdata, TreeDataType *ptd )
 {
 	RecordNode *p;
 	int i;
@@ -937,7 +936,6 @@ static void ShowList( TreeDataType *ptd )
 	}
 	DEBUG_OUT( "\n" );
 }
-#endif
 
 static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 {
@@ -985,10 +983,7 @@ int Phrasing( ChewingData *pgdata )
 	SortListByScore( &treeData );
 	NextCut( &treeData, &pgdata->phrOut );
 
-#ifdef ENABLE_DEBUG
-	ShowList( &treeData );
-	DEBUG_FLUSH;
-#endif
+	ShowList( pgdata, &treeData );
 
 	/* set phrasing output */
 	OutputRecordStr(

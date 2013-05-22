@@ -4,11 +4,6 @@ project(libchewing)
 set(LIBCHEWING_VERSION 0.3.4)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-option(ENABLE_DEBUG "Debug support" false)
-if(ENABLE_DEBUG)
-	add_definitions(-DENABLE_DEBUG=1)
-endif()
-
 if(UNIX)
 	set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
 	add_definitions(-DUNDER_POSIX -DPIC)
