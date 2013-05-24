@@ -128,7 +128,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
-static void NullLogger( void *data, const char *fmt, ...)
+static void NullLogger( void *data, int level, const char *fmt, ...)
 {
 }
 
@@ -238,7 +238,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	ChewingData *pgdata = ctx->data;
 	ChewingStaticData static_data;
 	ChewingConfigData old_config;
-	void (*logger)( void *data, const char *fmt, ...);
+	void (*logger)( void *data, int level, const char *fmt, ...);
 
 	/* Backup old config and restore it after clearing pgdata structure. */
 	old_config = pgdata->config;
@@ -1437,7 +1437,7 @@ CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 }
 
 CHEWING_API void chewing_set_logger( ChewingContext *ctx,
-	void (*logger)( void *data, const char *fmt, ... ),
+	void (*logger)( void *data, int level, const char *fmt, ... ),
 	void *data )
 {
 	if ( !logger ) {

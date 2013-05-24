@@ -10,12 +10,12 @@
 
 #define DEBUG_OUT( fmt, ... ) \
 	do { \
-		pgdata->logger( pgdata->loggerData, fmt, ##__VA_ARGS__ ); \
+		pgdata->logger( pgdata->loggerData, CHEWING_LOG_INFO, fmt, ##__VA_ARGS__ ); \
 	} while (0)
 
 #define DEBUG_CHECKPOINT() \
 	do { \
-		pgdata->logger( pgdata->loggerData, "[ File: %s  Func: %s  Line: %d ]\n", \
+		pgdata->logger( pgdata->loggerData, CHEWING_LOG_VERBOSE, "[ File: %s  Func: %s  Line: %d ]\n", \
 			__FILE__, __FUNCTION__, __LINE__ ); \
 	} while (0)
 
