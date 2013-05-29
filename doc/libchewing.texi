@@ -215,6 +215,49 @@ the Chewing IM and the caller, use this function the free the resource.
 Do nothing if @var{ptr} is @code{NULL}.
 @end deftypefun
 
+@deftypefun void chewing_set_logger (ChewingContext *@var{ctx}, void (*@var{logger})(void *@var{data}, int @var{level}, const char *@var{fmt}, ... ), void *@var{data})
+
+This function sets the logger function @var{logger}. The logger function is
+used to provide log inside Chewing IM for debugging. The @var{data} in
+@code{chewing_set_logger} is passed directly to @var{data} in @var{logger} when
+logging. The following example shows how to use @var{data}:
+
+@example
+void logger( void *data, int level, const char *fmt, ... )
+@{
+    FILE *fd = (FILE *) data;
+    ...
+@}
+
+int main()
+@{
+    ChewingContext *ctx;
+    FILE *fd;
+    ...
+    chewing_set_logger(ctx, logger, fd);
+    ...
+@}
+@end example
+
+The @var{level} is log level. The symbolic names and their values are listed as
+following:
+@deftypevr  Macro int CHEWING_LOG_VERBOSE
+Its value is @code{1}.
+@end deftypevr
+@deftypevr  Macro int CHEWING_LOG_DEBUG
+Its value is @code{2}.
+@end deftypevr
+@deftypevr  Macro int CHEWING_LOG_INFO
+Its value is @code{3}.
+@end deftypevr
+@deftypevr  Macro int CHEWING_LOG_WARN
+Its value is @code{4}.
+@end deftypevr
+@deftypevr  Macro int CHEWING_LOG_ERROR
+Its value is @code{5}.
+@end deftypevr
+@end deftypefun
+
 @node Input Handling
 @chapter Input Handling
 
