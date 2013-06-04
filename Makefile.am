@@ -7,6 +7,7 @@ CMAKE_FILES = \
 	cmake/chewing.pc.in \
 	cmake/config.h.in \
 	cmake/FindCurses.cmake \
+	cmake/version.texi.in \
 	CMakeLists.txt \
 	$(NULL)
 
@@ -14,7 +15,8 @@ CONTRIB_FILES = \
 	contrib/python/test.py \
 	contrib/python/chewing.py \
 	contrib/simple-select.c \
-	contrib/Makefile-simple-select
+	contrib/Makefile-simple-select \
+	$(NULL)
 
 EXTRA_DIST = \
 	autogen.sh \
