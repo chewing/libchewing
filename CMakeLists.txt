@@ -350,9 +350,11 @@ set_target_properties(${LIBS} PROPERTIES
 add_library(common OBJECT
 	${INC_DIR}/internal/chewing-utf8-util.h
 	${INC_DIR}/internal/key2pho-private.h
+	${INC_DIR}/internal/memory-private.h
 
 	${SRC_DIR}/common/chewing-utf8-util.c
 	${SRC_DIR}/common/key2pho.c
+	${SRC_DIR}/common/memory.c
 )
 
 # install

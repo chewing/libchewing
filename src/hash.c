@@ -25,6 +25,7 @@
 #include "hash-private.h"
 #include "private.h"
 #include "global.h"
+#include "memory-private.h"
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )
 {
@@ -148,8 +149,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
-	uint16_t *pshort;
-	unsigned char *puc;
+	char *pc;
 
 	memset( str, 0, FIELD_SIZE );
 	if ( sizeof(int) * 4 + ueStrLen( pItem->data.wordSeq ) * 2 +
@@ -159,25 +159,24 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	}
 
 	/* freq info */
-	*(int*) &str[ 0 ] = pItem->data.userfreq;
-	*(int*) &str[ 4 ] = pItem->data.recentTime;
-	*(int*) &str[ 8 ] = pItem->data.maxfreq;
-	*(int*) &str[ 12 ] = pItem->data.origfreq;
+	PutInt32( pItem->data.userfreq, &str[ 0 ] );
+	PutInt32( pItem->data.recentTime, &str[ 4 ] );
+	PutInt32( pItem->data.maxfreq, &str[ 8 ] );
+	PutInt32( pItem->data.origfreq, &str[ 12 ] );
 
 	/* phone seq*/
 	phraselen = ueStrLen( pItem->data.wordSeq );
 	str[ 16 ] = phraselen;
-	pshort = (uint16_t *) &str[ 17 ];
+	pc = &str[ 17 ];
 	for ( i = 0; i < phraselen; i++ ) {
-		*pshort = pItem->data.phoneSeq[ i ];
-		pshort++;
+		PutUint16( pItem->data.phoneSeq[ i ], pc );
+		pc += 2;
 	}
 
 	/* phrase */
-	puc = (unsigned char *) pshort;
-	*puc = strlen( pItem->data.wordSeq );
-	strcpy( (char *) (puc + 1), pItem->data.wordSeq );
-	pItem->data.wordSeq[ (int) *puc ] = '\0';
+	*pc = strlen( pItem->data.wordSeq );
+	strcpy( (pc + 1), pItem->data.wordSeq );
+	pItem->data.wordSeq[ (unsigned char) *pc ] = '\0';
 }
 
 void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
@@ -235,13 +234,6 @@ static int isValidChineseString( char *str )
 	return 1;
 }
 
-static int ReadInt(unsigned char *addr)
-{
-	/* TODO: Use bit-wise operation to read */
-	int *p = (void*)addr;
-	return *p;
-}
-
 /**
  * @return 1, 0 or -1
  * retval 0	end of file
@@ -251,33 +243,30 @@ static int ReadInt(unsigned char *addr)
 int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
 	int len, i;
-	uint16_t *pshort;
-	unsigned char recbuf[ FIELD_SIZE ], *puc;
+	const char *pc;
 
-	memcpy( recbuf, srcbuf, FIELD_SIZE );
 	memset( pItem, 0, sizeof(HASH_ITEM) );
 
 	/* freq info */
-	pItem->data.userfreq	= ReadInt(&recbuf[ 0 ]);
-	pItem->data.recentTime	= ReadInt(&recbuf[ 4 ]);
-	pItem->data.maxfreq	= ReadInt(&recbuf[ 8 ]);
-	pItem->data.origfreq	= ReadInt(&recbuf[ 12 ]);
+	pItem->data.userfreq	= GetInt32(&srcbuf[ 0 ]);
+	pItem->data.recentTime	= GetInt32(&srcbuf[ 4 ]);
+	pItem->data.maxfreq	= GetInt32(&srcbuf[ 8 ]);
+	pItem->data.origfreq	= GetInt32(&srcbuf[ 12 ]);
 
 	/* phone seq, length in num of chi words */
-	len = (int) recbuf[ 16 ];
+	len = (int) srcbuf[ 16 ];
 	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
-	pshort = (uint16_t *) &recbuf[ 17 ];
+	pc = &srcbuf[ 17 ];
 	for ( i = 0; i < len; i++ ) {
-		pItem->data.phoneSeq[ i ] = *pshort;
-		++pshort;
+		pItem->data.phoneSeq[ i ] = GetUint16( pc );
+		pc += 2;
 	}
 	pItem->data.phoneSeq[ i ] = 0;
 
 	/* phrase, length in num of bytes */
-	puc = (unsigned char *) pshort;
-	pItem->data.wordSeq = ALC( char, (*puc) + 1 );
-	strcpy( pItem->data.wordSeq, (char *) (puc + 1) );
-	pItem->data.wordSeq[ (int) *puc ] = '\0';
+	pItem->data.wordSeq = ALC( char, (*pc) + 1 );
+	strcpy( pItem->data.wordSeq, (char *) (pc + 1) );
+	pItem->data.wordSeq[ (unsigned int) *pc ] = '\0';
 
 	/* Invalid UTF-8 Chinese characters found */
 	if ( ! isValidChineseString( pItem->data.wordSeq ) ) {

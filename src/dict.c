@@ -21,6 +21,7 @@
 #include "private.h"
 #include "plat_mmap.h"
 #include "dict-private.h"
+#include "memory-private.h"
 
 #if ! defined(USE_BINARY_DATA)
 static char *fgettab( char *buf, int maxlen, FILE *fp )
@@ -145,7 +146,7 @@ static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(unsigned char);
 	memcpy( phr_ptr->phrase, pgdata->static_data.dict_cur_pos, size );
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + size;
-	phr_ptr->freq = *(int *) pgdata->static_data.dict_cur_pos;
+	phr_ptr->freq = GetInt32(pgdata->static_data.dict_cur_pos);
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(int);
 	phr_ptr->phrase[ size ] = '\0';
 #endif

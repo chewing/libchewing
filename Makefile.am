@@ -43,6 +43,7 @@ noinst_HEADERS =\
 	include/internal/choice-private.h \
 	include/internal/dict-private.h \
 	include/internal/global-private.h \
+	include/internal/memory-private.h \
 	include/internal/pinyin-private.h \
 	include/internal/hash-private.h \
 	include/internal/key2pho-private.h \
