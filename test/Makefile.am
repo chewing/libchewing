@@ -30,6 +30,7 @@ NATIVE_TESTS = \
 	test-fullshape \
 	test-key2pho \
 	test-keyboard \
+	test-logger \
 	test-mmap \
 	test-path \
 	test-reset \

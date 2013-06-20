@@ -8,39 +8,16 @@
 /* Platform-dependent declaration */
 #include "plat_types.h"
 
-#ifdef ENABLE_DEBUG
-#include <stdarg.h>
-#include <stdio.h>
-extern FILE *fp_g;
-#define DEBUG_OUT( ... ) \
+#define DEBUG_OUT( fmt, ... ) \
 	do { \
-		if ( fp_g ) { \
-			fprintf( fp_g, __VA_ARGS__ ); \
-		} \
-		else { \
-			fprintf( stderr, __VA_ARGS__ ); \
-		} \
+		pgdata->logger( pgdata->loggerData, CHEWING_LOG_INFO, fmt, ##__VA_ARGS__ ); \
 	} while (0)
-#define DEBUG_CHECKPOINT() \
-	DEBUG_OUT( "[ File: %s  Func: %s  Line: %d ]\n", __FILE__, __FUNCTION__, __LINE__ )
-#define DEBUG_FLUSH \
-	do { \
-		if ( fp_g ) { \
-			fflush( fp_g ); \
-		} \
-	} while (0)
-#define EMPHASIZE(real_string) \
-	"\033[44;37m"real_string"\033[m"
 
-#else /* ! ENABLE_DEBUG */
-#if _MSC_VER > 1000     // Vsual C++ compiler
-__forceinline void DEBUG_OUT( char* str, ... ){ }
-#else
-#define DEBUG_OUT( ... )
-#endif /* _MSC_VER > 1000 */
-#define DEBUG_FLUSH
-#define DEBUG_CHECKPOINT()
-#endif
+#define DEBUG_CHECKPOINT() \
+	do { \
+		pgdata->logger( pgdata->loggerData, CHEWING_LOG_VERBOSE, "[ File: %s  Func: %s  Line: %d ]\n", \
+			__FILE__, __FUNCTION__, __LINE__ ); \
+	} while (0)
 
 #define ALC(type, size) \
 	(type *) calloc( size, sizeof( type ) )

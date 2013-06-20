@@ -4,11 +4,6 @@ project(libchewing)
 set(LIBCHEWING_VERSION 0.3.4)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-option(ENABLE_DEBUG "Debug support" false)
-if(ENABLE_DEBUG)
-	add_definitions(-DENABLE_DEBUG=1)
-endif()
-
 if(UNIX)
 	set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
 	add_definitions(-DUNDER_POSIX -DPIC)
@@ -211,6 +206,7 @@ set(ALL_TESTCASES
 	test-fullshape
 	test-key2pho
 	test-keyboard
+	test-logger
 	test-mmap
 	test-path
 	test-regression
@@ -343,8 +339,10 @@ list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing
+	# Update configure.ac if one of SOVERSION/VERSION is updated.
+	# See configure.ac for more information.
 	SOVERSION 3
-	VERSION 3.0.1
+	VERSION 3.1.0
 )
 
 add_library(common OBJECT

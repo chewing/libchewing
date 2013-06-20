@@ -58,6 +58,12 @@
 #define MIN_SELKEY 1
 #define MAX_SELKEY 10
 
+#define CHEWING_LOG_VERBOSE 1
+#define CHEWING_LOG_DEBUG   2
+#define CHEWING_LOG_INFO    3
+#define CHEWING_LOG_WARN    4
+#define CHEWING_LOG_ERROR   5
+
 /**
  * @deprecated Use chewing_set_ series of functions to set parameters instead.
  */

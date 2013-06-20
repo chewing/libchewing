@@ -234,6 +234,8 @@ typedef struct tag_ChewingData {
 
 	struct tag_HASH_ITEM *prev_userphrase;
 	ChewingStaticData static_data;
+	void (*logger)( void *data, int level, const char *fmt, ... );
+	void *loggerData;
 } ChewingData;
 
 typedef struct {

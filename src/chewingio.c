@@ -41,13 +41,6 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 
-#ifdef ENABLE_DEBUG
-#include <stdio.h>
-#include <assert.h>
-#define FAILSAFE_OUTPUT "/tmp/chewing-debug.out"
-FILE *fp_g = NULL;
-#endif
-
 char *kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
@@ -108,16 +101,6 @@ CHEWING_API int chewing_KBStr2Num( char str[] )
 	return KB_DEFAULT;
 }
 
-#ifdef ENABLE_DEBUG     
-static void TerminateDebug()
-{
-	DEBUG_OUT( "DEBUG: logging service is about to terminate.\n" );
-	if ( fp_g ) {
-		fclose( fp_g );
-	}
-}               
-#endif
-
 static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
 {
 	ChewingData *pgdata = ctx->data;
@@ -145,6 +128,10 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
+static void NullLogger( void *data, int level, const char *fmt, ...)
+{
+}
+
 static ChewingData * allocate_ChewingData()
 {
 	static const int DEFAULT_SELKEY[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
@@ -153,6 +140,7 @@ static ChewingData * allocate_ChewingData()
 	if ( data ) {
 		data->config.candPerPage = MAX_SELKEY;
 		data->config.maxChiSymbolLen = MAX_CHI_SYMBOL_LEN;
+		data->logger = NullLogger;
 		memcpy( data->config.selKey, DEFAULT_SELKEY, sizeof( data->config.selKey ) );
 	}
 
@@ -242,28 +230,6 @@ CHEWING_API int chewing_Init(
 		const char *dataPath UNUSED,
 		const char *hashPath UNUSED)
 {
-#ifdef ENABLE_DEBUG
-{
-	char *dbg_path;
-	int failsafe = 1;
-	dbg_path = getenv( "CHEWING_DEBUG" );
-	if ( dbg_path ) {
-		fp_g = fopen( dbg_path, "w+" );
-		if ( fp_g )
-			failsafe = 0;
-	}
-	if ( failsafe == 1 ) {
-		dbg_path = FAILSAFE_OUTPUT;
-	        fp_g = fopen( dbg_path, "w+" );
-		if ( ! fp_g ) {
-			fprintf( stderr, 
-				"Failed to record debug message in file.\n"
-				"--> Output to stderr\n" );
-		}
-	}
-	/* register debug service */
-}
-#endif
 	return 0;
 }
 
@@ -272,13 +238,16 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	ChewingData *pgdata = ctx->data;
 	ChewingStaticData static_data;
 	ChewingConfigData old_config;
+	void (*logger)( void *data, int level, const char *fmt, ...);
 
 	/* Backup old config and restore it after clearing pgdata structure. */
 	old_config = pgdata->config;
 	static_data = pgdata->static_data;
+	logger = pgdata->logger;
 	memset( pgdata, 0, sizeof( ChewingData ) );
 	pgdata->config = old_config;
 	pgdata->static_data = static_data;
+	pgdata->logger = logger;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );
@@ -324,9 +293,6 @@ CHEWING_API char* chewing_get_KBString( ChewingContext *ctx )
 
 CHEWING_API void chewing_Terminate()
 {
-#ifdef ENABLE_DEBUG
-	TerminateDebug();
-#endif
 }
 
 CHEWING_API void chewing_delete( ChewingContext *ctx )
@@ -1167,7 +1133,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
 				rtn );
-			DEBUG_FLUSH;
 			
 			if ( rtn == ZUIN_KEY_ERROR )
 				rtn = SpecialSymbolInput( key, pgdata );
@@ -1469,4 +1434,16 @@ CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx )
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 {
 	return ctx->data->nPhoneSeq;
+}
+
+CHEWING_API void chewing_set_logger( ChewingContext *ctx,
+	void (*logger)( void *data, int level, const char *fmt, ... ),
+	void *data )
+{
+	if ( !logger ) {
+		logger = NullLogger;
+		data = 0;
+	}
+	ctx->data->logger = logger;
+	ctx->data->loggerData = data;
 }

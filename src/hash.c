@@ -123,7 +123,6 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 	return pItem;
 }
 
-#ifdef ENABLE_DEBUG
 static void HashItem2String( char *str, HASH_ITEM *pItem )
 {
 	int i, len;
@@ -141,7 +140,6 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 		pItem->data.maxfreq, pItem->data.origfreq );
 	strcat( str, buf );
 }
-#endif
 
 /* 
  * capacity of 'str' MUST bigger then FIELD_SIZE !
@@ -191,11 +189,8 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 	/* update "lifetime" */
 	fseek( outfile, strlen( BIN_HASH_SIG ), SEEK_SET );
 	fwrite( &pgdata->static_data.chewing_lifetime, 1, 4, outfile );
-#ifdef ENABLE_DEBUG
 	sprintf( str, "%d", pgdata->static_data.chewing_lifetime );
 	DEBUG_OUT( "HashModify-1: '%-75s'\n", str );
-	DEBUG_FLUSH;
-#endif
 
 	/* update record */
 	if ( pItem->item_index < 0 ) {
@@ -208,11 +203,10 @@ void HashModify( ChewingData *pgdata, HASH_ITEM *pItem )
 			pItem->item_index * FIELD_SIZE + 4 + strlen( BIN_HASH_SIG ),
 			SEEK_SET );
 	}
-#ifdef ENABLE_DEBUG
+
 	HashItem2String( str, pItem );
 	DEBUG_OUT( "HashModify-2: '%-75s'\n", str );
-	DEBUG_FLUSH;
-#endif
+
 	HashItem2Binary( str, pItem );
 	fwrite( str, 1, FIELD_SIZE, outfile );
 	fflush( outfile );

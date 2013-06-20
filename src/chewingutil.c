@@ -724,7 +724,6 @@ int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 	return 0;
 }
 
-#ifdef ENABLE_DEBUG
 static void ShowChewingData( ChewingData *pgdata )
 {
 	int i ;
@@ -769,7 +768,6 @@ static void ShowChewingData( ChewingData *pgdata )
 		pgdata->bChiSym, 
 		pgdata->bSelect );
 }
-#endif
 
 int CallPhrasing( ChewingData *pgdata )
 {
@@ -800,9 +798,7 @@ int CallPhrasing( ChewingData *pgdata )
 		}
 	}
 
-#ifdef ENABLE_DEBUG
 	ShowChewingData(pgdata);
-#endif
 
 	/* then phrasing */
 	Phrasing( pgdata );
