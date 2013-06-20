@@ -339,8 +339,10 @@ list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing
+	# Update configure.ac if one of SOVERSION/VERSION is updated.
+	# See configure.ac for more information.
 	SOVERSION 3
-	VERSION 3.0.1
+	VERSION 3.1.0
 )
 
 add_library(common OBJECT

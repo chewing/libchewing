@@ -11,16 +11,35 @@ AC_SUBST(PACKAGE_VERSION)
 
 # libtool versioning for libchewing
 
+# Update CMakeLists.txt if one of CURRENT/REVISION/AGE is updated.
+#
+# The version string in CMakeLists.txt is in major/minor/revision format, which
+# is different from current/revision/age format here. To convert between these
+# format, you can use the following formulas:
+#
+#    current = major + minor
+#    revision = revision
+#    age = minor
+#
+# or if we reversed them:
+#
+#    major = current - age
+#    minor = age
+#    revision = revision
+#
+# Reference:
+#   http://git.savannah.gnu.org/cgit/libtool.git/commit/?id=ba98d73f188333f75ab01fc396c8a17afcd7e8be
+
 # increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=3
+LIBCHEWING_CURRENT=4
 
 # increment any time the source changes; set to 0 if you increment CURRENT
-LIBCHEWING_REVISION=1
+LIBCHEWING_REVISION=0
 
 # increment if any interfaces have been added; set to 0
 # if any interfaces have been removed. removal has
 # precedence over adding, so set to 0 if both happened.
-LIBCHEWING_AGE=0
+LIBCHEWING_AGE=1
 
 AC_SUBST(LIBCHEWING_CURRENT)
 AC_SUBST(LIBCHEWING_REVISION)
