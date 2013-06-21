@@ -34,5 +34,6 @@ libchewing_la_LDFLAGS = \
 	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
 	-rpath $(libdir) \
 	-no-undefined \
+	-Wl,--no-undefined \
 	-export-symbols-regex "^(chewing)_" \
 	$(NULL)
