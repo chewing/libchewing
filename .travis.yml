@@ -10,7 +10,7 @@ matrix:
     - compiler: gcc
       env: BUILD=cmake
     - compiler: clang
-      env: BUILD=cmake CMAKE_OPTION=-DUSE_VALGRIND=no CFLAGS=-fsanitize=address
+      env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
 
 script:
   - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
