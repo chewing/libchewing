@@ -17,7 +17,12 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
 	if(ENABLE_GCOV)
 		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
 	endif()
-	set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+
+	# Use NO_UNDEFINED=no when running with address sanitizer
+	option(NO_UNDEFINED "No undefined symbol in object file" true)
+	if(NO_UNDEFINED)
+		set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+	endif()
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
 	# XXX: Not sure why we need to use MATCHES instead of STREQUAL here.
 
