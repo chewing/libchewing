@@ -11,39 +11,32 @@ AC_SUBST(PACKAGE_VERSION)
 
 # libtool versioning for libchewing
 
-# Update CMakeLists.txt if one of CURRENT/REVISION/AGE is updated.
+# Update CMakeLists.txt if one of MAJOR/MINOR/REVISION is updated.
 #
-# The version string in CMakeLists.txt is in major/minor/revision format, which
-# is different from current/revision/age format here. To convert between these
-# format, you can use the following formulas:
+# We use major/minor/revision instead of current/revision/age format here is due
+# to buggy behavior in libtool in BSD family. See the following link for detail
+# information.
 #
-#    current = major + minor
-#    revision = revision
-#    age = minor
+#   https://lists.gnu.org/archive/html/bug-libtool/2011-05/msg00007.html
 #
-# or if we reversed them:
+# The following link shows versioning policies in FreeBSD for your reference.
 #
-#    major = current - age
-#    minor = age
-#    revision = revision
-#
-# Reference:
-#   http://git.savannah.gnu.org/cgit/libtool.git/commit/?id=ba98d73f188333f75ab01fc396c8a17afcd7e8be
+#   http://www.freebsd.org/doc/en/books/developers-handbook/policies-shlib.html
 
-# increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=4
+# increment if the interface has incompatible update (changes, removals).
+LIBCHEWING_MAJOR=3
 
-# increment any time the source changes; set to 0 if you increment CURRENT
+# increment if the inteface has compatible update (additions).
+# Set to 0 if MAJOR is increased.
+LIBCHEWING_MINOR=1
+
+# increment any time the source changes
+# Set to 0 if MAJOR or MINOR is increased.
 LIBCHEWING_REVISION=0
 
-# increment if any interfaces have been added; set to 0
-# if any interfaces have been removed. removal has
-# precedence over adding, so set to 0 if both happened.
-LIBCHEWING_AGE=1
-
-AC_SUBST(LIBCHEWING_CURRENT)
+AC_SUBST(LIBCHEWING_MAJOR)
+AC_SUBST(LIBCHEWING_MINOR)
 AC_SUBST(LIBCHEWING_REVISION)
-AC_SUBST(LIBCHEWING_AGE)
 
 # Define a string for the earliest version that this release has
 # binary compatibility with. This is used for module locations.

@@ -31,7 +31,7 @@ libchewing_la_LIBADD = \
 	$(NULL)
 
 libchewing_la_LDFLAGS = \
-	-version-info $(LIBCHEWING_CURRENT):$(LIBCHEWING_REVISION):$(LIBCHEWING_AGE) \
+	-version-number $(LIBCHEWING_MAJOR):$(LIBCHEWING_MINOR):$(LIBCHEWING_REVISION) \
 	-rpath $(libdir) \
 	-no-undefined \
 	-Wl,--no-undefined \
