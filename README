@@ -98,6 +98,13 @@ The inactive one:
   - MPS2 Pinyin
 
 
+[-] Minimal Build Tools Requirement
+
+- autoconf 2.67
+- cmake 2.8.8
+- texinfo 4.12
+
+
 [-] Installation
 
 # ./configure --prefix=/usr
