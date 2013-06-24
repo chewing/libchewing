@@ -106,14 +106,19 @@ Studio are not needed. The versions listed here is the minimal version known to
 build libchewing. If any tools you use below this version, libchewing might not
 be built.
 
+Build tools:
 - autoconf >= 2.67
 - automake >= 1.11.6
-- clang >= 3.2
-- cmake >= 2.8.8
-- gcc >= 4.7.3
 - libtool >= 2.4.2
-- texinfo >= 4.12
+- cmake >= 2.8.8 (optional)
+
+Toolchain / IDE:
+- clang >= 3.2
+- gcc >= 4.7.3
 - Visual Studio Express 2012
+
+Documentation tools:
+- texinfo >= 4.12
 
 
 [-] Continuous Integration (CI) Service
