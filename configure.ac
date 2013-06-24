@@ -66,6 +66,7 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_LANG(C)
+AC_C_BIGENDIAN
 
 # Checks for library functions.
 AC_FUNC_MALLOC

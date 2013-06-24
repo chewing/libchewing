@@ -7,6 +7,7 @@
 #cmakedefine CURSES_HAVE_NCURSES_H 1
 #cmakedefine CURSES_HAVE_NCURSES_NCURSES_H 1
 #cmakedefine CURSES_HAVE_NCURSES_CURSES_H 1
+#cmakedefine WORDS_BIGENDIAN 1
 
 /* Change cmake curses macro name to autotools curses macro name */
 #ifdef CURSES_HAVE_CURSES_H

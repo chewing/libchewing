@@ -68,6 +68,9 @@ include(CheckIncludeFiles)
 check_include_files(unistd.h HAVE_UNISTD_H)
 check_include_files(stdint.h HAVE_STDINT_H)
 
+include(TestBigEndian)
+test_big_endian(WORDS_BIGENDIAN)
+
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/config.h.in
 	${PROJECT_BINARY_DIR}/config.h
@@ -353,7 +356,6 @@ add_library(common OBJECT
 
 	${SRC_DIR}/common/chewing-utf8-util.c
 	${SRC_DIR}/common/key2pho.c
-	${SRC_DIR}/common/memory.c
 )
 
 # install
