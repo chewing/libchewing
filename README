@@ -100,9 +100,28 @@ The inactive one:
 
 [-] Minimal Build Tools Requirement
 
-- autoconf 2.67
-- cmake 2.8.8
-- texinfo 4.12
+The following tools are used to build libchewing. Not all tools are necessary
+during building. For example, if the compiler you used is clang, gcc & Visual
+Studio are not needed. The versions listed here is the minimal version known to
+build libchewing. If any tools you use below this version, libchewing might not
+be built.
+
+- autoconf >= 2.67
+- automake >= 1.11.6
+- clang >= 3.2
+- cmake >= 2.8.8
+- gcc >= 4.7.3
+- libtool >= 2.4.2
+- texinfo >= 4.12
+- Visual Studio Express 2012
+
+
+[-] Continuous Integration (CI) Service
+
+libchewing uses the following CI service:
+
+- https://travis-ci.org/chewing/libchewing
+- https://drone.io/github.com/chewing/libchewing
 
 
 [-] Installation
