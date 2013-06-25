@@ -170,9 +170,9 @@ AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
 AC_CONFIG_LINKS([
-	data/pinyin.tab:data/pinyin.tab
-	data/swkb.dat:data/swkb.dat
-	data/symbols.dat:data/symbols.dat
+        data/pinyin.tab:data/pinyin.tab
+        data/swkb.dat:data/swkb.dat
+        data/symbols.dat:data/symbols.dat
         test/stresstest.py:test/stresstest.py
 ])
 
