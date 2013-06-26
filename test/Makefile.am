@@ -41,13 +41,6 @@ NATIVE_TESTS = \
 	test-utf8 \
 	$(NULL)
 
-if HAVE_TEST_MEMORY_FAIL
-NATIVE_TESTS += \
-	test-memory-fail \
-	$(NULL)
-test_memory_fail_LDFLAGS=-Wl,--wrap=malloc,--wrap=calloc -static
-endif
-
 check_HEADERS = \
 	testhelper.h \
 	$(NULL)

@@ -232,12 +232,6 @@ endif()
 
 enable_testing()
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
-	CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	list(APPEND ALL_TESTCASES test-memory-fail)
-	set(HAVE_TEST_MEMORY_FAIL true)
-endif()
-
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
 foreach(target ${ALL_TESTCASES})
@@ -276,10 +270,6 @@ endforeach()
 
 if (${CURSES_FOUND})
 	target_link_libraries(gen_keystroke ${CURSES_LIBRARIES})
-endif()
-if ("${HAVE_TEST_MEMORY_FAIL}")
-	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
-	set_target_properties(test-memory-fail PROPERTIES LINK_FLAGS "-Wl,--wrap=malloc,--wrap=calloc")
 endif()
 
 # data
