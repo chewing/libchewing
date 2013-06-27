@@ -107,7 +107,7 @@ void strip(char *line)
 	}
 }
 
-void store_word(const char *line)
+void store_word(const char *line, const int line_num)
 {
 	char phone_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 	char key_buf[ZUIN_SIZE + 1];
@@ -128,7 +128,7 @@ void store_word(const char *line)
 	sscanf(buf, "%s %s", key_buf, word_data[num_word_data].word);
 
 	if (strlen(key_buf) > ZUIN_SIZE) {
-		fprintf(stderr, "Error reading line `%s'\n", line);
+		fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
 		exit(-1);
 	}
 	PhoneFromKey(phone_buf, key_buf, KB_DEFAULT, 1);
@@ -184,6 +184,7 @@ void read_phone_cin(const char *filename)
 	FILE *phone_cin;
 	char buf[MAX_LINE_LEN];
 	char *ret;
+	int line_num = 0;
 
 	phone_cin = fopen(filename, "r");
 	if (!phone_cin) {
@@ -194,6 +195,7 @@ void read_phone_cin(const char *filename)
 	/* Find `%chardef  begin' */
 	for (;;) {
 		ret = fgets(buf, sizeof(buf), phone_cin);
+		++line_num;
 		if (!ret) {
 			fprintf(stderr, "Cannot find %s\n", CHARDEF_BEGIN);
 			exit(-1);
@@ -207,10 +209,11 @@ void read_phone_cin(const char *filename)
 	/* read all words into word_data. */
 	for (;;) {
 		ret = fgets(buf, sizeof(buf), phone_cin);
+		++line_num;
 		if (!ret || buf[0] == '%')
 			break;
 
-		store_word(buf);
+		store_word(buf, line_num);
 	}
 	fclose(phone_cin);
 
@@ -350,7 +353,7 @@ int is_exception_phrase(struct PhraseData *phrase, int pos) {
 	return 0;
 }
 
-void store_phrase(const char *line)
+void store_phrase(const char *line, int line_num)
 {
 	const char DELIM[] = " \t\n";
 	char buf[MAX_LINE_LEN];
@@ -377,7 +380,7 @@ void store_phrase(const char *line)
 	/* read phrase */
 	phrase = strtok(buf, DELIM);
 	if (!phrase) {
-		fprintf(stderr, "Error reading line `%s'\n", line);
+		fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
 		exit(-1);
 	}
 	strncpy(phrase_data[num_phrase_data].phrase, phrase, sizeof(phrase_data[0].phrase));
@@ -385,14 +388,14 @@ void store_phrase(const char *line)
 	/* read frequency */
 	freq = strtok(NULL, DELIM);
 	if (!freq) {
-		fprintf(stderr, "Error reading line `%s'\n", line);
+		fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
 		exit(-1);
 	}
 
 	errno = 0;
 	phrase_data[num_phrase_data].freq = strtol(freq, 0, 0);
 	if (errno) {
-		fprintf(stderr, "Error reading frequency `%s' in `%s'\n", freq, line);
+		fprintf(stderr, "Error reading frequency `%s' in line %d, `%s'\n", freq, line_num, line);
 		exit(-1);
 	}
 
@@ -403,17 +406,17 @@ void store_phrase(const char *line)
 
 		phrase_data[num_phrase_data].phone[phrase_len] = UintFromPhone(bopomofo);
 		if (phrase_data[num_phrase_data].phone[phrase_len] == 0) {
-			fprintf(stderr, "Error reading bopomofo `%s' in `%s'\n", bopomofo, line);
+			fprintf(stderr, "Error reading bopomofo `%s' in line %d, `%s'\n", bopomofo, line_num, line);
 			exit(-1);
 		}
 	}
 	if (bopomofo) {
-		fprintf(stderr, "Phrase `%s' too long\n", phrase);
+		fprintf(stderr, "Phrase `%s' too long in line %d\n", phrase, line_num);
 	}
 
 	/* check phrase length & bopomofo length */
 	if (ueStrLen(phrase_data[num_phrase_data].phrase) != phrase_len) {
-		fprintf(stderr, "Phrase length and bopomofo length mismatch in `%s'\n", line);
+		fprintf(stderr, "Phrase length and bopomofo length mismatch in line %d, `%s'\n", line_num, line);
 		exit(-1);
 	}
 
@@ -427,8 +430,8 @@ void store_phrase(const char *line)
 
 			PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), word.phone);
 
-			fprintf(stderr, "Error in phrase `%s'. Word `%s' has no phone %d (%s).", phrase_data[num_phrase_data].phrase ,word.word, word.phone, bopomofo_buf);
-			fprintf(stderr, " // { \"");
+			fprintf(stderr, "Error in phrase `%s'. Word `%s' has no phone %d (%s) in line %d\n", phrase_data[num_phrase_data].phrase ,word.word, word.phone, bopomofo_buf, line_num);
+			fprintf(stderr, "\tAdd the following struct to EXCEPTION_PHRASE if this is good phrase\n\t{ \"");
 			for (j = 0; j < strlen(phrase_data[num_phrase_data].phrase); ++j) {
 				fprintf(stderr, "\\x%02X", (unsigned char)phrase_data[num_phrase_data].phrase[j]);
 			}
@@ -480,6 +483,7 @@ void read_tsi_src(const char *filename)
 {
 	FILE *tsi_src;
 	char buf[MAX_LINE_LEN];
+	int line_num = 0;
 
 	tsi_src = fopen(filename, "r");
 	if (!tsi_src) {
@@ -488,7 +492,8 @@ void read_tsi_src(const char *filename)
 	}
 
 	while (fgets(buf, sizeof(buf), tsi_src)) {
-		store_phrase(buf);
+		++line_num;
+		store_phrase(buf, line_num);
 	}
 
 	qsort(phrase_data, num_phrase_data, sizeof(phrase_data[0]), compare_phrase);
