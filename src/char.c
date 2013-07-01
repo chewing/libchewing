@@ -16,6 +16,9 @@
  * @file char.c
  * @brief word data file
  */
+#if ! defined(USE_BINARY_DATA)
+#include <assert.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
