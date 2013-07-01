@@ -13,13 +13,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 
 #include "global-private.h"
 #include "pinyin-private.h"
 #include "zuin-private.h"
-#include "hash-private.h"
 #include "private.h"
 
 void TerminatePinyin( ChewingData *pgdata )

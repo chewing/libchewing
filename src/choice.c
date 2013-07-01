@@ -29,7 +29,6 @@
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "choice-private.h"
-#include "private.h"
 #include "zuin-private.h"
 
 #define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )

@@ -13,11 +13,9 @@
  */
 
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
 
 #include "chewing-utf8-util.h"
-#include "global.h"
 #include "hash-private.h"
 #include "dict-private.h"
 #include "tree-private.h"

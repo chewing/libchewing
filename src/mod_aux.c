@@ -20,7 +20,6 @@
 #include "chewing-private.h"
 #include "zuin-private.h"
 #include "chewingio.h"
-#include "private.h"
 
 /**
  * @param ctx handle to Chewing IM context

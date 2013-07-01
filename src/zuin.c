@@ -20,11 +20,8 @@
  */
 
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "global.h"
 #include "zuin-private.h"
 #include "char-private.h"
 #include "key2pho-private.h"

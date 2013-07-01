@@ -15,10 +15,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include "global-private.h"
-#include "private.h"
 #include "plat_mmap.h"
 #include "dict-private.h"
 #include "memory-private.h"

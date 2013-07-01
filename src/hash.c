@@ -16,7 +16,6 @@
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -24,7 +23,6 @@
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
 #include "private.h"
-#include "global.h"
 #include "memory-private.h"
 
 int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen )

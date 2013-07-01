@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "global.h"
 #include "global-private.h"
 #include "chewing-private.h"
 #include "config.h"
