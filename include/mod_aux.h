@@ -1,5 +1,5 @@
 /*
- * mod_aux.c
+ * mod_aux.h
  *
  * Copyright (c) 2005, 2008
  *	libchewing Core Team. See ChangeLog for details.
