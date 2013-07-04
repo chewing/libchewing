@@ -163,7 +163,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 
 static int _Inner_InternalSpecialSymbol(
 		int key, ChewingData *pgdata, 
-		char symkey, char *chibuf )
+		char symkey, const char *chibuf )
 {
 	int kbtype;
 
@@ -199,7 +199,7 @@ static int _Inner_InternalSpecialSymbol(
 
 static int InternalSpecialSymbol(
 		int key, ChewingData *pgdata,
-		int nSpecial, const char keybuf[], char *chibuf[] )
+		int nSpecial, const char keybuf[], const char *chibuf[] )
 {
 	int i, rtn = ZUIN_IGNORE; /* very strange and difficult to understand */
 
@@ -214,14 +214,14 @@ static int InternalSpecialSymbol(
 
 int SpecialSymbolInput( int key, ChewingData *pgdata )
 {
-	static char keybuf[] = {
+	static const char keybuf[] = {
 		'[', ']', '{', '}', '\'','<', ':', '\"', '>',
 		'~', '!', '@', '#', '$', '%', '^', '&', '*',
 		'(', ')', '_', '+', '=','\\', '|', '?',
 		',', '.', ';'
 	};
 
-	static char *chibuf[] = {
+	static const char *chibuf[] = {
 		"\xE3\x80\x8C", "\xE3\x80\x8D", "\xE3\x80\x8E", "\xE3\x80\x8F",
 			/* "「", "」", "『", "』" */
 		"\xE3\x80\x81", "\xEF\xBC\x8C", "\xEF\xBC\x9A", "\xEF\xBC\x9B",
