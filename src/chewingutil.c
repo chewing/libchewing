@@ -137,7 +137,6 @@ int HaninSymbolInput( ChewingData *pgdata )
 
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	AvailInfo *pai = &( pgdata->availInfo );
-	int candPerPage = pgdata->config.candPerPage;
 
 	/* No available symbol table */
 	if ( ! pgdata->static_data.symbol_table )
@@ -153,7 +152,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 	pai->avail[ 0 ].id = -1;  
 	pai->nAvail = 1;
 	pai->currentAvail = 0;
-	pci->nChoicePerPage = candPerPage;
+	pci->nChoicePerPage = pgdata->config.candPerPage;
 	assert( pci->nTotalChoice > 0 );
 	pci->nPage = CEIL_DIV( pci->nTotalChoice, pci->nChoicePerPage );
 	pci->pageNo = 0;
