@@ -1128,7 +1128,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				goto End_KeyDefault;
 			}
 
-			rtn = ZuinPhoInput( pgdata, &( pgdata->zuinData ), key );
+			rtn = ZuinPhoInput( pgdata, key );
 			DEBUG_OUT(
 				"\t\tChinese mode key, "
 				"ZuinPhoInput return value = %d\n", 
