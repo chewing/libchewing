@@ -18,6 +18,10 @@
 #  include <stdint.h>
 #endif
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
 static inline uint16_t GetUint16( const char *ptr )
 {
 	uint16_t val;
