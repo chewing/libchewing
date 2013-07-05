@@ -256,7 +256,7 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 		'Y', 'Z', ' ', '\"', '\'', '/', '<', '>', '`', '[',
 		']', '{', '}', '+',  '-'
 	};
-	static char* chibuf[] = {
+	static const char *chibuf[] = {
 		"\xEF\xBC\x90","\xEF\xBC\x91","\xEF\xBC\x92","\xEF\xBC\x93",
 			/* "０","１","２","３" */
 		"\xEF\xBC\x94","\xEF\xBC\x95","\xEF\xBC\x96","\xEF\xBC\x97",
@@ -326,7 +326,7 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 
 	rtn = InternalSpecialSymbol( 
 			key, pgdata, nSpecial, 
-			G_EASY_SYMBOL_KEY, pgdata->static_data.g_easy_symbol_value );
+			G_EASY_SYMBOL_KEY, (const char **) pgdata->static_data.g_easy_symbol_value );
 	if ( rtn == ZUIN_IGNORE )
 		rtn = SpecialSymbolInput( key, pgdata );
 	return ( rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK );
