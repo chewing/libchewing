@@ -1,5 +1,19 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Improve CMake rules
+  - Visual Studio build included
+* Dictionary improvements
+  - Remove duplicated phrases, fix Bopomofo representation
+  - tool tweaks
+* travis-ci support
+* Prevent unaligned memory access
+* Reduce maxChiSymbolLen to 39 to avoid overflow
+* Do not store user phrase when its length is 1
+* Check chiSymbolBufLen in chewing_handle_Numlock()
+* Set isSymbol to 0 in SetChoiceInfo
+* Fix 'j', 'k' in select mode cannot handle symbol selecting
+* Do not call GetCharNext() when GetCharFirst() fails
+
 
 What's New in libchewing 0.3.4 (Dec 31, 2012)
 ---------------------------------------------------------
