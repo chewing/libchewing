@@ -87,7 +87,7 @@ AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
 AM_CFLAGS="$CFLAGS -Wall"
-AS_IF([test x$ac_cv_func_asprintf == xyes -o x$HAVE_DECL_RTLD_NEXT == xyes],
+AS_IF([test x$ac_cv_func_asprintf == xyes],
       [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
