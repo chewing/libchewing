@@ -5,7 +5,7 @@
  *	Lu-chuan Kung and Kang-pen Chen.
  *	All rights reserved.
  *
- * Copyright (c) 2004, 2005, 2006, 2007, 2008, 2011
+ * Copyright (c) 2004, 2005, 2006, 2007, 2008, 2011, 2012, 2013
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -373,14 +373,15 @@ err_load_file:
 	return NULL;
 }
 
-// FIXME: Remove ofliename
-static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
+/* migrate from text-based hash to binary form */
+static int migrate_hash_to_bin( ChewingData *pgdata )
 {
 	FILE *txtfile;
 	char oldname[ 256 ], *dump, *seekdump;
 	HASH_ITEM item;
 	int item_index, iret, tflen;
 	int ret;
+	const char *ofilename = pgdata->static_data.hashfilename;
 
 	/* allocate dump buffer */
 	txtfile = open_file_get_length( ofilename, "r", &tflen );
@@ -414,7 +415,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 			--item_index;
 			continue;
 		}
-		else if ( iret==0 )
+		else if ( iret == 0 )
 			break;
 
 		HashItem2Binary( seekdump, &item );
@@ -439,7 +440,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata, const char *ofilename )
 	fclose( txtfile );
 	free( dump );
 
-	return  1;
+	return 1;
 }
 
 #if 0
@@ -557,7 +558,7 @@ open_hash_file:
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
 			/* perform migrate from text-based to binary form */
 			free( dump );
-			if ( ! migrate_hash_to_bin( pgdata, pgdata->static_data.hashfilename ) ) {
+			if ( ! migrate_hash_to_bin( pgdata ) ) {
 				return  0;
 			}
 			goto open_hash_file;
