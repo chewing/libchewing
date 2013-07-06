@@ -33,6 +33,10 @@
 #include "private.h"
 
 #ifdef HAVE_ASPRINTF
+/* asprintf is provided by GNU extensions and *BSD */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #else
 #include "plat_path.h"
