@@ -71,8 +71,8 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], 
 	HASH_ITEM *pNow = pItemLast ?
 			pItemLast->next :
 			pgdata->static_data.hashtable[ HashFunc( phoneSeq ) ];
-	
-	for ( ; pNow; pNow = pNow->next ) 
+
+	for ( ; pNow; pNow = pNow->next )
 		if ( PhoneSeqTheSame( pNow->data.phoneSeq, phoneSeq ) )
 			return pNow;
 	return NULL;
@@ -86,8 +86,8 @@ HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const 
 	hashvalue = HashFunc( phoneSeq );
 
 	for ( pItem = pgdata->static_data.hashtable[ hashvalue ]; pItem ; pItem = pItem->next ) {
-		if ( 
-			! strcmp( pItem->data.wordSeq, wordSeq ) && 
+		if (
+			! strcmp( pItem->data.wordSeq, wordSeq ) &&
 			PhoneSeqTheSame( pItem->data.phoneSeq, phoneSeq ) ) {
 			return pItem;
 		}
@@ -139,7 +139,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 	strcat( str, buf );
 }
 
-/* 
+/*
  * capacity of 'str' MUST bigger then FIELD_SIZE !
  */
 void HashItem2Binary( char *str, HASH_ITEM *pItem )
@@ -328,7 +328,7 @@ int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
 }
 
 static FILE *open_file_get_length(
-		const char *filename, 
+		const char *filename,
 		const char *otype, int *size)
 {
 	FILE *tf = fopen( filename, otype );
@@ -451,7 +451,7 @@ static int ComputeChewingLifeTime()
 {
        HASH_ITEM *item;
        int i, min;
-       
+
        i = 0;
 
        chewing_lifetime++;

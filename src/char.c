@@ -12,7 +12,7 @@
  * of this file.
  */
 
-/** 
+/**
  * @file char.c
  * @brief word data file
  */

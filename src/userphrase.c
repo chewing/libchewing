@@ -52,9 +52,9 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], con
 		do {
 			/* find the same phrase */
 			if ( ! strcmp(
-				phrase->phrase, 
+				phrase->phrase,
 				wordSeq ) ) {
-				retval = phrase->freq;	
+				retval = phrase->freq;
 				free( phrase );
 				return retval;
 			}
@@ -88,7 +88,7 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 		if ( uphrase->userfreq > maxFreq )
 			maxFreq = uphrase->userfreq;
 		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
-	}	  
+	}
 
 	return maxFreq;
 }
@@ -101,22 +101,22 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	/* Short interval */
 	if ( deltatime < 4000 ) {
 		delta = ( freq >= maxfreq ) ?
-			min( 
-				( maxfreq - origfreq ) / 5 + 1, 
+			min(
+				( maxfreq - origfreq ) / 5 + 1,
 				SHORT_INCREASE_FREQ ) :
-			max( 
-				( maxfreq - origfreq ) / 5 + 1, 
+			max(
+				( maxfreq - origfreq ) / 5 + 1,
 				SHORT_INCREASE_FREQ );
 		return min( freq + delta, MAX_ALLOW_FREQ );
 	}
 	/* Medium interval */
 	else if ( deltatime < 50000 ) {
 		delta = ( freq >= maxfreq ) ?
-			min( 
-				( maxfreq - origfreq ) / 10 + 1, 
+			min(
+				( maxfreq - origfreq ) / 10 + 1,
 				MEDIUM_INCREASE_FREQ ) :
-			max( 
-				( maxfreq - origfreq ) / 10 + 1, 
+			max(
+				( maxfreq - origfreq ) / 10 + 1,
 				MEDIUM_INCREASE_FREQ );
 		return min( freq + delta, MAX_ALLOW_FREQ );
 	}
@@ -156,10 +156,10 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 	}
 	else {
 		pItem->data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
-		pItem->data.userfreq = UpdateFreq( 
-			pItem->data.userfreq, 
-			pItem->data.maxfreq, 
-			pItem->data.origfreq, 
+		pItem->data.userfreq = UpdateFreq(
+			pItem->data.userfreq,
+			pItem->data.maxfreq,
+			pItem->data.origfreq,
 			pgdata->static_data.chewing_lifetime - pItem->data.recentTime );
 		pItem->data.recentTime = pgdata->static_data.chewing_lifetime;
 		HashModify( pgdata, pItem );

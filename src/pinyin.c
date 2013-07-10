@@ -21,7 +21,7 @@
 #include "private.h"
 
 void TerminatePinyin( ChewingData *pgdata )
-{ 
+{
 	free( pgdata->static_data.hanyuInitialsMap );
 	free( pgdata->static_data.hanyuFinalsMap );
 }
@@ -89,9 +89,9 @@ int InitPinyin( ChewingData *pgdata, const char *prefix )
 /**
  * Map pinyin key-sequence to Zuin key-sequence.
  * Caller should allocate char zuin[4].
- * 
+ *
  * Non-Zero: Fail to fully convert
- * 
+ *
  * @retval 0 Success
  */
 int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
@@ -294,7 +294,7 @@ int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
                         final = "";
                 }
         }
-	
+
         /* Hanyu uan/un/u :
          * ㄐ/ㄑ/ㄒ + -uan, -uan is ㄩㄢ, not ㄨㄢ
          * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
@@ -343,7 +343,7 @@ int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
 			initial = "5";
 		}
 	}
-	
+
         /* THL supplemental set
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄥ, -ㄨㄥ is another reading of -ㄥ
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄛ, -ㄨㄛ is another reading of -ㄛ
