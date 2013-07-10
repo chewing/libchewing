@@ -372,7 +372,7 @@ void internal_ok_keystroke_rtn( const char *file, int line,
 		// No function to check KEYSTROKE_BELL
 		{ KEYSTROKE_ABSORB, chewing_keystroke_CheckAbsorb },
 	};
-	int i;
+	size_t i;
 	int actual;
 	int expected;
 
