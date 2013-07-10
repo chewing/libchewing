@@ -21,9 +21,9 @@
  *	  Output a database file which indicates a phone phrase tree.\n
  *	  Each node represents a single phone.\n
  *	  The output file was a random access file, a record was defined:\n\code
- *	  { 
+ *	  {
  *		 uint16_t key; the phone data
- *		 int32 phraseno; 
+ *		 int32 phraseno;
  *		 int32 begin,end; //the children of this node(-1,-1 indicate a leaf node)
  *	  }\endcode
  */
@@ -41,8 +41,8 @@
 #define MAX_PH_NODE	6400000
 #define IN_FILE		"phoneid.dic"
 
-/* 
-	typedefs 
+/*
+	typedefs
 */
 typedef int int32;
 
@@ -124,7 +124,7 @@ NODE* Insert( NODE *pN, uint16_t key )
 	LISTNODE *prev, *p;
 	LISTNODE *pnew = (LISTNODE *) malloc( sizeof( LISTNODE ) );
 	NODE *pnode = NewNode( key );
-	
+
 	pnew->pNode = pnode;
 	pnew->next  = NULL;
 
@@ -133,7 +133,7 @@ NODE* Insert( NODE *pN, uint16_t key )
 		pN->childList = pnew;
 	}
 	else {
-		for ( 
+		for (
 			p = prev->next;
 			(p) && (p->pNode->key < key);
 			prev = p, p = p->next )
@@ -157,8 +157,8 @@ void Construct()
 	}
 	InitConstruct();
 
-	
-	while ( 1 ) {	
+
+	while ( 1 ) {
 		ret = fscanf( input, "%hu", &key );
 		if ( ret != 1 || feof( input ) )
 			break;
@@ -229,7 +229,7 @@ void BFS2()
 	tree_size = 0;
 	while ( ! QueueEmpty() ) {
 		pNode = QueueGet();
-		
+
 		tree.phone_id = pNode->key;
 		tree.phrase_id = pNode->phraseno;
 
@@ -265,7 +265,7 @@ void BFS2()
 int main()
 {
 	Construct();
-	BFS1();		
+	BFS1();
 	BFS2();
 
 	return 0;

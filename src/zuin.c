@@ -13,7 +13,7 @@
  */
 
 /**
- * @file zuin.c 
+ * @file zuin.c
  *
  * control keyboard mapping
  * include the definition of ZuinData structure
@@ -53,7 +53,7 @@ static int IsHsuPhoEndKey( int pho_inx[], int key )
 #if 0
 static int IsDvorakHsuPhoEndKey( int pho_inx[], int key )
 {
-	/* DvorakHsu tone mark should be same with Hsu's mark 
+	/* DvorakHsu tone mark should be same with Hsu's mark
 	 * after conversion.
 	 */
 	return IsHsuPhoEndKey(pho_inx, key);
@@ -94,7 +94,7 @@ static int IsDefPhoEndKey( int key, int kbtype )
 {
 	if ( PhoneInxFromKey( key, 3, kbtype, 1 )  )
 		return 1;
-	
+
 	if ( key == ' ' )
 		return 1;
 	return 0;
@@ -107,9 +107,9 @@ static int EndKeyProcess( ChewingData *pgdata, int key, int searchTimes )
 	Word tempword;
 	int pho_inx;
 
-	if ( 
-		pZuin->pho_inx[ 0 ] == 0 && 
-		pZuin->pho_inx[ 1 ] == 0 && 
+	if (
+		pZuin->pho_inx[ 0 ] == 0 &&
+		pZuin->pho_inx[ 1 ] == 0 &&
 		pZuin->pho_inx[ 2 ] == 0 &&
 		pZuin->pho_inx[ 3 ] == 0 ) {
 		/*
@@ -179,7 +179,7 @@ static int DefPhoInput( ChewingData *pgdata, int key )
 		if ( inx )
 			break;
 	}
-	
+
 	/* the key is NOT a phone */
 	if ( type > 3 ) {
 		return ZUIN_KEY_ERROR;
@@ -235,8 +235,8 @@ static int HsuPhoInput( ChewingData *pgdata, int key )
 		}
 
 		if (
-			( pZuin->pho_inx[ 0 ] == 9 ) && 
-			( ( pZuin->pho_inx[ 1 ] == 1 ) || 
+			( pZuin->pho_inx[ 0 ] == 9 ) &&
+			( ( pZuin->pho_inx[ 1 ] == 1 ) ||
 				( pZuin->pho_inx[ 1 ] == 3 ) ) ) {
 			pZuin->pho_inx[ 0 ] = 12;
 		}
@@ -256,40 +256,40 @@ static int HsuPhoInput( ChewingData *pgdata, int key )
 					/* if inx !=0 */
 					searchTimes = 2 ; /* possible infinite loop here */
 				}
-				else 
+				else
 					break;
 			}
 			else if ( type == 1 && inx == 1 ) { /* handle i and e*/
 				if ( pZuin->pho_inx[ 1 ] ) {
 					searchTimes = 2;
 				}
-				else 
+				else
 					break;
 			}
-			else 
+			else
 				break;
 		}
 		/* processing very special cases "j v c" */
-		if ( 
-			type == 1 && 
-			inx == 2 && 
-			12 <= pZuin->pho_inx[ 0 ] && 
+		if (
+			type == 1 &&
+			inx == 2 &&
+			12 <= pZuin->pho_inx[ 0 ] &&
 			pZuin->pho_inx[ 0 ] <= 14 ) {
 			pZuin->pho_inx[ 0 ] += 3;
 		}
 
 		/* Fuzzy "g e" to "j e" */
 		if (
-			( pZuin->pho_inx[ 0 ] == 9 ) && 
+			( pZuin->pho_inx[ 0 ] == 9 ) &&
 			( ( pZuin->pho_inx[ 1 ] == 1 ) || ( pZuin->pho_inx[ 1 ] == 3 ) ) ) {
 			pZuin->pho_inx[ 0 ] = 12;
 		}
 
 		/* ㄐㄑㄒ must follow ㄧㄩ */
 		if (
-			type == 2 && 
-			pZuin->pho_inx[ 1 ] == 0 && 
-			12 <= pZuin->pho_inx[ 0 ] && 
+			type == 2 &&
+			pZuin->pho_inx[ 1 ] == 0 &&
+			12 <= pZuin->pho_inx[ 0 ] &&
 			pZuin->pho_inx[ 0 ] <= 14 ) {
 			pZuin->pho_inx[ 0 ] += 3;
 		}
@@ -355,7 +355,7 @@ static int ET26PhoInput( ChewingData *pgdata, int key )
 		/* decide if the key is a phone */
 		for ( type = 0, searchTimes = 1; type < 3; type++ ) {
 			inx = PhoneInxFromKey( key, type, pZuin->kbtype, searchTimes );
-			if ( ! inx ) 
+			if ( ! inx )
 				continue; /* if inx == 0, next type */
 			else if ( type == 0 ) {
 				if ( pZuin->pho_inx[ 0 ] || pZuin->pho_inx[ 1 ] ) {
@@ -366,13 +366,13 @@ static int ET26PhoInput( ChewingData *pgdata, int key )
 					break;
 			}
 			else
-				break;	
+				break;
 		}
 		/* convert "ㄐㄒ" to "ㄓㄕ" */
 		if ( type == 1 ) {
 			if ( inx == 2 ) {
-				if ( 
-					pZuin->pho_inx[ 0 ] == 12 || 
+				if (
+					pZuin->pho_inx[ 0 ] == 12 ||
 					pZuin->pho_inx[ 0 ] == 14 ) {
 					pZuin->pho_inx[ 0 ] += 3;
 				}
@@ -380,14 +380,14 @@ static int ET26PhoInput( ChewingData *pgdata, int key )
 			else {
 				/* convert "ㄍ" to "ㄑ" */
 				if ( pZuin->pho_inx[ 0 ] == 9 ) {
-					pZuin->pho_inx[ 0 ] = 13;	
+					pZuin->pho_inx[ 0 ] = 13;
 				}
 			}
 		}
 
-		if ( 
-			type == 2 && 
-			pZuin->pho_inx[ 1 ] == 0 && 
+		if (
+			type == 2 &&
+			pZuin->pho_inx[ 1 ] == 0 &&
 			(pZuin->pho_inx[ 0 ] == 12 || pZuin->pho_inx[ 0 ] == 14 ) ) {
 			pZuin->pho_inx[ 0 ] += 3;
 		}
@@ -416,7 +416,7 @@ static int DACHENCP26PhoInput( ChewingData *pgdata, int key )
 		/* decide if the key is a phone */
 		for ( type = 0, searchTimes = 1; type < 3; type++ ) {
 			inx = PhoneInxFromKey( key, type, pZuin->kbtype, searchTimes );
-			if ( ! inx ) 
+			if ( ! inx )
 				continue; /* if inx == 0, next type */
 			else if ( type == 0 ) {
 				break;
@@ -428,7 +428,7 @@ static int DACHENCP26PhoInput( ChewingData *pgdata, int key )
 					break;
 			}
 			else
-				break;	
+				break;
 		}
 		/* switching between "ㄅ" and "ㄆ" */
 		if ( key == 'q' ) {
@@ -577,7 +577,7 @@ static int IsSymbolKey(int key)
 	if ( (key < 97) || (key > 122) ) {
 		return 1;
 	}
-		
+
 	return 0;
 }
 
@@ -648,7 +648,7 @@ static int PinYinInput( ChewingData *pgdata, int key )
 			case '2':
 				key = '6';
 				break;
-			case '5': 
+			case '5':
 				key = '7';
 		}
 		pZuin->pinYinData.keySeq[ 0 ] = '\0';
@@ -656,7 +656,7 @@ static int PinYinInput( ChewingData *pgdata, int key )
 	}
 	buf[ 0 ] = key; buf[ 1 ] = '\0';
 	strcat( pZuin->pinYinData.keySeq, buf );
-	
+
 	DEBUG_OUT( "PinYin Seq: %s\n", pZuin->pinYinData.keySeq );
 
 	return ZUIN_ABSORB;
@@ -684,7 +684,7 @@ int ZuinPhoInput( ChewingData *pgdata, int key )
 			break;
 		default:
 			return DefPhoInput( pgdata, key );
-	}	
+	}
 	return ZUIN_ERROR;
 }
 

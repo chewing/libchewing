@@ -147,7 +147,7 @@ CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx )
 
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 {
-	return (ctx->cand_no < ctx->output->pci->nTotalChoice);	
+	return (ctx->cand_no < ctx->output->pci->nTotalChoice);
 }
 
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
@@ -208,12 +208,12 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
-{ 
+{
 	return !!(ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
-} 
+}
 
 CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
-{ 
+{
 	return !!(ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
 

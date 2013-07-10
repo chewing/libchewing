@@ -124,7 +124,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		}
 		else {
 			memcpy(
-				userPhoneSeq, 
+				userPhoneSeq,
 				&phoneSeq[ head_tmp ],
 				sizeof( uint16_t ) * ( diff + 1 ) ) ;
 			userPhoneSeq[ diff + 1 ] = 0;
@@ -153,7 +153,7 @@ static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 	int i;
 
 	for ( i = 0; i < pci->nTotalChoice; i++ )
-		if ( ! memcmp( pci->totalChoiceStr[ i ], str, len ) ) 
+		if ( ! memcmp( pci->totalChoiceStr[ i ], str, len ) )
 			return 1;
 	return 0;
 }
@@ -286,9 +286,9 @@ static void SetChoiceInfo( ChewingData *pgdata )
 		if ( pai->avail[ pai->currentAvail ].id != -1 ) {
 			GetPhraseFirst( pgdata, &tempPhrase, pai->avail[ pai->currentAvail ].id );
 			do {
-				if ( ChoiceTheSame( 
-					pci, 
-					tempPhrase.phrase, 
+				if ( ChoiceTheSame(
+					pci,
+					tempPhrase.phrase,
 					len * ueBytesFromChar( tempPhrase.phrase[0] ) * sizeof( char ) ) ) {
 					continue;
 				}
@@ -304,9 +304,9 @@ static void SetChoiceInfo( ChewingData *pgdata )
 		if ( pUserPhraseData ) {
 			do {
 				/* check if the phrase is already in the choice list */
-				if ( ChoiceTheSame( 
-					pci, 
-					pUserPhraseData->wordSeq, 
+				if ( ChoiceTheSame(
+					pci,
+					pUserPhraseData->wordSeq,
 					len * ueBytesFromChar( pUserPhraseData->wordSeq[0] ) * sizeof( char ) ) )
 					continue;
 				/* otherwise store it */
@@ -315,7 +315,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 						pUserPhraseData->wordSeq,
 						len, 1);
 				pci->nTotalChoice++;
-			} while ( ( pUserPhraseData = 
+			} while ( ( pUserPhraseData =
 				    UserGetPhraseNext( pgdata, userPhoneSeq ) ) != NULL );
 		}
 
@@ -337,7 +337,7 @@ static int SeekPhraseHead( ChewingData *pgdata )
 	int i;
 	int phoneSeq = PhoneSeqCursor( pgdata );
 	for ( i = pgdata->nPrefer - 1; i >= 0; i-- ) {
-		if ( pgdata->preferInterval[ i ].from > phoneSeq 
+		if ( pgdata->preferInterval[ i ].from > phoneSeq
 				|| pgdata->preferInterval[ i ].to < phoneSeq )
 			continue;
 		return pgdata->preferInterval[ i ].from;
@@ -389,7 +389,7 @@ int ChoicePrevAvail( ChewingContext *ctx )
 }
 
 /** @brief Return the next phrase not longer than the previous phrase. */
-int ChoiceNextAvail( ChewingData *pgdata ) 
+int ChoiceNextAvail( ChewingData *pgdata )
 {
 	if (pgdata->choiceInfo.isSymbol) return 0;
 	if ( --( pgdata->availInfo.currentAvail ) < 0 )
@@ -418,17 +418,17 @@ static void ChangeUserData( ChewingData *pgdata, int selectNo )
 	uint16_t userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 	int len;
 
-	len = ueStrLen( pgdata->choiceInfo.totalChoiceStr[ selectNo ] ); 
+	len = ueStrLen( pgdata->choiceInfo.totalChoiceStr[ selectNo ] );
 	memcpy(
-		userPhoneSeq, 
-		&( pgdata->phoneSeq[ PhoneSeqCursor( pgdata ) ] ), 
+		userPhoneSeq,
+		&( pgdata->phoneSeq[ PhoneSeqCursor( pgdata ) ] ),
 		len * sizeof( uint16_t ) );
 	userPhoneSeq[ len ] = 0;
 	UserUpdatePhrase( pgdata, userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[ selectNo ] );
 }
 
 /** @brief commit the selected phrase. */
-int ChoiceSelect( ChewingData *pgdata, int selectNo ) 
+int ChoiceSelect( ChewingData *pgdata, int selectNo )
 {
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	AvailInfo *pai = &( pgdata->availInfo );
