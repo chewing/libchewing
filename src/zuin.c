@@ -587,6 +587,7 @@ static int PinYinInput( ChewingData *pgdata, int key )
 	int err = 0;
 	unsigned int i;
 	char zuinKeySeq[ 5 ], zuinKeySeqAlt[ 5 ], buf[ 2 ];
+	size_t len;
 
 	DEBUG_CHECKPOINT();
 
@@ -605,7 +606,8 @@ static int PinYinInput( ChewingData *pgdata, int key )
 		DEBUG_OUT( "zuinKeySeq: %s\n", zuinKeySeq );
 		DEBUG_OUT( "zuinKeySeqAlt: %s\n", zuinKeySeqAlt );
 
-		for ( i = 0; i < strlen( zuinKeySeq ); i++ ) {
+		len = strlen( zuinKeySeq );
+		for ( i = 0; i < len; i++ ) {
 			int type = 0, inx = 0;
 			for ( type = 0; type <= 3; type++ ) {
 				inx = PhoneInxFromKey( zuinKeySeq[ i ],
@@ -623,7 +625,8 @@ static int PinYinInput( ChewingData *pgdata, int key )
 
 		}
 
-		for ( i = 0; i < strlen( zuinKeySeqAlt ); i++ ) {
+		len = strlen( zuinKeySeqAlt );
+		for ( i = 0; i < len; i++ ) {
 			int type = 0, inx = 0;
 			for ( type = 0; type <= 3; type++ ) {
 				inx = PhoneInxFromKey( zuinKeySeqAlt[ i ],
