@@ -12,7 +12,7 @@
  * of this file.
  */
 
-/** 
+/**
  * @file key2pho.c
  * @brief map zuins to uint16_t type according to different kb_type
  */
@@ -87,7 +87,7 @@ static const char *key_str[ MAX_KBTYPE ] = {
 
 } ;
 
-/* 
+/*
  * Read one zhuin string,
  *
  * return the number it means. 0 means error.
@@ -143,7 +143,7 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		}
 		_index = findptr - key_str[ kbtype ];
 		ueStrNCpy( ueStrSeek( pho, i ),
-		           ueStrSeek( (char *) ph_str, _index ), 
+		           ueStrSeek( (char *) ph_str, _index ),
 			   1, 0);
 	}
 	pho = ueStrSeek( pho, len );

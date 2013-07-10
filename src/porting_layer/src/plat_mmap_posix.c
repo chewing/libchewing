@@ -1,7 +1,7 @@
 /**
  * plat_mmap_posix.c
  *
- * Copyright (c) 2005, 2006, 2008                                       
+ * Copyright (c) 2005, 2006, 2008
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution

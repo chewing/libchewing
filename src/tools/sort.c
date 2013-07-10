@@ -89,7 +89,7 @@ const struct WordData EXCEPTION_WORD[] = {
 void strip(char *line)
 {
 	char *end;
-	int i;
+	size_t i;
 
 	/* remove comment */
 	for (i = 0; i < strlen(line); ++i) {
@@ -307,7 +307,7 @@ void sort_word_for_dictionary()
 }
 
 int is_exception_phrase(struct PhraseData *phrase, int pos) {
-	int i;
+	size_t i;
 	char word[MAX_UTF8_SIZE + 1];
 
 	ueStrNCpy(word, ueStrSeek(phrase->phrase, pos), 1, 1);
@@ -360,9 +360,9 @@ void store_phrase(const char *line, int line_num)
 	char *phrase;
 	char *freq;
 	char *bopomofo;
-	int phrase_len;
-	int i;
-	int j;
+	size_t phrase_len;
+	size_t i;
+	size_t j;
 	struct WordData word;
 	char bopomofo_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 
@@ -415,7 +415,7 @@ void store_phrase(const char *line, int line_num)
 	}
 
 	/* check phrase length & bopomofo length */
-	if (ueStrLen(phrase_data[num_phrase_data].phrase) != phrase_len) {
+	if ((size_t)ueStrLen(phrase_data[num_phrase_data].phrase) != phrase_len) {
 		fprintf(stderr, "Phrase length and bopomofo length mismatch in line %d, `%s'\n", line_num, line);
 		exit(-1);
 	}
@@ -457,7 +457,7 @@ int compare_phrase(const void *x, const void *y)
 	const struct PhraseData *a = (const struct PhraseData *) x;
 	const struct PhraseData *b = (const struct PhraseData *) y;
 	int cmp;
-	int i;
+	size_t i;
 
 	for (i = 0; i < sizeof(a->phone) / sizeof(a->phone[0]); ++i) {
 		cmp = a->phone[i] - b->phone[i];
