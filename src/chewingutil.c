@@ -86,26 +86,22 @@ void SetUpdatePhraseMsg(
 	const char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
 		/* 已有： */
 	int begin = 3, i;
+	const char *msg;
 
 	pgdata->showMsgLen = begin + len;
 	if ( state == USER_UPDATE_INSERT ) {
-		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, insert, 1, 1 );
-		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-		           ueConstStrSeek( insert, 1 ),
-		           1, 1 );
-		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-		           ueConstStrSeek( insert, 2 ),
-		           1, 1 );
+		msg = insert;
 	}
 	else {
-		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, modify, 1, 1 );
-		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-		           ueConstStrSeek( modify, 1 ),
-			   1, 1 );
-		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-		           ueConstStrSeek( modify, 2 ),
-			   1, 1 );
+		msg = modify;
 	}
+	ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, msg, 1, 1 );
+	ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
+	           ueConstStrSeek( msg, 1 ),
+		   1, 1 );
+	ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
+	           ueConstStrSeek( msg, 2 ),
+		   1, 1 );
 	for ( i = 0; i < len; i++ ) {
 		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
 		           ueConstStrSeek( addWordSeq, i ),
