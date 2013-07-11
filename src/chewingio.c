@@ -128,7 +128,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
-static void NullLogger( void *data, int level, const char *fmt, ...)
+static void NullLogger( void *data UNUSED, int level UNUSED, const char *fmt UNUSED, ...)
 {
 }
 
@@ -1019,7 +1019,7 @@ static int dvorak_convert( int key )
 		'k','K','l','L',';',':','\'','\"',
 		'z','Z','x','X','c','C','v','V','b','B','n','N','m','M',
 		',','<','.','>','/','?'};
-	int i = 0;
+	size_t i;
 
 	STATIC_ASSERT( ARRAY_SIZE( dkey ) == ARRAY_SIZE( qkey ), update_dkey_and_qkey );
 

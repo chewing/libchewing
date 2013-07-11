@@ -36,8 +36,8 @@ static char* other_keys[] = {
     "<N0>", "<N1>", "<N2>", "<N3>", "<N4>", "<N5>", "<N6>", "<N7>", "<N8>", "<N9>",
     "<N+>", "<N->", "<N*>", "<N/>", "<N.>"};
 
-#define n_nkeys (sizeof(normal_keys) / sizeof(normal_keys[0]))
-#define n_okeys (sizeof(other_keys) / sizeof(other_keys[0]))
+#define n_nkeys (int)(sizeof(normal_keys) / sizeof(normal_keys[0]))
+#define n_okeys (int)(sizeof(other_keys) / sizeof(other_keys[0]))
 
 void usage()
 {

@@ -1343,8 +1343,8 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	const char *symbols;
 	const char *symbols_end;
 	const char *symbol;
-	int i;
-	int len;
+	size_t i;
+	size_t len;
 	size_t size;
 	int ret = -1;
 

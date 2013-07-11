@@ -38,7 +38,7 @@ static const int KEYBOARD_DEFAULT_TYPE = 0;
 void test_set_keyboard_type()
 {
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 	char *keyboard_string;
 	int keyboard_type;
 
@@ -62,8 +62,8 @@ void test_set_keyboard_type()
 			"`%s' shall be `%s'", keyboard_string, KEYBOARD_STRING[i] );
 		chewing_free( keyboard_string );
 		keyboard_type = chewing_get_KBType( ctx );
-		ok( keyboard_type == i ,
-			"`%d' shall be `%d'", keyboard_type, i );
+		ok( keyboard_type == (int)i ,
+			"`%d' shall be `%d'", keyboard_type, (int)i );
 	}
 
 	// The invalid KBType will reset KBType to default value.
@@ -87,7 +87,7 @@ void test_KBStr2Num()
 	int i;
 	int ret;
 
-	for ( i = 0; i < ARRAY_SIZE( KEYBOARD_STRING ); ++i ) {
+	for ( i = 0; i < (int)ARRAY_SIZE( KEYBOARD_STRING ); ++i ) {
 		// XXX: chewing_KBStr2Num shall accept const char *.
 		ret = chewing_KBStr2Num( KEYBOARD_STRING[i] );
 		ok( ret == i, "%d shall be %d", ret, i );
@@ -97,7 +97,7 @@ void test_KBStr2Num()
 void test_enumerate_keyboard_type()
 {
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 	char *keyboard_string;
 
 	chewing_Init( 0, 0 );

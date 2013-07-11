@@ -28,7 +28,7 @@ int failed_word_count = 0;
 
 static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
-static int get_char( void *param )
+static int get_char( void *param UNUSED )
 {
 	int ch = getchar();
 	if ( ch == EOF )
@@ -82,7 +82,7 @@ void compare_per_run()
 /* entry point for simulation */
 int chewing_test_Main()
 #else
-int main( int argc, char *argv[] )
+int main()
 #endif
 {
 	ChewingContext *ctx;

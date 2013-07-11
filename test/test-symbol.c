@@ -335,7 +335,7 @@ static const char *CAND[] = {
 void test_type_symbol()
 {
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 
 	chewing_Init( NULL, NULL );
 
