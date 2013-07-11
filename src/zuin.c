@@ -36,7 +36,7 @@
  *	ZUIN_KEY_ERROR
  *	ZUIN_ERROR
  */
-static int IsHsuPhoEndKey( int pho_inx[], int key )
+static int IsHsuPhoEndKey( const int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 's':
@@ -51,7 +51,7 @@ static int IsHsuPhoEndKey( int pho_inx[], int key )
 }
 
 /* copy the idea from HSU keyboard */
-static int IsET26PhoEndKey( int pho_inx[], int key )
+static int IsET26PhoEndKey( const int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 'd':
@@ -66,7 +66,7 @@ static int IsET26PhoEndKey( int pho_inx[], int key )
 }
 
 /* copy the idea from HSU keyboard */
-static int IsDACHENCP26PhoEndKey( int pho_inx[], int key )
+static int IsDACHENCP26PhoEndKey( const int pho_inx[], int key )
 {
 	switch ( key ) {
 		case 'e':

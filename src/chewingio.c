@@ -41,7 +41,7 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 
-char *kb_type_str[] = {
+const char * const kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
 	"KB_IBM",
@@ -1005,14 +1005,14 @@ CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
 /* Dvorak <-> Qwerty keyboard layout converter */
 static int dvorak_convert( int key )
 {
-	char dkey[] = {
+	const char dkey[] = {
 		'\'','\"',',','<','.','>','p','P','y','Y','f','F','g','G',
 		'c','C','r','R','l','L','/','?','=','+','\\','|',
 		'a','A','o','O','e','E','u','U','i','I','d','D','h','H',
 		't','T','n','N','s','S','-','_',
 		';',':','q','Q','j','J','k','K','x','X','b','B','m','M',
 		'w','W','v','V','z','Z'};
-	char qkey[] = {
+	const char qkey[] = {
 		'q','Q','w','W','e','E','r','R','t','T','y','Y','u','U',
 		'i','I','o','O','p','P','[','{',']','}','\\','|',
 		'a','A','s','S','d','D','f','F','g','G','h','H','j','J',

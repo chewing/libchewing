@@ -37,7 +37,7 @@ static void ChangeSelectIntervalAndBreakpoint(
 		ChewingData *pgdata,
 		int from,
 		int to,
-		char *str )
+		const char *str )
 {
 	int i;
 	int user_alloc;
@@ -148,7 +148,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 }
 
 /* FIXME: Improper use of len parameter */
-static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
+static int ChoiceTheSame( ChoiceInfo *pci, const char *str, int len )
 {
 	int i;
 

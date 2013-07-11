@@ -42,7 +42,7 @@
 #include "plat_path.h"
 #endif
 
-extern const char *zhuin_tab[];
+extern const char * const zhuin_tab[];
 static void MakePreferInterval( ChewingData *pgdata );
 static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata );
 static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
@@ -78,12 +78,12 @@ static int FindEasySymbolIndex( char ch )
 }
 
 void SetUpdatePhraseMsg(
-		ChewingData *pgdata, char *addWordSeq,
+		ChewingData *pgdata, const char *addWordSeq,
 		int len, int state )
 {
-	char *insert = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A";
+	const char *insert = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A";
 		/* 加入： */
-	char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
+	const char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
 		/* 已有： */
 	int begin = 3, i;
 
@@ -91,24 +91,24 @@ void SetUpdatePhraseMsg(
 	if ( state == USER_UPDATE_INSERT ) {
 		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, insert, 1, 1 );
 		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-		           ueStrSeek( insert, 1 ),
+		           ueConstStrSeek( insert, 1 ),
 		           1, 1 );
 		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-		           ueStrSeek( insert, 2 ),
+		           ueConstStrSeek( insert, 2 ),
 		           1, 1 );
 	}
 	else {
 		ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, modify, 1, 1 );
 		ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-		           ueStrSeek( modify, 1 ),
+		           ueConstStrSeek( modify, 1 ),
 			   1, 1 );
 		ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-		           ueStrSeek( modify, 2 ),
+		           ueConstStrSeek( modify, 2 ),
 			   1, 1 );
 	}
 	for ( i = 0; i < len; i++ ) {
 		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
-		           ueStrSeek( addWordSeq, i ),
+		           ueConstStrSeek( addWordSeq, i ),
 			   1, 1);
 	}
 }
@@ -166,7 +166,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 
 static int _Inner_InternalSpecialSymbol(
 		int key, ChewingData *pgdata,
-		char symkey, const char *chibuf )
+		char symkey, const char * const chibuf )
 {
 	int kbtype;
 
@@ -202,7 +202,7 @@ static int _Inner_InternalSpecialSymbol(
 
 static int InternalSpecialSymbol(
 		int key, ChewingData *pgdata,
-		int nSpecial, const char keybuf[], const char *chibuf[] )
+		int nSpecial, const char keybuf[], const char * const chibuf[] )
 {
 	int i, rtn = ZUIN_IGNORE; /* very strange and difficult to understand */
 
@@ -224,7 +224,7 @@ int SpecialSymbolInput( int key, ChewingData *pgdata )
 		',', '.', ';'
 	};
 
-	static const char *chibuf[] = {
+	static const char * const chibuf[] = {
 		"\xE3\x80\x8C", "\xE3\x80\x8D", "\xE3\x80\x8E", "\xE3\x80\x8F",
 			/* "「", "」", "『", "』" */
 		"\xE3\x80\x81", "\xEF\xBC\x8C", "\xEF\xBC\x9A", "\xEF\xBC\x9B",
@@ -568,7 +568,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 
 static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 {
-	static char *break_word[] = {
+	static const char * const break_word[] = {
 		"\xE6\x98\xAF", "\xE7\x9A\x84", "\xE4\xBA\x86", "\xE4\xB8\x8D",
 		/* 是              的              了              不 */
 		"\xE4\xB9\x9F", "\xE8\x80\x8C", "\xE4\xBD\xA0", "\xE6\x88\x91",
@@ -909,7 +909,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 
 	/* fill zuinBuf */
 	if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
-		char *p = pgdata->zuinData.pinYinData.keySeq;
+		const char *p = pgdata->zuinData.pinYinData.keySeq;
 		/*
 		 * Copy from old content in zuinBuf
 		 * NOTE: No Unicode transformation here.
@@ -934,7 +934,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 				 * skip the 2 space characters at
 				 * zhuin_tab[0] and zhuin_tab[1]. */
 				ueStrNCpy( (char *) pgo->zuinBuf[ i ].s,
-				           ueStrSeek( (char *) (zhuin_tab[ i ] + 2),
+				           ueConstStrSeek( (zhuin_tab[ i ] + 2),
 						      pgdata->zuinData.pho_inx[ i ] - 1 ),
 				           1, 1);
 			}
@@ -1118,7 +1118,7 @@ int IsPreferIntervalConnted( int cursor, ChewingData *pgdata )
 	return 0;
 }
 
-static char *symbol_buf[][ 50 ] = {
+static const char * const symbol_buf[][ 50 ] = {
 	{ "0", "\xC3\xB8", 0 },
 		/* "ø" */
 	{ "[", "\xE3\x80\x8C", "\xE3\x80\x8E", "\xE3\x80\x8A", "\xE3\x80\x88",
@@ -1273,7 +1273,7 @@ static char *symbol_buf[][ 50 ] = {
 static int FindSymbolKey( const char *symbol )
 {
 	unsigned int i;
-	char **buf;
+	const char * const *buf;
 	for ( i = 0; i < ARRAY_SIZE( symbol_buf ); ++i ) {
 		for ( buf = symbol_buf[ i ]; *buf; ++buf )	{
 			if (  0 == strcmp( *buf, symbol ) )
@@ -1286,7 +1286,7 @@ static int FindSymbolKey( const char *symbol )
 int OpenSymbolChoice( ChewingData *pgdata )
 {
 	int i, symbol_buf_len = ARRAY_SIZE( symbol_buf );
-	char **pBuf;
+	const char * const *pBuf;
 	ChoiceInfo *pci = &( pgdata->choiceInfo );
 	pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
@@ -1340,9 +1340,9 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	char *line = NULL;
 	SymbolEntry **entry = NULL;
 	char *category_end;
-	char *symbols;
-	char *symbols_end;
-	char *symbol;
+	const char *symbols;
+	const char *symbols_end;
+	const char *symbol;
 	int i;
 	int len;
 	size_t size;

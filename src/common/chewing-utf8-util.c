@@ -13,7 +13,7 @@
 #include "chewing-utf8-util.h"
 
 /* Table of UTF-8 length */
-static char utf8len_tab[256] =
+static const char utf8len_tab[256] =
 {
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,

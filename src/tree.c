@@ -579,7 +579,7 @@ static void Discard2( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
-static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, uint16_t phoneSeq[], int nPhoneSeq )
+static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, const uint16_t phoneSeq[], int nPhoneSeq )
 {
 	int i;
 	Word word;
@@ -596,11 +596,11 @@ static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, uint16_t phon
 static void OutputRecordStr(
 		ChewingData *pgdata,
 		char *out_buf, int out_buf_len,
-		int *record, int nRecord,
+		const int *record, int nRecord,
 		uint16_t phoneSeq[], int nPhoneSeq,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ],
 		IntervalType selectInterval[],
-		int nSelect, TreeDataType *ptd )
+		int nSelect, const TreeDataType *ptd )
 {
 	PhraseIntervalType inter;
 	int i;
@@ -622,7 +622,7 @@ static void OutputRecordStr(
 	}
 }
 
-static int rule_largest_sum( int *record, int nRecord, TreeDataType *ptd )
+static int rule_largest_sum( const int *record, int nRecord, const TreeDataType *ptd )
 {
 	int i, score = 0;
 	PhraseIntervalType inter;
@@ -635,13 +635,13 @@ static int rule_largest_sum( int *record, int nRecord, TreeDataType *ptd )
 	return score;
 }
 
-static int rule_largest_avgwordlen( int *record, int nRecord, TreeDataType *ptd )
+static int rule_largest_avgwordlen( const int *record, int nRecord, const TreeDataType *ptd )
 {
 	/* constant factor 6=1*2*3, to keep value as integer */
 	return 6 * rule_largest_sum( record, nRecord, ptd ) / nRecord;
 }
 
-static int rule_smallest_lenvariance( int *record, int nRecord, TreeDataType *ptd )
+static int rule_smallest_lenvariance( const int *record, int nRecord, const TreeDataType *ptd )
 {
 	int i, j, score = 0;
 	PhraseIntervalType inter1, inter2;
@@ -658,7 +658,7 @@ static int rule_smallest_lenvariance( int *record, int nRecord, TreeDataType *pt
 	return -score;
 }
 
-static int rule_largest_freqsum( int *record, int nRecord, TreeDataType *ptd )
+static int rule_largest_freqsum( const int *record, int nRecord, const TreeDataType *ptd )
 {
 	int i, score = 0;
 	PhraseIntervalType inter;
@@ -675,7 +675,7 @@ static int rule_largest_freqsum( int *record, int nRecord, TreeDataType *ptd )
 	return score;
 }
 
-static int LoadPhraseAndCountScore( int *record, int nRecord, TreeDataType *ptd )
+static int LoadPhraseAndCountScore( const int *record, int nRecord, const TreeDataType *ptd )
 {
 	int total_score = 0;
 	/* NOTE: the balance factor is tuneable */
@@ -688,7 +688,7 @@ static int LoadPhraseAndCountScore( int *record, int nRecord, TreeDataType *ptd 
 	return total_score;
 }
 
-static int IsRecContain( int *intA, int nA, int *intB, int nB, TreeDataType *ptd )
+static int IsRecContain( const int *intA, int nA, const int *intB, int nB, const TreeDataType *ptd )
 {
 	int big, sml;
 
@@ -750,7 +750,7 @@ static void SortListByScore( TreeDataType *ptd )
 }
 
 /* when record==NULL then output the "link list" */
-static void SaveRecord( int *record, int nInter, TreeDataType *ptd )
+static void SaveRecord( const int *record, int nInter, TreeDataType *ptd )
 {
 	RecordNode *now, *p, *pre;
 
@@ -858,7 +858,7 @@ static void CleanUpMem( TreeDataType *ptd )
 	}
 }
 
-static void CountMatchCnnct( TreeDataType *ptd, int *bUserArrCnnct, int nPhoneSeq )
+static void CountMatchCnnct( TreeDataType *ptd, const int *bUserArrCnnct, int nPhoneSeq )
 {
 	RecordNode *p;
 	int i, k, sum;
@@ -882,9 +882,9 @@ static void CountMatchCnnct( TreeDataType *ptd, int *bUserArrCnnct, int nPhoneSe
 	}
 }
 
-static void ShowList( ChewingData *pgdata, TreeDataType *ptd )
+static void ShowList( ChewingData *pgdata, const TreeDataType *ptd )
 {
-	RecordNode *p;
+	const RecordNode *p;
 	int i;
 
 	DEBUG_OUT( "After SaveList :\n" );

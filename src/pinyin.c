@@ -85,13 +85,13 @@ int InitPinyin( ChewingData *pgdata, const char *prefix )
  *
  * @retval 0 Success
  */
-int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
+int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
                   char *zuinKeySeq, char *zuinKeySeqAlt )
 {
-	char *p, *cursor = NULL;
-	char *initial = 0;
-	char *final = 0;
-	char *seq = 0;
+	const char *p, *cursor = NULL;
+	const char *initial = 0;
+	const char *final = 0;
+	const char *seq = 0;
 	int i;
 
 	/* special cases for WG */

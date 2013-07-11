@@ -232,7 +232,7 @@ CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx )
 	return ctx->kb_no < KB_TYPE_NUM;
 }
 
-extern char *kb_type_str[];
+extern const char * const kb_type_str[];
 
 CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
 {
