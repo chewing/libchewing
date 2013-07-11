@@ -313,7 +313,7 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 	int rtn, loop, _index;
 	char wordbuf[ 8 ];
 
-	int nSpecial = EASY_SYMBOL_KEY_TAB_LEN / sizeof( char );
+	int nSpecial = EASY_SYMBOL_KEY_TAB_LEN;
 
 	_index = FindEasySymbolIndex( key );
 	if ( -1 != _index ) {
@@ -1514,7 +1514,7 @@ end:
 void TerminateEasySymbolTable( ChewingData *pgdata )
 {
 	unsigned int i;
-	for ( i = 0; i < EASY_SYMBOL_KEY_TAB_LEN / sizeof( char ); ++i ) {
+	for ( i = 0; i < EASY_SYMBOL_KEY_TAB_LEN ; ++i ) {
 		if ( NULL != pgdata->static_data.g_easy_symbol_value[ i ] ) {
 			free( pgdata->static_data.g_easy_symbol_value[ i ] );
 			pgdata->static_data.g_easy_symbol_value[ i ] = NULL;

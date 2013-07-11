@@ -41,7 +41,7 @@ CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 	int i;
 	char *s = (char *) calloc(
 		1 + ctx->output->nCommitStr,
-		sizeof(char) * MAX_UTF8_SIZE );
+		MAX_UTF8_SIZE );
 	if ( s ) {
 		for ( i = 0; i < ctx->output->nCommitStr; i++ ) {
 			strcat( s, (char *) (ctx->output->commitStr[ i ].s) );
@@ -65,7 +65,7 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 	int i;
 	char *s = (char *) calloc(
 		1 + ctx->output->chiSymbolBufLen,
-		sizeof(char) * MAX_UTF8_SIZE );
+		MAX_UTF8_SIZE );
 	if ( s ) {
 		for ( i = 0; i < ctx->output->chiSymbolBufLen; i++ ) {
 			strcat( s, (char *) (ctx->output->chiSymbolBuf[ i ].s) );
@@ -198,7 +198,7 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 	int i;
 	char *msg = (char *) calloc(
 		1 + ctx->output->showMsgLen,
-		sizeof(char) * MAX_UTF8_SIZE );
+		MAX_UTF8_SIZE );
 	if ( msg ) {
 		for ( i = 0; i < ctx->output->showMsgLen; ++i )
 			strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
