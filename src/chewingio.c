@@ -1340,24 +1340,6 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	return 0;
 }
 
-#if 0
-CHEWING_API int chewing_handle_CtrlOption( ChewingContext *ctx, int key )
-{
-	ChewingData *pgdata = ctx->data;
-	ChewingOutput *pgo = ctx->output;
-	int rtn;
-	int keystrokeRtn = KEYSTROKE_ABSORB;
-
-	if ( ! pgdata->bSelect ) {
-		CheckAndResetRange( pgdata );
-		rtn = SpecialEtenSymbolInput( key, pgdata );
-	}
-	CallPhrasing( pgdata );
-	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-	return 0;
-}
-#endif
-
 CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {
 	ChewingData *pgdata = ctx->data;

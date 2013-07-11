@@ -336,29 +336,6 @@ int EasySymbolInput( int key, ChewingData *pgdata )
 	return ( rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK );
 }
 
-#if 0
-int SpecialEtenSymbolInput( int key, ChewingData *pgdata )
-{
-	static char keybuf[] = {
-		17, 23, 5, 18, 20, 25, 21, 9, 15, 16,
-		1, 19, 4, 6, 7, 8, 10, 11, 12, 59, 39,
-		26, 24, 3, 22, 2, 14, 13, 44, 46, 47
-	};
-
-	static char *chibuf[] = {
-		"\xE2\x94\x8C","\xE2\x94\xAC","\xE2\x94\x90","\xE2\x96\xA1","\xE3\x80\x88",
-		"\xE3\x80\x89","\xE2\x80\xA6","\xE3\x80\x81","\xE3\x80\x82","\xE2\x80\xBB",
-		"\xE2\x94\x9C","\xE2\x94\xBC","\xE2\x94\xA4","\xE3\x80\x90","\xE3\x80\x91",
-		"\xE2\x97\x87","\xE2\x97\x8B","\xE2\x80\x94","\xE2\x94\x82","\xEF\xBC\x9B",
-		"\xEF\xBC\x9A","\xE2\x94\x94","\xE2\x94\xB4","\xE2\x94\x98", "\xCB\x87",
-		"\xE3\x80\x8A", "\xE3\x80\x8B" ,"\xE2\x94\x80", "\xEF\xBC\x8C","\xEF\xBC\x8E",
-		"\xEF\xBC\x9F"
-	};
-	static int nSpecial = 31;
-	return InternalSpecialSymbol( key, pgdata, nSpecial, keybuf, chibuf );
-}
-#endif
-
 int SymbolChoice( ChewingData *pgdata, int sel_i )
 {
 	int kbtype;

@@ -26,15 +26,6 @@ void TerminatePinyin( ChewingData *pgdata )
 	free( pgdata->static_data.hanyuFinalsMap );
 }
 
-#if 0
-static int compkey( const void *k1, const void *k2 )
-{
-	keymap *key1 = (keymap *) k1;
-	keymap *key2 = (keymap *) k2;
-	return strcmp( key1->pinyin, key2->pinyin );
-}
-#endif
-
 int InitPinyin( ChewingData *pgdata, const char *prefix )
 {
 	char filename[ PATH_MAX ];
