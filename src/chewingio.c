@@ -191,8 +191,9 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	// FIXME: Which return code indicate error?
 	ret = InitHash( ctx->data );
+	if ( !ret )
+		goto error;
 
 	ctx->cand_no = 0;
 
