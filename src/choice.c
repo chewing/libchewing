@@ -30,8 +30,7 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "zuin-private.h"
-
-#define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
+#include "private.h"
 
 static void ChangeSelectIntervalAndBreakpoint(
 		ChewingData *pgdata,

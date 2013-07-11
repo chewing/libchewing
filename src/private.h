@@ -44,4 +44,6 @@
 
 typedef int (*CompFuncType)( const void *, const void * );
 
+#define CEIL_DIV(a,b) ((a + b - 1) / b)
+
 #endif

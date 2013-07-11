@@ -129,8 +129,6 @@ int ChewingIsEntering( ChewingData *pgdata )
 		ZuinIsEntering( &( pgdata->zuinData ) ) );
 }
 
-#define CEIL_DIV(a,b) ((a + b - 1) / b)
-
 int HaninSymbolInput( ChewingData *pgdata )
 {
 	unsigned int i;
