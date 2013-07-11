@@ -11,12 +11,18 @@ matrix:
       env: BUILD=cmake
     - compiler: clang
       env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
+    - compiler: gcc
+      env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
 
 script:
   - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
   - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make test; fi
 
 before_install:
+  - sudo pip install cpp-coveralls --use-mirrors
   - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9
   - sudo apt-get update -qq
   - sudo apt-get install -qq texinfo cmake valgrind
+
+after_success:
+  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test ; fi
