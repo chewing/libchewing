@@ -393,6 +393,17 @@ static int ET26PhoInput( ChewingData *pgdata, int key )
 	}
 }
 
+static int SwitchingBetween( int *pho_idx, int a, int b ) {
+	if ( *pho_idx == a ) {
+		*pho_idx = b;
+		return 1;
+	} else if ( *pho_idx == b ) {
+		*pho_idx = a;
+		return 1;
+	}
+	return 0;
+}
+
 static int DACHENCP26PhoInput( ChewingData *pgdata, int key )
 {
 	ZuinData *pZuin = &(pgdata->zuinData);
@@ -422,31 +433,19 @@ static int DACHENCP26PhoInput( ChewingData *pgdata, int key )
 		}
 		/* switching between "ㄅ" and "ㄆ" */
 		if ( key == 'q' ) {
-			if ( pZuin->pho_inx[ 0 ] == 1  ) {
-			 	pZuin->pho_inx[ 0 ] = 2;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[0] == 2) {
-				pZuin->pho_inx[ 0 ] = 1;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 0 ], 1, 2 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
 		/* switching between "ㄉ" and "ㄊ" */
 		else if ( key == 'w' ) {
-			if ( pZuin->pho_inx[ 0 ] == 5  ) {
-			 	pZuin->pho_inx[ 0 ] = 6;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[0] == 6) {
-				pZuin->pho_inx[ 0 ] = 5;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 0 ], 5, 6 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
 		/* switching between "ㄓ" and "ㄔ" */
 		else if ( key == 't' ) {
-			if ( pZuin->pho_inx[ 0 ] == 15  ) {
-			 	pZuin->pho_inx[ 0 ] = 16;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[0] == 16) {
-				pZuin->pho_inx[ 0 ] = 15;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 0 ], 15, 16 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
@@ -504,41 +503,25 @@ static int DACHENCP26PhoInput( ChewingData *pgdata, int key )
 		}
 		/* switching between "ㄛ" and "ㄞ" */
 		else if ( key == 'i' ) {
-			if ( pZuin->pho_inx[ 2 ] == 2  ) {
-			 	pZuin->pho_inx[ 2 ] = 5;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[2] == 5) {
-				pZuin->pho_inx[ 2 ] = 2;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 2 ], 2, 5 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
 		/* switching between "ㄟ" and "ㄢ" */
 		else if ( key == 'o' ) {
-			if ( pZuin->pho_inx[ 2 ] == 6  ) {
-			 	pZuin->pho_inx[ 2 ] = 9;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[2] == 9) {
-				pZuin->pho_inx[ 2 ] = 6;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 2 ], 6, 9 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
 		/* switching between "ㄠ" and "ㄤ" */
 		else if ( key == 'l' ) {
-			if ( pZuin->pho_inx[ 2 ] == 7  ) {
-			 	pZuin->pho_inx[ 2 ] = 11;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[2] == 11) {
-				pZuin->pho_inx[ 2 ] = 7;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 2 ], 7, 11 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
 		/* switching between "ㄣ" and "ㄦ" */
 		else if ( key == 'p' ) {
-			if ( pZuin->pho_inx[ 2 ] == 10  ) {
-			 	pZuin->pho_inx[ 2 ] = 13;
-				return ZUIN_ABSORB;
-			} else if ( pZuin->pho_inx[2] == 13) {
-				pZuin->pho_inx[ 2 ] = 10;
+			if ( SwitchingBetween ( &pZuin->pho_inx[ 2 ], 10, 13 ) ) {
 				return ZUIN_ABSORB;
 			}
 		}
