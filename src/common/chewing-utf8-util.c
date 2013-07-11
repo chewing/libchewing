@@ -66,6 +66,16 @@ int ueStrNCpy( char dest[], const char *src, size_t n, int end )
 	return len;
 }
 
+const char *ueConstStrSeek( const char *src, size_t n )
+{
+	size_t i = 0;
+	const char *iter = src;
+	for ( i = 0; i < n; i++ ) {
+		iter += ueBytesFromChar( iter[0] );
+	}
+	return iter;
+}
+
 char *ueStrSeek( char *src, size_t n )
 {
 	size_t i = 0;
