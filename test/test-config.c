@@ -98,8 +98,8 @@ void test_set_candPerPage()
 	};
 
 	ChewingContext *ctx;
-	int i;
-	int j;
+	size_t i;
+	size_t j;
 
 	chewing_Init( 0, 0 );
 
@@ -416,8 +416,8 @@ void test_set_ChiEngMode()
 	};
 
 	ChewingContext *ctx;
-	int i;
-	int j;
+	size_t i;
+	size_t j;
 
 	chewing_Init( 0, 0 );
 
@@ -453,8 +453,8 @@ void test_set_ShapeMode()
 	};
 
 	ChewingContext *ctx;
-	int i;
-	int j;
+	size_t i;
+	size_t j;
 
 	chewing_Init( 0, 0 );
 
@@ -481,7 +481,8 @@ void test_deprecated()
 {
 	ChewingContext *ctx;
 	int type;
-	ChewingConfigData configure = { 0 };
+	ChewingConfigData configure;
+	memset( &configure, 0, sizeof( ChewingConfigData ) );
 
 	chewing_Init( 0, 0 );
 

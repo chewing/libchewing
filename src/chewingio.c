@@ -41,7 +41,7 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 
-char *kb_type_str[] = {
+const char * const kb_type_str[] = {
 	"KB_DEFAULT",
 	"KB_HSU",
 	"KB_IBM",
@@ -128,7 +128,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	}
 }
 
-static void NullLogger( void *data, int level, const char *fmt, ...)
+static void NullLogger( void *data UNUSED, int level UNUSED, const char *fmt UNUSED, ...)
 {
 }
 
@@ -191,8 +191,9 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	// FIXME: Which return code indicate error?
 	ret = InitHash( ctx->data );
+	if ( !ret )
+		goto error;
 
 	ctx->cand_no = 0;
 
@@ -1004,21 +1005,21 @@ CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
 /* Dvorak <-> Qwerty keyboard layout converter */
 static int dvorak_convert( int key )
 {
-	char dkey[] = {
+	const char dkey[] = {
 		'\'','\"',',','<','.','>','p','P','y','Y','f','F','g','G',
 		'c','C','r','R','l','L','/','?','=','+','\\','|',
 		'a','A','o','O','e','E','u','U','i','I','d','D','h','H',
 		't','T','n','N','s','S','-','_',
 		';',':','q','Q','j','J','k','K','x','X','b','B','m','M',
 		'w','W','v','V','z','Z'};
-	char qkey[] = {
+	const char qkey[] = {
 		'q','Q','w','W','e','E','r','R','t','T','y','Y','u','U',
 		'i','I','o','O','p','P','[','{',']','}','\\','|',
 		'a','A','s','S','d','D','f','F','g','G','h','H','j','J',
 		'k','K','l','L',';',':','\'','\"',
 		'z','Z','x','X','c','C','v','V','b','B','n','N','m','M',
 		',','<','.','>','/','?'};
-	int i = 0;
+	size_t i;
 
 	STATIC_ASSERT( ARRAY_SIZE( dkey ) == ARRAY_SIZE( qkey ), update_dkey_and_qkey );
 
@@ -1338,24 +1339,6 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	MakeOutputAddMsgAndCleanInterval( pgo, pgdata );
 	return 0;
 }
-
-#if 0
-CHEWING_API int chewing_handle_CtrlOption( ChewingContext *ctx, int key )
-{
-	ChewingData *pgdata = ctx->data;
-	ChewingOutput *pgo = ctx->output;
-	int rtn;
-	int keystrokeRtn = KEYSTROKE_ABSORB;
-
-	if ( ! pgdata->bSelect ) {
-		CheckAndResetRange( pgdata );
-		rtn = SpecialEtenSymbolInput( key, pgdata );
-	}
-	CallPhrasing( pgdata );
-	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
-	return 0;
-}
-#endif
 
 CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 {

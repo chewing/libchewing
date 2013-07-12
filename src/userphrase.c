@@ -22,23 +22,6 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-#if 0
-static int DeltaFreq( int recentTime )
-{
-	int diff;
-
-	diff = ( chewing_lifetime - recentTime );
-
-	if ( diff < 1000 )
-		return ( 1500 - diff ); /* 1500 ~ 500 */
-	if ( diff < 2000 )
-		return ( 500 );       /* 500 ~ 500 */
-	if ( diff < 3000 )
-		return ( 2500 - diff ); /* 500 ~ -500 */
-	return ( -500 );    /* -500 forever */
-}
-#endif
-
 /* load the orginal frequency from the static dict */
 static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
 {

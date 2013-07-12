@@ -21,7 +21,7 @@
 
 static const char *LOG_PATH = TEST_HASH_DIR "/logger.log";
 
-void logger( void *data, int level, const char *fmt, ... )
+void logger( void *data UNUSED, int level UNUSED, const char *fmt, ... )
 {
 	va_list ap;
 	FILE *fd = (FILE *) data;

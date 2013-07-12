@@ -596,7 +596,7 @@ void test_Numlock_numeric_input()
 		{ "<N/>", "/" },
 		{ "<N.>", "." },
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	chewing_Init( NULL, NULL );
@@ -620,7 +620,7 @@ void test_Numlock_select_candidate()
 		{ "hk4<D><N3><E>", "\xE6\xB8\xAC" /* 測 */ },
 		{ "`<N1><E>", "\xE2\x80\xA6" /* … */ },
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	chewing_Init( NULL, NULL );
@@ -654,7 +654,7 @@ void test_get_phoneSeq()
 		{ "`31`31", { 0 } },
 	};
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 	int expected_len;
 	int len;
 	unsigned short *phone;

@@ -30,14 +30,13 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "zuin-private.h"
-
-#define CEIL_DIV( a, b ) 	( ( a + b - 1 ) / b )
+#include "private.h"
 
 static void ChangeSelectIntervalAndBreakpoint(
 		ChewingData *pgdata,
 		int from,
 		int to,
-		char *str )
+		const char *str )
 {
 	int i;
 	int user_alloc;
@@ -148,7 +147,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 }
 
 /* FIXME: Improper use of len parameter */
-static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
+static int ChoiceTheSame( ChoiceInfo *pci, const char *str, int len )
 {
 	int i;
 
@@ -161,17 +160,19 @@ static int ChoiceTheSame( ChoiceInfo *pci, char *str, int len )
 static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t phone )
 {
 	Word tempWord;
+	int len;
 	if ( GetCharFirst( pgdata, &tempWord, phone ) ) {
 		do {
+			len = ueBytesFromChar( tempWord.word[ 0 ] );
 			if ( ChoiceTheSame( pci, tempWord.word,
-					    ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) ) )
+					    len) )
 				continue;
 			assert( pci->nTotalChoice < MAX_CHOICE );
 			memcpy(
 				pci->totalChoiceStr[ pci->nTotalChoice ],
-				tempWord.word, ueBytesFromChar( tempWord.word[ 0 ] ) * sizeof( char ) );
+				tempWord.word, len );
 			pci->totalChoiceStr[ pci->nTotalChoice ]
-					   [ ueBytesFromChar( tempWord.word[ 0 ] ) ] = '\0';
+					   [ len ] = '\0';
 			pci->nTotalChoice++;
 		} while ( GetCharNext( pgdata, &tempWord ) );
 	}
@@ -199,7 +200,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 
 	/* Clears previous candidates. */
 	memset( pci->totalChoiceStr, '\0',
-		sizeof(char) * MAX_CHOICE * MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1);
+		MAX_CHOICE * MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1);
 
 	pci->nTotalChoice = 0;
 	len = pai->avail[ pai->currentAvail ].len;
@@ -289,7 +290,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 				if ( ChoiceTheSame(
 					pci,
 					tempPhrase.phrase,
-					len * ueBytesFromChar( tempPhrase.phrase[0] ) * sizeof( char ) ) ) {
+					len * ueBytesFromChar( tempPhrase.phrase[0] ) ) ) {
 					continue;
 				}
 				ueStrNCpy( pci->totalChoiceStr[ pci->nTotalChoice ],
@@ -307,7 +308,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 				if ( ChoiceTheSame(
 					pci,
 					pUserPhraseData->wordSeq,
-					len * ueBytesFromChar( pUserPhraseData->wordSeq[0] ) * sizeof( char ) ) )
+					len * ueBytesFromChar( pUserPhraseData->wordSeq[0] ) ) )
 					continue;
 				/* otherwise store it */
 				ueStrNCpy(

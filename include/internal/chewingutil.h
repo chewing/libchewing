@@ -23,7 +23,7 @@
 #define NONDECREASE_CURSOR 0
 
 void AutoLearnPhrase( ChewingData *pgdata );
-void SetUpdatePhraseMsg( ChewingData *pgdata, char *addWordSeq, int len, int state );
+void SetUpdatePhraseMsg( ChewingData *pgdata, const char *addWordSeq, int len, int state );
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end );
 int ChewingIsEntering( ChewingData *pgdata );
 void CleanAllBuf( ChewingData * );
