@@ -16,7 +16,7 @@
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"
 
-int main (int argc, char *argv[])
+int main ()
 {
 	char *u8phone;
 	char rt[10];

@@ -443,46 +443,6 @@ static int migrate_hash_to_bin( ChewingData *pgdata )
 	return 1;
 }
 
-#if 0
-/**
- * Attempt to re-compute lifetime
- */
-static int ComputeChewingLifeTime()
-{
-       HASH_ITEM *item;
-       int i, min;
-
-       i = 0;
-
-       chewing_lifetime++;
-       min = chewing_lifetime;
-
-       while ( hashtable[ i ] ) {
-               item = hashtable[ i ];
-               while ( item ) {
-                       if ( item->data.recentTime < min )
-                               min = item->data.recentTime;
-                       item = item->next;
-               }
-               i++;
-       }
-
-       chewing_lifetime -= min;
-       i = 0;
-
-       while ( hashtable[ i ] ) {
-               item = hashtable[ i ];
-               while ( item ) {
-                       item->data.recentTime -= min;
-                       HashModify( item );
-                       item = item->next;
-               }
-               i++;
-       }
-       return 0;
-}
-#endif
-
 static void FreeHashItem( HASH_ITEM *aItem )
 {
 	if ( aItem ) {

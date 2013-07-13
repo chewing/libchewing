@@ -14,7 +14,7 @@
 #include "testhelper.h"
 #include "chewing-utf8-util.h"
 
-int main (int argc, char *argv[])
+int main ()
 {
 	char *u8string;
 	int u8len;

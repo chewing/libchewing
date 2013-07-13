@@ -98,7 +98,7 @@ static const TestData FULLSHAPE_DATA[] = {
 void test_fullshape_input()
 {
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 
 	chewing_Init( NULL, NULL );
 
