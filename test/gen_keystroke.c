@@ -439,7 +439,7 @@ int main( int argc, char *argv[] )
 		mvaddstr( 9, 0, "Ctrl + d : leave" );
 		mvaddstr( 9, 20, "Ctrl + b : toggle Eng/Chi mode" );
 		mvaddstr( 10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
-		mvaddstr( 11, 0, "Crtl + h : toggle Full/Half shape mode" );
+		mvaddstr( 11, 0, "Ctrl + h : toggle Full/Half shape mode" );
 		show_commit_string( ctx );
 		show_userphrase( 7, 12, ctx );
 		show_edit_buffer( 1, 0, ctx );
