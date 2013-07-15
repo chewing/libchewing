@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "chewing.h"
 #include "plat_types.h"
@@ -109,9 +110,40 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_Terminate();
 }
 
+void test_select_candidate_4_bytes_utf8()
+{
+	ChewingContext *ctx;
+
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+
+	chewing_Init( NULL, NULL );
+
+	ctx = chewing_new();
+
+	chewing_set_maxChiSymbolLen( ctx, 16 );
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+	chewing_set_autoShiftCur( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "2k62k6" ); /* ㄉㄜˊ ㄉㄜˊ */
+	ok_preedit_buffer( ctx, "\xE5\xBE\x97\xE5\xBE\x97" /* 得得 */ );
+
+	type_keystroke_by_string( ctx, "<H>" );
+
+	type_keystroke_by_string( ctx, "<D>8" );
+	ok_preedit_buffer( ctx, "\xF0\xA2\x94\xA8\xE5\xBE\x97" /* 𢔨得 */ );
+
+	type_keystroke_by_string( ctx, "<D>8" );
+
+	ok_preedit_buffer( ctx, "\xF0\xA2\x94\xA8\xF0\xA2\x94\xA8" /* 𢔨𢔨 */ );
+
+	chewing_delete( ctx );
+	chewing_Terminate();
+}
+
 void test_select_candidate() {
 	test_select_candidate_no_phrase_choice_rearward();
 	test_select_candidate_phrase_choice_rearward();
+	test_select_candidate_4_bytes_utf8();
 }
 
 void test_Esc_not_entering_chewing()
@@ -564,7 +596,7 @@ void test_Numlock_numeric_input()
 		{ "<N/>", "/" },
 		{ "<N.>", "." },
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	chewing_Init( NULL, NULL );
@@ -588,7 +620,7 @@ void test_Numlock_select_candidate()
 		{ "hk4<D><N3><E>", "\xE6\xB8\xAC" /* 測 */ },
 		{ "`<N1><E>", "\xE2\x80\xA6" /* … */ },
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	chewing_Init( NULL, NULL );
@@ -613,27 +645,39 @@ void test_Numlock()
 
 void test_get_phoneSeq()
 {
-	static const unsigned short PHONE[] = { 10268, 8708 };
+	static const struct {
+		char *token;
+		unsigned short phone[5];
+	} DATA[] = {
+		{ "hk4g4", { 10268, 8708, 0 } },
+		{ "hk4g4`31hk4g4", { 10268, 8708, 10268, 8708, 0 } },
+		{ "`31`31", { 0 } },
+	};
 	ChewingContext *ctx;
-	unsigned short *phone;
+	size_t i;
+	int expected_len;
 	int len;
-	int i;
+	unsigned short *phone;
 
 	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystroke_by_string( ctx, "hk4g4" );
+	for ( i = 0; i < ARRAY_SIZE( DATA ); ++i ) {
+		chewing_Reset( ctx );
+		type_keystroke_by_string( ctx, DATA[i].token );
 
-	len = chewing_get_phoneSeqLen( ctx );
-	ok( len == ARRAY_SIZE( PHONE ), "phoneSeqLen `%d' shall be `%d'", len, ARRAY_SIZE( PHONE ) );
+		expected_len = 0;
+		while ( DATA[i].phone[expected_len] != 0 )
+			++expected_len;
+		len = chewing_get_phoneSeqLen( ctx );
+		ok( len == expected_len, "phoneSeqLen `%d' shall be `%d'", len, expected_len );
 
-	phone = chewing_get_phoneSeq( ctx );
-	for ( i = 0; i < len; ++i ) {
-		ok( phone[i] == PHONE[i], "phone in position %d is `%d', shall be `%d'", i, phone[i], PHONE[i] );
+		phone = chewing_get_phoneSeq( ctx );
+		ok ( memcmp( phone, DATA[i].phone, sizeof( phone[0] ) * expected_len ) == 0, "phoneSeq shall be expected value" );
+		chewing_free( phone );
 	}
-	chewing_free( phone );
 
 	chewing_delete( ctx );
 	chewing_Terminate();

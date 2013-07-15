@@ -30,6 +30,7 @@ NATIVE_TESTS = \
 	test-fullshape \
 	test-key2pho \
 	test-keyboard \
+	test-logger \
 	test-mmap \
 	test-path \
 	test-reset \
@@ -39,13 +40,6 @@ NATIVE_TESTS = \
 	test-userphrase \
 	test-utf8 \
 	$(NULL)
-
-if HAVE_TEST_MEMORY_FAIL
-NATIVE_TESTS += \
-	test-memory-fail \
-	$(NULL)
-test_memory_fail_LDFLAGS=-Wl,--wrap=malloc,--wrap=calloc -static
-endif
 
 check_HEADERS = \
 	testhelper.h \

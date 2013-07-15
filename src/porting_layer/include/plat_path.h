@@ -15,7 +15,7 @@
   #include <config.h>
 #endif
 
-#include <string.h>
+#include <stddef.h>
 
 #ifdef UNDER_POSIX
 #define SEARCH_PATH_SEP ":"

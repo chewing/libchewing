@@ -37,6 +37,9 @@ int ueStrNCpy( char dest[], const char *src, size_t n, int end );
 /* Return address from n length after src */
 char *ueStrSeek( char *src, size_t n );
 
+/* Const version of ueStrSeek */
+const char *ueConstStrSeek( const char *src, size_t n );
+
 /*!
  * Locate a UTF-8 substring from UTF-8 string
  * @param[in] str     UTF-8 string from which substr is located

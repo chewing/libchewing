@@ -12,7 +12,7 @@
  * of this file.
  */
 
-/** 
+/**
  * @file key2pho.c
  * @brief map zuins to uint16_t type according to different kb_type
  */
@@ -21,9 +21,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "chewing-utf8-util.h"
-#include "global.h"
 #include "chewing-private.h"
 
 /* NOTE:
@@ -31,7 +29,7 @@
  * sake of portability, that avoid some buggy or faulty environment like
  * Microsoft VC9 to misinterpret the string.
  */
-const char *zhuin_tab[] = {					/* number of bits */
+const char *const zhuin_tab[] = {				/* number of bits */
 	  "  \xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88\xE3\x84\x89"
 	  "\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C\xE3\x84\x8D\xE3\x84\x8E"
 	  "\xE3\x84\x8F\xE3\x84\x90\xE3\x84\x91\xE3\x84\x92\xE3\x84\x93"
@@ -52,7 +50,7 @@ static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 static const int shift[] = { 9, 7, 3, 0 };
 static const int sb[] = { 31, 3, 15, 7 };
 
-static const char *ph_str =
+static const char * const ph_str =
 	"\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
 		/* ㄅㄆㄇㄈ */
 	"\xE3\x84\x89\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C"
@@ -73,7 +71,7 @@ static const char *ph_str =
 		/* ㄢㄣㄤㄥㄦ */
 	"\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B" ;
 		/* ˙ˊˇˋ */
-static const char *key_str[ MAX_KBTYPE ] = {
+static const char * const key_str[ MAX_KBTYPE ] = {
 	 "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",		/* standard kb */
 	 "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",		/* hsu */
 	 "1234567890-qwertyuiopasdfghjkl;zxcvbn/m,.",		/* IBM */
@@ -89,7 +87,7 @@ static const char *key_str[ MAX_KBTYPE ] = {
 
 } ;
 
-/* 
+/*
  * Read one zhuin string,
  *
  * return the number it means. 0 means error.
@@ -145,7 +143,7 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		}
 		_index = findptr - key_str[ kbtype ];
 		ueStrNCpy( ueStrSeek( pho, i ),
-		           ueStrSeek( (char *) ph_str, _index ), 
+		           ueStrSeek( (char *) ph_str, _index ),
 			   1, 0);
 	}
 	pho = ueStrSeek( pho, len );
@@ -157,7 +155,7 @@ int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 {
 	int i;
 	int index;
-	char *pos;
+	const char *pos;
 	char tmp[ MAX_UTF8_SIZE + 1 ];
 	char buffer[ MAX_UTF8_SIZE * ZUIN_SIZE + 1 ] = { 0 };
 
@@ -166,8 +164,7 @@ int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 		// to add 1 here.
 		index = ((phone_num >> shift[ i ]) & sb[ i ]) + 1;
 		if ( index >= 2 ) {
-			// FIXME: ueStrSeek shall accept const char *
-			pos = ueStrSeek( (char *) zhuin_tab[ i ], index );
+			pos = ueConstStrSeek( zhuin_tab[ i ], index );
 			ueStrNCpy( tmp, pos, 1, 1 );
 			strcat( buffer, tmp );
 		}

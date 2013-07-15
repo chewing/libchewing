@@ -5,17 +5,16 @@ env: BUILD=autotools
 
 matrix:
   include:
-    - compiler: gcc
-      env: BUILD=autotools USE_BINARY_DATA=no
     - compiler: clang
-      env: BUILD=autotools
+      env: BUILD=autotools CONFIGURE_OPTION=--disable-binary-data
     - compiler: gcc
       env: BUILD=cmake
+    - compiler: clang
+      env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
 
 script:
-  - if [ x$BUILD == xautotools -a x$USE_BINARY_DATA != xno ]; then ./autogen.sh && ./configure && make && make check; fi
-  - if [ x$BUILD == xautotools -a x$USE_BINARY_DATA == xno ]; then ./autogen.sh && ./configure --disable-binary-data && make && make check; fi
-  - if [ x$BUILD == xcmake ]; then cmake . && make && make test; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
+  - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make test; fi
 
 before_install:
   - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9

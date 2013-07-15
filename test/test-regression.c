@@ -30,7 +30,7 @@ void test_libchewing_googlecode_issue_472()
 		"hk4`j 0",
 		"hk4<C0>j 0",
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	ctx = chewing_new();
@@ -53,7 +53,7 @@ void test_libchewing_googlecode_issue_473()
 		"wv<C0><C5><N9>$FIF<D><N4>B *<C2>E4*<C2>q)Kf)<SS><TT>4=<N5>%<R>mN4<EN>H<N9><N.>8s{XTD<N6>jZV(y3G`9<C6>JTy<B>J<C1>SNc<E>hC<SL><N/><R><C6>@an<C3><N7>wzF<C3>P*<N*><B>l<C3><N6>W<N*> $<SR><N.><N1><E><E><N0><N6>Y",
 		
 	};
-	int i;
+	size_t i;
 	ChewingContext *ctx;
 
 	ctx = chewing_new();

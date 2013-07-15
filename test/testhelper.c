@@ -372,7 +372,7 @@ void internal_ok_keystroke_rtn( const char *file, int line,
 		// No function to check KEYSTROKE_BELL
 		{ KEYSTROKE_ABSORB, chewing_keystroke_CheckAbsorb },
 	};
-	int i;
+	size_t i;
 	int actual;
 	int expected;
 
@@ -387,7 +387,7 @@ void internal_ok_keystroke_rtn( const char *file, int line,
 	}
 }
 
-int internal_has_userphrase( const char *file, int line,
+int internal_has_userphrase( const char *file UNUSED, int line UNUSED,
 	ChewingContext *ctx, const char *bopomofo, const char *phrase )
 {
 	uint16_t *phone = NULL;

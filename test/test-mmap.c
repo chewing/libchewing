@@ -27,7 +27,7 @@ void test_UnitFromPlatMmap()
 	char *data_buf;
 	char hard_copy[] = "ji3cp3vu3cj0 vup dj4up <E>";
 	int i;
-	
+
 	idx = plat_mmap_create(&m_mmap, TESTDATA, FLAG_ATTRIBUTE_READ);
 	ok (idx == 28, "plat_mmap_create");
 	if (idx > 0) {
@@ -42,7 +42,7 @@ void test_UnitFromPlatMmap()
 	plat_mmap_close( &m_mmap );
 }
 
-int main (int argc, char *argv[])
+int main ()
 {
 	test_UnitFromPlatMmap();
 	return exit_status();

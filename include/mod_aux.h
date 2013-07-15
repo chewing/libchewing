@@ -1,5 +1,5 @@
 /*
- * mod_aux.c
+ * mod_aux.h
  *
  * Copyright (c) 2005, 2008
  *	libchewing Core Team. See ChangeLog for details.
@@ -21,7 +21,7 @@
 /**
  * @brief Chewing the state for input context during commit process
  * @param ctx handle to Chewing IM context
- * @retval TRUE if it currnet input state is at the "end-of-a-char"
+ * @retval TRUE if its currnet input state is at the "end-of-a-char"
  */
 CHEWING_API int chewing_commit_Check( ChewingContext *ctx );
 

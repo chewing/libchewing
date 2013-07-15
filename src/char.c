@@ -12,13 +12,15 @@
  * of this file.
  */
 
-/** 
+/**
  * @file char.c
  * @brief word data file
  */
+#if ! defined(USE_BINARY_DATA)
+#include <assert.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include "global-private.h"
@@ -182,7 +184,7 @@ static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 	fgettab( buf, 1000, pgdata->static_data.charfile );
 	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
 	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
-	assert( wrd_ptr->word != '\0' );
+	assert( wrd_ptr->word[0] != '\0' );
 #else
 	unsigned char size;
 	size = *(unsigned char *) pgdata->static_data.char_cur_pos;

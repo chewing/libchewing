@@ -547,4 +547,8 @@ CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx );
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
 /*@}*/
 
+CHEWING_API void chewing_set_logger( ChewingContext *ctx,
+	void (*logger)( void *data, int level, const char *fmt, ... ),
+	void *data );
+
 #endif /* _CHEWING_IO_H */

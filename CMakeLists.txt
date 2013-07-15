@@ -4,28 +4,24 @@ project(libchewing)
 set(LIBCHEWING_VERSION 0.3.4)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-option(ENABLE_DEBUG "Debug support" false)
-if(ENABLE_DEBUG)
-	add_definitions(-DENABLE_DEBUG=1)
-endif()
-
 if(UNIX)
 	set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
 	add_definitions(-DUNDER_POSIX -DPIC)
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
+	${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
 	set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
 	add_definitions(-D_GNU_SOURCE)
 	option(ENABLE_GCOV "Coverage support" false)
 	if(ENABLE_GCOV)
 		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
 	endif()
-elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	add_definitions(-D_GNU_SOURCE)
-	option(ENABLE_GCOV "Coverage support" false)
-	if(ENABLE_GCOV)
-		set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
+
+	# Use NO_UNDEFINED=no when running with address sanitizer
+	option(NO_UNDEFINED "No undefined symbol in object file" true)
+	if(NO_UNDEFINED)
+		set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
 	endif()
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
 	# XXX: Not sure why we need to use MATCHES instead of STREQUAL here.
@@ -54,6 +50,9 @@ if (USE_BINARY_DATA)
 	add_definitions(-DUSE_BINARY_DATA=1)
 endif()
 
+# Use valgrind when testing
+option(USE_VALGRIND "Use valgrind when testing" true)
+
 # Feature probe
 include(CheckTypeSize)
 check_type_size(uint16_t UINT16_T)
@@ -67,6 +66,10 @@ check_function_exists(asprintf HAVE_ASPRINTF)
 
 include(CheckIncludeFiles)
 check_include_files(unistd.h HAVE_UNISTD_H)
+check_include_files(stdint.h HAVE_STDINT_H)
+
+include(TestBigEndian)
+test_big_endian(WORDS_BIGENDIAN)
 
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/config.h.in
@@ -207,6 +210,7 @@ set(ALL_TESTCASES
 	test-fullshape
 	test-key2pho
 	test-keyboard
+	test-logger
 	test-mmap
 	test-path
 	test-regression
@@ -228,23 +232,19 @@ endif()
 
 enable_testing()
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
-	CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	list(APPEND ALL_TESTCASES test-memory-fail)
-	set(HAVE_TEST_MEMORY_FAIL true)
-endif()
-
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
 foreach(target ${ALL_TESTCASES})
 	add_test(${target} ${TEST_BIN_DIR}/${target})
 endforeach()
 
-find_program(VALGRIND valgrind)
-if(VALGRIND)
-	foreach(target ${ALL_TESTCASES})
-		add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
-	endforeach()
+if(USE_VALGRIND)
+	find_program(VALGRIND valgrind)
+	if(VALGRIND)
+		foreach(target ${ALL_TESTCASES})
+			add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
+		endforeach()
+	endif()
 endif()
 
 foreach(target ${ALL_TESTS})
@@ -270,10 +270,6 @@ endforeach()
 
 if (${CURSES_FOUND})
 	target_link_libraries(gen_keystroke ${CURSES_LIBRARIES})
-endif()
-if ("${HAVE_TEST_MEMORY_FAIL}")
-	target_link_libraries(test-memory-fail ${CMAKE_DL_LIBS})
-	set_target_properties(test-memory-fail PROPERTIES LINK_FLAGS "-Wl,--wrap=malloc,--wrap=calloc")
 endif()
 
 # data
@@ -337,13 +333,16 @@ list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing
+	# Update configure.ac if one of SOVERSION/VERSION is updated.
+	# See configure.ac for more information.
 	SOVERSION 3
-	VERSION 3.0.1
+	VERSION 3.1.0
 )
 
 add_library(common OBJECT
 	${INC_DIR}/internal/chewing-utf8-util.h
 	${INC_DIR}/internal/key2pho-private.h
+	${INC_DIR}/internal/memory-private.h
 
 	${SRC_DIR}/common/chewing-utf8-util.c
 	${SRC_DIR}/common/key2pho.c

@@ -11,16 +11,26 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
+#if ! defined(USE_BINARY_DATA)
+#include <stdlib.h>
+#endif
 
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include "global-private.h"
-#include "private.h"
 #include "plat_mmap.h"
 #include "dict-private.h"
+#include "memory-private.h"
+
+#if ! defined(USE_BINARY_DATA)
+#include "private.h"
+#endif
 
 #if ! defined(USE_BINARY_DATA)
 static char *fgettab( char *buf, int maxlen, FILE *fp )
@@ -145,7 +155,7 @@ static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(unsigned char);
 	memcpy( phr_ptr->phrase, pgdata->static_data.dict_cur_pos, size );
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + size;
-	phr_ptr->freq = *(int *) pgdata->static_data.dict_cur_pos;
+	phr_ptr->freq = GetInt32(pgdata->static_data.dict_cur_pos);
 	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(int);
 	phr_ptr->phrase[ size ] = '\0';
 #endif

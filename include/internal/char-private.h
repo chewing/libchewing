@@ -19,7 +19,7 @@
 #endif
 
 typedef struct {
-	char word[ 7 ];
+	char word[ MAX_UTF8_SIZE+1 ];
 } Word;
 
 int GetCharFirst( ChewingData *, Word *, uint16_t );

@@ -11,20 +11,32 @@ AC_SUBST(PACKAGE_VERSION)
 
 # libtool versioning for libchewing
 
-# increment if the interface has additions, changes, removals.
-LIBCHEWING_CURRENT=3
+# Update CMakeLists.txt if one of MAJOR/MINOR/REVISION is updated.
+#
+# We use major/minor/revision instead of current/revision/age format here is due
+# to buggy behavior in libtool in BSD family. See the following link for detail
+# information.
+#
+#   https://lists.gnu.org/archive/html/bug-libtool/2011-05/msg00007.html
+#
+# The following link shows versioning policies in FreeBSD for your reference.
+#
+#   http://www.freebsd.org/doc/en/books/developers-handbook/policies-shlib.html
 
-# increment any time the source changes; set to 0 if you increment CURRENT
-LIBCHEWING_REVISION=1
+# increment if the interface has incompatible update (changes, removals).
+LIBCHEWING_MAJOR=3
 
-# increment if any interfaces have been added; set to 0
-# if any interfaces have been removed. removal has
-# precedence over adding, so set to 0 if both happened.
-LIBCHEWING_AGE=0
+# increment if the inteface has compatible update (additions).
+# Set to 0 if MAJOR is increased.
+LIBCHEWING_MINOR=1
 
-AC_SUBST(LIBCHEWING_CURRENT)
+# increment any time the source changes
+# Set to 0 if MAJOR or MINOR is increased.
+LIBCHEWING_REVISION=0
+
+AC_SUBST(LIBCHEWING_MAJOR)
+AC_SUBST(LIBCHEWING_MINOR)
 AC_SUBST(LIBCHEWING_REVISION)
-AC_SUBST(LIBCHEWING_AGE)
 
 # Define a string for the earliest version that this release has
 # binary compatibility with. This is used for module locations.
@@ -54,16 +66,11 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_LANG(C)
+AC_C_BIGENDIAN
 
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strtok_r asprintf])
-AC_CHECK_DECLS([RTLD_NEXT], [HAVE_DECL_RTLD_NEXT=yes], [HAVE_DECL_RTLD_NEXT=no], [
-        #define _GNU_SOURCE
-        #include <dlfcn.h>
-])
-AS_IF([test x$HAVE_DECL_RTLD_NEXT == xyes], [AC_SEARCH_LIBS([dlsym], [dl])])
-AM_CONDITIONAL([HAVE_TEST_MEMORY_FAIL], [test x$HAVE_DECL_RTLD_NEXT == xyes])
 
 # plat_mmap_posix
 AC_FUNC_MMAP
@@ -80,32 +87,13 @@ AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
 AM_CFLAGS="$CFLAGS -Wall"
-AS_IF([test x$ac_cv_func_asprintf == xyes -o x$HAVE_DECL_RTLD_NEXT == xyes],
+AS_IF([test x$ac_cv_func_asprintf == xyes],
       [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
 
 # Options
-dnl Debugging switch
-AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-                              [Turn on debugging support @<:@default=no@:>@])],
-              [case "${enableval}" in
-               yes)
-               LIBDEBUG="true"
-               ;;
-               *)
-               ;;
-               esac],
-              [LIBDEBUG="false"])
-
-if test x$LIBDEBUG = x"true"; then
-        AC_DEFINE(ENABLE_DEBUG, 1,
-                [Define to 1 if you want native library runtime debugging code enabled])
-fi
-AC_SUBST(LIBDEBUG)
-
 dnl Enable gcov for coverage test
 AC_ARG_ENABLE([gcov],
               [AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@])],
@@ -176,9 +164,9 @@ AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
 AC_CONFIG_LINKS([
-	data/pinyin.tab:data/pinyin.tab
-	data/swkb.dat:data/swkb.dat
-	data/symbols.dat:data/symbols.dat
+        data/pinyin.tab:data/pinyin.tab
+        data/swkb.dat:data/swkb.dat
+        data/symbols.dat:data/symbols.dat
         test/stresstest.py:test/stresstest.py
 ])
 
@@ -203,7 +191,6 @@ Build options:
   Host OS                 $host_os
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
-  Enable debug            $LIBDEBUG
   Enable gcov             $ENABLE_GCOV
   Enable binary data      $binary_data
   Build TextUI sample     $ax_cv_ncursesw

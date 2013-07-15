@@ -52,7 +52,7 @@ static const TestData CHINESE = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* æ¸¬è
 void test_type_easy_symbol()
 {
 	ChewingContext *ctx;
-	int i;
+	size_t i;
 
 	chewing_Init( NULL, NULL );
 

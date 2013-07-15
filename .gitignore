@@ -43,6 +43,7 @@ include/stamp-h1
 config.h
 chewing-definition.h
 
+# test suite
 test/genkeystroke
 test/genkeystroke.exe
 test/randkeystroke
@@ -63,6 +64,8 @@ test/test-key2pho
 test/test-key2pho.exe
 test/test-keyboard
 test/test-keyboard.exe
+test/test-logger
+test/test-logger.exe
 test/test-memory-fail
 test/test-memory-fail.exe
 test/test-mmap
@@ -81,15 +84,17 @@ test/test-userphrase
 test/test-userphrase.exe
 test/test-utf8
 test/test-utf8.exe
+test/do-test.xml
+test/test.txt
+test/*.log
+test/*.trs
 
+# Generated tools/headers
 src/chewing-definition.h
 src/tools/maketree
 src/tools/maketree.exe
 src/tools/sort
 src/tools/sort.exe
-
-test/do-test.xml
-test/test.txt
 
 # gcov output
 *.gcda

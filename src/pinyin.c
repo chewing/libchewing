@@ -13,29 +13,18 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 
 #include "global-private.h"
 #include "pinyin-private.h"
 #include "zuin-private.h"
-#include "hash-private.h"
 #include "private.h"
 
 void TerminatePinyin( ChewingData *pgdata )
-{ 
+{
 	free( pgdata->static_data.hanyuInitialsMap );
 	free( pgdata->static_data.hanyuFinalsMap );
 }
-
-#if 0
-static int compkey( const void *k1, const void *k2 )
-{
-	keymap *key1 = (keymap *) k1;
-	keymap *key2 = (keymap *) k2;
-	return strcmp( key1->pinyin, key2->pinyin );
-}
-#endif
 
 int InitPinyin( ChewingData *pgdata, const char *prefix )
 {
@@ -91,18 +80,18 @@ int InitPinyin( ChewingData *pgdata, const char *prefix )
 /**
  * Map pinyin key-sequence to Zuin key-sequence.
  * Caller should allocate char zuin[4].
- * 
+ *
  * Non-Zero: Fail to fully convert
- * 
+ *
  * @retval 0 Success
  */
-int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
+int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
                   char *zuinKeySeq, char *zuinKeySeqAlt )
 {
-	char *p, *cursor = NULL;
-	char *initial = 0;
-	char *final = 0;
-	char *seq = 0;
+	const char *p, *cursor = NULL;
+	const char *initial = 0;
+	const char *final = 0;
+	const char *seq = 0;
 	int i;
 
 	/* special cases for WG */
@@ -296,7 +285,7 @@ int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
                         final = "";
                 }
         }
-	
+
         /* Hanyu uan/un/u :
          * ㄐ/ㄑ/ㄒ + -uan, -uan is ㄩㄢ, not ㄨㄢ
          * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
@@ -345,7 +334,7 @@ int PinyinToZuin( ChewingData *pgdata, char *pinyinKeySeq,
 			initial = "5";
 		}
 	}
-	
+
         /* THL supplemental set
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄥ, -ㄨㄥ is another reading of -ㄥ
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄛ, -ㄨㄛ is another reading of -ㄛ

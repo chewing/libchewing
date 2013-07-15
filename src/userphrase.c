@@ -13,33 +13,14 @@
  */
 
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
 
 #include "chewing-utf8-util.h"
-#include "global.h"
 #include "hash-private.h"
 #include "dict-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "private.h"
-
-#if 0
-static int DeltaFreq( int recentTime )
-{
-	int diff;
-
-	diff = ( chewing_lifetime - recentTime );
-
-	if ( diff < 1000 )
-		return ( 1500 - diff ); /* 1500 ~ 500 */
-	if ( diff < 2000 )
-		return ( 500 );       /* 500 ~ 500 */
-	if ( diff < 3000 )
-		return ( 2500 - diff ); /* 500 ~ -500 */
-	return ( -500 );    /* -500 forever */
-}
-#endif
 
 /* load the orginal frequency from the static dict */
 static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
@@ -54,9 +35,9 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], con
 		do {
 			/* find the same phrase */
 			if ( ! strcmp(
-				phrase->phrase, 
+				phrase->phrase,
 				wordSeq ) ) {
-				retval = phrase->freq;	
+				retval = phrase->freq;
 				free( phrase );
 				return retval;
 			}
@@ -90,7 +71,7 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 		if ( uphrase->userfreq > maxFreq )
 			maxFreq = uphrase->userfreq;
 		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
-	}	  
+	}
 
 	return maxFreq;
 }
@@ -103,22 +84,22 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	/* Short interval */
 	if ( deltatime < 4000 ) {
 		delta = ( freq >= maxfreq ) ?
-			min( 
-				( maxfreq - origfreq ) / 5 + 1, 
+			min(
+				( maxfreq - origfreq ) / 5 + 1,
 				SHORT_INCREASE_FREQ ) :
-			max( 
-				( maxfreq - origfreq ) / 5 + 1, 
+			max(
+				( maxfreq - origfreq ) / 5 + 1,
 				SHORT_INCREASE_FREQ );
 		return min( freq + delta, MAX_ALLOW_FREQ );
 	}
 	/* Medium interval */
 	else if ( deltatime < 50000 ) {
 		delta = ( freq >= maxfreq ) ?
-			min( 
-				( maxfreq - origfreq ) / 10 + 1, 
+			min(
+				( maxfreq - origfreq ) / 10 + 1,
 				MEDIUM_INCREASE_FREQ ) :
-			max( 
-				( maxfreq - origfreq ) / 10 + 1, 
+			max(
+				( maxfreq - origfreq ) / 10 + 1,
 				MEDIUM_INCREASE_FREQ );
 		return min( freq + delta, MAX_ALLOW_FREQ );
 	}
@@ -158,10 +139,10 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 	}
 	else {
 		pItem->data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
-		pItem->data.userfreq = UpdateFreq( 
-			pItem->data.userfreq, 
-			pItem->data.maxfreq, 
-			pItem->data.origfreq, 
+		pItem->data.userfreq = UpdateFreq(
+			pItem->data.userfreq,
+			pItem->data.maxfreq,
+			pItem->data.origfreq,
 			pgdata->static_data.chewing_lifetime - pItem->data.recentTime );
 		pItem->data.recentTime = pgdata->static_data.chewing_lifetime;
 		HashModify( pgdata, pItem );
