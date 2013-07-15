@@ -94,12 +94,13 @@ static const char * const key_str[ MAX_KBTYPE ] = {
  */
 uint16_t UintFromPhone( const char *zhuin )
 {
-	char *iter, *pos;
+	const char *iter;
+	char *pos;
 	char buf[ MAX_UTF8_SIZE + 1 ];
 	int len, result = 0;
 	int zhuin_index = 0;
 
-	iter = (char*) zhuin;
+	iter = zhuin;
 
 	while ( *iter ) {
 		len = ueStrNCpy( buf, iter, 1, STRNCPY_CLOSE );
@@ -143,7 +144,7 @@ int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes )
 		}
 		_index = findptr - key_str[ kbtype ];
 		ueStrNCpy( ueStrSeek( pho, i ),
-		           ueStrSeek( (char *) ph_str, _index ),
+		           ueConstStrSeek( ph_str, _index ),
 			   1, 0);
 	}
 	pho = ueStrSeek( pho, len );

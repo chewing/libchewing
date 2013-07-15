@@ -48,7 +48,7 @@ int ueBytesFromChar( unsigned char b )
 int ueStrNBytes( const char *str, int n )
 {
 	int i = 0, len = 0;
-	char *iter = (char *) str;
+	const char *iter = str;
 	for ( i = 0; i < n; i++ ) {
 		len += ueBytesFromChar( iter[ len ] );
 	}
