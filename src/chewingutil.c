@@ -49,6 +49,7 @@ static int ChewingKillSelectIntervalAcross( int cursor, ChewingData *pgdata );
 
 static int FindSymbolKey( const char *symbol );
 
+/* Note: Keep synchronize with `FindEasySymbolIndex`! */
 static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
@@ -56,25 +57,25 @@ static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
 	'U', 'V', 'W', 'X', 'Y', 'Z'
 };
 
+/*
+ * FindEasySymbolIndex(ch) = char ch's index in G_EASY_SYMBOL_KEY
+ * Just return -1 if not found.
+ */
 static int FindEasySymbolIndex( char ch )
 {
-	int lo, hi, mid;
-
-	lo = 0;
-	hi = EASY_SYMBOL_KEY_TAB_LEN - 1;
-	while ( lo <= hi ) {
-		mid = (hi - lo) / 2 + lo;
-		if ( ch > G_EASY_SYMBOL_KEY[ mid ] ) {
-			lo = mid + 1;
-			continue;
-		}
-		else if ( ch < G_EASY_SYMBOL_KEY[ mid ] ) {
-			hi = mid - 1;
-			continue;
-		}
-		return mid;
+	/**
+	 * '0' => 0, ..., '9' => 9
+	 * 'A' => 10, 'B' => 11, ... 'Z' => 35
+	 */
+	if ( isdigit( ch ) ) {
+		return ch - '0';
 	}
-	return -1;
+	else if ( isupper( ch ) ) {
+		return ch - 'A' + 10;
+	}
+	else {
+		return -1;
+	}
 }
 
 void SetUpdatePhraseMsg(
