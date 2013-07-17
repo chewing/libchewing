@@ -50,7 +50,7 @@ const char USAGE[] =
 struct WordData {
 	int index; /* Used for stable sort */
 	uint16_t phone;
-	char word[MAX_UTF8_SIZE];
+	char word[MAX_UTF8_SIZE + 1];
 };
 
 struct PhraseData {
@@ -127,8 +127,11 @@ void store_word(const char *line, const int line_num)
 		exit(-1);
 	}
 
-	/* FIXME: Hope the buffers are sufficient. */
-	sscanf(buf, "%s %s", key_buf, word_data[num_word_data].word);
+#define UTF8_FORMAT_STRING(len1, len2) \
+	"%" __stringify(len1) "[^ ]" " " \
+	"%" __stringify(len2) "[^ ]"
+	sscanf(buf, UTF8_FORMAT_STRING(ZUIN_SIZE, MAX_UTF8_SIZE),
+		key_buf, word_data[num_word_data].word);
 
 	if (strlen(key_buf) > ZUIN_SIZE) {
 		fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
