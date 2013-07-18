@@ -142,7 +142,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 /*
  * capacity of 'str' MUST bigger then FIELD_SIZE !
  */
-void HashItem2Binary( char *str, HASH_ITEM *pItem )
+static void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
 	char *pc;
@@ -232,7 +232,7 @@ static int isValidChineseString( char *str )
  * retval 1	continue
  * retval -1	ignore this record
  */
-int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
+static int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
 	int len, i;
 	const char *pc;
@@ -286,7 +286,7 @@ ignore_corrupted_record:
  * @return 1, 0 or -1
  * retval -1 Ignore bad data item
  */
-int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
+static int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
 {
 	int len, i, word_len;
 	char wordbuf[ 64 ];
@@ -343,7 +343,7 @@ static FILE *open_file_get_length(
 	return tf;
 }
 
-char *_load_hash_file( const char *filename, int *size )
+static char *_load_hash_file( const char *filename, int *size )
 {
 	int flen;
 	char *pd = NULL;
