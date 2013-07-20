@@ -13,6 +13,9 @@ What's New in libchewing GIT
 * Set isSymbol to 0 in SetChoiceInfo
 * Fix 'j', 'k' in select mode cannot handle symbol selecting
 * Do not call GetCharNext() when GetCharFirst() fails
+* Successful stories:
+  . FreeArray utilizes libchewing for selecting phrases of Array
+    input method
 
 
 What's New in libchewing 0.3.4 (Dec 31, 2012)
