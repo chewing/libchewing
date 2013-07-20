@@ -18,6 +18,7 @@
 #include "global-private.h"
 #include "key2pho-private.h"
 #include "zuin-private.h"
+#include "private.h" // For ARRAY_SIZE safe macro.
 
 #define CHARDEF_BEGIN		"%chardef  begin"
 #define CHARDEF_END		"%chardef  end"
@@ -459,7 +460,7 @@ int compare_phrase(const void *x, const void *y)
 	int cmp;
 	size_t i;
 
-	for (i = 0; i < sizeof(a->phone) / sizeof(a->phone[0]); ++i) {
+	for (i = 0; i < ARRAY_SIZE(a->phone); ++i) {
 		cmp = a->phone[i] - b->phone[i];
 		if (cmp)
 			return cmp;
