@@ -18,7 +18,9 @@
 #include "global-private.h"
 #include "key2pho-private.h"
 #include "zuin-private.h"
-#include "private.h" // For ARRAY_SIZE safe macro.
+
+/* for ARRAY_SIZE macro */
+#include "../private.h"
 
 #define CHARDEF_BEGIN		"%chardef  begin"
 #define CHARDEF_END		"%chardef  end"
