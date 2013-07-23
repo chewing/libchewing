@@ -20,7 +20,7 @@
 #include "zuin-private.h"
 
 /* for ARRAY_SIZE macro */
-#include "../private.h"
+#include "private.h"
 
 #define CHARDEF_BEGIN		"%chardef  begin"
 #define CHARDEF_END		"%chardef  end"

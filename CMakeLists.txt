@@ -91,8 +91,8 @@ include_directories(
 	${PROJECT_BINARY_DIR}
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/include/internal
+	${PROJECT_SOURCE_DIR}/src
 	${PROJECT_SOURCE_DIR}/src/porting_layer/include
-	${PROJECT_SOURCE_DIR}/data/chewing
 )
 
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
