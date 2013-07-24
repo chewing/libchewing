@@ -143,10 +143,12 @@ Documentation tools:
 
 [-] Continuous Integration (CI) Service
 
-libchewing uses the following CI service:
+libchewing uses the following CI services:
 
-- https://travis-ci.org/chewing/libchewing
-- https://drone.io/github.com/chewing/libchewing
+- https://travis-ci.org/chewing/libchewing (testing)
+- https://drone.io/github.com/chewing/libchewing (testing)
+- https://coveralls.io/r/chewing/libchewing (coverage report)
+- https://launchpad.net/~chewing/+archive/chewing (ubuntu PPA)
 
 
 [-] Installation
