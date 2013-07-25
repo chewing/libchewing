@@ -280,8 +280,8 @@ static int CheckChoose(
 }
 
 /** @brief search for the phrases have the same pronunciation.*/
-/* if phoneSeq[a] ~ phoneSeq[b] is a phrase, then add an interval
- * from (a) to (b+1) */
+/* if phoneSeq[begin] ~ phoneSeq[end] is a phrase, then add an interval
+ * from (begin) to (end+1) */
 int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq )
 {
 	int child, tree_p, i;
