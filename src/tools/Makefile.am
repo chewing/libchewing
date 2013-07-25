@@ -12,8 +12,10 @@ noinst_PROGRAMS = sort maketree
 
 sort_SOURCES = \
 	sort.c \
-	$(top_builddir)/src/common/key2pho.c \
-	$(top_builddir)/src/common/chewing-utf8-util.c \
+	$(NULL)
+
+sort_LDADD = \
+	$(top_builddir)/src/common/libcommon.la \
 	$(NULL)
 
 maketree_SOURCES = maketree.c
