@@ -48,7 +48,7 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 
 	offset = 0;
 	csize = file_size;
-	pgdata->static_data.dict = plat_mmap_set_view( &pgdata->static_data.dict_mmap, &offset, &csize );
+	pgdata->static_data.dict = (const char*)plat_mmap_set_view( &pgdata->static_data.dict_mmap, &offset, &csize );
 	if ( !pgdata->static_data.dict )
 		return -1;
 

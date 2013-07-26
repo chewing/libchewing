@@ -160,14 +160,14 @@ typedef struct _SymbolEntry {
 } SymbolEntry;
 
 typedef struct {
-	TreeType *tree;
+	const TreeType *tree;
 	size_t tree_size;
 	plat_mmap tree_mmap;
 	int tree_cur_pos, tree_end_pos;
 
 	int char_cur_pos, char_end_pos;
 
-	void *dict;
+	const char *dict;
 	plat_mmap dict_mmap;
 
 	int chewing_lifetime;

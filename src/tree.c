@@ -98,7 +98,7 @@ int InitTree( ChewingData *pgdata, const char * prefix )
 		return -1;
 
 	offset = 0;
-	pgdata->static_data.tree = (TreeType *) plat_mmap_set_view( &pgdata->static_data.tree_mmap, &offset, &pgdata->static_data.tree_size );
+	pgdata->static_data.tree = (const TreeType *) plat_mmap_set_view( &pgdata->static_data.tree_mmap, &offset, &pgdata->static_data.tree_size );
 	if ( !pgdata->static_data.tree )
 		return -1;
 
