@@ -35,7 +35,7 @@
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 
 typedef struct {
-	int from, to, pho_id, source;
+	int from, to, source;
 	Phrase *p_phr;
 } PhraseIntervalType;
 
@@ -275,11 +275,10 @@ int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *pho
 
 static void AddInterval(
 		TreeDataType *ptd, int begin , int end,
-		int p_id, Phrase *p_phrase, int dict_or_user )
+		Phrase *p_phrase, int dict_or_user )
 {
 	ptd->interval[ ptd->nInterval ].from = begin;
 	ptd->interval[ ptd->nInterval ].to = end + 1;
-	ptd->interval[ ptd->nInterval ].pho_id = p_id;
 	ptd->interval[ ptd->nInterval ].p_phr = p_phrase;
 	ptd->interval[ ptd->nInterval ].source = dict_or_user;
 	ptd->nInterval++;
@@ -381,12 +380,10 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 			}
 			switch ( i_used_phrase ) {
 				case USED_PHRASE_USER:
-					AddInterval( ptd, begin, end, -1, puserphrase,
-							IS_USER_PHRASE );
+					AddInterval( ptd, begin, end, puserphrase, IS_USER_PHRASE );
 					break;
 				case USED_PHRASE_DICT:
-					AddInterval( ptd, begin, end, pho_id, pdictphrase,
-							IS_DICT_PHRASE );
+					AddInterval( ptd, begin, end, pdictphrase, IS_DICT_PHRASE );
 					break;
 				case USED_PHRASE_NONE:
 				default:
