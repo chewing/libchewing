@@ -194,7 +194,7 @@ static int CheckUserChoose(
  * their intersections are the same */
 static int CheckChoose(
 		ChewingData *pgdata,
-		int ph_id, int from, int to, Phrase **pp_phr,
+		int phrase_parent_id, int from, int to, Phrase **pp_phr,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ],
 		IntervalType selectInterval[], int nSelect )
 {
@@ -208,13 +208,13 @@ static int CheckChoose(
 	*pp_phr = NULL;
 
 	/* if there exist one phrase satisfied all selectStr then return 1, else return 0. */
-	GetPhraseFirst( pgdata, phrase, ph_id );
+	GetPhraseFirst( pgdata, phrase, phrase_parent_id );
 	do {
 		for ( chno = 0; chno < nSelect; chno++ ) {
 			c = selectInterval[ chno ];
 
 			if ( IsContain( inte, c ) ) {
-				/* find a phrase of ph_id where the text contains
+				/* find a phrase under phrase_parent_id where the text contains
 				 * 'selectStr[chno]' test if not ok then return 0, if ok
 				 * then continue to test
 				 */
@@ -314,7 +314,7 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 
 static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 {
-	int end, begin, pho_id;
+	int end, begin, phrase_parent_id;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -341,12 +341,12 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 			}
 
 			/* check dict phrase */
-			pho_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
+			phrase_parent_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
 			if (
-				( pho_id != -1 ) &&
+				( phrase_parent_id != -1 ) &&
 				CheckChoose(
 					pgdata,
-					pho_id, begin, end + 1,
+					phrase_parent_id, begin, end + 1,
 					&p_phrase, pgdata->selectStr,
 					pgdata->selectInterval, pgdata->nSelect ) ) {
 				pdictphrase = p_phrase;
