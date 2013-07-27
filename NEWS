@@ -5,7 +5,11 @@ What's New in libchewing GIT
 * Dictionary improvements
   - Remove duplicated phrases, fix Bopomofo representation
   - tool tweaks
-* travis-ci support
+* travis-ci support (https://travis-ci.org/chewing/libchewing)
+* drone.io support (https://drone.io/github.com/chewing/libchewing)
+* coveralls.io support (https://coveralls.io/r/chewing/libchewing)
+* editorconfig support (http://editorconfig.org/)
+* Add new chewing_set_logger API
 * Prevent unaligned memory access
 * Reduce maxChiSymbolLen to 39 to avoid overflow
 * Do not store user phrase when its length is 1
