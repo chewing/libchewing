@@ -103,11 +103,14 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx )
 {
-	int ret = 0;
-	if ( ctx->output->zuinBuf[ 0 ].s[ 0 ] == '\0' ) {
-		ret = 1;
+	int i;
+
+	for ( i = 0; i < ZUIN_SIZE; ++i ) {
+		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
+			return 0;
+		}
 	}
-	return ret;
+	return 1;
 }
 
 CHEWING_API int chewing_cursor_Current( ChewingContext *ctx )

@@ -683,6 +683,32 @@ void test_get_phoneSeq()
 	chewing_Terminate();
 }
 
+void test_zuin_buffer()
+{
+	ChewingContext *ctx;
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "1ul" );
+	ok_zuin_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
+
+	type_keystroke_by_string( ctx, " " );
+	ok_zuin_buffer( ctx, "" );
+
+	type_keystroke_by_string( ctx, "ul" );
+	ok_zuin_buffer( ctx, "\xE3\x84\xA7\xE3\x84\xA0" /* ㄧㄠ */ );
+
+	type_keystroke_by_string( ctx, " " );
+	ok_zuin_buffer( ctx, "" );
+
+	type_keystroke_by_string( ctx, "3");
+	ok_zuin_buffer( ctx, "\xCB\x87" /* ˇ */);
+
+	type_keystroke_by_string( ctx, " " );
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -705,6 +731,7 @@ int main()
 	test_Numlock();
 
 	test_get_phoneSeq();
+	test_zuin_buffer();
 
 	return exit_status();
 }
