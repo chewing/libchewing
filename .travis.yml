@@ -16,7 +16,7 @@ matrix:
 
 script:
   - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
-  - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make test; fi
+  - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
   - sudo pip install cpp-coveralls --use-mirrors

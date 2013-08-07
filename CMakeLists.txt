@@ -248,8 +248,10 @@ if(USE_VALGRIND)
 	endif()
 endif()
 
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
+	add_dependencies(check ${target})
 endforeach()
 
 add_library(testhelper STATIC
