@@ -54,7 +54,6 @@ void test_type_easy_symbol()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -69,14 +68,12 @@ void test_type_easy_symbol()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_mode_change()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -95,7 +92,6 @@ void test_mode_change()
 	ok_commit_buffer( ctx, CHINESE.expected );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()

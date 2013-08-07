@@ -337,7 +337,6 @@ void test_type_symbol()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -351,14 +350,12 @@ void test_type_symbol()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_symbol_cand_page()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -372,7 +369,6 @@ void test_symbol_cand_page()
 	ok_candidate( ctx, CAND, ARRAY_SIZE( CAND ) );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main ()

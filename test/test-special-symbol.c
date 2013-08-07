@@ -74,7 +74,6 @@ void test_in_chinese_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -93,7 +92,6 @@ void test_in_chinese_mode()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_in_easy_symbol_mode()
@@ -101,7 +99,6 @@ void test_in_easy_symbol_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -116,7 +113,6 @@ void test_in_easy_symbol_mode()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int is_fullshape_collision_key( const char *key )
@@ -150,7 +146,6 @@ void test_in_fullshape_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -170,7 +165,6 @@ void test_in_fullshape_mode()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()

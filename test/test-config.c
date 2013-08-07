@@ -37,7 +37,6 @@ void test_default_value()
 	int *select_key;
 	ChewingContext *ctx;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -82,7 +81,6 @@ void test_default_value()
 		"default ShapeMode shall be HALFSHAPE_MODE" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_candPerPage()
@@ -101,7 +99,6 @@ void test_set_candPerPage()
 	size_t i;
 	size_t j;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -119,7 +116,6 @@ void test_set_candPerPage()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_maxChiSymbolLen()
@@ -127,7 +123,6 @@ void test_set_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -163,7 +158,6 @@ void test_set_maxChiSymbolLen()
 		MAX_CHI_SYMBOL_LEN + 1);
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_maxChiSymbolLen()
@@ -171,7 +165,6 @@ void test_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
-	chewing_Init( 0, 0 );
 	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN );
@@ -185,7 +178,6 @@ void test_maxChiSymbolLen()
 	type_keystroke_by_string( ctx, "L" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_selKey()
@@ -193,7 +185,6 @@ void test_set_selKey()
 	ChewingContext *ctx;
 	int *select_key;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -214,7 +205,6 @@ void test_set_selKey()
 	chewing_free( select_key );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_addPhraseDirection()
@@ -223,7 +213,6 @@ void test_set_addPhraseDirection()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -245,7 +234,6 @@ void test_set_addPhraseDirection()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_spaceAsSelection()
@@ -254,7 +242,6 @@ void test_set_spaceAsSelection()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -276,7 +263,6 @@ void test_set_spaceAsSelection()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_escCleanAllBuf()
@@ -285,7 +271,6 @@ void test_set_escCleanAllBuf()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -307,7 +292,6 @@ void test_set_escCleanAllBuf()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_autoShiftCur()
@@ -316,7 +300,6 @@ void test_set_autoShiftCur()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -338,7 +321,6 @@ void test_set_autoShiftCur()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_easySymbolInput()
@@ -347,7 +329,6 @@ void test_set_easySymbolInput()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -369,7 +350,6 @@ void test_set_easySymbolInput()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_phraseChoiceRearward()
@@ -378,7 +358,6 @@ void test_set_phraseChoiceRearward()
 	int value;
 	int mode;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -400,7 +379,6 @@ void test_set_phraseChoiceRearward()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_ChiEngMode()
@@ -419,7 +397,6 @@ void test_set_ChiEngMode()
 	size_t i;
 	size_t j;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -437,7 +414,6 @@ void test_set_ChiEngMode()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_ShapeMode()
@@ -456,7 +432,6 @@ void test_set_ShapeMode()
 	size_t i;
 	size_t j;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -474,7 +449,6 @@ void test_set_ShapeMode()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_deprecated()
@@ -484,7 +458,6 @@ void test_deprecated()
 	ChewingConfigData configure;
 	memset( &configure, 0, sizeof( ChewingConfigData ) );
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -495,7 +468,6 @@ void test_deprecated()
 	chewing_Configure( ctx, &configure );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()

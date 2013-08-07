@@ -44,7 +44,6 @@ void test_select_candidate_no_phrase_choice_rearward()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -62,7 +61,6 @@ void test_select_candidate_no_phrase_choice_rearward()
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_select_candidate_phrase_choice_rearward()
@@ -87,7 +85,6 @@ void test_select_candidate_phrase_choice_rearward()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -107,7 +104,6 @@ void test_select_candidate_phrase_choice_rearward()
 	ok_commit_buffer( ctx, CAND_1[1] );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_select_candidate_4_bytes_utf8()
@@ -116,7 +112,6 @@ void test_select_candidate_4_bytes_utf8()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -137,7 +132,6 @@ void test_select_candidate_4_bytes_utf8()
 	ok_preedit_buffer( ctx, "\xF0\xA2\x94\xA8\xF0\xA2\x94\xA8" /* 𢔨𢔨 */ );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_select_candidate() {
@@ -150,42 +144,36 @@ void test_Esc_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<EE>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Esc_in_select()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<EE>" );
 	ok_candidate( ctx, NULL, 0 );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Esc_entering_zuin()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "hk<EE>" );
 	ok_zuin_buffer( ctx, "" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Esc()
@@ -200,35 +188,30 @@ void test_Del_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<DC>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Del_in_select()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<DC>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Del_word()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -237,7 +220,6 @@ void test_Del_word()
 	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Del()
@@ -251,49 +233,42 @@ void test_Backspace_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<B>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Backspace_in_select()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<B>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Backspace_remove_bopomofo()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "hk<B>" );
 	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Backspace_word()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -302,7 +277,6 @@ void test_Backspace_word()
 	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Backspace()
@@ -317,14 +291,12 @@ void test_Up_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<U>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Up()
@@ -337,14 +309,12 @@ void test_Down_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<D>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Down()
@@ -357,7 +327,6 @@ void test_Tab_insert_breakpoint_between_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -389,7 +358,6 @@ void test_Tab_insert_breakpoint_between_word()
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Tab_connect_word()
@@ -397,7 +365,6 @@ void test_Tab_connect_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -429,7 +396,6 @@ void test_Tab_connect_word()
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Tab_at_the_end()
@@ -437,7 +403,6 @@ void test_Tab_at_the_end()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -453,7 +418,6 @@ void test_Tab_at_the_end()
 	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Tab()
@@ -472,7 +436,6 @@ void test_Capslock()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -481,7 +444,6 @@ void test_Capslock()
 		"mode shall change to SYMBOL_MODE" );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Home()
@@ -489,7 +451,6 @@ void test_Home()
 	ChewingContext *ctx;
 	int cursor;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -503,7 +464,6 @@ void test_Home()
 	ok( cursor == 0, "cursor `%d' shall be 0", cursor );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_End()
@@ -511,7 +471,6 @@ void test_End()
 	ChewingContext *ctx;
 	int cursor;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -525,7 +484,6 @@ void test_End()
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_PageUp()
@@ -533,7 +491,6 @@ void test_PageUp()
 	ChewingContext *ctx;
 	int cursor;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -547,7 +504,6 @@ void test_PageUp()
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_PageDown()
@@ -555,7 +511,6 @@ void test_PageDown()
 	ChewingContext *ctx;
 	int cursor;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -569,7 +524,6 @@ void test_PageDown()
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_ShiftSpace()
@@ -599,7 +553,6 @@ void test_Numlock_numeric_input()
 	size_t i;
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -611,7 +564,6 @@ void test_Numlock_numeric_input()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Numlock_select_candidate()
@@ -623,7 +575,6 @@ void test_Numlock_select_candidate()
 	size_t i;
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -634,7 +585,6 @@ void test_Numlock_select_candidate()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_Numlock()
@@ -659,7 +609,6 @@ void test_get_phoneSeq()
 	int len;
 	unsigned short *phone;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -680,7 +629,6 @@ void test_get_phoneSeq()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_zuin_buffer()

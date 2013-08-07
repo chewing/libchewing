@@ -78,7 +78,6 @@ void test_libchewing_issue_30()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -91,7 +90,6 @@ void test_libchewing_issue_30()
 	ok( cursor == 2, "cursor position `%d' shall be `2'", cursor);
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_libchewing_data_issue_1()
@@ -101,7 +99,6 @@ void test_libchewing_data_issue_1()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -109,7 +106,6 @@ void test_libchewing_data_issue_1()
 	ok_preedit_buffer( ctx, DATA.expected );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()

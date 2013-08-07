@@ -42,7 +42,6 @@ void test_set_keyboard_type()
 	char *keyboard_string;
 	int keyboard_type;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -79,7 +78,6 @@ void test_set_keyboard_type()
 		"`%d' shall be `%d'", keyboard_type, KEYBOARD_DEFAULT_TYPE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_KBStr2Num()
@@ -100,7 +98,6 @@ void test_enumerate_keyboard_type()
 	size_t i;
 	char *keyboard_string;
 
-	chewing_Init( 0, 0 );
 
 	ctx = chewing_new();
 
@@ -124,7 +121,6 @@ void test_enumerate_keyboard_type()
 	chewing_free( keyboard_string );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()

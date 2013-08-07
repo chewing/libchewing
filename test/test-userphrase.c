@@ -24,14 +24,12 @@ void test_ShiftLeft_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<SL>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_ShiftLeft_add_userphrase()
@@ -43,7 +41,6 @@ void test_ShiftLeft_add_userphrase()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -59,7 +56,6 @@ void test_ShiftLeft_add_userphrase()
 		"`%s' shall be in userphrase", phrase );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_ShiftLeft()
@@ -72,14 +68,12 @@ void test_ShiftRight_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<SR>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_ShiftRight_add_userphrase()
@@ -91,7 +85,6 @@ void test_ShiftRight_add_userphrase()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -107,7 +100,6 @@ void test_ShiftRight_add_userphrase()
 		"`%s' shall be in userphrase", phrase );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_ShiftRight()
@@ -125,7 +117,6 @@ void test_CtrlNum_add_phrase_right()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -142,7 +133,6 @@ void test_CtrlNum_add_phrase_right()
 		"`%s' shall be in userphrase", phrase );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_CtrlNum_add_phrase_left()
@@ -154,7 +144,6 @@ void test_CtrlNum_add_phrase_left()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -171,7 +160,6 @@ void test_CtrlNum_add_phrase_left()
 		"`%s' shall be in userphrase", phrase );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_CtrlNum_add_phrase_right_symbol_in_between()
@@ -182,7 +170,6 @@ void test_CtrlNum_add_phrase_right_symbol_in_between()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -199,7 +186,6 @@ void test_CtrlNum_add_phrase_right_symbol_in_between()
 		"`%s' shall not be in userphrase", bopomofo );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_CtrlNum_add_phrase_left_symbol_in_between()
@@ -210,7 +196,6 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -227,7 +212,6 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
 		"`%s' shall not be in userphrase", bopomofo );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_CtrlNum()
@@ -245,7 +229,6 @@ void test_userphrase_auto_learn()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -259,7 +242,6 @@ void test_userphrase_auto_learn()
 		"`%s' shall be in userphrase", bopomofo );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_userphrase_auto_learn_hardcode_break()
@@ -271,7 +253,6 @@ void test_userphrase_auto_learn_hardcode_break()
 
 	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -285,7 +266,6 @@ void test_userphrase_auto_learn_hardcode_break()
 		"`%s' shall not be in userphrase", phrase );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_userphrase()

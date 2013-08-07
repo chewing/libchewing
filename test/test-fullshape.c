@@ -100,7 +100,6 @@ void test_fullshape_input()
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -115,14 +114,12 @@ void test_fullshape_input()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_fullshape()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
 
 	ctx = chewing_new();
 
@@ -148,7 +145,6 @@ void test_set_fullshape()
 
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 int main()
