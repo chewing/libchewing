@@ -267,7 +267,6 @@ int main( int argc, char *argv[] )
 {
 	ChewingContext *ctx;
 	FILE *fout;
-	char *prefix = CHEWING_DATA_PREFIX;
 	int ch;
 	int add_phrase_length;
 
