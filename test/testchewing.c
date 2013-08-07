@@ -86,7 +86,6 @@ int main()
 #endif
 {
 	ChewingContext *ctx;
-	char *prefix = CHEWING_DATA_PREFIX;
 	int i;
 
 	/* Initialize libchewing */
