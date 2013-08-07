@@ -97,7 +97,7 @@ int main()
 	/* Request handle to ChewingContext */
 	ctx = chewing_new();
 
-	/* Set keyboard type */ 
+	/* Set keyboard type */
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	chewing_set_candPerPage( ctx, 9 );
@@ -120,7 +120,7 @@ int main()
 end:
 	/* Free Chewing IM handle */
 	chewing_delete( ctx );
-	
+
 	/* Termate Chewing services */
 #ifndef USED_IN_SIMULATION
 	printf( "\n" );
