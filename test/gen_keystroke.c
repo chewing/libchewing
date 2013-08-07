@@ -210,10 +210,10 @@ void show_choose_buffer( int x, int y, ChewingContext *ctx )
 	move( x, y );
 	addstr( FILL_BLANK );
 	move( x, y );
-	
+
 	if ( chewing_cand_TotalPage( ctx ) == 0 )
 		return;
-	
+
 	chewing_cand_Enumerate( ctx );
 	while ( chewing_cand_hasNext( ctx ) ) {
 		if ( i > chewing_cand_ChoicePerPage( ctx ) )
@@ -249,7 +249,7 @@ void show_commit_string( int x, int y, ChewingContext *ctx )
 		for ( i = 0; i < pgo->nCommitStr; i++ ) {
 			mvaddstr( x, y, (const char *) pgo->commitStr[ i ].s );
 			y = ( y >= 54 ) ?
-				0 : 
+				0 :
 				( y + strlen( (const char *) pgo->commitStr[ i ].s ) - 3 < 0 ? y + 1 : y + 2 );
 			x = ( y == 0 ) ? ( x + 1 ) : x;
 		}
