@@ -29,7 +29,7 @@
 #include "plat_mmap.h"
 
 #define MAX_KBTYPE 13
-#define MAX_UTF8_SIZE 6
+#define MAX_UTF8_SIZE 4
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
 #define MAX_PHRASE_LEN 11
