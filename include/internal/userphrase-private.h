@@ -61,14 +61,14 @@ int UserUpdatePhrase( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[],
  * @brief Read the first phrase of the phone in user phrase database.
  *
  * @param phoneSeq[] Phone sequence
- * 
+ *
  * @return UserPhraseData, if it's not existing then return NULL.
  */
 UserPhraseData *UserGetPhraseFirst( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[] );
 
 /**
  * @brief Read the next phrase of the phone in user phrase database.
- * 
+ *
  * @param phoneSeq[] Phone sequence
  *
  * @return UserPhraseData, if it's not existing then return NULL.

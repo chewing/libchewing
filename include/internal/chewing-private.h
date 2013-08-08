@@ -101,7 +101,7 @@ typedef struct {
 		int len;
 		/** @brief phone id. */
 		int id;
-	} avail[ MAX_PHRASE_LEN ];  
+	} avail[ MAX_PHRASE_LEN ];
 	/** @brief total number of availble lengths. */
 	int nAvail;
 	/** @brief the current choosing available length. */
@@ -130,8 +130,8 @@ typedef struct {
 /** @brief entry of symbol table */
 typedef struct _SymbolEntry {
 	/** @brief  nSymnols is total number of symbols in this category.
-	 * If nSymbols = 0, category is treat as a symbol, 
-	 * which is a zero-terminated utf-8 string. 
+	 * If nSymbols = 0, category is treat as a symbol,
+	 * which is a zero-terminated utf-8 string.
 	 * In that case, symbols[] is unused and isn't allocated at all.
 	 */
 	int nSymbols;
@@ -224,7 +224,7 @@ typedef struct tag_ChewingData {
 	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
 	int nPrefer;
 	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN + 1 ];
-	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];   
+	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
@@ -252,7 +252,7 @@ typedef struct {
 	/** @brief indicate the method of showing sentence break. */
 	IntervalType dispInterval[ MAX_INTERVAL ]; /* from prefer, considering symbol */
 	int nDispInterval;
-	/** @brief indicate the break points going to display.*/ 
+	/** @brief indicate the break points going to display.*/
 	int dispBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/** @brief the string going to commit. */
 	wch_t commitStr[ MAX_PHONE_SEQ_LEN ];
@@ -264,7 +264,7 @@ typedef struct {
 	int selKey[ MAX_SELKEY ];
 	/** @brief return value. */
 	int keystrokeRtn;
-	int bShowMsg; 
+	int bShowMsg;
 	/** @brief user message. */
 	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
 	int showMsgLen;

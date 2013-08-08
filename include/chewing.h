@@ -24,7 +24,7 @@ extern "C" {
  *         phonetic IM (Input Method).</center>
  *
  * <h1>Overview</h1>
- * 
+ *
  * As far as we expect, input method (in fact, the way for text input and
  * output, especially in multi-lingual environments) implementations are
  * becoming more and more complex in system integrations.  The emerging

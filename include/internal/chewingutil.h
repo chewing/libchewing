@@ -45,8 +45,8 @@ int CountSymbols( ChewingData *pgdata, int to );
 int PhoneSeqCursor( ChewingData *pgdata );
 int ChewingIsChiAt( int cursor, ChewingData *pgdata );
 int ChewingKillChar(
-		ChewingData *pgdata, 
-		int chiSymbolCursorToKill, 
+		ChewingData *pgdata,
+		int chiSymbolCursorToKill,
 		int minus );
 void RemoveSelectElement( int i, ChewingData *pgdata );
 int IsPreferIntervalConnted( int cursor, ChewingData *pgdata );

@@ -287,7 +287,7 @@ CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
  * @brief Get current operating language mode: English / Chinese
  *
  * @param ctx
- * 
+ *
  * @return CHINESE_MODE or ENGLISH_MODE
  */
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
@@ -310,7 +310,7 @@ CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
  * @brief Get current shape mode of output symbols
  *
  * @param ctx
- * 
+ *
  * @return FULLSHAPE_MODE or HALFSHAPE_MODE
  */
 CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
