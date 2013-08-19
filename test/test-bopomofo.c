@@ -559,8 +559,7 @@ void test_Numlock_numeric_input()
 
 	for ( i = 0; i < ARRAY_SIZE( NUMLOCK_INPUT ); ++i ) {
 		type_keystroke_by_string( ctx, NUMLOCK_INPUT[i].token );
-		/* FIXME: Current buggy here */
-		/* ok_commit_buffer( ctx, NUMLOCK_INPUT[i].expected ); */
+		ok_commit_buffer( ctx, NUMLOCK_INPUT[i].expected );
 	}
 
 	chewing_delete( ctx );

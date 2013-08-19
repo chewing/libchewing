@@ -542,7 +542,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 
 	throwEnd = CountReleaseNum( pgdata );
 
-	pgo->nCommitStr = throwEnd;
+	pgo->nCommitStr += throwEnd;
 	if ( throwEnd ) {
 		/*
 		 * count how many chinese words in "chiSymbolBuf[ 0 .. (throwEnd - 1)]"
