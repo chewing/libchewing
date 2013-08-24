@@ -58,12 +58,8 @@ const char * const kb_type_str[] = {
 
 const char * const CHAR_FILES[] = {
 	CHAR_FILE,
-#ifdef USE_BINARY_DATA
 	CHAR_INDEX_BEGIN_FILE,
 	CHAR_INDEX_PHONE_FILE,
-#else
-	CHAR_INDEX_FILE,
-#endif
 	NULL,
 };
 

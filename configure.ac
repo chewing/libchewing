@@ -118,24 +118,6 @@ foo () {};
 ])
 AC_MSG_RESULT($has_visibility)
 
-dnl binary form of chewing data
-AC_ARG_ENABLE([binary-data],
-                [AS_HELP_STRING([--enable-binary-data],
-                                [Experimental use of binary data @<:@default=yes@:>@])],
-                [case "${enableval}" in
-                no)
-                binary_data="no"
-                ;;
-                *)
-                binary_data="yes"
-                ;;
-                esac],binary_data="yes")
-if test x$binary_data = "xyes"; then
-        AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
-fi
-AC_SUBST(ENABLE_BINARY_DATA)
-AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
-
 # Platform-dependent
 dnl What kind of system are we using?
 case $host_os in
@@ -193,7 +175,6 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable gcov             $ENABLE_GCOV
-  Enable binary data      $binary_data
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
 ])

@@ -35,12 +35,8 @@
 const char USAGE[] =
 	"usage: %s <phone.cin> <tsi.src>\n"
 	"This program creates the following new files:\n"
-#ifdef USE_BINARY_DATA
 	"* " CHAR_INDEX_PHONE_FILE "\n\tindex of word file (phone -> index)\n"
 	"* " CHAR_INDEX_BEGIN_FILE "\n\tindex of word file (index -> offset)\n"
-#else
-	"* " CHAR_INDEX_FILE "\n\tindex of word file\n"
-#endif
 	"* " CHAR_FILE "\n\tmain word file\n"
 	"* " PH_INDEX_FILE "\n\tindex of phrase file\n"
 	"* " DICT_FILE "\n\tmain phrase file\n"
@@ -230,39 +226,24 @@ void read_phone_cin(const char *filename)
 
 void write_word_data()
 {
-	FILE *chewing_file;
 	FILE *char_file;
-#ifdef USE_BINARY_DATA
 	FILE *index_begin_file;
 	FILE *index_phone_file;
 	unsigned char size;
-#else
-	FILE *index_file;
-#endif
 	int i;
 	uint16_t previous_phone;
 	int phone_num;
 	int pos;
 
 
-	chewing_file = fopen(CHEWING_DEFINITION_FILE, "w");
-#ifdef USE_BINARY_DATA
 	index_begin_file = fopen(CHAR_INDEX_BEGIN_FILE, "wb");
 	index_phone_file = fopen(CHAR_INDEX_PHONE_FILE, "wb");
 	char_file = fopen(CHAR_FILE, "wb");
 
-	if (!(chewing_file && index_begin_file && index_phone_file && char_file)) {
+	if (!(index_begin_file && index_phone_file && char_file)) {
 		fprintf(stderr, "Cannot open output file.\n");
 		exit(-1);
 	}
-#else
-	index_file = fopen(CHAR_INDEX_FILE, "w");
-	char_file = fopen(CHAR_FILE, "w");
-	if (!(chewing_file && index_file && char_file)) {
-		fprintf(stderr, "Cannot open output file.\n");
-		exit(-1);
-	}
-#endif
 
 	previous_phone = 0;
 	phone_num = 0;
@@ -270,41 +251,23 @@ void write_word_data()
 		if (word_data[i].phone != previous_phone) {
 			previous_phone = word_data[i].phone;
 			pos = ftell(char_file);
-#ifdef USE_BINARY_DATA
 			fwrite(&pos, sizeof(pos), 1, index_begin_file);
 			fwrite(&previous_phone, sizeof(previous_phone), 1, index_phone_file);
-#else
-			fprintf(index_file, "%hu %d\n", previous_phone, pos);
-#endif
 			phone_num++;
 		}
 
-#ifdef USE_BINARY_DATA
 		size = strlen(word_data[ i ].word);
 		fwrite(&size, sizeof(size), 1, char_file);
 		fwrite(word_data[i].word, size, 1, char_file);
-#else
-		fprintf(char_file, "%hu %s\t", word_data[i].phone, word_data[i].word);
-#endif
 	}
 	pos = ftell(char_file);
-#ifdef USE_BINARY_DATA
 	fwrite(&pos, sizeof(pos), 1, index_begin_file);
 	previous_phone = 0;
 	fwrite(&previous_phone, sizeof(previous_phone), 1, index_phone_file);
-#else
-	fprintf(index_file, "0 %d\n", pos);
-#endif
-	fprintf(chewing_file, "#define PHONE_NUM (%d)\n", phone_num);
 
 	fclose(char_file);
-#ifdef USE_BINARY_DATA
 	fclose(index_phone_file);
 	fclose(index_begin_file);
-#else
-	fclose(index_file);
-#endif
-	fclose(chewing_file);
 }
 
 void sort_word_for_dictionary()
@@ -518,17 +481,10 @@ void write_phrase_data()
 	int i;
 	int j;
 	int pos;
-#ifdef USE_BINARY_DATA
 	unsigned char size;
-#endif
 
-#ifdef USE_BINARY_DATA
 	dict_file = fopen(DICT_FILE, "wb");
 	ph_index_file = fopen(PH_INDEX_FILE, "wb");
-#else
-	dict_file = fopen(DICT_FILE, "w");
-	ph_index_file = fopen(PH_INDEX_FILE, "w");
-#endif
 	phoneid_file = fopen(PHONEID_FILE, "w");
 
 	if (!(dict_file && ph_index_file && phoneid_file)) {
@@ -539,24 +495,16 @@ void write_phrase_data()
 	for (i = 0; i < num_phrase_data - 1; ++i) {
 		if (i == 0 || compare_phone_in_phrase(i - 1, i)) {
 			pos = ftell(dict_file);
-#ifdef USE_BINARY_DATA
 			fwrite(&pos, sizeof(pos), 1, ph_index_file);
-#else
-			fprintf(ph_index_file, "%d\n", pos);
-#endif
+
 		}
-#ifdef USE_BINARY_DATA
 		size = strlen(phrase_data[i].phrase);
 		fwrite(&size, sizeof(size), 1, dict_file);
 		fwrite(phrase_data[i].phrase, size, 1, dict_file);
 		fwrite(&phrase_data[i].freq, sizeof(phrase_data[0].freq), 1, dict_file);
-#else
-		fprintf(dict_file, "%s %d\t", phrase_data[i].phrase, phrase_data[i].freq);
-#endif
 	}
 
 	pos = ftell(dict_file);
-#ifdef USE_BINARY_DATA
 	fwrite(&pos, sizeof(pos), 1, ph_index_file);
 	size = strlen(phrase_data[i].phrase);
 	fwrite(&size, sizeof(size), 1, dict_file);
@@ -564,12 +512,6 @@ void write_phrase_data()
 	fwrite(&phrase_data[i].freq, sizeof(phrase_data[0].freq), 1, dict_file);
 	pos = ftell(dict_file);
 	fwrite(&pos, sizeof(pos), 1, ph_index_file);
-#else
-	fprintf(ph_index_file, "%d\n", pos);
-	fprintf(dict_file, "%s %d", phrase_data[i].phrase, phrase_data[i].freq);
-	pos = ftell(dict_file);
-	fprintf(ph_index_file, "%d\n", pos);
-#endif
 
 	for (i = 0; i < num_phrase_data; ++i) {
 		if (i > 0 && !compare_phone_in_phrase(i - 1, i))

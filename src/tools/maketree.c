@@ -208,20 +208,10 @@ void BFS2()
 	NODE *pNode;
 	LISTNODE *pList;
 	TreeType tree = {0, 0, 0, 0};
-#ifdef USE_BINARY_DATA
 	FILE *output = fopen( PHONE_TREE_FILE, "wb" );
-#else
-	FILE *output = fopen( PHONE_TREE_FILE, "w" );
-#endif
-	FILE *config = fopen( CHEWING_DEFINITION_FILE, "a" );
 
 	if ( ! output ) {
 		fprintf( stderr, "Error opening file " PHONE_TREE_FILE " for output.\n" );
-		exit( 1 );
-	}
-
-	if ( ! config ) {
-		fprintf( stderr, "Error opening file " CHEWING_DEFINITION_FILE " for output.\n" );
 		exit( 1 );
 	}
 
@@ -248,18 +238,10 @@ void BFS2()
 			tree.child_begin = -1;
 			tree.child_end = -1;
 		}
-#ifdef USE_BINARY_DATA
 		fwrite( &tree, sizeof(TreeType), 1, output );
-#else
-		fprintf( output, "%hu %d %d %d\n",
-				tree.phone_id, tree.phrase_id,
-				tree.child_begin, tree.child_end );
-#endif
 		tree_size++;
 	}
-	fprintf( config, "#define TREE_SIZE (%d)\n", tree_size );
 	fclose( output );
-	fclose( config );
 }
 
 int main()

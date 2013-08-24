@@ -21,10 +21,6 @@
 #  include <stdint.h>
 #endif
 
-#ifndef USE_BINARY_DATA
-#include <stdio.h>
-#endif
-
 #include "global.h"
 #include "plat_mmap.h"
 
@@ -149,9 +145,7 @@ typedef struct _SymbolEntry {
 typedef struct {
 	TreeType *tree;
 	size_t tree_size;
-#ifdef USE_BINARY_DATA
 	plat_mmap tree_mmap;
-#endif
 
 	uint16_t *arrPhone;
 	int *char_begin;
@@ -159,13 +153,9 @@ typedef struct {
 	void *char_;
 	void *char_cur_pos;
 	int char_end_pos;
-#ifdef USE_BINARY_DATA
 	plat_mmap char_mmap;
 	plat_mmap char_begin_mmap;
 	plat_mmap char_phone_mmap;
-#else
-	FILE *charfile;
-#endif
 
 	int *dict_begin;
 	void *dict_cur_pos;
@@ -173,12 +163,8 @@ typedef struct {
 
 	void *dict;
 
-#ifdef USE_BINARY_DATA
 	plat_mmap dict_mmap;
 	plat_mmap index_mmap;
-#else
-	FILE *dictfile;
-#endif
 
 
 	int chewing_lifetime;

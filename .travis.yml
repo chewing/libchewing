@@ -5,8 +5,6 @@ env: BUILD=autotools
 
 matrix:
   include:
-    - compiler: clang
-      env: BUILD=autotools CONFIGURE_OPTION=--disable-binary-data
     - compiler: gcc
       env: BUILD=cmake
     - compiler: clang

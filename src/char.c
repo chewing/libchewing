@@ -16,37 +16,14 @@
  * @file char.c
  * @brief word data file
  */
-#if ! defined(USE_BINARY_DATA)
-#include <assert.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "global-private.h"
-#include "chewing-definition.h"
 #include "char-private.h"
 #include "private.h"
 #include "plat_mmap.h"
-
-#if ! defined(USE_BINARY_DATA)
-static char *fgettab( char *buf, int maxlen, FILE *fp )
-{
-	int i;
-
-	for ( i = 0; i < maxlen; i++ ) {
-		buf[ i ] = (char) fgetc( fp );
-		if ( feof( fp ) )
-			break;
-		if ( buf[ i ] == '\t' )
-			break;
-	}
-	if ( feof( fp ) )
-		return 0;
-	buf[ i ] = '\0';
-	return buf;
-}
-#endif
 
 static int CompUint16( const uint16_t *pa, const uint16_t *pb )
 {
@@ -55,7 +32,6 @@ static int CompUint16( const uint16_t *pa, const uint16_t *pb )
 
 void TerminateChar( ChewingData *pgdata )
 {
-#ifdef USE_BINARY_DATA
 	pgdata->static_data.arrPhone = NULL;
 	plat_mmap_close( &pgdata->static_data.char_phone_mmap );
 
@@ -66,18 +42,10 @@ void TerminateChar( ChewingData *pgdata )
 	plat_mmap_close( &pgdata->static_data.char_mmap );
 
 	pgdata->static_data.phone_num = 0;
-#else
-	if ( pgdata->static_data.charfile )
-		fclose( pgdata->static_data.charfile );
-	free( pgdata->static_data.char_begin );
-	free( pgdata->static_data.arrPhone );
-	pgdata->static_data.phone_num = 0;
-#endif
 }
 
 int InitChar( ChewingData *pgdata , const char * prefix )
 {
-#ifdef USE_BINARY_DATA
 	char filename[ PATH_MAX ];
 	size_t len;
 	size_t offset;
@@ -135,64 +103,16 @@ int InitChar( ChewingData *pgdata , const char * prefix )
 		return -1;
 
 	return 0;
-#else
-	char filename[ PATH_MAX ];
-	int len;
-	int i;
-	FILE *indexfile = NULL;
-
-	pgdata->static_data.phone_num = PHONE_NUM;
-
-	pgdata->static_data.arrPhone = ALC( uint16_t, pgdata->static_data.phone_num );
-	if ( !pgdata->static_data.arrPhone )
-	    return -1;
-
-	pgdata->static_data.char_begin = ALC( int, pgdata->static_data.phone_num );
-	if ( !pgdata->static_data.char_begin )
-	    return -1;
-
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	pgdata->static_data.charfile = fopen( filename, "r" );
-	if ( !pgdata->static_data.charfile )
-		return -1;
-
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	indexfile = fopen( filename, "r" );
-	if ( !indexfile )
-		return -1;
-
-	for ( i = 0; i < pgdata->static_data.phone_num; ++i )
-		fscanf( indexfile, "%hu %d", &pgdata->static_data.arrPhone[i], &pgdata->static_data.char_begin[i] );
-
-	fclose( indexfile );
-	return 0;
-#endif
 }
 
 static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 {
-#ifndef USE_BINARY_DATA
-	char buf[ 1000 ];
-	uint16_t sh;
-
-	fgettab( buf, 1000, pgdata->static_data.charfile );
-	/* only read 6 bytes to wrd_ptr->word avoid buffer overflow */
-	sscanf( buf, "%hu %6[^ ]", &sh, wrd_ptr->word );
-	assert( wrd_ptr->word[0] != '\0' );
-#else
 	unsigned char size;
 	size = *(unsigned char *) pgdata->static_data.char_cur_pos;
 	pgdata->static_data.char_cur_pos = (unsigned char*) pgdata->static_data.char_cur_pos + sizeof(unsigned char);
 	memcpy( wrd_ptr->word, pgdata->static_data.char_cur_pos, size );
 	pgdata->static_data.char_cur_pos = (unsigned char*) pgdata->static_data.char_cur_pos + size;
 	wrd_ptr->word[ size ] = '\0';
-#endif
 }
 
 int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
@@ -205,11 +125,7 @@ int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
 	if ( ! pinx )
 		return 0;
 
-#ifndef USE_BINARY_DATA
-	fseek( pgdata->static_data.charfile, pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone ], SEEK_SET );
-#else
 	pgdata->static_data.char_cur_pos = (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone ];
-#endif
 	pgdata->static_data.char_end_pos = pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone + 1 ];
 	Str2Word( pgdata, wrd_ptr );
 	return 1;
@@ -217,13 +133,8 @@ int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
 
 int GetCharNext( ChewingData *pgdata, Word *wrd_ptr )
 {
-#ifndef USE_BINARY_DATA
-	if ( ftell( pgdata->static_data.charfile ) >= pgdata->static_data.char_end_pos )
-		return 0;
-#else
 	if ( (unsigned char*)pgdata->static_data.char_cur_pos >= (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_end_pos )
 		return 0;
-#endif
 	Str2Word( pgdata, wrd_ptr );
 	return 1;
 }

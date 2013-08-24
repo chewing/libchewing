@@ -45,12 +45,6 @@ endif()
 # automake compatibility
 add_definitions(-DHAVE_CONFIG_H=1)
 
-# binary data representation
-option(USE_BINARY_DATA "Use binary representation for internal data manipulation" true)
-if (USE_BINARY_DATA)
-	add_definitions(-DUSE_BINARY_DATA=1)
-endif()
-
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
@@ -118,19 +112,9 @@ set(ALL_DATA
 	${DATA_BIN_DIR}/fonetree.dat
 	${DATA_BIN_DIR}/ph_index.dat
 	${DATA_BIN_DIR}/us_freq.dat
+	${DATA_BIN_DIR}/ch_index_begin.dat
+	${DATA_BIN_DIR}/ch_index_phone.dat
 )
-
-if (USE_BINARY_DATA)
-	list(APPEND ALL_DATA
-		${DATA_BIN_DIR}/ch_index_begin.dat
-		${DATA_BIN_DIR}/ch_index_phone.dat
-	)
-else()
-	list(APPEND ALL_DATA
-		${DATA_BIN_DIR}/ch_index.dat
-	)
-endif()
-
 
 set(ALL_INC
 	${INC_DIR}/chewing.h
@@ -191,12 +175,9 @@ set_target_properties(${ALL_TOOLS} PROPERTIES
 add_custom_command(
 	OUTPUT
 		${ALL_DATA}
-		${PROJECT_BINARY_DIR}/chewing-definition.h
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
 	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
 	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/maketree ${DATA_BIN_DIR}/phoneid.dic
-	COMMAND ${CMAKE_COMMAND} -E copy ${DATA_BIN_DIR}/chewing-definition.h ${PROJECT_BINARY_DIR}/chewing-definition.h
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${DATA_BIN_DIR}/chewing-definition.h ${DATA_BIN_DIR}/phoneid.dic
 	DEPENDS
 		${ALL_TOOLS}
 		${DATA_SRC_DIR}/phone.cin
@@ -314,8 +295,6 @@ add_library(chewing OBJECT
 	${SRC_DIR}/userphrase.c
 	${SRC_DIR}/zuin.c
 )
-add_custom_target(chewing-definition DEPENDS ${PROJECT_BINARY_DIR}/chewing-definition.h)
-add_dependencies(chewing chewing-definition)
 set_target_properties(chewing PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
