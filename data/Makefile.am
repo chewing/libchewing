@@ -8,7 +8,6 @@ datas = \
 	ch_index_phone.dat \
 	$(NULL)
 static_tables = pinyin.tab swkb.dat symbols.dat
-generated_header = $(top_builddir)/src/chewing-definition.h
 
 dist_noinst_DATA = \
 	NOTE \
@@ -29,9 +28,6 @@ all: $(datas)
 $(datas): gendata_stamp
 
 gendata_stamp: phone.cin tsi.src
-	-if test -f $(generated_header); then \
-		echo "chewing-definition.h exists."; \
-	fi
 	$(MAKE) gendata && \
 	touch $@
 
@@ -39,6 +35,5 @@ gendata:
 	env LC_ALL=C $(tooldir)/sort$(EXEEXT) $(top_srcdir)/data/phone.cin $(top_srcdir)/data/tsi.src
 	$(tooldir)/maketree$(EXEEXT)
 	-rm -f phoneid.dic
-	-mv -f chewing-definition.h $(generated_header)
 
-CLEANFILES = $(datas) gendata_stamp $(generated_header)
+CLEANFILES = $(datas) gendata_stamp
