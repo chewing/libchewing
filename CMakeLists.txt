@@ -68,7 +68,7 @@ test_big_endian(WORDS_BIGENDIAN)
 
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/config.h.in
-	${PROJECT_BINARY_DIR}/config.h
+	${PROJECT_BINARY_DIR}/include/config.h
 )
 
 configure_file(
@@ -83,7 +83,7 @@ configure_file(
 )
 
 include_directories(
-	${PROJECT_BINARY_DIR}
+	${PROJECT_BINARY_DIR}/include
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/include/internal
 	${PROJECT_SOURCE_DIR}/src
