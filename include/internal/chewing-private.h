@@ -165,8 +165,6 @@ typedef struct {
 	plat_mmap tree_mmap;
 	int tree_cur_pos, tree_end_pos;
 
-	int char_cur_pos, char_end_pos;
-
 	const char *dict;
 	plat_mmap dict_mmap;
 

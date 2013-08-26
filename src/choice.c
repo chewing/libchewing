@@ -23,7 +23,6 @@
 #include "chewing-utf8-util.h"
 #include "global.h"
 #include "dict-private.h"
-#include "char-private.h"
 #include "chewingutil.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
@@ -170,22 +169,22 @@ static int ChoiceTheSame( ChoiceInfo *pci, const char *str, int len )
 
 static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t phone )
 {
-	Word tempWord;
+	Phrase tempWord;
 	int len;
 	if ( GetCharFirst( pgdata, &tempWord, phone ) ) {
 		do {
-			len = ueBytesFromChar( tempWord.word[ 0 ] );
-			if ( ChoiceTheSame( pci, tempWord.word,
+			len = ueBytesFromChar( tempWord.phrase[ 0 ] );
+			if ( ChoiceTheSame( pci, tempWord.phrase,
 					    len) )
 				continue;
 			assert( pci->nTotalChoice < MAX_CHOICE );
 			memcpy(
 				pci->totalChoiceStr[ pci->nTotalChoice ],
-				tempWord.word, len );
+				tempWord.phrase, len );
 			pci->totalChoiceStr[ pci->nTotalChoice ]
 					   [ len ] = '\0';
 			pci->nTotalChoice++;
-		} while ( GetCharNext( pgdata, &tempWord ) );
+		} while ( GetPhraseNext( pgdata, &tempWord ) );
 	}
 }
 

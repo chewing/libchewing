@@ -30,7 +30,6 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "dict-private.h"
-#include "char-private.h"
 #include "hash-private.h"
 #include "tree-private.h"
 #include "pinyin-private.h"
@@ -160,10 +159,6 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	ret = InitChar( ctx->data, path );
-	if ( ret )
-		goto error;
-
 	ret = find_path_by_files(
 		search_path, DICT_FILES, path, sizeof( path ) );
 	if ( ret )
@@ -290,7 +285,6 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminateHash( ctx->data );
 			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
-			TerminateChar( ctx->data );
 			free( ctx->data );
 		}
 

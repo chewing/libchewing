@@ -266,7 +266,6 @@ add_custom_target(data ALL DEPENDS ${ALL_DATA})
 # library
 add_library(chewing OBJECT
 	${ALL_INC}
-	${INC_DIR}/internal/char-private.h
 	${INC_DIR}/internal/chewing-private.h
 	${INC_DIR}/internal/chewingutil.h
 	${INC_DIR}/internal/choice-private.h
@@ -278,7 +277,6 @@ add_library(chewing OBJECT
 	${INC_DIR}/internal/userphrase-private.h
 	${INC_DIR}/internal/zuin-private.h
 
-	${SRC_DIR}/char.c
 	${SRC_DIR}/chewingio.c
 	${SRC_DIR}/chewingutil.c
 	${SRC_DIR}/choice.c

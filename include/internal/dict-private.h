@@ -19,6 +19,7 @@
 
 #define PHONE_PHRASE_NUM (162244)
 
+int GetCharFirst( ChewingData *, Phrase *, uint16_t );
 int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id );
 int GetPhraseNext ( ChewingData *pgdata, Phrase *phr_ptr );
 int InitDict( ChewingData *pgdata, const char * prefix );

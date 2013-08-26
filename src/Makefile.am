@@ -12,7 +12,6 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
-	char.c \
 	chewingio.c \
 	chewingutil.c \
 	choice.c \
