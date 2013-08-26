@@ -1,5 +1,10 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Fix chewing_zuin_Check wrong return value
+* Add `make check' in cmake build
+* Change MAX_UTF8_SIZE to 4
+* Fix numlock key cannot output number
+* Remove text data support
 
 
 What's New in libchewing 0.3.5 (Jul 28, 2013)
