@@ -145,10 +145,20 @@ endif()
 
 # static target
 # We need to copy static data to binary tree when using out of tree build.
-set(ALL_STATIC_DATA pinyin.tab swkb.dat symbols.dat)
+set(ALL_STATIC_DATA
+	${DATA_BIN_DIR}/pinyin.tab
+	${DATA_BIN_DIR}/swkb.dat
+	${DATA_BIN_DIR}/symbols.dat
+)
+
 foreach(target ${ALL_STATIC_DATA})
-	add_custom_target(${target} ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/${target} ${DATA_BIN_DIR}/${target}
+	string(REPLACE ${DATA_BIN_DIR} ${DATA_SRC_DIR} source ${target})
+	add_custom_command(
+		OUTPUT
+			${target}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source} ${target}
+		DEPENDS
+			${source}
 	)
 endforeach()
 
@@ -232,6 +242,7 @@ endif()
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
+	add_dependencies(${target} data)
 	add_dependencies(check ${target})
 endforeach()
 
@@ -257,7 +268,7 @@ if (${CURSES_FOUND})
 endif()
 
 # data
-add_custom_target(data ALL DEPENDS ${ALL_DATA})
+add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
 
 # library
 add_library(chewing OBJECT
