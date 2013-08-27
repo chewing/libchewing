@@ -21,7 +21,7 @@
 
 int GetCharFirst( ChewingData *, Phrase *, uint16_t );
 int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id );
-int GetPhraseNext ( ChewingData *pgdata, Phrase *phr_ptr );
+int GetVocabNext ( ChewingData *pgdata, Phrase *phr_ptr );
 int InitDict( ChewingData *pgdata, const char * prefix );
 void TerminateDict( ChewingData *pgdata );
 

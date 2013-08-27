@@ -62,10 +62,10 @@ static int CompTreeType( const void *a, const void *b )
 }
 
 /*
- * The function gets string of phrase from dictionary and its frequency from
+ * The function gets string of vocabulary from dictionary and its frequency from
  * tree index mmap, and stores them into buffer given by phr_ptr.
  */
-static void GetPhraseFromDict( ChewingData *pgdata, Phrase *phr_ptr )
+static void GetVocabFromDict( ChewingData *pgdata, Phrase *phr_ptr )
 {
 	const TreeType *pLeaf = &pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ];
 
@@ -87,7 +87,7 @@ int GetCharFirst( ChewingData *pgdata, Phrase *wrd_ptr, uint16_t key )
 		return 0;
 	pgdata->static_data.tree_cur_pos = pinx->child.begin;
 	pgdata->static_data.tree_end_pos = pinx->child.end;
-	GetPhraseFromDict( pgdata, wrd_ptr );
+	GetVocabFromDict( pgdata, wrd_ptr );
 	return 1;
 }
 
@@ -102,16 +102,15 @@ int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phrase_parent_id )
 
 	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree[ phrase_parent_id ].child.begin;
 	pgdata->static_data.tree_end_pos = pgdata->static_data.tree[ phrase_parent_id ].child.end;
-	GetPhraseFromDict( pgdata, phr_ptr );
+	GetVocabFromDict( pgdata, phr_ptr );
 	return 1;
 }
 
-int GetPhraseNext( ChewingData *pgdata, Phrase *phr_ptr )
+int GetVocabNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
 	if ( pgdata->static_data.tree_cur_pos >= pgdata->static_data.tree_end_pos
 		|| pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ].key != 0)
 		return 0;
-
-	GetPhraseFromDict( pgdata, phr_ptr );
+	GetVocabFromDict( pgdata, phr_ptr );
 	return 1;
 }

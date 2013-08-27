@@ -184,7 +184,7 @@ static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t
 			pci->totalChoiceStr[ pci->nTotalChoice ]
 					   [ len ] = '\0';
 			pci->nTotalChoice++;
-		} while ( GetPhraseNext( pgdata, &tempWord ) );
+		} while ( GetVocabNext( pgdata, &tempWord ) );
 	}
 }
 
@@ -306,7 +306,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 				ueStrNCpy( pci->totalChoiceStr[ pci->nTotalChoice ],
 						tempPhrase.phrase, len, 1);
 				pci->nTotalChoice++;
-			} while( GetPhraseNext( pgdata, &tempPhrase ) );
+			} while( GetVocabNext( pgdata, &tempPhrase ) );
 		}
 
 		memcpy( userPhoneSeq, &phoneSeq[ cursor ], sizeof( uint16_t ) * len );
