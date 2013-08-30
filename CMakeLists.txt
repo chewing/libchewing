@@ -143,7 +143,6 @@ if (MAKEINFO)
 endif()
 
 
-# static target
 # We need to copy static data to binary tree when using out of tree build.
 set(ALL_STATIC_DATA
 	${DATA_BIN_DIR}/pinyin.tab
@@ -151,16 +150,11 @@ set(ALL_STATIC_DATA
 	${DATA_BIN_DIR}/symbols.dat
 )
 
-foreach(target ${ALL_STATIC_DATA})
-	string(REPLACE ${DATA_BIN_DIR} ${DATA_SRC_DIR} source ${target})
-	add_custom_command(
-		OUTPUT
-			${target}
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source} ${target}
-		DEPENDS
-			${source}
-	)
-endforeach()
+add_custom_target(all_static_data
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/pinyin.tab ${DATA_BIN_DIR}/pinyin.tab
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/swkb.dat ${DATA_BIN_DIR}/swkb.dat
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/symbols.dat ${DATA_BIN_DIR}/symbols.dat
+)
 
 set(ALL_STATIC_TEST stresstest.py)
 foreach(target ${ALL_STATIC_TEST})
@@ -188,6 +182,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
 	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
 	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/maketree ${DATA_BIN_DIR}/phoneid.dic
+	COMMAND ${CMAKE_COMMAND} -E remove -f ${DATA_BIN_DIR}/phoneid.dic
 	DEPENDS
 		${ALL_TOOLS}
 		${DATA_SRC_DIR}/phone.cin
@@ -242,7 +237,7 @@ endif()
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
-	add_dependencies(${target} data)
+	add_dependencies(${target} data all_static_data)
 	add_dependencies(check ${target})
 endforeach()
 
@@ -268,7 +263,7 @@ if (${CURSES_FOUND})
 endif()
 
 # data
-add_custom_target(data ALL DEPENDS ${ALL_DATA} ${ALL_STATIC_DATA})
+add_custom_target(data ALL DEPENDS ${ALL_DATA})
 
 # library
 add_library(chewing OBJECT
@@ -343,6 +338,7 @@ add_library(common OBJECT
 
 # install
 install(FILES ${ALL_DATA} DESTINATION ${INSTALL_DATA_DIR})
+install(FILES ${ALL_STATIC_DATA} DESTINATION ${INSTALL_DATA_DIR})
 install(FILES ${ALL_INC} DESTINATION ${INSTALL_INC_DIR})
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
 	DESTINATION ${INSTALL_LIB_DIR}/pkgconfig)
