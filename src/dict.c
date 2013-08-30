@@ -26,7 +26,6 @@
 
 void TerminateDict( ChewingData *pgdata )
 {
-	plat_mmap_close( &pgdata->static_data.index_mmap );
 	plat_mmap_close( &pgdata->static_data.dict_mmap );
 }
 
@@ -53,50 +52,43 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	if ( !pgdata->static_data.dict )
 		return -1;
 
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, PH_INDEX_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	plat_mmap_set_invalid( &pgdata->static_data.index_mmap );
-	file_size = plat_mmap_create( &pgdata->static_data.index_mmap, filename, FLAG_ATTRIBUTE_READ );
-	if ( file_size <= 0 )
-		return -1;
-
-	offset = 0;
-	csize = file_size;
-	pgdata->static_data.dict_begin = plat_mmap_set_view( &pgdata->static_data.index_mmap, &offset, &csize );
-	if ( !pgdata->static_data.dict_begin )
-		return -1;
-
 	return 0;
 }
 
-static void Str2Phrase( ChewingData *pgdata, Phrase *phr_ptr )
+/*
+ * The function gets string of phrase from dictionary and its frequency from
+ * tree index mmap, and stores them into buffer given by phr_ptr.
+ */
+static void GetPhraseFromDict( ChewingData *pgdata, Phrase *phr_ptr )
 {
-	unsigned char size;
-	size = *(unsigned char *) pgdata->static_data.dict_cur_pos;
-	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(unsigned char);
-	memcpy( phr_ptr->phrase, pgdata->static_data.dict_cur_pos, size );
-	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + size;
-	phr_ptr->freq = GetInt32(pgdata->static_data.dict_cur_pos);
-	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict_cur_pos + sizeof(int);
-	phr_ptr->phrase[ size ] = '\0';
+	const TreeType *pLeaf = &pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ];
+
+	strcpy(phr_ptr->phrase, pgdata->static_data.dict + pLeaf->phrase.pos);
+	phr_ptr->freq = pLeaf->phrase.freq;
+	pgdata->static_data.tree_cur_pos++;
 }
 
-int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phone_phr_id )
+/*
+ * Given an index of parent whose children are phrase leaves (phrase_parent_id),
+ * the function initializes reading position (tree_cur_pos) and ending position
+ * (tree_end_pos), and fetches the first phrase into phr_ptr.
+ */
+int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phrase_parent_id )
 {
-	assert( ( 0 <= phone_phr_id ) && ( phone_phr_id < PHONE_PHRASE_NUM ) );
+	assert( ( 0 <= phrase_parent_id ) && ( phrase_parent_id * sizeof(TreeType) < pgdata->static_data.tree_size ) );
 
-	pgdata->static_data.dict_cur_pos = (unsigned char *)pgdata->static_data.dict + pgdata->static_data.dict_begin[ phone_phr_id ];
-	pgdata->static_data.dict_end_pos = pgdata->static_data.dict_begin[ phone_phr_id + 1 ];
-	Str2Phrase( pgdata, phr_ptr );
+	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree[ phrase_parent_id ].child.begin;
+	pgdata->static_data.tree_end_pos = pgdata->static_data.tree[ phrase_parent_id ].child.end;
+	GetPhraseFromDict( pgdata, phr_ptr );
 	return 1;
 }
 
 int GetPhraseNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
-	if ( (unsigned char *)pgdata->static_data.dict_cur_pos >= (unsigned char *)pgdata->static_data.dict + pgdata->static_data.dict_end_pos )
+	if ( pgdata->static_data.tree_cur_pos >= pgdata->static_data.tree_end_pos
+		|| pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ].key != 0)
 		return 0;
-	Str2Phrase( pgdata, phr_ptr );
+
+	GetPhraseFromDict( pgdata, phr_ptr );
 	return 1;
 }

@@ -25,115 +25,55 @@
 #include "private.h"
 #include "plat_mmap.h"
 
-static int CompUint16( const uint16_t *pa, const uint16_t *pb )
+static int CompTreeType( const void *pa, const void *pb )
 {
-	return ( (*pa) - (*pb) );
+	return ( ((TreeType*)pa)->key - ((TreeType*)pb)->key );
 }
 
 void TerminateChar( ChewingData *pgdata )
 {
-	pgdata->static_data.arrPhone = NULL;
-	plat_mmap_close( &pgdata->static_data.char_phone_mmap );
-
-	pgdata->static_data.char_begin = NULL;
-	plat_mmap_close( &pgdata->static_data.char_begin_mmap );
-
-	pgdata->static_data.char_ = NULL;
-	plat_mmap_close( &pgdata->static_data.char_mmap );
-
-	pgdata->static_data.phone_num = 0;
 }
 
 int InitChar( ChewingData *pgdata , const char * prefix )
 {
-	char filename[ PATH_MAX ];
-	size_t len;
-	size_t offset;
-	size_t file_size;
-	size_t csize;
-
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	plat_mmap_set_invalid( &pgdata->static_data.char_mmap );
-	file_size = plat_mmap_create( &pgdata->static_data.char_mmap, filename, FLAG_ATTRIBUTE_READ );
-	if ( file_size <= 0 )
-		return -1;
-
-	csize = file_size;
-	offset = 0;
-	pgdata->static_data.char_ = plat_mmap_set_view( &pgdata->static_data.char_mmap, &offset, &csize );
-	if ( !pgdata->static_data.char_ )
-		return -1;
-
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_BEGIN_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	plat_mmap_set_invalid( &pgdata->static_data.char_begin_mmap );
-	file_size = plat_mmap_create( &pgdata->static_data.char_begin_mmap, filename, FLAG_ATTRIBUTE_READ );
-	if ( file_size <= 0 )
-		return -1;
-
-	pgdata->static_data.phone_num = file_size / sizeof( int );
-
-	offset = 0;
-	csize = file_size;
-	pgdata->static_data.char_begin = plat_mmap_set_view( &pgdata->static_data.char_begin_mmap, &offset, &csize );
-	if ( !pgdata->static_data.char_begin )
-		return -1;
-
-	len = snprintf( filename, sizeof( filename ), "%s" PLAT_SEPARATOR "%s", prefix, CHAR_INDEX_PHONE_FILE );
-	if ( len + 1 > sizeof( filename ) )
-		return -1;
-
-	plat_mmap_set_invalid( &pgdata->static_data.char_phone_mmap );
-	file_size = plat_mmap_create( &pgdata->static_data.char_phone_mmap, filename, FLAG_ATTRIBUTE_READ );
-	if ( file_size <= 0 )
-		return -1;
-
-	if ( pgdata->static_data.phone_num != file_size / sizeof( uint16_t ))
-		return -1;
-
-	offset = 0;
-	csize = file_size;
-	pgdata->static_data.arrPhone = plat_mmap_set_view( &pgdata->static_data.char_phone_mmap, &offset, &csize );
-	if ( !pgdata->static_data.arrPhone )
-		return -1;
-
 	return 0;
 }
 
+/*
+ * The function gets string of a Chinese character from dictionary, and stores
+ * it into buffer given by wrd_ptr.
+ */
 static void Str2Word( ChewingData *pgdata, Word *wrd_ptr )
 {
-	unsigned char size;
-	size = *(unsigned char *) pgdata->static_data.char_cur_pos;
-	pgdata->static_data.char_cur_pos = (unsigned char*) pgdata->static_data.char_cur_pos + sizeof(unsigned char);
-	memcpy( wrd_ptr->word, pgdata->static_data.char_cur_pos, size );
-	pgdata->static_data.char_cur_pos = (unsigned char*) pgdata->static_data.char_cur_pos + size;
-	wrd_ptr->word[ size ] = '\0';
+	const TreeType *pLeaf = &pgdata->static_data.tree[ pgdata->static_data.char_cur_pos ];
+
+	strcpy(wrd_ptr->word, pgdata->static_data.dict + pLeaf->phrase.pos);
+	pgdata->static_data.char_cur_pos++;
 }
 
-int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t phoneid )
+int GetCharFirst( ChewingData *pgdata, Word *wrd_ptr, uint16_t key )
 {
-	uint16_t *pinx;
+	const TreeType *pinx;
+	TreeType keyNode = {0};
 
-	pinx = (uint16_t *) bsearch(
-		&phoneid, pgdata->static_data.arrPhone, pgdata->static_data.phone_num,
-		sizeof( uint16_t ), (CompFuncType) CompUint16 );
+	keyNode.key = key;
+	pinx = (const TreeType*) bsearch(
+		&keyNode, pgdata->static_data.tree + pgdata->static_data.tree[0].child.begin,
+		pgdata->static_data.tree[0].child.end - pgdata->static_data.tree[0].child.begin,
+		sizeof( TreeType ), CompTreeType );
 	if ( ! pinx )
 		return 0;
 
-	pgdata->static_data.char_cur_pos = (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone ];
-	pgdata->static_data.char_end_pos = pgdata->static_data.char_begin[ pinx - pgdata->static_data.arrPhone + 1 ];
+	pgdata->static_data.char_cur_pos = pinx->child.begin;
+	pgdata->static_data.char_end_pos = pinx->child.end;
 	Str2Word( pgdata, wrd_ptr );
 	return 1;
 }
 
 int GetCharNext( ChewingData *pgdata, Word *wrd_ptr )
 {
-	if ( (unsigned char*)pgdata->static_data.char_cur_pos >= (unsigned char*)pgdata->static_data.char_ + pgdata->static_data.char_end_pos )
+	if ( pgdata->static_data.char_cur_pos >= pgdata->static_data.char_end_pos
+		|| pgdata->static_data.tree[ pgdata->static_data.char_cur_pos ].key != 0)
 		return 0;
 	Str2Word( pgdata, wrd_ptr );
 	return 1;

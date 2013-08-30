@@ -64,10 +64,27 @@ typedef union {
 	uint16_t wch;
 } wch_t;
 
+/*
+ * This structure may represent both internal nodes and leaf nodes of a phrase
+ * tree. Two kinds are distinguished by whether key is 0. For an internal node,
+ * child.begin and child.end give a list of children in the position
+ * [child.begin, child.end). For a leaf node, phrase.pos offers the position
+ * of the phrase in system dictionary, and phrase.freq offers frequency of this
+ * phrase using a specific input method (may be bopomofo or non-phone). Note
+ * that key in root represents the number of total elements(nodes) in the tree.
+ */
 typedef struct {
-	uint16_t phone_id;
-	int phrase_id;
-	int child_begin, child_end;
+	uint32_t key;
+	union {
+		struct {
+			uint32_t begin;
+			uint32_t end;
+		} child;
+		struct {
+			uint32_t pos;
+			uint32_t freq;
+		} phrase;
+	};
 } TreeType;
 
 typedef struct {
@@ -146,26 +163,12 @@ typedef struct {
 	TreeType *tree;
 	size_t tree_size;
 	plat_mmap tree_mmap;
+	int tree_cur_pos, tree_end_pos;
 
-	uint16_t *arrPhone;
-	int *char_begin;
-	size_t phone_num;
-	void *char_;
-	void *char_cur_pos;
-	int char_end_pos;
-	plat_mmap char_mmap;
-	plat_mmap char_begin_mmap;
-	plat_mmap char_phone_mmap;
-
-	int *dict_begin;
-	void *dict_cur_pos;
-	int dict_end_pos;
+	int char_cur_pos, char_end_pos;
 
 	void *dict;
-
 	plat_mmap dict_mmap;
-	plat_mmap index_mmap;
-
 
 	int chewing_lifetime;
 

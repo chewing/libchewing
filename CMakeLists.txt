@@ -108,12 +108,8 @@ set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
 
 set(ALL_DATA
-	${DATA_BIN_DIR}/dict.dat
-	${DATA_BIN_DIR}/fonetree.dat
-	${DATA_BIN_DIR}/ph_index.dat
-	${DATA_BIN_DIR}/us_freq.dat
-	${DATA_BIN_DIR}/ch_index_begin.dat
-	${DATA_BIN_DIR}/ch_index_phone.dat
+	${DATA_BIN_DIR}/dictionary.dat
+	${DATA_BIN_DIR}/index_tree.dat
 )
 
 set(ALL_INC
@@ -164,9 +160,8 @@ foreach(target ${ALL_STATIC_TEST})
 endforeach()
 
 # tools
-set(ALL_TOOLS sort maketree)
-add_executable(sort ${TOOLS_SRC_DIR}/sort.c $<TARGET_OBJECTS:common>)
-add_executable(maketree ${TOOLS_SRC_DIR}/maketree.c)
+set(ALL_TOOLS init_database)
+add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
 set_target_properties(${ALL_TOOLS} PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
 		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
@@ -180,9 +175,7 @@ add_custom_command(
 	OUTPUT
 		${ALL_DATA}
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/maketree ${DATA_BIN_DIR}/phoneid.dic
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${DATA_BIN_DIR}/phoneid.dic
+	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/init_database ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
 	DEPENDS
 		${ALL_TOOLS}
 		${DATA_SRC_DIR}/phone.cin

@@ -241,30 +241,36 @@ static int CheckChoose(
 
 /** @brief search for the phrases have the same pronunciation.*/
 /* if phoneSeq[begin] ~ phoneSeq[end] is a phrase, then add an interval
- * from (begin) to (end+1) */
+ * from (begin) to (end+1)
+ */
 int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq )
 {
-	int child, tree_p, i;
+	int child;
+	int tree_p = 0;
+	int i;
 
-	tree_p = 0;
 	for ( i = begin; i <= end; i++ ) {
 		for (
-			child = pgdata->static_data.tree[ tree_p ].child_begin;
-			child != -1 && child <= pgdata->static_data.tree[ tree_p ].child_end;
+			child = pgdata->static_data.tree[ tree_p ].child.begin;
+			child < pgdata->static_data.tree[ tree_p ].child.end;
 			child++ ) {
 
 			assert(0 <= child && child * sizeof(TreeType) < pgdata->static_data.tree_size);
-			if ( pgdata->static_data.tree[ child ].phone_id == phoneSeq[ i ] )
+			if ( pgdata->static_data.tree[ child ].key == phoneSeq[ i ] )
 				break;
 		}
 		/* if not found any word then fail. */
-		if ( child == -1 || child > pgdata->static_data.tree[ tree_p ].child_end )
+		if ( child >= pgdata->static_data.tree[ tree_p ].child.end )
 			return -1;
 		else {
 			tree_p = child;
 		}
 	}
-	return pgdata->static_data.tree[ tree_p ].phrase_id;
+	/* If its child has no key value of 0, then it is only a "half" phrase. */
+	child = pgdata->static_data.tree[ tree_p ].child.begin;
+	if( pgdata->static_data.tree[ child ].key != 0)
+		return -1;
+	return tree_p;
 }
 
 static void AddInterval(
