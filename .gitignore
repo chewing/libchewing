@@ -32,7 +32,6 @@ libtool
 .deps
 .libs
 
-data/checkdata_stamp
 data/gendata_stamp
 
 include/config.h
@@ -41,7 +40,9 @@ include/stamp-h1
 
 # cmake generated files
 config.h
-chewing-definition.h
+/libchewing.*
+/libtesthelper.a
+/Testing
 
 # test suite
 test/genkeystroke
