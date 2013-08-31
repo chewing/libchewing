@@ -57,7 +57,7 @@ test_mmap_CPPFLAGS = -DTESTDATA="\"$(srcdir)/default-test.txt\""
 
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke
-genkeystroke_SOURCES = gen_keystroke.c
+genkeystroke_SOURCES = genkeystroke.c
 genkeystroke_LDADD = $(LDADD) @CURSES_LIB@
 else
 TEXT_UI_BIN=

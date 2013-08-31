@@ -214,7 +214,7 @@ set(ALL_TESTTOOLS
 )
 
 if(${CURSES_FOUND})
-	set(ALL_TESTTOOLS ${ALL_TESTTOOLS} gen_keystroke)
+	set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
 endif()
 
 enable_testing()
@@ -259,7 +259,7 @@ foreach(target ${ALL_TESTS})
 endforeach()
 
 if (${CURSES_FOUND})
-	target_link_libraries(gen_keystroke ${CURSES_LIBRARIES})
+	target_link_libraries(genkeystroke ${CURSES_LIBRARIES})
 endif()
 
 # data
