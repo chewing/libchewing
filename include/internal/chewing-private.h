@@ -23,6 +23,7 @@
 
 #include "global.h"
 #include "plat_mmap.h"
+#include "sqlite3.h"
 
 #define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
@@ -170,6 +171,7 @@ typedef struct {
 	int chewing_lifetime;
 
 	char hashfilename[ 200 ];
+	sqlite3 *db;
 	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 
 	unsigned int n_symbol_entry;

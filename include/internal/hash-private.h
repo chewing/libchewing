@@ -24,6 +24,8 @@
 #define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "uhash.dat"
 
+#define CHEWING_CREATE_TABLE	"CREATE TABLE userphrase_v1 (phrase TEXT, phone BLOB);"
+
 typedef struct tag_HASH_ITEM {
 	int item_index;
 	UserPhraseData data;

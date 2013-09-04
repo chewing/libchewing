@@ -82,14 +82,6 @@ configure_file(
 	${PROJECT_BINARY_DIR}/doc/version.texi
 )
 
-include_directories(
-	${PROJECT_BINARY_DIR}/include
-	${PROJECT_SOURCE_DIR}/include
-	${PROJECT_SOURCE_DIR}/include/internal
-	${PROJECT_SOURCE_DIR}/src
-	${PROJECT_SOURCE_DIR}/src/porting_layer/include
-)
-
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
 set(TOOLS_SRC_DIR ${PROJECT_SOURCE_DIR}/src/tools)
@@ -106,6 +98,17 @@ set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
+
+set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
+
+include_directories(
+	${PROJECT_BINARY_DIR}/include
+	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}/include/internal
+	${PROJECT_SOURCE_DIR}/src
+	${PROJECT_SOURCE_DIR}/src/porting_layer/include
+	${SQLITE3_SRC_DIR}
+)
 
 set(ALL_DATA
 	${DATA_BIN_DIR}/dict.dat
@@ -246,6 +249,7 @@ add_library(testhelper STATIC
 	$<TARGET_OBJECTS:chewing>
 	$<TARGET_OBJECTS:common>
 )
+target_link_libraries(testhelper sqlite3_static)
 set_target_properties(testhelper PROPERTIES
 	COMPILE_DEFINITIONS
 		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
@@ -255,6 +259,8 @@ set_target_properties(${ALL_TESTS} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 	COMPILE_DEFINITIONS
 		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
 )
@@ -294,12 +300,14 @@ add_library(chewing OBJECT
 	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/porting_layer/include/plat_mmap.h
 	${SRC_DIR}/porting_layer/include/plat_path.h
+	${SRC_DIR}/porting_layer/include/plat_sqlite3.h
 	${SRC_DIR}/porting_layer/include/plat_types.h
 	${SRC_DIR}/porting_layer/include/sys/plat_posix.h
 	${SRC_DIR}/porting_layer/include/sys/plat_windows.h
 	${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
 	${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
 	${SRC_DIR}/porting_layer/src/plat_path.c
+	${SRC_DIR}/porting_layer/src/plat_sqlite3.c
 	${SRC_DIR}/private.h
 	${SRC_DIR}/tree.c
 	${SRC_DIR}/userphrase.c
@@ -314,6 +322,7 @@ if (NOT MSVC)
 		$<TARGET_OBJECTS:chewing>
 		$<TARGET_OBJECTS:common>
 	)
+	target_link_libraries(chewing_shared sqlite3_static)
 	list(APPEND LIBS chewing_shared)
 endif()
 
@@ -321,6 +330,7 @@ add_library(chewing_static STATIC
 	$<TARGET_OBJECTS:chewing>
 	$<TARGET_OBJECTS:common>
 )
+target_link_libraries(chewing_static sqlite3_static)
 list(APPEND LIBS chewing_static)
 
 set_target_properties(${LIBS} PROPERTIES
@@ -338,6 +348,25 @@ add_library(common OBJECT
 
 	${SRC_DIR}/common/chewing-utf8-util.c
 	${SRC_DIR}/common/key2pho.c
+)
+
+find_package (Threads)
+add_library(sqlite3_static STATIC
+	${SQLITE3_SRC_DIR}/sqlite3.c
+	${SQLITE3_SRC_DIR}/sqlite3.h
+)
+target_link_libraries(sqlite3_static ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(sqlite3
+	${SQLITE3_SRC_DIR}/shell.c
+)
+target_link_libraries(sqlite3 sqlite3_static)
+set_target_properties(sqlite3 PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 )
 
 # install

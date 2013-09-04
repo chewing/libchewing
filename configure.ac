@@ -73,6 +73,18 @@ AC_C_BIGENDIAN
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strtok_r asprintf])
 
+# for sqlite
+AC_SEARCH_LIBS([dlopen], [dl dld],
+  [AS_IF([test x$ac_cv_search_dlopen != x"none required"],
+         [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_dlopen"])],
+  [AC_MSG_ERROR([unable to find the dlopen() function])])
+
+# for sqlite
+AX_PTHREAD([
+  AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
+  AM_LDFLAGS="$AM_LDFLAGS $PTHREAD_LIBS"
+], [AC_MSG_ERROR([cannot find pthread])])
+
 # plat_mmap_posix
 AC_FUNC_MMAP
 
@@ -87,7 +99,7 @@ CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
-AM_CFLAGS="$CFLAGS -Wall"
+AM_CFLAGS="$AM_CFLAGS -Wall $CFLAGS"
 AS_IF([test x$ac_cv_func_asprintf == xyes],
       [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
 
@@ -145,6 +157,7 @@ esac
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
+AC_SUBST(AM_LDFLAGS)
 
 AC_CONFIG_LINKS([
         data/pinyin.tab:data/pinyin.tab
@@ -177,4 +190,5 @@ Build options:
   Enable gcov             $ENABLE_GCOV
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
+  Default LDFLAGS         $AM_LDFLAGS
 ])

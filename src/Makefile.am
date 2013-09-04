@@ -3,6 +3,7 @@ INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
+	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
 	$(NULL)
 
@@ -23,6 +24,7 @@ libchewing_la_SOURCES = \
 	zuin.c \
 	pinyin.c \
 	mod_aux.c \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
 	$(NULL)
 
 libchewing_la_LIBADD = \

@@ -12,12 +12,15 @@
  * of this file.
  */
 
+#include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "plat_sqlite3.h"
 
 #include "chewing-private.h"
 #include "chewing-utf8-util.h"
@@ -458,6 +461,7 @@ static void FreeHashItem( HASH_ITEM *aItem )
 
 void TerminateHash( ChewingData *pgdata )
 {
+	int ret;
 	HASH_ITEM *pItem;
 	int i;
 	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
@@ -465,6 +469,8 @@ void TerminateHash( ChewingData *pgdata )
 		DEBUG_CHECKPOINT();
 		FreeHashItem( pItem );
 	}
+	ret = sqlite3_close( pgdata->static_data.db );
+	assert( SQLITE_OK == ret );
 }
 
 void setHashFileName( ChewingData *pgdata )
@@ -497,6 +503,9 @@ int InitHash( ChewingData *pgdata )
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
+
+	pgdata->static_data.db = GetSQLiteInstance();
+	if ( !pgdata->static_data.db ) return 0; // FIXME: Use -1 as error;
 
 	setHashFileName( pgdata );
 	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
