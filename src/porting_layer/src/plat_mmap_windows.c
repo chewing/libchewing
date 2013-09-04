@@ -43,7 +43,6 @@ int plat_mmap_is_valid( plat_mmap *handle )
 size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr )
 {
 	LARGE_INTEGER sizet;
-
 	/* check error(s) */
 	if ( ! handle )
 		return 0;
@@ -53,7 +52,7 @@ size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr
 
 	if ( FLAG_ATTRIBUTE_READ & fileAccessAttr ) {
 #ifdef _WIN32_WCE
-		handle->fd_file = CreateFileForMapping(
+		handle->fd_file = CreateFileForMappingA(
 				file,
 				GENERIC_READ,
 				FILE_SHARE_READ,
@@ -62,7 +61,7 @@ size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr
 				FILE_ATTRIBUTE_NORMAL,
 				NULL );
 #else /* !_WIN32_WCE */
-		handle->fd_file = CreateFile(
+		handle->fd_file = CreateFileA(
 				file,
 				GENERIC_READ,
 				FILE_SHARE_READ,
@@ -76,7 +75,7 @@ size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr
 			return 0;
 
 		sizet.LowPart = GetFileSize( handle->fd_file, (LPDWORD) &sizet.HighPart );
-		handle->fd_map = CreateFileMapping(
+		handle->fd_map = CreateFileMappingA(
 				handle->fd_file,
 				NULL,
 				PAGE_READONLY,
@@ -86,7 +85,7 @@ size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr
 	}
 	else {
 #ifdef _WIN32_WCE
-		handle->fd_file = CreateFileForMapping(
+		handle->fd_file = CreateFileForMappingA(
 				file,
 				GENERIC_WRITE | GENERIC_READ,
 				FILE_SHARE_WRITE,
@@ -95,7 +94,7 @@ size_t plat_mmap_create( plat_mmap *handle, const char *file, int fileAccessAttr
 				FILE_ATTRIBUTE_NORMAL,
 				NULL);
 #else /* !_WIN32_WCE */
-		handle->fd_file = CreateFile(
+		handle->fd_file = CreateFileA(
 				file,
 				GENERIC_WRITE | GENERIC_READ,
 				FILE_SHARE_WRITE,
