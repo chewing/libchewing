@@ -181,6 +181,7 @@ static int CheckUserChoose(
 			}
 		}
 	} while ( ( pUserPhraseData = UserGetPhraseNext( pgdata, new_phoneSeq ) ) != NULL );
+	UserGetPhraseEnd( pgdata, new_phoneSeq );
 
 	if ( p_phr->freq != -1 )
 		return 1;
@@ -334,6 +335,7 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 					&p_phrase, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect ) ) {
 				puserphrase = p_phrase;
 			}
+			UserGetPhraseEnd( pgdata, new_phoneSeq );
 
 			/* check dict phrase */
 			pho_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );

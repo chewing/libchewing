@@ -72,6 +72,7 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 			maxFreq = uphrase->userfreq;
 		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
 	}
+	UserGetPhraseEnd( pgdata, phoneSeq );
 
 	return maxFreq;
 }
@@ -166,3 +167,6 @@ UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16_t phoneSeq[
 	return &( pgdata->prev_userphrase->data );
 }
 
+void UserGetPhraseEnd( ChewingData *pgdata, const uint16_t phoneSeq[] )
+{
+}
