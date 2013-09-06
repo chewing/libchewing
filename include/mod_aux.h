@@ -67,6 +67,7 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx );
 CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx );
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx );
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx );
+CHEWING_API char *chewing_cand_String_by_index( ChewingContext *ctx, int index );
 /*@}*/
 
 

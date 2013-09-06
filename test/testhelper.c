@@ -344,7 +344,13 @@ void internal_ok_candidate( const char *file, int line,
 	for ( i = 0; i < cand_len; ++i ) {
 		internal_ok( file, line, chewing_cand_hasNext( ctx ), __func__,
 			"shall has next candidate" );
+
 		buf = chewing_cand_String( ctx );
+		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
+			"candndate `%s' shall be `%s'", buf, cand[i] );
+		chewing_free( buf );
+
+		buf = chewing_cand_String_by_index( ctx, i );
 		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
 			"candndate `%s' shall be `%s'", buf, cand[i] );
 		chewing_free( buf );

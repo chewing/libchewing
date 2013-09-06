@@ -559,6 +559,16 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
+@deftypefun char* chewing_cand_String_by_index (ChewingContext *@var{ctx}, int @var{index})
+This function returns the candidate string by its index. The range of
+@var{index} shall be @code{0} @leq{} @var{index} <
+@code{chewing_cand_TotalChoice()} This function returns @code{NULL} when no
+memory.
+
+The return value @emph{must} be freed by the @code{chewing_free}
+function.
+@end deftypefun
+
 @deftypefun int chewing_cand_CheckDone (ChewingContext *@var{ctx})
 @quotation Deprecated
 The @code{chewing_cand_TotalPage} function could achieve the same
