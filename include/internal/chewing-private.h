@@ -24,6 +24,7 @@
 #include "global.h"
 #include "plat_mmap.h"
 #include "sqlite3.h"
+#include "userphrase-private.h"
 
 #define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
@@ -172,6 +173,7 @@ typedef struct {
 
 	char hashfilename[ 200 ];
 	sqlite3 *db;
+	sqlite3_stmt *userphrase_stmt;
 	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 
 	unsigned int n_symbol_entry;
@@ -221,6 +223,8 @@ typedef struct tag_ChewingData {
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
 	struct tag_HASH_ITEM *prev_userphrase;
+
+	UserPhraseData userphrase_data;
 	ChewingStaticData static_data;
 	void (*logger)( void *data, int level, const char *fmt, ... );
 	void *loggerData;

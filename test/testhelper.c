@@ -448,5 +448,5 @@ int exit_status()
 
 void clean_userphrase()
 {
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	remove( TEST_HASH_DIR PLAT_SEPARATOR "chewing.db" );
 }

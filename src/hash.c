@@ -504,8 +504,22 @@ int InitHash( ChewingData *pgdata )
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
+	int ret;
+	sqlite3_stmt *stmt;
+
 	pgdata->static_data.db = GetSQLiteInstance();
 	if ( !pgdata->static_data.db ) return 0; // FIXME: Use -1 as error;
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CREATE_TABLE, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) return 0; // FIXME: Use -1 as error;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) return 0; // FIXME: Use -1 as error;
+
+	ret = sqlite3_finalize( stmt );
+	if ( ret != SQLITE_OK ) return 0; // FIXME: Use -1 as error;
+
+	pgdata->static_data.userphrase_stmt = NULL;
 
 	setHashFileName( pgdata );
 	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
