@@ -510,7 +510,7 @@ int InitHash( ChewingData *pgdata )
 	pgdata->static_data.db = GetSQLiteInstance();
 	if ( !pgdata->static_data.db ) return 0; // FIXME: Use -1 as error;
 
-	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CREATE_TABLE, -1, &stmt, NULL );
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_CREATE_TABLE_USERPHRASE, -1, &stmt, NULL );
 	if ( ret != SQLITE_OK ) return 0; // FIXME: Use -1 as error;
 
 	ret = sqlite3_step( stmt );
