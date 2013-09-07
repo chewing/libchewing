@@ -120,6 +120,29 @@ static int GetPhoneLen( const uint16_t phoneSeq[] )
 	return len;
 }
 
+static int GetCurrentLiftTime( ChewingData *pgdata )
+{
+	sqlite3_stmt *stmt = NULL;
+	int ret;
+	int lifttime = 0;
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db,
+		CHEWING_DB_CONFIG_SELECT, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_SEL_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_ROW ) goto end;
+
+	lifttime = sqlite3_column_int( stmt, CHEWING_DB_CONFIG_SEL_VALUE );
+
+end:
+	sqlite3_finalize( stmt );
+	return lifttime;
+}
+
 int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	int ret;
@@ -146,6 +169,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 		wordSeq, -1, SQLITE_STATIC );
 	if ( ret != SQLITE_OK ) goto error;
 
+	recent_time = GetCurrentLiftTime( pgdata );
 	ret = sqlite3_step( stmt );
 	if ( ret == SQLITE_ROW ) {
 		action = USER_UPDATE_MODIFY;
@@ -156,16 +180,13 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 			sqlite3_column_int( pgdata->static_data.userphrase_stmt, CHEWING_DB_SEL_INDEX_USER_FREQ ),
 			sqlite3_column_int( pgdata->static_data.userphrase_stmt, CHEWING_DB_SEL_INDEX_MAX_FREQ ),
 			orig_freq,
-			pgdata->static_data.chewing_lifetime -
-				sqlite3_column_int( pgdata->static_data.userphrase_stmt, CHEWING_DB_SEL_INDEX_TIME ) );
-		recent_time = pgdata->static_data.chewing_lifetime;
+			recent_time - sqlite3_column_int( pgdata->static_data.userphrase_stmt, CHEWING_DB_SEL_INDEX_TIME ) );
 	} else {
 		action = USER_UPDATE_INSERT;
 
 		orig_freq = LoadOriginalFreq( pgdata, phoneSeq, wordSeq, len );
 		max_freq = LoadMaxFreq( pgdata, phoneSeq, len );
 		user_freq = orig_freq;
-		recent_time = pgdata->static_data.chewing_lifetime;
 	}
 	sqlite3_finalize( stmt );
 	stmt = NULL;
@@ -259,4 +280,20 @@ void UserGetPhraseEnd( ChewingData *pgdata, const uint16_t phoneSeq[] )
 	assert( pgdata->static_data.userphrase_stmt );
 	sqlite3_finalize( pgdata->static_data.userphrase_stmt );
 	pgdata->static_data.userphrase_stmt = NULL;
+}
+
+void IncreaseLifeTime( ChewingData *pgdata )
+{
+	sqlite3_stmt *stmt = 0;
+	int ret;
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db,
+		CHEWING_DB_CONFIG_LIFETIME_INCREASE, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) goto end;
+
+end:
+	sqlite3_finalize( stmt );
 }

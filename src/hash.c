@@ -507,6 +507,8 @@ int InitHash( ChewingData *pgdata )
 	int ret;
 	sqlite3_stmt *stmt = NULL;
 
+	// FIXME: Normalize lifttime when necessary.
+
 	pgdata->static_data.db = GetSQLiteInstance();
 	if ( !pgdata->static_data.db ) goto error;
 

@@ -77,4 +77,6 @@ UserPhraseData *UserGetPhraseNext( struct tag_ChewingData *pgdata, const uint16_
 
 void UserGetPhraseEnd( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[] );
 
+void IncreaseLifeTime( struct tag_ChewingData *pgdata );
+
 #endif
