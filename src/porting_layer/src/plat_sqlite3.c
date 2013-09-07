@@ -61,8 +61,14 @@ static int GetSQLitePath( wchar_t *wbuf, size_t wlen )
 	// FIXME: Use SHGetKnownFolderPath instead?
 	ret = GetEnvironmentVariableW( L"APPDATA", wbuf, wlen );
 	if ( ret ) {
-		wcscat_s( wbuf, wlen, CHEWING_DB_PATH L"\\" CHEWING_DB_NAME );
-		return 0;
+		wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_PATH );
+
+		ret = CreateDirectoryW( wbuf, 0 );
+		if ( ret != 0 || GetLastError() == ERROR_ALREADY_EXISTS ) {
+			wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_NAME );
+			return 0;
+		}
+
 	}
 	return -1;
 }
