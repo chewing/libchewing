@@ -168,13 +168,8 @@ typedef struct {
 	plat_mmap dict_mmap;
 	plat_mmap index_mmap;
 
-
-	int chewing_lifetime;
-
-	char hashfilename[ 200 ];
 	sqlite3 *db;
 	sqlite3_stmt *userphrase_stmt;
-	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
