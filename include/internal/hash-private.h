@@ -36,7 +36,6 @@
 	");"
 
 #define CHEWING_DB_COLUMN "time, user_freq, max_freq, orig_freq, phone, phrase"
-
 /*
  * The SELECT index starts from 0, but the INSERT/REPLACE index starts from 1,
  * so we cannot use the same index for both SELECT & INSERT/REPLACE.
@@ -63,6 +62,30 @@
 
 #define CHEWING_DB_UPSERT "INSERT OR REPLACE INTO " CHEWING_TABLE_USERPHRASE \
 	"(" CHEWING_DB_COLUMN ") VALUES (?1,?2,?3,?4,?5,?6)"
+
+
+#define CHEWING_TABLE_CONFIG	"config_v1"
+#define CHEWING_DB_CONFIG_CREATE_TABLE "CREATE TABLE IF NOT EXISTS " CHEWING_TABLE_CONFIG " ("\
+	"id INTEGER," \
+	"value INTEGER," \
+	"PRIMARY KEY (id)" \
+	");"
+
+#define CHEWING_DB_CONFIG_ID_LIFETIME	(0)
+
+#define CHEWING_DB_CONFIG_SEL_VALUE	(1)
+
+#define CHEWING_DB_CONFIG_INS_ID	(1)
+#define CHEWING_DB_CONFIG_INS_VALUE	(2)
+
+#define CHEWING_DB_CONFIG_SELECT "SELECT " CHEWING_TABLE_CONFIG " FROM (value) " \
+	"WHERE id = ?1"
+
+#define CHEWING_DB_CONFIG_INSERT "INSERT OR IGNORE INTO " CHEWING_TABLE_CONFIG \
+	"(id, value) VALUES (?1, ?2)"
+
+#define CHEWING_DB_CONFIG_UPSERT "INSERT OR REPLACE INTO " CHEWING_TABLE_CONFIG \
+	"(id, value) VALUES (?1, ?2)"
 
 typedef struct tag_HASH_ITEM {
 	int item_index;

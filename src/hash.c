@@ -505,21 +505,44 @@ int InitHash( ChewingData *pgdata )
 	char *dump, *seekdump;
 
 	int ret;
-	sqlite3_stmt *stmt;
+	sqlite3_stmt *stmt = NULL;
 
 	pgdata->static_data.db = GetSQLiteInstance();
-	if ( !pgdata->static_data.db ) return 0; // FIXME: Use -1 as error;
+	if ( !pgdata->static_data.db ) goto error;
 
 	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_CREATE_TABLE_USERPHRASE, -1, &stmt, NULL );
-	if ( ret != SQLITE_OK ) return 0; // FIXME: Use -1 as error;
+	if ( ret != SQLITE_OK ) goto error;
 
 	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_DONE ) return 0; // FIXME: Use -1 as error;
+	if ( ret != SQLITE_DONE ) goto error;
 
 	ret = sqlite3_finalize( stmt );
-	if ( ret != SQLITE_OK ) return 0; // FIXME: Use -1 as error;
+	if ( ret != SQLITE_OK ) goto error;
 
-	pgdata->static_data.userphrase_stmt = NULL;
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_CREATE_TABLE, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) goto error;
+
+	ret = sqlite3_finalize( stmt );
+	if ( ret != SQLITE_OK ) goto error;
+
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_INSERT, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_INS_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_INS_VALUE, 0 );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) goto error;
+
+	ret = sqlite3_finalize( stmt );
+	if ( ret != SQLITE_OK ) goto error;
 
 	setHashFileName( pgdata );
 	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
@@ -595,5 +618,9 @@ open_hash_file:
 		pgdata->static_data.chewing_lifetime -= oldest;
 	}
 	return 1;
+error:
+	sqlite3_finalize( stmt );
+	// FIXME: Use -1 as error
+	return 0;
 }
 
