@@ -19,6 +19,7 @@
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
 #include "key2pho-private.h"
+#include "plat_path.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;
@@ -439,4 +440,9 @@ end:
 int exit_status()
 {
 	return test_run == test_ok ? 0 : -1;
+}
+
+void clean_userphrase()
+{
+	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
 }

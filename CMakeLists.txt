@@ -246,6 +246,10 @@ add_library(testhelper STATIC
 	$<TARGET_OBJECTS:chewing>
 	$<TARGET_OBJECTS:common>
 )
+set_target_properties(testhelper PROPERTIES
+	COMPILE_DEFINITIONS
+		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
+)
 
 set_target_properties(${ALL_TESTS} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}

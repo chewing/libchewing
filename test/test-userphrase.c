@@ -24,7 +24,6 @@ void test_ShiftLeft_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<SL>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
@@ -39,7 +38,7 @@ void test_ShiftLeft_add_userphrase()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -83,7 +82,7 @@ void test_ShiftRight_add_userphrase()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -115,7 +114,7 @@ void test_CtrlNum_add_phrase_right()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -142,7 +141,7 @@ void test_CtrlNum_add_phrase_left()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -168,7 +167,7 @@ void test_CtrlNum_add_phrase_right_symbol_in_between()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -194,7 +193,7 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
 	int cursor;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -227,7 +226,7 @@ void test_userphrase_auto_learn()
 	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -251,7 +250,7 @@ void test_userphrase_auto_learn_hardcode_break()
 	static const char bopomofo[] = "\xE3\x84\x89\xE3\x84\x9C\xCB\x99 \xE3\x84\x89\xE3\x84\x9C\xCB\x99" /* ㄉㄜ˙ ㄉㄜ˙ */;
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();

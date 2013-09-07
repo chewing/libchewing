@@ -42,7 +42,7 @@ void test_select_candidate_no_phrase_choice_rearward()
 
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -83,7 +83,7 @@ void test_select_candidate_phrase_choice_rearward()
 	};
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -110,7 +110,7 @@ void test_select_candidate_4_bytes_utf8()
 {
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();

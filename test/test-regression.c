@@ -76,7 +76,7 @@ void test_libchewing_issue_30()
 	ChewingContext *ctx;
 	int cursor;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
@@ -97,7 +97,7 @@ void test_libchewing_data_issue_1()
 	const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走*/ };
 	ChewingContext *ctx;
 
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	clean_userphrase();
 
 
 	ctx = chewing_new();
