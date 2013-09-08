@@ -193,7 +193,7 @@ static int CheckUserChoose(
  * their intersections are the same */
 static int CheckChoose(
 		ChewingData *pgdata,
-		int phrase_parent_id, int from, int to, Phrase **pp_phr,
+		const TreeType *phrase_parent, int from, int to, Phrase **pp_phr,
 		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ],
 		IntervalType selectInterval[], int nSelect )
 {
@@ -207,13 +207,13 @@ static int CheckChoose(
 	*pp_phr = NULL;
 
 	/* if there exist one phrase satisfied all selectStr then return 1, else return 0. */
-	GetPhraseFirst( pgdata, phrase, phrase_parent_id );
+	GetPhraseFirst( pgdata, phrase, phrase_parent );
 	do {
 		for ( chno = 0; chno < nSelect; chno++ ) {
 			c = selectInterval[ chno ];
 
 			if ( IsContain( inte, c ) ) {
-				/* find a phrase under phrase_parent_id where the text contains
+				/* find a phrase under phrase_parent where the text contains
 				 * 'selectStr[chno]' test if not ok then return 0, if ok
 				 * then continue to test
 				 */
@@ -238,38 +238,44 @@ static int CheckChoose(
 	return 0;
 }
 
+static int CompTreeType( const void *a, const void *b )
+{
+	return ( ((TreeType*)a)->key - ((TreeType*)b)->key );
+}
+
 /** @brief search for the phrases have the same pronunciation.*/
 /* if phoneSeq[begin] ~ phoneSeq[end] is a phrase, then add an interval
  * from (begin) to (end+1)
  */
-int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq )
+const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq )
 {
-	int child;
-	int tree_p = 0;
+	TreeType target;
+	const TreeType *tree_p = pgdata->static_data.tree;
 	int i;
 
 	for ( i = begin; i <= end; i++ ) {
-		for (
-			child = pgdata->static_data.tree[ tree_p ].child.begin;
-			child < pgdata->static_data.tree[ tree_p ].child.end;
-			child++ ) {
+		target.key = phoneSeq[i];
+		tree_p = (const TreeType*)bsearch(&target, pgdata->static_data.tree + tree_p->child.begin,
+						  tree_p->child.end - tree_p->child.begin, sizeof(TreeType), CompTreeType);
 
-			assert(0 <= child && child * sizeof(TreeType) < pgdata->static_data.tree_size);
-			if ( pgdata->static_data.tree[ child ].key == phoneSeq[ i ] )
-				break;
-		}
 		/* if not found any word then fail. */
-		if ( child >= pgdata->static_data.tree[ tree_p ].child.end )
-			return -1;
-		else {
-			tree_p = child;
-		}
+		if( !tree_p )
+			return NULL;
 	}
+
 	/* If its child has no key value of 0, then it is only a "half" phrase. */
-	child = pgdata->static_data.tree[ tree_p ].child.begin;
-	if( pgdata->static_data.tree[ child ].key != 0)
-		return -1;
+	if( pgdata->static_data.tree[ tree_p->child.begin ].key != 0)
+		return NULL;
 	return tree_p;
+}
+
+/**
+ * @brief get child range of a given parent node.
+ */
+void TreeChildRange( ChewingData *pgdata, const TreeType *parent )
+{
+	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree + parent->child.begin;
+	pgdata->static_data.tree_end_pos = pgdata->static_data.tree + parent->child.end;
 }
 
 static void AddInterval(
@@ -313,7 +319,8 @@ static void internal_release_Phrase( UsedPhraseMode mode, Phrase *pUser, Phrase 
 
 static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 {
-	int end, begin, phrase_parent_id;
+	int end, begin;
+	const TreeType *phrase_parent;
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -340,12 +347,12 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 			}
 
 			/* check dict phrase */
-			phrase_parent_id = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
+			phrase_parent = TreeFindPhrase( pgdata, begin, end, pgdata->phoneSeq );
 			if (
-				( phrase_parent_id != -1 ) &&
+				phrase_parent &&
 				CheckChoose(
 					pgdata,
-					phrase_parent_id, begin, end + 1,
+					phrase_parent, begin, end + 1,
 					&p_phrase, pgdata->selectStr,
 					pgdata->selectInterval, pgdata->nSelect ) ) {
 				pdictphrase = p_phrase;

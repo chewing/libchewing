@@ -113,7 +113,7 @@ typedef struct {
 	struct {
 		int len;
 		/** @brief phone id. */
-		int id;
+		const TreeType *id;
 	} avail[ MAX_PHRASE_LEN ];
 	/** @brief total number of availble lengths. */
 	int nAvail;
@@ -163,7 +163,7 @@ typedef struct {
 	const TreeType *tree;
 	size_t tree_size;
 	plat_mmap tree_mmap;
-	int tree_cur_pos, tree_end_pos;
+	const TreeType *tree_cur_pos, *tree_end_pos;
 
 	const char *dict;
 	plat_mmap dict_mmap;

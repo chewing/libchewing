@@ -26,13 +26,13 @@
 /* load the orginal frequency from the static dict */
 static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
 {
-	int pho_id;
+	const TreeType *tree_pos;
 	int retval;
 	Phrase *phrase = ALC( Phrase, 1 );
 
-	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
-	if ( pho_id != -1 ) {
-		GetPhraseFirst( pgdata, phrase, pho_id );
+	tree_pos = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
+	if ( tree_pos ) {
+		GetPhraseFirst( pgdata, phrase, tree_pos );
 		do {
 			/* find the same phrase */
 			if ( ! strcmp(
@@ -52,14 +52,14 @@ static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], con
 /* find the maximum frequency of the same phrase */
 static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len )
 {
-	int pho_id;
+	const TreeType *tree_pos;
 	Phrase *phrase = ALC( Phrase, 1 );
 	int maxFreq = FREQ_INIT_VALUE;
 	UserPhraseData *uphrase;
 
-	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
-	if ( pho_id != -1 ) {
-		GetPhraseFirst( pgdata, phrase, pho_id );
+	tree_pos = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
+	if ( tree_pos ) {
+		GetPhraseFirst( pgdata, phrase, tree_pos );
 		do {
 			if ( phrase->freq > maxFreq )
 				maxFreq = phrase->freq;

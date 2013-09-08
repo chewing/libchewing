@@ -24,6 +24,8 @@
 #include "plat_mmap.h"
 #include "dict-private.h"
 #include "memory-private.h"
+#include "tree-private.h"
+#include "private.h"
 
 void TerminateDict( ChewingData *pgdata )
 {
@@ -56,37 +58,25 @@ int InitDict( ChewingData *pgdata, const char *prefix )
 	return 0;
 }
 
-static int CompTreeType( const void *a, const void *b )
-{
-	return ( ((TreeType*)a)->key - ((TreeType*)b)->key );
-}
-
 /*
  * The function gets string of vocabulary from dictionary and its frequency from
  * tree index mmap, and stores them into buffer given by phr_ptr.
  */
 static void GetVocabFromDict( ChewingData *pgdata, Phrase *phr_ptr )
 {
-	const TreeType *pLeaf = &pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ];
-
-	strcpy(phr_ptr->phrase, pgdata->static_data.dict + pLeaf->phrase.pos);
-	phr_ptr->freq = pLeaf->phrase.freq;
+	strcpy(phr_ptr->phrase, pgdata->static_data.dict + pgdata->static_data.tree_cur_pos->phrase.pos);
+	phr_ptr->freq = pgdata->static_data.tree_cur_pos->phrase.freq;
 	pgdata->static_data.tree_cur_pos++;
 }
 
 int GetCharFirst( ChewingData *pgdata, Phrase *wrd_ptr, uint16_t key )
 {
-	const TreeType *pinx;
-	TreeType keyNode = {0};
-	keyNode.key = key;
-	pinx = (const TreeType*) bsearch(
-		&keyNode, pgdata->static_data.tree + pgdata->static_data.tree[0].child.begin,
-		pgdata->static_data.tree[0].child.end - pgdata->static_data.tree[0].child.begin,
-	sizeof( TreeType ), CompTreeType );
+	/* &key serves as an array whose begin and end are both 0. */
+	const TreeType *pinx = TreeFindPhrase( pgdata, 0, 0, &key );
+
 	if ( ! pinx )
 		return 0;
-	pgdata->static_data.tree_cur_pos = pinx->child.begin;
-	pgdata->static_data.tree_end_pos = pinx->child.end;
+	TreeChildRange( pgdata, pinx );
 	GetVocabFromDict( pgdata, wrd_ptr );
 	return 1;
 }
@@ -96,12 +86,11 @@ int GetCharFirst( ChewingData *pgdata, Phrase *wrd_ptr, uint16_t key )
  * the function initializes reading position (tree_cur_pos) and ending position
  * (tree_end_pos), and fetches the first phrase into phr_ptr.
  */
-int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phrase_parent_id )
+int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, const TreeType *phrase_parent )
 {
-	assert( ( 0 <= phrase_parent_id ) && ( phrase_parent_id * sizeof(TreeType) < pgdata->static_data.tree_size ) );
+	assert( phrase_parent );
 
-	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree[ phrase_parent_id ].child.begin;
-	pgdata->static_data.tree_end_pos = pgdata->static_data.tree[ phrase_parent_id ].child.end;
+	TreeChildRange( pgdata, phrase_parent );
 	GetVocabFromDict( pgdata, phr_ptr );
 	return 1;
 }
@@ -109,7 +98,7 @@ int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, int phrase_parent_id )
 int GetVocabNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
 	if ( pgdata->static_data.tree_cur_pos >= pgdata->static_data.tree_end_pos
-		|| pgdata->static_data.tree[ pgdata->static_data.tree_cur_pos ].key != 0)
+		|| pgdata->static_data.tree_cur_pos->key != 0)
 		return 0;
 	GetVocabFromDict( pgdata, phr_ptr );
 	return 1;
