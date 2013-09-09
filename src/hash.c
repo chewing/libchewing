@@ -60,15 +60,10 @@ void TerminateHash( ChewingData *pgdata )
 	assert( SQLITE_OK == ret );
 }
 
-int InitHash( ChewingData *pgdata )
+static int CreateTable( ChewingData *pgdata )
 {
 	int ret;
 	sqlite3_stmt *stmt = NULL;
-
-	// FIXME: Normalize lifttime when necessary.
-
-	pgdata->static_data.db = GetSQLiteInstance();
-	if ( !pgdata->static_data.db ) goto error;
 
 	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_CREATE_TABLE_USERPHRASE, -1, &stmt, NULL );
 	if ( ret != SQLITE_OK ) goto error;
@@ -88,6 +83,17 @@ int InitHash( ChewingData *pgdata )
 	ret = sqlite3_finalize( stmt );
 	if ( ret != SQLITE_OK ) goto error;
 
+	return 0;
+
+error:
+	sqlite3_finalize( stmt );
+	return -1;
+}
+
+static int SetupUserphraseLiftTime( ChewingData *pgdata )
+{
+	int ret;
+	sqlite3_stmt *stmt = NULL;
 
 	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_INSERT, -1, &stmt, NULL );
 	if ( ret != SQLITE_OK ) goto error;
@@ -120,12 +126,29 @@ int InitHash( ChewingData *pgdata )
 	ret = sqlite3_finalize( stmt );
 	if ( ret != SQLITE_OK ) goto error;
 
-	// FIXME: Migrate old uhash.dat here.
-
 	return 0;
 
 error:
 	sqlite3_finalize( stmt );
 	return -1;
+}
+
+int InitHash( ChewingData *pgdata )
+{
+	int ret;
+
+	pgdata->static_data.db = GetSQLiteInstance();
+	if ( !pgdata->static_data.db ) return -1;
+
+	ret = CreateTable( pgdata );
+	if ( ret ) return -1;
+
+	ret = SetupUserphraseLiftTime( pgdata );
+	if ( ret ) return -1;
+
+	// FIXME: Normalize lifttime when necessary.
+	// FIXME: Migrate old uhash.dat here.
+
+	return 0;
 }
 
