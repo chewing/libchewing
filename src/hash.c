@@ -122,11 +122,10 @@ int InitHash( ChewingData *pgdata )
 
 	// FIXME: Migrate old uhash.dat here.
 
-	return 1;
+	return 0;
 
 error:
 	sqlite3_finalize( stmt );
-	// FIXME: Use -1 as error
-	return 0;
+	return -1;
 }
 

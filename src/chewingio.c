@@ -188,7 +188,7 @@ CHEWING_API ChewingContext *chewing_new()
 		goto error;
 
 	ret = InitHash( ctx->data );
-	if ( !ret )
+	if ( ret )
 		goto error;
 
 	ctx->cand_no = 0;
