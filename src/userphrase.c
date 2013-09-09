@@ -122,25 +122,7 @@ static int GetPhoneLen( const uint16_t phoneSeq[] )
 
 static int GetCurrentLiftTime( ChewingData *pgdata )
 {
-	sqlite3_stmt *stmt = NULL;
-	int ret;
-	int lifttime = 0;
-
-	ret = sqlite3_prepare_v2( pgdata->static_data.db,
-		CHEWING_DB_CONFIG_SELECT, -1, &stmt, NULL );
-	if ( ret != SQLITE_OK ) goto end;
-
-	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_SEL_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
-	if ( ret != SQLITE_OK ) goto end;
-
-	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_ROW ) goto end;
-
-	lifttime = sqlite3_column_int( stmt, CHEWING_DB_CONFIG_SEL_VALUE );
-
-end:
-	sqlite3_finalize( stmt );
-	return lifttime;
+	return pgdata->static_data.new_lifttime;
 }
 
 int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
@@ -284,16 +266,5 @@ void UserGetPhraseEnd( ChewingData *pgdata, const uint16_t phoneSeq[] )
 
 void IncreaseLifeTime( ChewingData *pgdata )
 {
-	sqlite3_stmt *stmt = 0;
-	int ret;
-
-	ret = sqlite3_prepare_v2( pgdata->static_data.db,
-		CHEWING_DB_CONFIG_LIFETIME_INCREASE, -1, &stmt, NULL );
-	if ( ret != SQLITE_OK ) goto end;
-
-	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_DONE ) goto end;
-
-end:
-	sqlite3_finalize( stmt );
+	++pgdata->static_data.new_lifttime;
 }

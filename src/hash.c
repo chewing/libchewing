@@ -28,9 +28,34 @@
 #include "private.h"
 #include "memory-private.h"
 
+static void UpdateLiftTime( ChewingData *pgdata )
+{
+	int ret;
+	sqlite3_stmt *stmt = NULL;
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_INCREASE, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_INS_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_INS_VALUE_INC,
+		pgdata->static_data.new_lifttime - pgdata->static_data.original_lifttime );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) goto error;
+
+error:
+	sqlite3_finalize( stmt );
+}
+
 void TerminateHash( ChewingData *pgdata )
 {
 	int ret;
+
+	UpdateLiftTime( pgdata );
+
 	ret = sqlite3_close( pgdata->static_data.db );
 	assert( SQLITE_OK == ret );
 }
@@ -75,6 +100,22 @@ int InitHash( ChewingData *pgdata )
 
 	ret = sqlite3_step( stmt );
 	if ( ret != SQLITE_DONE ) goto error;
+
+	ret = sqlite3_finalize( stmt );
+	if ( ret != SQLITE_OK ) goto error;
+
+
+	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_SELECT, -1, &stmt, NULL );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_SEL_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
+	if ( ret != SQLITE_OK ) goto error;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_ROW ) goto error;
+
+	pgdata->static_data.original_lifttime = sqlite3_column_int( stmt, CHEWING_DB_CONFIG_SEL_VALUE );
+	pgdata->static_data.new_lifttime = pgdata->static_data.original_lifttime;
 
 	ret = sqlite3_finalize( stmt );
 	if ( ret != SQLITE_OK ) goto error;

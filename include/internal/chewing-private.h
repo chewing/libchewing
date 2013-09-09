@@ -170,6 +170,8 @@ typedef struct {
 
 	sqlite3 *db;
 	sqlite3_stmt *userphrase_stmt;
+	unsigned int original_lifttime;
+	unsigned int new_lifttime;
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
