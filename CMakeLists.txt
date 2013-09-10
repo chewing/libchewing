@@ -208,6 +208,7 @@ set(ALL_TESTCASES
 	test-utf8
 )
 set(ALL_TESTTOOLS
+	performance
 	randkeystroke
 	simulate
 	testchewing
