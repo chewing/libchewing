@@ -69,7 +69,7 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 	free( phrase );
 
 	ret = sqlite3_prepare_v2( pgdata->static_data.db,
-		"SELECT MAX(user_freq) FROM " CHEWING_TABLE_USERPHRASE " WHERE phone = ?1", -1,
+		"SELECT MAX(user_freq) FROM " TABLE_USERPHRASE " WHERE phone = ?1", -1,
 		&stmt, NULL );
 	if ( ret != SQLITE_OK ) goto end;
 

@@ -63,31 +63,30 @@ void TerminateHash( ChewingData *pgdata )
 static int CreateTable( ChewingData *pgdata )
 {
 	int ret;
-	sqlite3_stmt *stmt = NULL;
 
-	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_CREATE_TABLE_USERPHRASE, -1, &stmt, NULL );
-	if ( ret != SQLITE_OK ) goto error;
+	ret = sqlite3_exec( pgdata->static_data.db,
+		"CREATE TABLE IF NOT EXISTS " TABLE_USERPHRASE " ("
+		"time INTEGER,"
+		"user_freq INTEGER,"
+		"max_freq INTEGER,"
+		"orig_freq INTEGER,"
+		"phone BLOB,"
+		"phrase TEXT,"
+		"PRIMARY KEY (phone, phrase)"
+		")",
+		NULL, NULL, NULL );
+	if ( ret != SQLITE_OK ) return -1;
 
-	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_DONE ) goto error;
-
-	ret = sqlite3_finalize( stmt );
-	if ( ret != SQLITE_OK ) goto error;
-
-	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_CREATE_TABLE, -1, &stmt, NULL );
-	if ( ret != SQLITE_OK ) goto error;
-
-	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_DONE ) goto error;
-
-	ret = sqlite3_finalize( stmt );
-	if ( ret != SQLITE_OK ) goto error;
+	ret = sqlite3_exec( pgdata->static_data.db,
+		"CREATE TABLE IF NOT EXISTS " TABLE_CONFIG " ("
+		"id INTEGER,"
+		"value INTEGER,"
+		"PRIMARY KEY (id)"
+		")",
+		NULL, NULL, NULL );
+	if ( ret != SQLITE_OK ) return -1;
 
 	return 0;
-
-error:
-	sqlite3_finalize( stmt );
-	return -1;
 }
 
 static int SetupUserphraseLiftTime( ChewingData *pgdata )
