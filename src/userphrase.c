@@ -55,7 +55,8 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 	int pho_id;
 	Phrase *phrase = ALC( Phrase, 1 );
 	int maxFreq = FREQ_INIT_VALUE;
-	UserPhraseData *uphrase;
+	int ret;
+	sqlite3_stmt *stmt = NULL;
 
 	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
 	if ( pho_id != -1 ) {
@@ -67,14 +68,22 @@ static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len 
 	}
 	free( phrase );
 
-	uphrase = UserGetPhraseFirst( pgdata, phoneSeq );
-	while ( uphrase ) {
-		if ( uphrase->userfreq > maxFreq )
-			maxFreq = uphrase->userfreq;
-		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
-	}
-	UserGetPhraseEnd( pgdata, phoneSeq );
+	ret = sqlite3_prepare_v2( pgdata->static_data.db,
+		"SELECT MAX(user_freq) FROM " CHEWING_TABLE_USERPHRASE " WHERE phone = ?1", -1,
+		&stmt, NULL );
+	if ( ret != SQLITE_OK ) goto end;
 
+	ret = sqlite3_bind_blob( stmt, 1,
+		phoneSeq, (len + 1) * sizeof( phoneSeq[0]), SQLITE_STATIC );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_step( stmt );
+	if ( ret !=  SQLITE_ROW ) goto end;
+
+	maxFreq = sqlite3_column_int( stmt, 0 );
+
+end:
+	sqlite3_finalize( stmt );
 	return maxFreq;
 }
 
