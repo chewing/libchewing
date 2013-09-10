@@ -614,6 +614,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	int prev_pos = 0;
 	int pending = 0;
 
+	UserUpdatePhraseBegin( pgdata );
+
 	for ( i = 0; i < pgdata->nPrefer; i++ ) {
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
@@ -645,6 +647,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		prev_pos = 0;
 		pending = 0;
 	}
+
+	UserUpdatePhraseEnd( pgdata );
 }
 
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )

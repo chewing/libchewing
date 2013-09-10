@@ -44,6 +44,7 @@ typedef struct tag_UserPhraseData {
 	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
 } UserPhraseData ;
 
+void UserUpdatePhraseBegin( struct tag_ChewingData *pgdata );
 /**
  * @brief Update or add a new UserPhrase.
  *
@@ -56,6 +57,8 @@ typedef struct tag_UserPhraseData {
  * @retval USER_UPDATE_MODIFY Sequence is existing, update it's data.
  */
 int UserUpdatePhrase( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
+
+void UserUpdatePhraseEnd( struct tag_ChewingData *pgdata );
 
 /**
  * @brief Read the first phrase of the phone in user phrase database.

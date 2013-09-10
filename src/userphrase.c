@@ -125,6 +125,11 @@ static int GetCurrentLiftTime( ChewingData *pgdata )
 	return pgdata->static_data.new_lifttime;
 }
 
+void UserUpdatePhraseBegin( ChewingData *pgdata )
+{
+	sqlite3_exec( pgdata->static_data.db, "BEGIN", 0, 0, 0 );
+}
+
 int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	int ret;
@@ -208,6 +213,12 @@ error:
 	sqlite3_finalize( stmt );
 	return USER_UPDATE_FAIL;
 }
+
+void UserUpdatePhraseEnd( ChewingData *pgdata )
+{
+	sqlite3_exec( pgdata->static_data.db, "END", 0, 0, 0 );
+}
+
 
 UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] )
 {
