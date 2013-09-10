@@ -95,6 +95,9 @@ sqlite3 *GetSQLiteInstance()
 	ret = sqlite3_open16( wbuf, &db );
 	if ( ret != SQLITE_OK ) goto end;
 
+	ret = sqlite3_exec( db, "PRAGMA synchronous=OFF", NULL, NULL, NULL );
+	if ( ret != SQLITE_OK ) goto end;
+
 end:
 	free( buf );
 	free( wbuf );
@@ -143,6 +146,9 @@ sqlite3 * GetSQLiteInstance()
 	if ( ret ) goto end;
 
 	ret = sqlite3_open( buf, &db );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_exec( db, "PRAGMA synchronous=OFF", NULL, NULL, NULL );
 	if ( ret != SQLITE_OK ) goto end;
 
 end:
