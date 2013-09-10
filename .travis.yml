@@ -23,4 +23,4 @@ before_install:
   - sudo apt-get install -qq texinfo cmake valgrind
 
 after_success:
-  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test ; fi
+  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty; fi
