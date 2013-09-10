@@ -24,7 +24,6 @@
 #define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "uhash.dat"
 
-#define TABLE_USERPHRASE "userphrase_v1"
 #define CHEWING_DB_COLUMN "time, user_freq, max_freq, orig_freq, phone, phrase"
 /*
  * The SELECT index starts from 0, but the INSERT/REPLACE index starts from 1,
@@ -45,16 +44,15 @@
 #define CHEWING_DB_INS_INDEX_PHRASE	(CHEWING_DB_SEL_INDEX_PHRASE + 1)
 
 #define CHEWING_DB_SELECT_BY_PHONE "SELECT " CHEWING_DB_COLUMN " FROM " \
-	TABLE_USERPHRASE " WHERE phone = ?4"
+	"userphrase_v1 WHERE phone = ?4"
 
 #define CHEWING_DB_SELECT_BY_PHONE_PHRASE "SELECT " CHEWING_DB_COLUMN " FROM " \
-	TABLE_USERPHRASE " WHERE phone = ?4 AND phrase = ?5"
+	"userphrase_v1 WHERE phone = ?4 AND phrase = ?5"
 
-#define CHEWING_DB_UPSERT "INSERT OR REPLACE INTO " TABLE_USERPHRASE \
+#define CHEWING_DB_UPSERT "INSERT OR REPLACE INTO userphrase_v1" \
 	"(" CHEWING_DB_COLUMN ") VALUES (?1,?2,?3,?4,?5,?6)"
 
 
-#define TABLE_CONFIG	"config_v1"
 #define CHEWING_DB_CONFIG_COLUMN	"value, id"
 
 #define CHEWING_DB_CONFIG_ID_LIFETIME	(0)
@@ -66,13 +64,13 @@
 #define CHEWING_DB_CONFIG_INS_ID	(2)
 #define CHEWING_DB_CONFIG_INS_VALUE_INC	(3)
 
-#define CHEWING_DB_CONFIG_SELECT "SELECT " CHEWING_DB_CONFIG_COLUMN " FROM " TABLE_CONFIG \
-	" WHERE id = ?1"
+#define CHEWING_DB_CONFIG_SELECT "SELECT " CHEWING_DB_CONFIG_COLUMN " FROM " \
+	"config_v1  WHERE id = ?1"
 
-#define CHEWING_DB_CONFIG_INSERT "INSERT OR IGNORE INTO " TABLE_CONFIG \
+#define CHEWING_DB_CONFIG_INSERT "INSERT OR IGNORE INTO config_v1 " \
 	" (" CHEWING_DB_CONFIG_COLUMN ") VALUES (?1, ?2)"
 
-#define CHEWING_DB_CONFIG_INCREASE "UPDATE " TABLE_CONFIG \
+#define CHEWING_DB_CONFIG_INCREASE "UPDATE config_v1 " \
 	" SET value = value + ?3 WHERE id = ?2"
 
 int InitHash( struct tag_ChewingData *ctx );

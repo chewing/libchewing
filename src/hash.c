@@ -65,7 +65,7 @@ static int CreateTable( ChewingData *pgdata )
 	int ret;
 
 	ret = sqlite3_exec( pgdata->static_data.db,
-		"CREATE TABLE IF NOT EXISTS " TABLE_USERPHRASE " ("
+		"CREATE TABLE IF NOT EXISTS userphrase_v1 ("
 		"time INTEGER,"
 		"user_freq INTEGER,"
 		"max_freq INTEGER,"
@@ -78,7 +78,7 @@ static int CreateTable( ChewingData *pgdata )
 	if ( ret != SQLITE_OK ) return -1;
 
 	ret = sqlite3_exec( pgdata->static_data.db,
-		"CREATE TABLE IF NOT EXISTS " TABLE_CONFIG " ("
+		"CREATE TABLE IF NOT EXISTS config_v1 ("
 		"id INTEGER,"
 		"value INTEGER,"
 		"PRIMARY KEY (id)"
