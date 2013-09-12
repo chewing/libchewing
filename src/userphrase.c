@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -110,6 +111,29 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	}
 }
 
+static void LogUserPhrase(
+	ChewingData *pgdata,
+	const uint16_t phoneSeq[],
+	const char wordSeq[],
+	int orig_freq,
+	int max_freq,
+	int user_freq,
+	int recent_time)
+{
+	/* Size of each phone is len("0x1234 ") = 7 */
+	char buf[7 * MAX_PHRASE_LEN + 1] = { 0 };
+	int i;
+
+	for ( i = 0; i < MAX_PHRASE_LEN; ++i ) {
+		if ( phoneSeq[i] == 0 )
+			break;
+		snprintf( buf + 7 * i, 7 + 1, "%#06x ", phoneSeq[i] );
+	}
+
+	LOG_INFO( "userphrase %s, phone = %s, orig_freq = %d, max_freq = %d, user_freq = %d, recent_time = %d\n",
+		wordSeq, buf, orig_freq, max_freq, user_freq, recent_time );
+}
+
 int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
@@ -134,6 +158,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 		data.userfreq = data.origfreq;
 		data.recentTime = pgdata->static_data.chewing_lifetime;
 		pItem = HashInsert( pgdata, &data );
+		LogUserPhrase( pgdata, phoneSeq, wordSeq, pItem->data.origfreq, pItem->data.maxfreq, pItem->data.userfreq, pItem->data.recentTime );
 		HashModify( pgdata, pItem );
 		return USER_UPDATE_INSERT;
 	}
@@ -145,6 +170,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 			pItem->data.origfreq,
 			pgdata->static_data.chewing_lifetime - pItem->data.recentTime );
 		pItem->data.recentTime = pgdata->static_data.chewing_lifetime;
+		LogUserPhrase( pgdata, phoneSeq, wordSeq, pItem->data.origfreq, pItem->data.maxfreq, pItem->data.userfreq, pItem->data.recentTime );
 		HashModify( pgdata, pItem );
 		return USER_UPDATE_MODIFY;
 	}
