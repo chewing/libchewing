@@ -8,6 +8,21 @@
 /* Platform-dependent declaration */
 #include "plat_types.h"
 
+#define LOG_VERBOSE(fmt, ...) \
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, fmt, ##__VA_ARGS__); } while (0)
+
+#define LOG_DEBUG(fmt, ...) \
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_DEBUG, fmt, ##__VA_ARGS__); } while (0)
+
+#define LOG_INFO(fmt, ...) \
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_INFO, fmt, ##__VA_ARGS__); } while (0)
+
+#define LOG_WARN(fmt, ...) \
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_WARN, fmt, ##__VA_ARGS__); } while (0)
+
+#define LOG_ERROR(fmt, ...) \
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_ERROR, fmt, ##__VA_ARGS__); } while (0)
+
 #define DEBUG_OUT( fmt, ... ) \
 	do { \
 		pgdata->logger( pgdata->loggerData, CHEWING_LOG_INFO, fmt, ##__VA_ARGS__ ); \
