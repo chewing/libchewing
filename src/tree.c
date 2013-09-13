@@ -430,15 +430,6 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 }
 
 /*
- * If interval small is inside interval large
- */
-static int IsIntervalInside( TreeDataType *ptd, int small, int large )
-{
-	return ptd->interval[ large ].from <= ptd->interval[ small ].from &&
-		ptd->interval[ small ].to <= ptd->interval[ large ].to;
-}
-
-/*
  * Remove the interval containing in another interval.
  *
  * Example:
@@ -460,7 +451,7 @@ static void Discard1( TreeDataType *ptd )
 				continue ;
 
 			/* interval b is in interval a */
-			if ( IsIntervalInside( ptd, b, a ) )
+			if ( PhraseIntervalContain( ptd->interval[ a ], ptd->interval[ b ] ) )
 				continue;
 
 			/* interval b is in front of interval a */
@@ -480,7 +471,7 @@ static void Discard1( TreeDataType *ptd )
 			int i;
 			for ( i = 0; i < ptd->nInterval; i++ ) {
 				if (! failflag[ i ] && i != a &&
-					IsIntervalInside( ptd, i, a ) ) {
+					PhraseIntervalContain( ptd->interval[ a ], ptd->interval[ i ] ) ) {
 					failflag[ i ] = 1;
 				}
 			}
