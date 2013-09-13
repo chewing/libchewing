@@ -429,6 +429,14 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 	return ( (*pb)->score - (*pa)->score );
 }
 
+/*
+ * If interval small is inside interval large
+ */
+static int IsIntervalInside( TreeDataType *ptd, int small, int large )
+{
+	return ptd->interval[ large ].from <= ptd->interval[ small ].from &&
+		ptd->interval[ small ].to <= ptd->interval[ large ].to;
+}
 
 /*
  * Remove the interval containing in another interval.
@@ -450,15 +458,19 @@ static void Discard1( TreeDataType *ptd )
 		for ( b = 0; b < ptd->nInterval; b++ ) {
 			if ( a == b || failflag[ b ] )
 				continue ;
-			if ( ptd->interval[ b ].from >= ptd->interval[ a ].from &&
-				ptd->interval[ b ].to <= ptd->interval[ a ].to )
+
+			/* interval b is in interval a */
+			if ( IsIntervalInside( ptd, b, a ) )
 				continue;
-			if ( ptd->interval[ b ].from <= ptd->interval[ a ].from &&
-				ptd->interval[ b ].to <= ptd->interval[ a ].from )
+
+			/* interval b is in front of interval a */
+			if ( ptd->interval[ b ].to <= ptd->interval[ a ].from )
 				continue;
-			if ( ptd->interval[ b ].from >= ptd->interval[ a ].to &&
-				ptd->interval[ b ].to >= ptd->interval[ a ].to )
+
+			/* interval b is in back of interval a */
+			if ( ptd->interval[ a ].to <= ptd->interval[ b ].from )
 				continue;
+
 			break;
 		}
 		/* if any other interval b is inside or leftside or rightside the
@@ -466,12 +478,9 @@ static void Discard1( TreeDataType *ptd )
 		if ( b >= ptd->nInterval ) {
 			/* then kill all the intervals inside the interval a */
 			int i;
-			for ( i = 0; i < ptd->nInterval; i++ )  {
-				if (
-					! failflag[ i ] && i != a &&
-					ptd->interval[ i ].from >=
-						ptd->interval[ a ].from &&
-					ptd->interval[ i ].to <= ptd->interval[ a ].to ) {
+			for ( i = 0; i < ptd->nInterval; i++ ) {
+				if (! failflag[ i ] && i != a &&
+					IsIntervalInside( ptd, i, a ) ) {
 					failflag[ i ] = 1;
 				}
 			}
