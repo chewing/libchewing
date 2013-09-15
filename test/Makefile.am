@@ -46,6 +46,7 @@ check_HEADERS = \
 	$(NULL)
 
 check_PROGRAMS = \
+	performance \
 	testchewing \
 	simulate \
 	randkeystroke \

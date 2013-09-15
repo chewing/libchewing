@@ -317,9 +317,9 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 	UserPhraseData *userphrase;
 
 	for ( begin = 0; begin < pgdata->nPhoneSeq; begin++ ) {
-		for ( end = begin; end < pgdata->nPhoneSeq; end++ ) {
+		for ( end = begin; end < min( pgdata->nPhoneSeq, begin + MAX_PHRASE_LEN ); end++ ) {
 			if ( ! CheckBreakpoint( begin, end + 1, pgdata->bArrBrkpt ) )
-				continue;
+				break;
 
 			/* set new_phoneSeq */
 			memcpy(
@@ -432,7 +432,6 @@ static int CompRecord( const RecordNode **pa, const RecordNode **pb )
 	return ( (*pb)->score - (*pa)->score );
 }
 
-
 /*
  * Remove the interval containing in another interval.
  *
@@ -453,15 +452,19 @@ static void Discard1( TreeDataType *ptd )
 		for ( b = 0; b < ptd->nInterval; b++ ) {
 			if ( a == b || failflag[ b ] )
 				continue ;
-			if ( ptd->interval[ b ].from >= ptd->interval[ a ].from &&
-				ptd->interval[ b ].to <= ptd->interval[ a ].to )
+
+			/* interval b is in interval a */
+			if ( PhraseIntervalContain( ptd->interval[ a ], ptd->interval[ b ] ) )
 				continue;
-			if ( ptd->interval[ b ].from <= ptd->interval[ a ].from &&
-				ptd->interval[ b ].to <= ptd->interval[ a ].from )
+
+			/* interval b is in front of interval a */
+			if ( ptd->interval[ b ].to <= ptd->interval[ a ].from )
 				continue;
-			if ( ptd->interval[ b ].from >= ptd->interval[ a ].to &&
-				ptd->interval[ b ].to >= ptd->interval[ a ].to )
+
+			/* interval b is in back of interval a */
+			if ( ptd->interval[ a ].to <= ptd->interval[ b ].from )
 				continue;
+
 			break;
 		}
 		/* if any other interval b is inside or leftside or rightside the
@@ -469,12 +472,9 @@ static void Discard1( TreeDataType *ptd )
 		if ( b >= ptd->nInterval ) {
 			/* then kill all the intervals inside the interval a */
 			int i;
-			for ( i = 0; i < ptd->nInterval; i++ )  {
-				if (
-					! failflag[ i ] && i != a &&
-					ptd->interval[ i ].from >=
-						ptd->interval[ a ].from &&
-					ptd->interval[ i ].to <= ptd->interval[ a ].to ) {
+			for ( i = 0; i < ptd->nInterval; i++ ) {
+				if (! failflag[ i ] && i != a &&
+					PhraseIntervalContain( ptd->interval[ a ], ptd->interval[ i ] ) ) {
 					failflag[ i ] = 1;
 				}
 			}

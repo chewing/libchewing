@@ -1,5 +1,5 @@
 /**
- * testhelper.hewing.c
+ * testchewing.c
  *
  * Copyright (c) 2004, 2005, 2008, 2011
  *	libchewing Core Team. See ChangeLog for details.

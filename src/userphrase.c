@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -134,6 +135,29 @@ static int GetCurrentLiftTime( ChewingData *pgdata )
 	return pgdata->static_data.new_lifttime;
 }
 
+static void LogUserPhrase(
+	ChewingData *pgdata,
+	const uint16_t phoneSeq[],
+	const char wordSeq[],
+	int orig_freq,
+	int max_freq,
+	int user_freq,
+	int recent_time)
+{
+	/* Size of each phone is len("0x1234 ") = 7 */
+	char buf[7 * MAX_PHRASE_LEN + 1] = { 0 };
+	int i;
+
+	for ( i = 0; i < MAX_PHRASE_LEN; ++i ) {
+		if ( phoneSeq[i] == 0 )
+			break;
+		snprintf( buf + 7 * i, 7 + 1, "%#06x ", phoneSeq[i] );
+	}
+
+	LOG_INFO( "userphrase %s, phone = %s, orig_freq = %d, max_freq = %d, user_freq = %d, recent_time = %d\n",
+		wordSeq, buf, orig_freq, max_freq, user_freq, recent_time );
+}
+
 void UserUpdatePhraseBegin( ChewingData *pgdata )
 {
 	sqlite3_exec( pgdata->static_data.db, "BEGIN", 0, 0, 0 );
@@ -213,6 +237,8 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 
 	ret = sqlite3_step( stmt );
 	if ( ret != SQLITE_DONE ) goto error;
+
+	LogUserPhrase( pgdata, phoneSeq, wordSeq, orig_freq, max_freq, user_freq, recent_time);
 
 	sqlite3_finalize( stmt );
 
