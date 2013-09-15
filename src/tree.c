@@ -315,9 +315,9 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
 
 	for ( begin = 0; begin < pgdata->nPhoneSeq; begin++ ) {
-		for ( end = begin; end < pgdata->nPhoneSeq; end++ ) {
+		for ( end = begin; end < min( pgdata->nPhoneSeq, begin + MAX_PHRASE_LEN ); end++ ) {
 			if ( ! CheckBreakpoint( begin, end + 1, pgdata->bArrBrkpt ) )
-				continue;
+				break;
 
 			/* set new_phoneSeq */
 			memcpy(
