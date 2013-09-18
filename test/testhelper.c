@@ -348,7 +348,7 @@ void internal_ok_candidate( const char *file, int line,
 
 		buf = chewing_cand_String( ctx );
 		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
-			"candndate `%s' shall be `%s'", buf, cand[i] );
+			"candidate `%s' shall be `%s'", buf, cand[i] );
 		chewing_free( buf );
 
 		buf = chewing_cand_String_by_index( ctx, i );
