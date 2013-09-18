@@ -47,6 +47,8 @@ config.h
 # test suite
 test/genkeystroke
 test/genkeystroke.exe
+test/performance
+test/performance.exe
 test/randkeystroke
 test/randkeystroke.exe
 test/simulate
