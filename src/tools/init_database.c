@@ -37,6 +37,7 @@
 #include "chewing-utf8-util.h"
 #include "global-private.h"
 #include "key2pho-private.h"
+#include "memory-private.h"
 #include "zuin-private.h"
 
 /* For ALC macro */
@@ -474,7 +475,7 @@ NODE *new_node(uint32_t key)
 	}
 
 	memset(&pnew->data, 0, sizeof(pnew->data));
-	pnew->data.key = key;
+	PutUint16(key, pnew->data.key);
 	pnew->pFirstChild = NULL;
 	pnew->pNextSibling = NULL;
 	return pnew;
@@ -491,8 +492,8 @@ NODE *find_or_insert(NODE *parent, uint32_t key)
 	NODE *p;
 	NODE *pnew;
 
-	for (p = parent->pFirstChild; p && p->data.key <= key; prev = p, p = p->pNextSibling)
-		if (p->data.key == key)
+	for (p = parent->pFirstChild; p && GetUint16(p->data.key) <= key; prev = p, p = p->pNextSibling)
+		if (GetUint16(p->data.key) == key)
 			return p;
 
 	pnew = new_node(key);
@@ -511,13 +512,13 @@ void insert_leaf(NODE *parent, long phr_pos, uint32_t freq)
 	NODE *p;
 	NODE *pnew;
 
-	for (p = parent->pFirstChild; p && p->data.key == 0; prev = p, p = p->pNextSibling)
-		if (p->data.phrase.freq <= freq)
+	for (p = parent->pFirstChild; p && GetUint16(p->data.key) == 0; prev = p, p = p->pNextSibling)
+		if (GetUint16(p->data.phrase.freq) <= freq)
 			break;
 
 	pnew = new_node(0);
-	pnew->data.phrase.pos = (uint32_t)phr_pos;
-	pnew->data.phrase.freq = freq;
+	PutUint24((uint32_t)phr_pos, pnew->data.phrase.pos);
+	PutUint24(freq, pnew->data.phrase.freq);
 	if (prev == NULL)
 		parent->pFirstChild = pnew;
 	else
@@ -545,8 +546,8 @@ void construct_phrase_tree()
 			root->pFirstChild = levelPtr;
 		}
 		levelPtr = new_node(0);
-		levelPtr->data.phrase.pos = (uint32_t)word_data[i].text->pos;
-		levelPtr->data.phrase.freq = word_data[i].text->freq;
+		PutUint24((uint32_t)word_data[i].text->pos, levelPtr->data.phrase.pos);
+		PutUint24(word_data[i].text->freq, levelPtr->data.phrase.freq);
 		levelPtr->pNextSibling = root->pFirstChild->pFirstChild;
 		root->pFirstChild->pFirstChild = levelPtr;
 	}
@@ -634,8 +635,8 @@ void write_index_tree()
 		p = queue[tail++];
 		if (tail >= q_len)
 			tail = 0;
-		if (p->data.key != 0) {
-			p->data.child.begin = tree_size;
+		if (GetUint16(p->data.key) != 0) {
+			PutUint24(tree_size, p->data.child.begin);
 
 			/*
 			 * The latest inserted element must have a NULL
@@ -655,10 +656,10 @@ void write_index_tree()
 				tree_size++;
 			}
 
-			p->data.child.end = tree_size;
+			PutUint24(tree_size, p->data.child.end);
 		}
 	}
-	root->data.key = tree_size;
+	PutUint16(tree_size, root->data.key);
 
 	for (p = root; p; p = pNext) {
 		fwrite(&p->data, sizeof(TreeType), 1, output);

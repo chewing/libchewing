@@ -27,6 +27,7 @@
 #include "global.h"
 #include "global-private.h"
 #include "dict-private.h"
+#include "memory-private.h"
 #include "tree-private.h"
 #include "private.h"
 #include "plat_mmap.h"
@@ -240,7 +241,7 @@ static int CheckChoose(
 
 static int CompTreeType( const void *a, const void *b )
 {
-	return ( ((TreeType*)a)->key - ((TreeType*)b)->key );
+	return GetUint16(((TreeType*)a)->key) - GetUint16(((TreeType*)b)->key);
 }
 
 /** @brief search for the phrases have the same pronunciation.*/
@@ -251,12 +252,15 @@ const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const u
 {
 	TreeType target;
 	const TreeType *tree_p = pgdata->static_data.tree;
+	uint32_t range[2];
 	int i;
 
 	for ( i = begin; i <= end; i++ ) {
-		target.key = phoneSeq[i];
-		tree_p = (const TreeType*)bsearch(&target, pgdata->static_data.tree + tree_p->child.begin,
-						  tree_p->child.end - tree_p->child.begin, sizeof(TreeType), CompTreeType);
+		PutUint16(phoneSeq[i], target.key);
+		range[0] = GetUint24(tree_p->child.begin);
+		range[1] = GetUint24(tree_p->child.end);
+		tree_p = (const TreeType*)bsearch(&target, pgdata->static_data.tree + range[0],
+						  range[1] - range[0], sizeof(TreeType), CompTreeType);
 
 		/* if not found any word then fail. */
 		if( !tree_p )
@@ -264,7 +268,7 @@ const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const u
 	}
 
 	/* If its child has no key value of 0, then it is only a "half" phrase. */
-	if( pgdata->static_data.tree[ tree_p->child.begin ].key != 0)
+	if( GetUint16(pgdata->static_data.tree[ GetUint24(tree_p->child.begin) ].key) != 0)
 		return NULL;
 	return tree_p;
 }
@@ -274,8 +278,8 @@ const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const u
  */
 void TreeChildRange( ChewingData *pgdata, const TreeType *parent )
 {
-	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree + parent->child.begin;
-	pgdata->static_data.tree_end_pos = pgdata->static_data.tree + parent->child.end;
+	pgdata->static_data.tree_cur_pos = pgdata->static_data.tree + GetUint24(parent->child.begin);
+	pgdata->static_data.tree_end_pos = pgdata->static_data.tree + GetUint24(parent->child.end);
 }
 
 static void AddInterval(

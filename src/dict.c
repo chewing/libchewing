@@ -64,8 +64,8 @@ int InitDict( ChewingData *pgdata, const char *prefix )
  */
 static void GetVocabFromDict( ChewingData *pgdata, Phrase *phr_ptr )
 {
-	strcpy(phr_ptr->phrase, pgdata->static_data.dict + pgdata->static_data.tree_cur_pos->phrase.pos);
-	phr_ptr->freq = pgdata->static_data.tree_cur_pos->phrase.freq;
+	strcpy(phr_ptr->phrase, pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
+	phr_ptr->freq = GetUint24(pgdata->static_data.tree_cur_pos->phrase.freq);
 	pgdata->static_data.tree_cur_pos++;
 }
 
@@ -98,7 +98,7 @@ int GetPhraseFirst( ChewingData *pgdata, Phrase *phr_ptr, const TreeType *phrase
 int GetVocabNext( ChewingData *pgdata, Phrase *phr_ptr )
 {
 	if ( pgdata->static_data.tree_cur_pos >= pgdata->static_data.tree_end_pos
-		|| pgdata->static_data.tree_cur_pos->key != 0)
+		|| GetUint16(pgdata->static_data.tree_cur_pos->key) != 0)
 		return 0;
 	GetVocabFromDict( pgdata, phr_ptr );
 	return 1;

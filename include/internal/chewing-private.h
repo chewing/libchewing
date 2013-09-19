@@ -74,15 +74,15 @@ typedef union {
  * that key in root represents the number of total elements(nodes) in the tree.
  */
 typedef struct {
-	uint32_t key;
+	unsigned char key[2];
 	union {
 		struct {
-			uint32_t begin;
-			uint32_t end;
+			unsigned char begin[3];
+			unsigned char end[3];
 		} child;
 		struct {
-			uint32_t pos;
-			uint32_t freq;
+			unsigned char pos[3];
+			unsigned char freq[3];
 		} phrase;
 	};
 } TreeType;
