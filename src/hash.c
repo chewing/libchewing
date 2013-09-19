@@ -445,14 +445,12 @@ static int migrate_hash_to_bin( ChewingData *pgdata )
 
 static void FreeHashItem( HASH_ITEM *aItem )
 {
-	if ( aItem ) {
-		HASH_ITEM *pItem = aItem->next;
+	while ( aItem ) {
+		HASH_ITEM *next = aItem->next;
 		free( aItem->data.phoneSeq );
 		free( aItem->data.wordSeq );
 		free( aItem );
-		if ( pItem ) {
-			FreeHashItem( pItem );
-		}
+		aItem = next;
 	}
 }
 
