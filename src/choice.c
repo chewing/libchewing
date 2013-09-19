@@ -76,6 +76,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 	const uint16_t *phoneSeq = pgdata->phoneSeq;
 	int nPhoneSeq = pgdata->nPhoneSeq;
 	const int *bSymbolArrBrkpt = pgdata->bSymbolArrBrkpt;
+	int symbolArrBrkpt[ ARRAY_SIZE(pgdata->bSymbolArrBrkpt) ] = { 0 };
 
 	int pho_id;
 	int diff;
@@ -88,10 +89,21 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 
 	pai->nAvail = 0;
 
+	/*
+	 * XXX: The phoneSeq, nPhoneSeq skip any symbol in preedit buffer,
+	 * while bSymbolArrBrkpt, pos does not skip any symbol in preedit
+	 * buffer.  So we need to do some translate here.
+	 */
+	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
+		if ( bSymbolArrBrkpt[i] ) {
+			symbolArrBrkpt[ i - CountSymbols( pgdata, i + 1 ) ] = 1;
+		}
+	}
+
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		for ( i = end; i >= begin; i--){
 			head = i;
-			if ( bSymbolArrBrkpt[ i ] )
+			if ( symbolArrBrkpt[ i ] )
 				break;
 		}
 		head_tmp = end;
@@ -103,7 +115,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		tail_tmp = tail = end;
 	} else {
 		for ( i = begin; i < nPhoneSeq; i++ ) {
-			if ( bSymbolArrBrkpt[ i ] )
+			if ( symbolArrBrkpt[ i ] )
 				break;
 			tail = i;
 		}
