@@ -30,7 +30,6 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "dict-private.h"
-#include "char-private.h"
 #include "hash-private.h"
 #include "tree-private.h"
 #include "pinyin-private.h"
@@ -56,16 +55,8 @@ const char * const kb_type_str[] = {
 	"KB_MPS2_PINYIN"
 };
 
-const char * const CHAR_FILES[] = {
-	CHAR_FILE,
-	CHAR_INDEX_BEGIN_FILE,
-	CHAR_INDEX_PHONE_FILE,
-	NULL,
-};
-
 const char * const DICT_FILES[] = {
 	DICT_FILE,
-	PH_INDEX_FILE,
 	PHONE_TREE_FILE,
 	NULL,
 };
@@ -165,14 +156,6 @@ CHEWING_API ChewingContext *chewing_new()
 	chewing_Reset( ctx );
 
 	ret = get_search_path( search_path, sizeof( search_path ) );
-	if ( ret )
-		goto error;
-
-	ret = find_path_by_files(
-		search_path, CHAR_FILES, path, sizeof( path ) );
-	if ( ret )
-		goto error;
-	ret = InitChar( ctx->data, path );
 	if ( ret )
 		goto error;
 
@@ -302,7 +285,6 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminateHash( ctx->data );
 			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
-			TerminateChar( ctx->data );
 			free( ctx->data );
 		}
 

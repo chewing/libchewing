@@ -1,11 +1,7 @@
 tooldir = $(top_builddir)/src/tools
 datas = \
-	us_freq.dat \
-	dict.dat \
-	ph_index.dat \
-	fonetree.dat \
-	ch_index_begin.dat \
-	ch_index_phone.dat \
+	dictionary.dat \
+	index_tree.dat \
 	$(NULL)
 static_tables = pinyin.tab swkb.dat symbols.dat
 
@@ -32,8 +28,6 @@ gendata_stamp: phone.cin tsi.src
 	touch $@
 
 gendata:
-	env LC_ALL=C $(tooldir)/sort$(EXEEXT) $(top_srcdir)/data/phone.cin $(top_srcdir)/data/tsi.src
-	$(tooldir)/maketree$(EXEEXT)
-	-rm -f phoneid.dic
+	env LC_ALL=C $(tooldir)/init_database$(EXEEXT) $(top_srcdir)/data/phone.cin $(top_srcdir)/data/tsi.src
 
 CLEANFILES = $(datas) gendata_stamp

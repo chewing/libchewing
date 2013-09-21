@@ -148,7 +148,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 		pci->nTotalChoice++;
 	}
 	pai->avail[ 0 ].len = 1;
-	pai->avail[ 0 ].id = -1;
+	pai->avail[ 0 ].id = NULL;
 	pai->nAvail = 1;
 	pai->currentAvail = 0;
 	pci->nChoicePerPage = pgdata->config.candPerPage;
@@ -360,7 +360,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 			pci->nTotalChoice++;
 		}
 		pai->avail[ 0 ].len = 1;
-		pai->avail[ 0 ].id = -1;
+		pai->avail[ 0 ].id = NULL;
 		pai->nAvail = 1;
 		pai->currentAvail = 0;
 		pci->nChoicePerPage = pgdata->config.candPerPage;
@@ -1317,7 +1317,7 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	pgdata->bSelect = 1;
 	pgdata->availInfo.nAvail = 1;
 	pgdata->availInfo.currentAvail = 0;
-	pgdata->availInfo.avail[ 0 ].id = -1;
+	pgdata->availInfo.avail[ 0 ].id = NULL;
 	pgdata->availInfo.avail[ 0 ].len = 1;
 	return 0;
 }
