@@ -36,7 +36,7 @@ int HaninSymbolInput( ChewingData *pgdata );
 int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata );
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata );
-int CallPhrasing( ChewingData *pgdata );
+int CallPhrasing( ChewingData *pgdata, int all_phrasing );
 int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn );
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata );
 int AddSelect( ChewingData *pgdata, int sel_i );

@@ -901,7 +901,7 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
-int Phrasing( ChewingData *pgdata )
+int Phrasing( ChewingData *pgdata, int all_phrasing )
 {
 	TreeDataType treeData;
 
