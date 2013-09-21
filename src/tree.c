@@ -564,32 +564,25 @@ static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, const uint16_
 }
 
 /* kpchen said, record is the index array of interval */
-static void OutputRecordStr(
-		ChewingData *pgdata,
-		char *out_buf, int out_buf_len,
-		const int *record, int nRecord,
-		uint16_t phoneSeq[], int nPhoneSeq,
-		char selectStr[][ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ],
-		IntervalType selectInterval[],
-		int nSelect, const TreeDataType *ptd )
+static void OutputRecordStr( ChewingData *pgdata, const TreeDataType *ptd )
 {
 	PhraseIntervalType inter;
 	int i;
 
-	LoadChar( pgdata, out_buf, out_buf_len, phoneSeq, nPhoneSeq );
-	for ( i = 0; i < nRecord; i++ ) {
-		inter = ptd->interval[ record[ i ] ];
+	LoadChar( pgdata, pgdata->phrOut.chiBuf, ARRAY_SIZE( pgdata->phrOut.chiBuf ), pgdata->phoneSeq, pgdata->nPhoneSeq );
+	for ( i = 0; i < ptd->phList->nInter; i++ ) {
+		inter = ptd->interval[ ptd->phList->arrIndex[ i ] ];
 		ueStrNCpy(
-				ueStrSeek( out_buf, inter.from ),
+				ueStrSeek( pgdata->phrOut.chiBuf, inter.from ),
 				( inter.p_phr )->phrase,
 				( inter.to - inter.from ), -1);
 	}
-	for ( i = 0; i < nSelect; i++ ) {
-		inter.from = selectInterval[ i ].from;
-		inter.to = selectInterval[ i ].to ;
+	for ( i = 0; i < pgdata->nSelect; i++ ) {
+		inter.from = pgdata->selectInterval[ i ].from;
+		inter.to = pgdata->selectInterval[ i ].to ;
 		ueStrNCpy(
-				ueStrSeek( out_buf, inter.from ),
-				selectStr[ i ], ( inter.to - inter.from ), -1);
+				ueStrSeek( pgdata->phrOut.chiBuf, inter.from ),
+				pgdata->selectStr[ i ], ( inter.to - inter.from ), -1);
 	}
 }
 
@@ -925,14 +918,7 @@ int Phrasing( ChewingData *pgdata )
 	ShowList( pgdata, &treeData );
 
 	/* set phrasing output */
-	OutputRecordStr(
-		pgdata,
-		pgdata->phrOut.chiBuf, sizeof(pgdata->phrOut.chiBuf),
-		( treeData.phList )->arrIndex,
-		( treeData.phList )->nInter,
-		pgdata->phoneSeq,
-		pgdata->nPhoneSeq,
-		pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect, &treeData );
+	OutputRecordStr( pgdata, &treeData );
 	SaveDispInterval( &pgdata->phrOut, &treeData );
 
 	/* free "phrase" */
