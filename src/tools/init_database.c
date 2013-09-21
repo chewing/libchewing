@@ -206,10 +206,10 @@ int is_exception_phrase(PhraseData *phrase, int pos) {
 	}
 
 	/*
-	 * If the same word appears continuous in a phrase (??), the second
+	 * If the same word appears continuous in a phrase (疊字), the second
 	 * word can change to light tone.
 	 * ex:
-	 * ?? -> ??? ???
+	 * 爸爸 -> ㄅㄚˋ ㄅㄚ˙
 	 */
 	if (pos > 0) {
 		char previous[MAX_UTF8_SIZE + 1];
