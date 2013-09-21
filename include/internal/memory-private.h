@@ -56,20 +56,20 @@ static inline void PutUint16( uint16_t val, void *ptr )
  */
 static inline uint32_t GetUint24( const void *ptr )
 {
-        uint32_t val;
-        const unsigned char *uptr = ptr;
+	uint32_t val;
+	const unsigned char *uptr = ptr;
 #if WORDS_BIGENDIAN
-        val =
-                ( uptr[0] << 16 ) |
-                ( uptr[1] <<  8 ) |
-                ( uptr[2] <<  0 );
+	val =
+		( uptr[0] << 16 ) |
+		( uptr[1] <<  8 ) |
+		( uptr[2] <<  0 );
 #else
-        val =
-                ( uptr[0] <<  0 ) |
-                ( uptr[1] <<  8 ) |
-                ( uptr[2] << 16 );
+	val =
+		( uptr[0] <<  0 ) |
+		( uptr[1] <<  8 ) |
+		( uptr[2] << 16 );
 #endif
-        return val;
+	return val;
 }
 
 /*
@@ -78,15 +78,15 @@ static inline uint32_t GetUint24( const void *ptr )
  */
 static inline void PutUint24( uint32_t val, void *ptr )
 {
-        unsigned char *uptr = (unsigned char *) ptr;
+	unsigned char *uptr = (unsigned char *) ptr;
 #if WORDS_BIGENDIAN
-        uptr[0] = ( val >> 16 ) & 0xff;
-        uptr[1] = ( val >>  8 ) & 0xff;
-        uptr[2] = ( val >>  0 ) & 0xff;
+	uptr[0] = ( val >> 16 ) & 0xff;
+	uptr[1] = ( val >>  8 ) & 0xff;
+	uptr[2] = ( val >>  0 ) & 0xff;
 #else
-        uptr[0] = ( val >>  0 ) & 0xff;
-        uptr[1] = ( val >>  8 ) & 0xff;
-        uptr[2] = ( val >> 16 ) & 0xff;
+	uptr[0] = ( val >>  0 ) & 0xff;
+	uptr[1] = ( val >>  8 ) & 0xff;
+	uptr[2] = ( val >> 16 ) & 0xff;
 #endif
 }
 
