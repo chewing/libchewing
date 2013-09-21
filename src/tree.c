@@ -901,6 +901,173 @@ static RecordNode* NextCut( TreeDataType *tdt, PhrasingOutput *ppo )
 	return tdt->phList;
 }
 
+static int SortByIncreaseEnd( const void *x, const void *y)
+{
+	const PhraseIntervalType *interval_x = (const PhraseIntervalType *) x;
+	const PhraseIntervalType *interval_y = (const PhraseIntervalType *) y;
+
+	if ( interval_x->to < interval_y->to )
+		return -1;
+
+	if ( interval_x->to > interval_y->to )
+		return 1;
+
+	return 0;
+}
+
+static RecordNode * DuplicateRecordAndInsertInterval(
+	const RecordNode *record,
+	TreeDataType *pdt,
+	const int interval_id )
+{
+	RecordNode *ret = NULL;
+
+	assert( record );
+	assert( pdt );
+
+	ret = ALC( RecordNode, 1 );
+	if ( !ret )
+		return NULL;
+
+	ret->arrIndex = ALC( int, record->nInter + 1 );
+	if ( !ret->arrIndex ) {
+		free( ret );
+		return NULL;
+	}
+	ret->nInter = record->nInter + 1;
+	memcpy( ret->arrIndex, record->arrIndex, sizeof(record->arrIndex[0]) * record->nInter );
+
+	ret->arrIndex[ ret->nInter - 1 ] = interval_id;
+
+	ret->score = LoadPhraseAndCountScore( ret->arrIndex, ret->nInter, pdt );
+
+	return ret;
+}
+
+static RecordNode * CreateSingleIntervalRecord( TreeDataType *pdt, const int interval_id )
+{
+	RecordNode *ret = NULL;
+
+	assert( pdt );
+
+	ret = ALC( RecordNode, 1 );
+	if ( !ret )
+		return NULL;
+
+	ret->arrIndex = ALC( int, 1 );
+	if ( !ret->arrIndex ) {
+		free( ret );
+		return NULL;
+	}
+
+	ret->nInter = 1;
+	ret->arrIndex[0] = interval_id;
+
+	ret->score = LoadPhraseAndCountScore( ret->arrIndex, ret->nInter, pdt );
+
+	return ret;
+}
+
+static RecordNode * CreateNullIntervalRecord()
+{
+	RecordNode *ret = NULL;
+	ret = ALC( RecordNode, 1 );
+	if ( !ret )
+		return NULL;
+
+	ret->arrIndex = ALC( int, 1 );
+	if ( !ret->arrIndex ) {
+		free( ret );
+		return NULL;
+	}
+
+	ret->nInter = 0;
+	ret->score = 0;
+
+	return ret;
+}
+
+static void FreeRecord( RecordNode *node )
+{
+	if ( node ) {
+		free( node->arrIndex );
+		free( node );
+	}
+}
+
+static void DoDpPhrasing( ChewingData *pgdata, TreeDataType *pdt )
+{
+	RecordNode *highest_score[ MAX_PHONE_SEQ_LEN ] = { 0 };
+	RecordNode *tmp;
+	int prev_end;
+	int end;
+	int interval_id;
+
+	assert( pgdata );
+	assert( pdt );
+
+	/*
+	 * Assume P(x,y) is the highest score phrasing result from x to y. The
+	 * following is formula for P(x,y):
+	 *
+	 * P(x,y) = MAX( P(x,y-1)+P(y-1,y), P(x,y-2)+P(y-2,y), ... )
+	 *
+	 * While P(x,y-1) is stored in highest_score array, and P(y-1,y) is
+	 * interval end at y. In this formula, x is always 0.
+	 *
+	 * The format of highest_score array is described as following:
+	 *
+	 * highest_score[0] = P(0,0)
+	 * highest_score[1] = P(0,1)
+	 * ...
+	 * highest_score[y-1] = P(0,y-1)
+	 */
+
+	/* The interval shall be sorted by the increase order of end. */
+	qsort( pdt->interval, pdt->nInterval, sizeof( pdt->interval[0] ), SortByIncreaseEnd );
+
+	for ( end = 0, interval_id = 0; end < pgdata->nPhoneSeq; ++end ) {
+		for (; interval_id < pdt->nInterval; ++interval_id ) {
+			/*
+			 * XXX: pdt->interval.to is excluding, while end is
+			 * including, so we need to minus one here.
+			 */
+			if ( pdt->interval[interval_id].to - 1 != end )
+				break;
+
+			prev_end = pdt->interval[interval_id].from - 1;
+
+			if ( prev_end >= 0 )
+				tmp = DuplicateRecordAndInsertInterval(
+					highest_score[ prev_end ],
+					pdt,
+					interval_id );
+			else
+				tmp = CreateSingleIntervalRecord( pdt, interval_id );
+
+			/* FIXME: shall exit immediately? */
+			if (!tmp)
+				continue;
+
+			if ( highest_score[end] == NULL || highest_score[end]->score < tmp->score ) {
+				FreeRecord( highest_score[end] );
+				highest_score[end] = tmp;
+			} else
+				FreeRecord( tmp );
+		}
+	}
+
+	if ( pgdata->nPhoneSeq - 1 < 0 || highest_score[ pgdata->nPhoneSeq - 1 ] == NULL ) {
+		pdt->phList = CreateNullIntervalRecord();
+	} else {
+		pdt->phList = highest_score[ pgdata->nPhoneSeq - 1 ];
+	}
+	pdt->nPhListLen = 1;
+
+	for ( end = 0; end < pgdata->nPhoneSeq - 1; ++end )
+		FreeRecord( highest_score[end] );
+}
+
 int Phrasing( ChewingData *pgdata, int all_phrasing )
 {
 	TreeDataType treeData;
@@ -911,10 +1078,14 @@ int Phrasing( ChewingData *pgdata, int all_phrasing )
 	SetInfo( pgdata->nPhoneSeq, &treeData );
 	Discard1( &treeData );
 	Discard2( &treeData );
-	SaveList( &treeData );
-	CountMatchCnnct( &treeData, pgdata->bUserArrCnnct, pgdata->nPhoneSeq );
-	SortListByScore( &treeData );
-	NextCut( &treeData, &pgdata->phrOut );
+	if ( all_phrasing ) {
+		SaveList( &treeData );
+		CountMatchCnnct( &treeData, pgdata->bUserArrCnnct, pgdata->nPhoneSeq );
+		SortListByScore( &treeData );
+		NextCut( &treeData, &pgdata->phrOut );
+	} else {
+		DoDpPhrasing( pgdata, &treeData );
+	}
 
 	ShowList( pgdata, &treeData );
 
