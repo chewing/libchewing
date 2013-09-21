@@ -410,6 +410,9 @@ void test_Tab_at_the_end()
 	type_keystroke_by_string( ctx, "<T>" );
 	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE5\x84\x80\xE4\xB8\x8B" /* 測試儀下 */ );
 
+	type_keystroke_by_string( ctx, "<T>" );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE4\xB8\x80\xE4\xB8\x8B" /* 測試一下 */ );
+
 	chewing_delete( ctx );
 }
 
