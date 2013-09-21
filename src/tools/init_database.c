@@ -109,6 +109,7 @@ typedef struct _tNODE {
 } NODE;
 
 WordData word_data[MAX_WORD_DATA];
+char word_matched[MAX_WORD_DATA];
 int num_word_data = 0;
 
 PhraseData phrase_data[MAX_PHRASE_DATA];
@@ -235,6 +236,7 @@ void store_phrase(const char *line, int line_num)
 	char bopomofo_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 	size_t phrase_len;
 	WordData word; /* For check. */
+	WordData *found_word;
 	int i;
 	int j;
 
@@ -297,7 +299,10 @@ void store_phrase(const char *line, int line_num)
 	for (i = 0; i < phrase_len; ++i) {
 		ueStrNCpy(word.text->phrase, ueStrSeek(phrase_data[num_phrase_data].phrase, i), 1, 1);
 		word.text->phone[0] = phrase_data[num_phrase_data].phone[i];
-		if (bsearch(&word, word_data, num_word_data, sizeof(word), compare_word_by_text) == NULL &&
+		found_word = bsearch(&word, word_data, num_word_data, sizeof(word), compare_word_by_text);
+		if ((found_word == NULL ||
+			(phrase_len == 1 &&
+			word_matched[found_word - word_data])) &&
 			!is_exception_phrase(&phrase_data[num_phrase_data], i)) {
 
 			PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), word.text->phone[0]);
@@ -324,6 +329,8 @@ void store_phrase(const char *line, int line_num)
 
 	if (phrase_len >= 2)
 		++num_phrase_data;
+	else
+		word_matched[found_word - word_data] = 1;
 }
 
 int compare_phrase(const void *x, const void *y)
