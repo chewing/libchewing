@@ -401,21 +401,14 @@ void test_Tab_connect_word()
 void test_Tab_at_the_end()
 {
 	ChewingContext *ctx;
-	IntervalType it;
-
 
 	ctx = chewing_new();
-	chewing_set_maxChiSymbolLen( ctx, 16 );
 
-	type_keystroke_by_string( ctx, "hk4<T>g4" );
-	chewing_interval_Enumerate( ctx );
+	type_keystroke_by_string( ctx, "hk4g4u6vu84" );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE4\xB8\x80\xE4\xB8\x8B" /* 測試一下 */ );
 
-	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
-	chewing_interval_Get( ctx, &it );
-	ok( it.from == 0 && it.to == 2, "interval (%d, %d) shall be (0, 2)",
-		it.from, it.to );
-
-	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+	type_keystroke_by_string( ctx, "<T>" );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE5\x84\x80\xE4\xB8\x8B" /* 測試儀下 */ );
 
 	chewing_delete( ctx );
 }
