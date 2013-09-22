@@ -588,6 +588,43 @@ void test_Numlock()
 	test_Numlock_select_candidate();
 }
 
+void test_Space_selection()
+{
+	ChewingContext *ctx;
+	char *buf;
+	int len;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	chewing_set_spaceAsSelection( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "hk4g4<H>" /* 測試 */ );
+
+	type_keystroke_by_string( ctx, " " );
+
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen(buf);
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d'", buf, len, 2 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, " " );
+
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen(buf);
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d'", buf, len, 1 );
+	chewing_free( buf );
+
+	chewing_delete( ctx );
+}
+
+void test_Space()
+{
+	test_Space_selection();
+}
+
 void test_get_phoneSeq()
 {
 	static const struct {
@@ -694,6 +731,7 @@ int main()
 	test_PageDown();
 	test_ShiftSpace();
 	test_Numlock();
+	test_Space();
 
 	test_get_phoneSeq();
 	test_zuin_buffer();

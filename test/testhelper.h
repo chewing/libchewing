@@ -14,6 +14,7 @@
 
 #include "chewing.h"
 #include "chewingio.h"
+#include "chewing-utf8-util.h"
 
 #define KEY_DBLTAB	892 // <TT>
 #define KEY_SSPACE	893 // <SS>

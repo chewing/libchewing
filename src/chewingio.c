@@ -517,7 +517,15 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 
 	CheckAndResetRange( pgdata );
 
-	if ( pgdata->bSelect ) {
+	/*
+	 * space = right when the follogin conditions are true
+	 * 1. In select mode
+	 * 2. The candidate page is not last page
+	 *
+	 * Otherwise, space = down
+	 */
+	if ( pgdata->bSelect &&
+	     ctx->output->pci->pageNo < ctx->output->pci->nPage - 1 ) {
 		return chewing_handle_Right( ctx );
 	} else {
 		return chewing_handle_Down( ctx );
