@@ -519,7 +519,8 @@ static void Discard1( TreeDataType *ptd )
 static void Discard2( TreeDataType *ptd )
 {
 	int i, j;
-	char overwrite[ MAX_PHONE_SEQ_LEN ], failflag[ MAX_PHONE_SEQ_LEN ];
+	char overwrite[ MAX_PHONE_SEQ_LEN ];
+	char failflag[ INTERVAL_SIZE ];
 	int nInterval2;
 
 	memset( failflag, 0, sizeof( failflag ) );
