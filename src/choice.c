@@ -83,6 +83,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 
 	int i, head, head_tmp;
 	int tail, tail_tmp;
+	int pos;
 
 	head = tail = 0;
 
@@ -90,20 +91,28 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 
 	/*
 	 * XXX: The phoneSeq, nPhoneSeq skip any symbol in preedit buffer,
-	 * while bSymbolArrBrkpt, pos does not skip any symbol in preedit
-	 * buffer.  So we need to do some translate here.
+	 * while bSymbolArrBrkpt, does not skip any symbol in preedit
+	 * buffer. So we need to do some translate here.
 	 */
 	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
 		if ( bSymbolArrBrkpt[i] ) {
-			symbolArrBrkpt[ i - CountSymbols( pgdata, i + 1 ) ] = 1;
+			/*
+			 * XXX: If preedit buffer starts with symbol, the pos
+			 * will become negative. In this case, we just ignore
+			 * this symbol because it does not create any break
+			 * point.
+			 */
+			pos = i - CountSymbols( pgdata, i + 1 );
+			if (pos >= 0)
+				symbolArrBrkpt[ pos ] = 1;
 		}
 	}
 
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		for ( i = end; i >= begin; i--){
-			head = i;
 			if ( symbolArrBrkpt[ i ] )
 				break;
+			head = i;
 		}
 		head_tmp = end;
 	} else {
@@ -114,9 +123,9 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		tail_tmp = tail = end;
 	} else {
 		for ( i = begin; i < nPhoneSeq; i++ ) {
+			tail = i;
 			if ( symbolArrBrkpt[ i ] )
 				break;
-			tail = i;
 		}
 		tail_tmp = begin;
 	}
