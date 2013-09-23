@@ -21,7 +21,7 @@
 #include "hash-private.h"
 #include "testhelper.h"
 
-void test_select_candidate_no_phrase_choice_rearward()
+void test_select_candidate_no_rearward()
 {
 	/*
 	 * The following phrases are in dict
@@ -64,7 +64,7 @@ void test_select_candidate_no_phrase_choice_rearward()
 	chewing_delete( ctx );
 }
 
-void test_select_candidate_phrase_choice_rearward()
+void test_select_candidate_rearward()
 {
 	/*
 	 * The following phrases are in dict
@@ -108,6 +108,225 @@ void test_select_candidate_phrase_choice_rearward()
 	chewing_delete( ctx );
 }
 
+void test_select_candidate_no_rearward_with_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+	char *buf;
+	int len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
+
+	type_keystroke_by_string( ctx, "<EE><H><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 0 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 0 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 1 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 1 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 2 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 2 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 3 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 3 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 4 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 4 );
+	chewing_free( buf );
+
+	chewing_delete( ctx );
+}
+
+void test_select_candidate_rearward_with_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+	char *buf;
+	int len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
+
+	type_keystroke_by_string( ctx, "<EE><H><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 0 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 0 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 1 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 1 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 2 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 2 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 3 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 3 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 4 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 4 );
+	chewing_free( buf );
+
+	chewing_delete( ctx );
+}
+
+void test_select_candidate_no_rearward_start_with_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+	char *buf;
+	int len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "`31hk4g4" /* ，測試 */);
+
+	type_keystroke_by_string( ctx, "<EE><H><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 0 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 0 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 1 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 1 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 2 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 2 );
+	chewing_free( buf );
+
+	chewing_delete( ctx );
+}
+
+void test_select_candidate_rearward_start_with_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+	char *buf;
+	int len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "`31hk4g4" /* ，測試 */);
+
+	type_keystroke_by_string( ctx, "<EE><H><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 0 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 0 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 1 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 1, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 1, 1 );
+	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, "<EE><H><R><R><D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0 at pos `%d'", ret, 2 );
+	chewing_cand_Enumerate( ctx );
+	buf = chewing_cand_String( ctx );
+	len = ueStrLen( buf );
+	ok( len == 2, "candidate `%s' length `%d' shall be `%d' at pos `%d'", buf, len, 2, 2 );
+	chewing_free( buf );
+
+	chewing_delete( ctx );
+}
+
+
 void test_select_candidate_4_bytes_utf8()
 {
 	ChewingContext *ctx;
@@ -138,9 +357,14 @@ void test_select_candidate_4_bytes_utf8()
 }
 
 void test_select_candidate() {
-	test_select_candidate_no_phrase_choice_rearward();
-	test_select_candidate_phrase_choice_rearward();
+	test_select_candidate_no_rearward();
+	test_select_candidate_rearward();
+	test_select_candidate_no_rearward_with_symbol();
+	test_select_candidate_rearward_with_symbol();
+	test_select_candidate_no_rearward_start_with_symbol();
+	test_select_candidate_rearward_start_with_symbol();
 	test_select_candidate_4_bytes_utf8();
+
 }
 
 void test_Esc_not_entering_chewing()

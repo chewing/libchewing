@@ -97,24 +97,6 @@ void test_libchewing_issue_30()
 	chewing_delete( ctx );
 }
 
-void test_libchewing_issue_79()
-{
-	ChewingContext *ctx;
-	int ret;
-
-	print_function_name();
-
-	ctx = chewing_new();
-
-	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
-	type_keystroke_by_string( ctx, "<L><L><D>" );
-
-	ret = chewing_cand_TotalChoice( ctx );
-	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall greater than 0", ret );
-
-	chewing_delete( ctx );
-}
-
 void test_libchewing_data_issue_1()
 {
 	const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走*/ };
@@ -139,7 +121,6 @@ int main()
 
 	test_libchewing_data_issue_1();
 	test_libchewing_issue_30();
-	test_libchewing_issue_79();
 	test_libchewing_googlecode_issue_472();
 	test_libchewing_googlecode_issue_473();
 
