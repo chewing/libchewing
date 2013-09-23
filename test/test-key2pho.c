@@ -24,6 +24,7 @@ void test_uint_and_phone()
 	uint16_t phone;
 	uint16_t expect;
 
+	print_function_name();
 
 	u8phone = "\xE3\x84\x86\xE3\x84\xA3" /* ㄆㄣ */;
 	phone = UintFromPhone(u8phone);
@@ -65,6 +66,8 @@ void test_uint_and_phone_error()
 	uint16_t phone;
 	uint16_t expect;
 
+	print_function_name();
+
 	u8phone = "\xE3\x84\x8A\xE3\x84\xA7\xE6\xB8\xAC" /* ㄊㄧ測 */;
 	phone = UintFromPhone(u8phone);
 	expect = 0;
@@ -92,6 +95,8 @@ void test_uint_and_phone_error()
 void test_key_and_phone()
 {
 	char rt[ MAX_UTF8_SIZE * ZUIN_SIZE + 1 ];
+
+	print_function_name();
 
 	PhoneFromKey( rt, "dj", 0, 1 );
 	ok (!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8" /* ㄎㄨ */ ), "dj");

@@ -33,6 +33,8 @@ void test_libchewing_googlecode_issue_472()
 	size_t i;
 	ChewingContext *ctx;
 
+	print_function_name();
+
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
@@ -56,6 +58,8 @@ void test_libchewing_googlecode_issue_473()
 	size_t i;
 	ChewingContext *ctx;
 
+	print_function_name();
+
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
@@ -76,8 +80,9 @@ void test_libchewing_issue_30()
 	ChewingContext *ctx;
 	int cursor;
 
-	clean_userphrase();
+	print_function_name();
 
+	clean_userphrase();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -97,6 +102,8 @@ void test_libchewing_issue_79()
 	ChewingContext *ctx;
 	int ret;
 
+	print_function_name();
+
 	ctx = chewing_new();
 
 	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
@@ -113,8 +120,9 @@ void test_libchewing_data_issue_1()
 	const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走*/ };
 	ChewingContext *ctx;
 
-	clean_userphrase();
+	print_function_name();
 
+	clean_userphrase();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );

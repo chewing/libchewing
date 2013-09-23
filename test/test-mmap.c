@@ -28,6 +28,8 @@ void test_UnitFromPlatMmap()
 	char hard_copy[] = "ji3cp3vu3cj0 vup dj4up <E>";
 	int i;
 
+	print_function_name();
+
 	idx = plat_mmap_create(&m_mmap, TESTDATA, FLAG_ATTRIBUTE_READ);
 	ok (idx == 28, "plat_mmap_create");
 	if (idx > 0) {

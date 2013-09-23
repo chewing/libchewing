@@ -42,8 +42,9 @@ void test_select_candidate_no_phrase_choice_rearward()
 
 	ChewingContext *ctx;
 
-	clean_userphrase();
+	print_function_name();
 
+	clean_userphrase();
 
 	ctx = chewing_new();
 
@@ -83,8 +84,9 @@ void test_select_candidate_phrase_choice_rearward()
 	};
 	ChewingContext *ctx;
 
-	clean_userphrase();
+	print_function_name();
 
+	clean_userphrase();
 
 	ctx = chewing_new();
 
@@ -110,8 +112,9 @@ void test_select_candidate_4_bytes_utf8()
 {
 	ChewingContext *ctx;
 
-	clean_userphrase();
+	print_function_name();
 
+	clean_userphrase();
 
 	ctx = chewing_new();
 
@@ -144,6 +147,7 @@ void test_Esc_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<EE>" );
@@ -156,6 +160,7 @@ void test_Esc_in_select()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<EE>" );
@@ -168,6 +173,7 @@ void test_Esc_entering_zuin()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "hk<EE>" );
@@ -188,6 +194,7 @@ void test_Del_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<DC>" );
@@ -200,6 +207,7 @@ void test_Del_in_select()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<DC>" );
@@ -212,6 +220,7 @@ void test_Del_word()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -233,6 +242,7 @@ void test_Backspace_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<B>" );
@@ -245,6 +255,7 @@ void test_Backspace_in_select()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "`<B>" );
@@ -257,6 +268,7 @@ void test_Backspace_remove_bopomofo()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "hk<B>" );
@@ -269,6 +281,7 @@ void test_Backspace_word()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -291,6 +304,7 @@ void test_Up_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<U>" );
@@ -309,6 +323,7 @@ void test_Down_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	type_keystroke_by_string( ctx, "<D>" );
@@ -327,6 +342,7 @@ void test_Tab_insert_breakpoint_between_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -365,6 +381,7 @@ void test_Tab_connect_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -402,6 +419,8 @@ void test_Tab_at_the_end()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
+
 	ctx = chewing_new();
 
 	type_keystroke_by_string( ctx, "hk4g4u6vu84" );
@@ -432,6 +451,7 @@ void test_Capslock()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -447,6 +467,7 @@ void test_Home()
 	ChewingContext *ctx;
 	int cursor;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -467,6 +488,7 @@ void test_End()
 	ChewingContext *ctx;
 	int cursor;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -487,6 +509,7 @@ void test_PageUp()
 	ChewingContext *ctx;
 	int cursor;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -507,6 +530,7 @@ void test_PageDown()
 	ChewingContext *ctx;
 	int cursor;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -549,6 +573,7 @@ void test_Numlock_numeric_input()
 	size_t i;
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -570,6 +595,7 @@ void test_Numlock_select_candidate()
 	size_t i;
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -593,6 +619,8 @@ void test_Space_selection()
 	ChewingContext *ctx;
 	char *buf;
 	int len;
+
+	print_function_name();
 
 	clean_userphrase();
 
@@ -641,6 +669,7 @@ void test_get_phoneSeq()
 	int len;
 	unsigned short *phone;
 
+	print_function_name();
 
 	ctx = chewing_new();
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -666,6 +695,9 @@ void test_get_phoneSeq()
 void test_zuin_buffer()
 {
 	ChewingContext *ctx;
+
+	print_function_name();
+
 	ctx = chewing_new();
 
 	type_keystroke_by_string( ctx, "1ul" );
@@ -693,6 +725,8 @@ void test_longest_phrase()
 {
 	ChewingContext *ctx;
 	IntervalType it;
+
+	print_function_name();
 
 	ctx = chewing_new();
 

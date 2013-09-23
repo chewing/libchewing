@@ -42,6 +42,8 @@ void test_plat_get_search_path()
 	int ret;
 	char output[PATH_MAX];
 
+	print_function_name();
+
 	putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
 	ret = get_search_path( output, sizeof(output) );
 	ok (ret == 0, "get_search_path return 0");
@@ -53,6 +55,8 @@ void test_plat_path_found()
 {
 	int ret;
 	char output[ PATH_MAX ];
+
+	print_function_name();
 
 	ret = find_path_by_files(
 		CHEWING_DATA_PREFIX "_no_such_path" SEARCH_PATH_SEP
@@ -68,6 +72,8 @@ void test_plat_path_cannot_find()
 {
 	int ret;
 	char output[ PATH_MAX ];
+
+	print_function_name();
 
 	ret = find_path_by_files(
 			CHEWING_DATA_PREFIX "_no_such_path_1" SEARCH_PATH_SEP

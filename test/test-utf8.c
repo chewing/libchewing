@@ -14,12 +14,14 @@
 #include "testhelper.h"
 #include "chewing-utf8-util.h"
 
-int main ()
+void test_utf8()
 {
 	char *u8string;
 	int u8len;
 	int len;
 	char u8string2[16];
+
+	print_function_name();
 
 	u8string = "HelloWorld";
 	u8len = ueStrLen(u8string);
@@ -42,5 +44,10 @@ int main ()
 	u8string = ueStrSeek(u8string, 0);
 	ok (!strcmp(u8string, "\xE6\xB8\xAC\xE8\xA9\xA6\xE8\xA8\x88\xE7\xAE\x97\xE9\x95\xB7\xE5\xBA\xA6" /* 測試計算長度 */ ), "ueStrSeek");
 
+}
+
+int main ()
+{
+test_utf8();
 	return exit_status();
 }

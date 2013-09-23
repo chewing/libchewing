@@ -37,6 +37,7 @@ void test_default_value()
 	int *select_key;
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -99,6 +100,7 @@ void test_set_candPerPage()
 	size_t i;
 	size_t j;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -123,6 +125,7 @@ void test_set_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -165,6 +168,8 @@ void test_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
+	print_function_name();
+
 	ctx = chewing_new();
 
 	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN );
@@ -185,6 +190,7 @@ void test_set_selKey()
 	ChewingContext *ctx;
 	int *select_key;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -213,6 +219,7 @@ void test_set_addPhraseDirection()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -242,6 +249,7 @@ void test_set_spaceAsSelection()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -271,6 +279,7 @@ void test_set_escCleanAllBuf()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -300,6 +309,7 @@ void test_set_autoShiftCur()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -329,6 +339,7 @@ void test_set_easySymbolInput()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -358,6 +369,7 @@ void test_set_phraseChoiceRearward()
 	int value;
 	int mode;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -397,6 +409,7 @@ void test_set_ChiEngMode()
 	size_t i;
 	size_t j;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -432,6 +445,7 @@ void test_set_ShapeMode()
 	size_t i;
 	size_t j;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -458,6 +472,7 @@ void test_deprecated()
 	ChewingConfigData configure;
 	memset( &configure, 0, sizeof( ChewingConfigData ) );
 
+	print_function_name();
 
 	ctx = chewing_new();
 

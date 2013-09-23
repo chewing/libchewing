@@ -100,6 +100,7 @@ void test_fullshape_input()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -120,6 +121,7 @@ void test_set_fullshape()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 

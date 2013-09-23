@@ -337,6 +337,7 @@ void test_type_symbol()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -356,6 +357,7 @@ void test_symbol_cand_page()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 

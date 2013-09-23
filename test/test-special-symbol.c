@@ -74,6 +74,7 @@ void test_in_chinese_mode()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -99,6 +100,7 @@ void test_in_easy_symbol_mode()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -146,6 +148,7 @@ void test_in_fullshape_mode()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
