@@ -740,7 +740,7 @@ static void ShowChewingData( ChewingData *pgdata )
 		pgdata->bSelect );
 }
 
-int CallPhrasing( ChewingData *pgdata )
+int CallPhrasing( ChewingData *pgdata, int all_phrasing )
 {
 	/* set "bSymbolArrBrkpt" && "bArrBrkpt" */
 	int i, ch_count = 0;
@@ -772,7 +772,7 @@ int CallPhrasing( ChewingData *pgdata )
 	ShowChewingData(pgdata);
 
 	/* then phrasing */
-	Phrasing( pgdata );
+	Phrasing( pgdata, all_phrasing );
 
 	/* and then make prefer interval */
 	MakePreferInterval( pgdata );
