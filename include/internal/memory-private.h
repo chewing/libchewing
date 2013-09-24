@@ -26,6 +26,23 @@ static inline uint16_t GetUint16( const void *ptr )
 {
 	uint16_t val;
 	const unsigned char *uptr = ptr;
+	val =
+		( uptr[0] << 0 ) |
+		( uptr[1] << 8 );
+	return val;
+}
+
+static inline void PutUint16( uint16_t val, void *ptr )
+{
+	unsigned char *uptr = (unsigned char *) ptr;
+	uptr[0] = ( val >> 0 ) & 0xff;
+	uptr[1] = ( val >> 8 ) & 0xff;
+}
+
+static inline uint16_t GetUint16PreservedEndian( const void *ptr )
+{
+	uint16_t val;
+	const unsigned char *uptr = ptr;
 #if WORDS_BIGENDIAN
 	val =
 		( uptr[0] << 8 ) |
@@ -38,7 +55,7 @@ static inline uint16_t GetUint16( const void *ptr )
 	return val;
 }
 
-static inline void PutUint16( uint16_t val, void *ptr )
+static inline void PutUint16PreservedEndian( uint16_t val, void *ptr )
 {
 	unsigned char *uptr = (unsigned char *) ptr;
 #if WORDS_BIGENDIAN
@@ -79,7 +96,7 @@ static inline void PutUint24( uint32_t val, void *ptr )
 	uptr[2] = ( val >> 16 ) & 0xff;
 }
 
-static inline int GetInt32( const void *ptr )
+static inline int GetInt32PreservedEndian( const void *ptr )
 {
 	int val;
 	const unsigned char *uptr = ptr;
@@ -99,7 +116,7 @@ static inline int GetInt32( const void *ptr )
 	return val;
 }
 
-static inline void PutInt32( int val, void *ptr )
+static inline void PutInt32PreservedEndian( int val, void *ptr )
 {
 	unsigned char *uptr = (unsigned char *) ptr;
 #if WORDS_BIGENDIAN

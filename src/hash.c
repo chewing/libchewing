@@ -155,17 +155,17 @@ static void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	}
 
 	/* freq info */
-	PutInt32( pItem->data.userfreq, &str[ 0 ] );
-	PutInt32( pItem->data.recentTime, &str[ 4 ] );
-	PutInt32( pItem->data.maxfreq, &str[ 8 ] );
-	PutInt32( pItem->data.origfreq, &str[ 12 ] );
+	PutInt32PreservedEndian( pItem->data.userfreq, &str[ 0 ] );
+	PutInt32PreservedEndian( pItem->data.recentTime, &str[ 4 ] );
+	PutInt32PreservedEndian( pItem->data.maxfreq, &str[ 8 ] );
+	PutInt32PreservedEndian( pItem->data.origfreq, &str[ 12 ] );
 
 	/* phone seq*/
 	phraselen = ueStrLen( pItem->data.wordSeq );
 	str[ 16 ] = phraselen;
 	pc = &str[ 17 ];
 	for ( i = 0; i < phraselen; i++ ) {
-		PutUint16( pItem->data.phoneSeq[ i ], pc );
+		PutUint16PreservedEndian( pItem->data.phoneSeq[ i ], pc );
 		pc += 2;
 	}
 
@@ -240,17 +240,17 @@ static int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_inde
 	memset( pItem, 0, sizeof(HASH_ITEM) );
 
 	/* freq info */
-	pItem->data.userfreq	= GetInt32(&srcbuf[ 0 ]);
-	pItem->data.recentTime	= GetInt32(&srcbuf[ 4 ]);
-	pItem->data.maxfreq	= GetInt32(&srcbuf[ 8 ]);
-	pItem->data.origfreq	= GetInt32(&srcbuf[ 12 ]);
+	pItem->data.userfreq	= GetInt32PreservedEndian(&srcbuf[ 0 ]);
+	pItem->data.recentTime	= GetInt32PreservedEndian(&srcbuf[ 4 ]);
+	pItem->data.maxfreq	= GetInt32PreservedEndian(&srcbuf[ 8 ]);
+	pItem->data.origfreq	= GetInt32PreservedEndian(&srcbuf[ 12 ]);
 
 	/* phone seq, length in num of chi words */
 	len = (int) srcbuf[ 16 ];
 	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
 	pc = &srcbuf[ 17 ];
 	for ( i = 0; i < len; i++ ) {
-		pItem->data.phoneSeq[ i ] = GetUint16( pc );
+		pItem->data.phoneSeq[ i ] = GetUint16PreservedEndian( pc );
 		pc += 2;
 	}
 	pItem->data.phoneSeq[ i ] = 0;
