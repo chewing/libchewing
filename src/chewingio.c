@@ -687,7 +687,10 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 	// XXX: Why close symbol choice list, but not word choice list.
 	if ( ! pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
 		/* Close Symbol Choice List */
-		chewing_handle_Esc(ctx);
+		if ( pgdata->bSelect ) {
+			// FIXME: why we need to close the candidate list here?
+			ChoiceEndChoice( pgdata );
+		}
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
