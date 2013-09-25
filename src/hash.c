@@ -114,9 +114,16 @@ static int SetupUserphraseLiftTime( ChewingData *pgdata )
 	if ( ret != SQLITE_OK ) goto error;
 
 	ret = sqlite3_step( stmt );
-	if ( ret != SQLITE_ROW ) goto error;
-
-	pgdata->static_data.original_lifttime = sqlite3_column_int( stmt, CHEWING_DB_CONFIG_SEL_VALUE );
+	switch ( ret ) {
+	case SQLITE_ROW:
+		pgdata->static_data.original_lifttime = sqlite3_column_int( stmt, CHEWING_DB_CONFIG_SEL_VALUE );
+		break;
+	case SQLITE_DONE:
+		pgdata->static_data.original_lifttime = 0;
+		break;
+	default:
+		goto error;
+	}
 	pgdata->static_data.new_lifttime = pgdata->static_data.original_lifttime;
 
 	ret = sqlite3_finalize( stmt );
