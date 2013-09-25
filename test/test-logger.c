@@ -36,6 +36,8 @@ void test_set_logger()
 	ChewingContext *ctx;
 	FILE *fd;
 
+	print_function_name();
+
 	ctx = chewing_new();
 	fd = fopen( LOG_PATH,  "w" );
 

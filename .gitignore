@@ -47,6 +47,8 @@ config.h
 # test suite
 test/genkeystroke
 test/genkeystroke.exe
+test/performance
+test/performance.exe
 test/randkeystroke
 test/randkeystroke.exe
 test/simulate
@@ -91,11 +93,8 @@ test/*.log
 test/*.trs
 
 # Generated tools/headers
-src/chewing-definition.h
-src/tools/maketree
-src/tools/maketree.exe
-src/tools/sort
-src/tools/sort.exe
+src/tools/init_database
+src/tools/init_database.exe
 
 # gcov output
 *.gcda

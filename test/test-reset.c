@@ -26,6 +26,7 @@ void test_reset_shall_not_clean_static_data()
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
+	print_function_name();
 
 	ctx = chewing_new();
 

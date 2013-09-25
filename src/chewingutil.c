@@ -148,7 +148,7 @@ int HaninSymbolInput( ChewingData *pgdata )
 		pci->nTotalChoice++;
 	}
 	pai->avail[ 0 ].len = 1;
-	pai->avail[ 0 ].id = -1;
+	pai->avail[ 0 ].id = NULL;
 	pai->nAvail = 1;
 	pai->currentAvail = 0;
 	pci->nChoicePerPage = pgdata->config.candPerPage;
@@ -360,7 +360,7 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 			pci->nTotalChoice++;
 		}
 		pai->avail[ 0 ].len = 1;
-		pai->avail[ 0 ].id = -1;
+		pai->avail[ 0 ].id = NULL;
 		pai->nAvail = 1;
 		pai->currentAvail = 0;
 		pci->nChoicePerPage = pgdata->config.candPerPage;
@@ -537,8 +537,6 @@ void CleanAllBuf( ChewingData *pgdata )
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 {
 	int throwEnd;
-	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
-	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 
 	throwEnd = CountReleaseNum( pgdata );
 
@@ -550,11 +548,10 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 		 */
 		WriteChiSymbolToBuf( pgo->commitStr, throwEnd, pgdata );
 
-		/* Add to userphrase */
-		memcpy( bufPhoneSeq, pgdata->phoneSeq, sizeof( uint16_t ) * throwEnd );
-		bufPhoneSeq[ throwEnd ] = (uint16_t) 0;
-		ueStrNCpy( bufWordSeq, pgdata->phrOut.chiBuf, throwEnd, 1 );
-		UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
+		/*
+		 * FIXME: analyze auto commit string and update userphrase
+		 * according to it.
+		 */
 
 		KillFromLeft( pgdata, throwEnd );
 	}
@@ -747,7 +744,7 @@ static void ShowChewingData( ChewingData *pgdata )
 		pgdata->bSelect );
 }
 
-int CallPhrasing( ChewingData *pgdata )
+int CallPhrasing( ChewingData *pgdata, int all_phrasing )
 {
 	/* set "bSymbolArrBrkpt" && "bArrBrkpt" */
 	int i, ch_count = 0;
@@ -779,7 +776,7 @@ int CallPhrasing( ChewingData *pgdata )
 	ShowChewingData(pgdata);
 
 	/* then phrasing */
-	Phrasing( pgdata );
+	Phrasing( pgdata, all_phrasing );
 
 	/* and then make prefer interval */
 	MakePreferInterval( pgdata );
@@ -1324,7 +1321,7 @@ int OpenSymbolChoice( ChewingData *pgdata )
 	pgdata->bSelect = 1;
 	pgdata->availInfo.nAvail = 1;
 	pgdata->availInfo.currentAvail = 0;
-	pgdata->availInfo.avail[ 0 ].id = -1;
+	pgdata->availInfo.avail[ 0 ].id = NULL;
 	pgdata->availInfo.avail[ 0 ].len = 1;
 	return 0;
 }

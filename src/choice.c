@@ -23,7 +23,6 @@
 #include "chewing-utf8-util.h"
 #include "global.h"
 #include "dict-private.h"
-#include "char-private.h"
 #include "chewingutil.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
@@ -76,23 +75,44 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 	const uint16_t *phoneSeq = pgdata->phoneSeq;
 	int nPhoneSeq = pgdata->nPhoneSeq;
 	const int *bSymbolArrBrkpt = pgdata->bSymbolArrBrkpt;
+	int symbolArrBrkpt[ ARRAY_SIZE(pgdata->bSymbolArrBrkpt) ] = { 0 };
 
-	int pho_id;
+	const TreeType *tree_pos;
 	int diff;
 	uint16_t userPhoneSeq[ MAX_PHONE_SEQ_LEN ];
 
 	int i, head, head_tmp;
 	int tail, tail_tmp;
+	int pos;
 
 	head = tail = 0;
 
 	pai->nAvail = 0;
 
+	/*
+	 * XXX: The phoneSeq, nPhoneSeq skip any symbol in preedit buffer,
+	 * while bSymbolArrBrkpt, does not skip any symbol in preedit
+	 * buffer. So we need to do some translate here.
+	 */
+	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
+		if ( bSymbolArrBrkpt[i] ) {
+			/*
+			 * XXX: If preedit buffer starts with symbol, the pos
+			 * will become negative. In this case, we just ignore
+			 * this symbol because it does not create any break
+			 * point.
+			 */
+			pos = i - CountSymbols( pgdata, i + 1 );
+			if (pos >= 0)
+				symbolArrBrkpt[ pos ] = 1;
+		}
+	}
+
 	if ( pgdata->config.bPhraseChoiceRearward ) {
 		for ( i = end; i >= begin; i--){
-			head = i;
-			if ( bSymbolArrBrkpt[ i ] )
+			if ( symbolArrBrkpt[ i ] )
 				break;
+			head = i;
 		}
 		head_tmp = end;
 	} else {
@@ -103,21 +123,21 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 		tail_tmp = tail = end;
 	} else {
 		for ( i = begin; i < nPhoneSeq; i++ ) {
-			if ( bSymbolArrBrkpt[ i ] )
-				break;
 			tail = i;
+			if ( symbolArrBrkpt[ i ] )
+				break;
 		}
 		tail_tmp = begin;
 	}
 
 	while ( head <= head_tmp && tail_tmp <= tail ) {
 		diff = tail_tmp - head_tmp;
-		pho_id = TreeFindPhrase( pgdata, head_tmp, tail_tmp, phoneSeq );
+		tree_pos = TreeFindPhrase( pgdata, head_tmp, tail_tmp, phoneSeq );
 
-		if ( pho_id != -1 ) {
+		if ( tree_pos ) {
 			/* save it! */
 			pai->avail[ pai->nAvail ].len = diff + 1;
-			pai->avail[ pai->nAvail ].id = pho_id;
+			pai->avail[ pai->nAvail ].id = tree_pos;
 			pai->nAvail++;
 		}
 		else {
@@ -129,11 +149,11 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 			if ( UserGetPhraseFirst( pgdata, userPhoneSeq ) ) {
 				/* save it! */
 				pai->avail[ pai->nAvail ].len = diff + 1;
-				pai->avail[ pai->nAvail ].id = -1;
+				pai->avail[ pai->nAvail ].id = NULL;
 				pai->nAvail++;
 			} else {
 				pai->avail[ pai->nAvail ].len = 0;
-				pai->avail[ pai->nAvail ].id = -1;
+				pai->avail[ pai->nAvail ].id = NULL;
 			}
 			UserGetPhraseEnd( pgdata, userPhoneSeq );
 		}
@@ -159,22 +179,22 @@ static int ChoiceTheSame( ChoiceInfo *pci, const char *str, int len )
 
 static void ChoiceInfoAppendChi( ChewingData *pgdata,  ChoiceInfo *pci, uint16_t phone )
 {
-	Word tempWord;
+	Phrase tempWord;
 	int len;
 	if ( GetCharFirst( pgdata, &tempWord, phone ) ) {
 		do {
-			len = ueBytesFromChar( tempWord.word[ 0 ] );
-			if ( ChoiceTheSame( pci, tempWord.word,
+			len = ueBytesFromChar( tempWord.phrase[ 0 ] );
+			if ( ChoiceTheSame( pci, tempWord.phrase,
 					    len) )
 				continue;
 			assert( pci->nTotalChoice < MAX_CHOICE );
 			memcpy(
 				pci->totalChoiceStr[ pci->nTotalChoice ],
-				tempWord.word, len );
+				tempWord.phrase, len );
 			pci->totalChoiceStr[ pci->nTotalChoice ]
 					   [ len ] = '\0';
 			pci->nTotalChoice++;
-		} while ( GetCharNext( pgdata, &tempWord ) );
+		} while ( GetVocabNext( pgdata, &tempWord ) );
 	}
 }
 
@@ -284,7 +304,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 	}
 	/* phrase */
 	else {
-		if ( pai->avail[ pai->currentAvail ].id != -1 ) {
+		if ( pai->avail[ pai->currentAvail ].id ) {
 			GetPhraseFirst( pgdata, &tempPhrase, pai->avail[ pai->currentAvail ].id );
 			do {
 				if ( ChoiceTheSame(
@@ -296,7 +316,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 				ueStrNCpy( pci->totalChoiceStr[ pci->nTotalChoice ],
 						tempPhrase.phrase, len, 1);
 				pci->nTotalChoice++;
-			} while( GetPhraseNext( pgdata, &tempPhrase ) );
+			} while( GetVocabNext( pgdata, &tempPhrase ) );
 		}
 
 		memcpy( userPhoneSeq, &phoneSeq[ cursor ], sizeof( uint16_t ) * len );

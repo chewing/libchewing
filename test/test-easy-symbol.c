@@ -54,6 +54,7 @@ void test_type_easy_symbol()
 	ChewingContext *ctx;
 	size_t i;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -74,6 +75,7 @@ void test_mode_change()
 {
 	ChewingContext *ctx;
 
+	print_function_name();
 
 	ctx = chewing_new();
 

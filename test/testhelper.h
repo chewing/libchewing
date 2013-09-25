@@ -11,9 +11,11 @@
 #endif
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "chewing.h"
 #include "chewingio.h"
+#include "chewing-utf8-util.h"
 
 #define KEY_DBLTAB	892 // <TT>
 #define KEY_SSPACE	893 // <SS>
@@ -60,6 +62,7 @@
 	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
 	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
+#define print_function_name() do { printf("#\n# %s\n#\n", __func__); } while ( 0 )
 
 typedef struct {
 	char * token;

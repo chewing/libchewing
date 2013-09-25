@@ -42,6 +42,7 @@ void test_set_keyboard_type()
 	char *keyboard_string;
 	int keyboard_type;
 
+	print_function_name();
 
 	ctx = chewing_new();
 
@@ -85,6 +86,8 @@ void test_KBStr2Num()
 	int i;
 	int ret;
 
+	print_function_name();
+
 	for ( i = 0; i < (int)ARRAY_SIZE( KEYBOARD_STRING ); ++i ) {
 		// XXX: chewing_KBStr2Num shall accept const char *.
 		ret = chewing_KBStr2Num( KEYBOARD_STRING[i] );
@@ -98,6 +101,7 @@ void test_enumerate_keyboard_type()
 	size_t i;
 	char *keyboard_string;
 
+	print_function_name();
 
 	ctx = chewing_new();
 

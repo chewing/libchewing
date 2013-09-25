@@ -36,7 +36,6 @@ chewing_include_HEADERS = \
 	$(NULL)
 
 noinst_HEADERS =\
-	include/internal/char-private.h \
 	include/internal/chewing-private.h \
 	include/internal/chewing-utf8-util.h \
 	include/internal/chewingutil.h \

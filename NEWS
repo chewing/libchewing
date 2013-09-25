@@ -5,6 +5,11 @@ What's New in libchewing GIT
 * Change MAX_UTF8_SIZE to 4
 * Fix numlock key cannot output number
 * Remove text data support
+* Add new chewing_cand_String_by_index API
+* Fix negative frequency problem
+* Fix cannot select candidate when symbol exists
+* Fix auto commit create problematic user phrase
+* New platform independent binary data implemented by Bo-cheng Jan
 
 
 What's New in libchewing 0.3.5 (Jul 28, 2013)

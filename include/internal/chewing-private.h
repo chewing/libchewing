@@ -66,10 +66,27 @@ typedef union {
 	uint16_t wch;
 } wch_t;
 
+/*
+ * This structure may represent both internal nodes and leaf nodes of a phrase
+ * tree. Two kinds are distinguished by whether key is 0. For an internal node,
+ * child.begin and child.end give a list of children in the position
+ * [child.begin, child.end). For a leaf node, phrase.pos offers the position
+ * of the phrase in system dictionary, and phrase.freq offers frequency of this
+ * phrase using a specific input method (may be bopomofo or non-phone). Note
+ * that key in root represents the number of total elements(nodes) in the tree.
+ */
 typedef struct {
-	uint16_t phone_id;
-	int phrase_id;
-	int child_begin, child_end;
+	unsigned char key[2];
+	union {
+		struct {
+			unsigned char begin[3];
+			unsigned char end[3];
+		} child;
+		struct {
+			unsigned char pos[3];
+			unsigned char freq[3];
+		} phrase;
+	};
 } TreeType;
 
 typedef struct {
@@ -98,7 +115,7 @@ typedef struct {
 	struct {
 		int len;
 		/** @brief phone id. */
-		int id;
+		const TreeType *id;
 	} avail[ MAX_PHRASE_LEN ];
 	/** @brief total number of availble lengths. */
 	int nAvail;
@@ -145,28 +162,13 @@ typedef struct _SymbolEntry {
 } SymbolEntry;
 
 typedef struct {
-	TreeType *tree;
+	const TreeType *tree;
 	size_t tree_size;
 	plat_mmap tree_mmap;
+	const TreeType *tree_cur_pos, *tree_end_pos;
 
-	uint16_t *arrPhone;
-	int *char_begin;
-	size_t phone_num;
-	void *char_;
-	void *char_cur_pos;
-	int char_end_pos;
-	plat_mmap char_mmap;
-	plat_mmap char_begin_mmap;
-	plat_mmap char_phone_mmap;
-
-	int *dict_begin;
-	void *dict_cur_pos;
-	int dict_end_pos;
-
-	void *dict;
-
+	const char *dict;
 	plat_mmap dict_mmap;
-	plat_mmap index_mmap;
 
 	sqlite3 *db;
 	sqlite3_stmt *userphrase_stmt;

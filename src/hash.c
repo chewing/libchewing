@@ -113,9 +113,6 @@ static int SetupUserphraseLiftTime( ChewingData *pgdata )
 	ret = sqlite3_prepare_v2( pgdata->static_data.db, CHEWING_DB_CONFIG_SELECT, -1, &stmt, NULL );
 	if ( ret != SQLITE_OK ) goto error;
 
-	ret = sqlite3_bind_int( stmt, CHEWING_DB_CONFIG_SEL_ID, CHEWING_DB_CONFIG_ID_LIFETIME );
-	if ( ret != SQLITE_OK ) goto error;
-
 	ret = sqlite3_step( stmt );
 	if ( ret != SQLITE_ROW ) goto error;
 
