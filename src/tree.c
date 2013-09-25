@@ -1026,35 +1026,32 @@ static void DoDpPhrasing( ChewingData *pgdata, TreeDataType *pdt )
 	/* The interval shall be sorted by the increase order of end. */
 	qsort( pdt->interval, pdt->nInterval, sizeof( pdt->interval[0] ), SortByIncreaseEnd );
 
-	for ( end = 0, interval_id = 0; end < pgdata->nPhoneSeq; ++end ) {
-		for (; interval_id < pdt->nInterval; ++interval_id ) {
-			/*
-			 * XXX: pdt->interval.to is excluding, while end is
-			 * including, so we need to minus one here.
-			 */
-			if ( pdt->interval[interval_id].to - 1 != end )
-				break;
+	for ( interval_id = 0; interval_id < pdt->nInterval; ++interval_id ) {
+		/*
+		 * XXX: pdt->interval.to is excluding, while end is
+		 * including, so we need to minus one here.
+		 */
+		end = pdt->interval[interval_id].to - 1;
 
-			prev_end = pdt->interval[interval_id].from - 1;
+		prev_end = pdt->interval[interval_id].from - 1;
 
-			if ( prev_end >= 0 )
-				tmp = DuplicateRecordAndInsertInterval(
-					highest_score[ prev_end ],
-					pdt,
-					interval_id );
-			else
-				tmp = CreateSingleIntervalRecord( pdt, interval_id );
+		if ( prev_end >= 0 )
+			tmp = DuplicateRecordAndInsertInterval(
+				highest_score[ prev_end ],
+				pdt,
+				interval_id );
+		else
+			tmp = CreateSingleIntervalRecord( pdt, interval_id );
 
-			/* FIXME: shall exit immediately? */
-			if (!tmp)
-				continue;
+		/* FIXME: shall exit immediately? */
+		if (!tmp)
+			continue;
 
-			if ( highest_score[end] == NULL || highest_score[end]->score < tmp->score ) {
-				FreeRecord( highest_score[end] );
-				highest_score[end] = tmp;
-			} else
-				FreeRecord( tmp );
-		}
+		if ( highest_score[end] == NULL || highest_score[end]->score < tmp->score ) {
+			FreeRecord( highest_score[end] );
+			highest_score[end] = tmp;
+		} else
+			FreeRecord( tmp );
 	}
 
 	if ( pgdata->nPhoneSeq - 1 < 0 || highest_score[ pgdata->nPhoneSeq - 1 ] == NULL ) {
