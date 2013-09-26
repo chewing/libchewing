@@ -813,8 +813,16 @@ void test_Numlock_numeric_input()
 void test_Numlock_select_candidate()
 {
 	const TestData NUMLOCK_SELECT[] = {
+		{ "hk4<D><N1><E>", "\xE5\x86\x8A" /* 冊 */ },
+		{ "hk4<D><N2><E>", "\xE7\xAD\x96" /* 策 */ },
 		{ "hk4<D><N3><E>", "\xE6\xB8\xAC" /* 測 */ },
-		{ "`<N1><E>", "\xE2\x80\xA6" /* … */ },
+		{ "hk4<D><N4><E>", "\xE5\x81\xB4" /* 側 */ },
+		{ "hk4<D><N5><E>", "\xE5\xBB\x81" /* 廁 */ },
+		{ "hk4<D><N6><E>", "\xE6\x83\xBB" /* 惻 */ },
+		{ "hk4<D><N7><E>", "\xE7\xAD\xB4" /* 筴 */ },
+		{ "hk4<D><N8><E>", "\xE7\x95\x9F" /* 畟 */ },
+		{ "hk4<D><N9><E>", "\xE8\x8C\xA6" /* 茦 */ },
+		{ "hk4<D><N0><E>", "\xE7\xB2\xA3" /* 粣 */ },
 	};
 	size_t i;
 	ChewingContext *ctx;

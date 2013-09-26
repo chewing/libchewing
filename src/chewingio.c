@@ -1383,7 +1383,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 		 * and submit the words.
 		 */
 		int num = -1;
-		if ( key > '0' && key < '9' )
+		if ( key > '0' && key <= '9' )
 			num = key - '1';
 		else if ( key == '0' )
 			num = 9;
