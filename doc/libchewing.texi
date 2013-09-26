@@ -684,6 +684,18 @@ The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
+@deftypefun int chewing_bopomofo_Check (ChewingContext *@var{ctx})
+This function returns whether there are phonetic pre-edit string in the
+buffer.
+
+The return value is @code{1} on success, @code{0} on failure.
+
+@quotation Deprecated
+The @code{chewing_bopomofo_Check} function is no-op now. This function exists only for
+backword compatibility.
+@end quotation
+@end deftypefun
+
 @deftypefun int chewing_zuin_Check (ChewingContext *@var{ctx})
 This function returns whether there are phonetic pre-edit string in the
 buffer.  Here ``zuin'' means bopomofo, a phonetic system for transcribing
@@ -695,6 +707,22 @@ otherwise.
 @strong{CAUTION}: The return value of this function is different from
 @code{chewing_commit_Check}, @code{chewing_buffer_Check}, and
 @code{chewing_aux_Check}.
+@end deftypefun
+
+@deftypefun char* chewing_bopomofo_String (ChewingContext *@var{ctx})
+This function returns the phonetic characters in the pre-edit buffer.
+
+It will contain the number of phonetic characters in the returned string.
+This function returns @code{NULL} when no memory.
+
+The return value is a pointer to a character string. This function returns
+@code{NULL} when no memory. The memory @emph{must} be freed by the caller using
+function @code{chewing_free}.
+
+@quotation Deprecated
+The @code{chewing_bopomofo_String} function is no-op now. This function exists only for
+backword compatibility.
+@end quotation
 @end deftypefun
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
