@@ -545,8 +545,8 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 	* we need to throw some of the characters at the head of the buffer and
 	* commit them.
 	*/
-	pgo->nCommitStr = throwEnd;
 	if ( throwEnd ) {
+		pgo->nCommitStr = throwEnd;
 		/*
 		 * count how many chinese words in "chiSymbolBuf[ 0 .. (throwEnd - 1)]"
 		 * And release from "chiSymbolBuf" && "phoneSeq"
