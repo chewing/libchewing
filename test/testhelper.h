@@ -70,6 +70,7 @@ typedef struct {
 } TestData;
 
 typedef struct {
+	char *name;
 	int (*check)(ChewingContext *ctx);
 	int (*check_alt)(ChewingContext *ctx);
 	int (*get_length)(ChewingContext *ctx);

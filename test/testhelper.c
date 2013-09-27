@@ -26,6 +26,7 @@ static unsigned int test_ok;
 
 /* We cannot use designated initializer here due to Visual Studio */
 BufferType COMMIT_BUFFER = {
+	"commit buffer",
 	chewing_commit_Check,
 	0,
 	0,
@@ -34,6 +35,7 @@ BufferType COMMIT_BUFFER = {
 };
 
 BufferType PREEDIT_BUFFER = {
+	"preedit buffer",
 	chewing_buffer_Check,
 	0,
 	chewing_buffer_Len,
@@ -42,6 +44,7 @@ BufferType PREEDIT_BUFFER = {
 };
 
 BufferType ZUIN_BUFFER = {
+	"zuin buffer",
 	0,
 	chewing_zuin_Check,
 	0,
@@ -50,6 +53,7 @@ BufferType ZUIN_BUFFER = {
 };
 
 BufferType AUX_BUFFER = {
+	"aux buffer",
 	chewing_aux_Check,
 	0,
 	chewing_aux_Length,
@@ -295,7 +299,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = !!expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s check function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->check_alt ) {
@@ -303,7 +307,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = !expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s check function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->get_length ) {
@@ -311,13 +315,13 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"get length function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s get length function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->get_string ) {
 		buf = buffer->get_string( ctx );
 		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
-			"string function returned `%s' shall be `%s'", buf, expected );
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
 		chewing_free( buf );
 	}
 
@@ -326,9 +330,9 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"string function returned parameter `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s string function returned parameter `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
-			"string function returned `%s' shall be `%s'", buf, expected );
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
 		chewing_free( buf );
 	}
 }
