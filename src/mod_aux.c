@@ -80,6 +80,32 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
  *
  * Always returns a char pointer, caller must free it.
  */
+CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx)
+{
+	char *s;
+	int i;
+
+	s = (char*) calloc(
+		1 + ZUIN_SIZE,
+		sizeof(ctx->output->zuinBuf[ 0 ].s) );
+
+	if ( s ) {
+		for ( i = 0; i < ZUIN_SIZE; i++ ) {
+			if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
+				strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
+			}
+		}
+	}
+	return s;
+}
+
+/**
+ * @param ctx handle to Chewing IM context
+ * @param zuin_count pointer to the integer of available Zuin preedit string
+ *
+ * Always returns a char pointer, caller must free it.
+ */
+// deprecated
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
 	char *s;
@@ -101,6 +127,19 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 	return s;
 }
 
+CHEWING_API int chewing_bopomofo_Check( ChewingContext *ctx )
+{
+	int i;
+
+	for ( i = 0; i < ZUIN_SIZE; ++i ) {
+		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// deprecated
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx )
 {
 	int i;
