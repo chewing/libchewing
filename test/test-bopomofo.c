@@ -977,6 +977,45 @@ void test_longest_phrase()
 	chewing_delete( ctx );
 }
 
+void test_auto_commit_phrase()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 3 );
+
+	type_keystroke_by_string( ctx, "hk4g4hk4g4" /* 測試測試 */ );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_auto_commit_symbol()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 2 );
+
+	type_keystroke_by_string( ctx, "`31hk4g4hk4g4" /* ，測試 */ );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+	ok_commit_buffer( ctx, "\xEF\xBC\x8C" /* ， */ );
+
+	chewing_delete( ctx );
+}
+
+void test_auto_commit()
+{
+	test_auto_commit_phrase();
+	// FIXME: Auto commit for symbol seem to be incorrect.
+	//test_auto_commit_symbol();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -1003,6 +1042,7 @@ int main()
 	test_zuin_buffer();
 
 	test_longest_phrase();
+	test_auto_commit();
 
 	return exit_status();
 }
