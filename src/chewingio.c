@@ -1421,3 +1421,48 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 	ctx->data->logger = logger;
 	ctx->data->loggerData = data;
 }
+
+CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
+{
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_has_next(
+	ChewingContext *ctx,
+	unsigned int *phrase_len,
+	unsigned int *bopomofo_len)
+{
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_get(
+	ChewingContext *ctx,
+	char *phrase_buf, unsigned int phrase_len,
+	char *bopomofo_buf, unsigned int bopomofo_len)
+{
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_add(
+	ChewingContext *ctx,
+	char *phrase_buf,
+	char *bopomofo_buf)
+{
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_remove(
+	ChewingContext *ctx,
+	char *phrase_buf,
+	char *bopomofo_buf)
+{
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_lookup(
+	ChewingContext *ctx,
+	char *phrase_buf,
+	char *bopomofo_buf)
+{
+	return 0;
+}
