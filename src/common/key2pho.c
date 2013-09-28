@@ -19,6 +19,7 @@
 
 /* This file is encoded in UTF-8 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include "chewing-utf8-util.h"
@@ -171,6 +172,7 @@ int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 		}
 	}
 	strncpy( phone, buffer, phone_len );
+	phone[ phone_len - 1 ] = 0;
 	return 0;
 }
 
@@ -198,3 +200,36 @@ uint16_t UintFromPhoneInx( const int ph_inx[] )
 	return result;
 }
 
+static size_t GetPhoneLen( const uint16_t *phoneSeq )
+{
+	size_t len = 0;
+	assert( phoneSeq );
+
+	while ( phoneSeq[len] )
+		++len;
+	return len;
+}
+
+size_t BopomofoFromUintArray( char * const bopomofo_buf, const size_t bopomofo_len, const uint16_t *phoneSeq )
+{
+	size_t i;
+	size_t len;
+	size_t buf_len;
+	size_t shift = 0;
+
+	assert( phoneSeq );
+
+	len = GetPhoneLen( phoneSeq );
+	buf_len = len * ( MAX_UTF8_SIZE * ZUIN_SIZE + 1 );
+
+	if ( bopomofo_buf && bopomofo_len >= buf_len ) {
+		for ( i = 0; i < len; ++i ) {
+			PhoneFromUint( bopomofo_buf + shift, bopomofo_len - shift, phoneSeq[i] );
+			strcat( bopomofo_buf + shift, " " );
+			shift += strlen( bopomofo_buf + shift );
+		}
+		if ( shift )
+			bopomofo_buf[ shift - 1 ] = 0;
+	}
+	return buf_len;
+}

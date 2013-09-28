@@ -39,6 +39,7 @@
 #include "global-private.h"
 #include "plat_path.h"
 #include "chewing-private.h"
+#include "key2pho-private.h"
 
 const char * const kb_type_str[] = {
 	"KB_DEFAULT",
@@ -1424,6 +1425,12 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 
 CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 {
+	ChewingData *pgdata;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgdata->static_data.userphrase_enum = FindNextHash( pgdata, NULL );
 	return 0;
 }
 
@@ -1432,6 +1439,19 @@ CHEWING_API int chewing_userphrase_has_next(
 	unsigned int *phrase_len,
 	unsigned int *bopomofo_len)
 {
+	ChewingData *pgdata;
+
+	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
+
+	pgdata = ctx->data;
+	if ( pgdata->static_data.userphrase_enum ) {
+		*phrase_len = strlen(
+			pgdata->static_data.userphrase_enum->data.wordSeq ) + 1;
+		*bopomofo_len = BopomofoFromUintArray(
+			NULL, 0, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		return 1;
+
+	}
 	return 0;
 }
 
@@ -1440,7 +1460,26 @@ CHEWING_API int chewing_userphrase_get(
 	char *phrase_buf, unsigned int phrase_len,
 	char *bopomofo_buf, unsigned int bopomofo_len)
 {
-	return 0;
+	ChewingData *pgdata;
+
+	if ( !ctx || !phrase_buf || !phrase_len ||
+		!bopomofo_buf || !bopomofo_len ) return -1;
+
+	pgdata = ctx->data;
+	if ( pgdata->static_data.userphrase_enum ) {
+		strncpy( phrase_buf, pgdata->static_data.userphrase_enum->data.wordSeq, phrase_len );
+		phrase_buf[ phrase_len - 1 ] = 0;
+
+		BopomofoFromUintArray( bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		bopomofo_buf[ bopomofo_len - 1 ] = 0;
+
+		pgdata->static_data.userphrase_enum = FindNextHash(
+			pgdata, pgdata->static_data.userphrase_enum );
+
+		return 0;
+	}
+
+	return -1;
 }
 
 CHEWING_API int chewing_userphrase_add(

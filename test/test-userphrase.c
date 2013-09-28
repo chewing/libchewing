@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -284,6 +285,130 @@ void test_userphrase()
 	test_userphrase_auto_learn_hardcode_break();
 }
 
+void test_userphrase_enumerate_normal()
+{
+	ChewingContext *ctx;
+	int ret;
+	unsigned int expect_len;
+
+	const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	char phrase_buf[50];
+	unsigned int phrase_len;
+
+	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
+	char bopomofo_buf[50];
+	unsigned int bopomofo_len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4g4<E>");
+
+	ret = chewing_userphrase_enumerate( ctx );
+	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_has_next( ctx, &phrase_len, &bopomofo_len );
+	ok( ret == 1, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 1 );
+	expect_len = strlen(phrase) + 1;
+	ok( phrase_len >= expect_len, "chewing_userphrase_has_next() shall set phrase_len `%d' >= `%d'", phrase_len, expect_len );
+	expect_len = strlen(bopomofo) + 1;
+	ok( bopomofo_len >= expect_len, "chewing_userphrase_has_next() shall set bopomofo_len `%d' >= `%d'", bopomofo_len, expect_len );
+	ret = chewing_userphrase_get( ctx, phrase_buf, sizeof( phrase_buf ), bopomofo_buf, sizeof( bopomofo_buf ) );
+	ok( ret == 0, "chewing_userphrase_get() return value `%d' shall be `%d'", ret, 0 );
+	ok( strcmp( phrase_buf, phrase ) == 0, "chewing_userphrase_get() shall set phrase_buf `%s' to `%s'", phrase_buf, phrase );
+	ok( strcmp( bopomofo_buf, bopomofo ) == 0, "chewing_userphrase_get() shall set bopomofo_buf `%s' to `%s'", bopomofo_buf, bopomofo );
+
+	ret = chewing_userphrase_has_next( ctx, &phrase_len, &bopomofo_len );
+	ok( ret == 0, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_enumerate_empty()
+{
+	ChewingContext *ctx;
+	int ret;
+	unsigned int phrase_len;
+	unsigned int bopomofo_len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	ret = chewing_userphrase_enumerate( ctx );
+	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_has_next( ctx, &phrase_len, &bopomofo_len );
+	ok( ret == 0, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_enumerate_rewind()
+{
+	ChewingContext *ctx;
+	int ret;
+	unsigned int expect_len;
+
+	const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	char phrase_buf[50];
+	unsigned int phrase_len;
+
+	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
+	char bopomofo_buf[50];
+	unsigned int bopomofo_len;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4g4<E>");
+
+	ret = chewing_userphrase_enumerate( ctx );
+	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_has_next( ctx, &phrase_len, &bopomofo_len );
+	ok( ret == 1, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 1 );
+	expect_len = strlen(phrase) + 1;
+	ok( phrase_len >= expect_len, "chewing_userphrase_has_next() shall set phrase_len `%d' >= `%d'", phrase_len, expect_len );
+	expect_len = strlen(bopomofo) + 1;
+	ok( bopomofo_len >= expect_len, "chewing_userphrase_has_next() shall set bopomofo_len `%d' >= `%d'", bopomofo_len, expect_len );
+	ret = chewing_userphrase_get( ctx, phrase_buf, sizeof( phrase_buf ), bopomofo_buf, sizeof( bopomofo_buf ) );
+	ok( ret == 0, "chewing_userphrase_get() return value `%d' shall be `%d'", ret, 0 );
+	ok( strcmp( phrase_buf, phrase ) == 0, "chewing_userphrase_get() shall set phrase_buf `%s' to `%s'", phrase_buf, phrase );
+	ok( strcmp( bopomofo_buf, bopomofo ) == 0, "chewing_userphrase_get() shall set bopomofo_buf `%s' to `%s'", bopomofo_buf, bopomofo );
+
+	ret = chewing_userphrase_enumerate( ctx );
+	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_has_next( ctx, &phrase_len, &bopomofo_len );
+	ok( ret == 1, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 1 );
+	expect_len = strlen(phrase) + 1;
+	ok( phrase_len >= expect_len, "chewing_userphrase_has_next() shall set phrase_len `%d' >= `%d'", phrase_len, expect_len );
+	expect_len = strlen(bopomofo) + 1;
+	ok( bopomofo_len >= expect_len, "chewing_userphrase_has_next() shall set bopomofo_len `%d' >= `%d'", bopomofo_len, expect_len );
+	ret = chewing_userphrase_get( ctx, phrase_buf, sizeof( phrase_buf ), bopomofo_buf, sizeof( bopomofo_buf ) );
+	ok( ret == 0, "chewing_userphrase_get() return value `%d' shall be `%d'", ret, 0 );
+	ok( strcmp( phrase_buf, phrase ) == 0, "chewing_userphrase_get() shall set phrase_buf `%s' to `%s'", phrase_buf, phrase );
+	ok( strcmp( bopomofo_buf, bopomofo ) == 0, "chewing_userphrase_get() shall set bopomofo_buf `%s' to `%s'", bopomofo_buf, bopomofo );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_enumerate()
+{
+	test_userphrase_enumerate_normal();
+	test_userphrase_enumerate_empty();
+	test_userphrase_enumerate_rewind();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -293,6 +418,7 @@ int main()
 	test_ShiftRight();
 	test_CtrlNum();
 	test_userphrase();
+	test_userphrase_enumerate();
 
 	return exit_status();
 }

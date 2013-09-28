@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
@@ -119,6 +119,25 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 	pgdata->static_data.hashtable[ hashvalue ] = pItem;
 
 	return pItem;
+}
+
+HASH_ITEM *FindNextHash( const ChewingData *pgdata, HASH_ITEM *curr )
+{
+	unsigned int hash_value = 0;
+
+	assert( pgdata );
+
+	if ( curr ) {
+		if ( curr->next )
+			return curr->next;
+		/* Find next entry in hash table. */
+		hash_value = HashFunc( curr->data.phoneSeq ) + 1;
+	}
+
+	for (; hash_value < HASH_TABLE_SIZE; ++hash_value )
+		if ( pgdata->static_data.hashtable[hash_value] )
+			return pgdata->static_data.hashtable[hash_value];
+	return NULL;
 }
 
 static void HashItem2String( char *str, HASH_ITEM *pItem )
@@ -571,4 +590,3 @@ open_hash_file:
 	}
 	return 1;
 }
-
