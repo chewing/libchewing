@@ -565,17 +565,17 @@ CHEWING_API int chewing_userphrase_get(
 
 CHEWING_API int chewing_userphrase_add(
 	ChewingContext *ctx,
-	char *phrase_buf,
-	char *bopomofo_buf);
+	const char *phrase_buf,
+	const char *bopomofo_buf);
 
 CHEWING_API int chewing_userphrase_remove(
 	ChewingContext *ctx,
-	char *phrase_buf,
-	char *bopomofo_buf);
+	const char *phrase_buf,
+	const char *bopomofo_buf);
 
 CHEWING_API int chewing_userphrase_lookup(
 	ChewingContext *ctx,
-	char *phrase_buf,
-	char *bopomofo_buf);
+	const char *phrase_buf,
+	const char *bopomofo_buf);
 
 #endif /* _CHEWING_IO_H */

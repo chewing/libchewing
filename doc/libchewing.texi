@@ -826,22 +826,22 @@ The length of buffer @var{phrase_len} and @var{bopomofo_len} can be get by
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_add(ChewingContext *@var{ctx}, char
-*@var{phrase_buf}, char *@var{bopomofo_buf})
+@deftypefun int chewing_userphrase_add(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_remove(ChewingContext *@var{ctx}, char
-*@var{phrase_buf}, char *@var{bopomofo_buf})
+@deftypefun int chewing_userphrase_remove(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_lookup(ChewingContext *@var{ctx}, char
-*@var{phrase_buf}, char *@var{bopomofo_buf})
+@deftypefun int chewing_userphrase_lookup(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function lookups if userphrase @var{phrase_buf}(@var{bopomofo_buf}) is in
 userphrase.
 

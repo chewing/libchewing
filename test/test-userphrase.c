@@ -305,7 +305,8 @@ void test_userphrase_enumerate_normal()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4g4<E>");
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
 
 	ret = chewing_userphrase_enumerate( ctx );
 	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
@@ -369,7 +370,8 @@ void test_userphrase_enumerate_rewind()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4g4<E>");
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
 
 	ret = chewing_userphrase_enumerate( ctx );
 	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
@@ -409,6 +411,41 @@ void test_userphrase_enumerate()
 	test_userphrase_enumerate_rewind();
 }
 
+void test_userphrase_manupulate_normal()
+{
+	/* FIXME: Implement this */
+}
+
+void test_userphrase_manipulate_error_handling()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	ret = chewing_userphrase_add( ctx,
+		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
+		"\xE3\x84\x98\xE3\x84\x9C\xCB\x8B" /* ㄘㄜˋ */ );
+	ok( ret == -1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_userphrase_add( ctx,
+		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
+		"\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xCB\x8B\xE3\x84\x95" /* ㄘㄜˋ ˋㄕ */ );
+	ok( ret == -1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, -1 );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_manipulate()
+{
+	test_userphrase_manupulate_normal();
+	test_userphrase_manipulate_error_handling();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -419,6 +456,7 @@ int main()
 	test_CtrlNum();
 	test_userphrase();
 	test_userphrase_enumerate();
+	test_userphrase_manipulate();
 
 	return exit_status();
 }
