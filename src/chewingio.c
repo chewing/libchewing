@@ -1526,6 +1526,27 @@ CHEWING_API int chewing_userphrase_remove(
 	const char *phrase_buf,
 	const char *bopomofo_buf)
 {
+	ChewingData *pgdata;
+	ssize_t phone_len;
+	uint16_t *phone_buf = 0;
+	int ret;
+
+	if ( !ctx || !phrase_buf || !bopomofo_buf )
+		return -1;
+
+	pgdata = ctx->data;
+
+	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
+	phone_buf = ALC( uint16_t, phone_len + 1 );
+	if ( !phone_buf ) return 0;
+	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
+	if ( ret == -1 ) {
+		free( phone_buf );
+		return -1;
+	}
+	UserRemovePhrase( pgdata, phone_buf, phrase_buf );
+	free( phone_buf );
+
 	return 0;
 }
 
