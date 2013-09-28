@@ -307,6 +307,8 @@ void test_userphrase_enumerate_normal()
 
 	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo );
+	ok( ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1 );
 
 	ret = chewing_userphrase_enumerate( ctx );
 	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
@@ -332,7 +334,9 @@ void test_userphrase_enumerate_empty()
 {
 	ChewingContext *ctx;
 	int ret;
+	const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
 	unsigned int phrase_len;
+	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
 	unsigned int bopomofo_len;
 
 	print_function_name();
@@ -340,6 +344,9 @@ void test_userphrase_enumerate_empty()
 	clean_userphrase();
 
 	ctx = chewing_new();
+
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo );
+	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
 
 	ret = chewing_userphrase_enumerate( ctx );
 	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
@@ -372,6 +379,8 @@ void test_userphrase_enumerate_rewind()
 
 	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo );
+	ok( ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1 );
 
 	ret = chewing_userphrase_enumerate( ctx );
 	ok( ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0 );
@@ -446,6 +455,30 @@ void test_userphrase_manipulate()
 	test_userphrase_manipulate_error_handling();
 }
 
+void test_userphrase_lookup()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	ret = chewing_userphrase_lookup( ctx,
+		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
+		"\xE3\x84\x98\xE3\x84\x9C\xCB\x8B" /* ㄘㄜˋ */ );
+	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx,
+		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
+		"\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xCB\x8B\xE3\x84\x95" /* ㄘㄜˋ ˋㄕ */ );
+	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -457,6 +490,7 @@ int main()
 	test_userphrase();
 	test_userphrase_enumerate();
 	test_userphrase_manipulate();
+	test_userphrase_lookup();
 
 	return exit_status();
 }
