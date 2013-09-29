@@ -45,10 +45,10 @@ BufferType PREEDIT_BUFFER = {
 
 BufferType ZUIN_BUFFER = {
 	"zuin buffer",
-	0,
+	chewing_bopomofo_Check,
 	chewing_zuin_Check,
 	0,
-	0,
+	chewing_bopomofo_String,
 	chewing_zuin_String,
 };
 
