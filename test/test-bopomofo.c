@@ -524,6 +524,30 @@ void test_Backspace()
 	test_Backspace_word();
 }
 
+void test_Up_close_candidate_window()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<U>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
 void test_Up_not_entering_chewing()
 {
 	ChewingContext *ctx;
@@ -539,8 +563,34 @@ void test_Up_not_entering_chewing()
 
 void test_Up()
 {
+	test_Up_close_candidate_window();
 	test_Up_not_entering_chewing();
-	/* XXX: What is spec of Up? */
+}
+
+void test_Down_open_candidate_window()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<E>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	// FIXME: chewing_cand_TotalChoice() shall be 0 after candidate is selected.
+	//ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
+
+	chewing_delete( ctx );
 }
 
 void test_Down_not_entering_chewing()
@@ -558,6 +608,7 @@ void test_Down_not_entering_chewing()
 
 void test_Down()
 {
+	test_Down_open_candidate_window();
 	test_Down_not_entering_chewing();
 }
 
