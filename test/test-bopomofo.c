@@ -584,11 +584,10 @@ void test_Down_open_candidate_window()
 	ret = chewing_cand_TotalChoice( ctx );
 	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
 
-	type_keystroke_by_string( ctx, "<E>" );
+	type_keystroke_by_string( ctx, "3" );
 	ret = chewing_cand_TotalChoice( ctx );
-	// FIXME: chewing_cand_TotalChoice() shall be 0 after candidate is selected.
-	//ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
-	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC" /* 測 */ );
 
 	chewing_delete( ctx );
 }
