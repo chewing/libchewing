@@ -712,8 +712,7 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 	}
 
 	key_buf_cursor = pgdata->chiSymbolCursor;
-	// FIXME: when pgdata->chiSymbolBufLen == 0, key_buf_cursor will be -1.
-	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
+	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen && key_buf_cursor > 0 )
 		key_buf_cursor--;
 
 	/* see if to select */
