@@ -172,6 +172,7 @@ typedef struct {
 
 	char hashfilename[ 200 ];
 	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct tag_HASH_ITEM *userphrase_enum;
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
