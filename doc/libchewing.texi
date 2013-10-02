@@ -54,6 +54,7 @@ The document was typeset with
 * Operating Modes::
 * Candidates Selection::
 * Output Handling::
+* Userphrase Handling::
 * Global Settings::
 * Variable Index::
 * Function Index::
@@ -807,6 +808,76 @@ freed by the caller using function @code{chewing_free}.
 @deftypefun int chewing_get_phoneSeqLen (ChewingContext *@var{ctx})
 This function returns the length of the phonetic sequence in the
 Chewing IM internal state machine.
+@end deftypefun
+
+@node Userphrase Handling
+@chapter Userphrase Handling
+
+@deftypefun int chewing_userphrase_enumerate(ChewingContext *@var{ctx})
+This function starts a userphrase enumeration. Caller shall call this function
+prior @code{chewing_userphrase_has_next} and @code{chewing_userphrase_get} in
+order to enumerate userphrase correctly.
+
+The return value is @code{0} on success, @code{-1} on failure.
+
+The following example shows how to enumerate userphrase:
+@example
+chewing_userphrase_enumerate(ctx);
+while (chewing_userphrase_has_next(ctx, &phrase_len, &bopomofo_len)) @{
+    phrase = malloc(phrase_len);
+    if (!phrase) goto error;
+    bopomofo = malloc(bopomofo_len);
+    if (!bopomofo) goto error;
+
+    chewing_userphrase_get(ctx, phrase, phrase_len, bopomofo, bopomofo_len);
+    /* do somthing */
+@}
+@end example
+@end deftypefun
+
+@deftypefun int chewing_userphrase_has_next(ChewingContext *@var{ctx}, unsigned
+int *@var{phrase_len}, unsigned int *@var{bopomofo_len})
+
+This function checks if there is another userphrase in current enumeration. The
+*@var{phrase_len} and *@var{bopomofo_len} are output buffer lengths needed by
+userphrase and its bopomofo representation.
+
+The return value is @code{1} if there is another userphrase present, @code{0}
+otherwise.
+@end deftypefun
+
+@deftypefun int chewing_userphrase_get(ChewingContext *@var{ctx}, char
+*@var{phrase_buf}, unsigned int @var{phrase_len}, char *@var{bopomofo_buf},
+unsigned int @var{bopomofo_len})
+This function gets the current enumerated userphrase. The @var{phrase_buf} and
+@var{bopomofo_buf} are userphrase and its bopomofo buffers provided by caller.
+The length of buffer @var{phrase_len} and @var{bopomofo_len} can be get by
+@code{chewing_userphrase_has_next}.
+
+The return value is @code{0} on success, @code{-1} on failure.
+@end deftypefun
+
+@deftypefun int chewing_userphrase_add(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
+This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
+
+The return value is @code{0} on success, @code{-1} on failure.
+@end deftypefun
+
+@deftypefun int chewing_userphrase_remove(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
+This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
+
+The return value is @code{0} on success, @code{-1} on failure.
+@end deftypefun
+
+@deftypefun int chewing_userphrase_lookup(ChewingContext *@var{ctx}, const char
+*@var{phrase_buf}, const char *@var{bopomofo_buf})
+This function lookups if userphrase @var{phrase_buf}(@var{bopomofo_buf}) is in
+userphrase.
+
+The return value is @code{1} if userphrase @var{phrase_buf}(@var{bopomofo_buf})
+is present, @code{0} otherwise.
 @end deftypefun
 
 @node Global Settings

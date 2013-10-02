@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
@@ -78,6 +78,14 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], 
 	return NULL;
 }
 
+HASH_ITEM **HashFindHead( ChewingData *pgdata, const uint16_t phoneSeq[] )
+{
+	assert( pgdata );
+	assert( phoneSeq );
+
+	return &pgdata->static_data.hashtable[ HashFunc( phoneSeq ) ];
+}
+
 HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
@@ -119,6 +127,25 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 	pgdata->static_data.hashtable[ hashvalue ] = pItem;
 
 	return pItem;
+}
+
+HASH_ITEM *FindNextHash( const ChewingData *pgdata, HASH_ITEM *curr )
+{
+	unsigned int hash_value = 0;
+
+	assert( pgdata );
+
+	if ( curr ) {
+		if ( curr->next )
+			return curr->next;
+		/* Find next entry in hash table. */
+		hash_value = HashFunc( curr->data.phoneSeq ) + 1;
+	}
+
+	for (; hash_value < HASH_TABLE_SIZE; ++hash_value )
+		if ( pgdata->static_data.hashtable[hash_value] )
+			return pgdata->static_data.hashtable[hash_value];
+	return NULL;
 }
 
 static void HashItem2String( char *str, HASH_ITEM *pItem )
@@ -259,6 +286,10 @@ static int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_inde
 	pItem->data.wordSeq = ALC( char, (*pc) + 1 );
 	strcpy( pItem->data.wordSeq, (char *) (pc + 1) );
 	pItem->data.wordSeq[ (unsigned int) *pc ] = '\0';
+
+	/* This record is removed by UserRemovePhrase */
+	if ( pItem->data.wordSeq[0] == 0 && pItem->data.phoneSeq[0] == 0 )
+		goto ignore_corrupted_record;
 
 	/* Invalid UTF-8 Chinese characters found */
 	if ( ! isValidChineseString( pItem->data.wordSeq ) ) {
@@ -443,14 +474,14 @@ static int migrate_hash_to_bin( ChewingData *pgdata )
 	return 1;
 }
 
-static void FreeHashItem( HASH_ITEM *aItem )
+void FreeHashItem( HASH_ITEM *pItem )
 {
-	while ( aItem ) {
-		HASH_ITEM *next = aItem->next;
-		free( aItem->data.phoneSeq );
-		free( aItem->data.wordSeq );
-		free( aItem );
-		aItem = next;
+	while ( pItem ) {
+		HASH_ITEM *next = pItem->next;
+		free( pItem->data.phoneSeq );
+		free( pItem->data.wordSeq );
+		free( pItem );
+		pItem = next;
 	}
 }
 
@@ -571,4 +602,3 @@ open_hash_file:
 	}
 	return 1;
 }
-

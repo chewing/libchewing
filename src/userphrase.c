@@ -12,6 +12,7 @@
  * of this file.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -173,6 +174,35 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 		LogUserPhrase( pgdata, phoneSeq, wordSeq, pItem->data.origfreq, pItem->data.maxfreq, pItem->data.userfreq, pItem->data.recentTime );
 		HashModify( pgdata, pItem );
 		return USER_UPDATE_MODIFY;
+	}
+}
+
+void UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
+{
+	HASH_ITEM **prev = NULL;
+	HASH_ITEM *item = NULL;
+
+	assert( pgdata );
+	assert( phoneSeq );
+	assert( wordSeq );
+
+	prev = HashFindHead( pgdata, phoneSeq );
+	item = *prev;
+
+	while ( item ) {
+		if ( strcmp( item->data.wordSeq, wordSeq ) == 0 ) {
+			/* Remove this phrase by removing */
+			item->data.phoneSeq[0] = 0;
+			item->data.wordSeq[0] = 0;
+			HashModify( pgdata, item );
+
+			*prev = item->next;
+			FreeHashItem( item );
+
+			return;
+		}
+		prev = &item->next;
+		item = item->next;
 	}
 }
 

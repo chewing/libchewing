@@ -39,6 +39,7 @@
 #include "global-private.h"
 #include "plat_path.h"
 #include "chewing-private.h"
+#include "key2pho-private.h"
 
 const char * const kb_type_str[] = {
 	"KB_DEFAULT",
@@ -1419,4 +1420,166 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 	}
 	ctx->data->logger = logger;
 	ctx->data->loggerData = data;
+}
+
+CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgdata->static_data.userphrase_enum = FindNextHash( pgdata, NULL );
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_has_next(
+	ChewingContext *ctx,
+	unsigned int *phrase_len,
+	unsigned int *bopomofo_len)
+{
+	ChewingData *pgdata;
+
+	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
+
+	pgdata = ctx->data;
+	if ( pgdata->static_data.userphrase_enum ) {
+		*phrase_len = strlen(
+			pgdata->static_data.userphrase_enum->data.wordSeq ) + 1;
+		*bopomofo_len = BopomofoFromUintArray(
+			NULL, 0, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		return 1;
+
+	}
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_get(
+	ChewingContext *ctx,
+	char *phrase_buf, unsigned int phrase_len,
+	char *bopomofo_buf, unsigned int bopomofo_len)
+{
+	ChewingData *pgdata;
+
+	if ( !ctx || !phrase_buf || !phrase_len ||
+		!bopomofo_buf || !bopomofo_len ) return -1;
+
+	pgdata = ctx->data;
+	if ( pgdata->static_data.userphrase_enum ) {
+		strncpy( phrase_buf, pgdata->static_data.userphrase_enum->data.wordSeq, phrase_len );
+		phrase_buf[ phrase_len - 1 ] = 0;
+
+		BopomofoFromUintArray( bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		bopomofo_buf[ bopomofo_len - 1 ] = 0;
+
+		pgdata->static_data.userphrase_enum = FindNextHash(
+			pgdata, pgdata->static_data.userphrase_enum );
+
+		return 0;
+	}
+
+	return -1;
+}
+
+CHEWING_API int chewing_userphrase_add(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf)
+{
+	ChewingData *pgdata;
+	ssize_t phrase_len;
+	ssize_t phone_len;
+	uint16_t *phone_buf = 0;
+	int ret;
+
+	if ( !ctx || !phrase_buf || !bopomofo_buf )
+		return -1;
+
+	pgdata = ctx->data;
+
+	phrase_len = ueStrLen( phrase_buf );
+	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
+
+	if ( phrase_len != phone_len )
+		return -1;
+
+	phone_buf = ALC( uint16_t, phone_len + 1 );
+	if ( !phone_buf ) return -1;
+	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
+	if ( ret == -1 ) {
+		free( phone_buf );
+		return -1;
+	}
+
+	ret = UserUpdatePhrase( pgdata, phone_buf, phrase_buf );
+	free( phone_buf );
+
+	if ( ret == USER_UPDATE_FAIL )
+		return -1;
+
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_remove(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf)
+{
+	ChewingData *pgdata;
+	ssize_t phone_len;
+	uint16_t *phone_buf = 0;
+	int ret;
+
+	if ( !ctx || !phrase_buf || !bopomofo_buf )
+		return -1;
+
+	pgdata = ctx->data;
+
+	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
+	phone_buf = ALC( uint16_t, phone_len + 1 );
+	if ( !phone_buf ) return 0;
+	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
+	if ( ret == -1 ) {
+		free( phone_buf );
+		return -1;
+	}
+	UserRemovePhrase( pgdata, phone_buf, phrase_buf );
+	free( phone_buf );
+
+	return 0;
+}
+
+CHEWING_API int chewing_userphrase_lookup(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf)
+{
+	ChewingData *pgdata;
+	ssize_t phone_len;
+	uint16_t *phone_buf = 0;
+	int ret;
+	UserPhraseData *user_phrase_data;
+
+	if ( !ctx || !phrase_buf || !bopomofo_buf )
+		return 0;
+
+	pgdata = ctx->data;
+
+	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
+	phone_buf = ALC( uint16_t, phone_len + 1 );
+	if ( !phone_buf ) return 0;
+	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
+	if ( ret == -1 ) {
+		free( phone_buf );
+		return 0;
+	}
+
+	user_phrase_data = UserGetPhraseFirst( pgdata, phone_buf );
+	while ( user_phrase_data ) {
+		if ( strcmp( phrase_buf, user_phrase_data->wordSeq) == 0 )
+			break;
+		user_phrase_data = UserGetPhraseNext( pgdata, phone_buf );
+	}
+	free( phone_buf );
+	return user_phrase_data == NULL ? 0 : 1;
 }
