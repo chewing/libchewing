@@ -7,5 +7,4 @@ For developers, please add new entry for your plans.
   a) Support data versioning.
   b) Explicit data struct size.
   c) Remove text data support.
-* Provide public API to manipulate/query system and user dict.
 * Rebuild data after code changes to tools.
