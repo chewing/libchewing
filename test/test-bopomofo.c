@@ -326,6 +326,24 @@ void test_select_candidate_rearward_start_with_symbol()
 	chewing_delete( ctx );
 }
 
+void test_del_bopomofo_as_mode_switch()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
+	ok_zuin_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
+
+	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
 
 void test_select_candidate_4_bytes_utf8()
 {
@@ -364,7 +382,7 @@ void test_select_candidate() {
 	test_select_candidate_no_rearward_start_with_symbol();
 	test_select_candidate_rearward_start_with_symbol();
 	test_select_candidate_4_bytes_utf8();
-
+	test_del_bopomofo_as_mode_switch();
 }
 
 void test_Esc_not_entering_chewing()
