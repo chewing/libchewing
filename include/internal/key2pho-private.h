@@ -21,6 +21,12 @@
 #  include <stdint.h>
 #endif
 
+/* visual C++ does not have ssize_t type */
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 uint16_t UintFromPhone( const char *phone );
 uint16_t UintFromPhoneInx( const int ph_inx[] );
 int PhoneFromKey( char *pho, const char *inputkey, int kbtype, int searchTimes );

@@ -21,6 +21,12 @@
 #  include <stdint.h>
 #endif
 
+/* visual C++ does not have ssize_t type */
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include "global.h"
 #include "plat_mmap.h"
 
