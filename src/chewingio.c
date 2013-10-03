@@ -437,10 +437,17 @@ CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx )
 	return ctx->data->config.bPhraseChoiceRearward;
 }
 
+static void CheckAndResetRange( ChewingData *pgdata );
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
-	if ( mode == CHINESE_MODE || mode == SYMBOL_MODE )
+
+	if ( mode == CHINESE_MODE || mode == SYMBOL_MODE ) {
+        // remove all data inside buffer as switching mode.
+        ZuinRemoveAll( &( ctx->data->zuinData ) );
+        MakeOutputWithRtn( ctx->output, ctx->data, KEYSTROKE_ABSORB);
+
 		ctx->data->bChiSym = mode;
+    }
 }
 
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx )
