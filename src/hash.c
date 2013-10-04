@@ -272,6 +272,16 @@ static int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_inde
 	pItem->data.maxfreq	= GetInt32PreservedEndian(&srcbuf[ 8 ]);
 	pItem->data.origfreq	= GetInt32PreservedEndian(&srcbuf[ 12 ]);
 
+	/*
+	 * Due to a bug in 0.3.5, some userphrase has negative frequency value.
+	 * In this case, we just skip this record.
+	 *
+	 * See https://github.com/chewing/libchewing/issues/75
+	 */
+	if ( pItem->data.userfreq < 0 || pItem->data.recentTime < 0 ||
+		pItem->data.maxfreq < 0 || pItem->data.origfreq < 0 )
+		goto ignore_corrupted_record;
+
 	/* phone seq, length in num of chi words */
 	len = (int) srcbuf[ 16 ];
 	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
