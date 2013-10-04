@@ -18,7 +18,7 @@ script:
 
 before_install:
   - sudo pip install cpp-coveralls --use-mirrors
-  - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9
+  - sudo add-apt-repository --yes ppa:chewing/travis-ci
   - sudo apt-get update -qq
   - sudo apt-get install -qq texinfo cmake valgrind
 
