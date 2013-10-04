@@ -1421,6 +1421,8 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 	void (*logger)( void *data, int level, const char *fmt, ... ),
 	void *data )
 {
+	if ( !ctx ) return;
+
 	if ( !logger ) {
 		logger = NullLogger;
 		data = 0;
