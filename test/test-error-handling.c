@@ -1,5 +1,5 @@
 /**
- * test-null-context.c
+ * test-error-handling.c
  *
  * Copyright (c) 2013
  *	libchewing Core Team. See ChangeLog for details.
@@ -16,6 +16,8 @@
 void test_null()
 {
 	int ret;
+
+	print_function_name();
 
 	chewing_set_logger( NULL, NULL, NULL );
 
