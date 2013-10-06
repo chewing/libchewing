@@ -1639,5 +1639,11 @@ CHEWING_API int chewing_cand_open( ChewingContext *ctx )
 CHEWING_API int chewing_cand_close( ChewingContext *ctx )
 {
 	if ( !ctx ) return -1;
+
+	if ( ctx->data->bSelect ) {
+		ChoiceEndChoice( ctx->data );
+	}
+
 	return 0;
+
 }
