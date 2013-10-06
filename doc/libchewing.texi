@@ -329,11 +329,23 @@ This function handles the input key @kbd{RIGHT}.
 @end deftypefun
 
 @deftypefun int chewing_handle_Up (ChewingContext *@var{ctx})
-This function handles the input key @kbd{UP}.
+This function handles the input key @kbd{UP}. @kbd{UP} is used to close
+candidate window.
+
+@quotation Deprecated
+Use @code{chewing_cand_close} to close candidate window. The keyboard oriented
+API is not suggested to use anymore.
+@end quotation
 @end deftypefun
 
 @deftypefun int chewing_handle_Down (ChewingContext *@var{ctx})
-This function handles the input key @kbd{DOWN}.
+This function handles the input key @kbd{DOWN}. @kbd{DOWN} is used to open
+candidate window.
+
+@quotation Deprecated
+Use @code{chewing_cand_open} to open candidate window. The keyboard oriented
+API is not suggested to use anymore.
+@end quotation
 @end deftypefun
 
 @deftypefun int chewing_handle_ShiftLeft (ChewingContext *@var{ctx})
@@ -501,6 +513,7 @@ zero.
 @menu
 * Get Candidates::
 * Candidates Behavior::
+* Keyboardless APIs::
 @end menu
 
 @node Get Candidates
@@ -555,16 +568,6 @@ choices instead of the end of current page.
 @deftypefun char* chewing_cand_String (ChewingContext *@var{ctx})
 This function returns the current enumerated candidate string. This function
 returns @code{NULL} when no memory.
-
-The return value @emph{must} be freed by the @code{chewing_free}
-function.
-@end deftypefun
-
-@deftypefun char* chewing_cand_String_by_index (ChewingContext *@var{ctx}, int @var{index})
-This function returns the candidate string by its index. The range of
-@var{index} shall be @code{0} @leq{} @var{index} <
-@code{chewing_cand_TotalChoice()} This function returns @code{NULL} when no
-memory.
 
 The return value @emph{must} be freed by the @code{chewing_free}
 function.
@@ -631,6 +634,44 @@ This function is no-op now. Use @code{chewing_set_selKey} instead.
 @quotation Deprecated
 This function is no-op now. Use @code{chewing_get_selKey} instead.
 @end quotation
+@end deftypefun
+
+@node Keyboardless APIs
+@section Keyboardless APIs
+
+The traditional chewing APIs are coupling to keyboard. They cause some problems
+if the program like to design its own keyboard scheme, or if a platform does
+not have certain keyboard keys (ex: mobile device). To overcome these problems,
+the new keyboardless APIs are provided. With these APIs, program can have
+better control over libchewing, instead of hacking libchewing via fake keyboard
+event.
+
+@deftypefun int chewing_cand_open(ChewingContext *@var{ctx})
+This function opens the candidate windows. It returns @code{0} when success,
+@code{-1} otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_close(ChewingContext *@var{ctx})
+This function closes the candidate windows. It returns @code{0} when success,
+@code{-1} otherwise.
+@end deftypefun
+
+@deftypefun char* chewing_cand_string_by_index (ChewingContext *@var{ctx}, int
+@var{index})
+This function returns the candidate string by its index. The range of
+@var{index} shall be @code{0} @leq{} @var{index} <
+@code{chewing_cand_TotalChoice}. This function returns @code{NULL} when no
+memory.
+
+The return value @emph{must} be freed by the @code{chewing_free}
+function.
+@end deftypefun
+
+@deftypefun int chewing_cand_choose_by_index(ChewingContext *@var{ctx}, int
+@var{index})
+This function chooses the candidate by its index. The range of @var{index}
+shall be @code{0} @leq{} @var{index} < @code{chewing_cand_TotalChoice}. This
+function returns @code{0} when success, @code{-1} otherwise.
 @end deftypefun
 
 @node Output Handling

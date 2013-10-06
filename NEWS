@@ -1,13 +1,18 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 * Add the following APIs:
-  - chewing_cand_String_by_index API
-  - chewing_userphrase_enumerate
-  - chewing_userphrase_has_next
-  - chewing_userphrase_get
-  - chewing_userphrase_add
-  - chewing_userphrase_remove
-  - chewing_userphrase_lookup
+  - Userphrase manipulation
+    - chewing_userphrase_enumerate
+    - chewing_userphrase_has_next
+    - chewing_userphrase_get
+    - chewing_userphrase_add
+    - chewing_userphrase_remove
+    - chewing_userphrase_lookup
+  - Keyboardless action
+    - chewing_cand_open
+    - chewing_cand_close
+    - chewing_cand_string_by_index
+    - chewing_cand_choose_by_index
 * Fix chewing_zuin_Check wrong return value
 * Add `make check' in cmake build
 * Change MAX_UTF8_SIZE to 4
