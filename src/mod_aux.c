@@ -194,33 +194,6 @@ CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
 	return s;
 }
 
-CHEWING_API char *chewing_cand_string_by_index( ChewingContext *ctx, int index )
-{
-	char *s;
-
-	if ( 0 <= index && index < ctx->output->pci->nTotalChoice ) {
-		s = strdup( ctx->output->pci->totalChoiceStr[ index ] );
-	} else {
-		s = strdup( "" );
-	}
-	return s;
-}
-
-CHEWING_API int chewing_cand_choose_by_index( ChewingContext *ctx, int index )
-{
-	return 0;
-}
-
-CHEWING_API int chewing_cand_open( ChewingContext *ctx )
-{
-	return 0;
-}
-
-CHEWING_API int chewing_cand_close( ChewingContext *ctx )
-{
-	return 0;
-}
-
 CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx )
 {
 	ctx->it_no = 0;

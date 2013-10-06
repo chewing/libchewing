@@ -38,6 +38,9 @@ void test_null()
 
 	ret = chewing_userphrase_lookup( NULL, NULL, NULL );
 	ok( ret == 0, "chewing_userphrase_lookup() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_open( NULL );
+	ok ( ret == -1, "chewing_cand_open() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main()

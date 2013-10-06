@@ -1592,3 +1592,52 @@ CHEWING_API int chewing_userphrase_lookup(
 	free( phone_buf );
 	return user_phrase_data == NULL ? 0 : 1;
 }
+
+
+CHEWING_API char *chewing_cand_string_by_index( ChewingContext *ctx, int index )
+{
+	char *s;
+
+	if ( !ctx ) return NULL;
+
+	if ( 0 <= index && index < ctx->output->pci->nTotalChoice ) {
+		s = strdup( ctx->output->pci->totalChoiceStr[ index ] );
+	} else {
+		s = strdup( "" );
+	}
+	return s;
+}
+
+CHEWING_API int chewing_cand_choose_by_index( ChewingContext *ctx, int index )
+{
+	if ( !ctx ) return -1;
+
+	return 0;
+}
+
+CHEWING_API int chewing_cand_open( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	int pos;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+
+	if ( pgdata->bSelect ) return 0;
+	if ( pgdata->chiSymbolBufLen == 0 ) return -1;
+
+	pos = pgdata->chiSymbolCursor;
+	if ( pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen )
+		--pos;
+
+	chooseCandidate( ctx, ChewingIsChiAt( pos, pgdata ), pos );
+
+	return 0;
+}
+
+CHEWING_API int chewing_cand_close( ChewingContext *ctx )
+{
+	if ( !ctx ) return -1;
+	return 0;
+}
