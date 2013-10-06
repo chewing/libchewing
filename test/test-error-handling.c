@@ -44,6 +44,9 @@ void test_null()
 
 	ret = chewing_cand_close( NULL );
 	ok ( ret == -1, "chewing_cand_open() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_choose_by_index( NULL, 0 );
+	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main()

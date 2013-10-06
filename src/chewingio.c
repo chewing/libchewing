@@ -474,37 +474,45 @@ static void CheckAndResetRange( ChewingData *pgdata )
 	}
 }
 
-static int DoSelect( ChewingData *pgdata, int num )
+static int SelectCandidate( ChewingData *pgdata, int num )
+{
+	assert( pgdata );
+	assert( pgdata->choiceInfo.pageNo >= 0 );
+
+	if ( 0 <= num && num < pgdata->choiceInfo.nTotalChoice ) {
+		if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) {
+			SymbolChoice( pgdata, num );
+		}
+		else {
+			/* change the select interval & selectStr & nSelect */
+			AddSelect( pgdata, num );
+			/* second, call choice module */
+			ChoiceSelect( pgdata, num );
+			/* automatically shift the cursor to next phrase */
+			if ( pgdata->config.bAutoShiftCur != 0 &&
+			     /* if cursor at end of string, do not shift the cursor. */
+			     pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
+				if ( pgdata->config.bPhraseChoiceRearward ) {
+					++pgdata->chiSymbolCursor;
+				} else {
+					pgdata->chiSymbolCursor +=
+						pgdata->availInfo.avail[ pgdata->availInfo.currentAvail ].len;
+				}
+			}
+		}
+		return 0;
+	}
+
+	return -1;
+}
+
+static void DoSelect( ChewingData *pgdata, int num )
 {
 	assert( pgdata->choiceInfo.pageNo >= 0 );
 	if ( num >= 0 ) {
 		num += pgdata->choiceInfo.pageNo * pgdata->choiceInfo.nChoicePerPage;
-		/* Note: if num is larger than the total, there will be big troubles. */
-		if ( num < pgdata->choiceInfo.nTotalChoice ) {
-			if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) {
-				SymbolChoice( pgdata, num );
-			}
-			else {
-				/* change the select interval & selectStr & nSelect */
-				AddSelect( pgdata, num );
-				/* second, call choice module */
-				ChoiceSelect( pgdata, num );
-				/* automatically shift the cursor to next phrase */
-				if ( pgdata->config.bAutoShiftCur != 0 &&
-				     /* if cursor at end of string, do not shift the cursor. */
-				     pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen ) {
-					if ( pgdata->config.bPhraseChoiceRearward ) {
-						++pgdata->chiSymbolCursor;
-					} else {
-						pgdata->chiSymbolCursor +=
-							pgdata->availInfo.avail[ pgdata->availInfo.currentAvail ].len;
-					}
-				}
-			}
-			return 1;
-		}
+		SelectCandidate( pgdata, num );
 	}
-	return 0;
 }
 
 CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
@@ -1610,9 +1618,23 @@ CHEWING_API char *chewing_cand_string_by_index( ChewingContext *ctx, int index )
 
 CHEWING_API int chewing_cand_choose_by_index( ChewingContext *ctx, int index )
 {
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	int ret;
 	if ( !ctx ) return -1;
 
-	return 0;
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->choiceInfo.nTotalChoice == 0 ) return -1;
+
+	ret = SelectCandidate( pgdata, index );
+	if ( ret == 0 ) {
+		CallPhrasing( pgdata, 0 );
+		MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_ABSORB );
+	}
+	return ret;
 }
 
 CHEWING_API int chewing_cand_open( ChewingContext *ctx )

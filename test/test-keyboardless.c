@@ -21,7 +21,7 @@ void test_cand_open_word()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4" /* 測 */ );
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
 	ret = chewing_cand_open( ctx );
 	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
@@ -61,7 +61,7 @@ void test_cand_open_already_opened()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4" /* 測 */ );
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
 	ret = chewing_cand_open( ctx );
 	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
@@ -118,7 +118,7 @@ void test_cand_open_during_bopomofo()
 
 	chewing_Reset( ctx );
 
-	type_keystroke_by_string( ctx, "hk4g" /* 測ㄕ */ );
+	type_keystroke_by_string( ctx, "hk4g" /* ㄘㄜˋ ㄕ */ );
 	ret = chewing_cand_open( ctx );
 	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
 
@@ -146,7 +146,7 @@ void test_cand_close_word()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4" /* 測 */ );
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
 	ret = chewing_cand_open( ctx );
 	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
@@ -203,7 +203,7 @@ void test_cand_close_already_closed()
 
 	ctx = chewing_new();
 
-	type_keystroke_by_string( ctx, "hk4" /* 測 */ );
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
 	ret = chewing_cand_close( ctx );
 	ok( ret == 0, "chewing_cand_close() returns `%d' shall be `%d'", ret, 0 );
@@ -240,6 +240,117 @@ void test_cand_close()
 	test_cand_close_nothing_in_preedit();
 }
 
+void test_cand_choose_word()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	ret = chewing_cand_choose_by_index( ctx, 2 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC" /* 測 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_choose_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "`" /* ， */ );
+
+	ret = chewing_cand_choose_by_index( ctx, 2 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_choose_by_index( ctx, 0 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xEF\xBC\x8C" /* ， */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_choose_out_of_range()
+{
+	ChewingContext *ctx;
+	int ret;
+	int total_choice;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	total_choice = chewing_cand_TotalChoice( ctx );
+	ok ( total_choice > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", total_choice, 0 );
+
+	ret = chewing_cand_choose_by_index( ctx, total_choice );
+	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_choose_by_index( ctx, -1 );
+	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
+
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */);
+
+	chewing_delete( ctx );
+}
+
+void test_cand_choose_not_in_select()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_choose_by_index( ctx, 2 );
+	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
+
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */);
+
+	chewing_delete( ctx );
+}
+
+void test_cand_choose() {
+	test_cand_choose_word();
+	test_cand_choose_symbol();
+	test_cand_choose_out_of_range();
+	test_cand_choose_not_in_select();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -247,6 +358,7 @@ int main()
 
 	test_cand_open();
 	test_cand_close();
+	test_cand_choose();
 
 	return exit_status();
 }
