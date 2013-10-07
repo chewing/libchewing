@@ -11,7 +11,7 @@
 #ifndef _CHEWING_CHOICE_PRIVATE_H
 #define _CHEWING_CHOICE_PRIVATE_H
 
-int ChoiceFirstAvail( ChewingData * );
+int ChoiceInitAvail( ChewingData * );
 int ChoiceNextAvail( ChewingData * );
 int ChoicePrevAvail( ChewingContext * );
 int ChoiceSelect( ChewingData *, int selectNo );

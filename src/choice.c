@@ -366,7 +366,7 @@ static int SeekPhraseHead( ChewingData *pgdata )
 }
 
 /** @brief Enter choice mode and relating initialisations. */
-int ChoiceFirstAvail( ChewingData *pgdata )
+int ChoiceInitAvail( ChewingData *pgdata )
 {
 	int end, begin;
 

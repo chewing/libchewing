@@ -94,7 +94,7 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 	ChewingData *pgdata = ctx->data;
 	if ( toSelect ) {
 		if ( ! pgdata->bSelect ) {
-			ChoiceFirstAvail( pgdata );
+			ChoiceInitAvail( pgdata );
 		} else {
 			if ( pgdata->config.bPhraseChoiceRearward ) {
 				int avail_willbe = (pgdata->availInfo.currentAvail > 0) ?
@@ -1094,7 +1094,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					CheckAndResetRange( pgdata );
 					pgdata->chiSymbolCursor--;
 					if ( ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
-						ChoiceFirstAvail( pgdata );
+						ChoiceInitAvail( pgdata );
 					else
 						OpenSymbolChoice( pgdata );
 
@@ -1109,7 +1109,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 					CheckAndResetRange( pgdata );
 					pgdata->chiSymbolCursor++;
 					if ( ChewingIsChiAt( pgdata->chiSymbolCursor, pgdata ) )
-						ChoiceFirstAvail( pgdata );
+						ChoiceInitAvail( pgdata );
 					else
 						OpenSymbolChoice( pgdata );
 				}
