@@ -578,4 +578,11 @@ CHEWING_API int chewing_userphrase_lookup(
 	const char *phrase_buf,
 	const char *bopomofo_buf);
 
+CHEWING_API int chewing_cand_list_first( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_last( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_next( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx );
+
 #endif /* _CHEWING_IO_H */

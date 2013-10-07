@@ -47,6 +47,24 @@ void test_null()
 
 	ret = chewing_cand_choose_by_index( NULL, 0 );
 	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_first( NULL );
+	ok ( ret == -1, "chewing_cand_list_first() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_last( NULL );
+	ok ( ret == -1, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_has_next( NULL );
+	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_list_has_prev( NULL );
+	ok ( ret == 0, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_list_next( NULL );
+	ok ( ret == -1, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_prev( NULL );
+	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main()

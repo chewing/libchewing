@@ -646,12 +646,12 @@ the new keyboardless APIs are provided. With these APIs, program can have
 better control over libchewing, instead of hacking libchewing via fake keyboard
 event.
 
-@deftypefun int chewing_cand_open(ChewingContext *@var{ctx})
+@deftypefun int chewing_cand_open (ChewingContext *@var{ctx})
 This function opens the candidate windows. It returns @code{0} when success,
 @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun int chewing_cand_close(ChewingContext *@var{ctx})
+@deftypefun int chewing_cand_close (ChewingContext *@var{ctx})
 This function closes the candidate windows. It returns @code{0} when success,
 @code{-1} otherwise.
 @end deftypefun
@@ -667,11 +667,49 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
-@deftypefun int chewing_cand_choose_by_index(ChewingContext *@var{ctx}, int
+@deftypefun int chewing_cand_choose_by_index (ChewingContext *@var{ctx}, int
 @var{index})
 This function chooses the candidate by its index. The range of @var{index}
 shall be @code{0} @leq{} @var{index} < @code{chewing_cand_TotalChoice}. This
 function returns @code{0} when success, @code{-1} otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_first (ChewingContext *@var{ctx})
+This function sets the candidate list to the first (longest) candidate list.
+
+This function returns @code{0} when success, @code{-1} otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_last (ChewingContext *@var{ctx})
+This function sets the candidate list to the last (shortest) candidate list.
+
+This function returns @code{0} when success, @code{-1} otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_has_next (ChewingContext *@var{ctx})
+This function checks whether or not there is a next (shorter) candidate list.
+
+The return value is @code{1} when there is a next candidate list, @code{0}
+otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_has_prev (ChewingContext *@var{ctx})
+This function checks whether or not there is a prev (longer) candidate list.
+
+The return value is @code{1} when there is a prev candidate list, @code{0}
+otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_next (ChewingContext *@var{ctx})
+This function changes current candidate list to next candidate list.
+
+This function returns @code{0} when success, @code{-1} otherwise.
+@end deftypefun
+
+@deftypefun int chewing_cand_list_prev (ChewingContext *@var{ctx})
+This function changes current candidate list to prev candidate list.
+
+This function returns @code{0} when success, @code{-1} otherwise.
 @end deftypefun
 
 @node Output Handling

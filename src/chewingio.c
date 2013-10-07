@@ -1669,3 +1669,81 @@ CHEWING_API int chewing_cand_close( ChewingContext *ctx )
 	return 0;
 
 }
+
+CHEWING_API int chewing_cand_list_first( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return -1;
+
+	/* FIXME: Implement this */
+
+	return 0;
+}
+
+CHEWING_API int chewing_cand_list_last( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return -1;
+
+	/* FIXME: Implement this */
+
+	return 0;
+}
+
+CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return 0;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return 0;
+
+	/* FIXME: Implement this */
+
+	return 1;
+}
+
+CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return 0;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return 0;
+
+	/* FIXME: Implement this */
+
+	return 1;
+}
+
+CHEWING_API int chewing_cand_list_next( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return -1;
+
+	/* FIXME: Implement this */
+
+	return 0;
+}
+
+CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	if ( !pgdata->bSelect ) return -1;
+
+	/* FIXME: Implement this */
+
+	return 0;
+}
