@@ -92,6 +92,7 @@ CHEWING_API int chewing_KBStr2Num( char str[] )
 static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_cursor )
 {
 	ChewingData *pgdata = ctx->data;
+
 	if ( toSelect ) {
 		if ( ! pgdata->bSelect ) {
 			ChoiceInitAvail( pgdata );
@@ -107,7 +108,11 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 					pgdata->chiSymbolCursor++;
 				}
 			}
-			ChoiceNextAvail( pgdata );
+
+			if ( ChoiceHasNextAvail( pgdata ) )
+				ChoiceNextAvail( pgdata );
+			else /* rollover */
+				ChoiceFirstAvail( pgdata );
 		}
 	} else if ( pgdata->symbolKeyBuf[ key_buf_cursor ] ) {
 		/* Open Symbol Choice List */
