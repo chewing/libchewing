@@ -371,6 +371,21 @@ void internal_ok_candidate( const char *file, int line,
 	chewing_free( buf );
 }
 
+void internal_ok_candidate_len( const char *file, int line,
+	ChewingContext *ctx, size_t expected_len )
+{
+	char *buf;
+	int actual_len;
+
+	assert( ctx );
+
+	buf = chewing_cand_string_by_index( ctx, 0 );
+	actual_len = ueStrLen( buf );
+	internal_ok( file, line, actual_len == expected_len, __func__,
+			"candidate length `%d' shall be `%d'", actual_len, expected_len );
+	chewing_free( buf );
+}
+
 void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn )
 {
