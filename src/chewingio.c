@@ -1683,7 +1683,7 @@ CHEWING_API int chewing_cand_list_first( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return -1;
 
-	/* FIXME: Implement this */
+	return ChoiceFirstAvail( pgdata );
 
 	return 0;
 }
@@ -1696,9 +1696,7 @@ CHEWING_API int chewing_cand_list_last( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return -1;
 
-	/* FIXME: Implement this */
-
-	return 0;
+	return ChoiceLastAvail( pgdata );
 }
 
 CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx )
@@ -1709,9 +1707,7 @@ CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return 0;
 
-	/* FIXME: Implement this */
-
-	return 1;
+	return ChoiceHasNextAvail( pgdata );
 }
 
 CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx )
@@ -1722,9 +1718,7 @@ CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return 0;
 
-	/* FIXME: Implement this */
-
-	return 1;
+	return ChoiceHasPrevAvail( pgdata);
 }
 
 CHEWING_API int chewing_cand_list_next( ChewingContext *ctx )
@@ -1735,9 +1729,7 @@ CHEWING_API int chewing_cand_list_next( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return -1;
 
-	/* FIXME: Implement this */
-
-	return 0;
+	return ChoiceNextAvail( pgdata );
 }
 
 CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
@@ -1748,7 +1740,5 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
 	pgdata = ctx->data;
 	if ( !pgdata->bSelect ) return -1;
 
-	/* FIXME: Implement this */
-
-	return 0;
+	return ChoicePrevAvail( pgdata );
 }

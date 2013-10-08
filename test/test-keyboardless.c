@@ -351,6 +351,181 @@ void test_cand_choose() {
 	test_cand_choose_not_in_select();
 }
 
+void test_cand_list_word_no_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_phraseChoiceRearward( ctx, 0 );
+
+	type_keystroke_by_string( ctx, "hk4g4<H>" /* 測試 */ );
+
+	ret = chewing_cand_open( ctx );
+	ok ( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_next( ctx );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_last( ctx );
+	ok ( ret == 0, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_first( ctx );
+	ok ( ret == 0, "chewing_cand_list_first() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_word_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
+
+	ret = chewing_cand_open( ctx );
+	ok ( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_next( ctx );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_list_last( ctx );
+	ok ( ret == 0, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_first( ctx );
+	ok ( ret == 0, "chewing_cand_list_first() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	type_keystroke_by_string( ctx, "`31" /* ， */ );
+
+	ret = chewing_cand_open( ctx );
+	ok ( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == -1, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, -1 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_first( ctx );
+	ok ( ret == 0, "chewing_cand_list_first() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_last( ctx );
+	ok ( ret == 0, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 0 );
+	ok_candidate_len( ctx, 1 );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_no_cand_windows()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == -1, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_list_first( ctx );
+	ok ( ret == -1, "chewing_cand_list_first() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_list_last( ctx );
+	ok ( ret == -1, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list()
+{
+	test_cand_list_word_no_rearward();
+	test_cand_list_word_rearward();
+	test_cand_list_symbol();
+	test_cand_list_no_cand_windows();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -359,6 +534,7 @@ int main()
 	test_cand_open();
 	test_cand_close();
 	test_cand_choose();
+	test_cand_list();
 
 	return exit_status();
 }
