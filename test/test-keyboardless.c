@@ -315,7 +315,30 @@ void test_cand_choose_out_of_range()
 	ret = chewing_cand_choose_by_index( ctx, -1 );
 	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
 
-	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */);
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_choose_second_layer()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "`" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ret = chewing_cand_choose_by_index( ctx, 2 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ret = chewing_cand_choose_by_index( ctx, 0 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+	ok_preedit_buffer( ctx, "\xEF\xBC\x8C" /* ， */ );
 
 	chewing_delete( ctx );
 }
@@ -339,7 +362,7 @@ void test_cand_choose_not_in_select()
 	ret = chewing_cand_choose_by_index( ctx, 2 );
 	ok ( ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1 );
 
-	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */);
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
 
 	chewing_delete( ctx );
 }
@@ -347,6 +370,7 @@ void test_cand_choose_not_in_select()
 void test_cand_choose() {
 	test_cand_choose_word();
 	test_cand_choose_symbol();
+	test_cand_choose_second_layer();
 	test_cand_choose_out_of_range();
 	test_cand_choose_not_in_select();
 }
