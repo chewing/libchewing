@@ -326,6 +326,24 @@ void test_select_candidate_rearward_start_with_symbol()
 	chewing_delete( ctx );
 }
 
+void test_del_bopomofo_as_mode_switch()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
+	ok_zuin_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
+
+	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
 
 void test_select_candidate_4_bytes_utf8()
 {
@@ -364,7 +382,7 @@ void test_select_candidate() {
 	test_select_candidate_no_rearward_start_with_symbol();
 	test_select_candidate_rearward_start_with_symbol();
 	test_select_candidate_4_bytes_utf8();
-
+	test_del_bopomofo_as_mode_switch();
 }
 
 void test_Esc_not_entering_chewing()
@@ -524,6 +542,30 @@ void test_Backspace()
 	test_Backspace_word();
 }
 
+void test_Up_close_candidate_window()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<U>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
 void test_Up_not_entering_chewing()
 {
 	ChewingContext *ctx;
@@ -539,8 +581,33 @@ void test_Up_not_entering_chewing()
 
 void test_Up()
 {
+	test_Up_close_candidate_window();
 	test_Up_not_entering_chewing();
-	/* XXX: What is spec of Up? */
+}
+
+void test_Down_open_candidate_window()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	print_function_name();
+
+	ctx = chewing_new();
+
+	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "3" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC" /* 測 */ );
+
+	chewing_delete( ctx );
 }
 
 void test_Down_not_entering_chewing()
@@ -558,6 +625,7 @@ void test_Down_not_entering_chewing()
 
 void test_Down()
 {
+	test_Down_open_candidate_window();
 	test_Down_not_entering_chewing();
 }
 
@@ -813,8 +881,16 @@ void test_Numlock_numeric_input()
 void test_Numlock_select_candidate()
 {
 	const TestData NUMLOCK_SELECT[] = {
+		{ "hk4<D><N1><E>", "\xE5\x86\x8A" /* 冊 */ },
+		{ "hk4<D><N2><E>", "\xE7\xAD\x96" /* 策 */ },
 		{ "hk4<D><N3><E>", "\xE6\xB8\xAC" /* 測 */ },
-		{ "`<N1><E>", "\xE2\x80\xA6" /* … */ },
+		{ "hk4<D><N4><E>", "\xE5\x81\xB4" /* 側 */ },
+		{ "hk4<D><N5><E>", "\xE5\xBB\x81" /* 廁 */ },
+		{ "hk4<D><N6><E>", "\xE6\x83\xBB" /* 惻 */ },
+		{ "hk4<D><N7><E>", "\xE7\xAD\xB4" /* 筴 */ },
+		{ "hk4<D><N8><E>", "\xE7\x95\x9F" /* 畟 */ },
+		{ "hk4<D><N9><E>", "\xE8\x8C\xA6" /* 茦 */ },
+		{ "hk4<D><N0><E>", "\xE7\xB2\xA3" /* 粣 */ },
 	};
 	size_t i;
 	ChewingContext *ctx;
@@ -969,6 +1045,45 @@ void test_longest_phrase()
 	chewing_delete( ctx );
 }
 
+void test_auto_commit_phrase()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 3 );
+
+	type_keystroke_by_string( ctx, "hk4g4hk4g4" /* 測試測試 */ );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+	ok_commit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_auto_commit_symbol()
+{
+	ChewingContext *ctx;
+
+	print_function_name();
+
+	ctx = chewing_new();
+	chewing_set_maxChiSymbolLen( ctx, 2 );
+
+	type_keystroke_by_string( ctx, "`31hk4g4hk4g4" /* ，測試 */ );
+	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+	ok_commit_buffer( ctx, "\xEF\xBC\x8C" /* ， */ );
+
+	chewing_delete( ctx );
+}
+
+void test_auto_commit()
+{
+	test_auto_commit_phrase();
+	// FIXME: Auto commit for symbol seem to be incorrect.
+	//test_auto_commit_symbol();
+}
+
 int main()
 {
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
@@ -995,6 +1110,7 @@ int main()
 	test_zuin_buffer();
 
 	test_longest_phrase();
+	test_auto_commit();
 
 	return exit_status();
 }

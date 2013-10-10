@@ -11,7 +11,6 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
 #include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -55,6 +54,8 @@ void TerminateHash( ChewingData *pgdata )
 	int ret;
 
 	UpdateLiftTime( pgdata );
+
+	sqlite3_finalize( pgdata->static_data.userphrase_enum_stmt );
 
 	ret = sqlite3_close( pgdata->static_data.db );
 	assert( SQLITE_OK == ret );
@@ -154,4 +155,3 @@ int InitHash( ChewingData *pgdata )
 
 	return 0;
 }
-

@@ -51,9 +51,13 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx );
  *
  * Always returns a C-style string (char pointer), caller must free it.
  */
+// deprecated
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
-
+// deprecated
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx );
+
+CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx);
+CHEWING_API int chewing_bopomofo_Check( ChewingContext *ctx );
 /*@}*/
 
 CHEWING_API int chewing_cursor_Current( ChewingContext *ctx );
@@ -67,7 +71,10 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx );
 CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx );
 CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx );
 CHEWING_API char *chewing_cand_String( ChewingContext *ctx );
-CHEWING_API char *chewing_cand_String_by_index( ChewingContext *ctx, int index );
+CHEWING_API char *chewing_cand_string_by_index( ChewingContext *ctx, int index );
+CHEWING_API int chewing_cand_choose_by_index( ChewingContext *ctx, int index );
+CHEWING_API int chewing_cand_open( ChewingContext *ctx );
+CHEWING_API int chewing_cand_close( ChewingContext *ctx );
 /*@}*/
 
 

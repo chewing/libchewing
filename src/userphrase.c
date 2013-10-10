@@ -23,6 +23,7 @@
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "private.h"
+#include "key2pho-private.h"
 
 /* load the orginal frequency from the static dict */
 static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
@@ -120,14 +121,6 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 		delta = max( ( freq - origfreq ) / 5, LONG_DECREASE_FREQ );
 		return max( freq - delta, origfreq );
 	}
-}
-
-static int GetPhoneLen( const uint16_t phoneSeq[] )
-{
-	int len = 0;
-	while ( phoneSeq[len] != 0 )
-		++len;
-	return len;
 }
 
 static int GetCurrentLiftTime( ChewingData *pgdata )
@@ -252,6 +245,38 @@ error:
 void UserUpdatePhraseEnd( ChewingData *pgdata )
 {
 	sqlite3_exec( pgdata->static_data.db, "END", 0, 0, 0 );
+}
+
+void UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
+{
+	int ret;
+	int len;
+	sqlite3_stmt *stmt = NULL;
+
+	assert( pgdata );
+	assert( phoneSeq );
+	assert( wordSeq );
+
+	len = GetPhoneLen( phoneSeq );
+
+	ret = sqlite3_prepare_v2(
+		pgdata->static_data.db,
+		"DELETE FROM userphrase_v1 WHERE phrase = ?1 AND phone = ?2", -1,
+		&stmt, NULL );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_bind_text( stmt, 1, wordSeq, -1 , SQLITE_STATIC );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_bind_blob( stmt, 2, phoneSeq,
+		( len + 1 ) * sizeof( phoneSeq[0] ) , SQLITE_STATIC );
+	if ( ret != SQLITE_OK ) goto end;
+
+	ret = sqlite3_step( stmt );
+	if ( ret != SQLITE_DONE ) goto end;
+
+end:
+	sqlite3_finalize( stmt );
 }
 
 

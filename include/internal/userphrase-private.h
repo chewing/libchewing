@@ -59,6 +59,7 @@ void UserUpdatePhraseBegin( struct tag_ChewingData *pgdata );
 int UserUpdatePhrase( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
 void UserUpdatePhraseEnd( struct tag_ChewingData *pgdata );
+void UserRemovePhrase( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
 /**
  * @brief Read the first phrase of the phone in user phrase database.

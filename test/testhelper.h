@@ -58,6 +58,8 @@
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
+#define ok_candidate_len(ctx, expected_len) \
+	internal_ok_candidate_len(__FILE__, __LINE__, ctx, expected_len)
 #define ok_keystroke_rtn(ctx, rtn) \
 	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
@@ -70,6 +72,7 @@ typedef struct {
 } TestData;
 
 typedef struct {
+	char *name;
 	int (*check)(ChewingContext *ctx);
 	int (*check_alt)(ChewingContext *ctx);
 	int (*get_length)(ChewingContext *ctx);
@@ -98,6 +101,8 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len );
+void internal_ok_candidate_len( const char *file, int line,
+	ChewingContext *ctx, size_t expected_len );
 void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn );
 int internal_has_userphrase( const char *file, int line,

@@ -132,10 +132,9 @@ void test_set_fullshape()
 	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
 		"mode shall change to FULLSHAPE_MODE" );
 
-	// XXX: What is the correct behavior when input parameter is wrong?
-//	chewing_set_ShapeMode( ctx, -1 );
-//	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
-//		"mode shall not change when parameter is invalid" );
+	chewing_set_ShapeMode( ctx, -1 );
+	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
+		"mode shall not change when parameter is invalid" );
 
 	chewing_set_ShapeMode( ctx, HALFSHAPE_MODE );
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,

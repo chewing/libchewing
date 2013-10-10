@@ -18,7 +18,9 @@
  */
 
 /* This file is encoded in UTF-8 */
+#include "key2pho-private.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include "chewing-utf8-util.h"
@@ -102,7 +104,7 @@ uint16_t UintFromPhone( const char *zhuin )
 
 	iter = zhuin;
 
-	while ( *iter ) {
+	while ( *iter && *iter != 0x20 ) {
 		len = ueStrNCpy( buf, iter, 1, STRNCPY_CLOSE );
 
 		for (; zhuin_index < ZUIN_SIZE; ++zhuin_index ) {
@@ -171,6 +173,7 @@ int PhoneFromUint( char *phone, size_t phone_len, uint16_t phone_num )
 		}
 	}
 	strncpy( phone, buffer, phone_len );
+	phone[ phone_len - 1 ] = 0;
 	return 0;
 }
 
@@ -198,3 +201,79 @@ uint16_t UintFromPhoneInx( const int ph_inx[] )
 	return result;
 }
 
+size_t GetPhoneLen( const uint16_t *phoneSeq )
+{
+	size_t len = 0;
+	assert( phoneSeq );
+
+	while ( phoneSeq[len] )
+		++len;
+	return len;
+}
+
+static size_t GetBopomofoCount( const char * bopomofo_buf )
+{
+	size_t count = 0;
+	assert( bopomofo_buf );
+
+	while( (bopomofo_buf = strpbrk( bopomofo_buf, " ")) != NULL ) {
+		++count;
+		bopomofo_buf += 1;
+	}
+
+	return count;
+}
+
+size_t BopomofoFromUintArray( char * const bopomofo_buf, const size_t bopomofo_len, const uint16_t *phoneSeq )
+{
+	size_t i;
+	size_t len;
+	size_t buf_len;
+	size_t shift = 0;
+
+	assert( phoneSeq );
+
+	len = GetPhoneLen( phoneSeq );
+	buf_len = GetBopomofoBufLen( len );
+
+	if ( bopomofo_buf && bopomofo_len >= buf_len ) {
+		for ( i = 0; i < len; ++i ) {
+			PhoneFromUint( bopomofo_buf + shift, bopomofo_len - shift, phoneSeq[i] );
+			strcat( bopomofo_buf + shift, " " );
+			shift += strlen( bopomofo_buf + shift );
+		}
+		if ( shift )
+			bopomofo_buf[ shift - 1 ] = 0;
+	}
+	return buf_len;
+}
+
+ssize_t UintArrayFromBopomofo( uint16_t *phone_seq, const size_t phone_len, const char * bopomofo_buf )
+{
+	ssize_t i;
+	ssize_t len;
+
+	assert( bopomofo_buf );
+
+	len = GetBopomofoCount( bopomofo_buf ) + 1;
+	if ( !phone_seq )
+		return len;
+
+	if ( phone_len <= len )
+		return -1;
+
+	for ( i = 0; i < len ; ++i ) {
+		phone_seq[ i ] = UintFromPhone( bopomofo_buf );
+		if ( phone_seq[ i ] == 0 )
+			return -1;
+		bopomofo_buf = strpbrk( bopomofo_buf, " " ) + 1;
+	}
+	phone_seq[ len ] = 0;
+
+	return len;
+}
+
+size_t GetBopomofoBufLen( size_t len )
+{
+	return ( MAX_UTF8_SIZE * ZUIN_SIZE + 1 ) * len;
+}

@@ -368,7 +368,7 @@ static int SeekPhraseHead( ChewingData *pgdata )
 }
 
 /** @brief Enter choice mode and relating initialisations. */
-int ChoiceFirstAvail( ChewingData *pgdata )
+int ChoiceInitAvail( ChewingData *pgdata )
 {
 	int end, begin;
 
@@ -400,24 +400,79 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 	return 0;
 }
 
-int ChoicePrevAvail( ChewingContext *ctx )
+int ChoiceFirstAvail( ChewingData *pgdata )
 {
-	ChewingData *pgdata = ctx->data;
-	if (pgdata->choiceInfo.isSymbol != WORD_CHOICE) return 0;
-	if ( ++( pgdata->availInfo.currentAvail ) >= pgdata->availInfo.nAvail )
-		pgdata->availInfo.currentAvail = 0;
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
 	SetChoiceInfo( pgdata );
+
 	return 0;
 }
 
-/** @brief Return the next phrase not longer than the previous phrase. */
+int ChoiceLastAvail( ChewingData *pgdata )
+{
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	pgdata->availInfo.currentAvail = 0;
+	SetChoiceInfo( pgdata );
+
+	return 0;
+}
+
+int ChoiceHasNextAvail( ChewingData *pgdata )
+{
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	return pgdata->availInfo.currentAvail > 0;
+}
+
+
+int ChoiceHasPrevAvail( ChewingData *pgdata )
+{
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	return pgdata->availInfo.currentAvail < pgdata->availInfo.nAvail - 1;
+}
+
+int ChoicePrevAvail( ChewingData *pgdata )
+{
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( ChoiceHasPrevAvail( pgdata ) ) {
+		++pgdata->availInfo.currentAvail;
+		SetChoiceInfo( pgdata );
+		return 0;
+	}
+
+	return -1;
+}
+
 int ChoiceNextAvail( ChewingData *pgdata )
 {
-	if (pgdata->choiceInfo.isSymbol) return 0;
-	if ( --( pgdata->availInfo.currentAvail ) < 0 )
-		pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
-	SetChoiceInfo( pgdata );
-	return 0;
+	assert( pgdata );
+	assert( pgdata->bSelect );
+
+	if ( ChoiceHasNextAvail( pgdata ) ) {
+		--pgdata->availInfo.currentAvail;
+		SetChoiceInfo( pgdata );
+		return 0;
+	}
+
+	return -1;
 }
 
 int ChoiceEndChoice( ChewingData *pgdata )

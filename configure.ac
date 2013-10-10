@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.67])
+AC_PREREQ([2.65])
 
 # Update CMakeLists.txt if version is changed.
 AC_INIT([libchewing],[0.3.5],[chewing-devel@googlegroups.com])

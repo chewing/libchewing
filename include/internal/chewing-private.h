@@ -21,6 +21,12 @@
 #  include <stdint.h>
 #endif
 
+/* visual C++ does not have ssize_t type */
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include "global.h"
 #include "plat_mmap.h"
 #include "sqlite3.h"
@@ -172,6 +178,12 @@ typedef struct {
 
 	sqlite3 *db;
 	sqlite3_stmt *userphrase_stmt;
+
+	/* For userphrase enumerate APIs */
+	sqlite3_stmt *userphrase_enum_stmt;
+	const char *userphrase_enum_phrase;
+	const uint16_t *userphrase_enum_phone;
+
 	unsigned int original_lifttime;
 	unsigned int new_lifttime;
 

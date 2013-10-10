@@ -190,9 +190,11 @@ set(ALL_TESTCASES
 	test-bopomofo
 	test-config
 	test-easy-symbol
+	test-error-handling
 	test-fullshape
 	test-key2pho
 	test-keyboard
+	test-keyboardless
 	test-logger
 	test-mmap
 	test-path
