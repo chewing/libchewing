@@ -537,11 +537,85 @@ void test_userphrase_manipulate_error_handling()
 	chewing_delete( ctx );
 }
 
+void test_userphrase_manipulate_remove_same_phone()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	const char phrase_1[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	const char phrase_2[] = "\xE5\x81\xB4\xE5\xAE\xA4" /* 側室 */;
+	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	ret = chewing_userphrase_add( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_add( ctx, phrase_2, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase_1, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+	ret = chewing_userphrase_lookup( ctx, phrase_2, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	ret = chewing_userphrase_remove( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_lookup() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase_2, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_manipulate_remove_same_phrase()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	const char phrase[] = "\xE4\xBB\x80\xE9\xBA\xBC" /* 什麼 */;
+	const char bopomofo_1[] = "\xE3\x84\x95\xE3\x84\xA3\xCB\x8A \xE3\x84\x87\xE3\x84\x9C\xCB\x99" /* ㄕㄣˊ ㄇㄜ˙ */;
+	const char bopomofo_2[] = "\xE3\x84\x95\xE3\x84\x9C\xCB\x8A \xE3\x84\x87\xE3\x84\x9C\xCB\x99" /* ㄕㄜˊ ㄇㄜ˙ */;
+
+	print_function_name();
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo_2 );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_1 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_2 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	ret = chewing_userphrase_remove( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_lookup() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_2 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	chewing_delete( ctx );
+}
+
 void test_userphrase_manipulate()
 {
 	test_userphrase_manipulate_normal();
 	test_userphrase_manipulate_hash_collision();
 	test_userphrase_manipulate_error_handling();
+	test_userphrase_manipulate_remove_same_phone();
+	test_userphrase_manipulate_remove_same_phrase();
 }
 
 void test_userphrase_lookup()
