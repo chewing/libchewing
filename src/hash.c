@@ -65,15 +65,42 @@ static int CreateTable( ChewingData *pgdata )
 {
 	int ret;
 
+#if MAX_PHRASE_LEN != 11
+#error update database table
+#endif
+
 	ret = sqlite3_exec( pgdata->static_data.db,
 		"CREATE TABLE IF NOT EXISTS userphrase_v1 ("
 		"time INTEGER,"
 		"user_freq INTEGER,"
 		"max_freq INTEGER,"
 		"orig_freq INTEGER,"
-		"phone BLOB,"
+		"length INTEGER,"
+		"phone_0 INTEGER,"
+		"phone_1 INTEGER,"
+		"phone_2 INTEGER,"
+		"phone_3 INTEGER,"
+		"phone_4 INTEGER,"
+		"phone_5 INTEGER,"
+		"phone_6 INTEGER,"
+		"phone_7 INTEGER,"
+		"phone_8 INTEGER,"
+		"phone_9 INTEGER,"
+		"phone_10 INTEGER,"
 		"phrase TEXT,"
-		"PRIMARY KEY (phone, phrase)"
+		"PRIMARY KEY ("
+			"phone_0,"
+			"phone_1,"
+			"phone_2,"
+			"phone_3,"
+			"phone_4,"
+			"phone_5,"
+			"phone_6,"
+			"phone_7,"
+			"phone_8,"
+			"phone_9,"
+			"phone_10,"
+			"phrase)"
 		")",
 		NULL, NULL, NULL );
 	if ( ret != SQLITE_OK ) return -1;

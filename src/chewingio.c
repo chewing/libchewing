@@ -1458,7 +1458,8 @@ CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 
 	ret = sqlite3_prepare_v2(
 		pgdata->static_data.db,
-		"SELECT phrase, phone FROM userphrase_v1", -1,
+		"SELECT phrase,phone_0,phone_1,phone_2,phone_3,phone_4,phone_5,"
+		"phone_6,phone_7,phone_8,phone_9,phone_10 from userphrase_v1", -1,
 		&pgdata->static_data.userphrase_enum_stmt, NULL );
 	if ( ret != SQLITE_OK ) return -1;
 
@@ -1472,6 +1473,7 @@ CHEWING_API int chewing_userphrase_has_next(
 {
 	ChewingData *pgdata;
 	int ret;
+	int i;
 
 	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
 
@@ -1487,10 +1489,11 @@ CHEWING_API int chewing_userphrase_has_next(
 	}
 
 	pgdata->static_data.userphrase_enum_phrase =
-		sqlite3_column_blob( pgdata->static_data.userphrase_enum_stmt, 0 );
+		(const char *)sqlite3_column_text( pgdata->static_data.userphrase_enum_stmt, 0 );
 
-	pgdata->static_data.userphrase_enum_phone =
-		sqlite3_column_blob( pgdata->static_data.userphrase_enum_stmt, 1 );
+	for ( i = 0; i < MAX_PHRASE_LEN; ++i )
+		pgdata->static_data.userphrase_enum_phone[i] =
+			sqlite3_column_int( pgdata->static_data.userphrase_enum_stmt, 1 + i );
 
 	*phrase_len = strlen( pgdata->static_data.userphrase_enum_phrase ) + 1;
 	*bopomofo_len = GetBopomofoBufLen( GetPhoneLen( pgdata->static_data.userphrase_enum_phone ) );

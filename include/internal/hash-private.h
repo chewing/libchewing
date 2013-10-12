@@ -24,34 +24,69 @@
 #define BIN_HASH_SIG "CBiH"
 #define HASH_FILE  "uhash.dat"
 
-#define CHEWING_DB_COLUMN "time, user_freq, max_freq, orig_freq, phone, phrase"
 /*
- * The SELECT index starts from 0, but the INSERT/REPLACE index starts from 1,
- * so we cannot use the same index for both SELECT & INSERT/REPLACE.
+ * userphrase_v1
  */
-#define CHEWING_DB_SEL_INDEX_TIME	(0)
-#define CHEWING_DB_SEL_INDEX_USER_FREQ	(1)
-#define CHEWING_DB_SEL_INDEX_MAX_FREQ	(2)
-#define CHEWING_DB_SEL_INDEX_ORIG_FREQ	(3)
-#define CHEWING_DB_SEL_INDEX_PHONE	(4)
-#define CHEWING_DB_SEL_INDEX_PHRASE	(5)
 
-#define CHEWING_DB_INS_INDEX_TIME	(CHEWING_DB_SEL_INDEX_TIME + 1)
-#define CHEWING_DB_INS_INDEX_USER_FREQ	(CHEWING_DB_SEL_INDEX_USER_FREQ + 1)
-#define CHEWING_DB_INS_INDEX_MAX_FREQ	(CHEWING_DB_SEL_INDEX_MAX_FREQ + 1)
-#define CHEWING_DB_INS_INDEX_ORIG_FREQ	(CHEWING_DB_SEL_INDEX_ORIG_FREQ + 1)
-#define CHEWING_DB_INS_INDEX_PHONE	(CHEWING_DB_SEL_INDEX_PHONE + 1)
-#define CHEWING_DB_INS_INDEX_PHRASE	(CHEWING_DB_SEL_INDEX_PHRASE + 1)
+#define DB_USERPHRASE_COLUMN_NO_PHONE_PHRASE \
+	"time,user_freq,max_freq,orig_freq,length"
 
-#define CHEWING_DB_SELECT_BY_PHONE "SELECT " CHEWING_DB_COLUMN " FROM " \
-	"userphrase_v1 WHERE phone = ?4"
+#define DB_USERPHRASE_COLUMN_NO_PHONE \
+	DB_USERPHRASE_COLUMN_NO_PHONE_PHRASE ",phrase" \
 
-#define CHEWING_DB_SELECT_BY_PHONE_PHRASE "SELECT " CHEWING_DB_COLUMN " FROM " \
-	"userphrase_v1 WHERE phone = ?4 AND phrase = ?5"
+#define DB_USERPHRASE_COLUMN \
+	DB_USERPHRASE_COLUMN_NO_PHONE ","\
+	"phone_0,phone_1,phone_2,phone_3,phone_4,phone_5," \
+	"phone_6,phone_7,phone_8,phone_9,phone_10"
 
-#define CHEWING_DB_UPSERT "INSERT OR REPLACE INTO userphrase_v1" \
-	"(" CHEWING_DB_COLUMN ") VALUES (?1,?2,?3,?4,?5,?6)"
+#define DB_INDEX_TIME		(90)
+#define DB_INDEX_USER_FREQ	(91)
+#define DB_INDEX_MAX_FREQ	(92)
+#define DB_INDEX_ORIG_FREQ	(93)
+#define DB_INDEX_LENGTH		(94)
+#define DB_INDEX_PHRASE		(95)
+#define DB_INDEX_PHONE_0	(100)
 
+#define DB_SELECT_INDEX_TIME		(0)
+#define DB_SELECT_INDEX_USER_FREQ	(1)
+#define DB_SELECT_INDEX_MAX_FREQ	(2)
+#define DB_SELECT_INDEX_ORIG_FREQ	(3)
+#define DB_SELECT_INDEX_LENGTH		(4)
+#define DB_SELECT_INDEX_PHRASE		(5)
+#define DB_SELECT_INDEX_PHONE_0		(6)
+
+#define DB_PHONE_STMT \
+	"length = ?94 AND " \
+	"phone_0 = ?100 AND " \
+	"phone_1 = ?101 AND " \
+	"phone_2 = ?102 AND " \
+	"phone_3 = ?103 AND " \
+	"phone_4 = ?104 AND " \
+	"phone_5 = ?105 AND " \
+	"phone_6 = ?106 AND " \
+	"phone_7 = ?107 AND " \
+	"phone_8 = ?108 AND " \
+	"phone_9 = ?109 AND " \
+	"phone_10 = ?110"
+
+#define DB_SELECT_USERPHRASE_BY_PHONE \
+	"SELECT " DB_USERPHRASE_COLUMN_NO_PHONE " FROM userphrase_v1 WHERE " \
+	DB_PHONE_STMT
+
+#define DB_SELECT_USERPHRASE_BY_PHONE_PHRASE \
+	"SELECT " DB_USERPHRASE_COLUMN_NO_PHONE_PHRASE " FROM userphrase_v1 WHERE " \
+	DB_PHONE_STMT " AND phrase = ?95"
+
+#define DB_UPSERT_USERPHRASE \
+	"INSERT OR REPLACE INTO userphrase_v1 (" DB_USERPHRASE_COLUMN ") " \
+	"VALUES (?90,?91,?92,?93,?94,?95,?100,?101,?102,?103,?104,?105,?106,?107,?108,?109,?110)"
+
+#define DB_DELETE_USERPHRASE \
+	"DELETE FROM userphrase_v1 WHERE " DB_PHONE_STMT " AND phrase = ?95"
+
+/*
+ * config_v1
+ */
 
 #define CHEWING_DB_CONFIG_COLUMN	"value, id"
 

@@ -182,7 +182,7 @@ typedef struct {
 	/* For userphrase enumerate APIs */
 	sqlite3_stmt *userphrase_enum_stmt;
 	const char *userphrase_enum_phrase;
-	const uint16_t *userphrase_enum_phone;
+	uint16_t userphrase_enum_phone[ MAX_PHRASE_LEN ];
 
 	unsigned int original_lifttime;
 	unsigned int new_lifttime;
