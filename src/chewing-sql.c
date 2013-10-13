@@ -14,12 +14,15 @@
 
 #include "chewing-sql.h"
 
-int InitSql( struct tag_ChewingData *pgdata )
+const SqlStmtDesc SQL_STMT_DESC[] = {
+};
+
+int InitSql(ChewingData *pgdata)
 {
 	return 0;
 }
 
-void TerminateHash( struct tag_ChewingData *pgdata )
+void TerminateHash(ChewingData *pgdata)
 {
 
 }
