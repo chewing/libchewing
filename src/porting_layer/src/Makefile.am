@@ -16,5 +16,4 @@ libporting_layer_la_SOURCES = \
 	plat_mmap_posix.c \
 	plat_mmap_windows.c \
 	plat_path.c \
-	plat_sqlite3.c \
 	$(NULL)

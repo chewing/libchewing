@@ -291,7 +291,6 @@ add_library(chewing OBJECT
 	${SRC_DIR}/chewingutil.c
 	${SRC_DIR}/choice.c
 	${SRC_DIR}/dict.c
-	${SRC_DIR}/hash.c
 	${SRC_DIR}/mod_aux.c
 	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/porting_layer/include/plat_mmap.h
@@ -303,7 +302,6 @@ add_library(chewing OBJECT
 	${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
 	${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
 	${SRC_DIR}/porting_layer/src/plat_path.c
-	${SRC_DIR}/porting_layer/src/plat_sqlite3.c
 	${SRC_DIR}/private.h
 	${SRC_DIR}/tree.c
 	${SRC_DIR}/userphrase.c

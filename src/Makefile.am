@@ -18,7 +18,6 @@ libchewing_la_SOURCES = \
 	chewingutil.c \
 	choice.c \
 	dict.c \
-	hash.c \
 	tree.c \
 	userphrase.c \
 	zuin.c \
