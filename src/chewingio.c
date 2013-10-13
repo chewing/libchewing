@@ -1453,15 +1453,11 @@ CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 
 	pgdata = ctx->data;
 
-	sqlite3_finalize( pgdata->static_data.userphrase_enum_stmt );
-	pgdata->static_data.userphrase_enum_stmt = NULL;
-
-	ret = sqlite3_prepare_v2(
-		pgdata->static_data.db,
-		"SELECT phrase,phone_0,phone_1,phone_2,phone_3,phone_4,phone_5,"
-		"phone_6,phone_7,phone_8,phone_9,phone_10 from userphrase_v1", -1,
-		&pgdata->static_data.userphrase_enum_stmt, NULL );
-	if ( ret != SQLITE_OK ) return -1;
+	ret = sqlite3_reset( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
+	if ( ret != SQLITE_OK ) {
+		LOG_ERROR("sqlite3_reset returns %d", ret);
+		return -1;
+	}
 
 	return 0;
 }
@@ -1473,30 +1469,26 @@ CHEWING_API int chewing_userphrase_has_next(
 {
 	ChewingData *pgdata;
 	int ret;
-	int i;
 
 	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
 
 	pgdata = ctx->data;
 
-	if ( pgdata->static_data.userphrase_enum_stmt == NULL ) return 0;
-
-	ret = sqlite3_step( pgdata->static_data.userphrase_enum_stmt );
+	ret = sqlite3_step( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_ROW ) {
-		sqlite3_finalize( pgdata->static_data.userphrase_enum_stmt );
-		pgdata->static_data.userphrase_enum_stmt = NULL;
+		if ( ret != SQLITE_DONE ) {
+			LOG_ERROR( "sqlite3_step returns %d", ret );
+		}
 		return 0;
 	}
 
-	pgdata->static_data.userphrase_enum_phrase =
-		(const char *)sqlite3_column_text( pgdata->static_data.userphrase_enum_stmt, 0 );
+	*phrase_len = strlen( (const char *) sqlite3_column_text(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] ) ) + 1;
 
-	for ( i = 0; i < MAX_PHRASE_LEN; ++i )
-		pgdata->static_data.userphrase_enum_phone[i] =
-			sqlite3_column_int( pgdata->static_data.userphrase_enum_stmt, 1 + i );
-
-	*phrase_len = strlen( pgdata->static_data.userphrase_enum_phrase ) + 1;
-	*bopomofo_len = GetBopomofoBufLen( GetPhoneLen( pgdata->static_data.userphrase_enum_phone ) );
+	*bopomofo_len = GetBopomofoBufLen( sqlite3_column_int(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH] ) );
 
 	return 1;
 }
@@ -1507,17 +1499,41 @@ CHEWING_API int chewing_userphrase_get(
 	char *bopomofo_buf, unsigned int bopomofo_len)
 {
 	ChewingData *pgdata;
+	const char *phrase;
+	int length;
+	int i;
+	uint16_t phone_array[MAX_PHRASE_LEN] = { 0 };
 
 	if ( !ctx || !phrase_buf || !phrase_len ||
 		!bopomofo_buf || !bopomofo_len ) return -1;
 
 	pgdata = ctx->data;
 
-	if ( phrase_len < strlen( pgdata->static_data.userphrase_enum_phrase ) + 1 ) return -1;
-	if ( bopomofo_len < GetBopomofoBufLen( GetPhoneLen( pgdata->static_data.userphrase_enum_phone ) ) ) return -1;
+	phrase = (const char *) sqlite3_column_text(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] );
+	length = sqlite3_column_int(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH] );
 
-	strncpy( phrase_buf, pgdata->static_data.userphrase_enum_phrase, phrase_len );
-	BopomofoFromUintArray( bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum_phone );
+	if ( phrase_len < strlen( phrase ) + 1 ) {
+		LOG_ERROR("phrase_len %d is smaller than %d", phrase_len, strlen( phrase ) + 1 );
+		return -1;
+	}
+
+	if ( bopomofo_len < GetBopomofoBufLen( length ) ) {
+		LOG_ERROR("bopomofo_len %d is smaller than %d", bopomofo_len, GetBopomofoBufLen( length ) );
+		return -1;
+	}
+
+	for ( i = 0; i < length && i < ARRAY_SIZE(phone_array); ++i ) {
+		phone_array[i] = sqlite3_column_int(
+			pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+			SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHONE_0 + i]);
+	}
+
+	strncpy( phrase_buf, phrase, phrase_len );
+	BopomofoFromUintArray( bopomofo_buf, bopomofo_len, phone_array );
 
 	return 0;
 }

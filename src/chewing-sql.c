@@ -529,8 +529,6 @@ void TerminateSql(ChewingData *pgdata)
 		pgdata->static_data.stmt_userphrase[i] = NULL;
 	}
 
-	sqlite3_finalize(pgdata->static_data.userphrase_enum_stmt);
-
 	ret = sqlite3_close(pgdata->static_data.db);
 	assert(SQLITE_OK == ret);
 	pgdata->static_data.db = NULL;

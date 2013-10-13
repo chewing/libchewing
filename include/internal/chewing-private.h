@@ -180,11 +180,6 @@ typedef struct {
 	sqlite3 *db;
 	sqlite3_stmt *userphrase_stmt;
 
-	/* For userphrase enumerate APIs */
-	sqlite3_stmt *userphrase_enum_stmt;
-	const char *userphrase_enum_phrase;
-	uint16_t userphrase_enum_phone[ MAX_PHRASE_LEN ];
-
 	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
 	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
 
