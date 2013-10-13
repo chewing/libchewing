@@ -37,6 +37,7 @@ chewing_include_HEADERS = \
 
 noinst_HEADERS =\
 	include/internal/chewing-private.h \
+	include/internal/chewing-sql.h \
 	include/internal/chewing-utf8-util.h \
 	include/internal/chewingutil.h \
 	include/internal/choice-private.h \

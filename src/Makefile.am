@@ -13,6 +13,7 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
+	chewing-sql.c \
 	chewingio.c \
 	chewingutil.c \
 	choice.c \
