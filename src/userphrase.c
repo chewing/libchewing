@@ -207,7 +207,8 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 {
 	int ret;
 	int action;
-	int len;
+	int phone_len;
+	int word_len;
 
 	int orig_freq;
 	int max_freq;
@@ -219,7 +220,13 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 	assert(phoneSeq);
 	assert(wordSeq);
 
-	len = GetPhoneLen(phoneSeq);
+	phone_len = GetPhoneLen(phoneSeq);
+	word_len = ueStrLen(wordSeq);
+
+	if (phone_len != word_len) {
+		LOG_WARN("Do not update userphrase because phoneSeq length %d != wordSeq length %d", phone_len, word_len);
+		return USER_UPDATE_FAIL;
+	}
 
 	ret = sqlite3_reset(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE]);
 	if (ret != SQLITE_OK) {
@@ -252,7 +259,7 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 			pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE],
 			SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].column[COLUMN_USERPHRASE_ORIG_FREQ]);
 
-		max_freq = LoadMaxFreq(pgdata, phoneSeq, len);
+		max_freq = LoadMaxFreq(pgdata, phoneSeq, phone_len);
 
 		user_freq = sqlite3_column_int(
 			pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE],
@@ -266,8 +273,8 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 	} else {
 		action = USER_UPDATE_INSERT;
 
-		orig_freq = LoadOriginalFreq(pgdata, phoneSeq, wordSeq, len);
-		max_freq = LoadMaxFreq(pgdata, phoneSeq, len);
+		orig_freq = LoadOriginalFreq(pgdata, phoneSeq, wordSeq, word_len);
+		max_freq = LoadMaxFreq(pgdata, phoneSeq, phone_len);
 		user_freq = orig_freq;
 	}
 
