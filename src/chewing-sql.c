@@ -48,7 +48,7 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 #define CHEWING_DB_PATH		L"chewing"
 #define CHEWING_DB_NAME		L"chewing.db"
 
-static int SetSQLiteTemp( char *buf, size_t len, wchar_t *wbuf, size_t wlen )
+static int SetSQLiteTemp(char *buf, size_t len, wchar_t *wbuf, size_t wlen)
 {
 	/*
 	 * Set temporary directory is necessary for Windows platform.
@@ -57,41 +57,40 @@ static int SetSQLiteTemp( char *buf, size_t len, wchar_t *wbuf, size_t wlen )
 
 	int ret;
 
-	ret = GetTempPathW( wlen, wbuf );
-	if ( ret == 0 || ret >= wlen ) return -1;
+	ret = GetTempPathW(wlen, wbuf);
+	if (ret == 0 || ret >= wlen) return -1;
 
-	ret = WideCharToMultiByte( CP_UTF8, 0, wbuf, -1, buf, len, NULL, NULL );
-	if ( ret == 0 ) return -1;
+	ret = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, buf, len, NULL, NULL);
+	if (ret == 0) return -1;
 
 	// FIXME: When to free sqlite3_temp_directory?
 	// FIXME: thread safe?
-	sqlite3_temp_directory = sqlite3_mprintf( "%s", buf );
-	if ( sqlite3_temp_directory == 0 ) exit( -1 );
+	sqlite3_temp_directory = sqlite3_mprintf("%s", buf);
+	if (sqlite3_temp_directory == 0) exit(-1);
 
 	return 0;
 }
 
-static int GetSQLitePath( wchar_t *wbuf, size_t wlen )
+static int GetSQLitePath(wchar_t *wbuf, size_t wlen)
 {
 	int ret;
 
-	ret = GetEnvironmentVariableW( L"CHEWING_USER_PATH", wbuf, wlen );
-	if ( ret ) {
-		wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_NAME );
+	ret = GetEnvironmentVariableW(L"CHEWING_USER_PATH", wbuf, wlen);
+	if (ret) {
+		wcscat_s(wbuf, wlen, L"\\" CHEWING_DB_NAME);
 		return 0;
 	}
 
-	// FIXME: Use SHGetKnownFolderPath instead?
-	ret = GetEnvironmentVariableW( L"APPDATA", wbuf, wlen );
-	if ( ret ) {
-		wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_PATH );
+	// FIXME: Shall be %USERPROFILE%\ChewingTextService
+	ret = GetEnvironmentVariableW(L"APPDATA", wbuf, wlen);
+	if (ret) {
+		wcscat_s(wbuf, wlen, L"\\" CHEWING_DB_PATH);
 
-		ret = CreateDirectoryW( wbuf, 0 );
-		if ( ret != 0 || GetLastError() == ERROR_ALREADY_EXISTS ) {
-			wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_NAME );
+		ret = CreateDirectoryW(wbuf, 0);
+		if (ret != 0 || GetLastError() == ERROR_ALREADY_EXISTS) {
+			wcscat_s(wbuf, wlen, L"\\" CHEWING_DB_NAME);
 			return 0;
 		}
-
 	}
 	return -1;
 }
@@ -103,24 +102,24 @@ sqlite3 *GetSQLiteInstance()
 	int ret;
 	sqlite3 *db = NULL;
 
-	wbuf = (wchar_t *) calloc( CHEWING_MAX_DB_PATH, sizeof( *wbuf ) );
-	if ( !wbuf ) exit( -1 );
+	wbuf = (wchar_t *) calloc(CHEWING_MAX_DB_PATH, sizeof(*wbuf));
+	if (!wbuf) exit(-1);
 
-	buf = (char *) calloc( CHEWING_MAX_DB_PATH, sizeof( *buf ) );
-	if ( !buf ) exit( -1 );
+	buf = (char *) calloc(CHEWING_MAX_DB_PATH, sizeof(*buf));
+	if (!buf) exit(-1);
 
-	ret = SetSQLiteTemp( buf, CHEWING_MAX_DB_PATH, wbuf, CHEWING_MAX_DB_PATH );
-	if ( ret ) goto end;
+	ret = SetSQLiteTemp(buf, CHEWING_MAX_DB_PATH, wbuf, CHEWING_MAX_DB_PATH);
+	if (ret) goto end;
 
-	ret = GetSQLitePath( wbuf, CHEWING_MAX_DB_PATH );
-	if ( ret ) goto end;
+	ret = GetSQLitePath(wbuf, CHEWING_MAX_DB_PATH);
+	if (ret) goto end;
 
-	ret = sqlite3_open16( wbuf, &db );
-	if ( ret != SQLITE_OK ) goto end;
+	ret = sqlite3_open16(wbuf, &db);
+	if (ret != SQLITE_OK) goto end;
 
 end:
-	free( buf );
-	free( wbuf );
+	free(buf);
+	free(wbuf);
 	return db;
 }
 
@@ -132,24 +131,24 @@ end:
 #define CHEWING_DB_PATH		"chewing"
 #define CHEWING_DB_NAME		"chewing.db"
 
-static int GetSQLitePath( char *buf, size_t len )
+static int GetSQLitePath(char *buf, size_t len)
 {
 	char *path;
 
-	path = getenv( "CHEWING_USER_PATH" );
-	if ( path && access( path, W_OK ) == 0 ) {
-		snprintf( buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_NAME );
+	path = getenv("CHEWING_USER_PATH");
+	if (path && access(path, W_OK) == 0) {
+		snprintf(buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_NAME);
 		return 0;
 	}
 
-	path = getenv( "HOME" );
-	if ( !path ) {
+	path = getenv("HOME");
+	if (!path) {
 		path = PLAT_TMPDIR;
 	}
 
-	snprintf( buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_PATH );
-	PLAT_MKDIR( buf );
-	strncat( buf, PLAT_SEPARATOR CHEWING_DB_NAME, len - strlen( buf ) );
+	snprintf(buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_PATH);
+	PLAT_MKDIR(buf);
+	strncat(buf, PLAT_SEPARATOR CHEWING_DB_NAME, len - strlen(buf));
 	return 0;
 }
 
@@ -159,29 +158,27 @@ sqlite3 * GetSQLiteInstance()
 	int ret;
 	sqlite3 *db = NULL;
 
-	buf = (char *) calloc( CHEWING_MAX_DB_PATH, sizeof( *buf ) );
-	if ( !buf ) exit( -1 );
+	buf = (char *) calloc(CHEWING_MAX_DB_PATH, sizeof(*buf));
+	if (!buf) exit(-1);
 
-	ret = GetSQLitePath( buf, CHEWING_MAX_DB_PATH );
-	if ( ret ) goto end;
+	ret = GetSQLitePath(buf, CHEWING_MAX_DB_PATH);
+	if (ret) goto end;
 
-	ret = sqlite3_open( buf, &db );
-	if ( ret != SQLITE_OK ) goto end;
+	ret = sqlite3_open(buf, &db);
+	if (ret != SQLITE_OK) goto end;
 
 end:
-	free( buf );
+	free(buf);
 	return db;
 }
 
 #endif
 
-static int CreateTable( ChewingData *pgdata )
+static int CreateTable(ChewingData *pgdata)
 {
 	int ret;
 
-#if MAX_PHRASE_LEN != 11
-#error update database table
-#endif
+	STATIC_ASSERT(MAX_PHRASE_LEN == 11, update_database_schema_for_max_phrase_len);
 
 	ret = sqlite3_exec(pgdata->static_data.db,
 		"CREATE TABLE IF NOT EXISTS userphrase_v1 ("
@@ -231,7 +228,7 @@ static int CreateTable( ChewingData *pgdata )
 	return 0;
 }
 
-static int SetupUserphraseLiftTime( ChewingData *pgdata )
+static int SetupUserphraseLiftTime(ChewingData *pgdata)
 {
 	int ret;
 
@@ -274,7 +271,7 @@ static int SetupUserphraseLiftTime( ChewingData *pgdata )
 	return 0;
 }
 
-static int UpdateLiftTime( ChewingData *pgdata )
+static int UpdateLiftTime(ChewingData *pgdata)
 {
 	int ret;
 
@@ -369,7 +366,7 @@ int InitSql(ChewingData *pgdata)
 	ret = CreateStmt(pgdata);
 	if (ret != 0) goto error;
 
-	ret = SetupUserphraseLiftTime( pgdata );
+	ret = SetupUserphraseLiftTime(pgdata);
 	if (ret != 0) return -1;
 
 	// FIXME: Normalize lifttime when necessary.
