@@ -36,7 +36,7 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
 			"phone_9 = ?19 AND phone_10 = ?20",
 		{ -1, -1, -1, -1, 1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
-		{ 0, 1, 2, 3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+		{ 0, 1, 2, 3, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
 		"SELECT time, user_freq, max_freq, orig_freq "
