@@ -123,9 +123,9 @@ static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
 	}
 }
 
-static int GetCurrentLiftTime( ChewingData *pgdata )
+static int GetCurrentLifeTime( ChewingData *pgdata )
 {
-	return pgdata->static_data.new_lifttime;
+	return pgdata->static_data.new_lifetime;
 }
 
 static void LogUserPhrase(
@@ -208,7 +208,7 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 		wordSeq, -1, SQLITE_STATIC );
 	if ( ret != SQLITE_OK ) goto error;
 
-	recent_time = GetCurrentLiftTime( pgdata );
+	recent_time = GetCurrentLifeTime( pgdata );
 	ret = sqlite3_step( stmt );
 	if ( ret == SQLITE_ROW ) {
 		action = USER_UPDATE_MODIFY;
@@ -358,5 +358,5 @@ void UserGetPhraseEnd( ChewingData *pgdata, const uint16_t phoneSeq[] )
 
 void IncreaseLifeTime( ChewingData *pgdata )
 {
-	++pgdata->static_data.new_lifttime;
+	++pgdata->static_data.new_lifetime;
 }

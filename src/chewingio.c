@@ -30,7 +30,6 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "dict-private.h"
-#include "hash-private.h"
 #include "tree-private.h"
 #include "pinyin-private.h"
 #include "private.h"
@@ -40,6 +39,7 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 #include "key2pho-private.h"
+#include "chewing-sql.h"
 
 const char * const kb_type_str[] = {
 	"KB_DEFAULT",
@@ -176,7 +176,7 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	ret = InitHash( ctx->data );
+	ret = InitSql( ctx-> data );
 	if ( ret )
 		goto error;
 
@@ -288,7 +288,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminatePinyin( ctx->data );
 			TerminateEasySymbolTable( ctx->data );
 			TerminateSymbolTable( ctx->data );
-			TerminateHash( ctx->data );
+			TerminateSql( ctx->data );
 			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
 			free( ctx->data );

@@ -1,10 +1,6 @@
 /**
  * chewing-sql.c
  *
- * Copyright (c)
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
- *
  * Copyright (c) 2013
  *	libchewing Core Team. See ChangeLog for details.
  *
@@ -13,16 +9,401 @@
  */
 
 #include "chewing-sql.h"
+#include "chewing-private.h"
 
-const SqlStmtDesc SQL_STMT_DESC[] = {
+#include <assert.h>
+#include <malloc.h>
+#include <stdlib.h>
+
+#include "sqlite3.h"
+#include "plat_types.h"
+#include "private.h"
+
+const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 };
 
-int InitSql(ChewingData *pgdata)
+const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
+	{
+		"SELECT value FROM config_v1 WHERE id = ?1",
+		{ 1, -1 },
+		{ -1, 0 },
+	},
+	{
+		"INSERT OR IGNORE INTO config_v1 (id, value) VALUES (?1, ?2)",
+		{ 1, 2 },
+		{ -1, -1 },
+	},
+	{
+		"UPDATE config_v1 SET value = value + ?1 WHERE id = ?2",
+		{ 2, 1 },
+		{ -1, -1 },
+	},
+};
+
+#define CHEWING_MAX_DB_PATH	(1024)
+
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+
+#include <Shlobj.h>
+#define CHEWING_DB_PATH		L"chewing"
+#define CHEWING_DB_NAME		L"chewing.db"
+
+static int SetSQLiteTemp( char *buf, size_t len, wchar_t *wbuf, size_t wlen )
 {
+	/*
+	 * Set temporary directory is necessary for Windows platform.
+	 * http://www.sqlite.org/capi3ref.html#sqlite3_temp_directory
+	 */
+
+	int ret;
+
+	ret = GetTempPathW( wlen, wbuf );
+	if ( ret == 0 || ret >= wlen ) return -1;
+
+	ret = WideCharToMultiByte( CP_UTF8, 0, wbuf, -1, buf, len, NULL, NULL );
+	if ( ret == 0 ) return -1;
+
+	// FIXME: When to free sqlite3_temp_directory?
+	// FIXME: thread safe?
+	sqlite3_temp_directory = sqlite3_mprintf( "%s", buf );
+	if ( sqlite3_temp_directory == 0 ) exit( -1 );
+
 	return 0;
 }
 
-void TerminateHash(ChewingData *pgdata)
+static int GetSQLitePath( wchar_t *wbuf, size_t wlen )
 {
+	int ret;
 
+	ret = GetEnvironmentVariableW( L"CHEWING_USER_PATH", wbuf, wlen );
+	if ( ret ) {
+		wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_NAME );
+		return 0;
+	}
+
+	// FIXME: Use SHGetKnownFolderPath instead?
+	ret = GetEnvironmentVariableW( L"APPDATA", wbuf, wlen );
+	if ( ret ) {
+		wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_PATH );
+
+		ret = CreateDirectoryW( wbuf, 0 );
+		if ( ret != 0 || GetLastError() == ERROR_ALREADY_EXISTS ) {
+			wcscat_s( wbuf, wlen, L"\\" CHEWING_DB_NAME );
+			return 0;
+		}
+
+	}
+	return -1;
+}
+
+sqlite3 *GetSQLiteInstance()
+{
+	wchar_t *wbuf = NULL;
+	char *buf = NULL;
+	int ret;
+	sqlite3 *db = NULL;
+
+	wbuf = (wchar_t *) calloc( CHEWING_MAX_DB_PATH, sizeof( *wbuf ) );
+	if ( !wbuf ) exit( -1 );
+
+	buf = (char *) calloc( CHEWING_MAX_DB_PATH, sizeof( *buf ) );
+	if ( !buf ) exit( -1 );
+
+	ret = SetSQLiteTemp( buf, CHEWING_MAX_DB_PATH, wbuf, CHEWING_MAX_DB_PATH );
+	if ( ret ) goto end;
+
+	ret = GetSQLitePath( wbuf, CHEWING_MAX_DB_PATH );
+	if ( ret ) goto end;
+
+	ret = sqlite3_open16( wbuf, &db );
+	if ( ret != SQLITE_OK ) goto end;
+
+end:
+	free( buf );
+	free( wbuf );
+	return db;
+}
+
+#else
+
+#include <string.h>
+#include <unistd.h>
+
+#define CHEWING_DB_PATH		"chewing"
+#define CHEWING_DB_NAME		"chewing.db"
+
+static int GetSQLitePath( char *buf, size_t len )
+{
+	char *path;
+
+	path = getenv( "CHEWING_USER_PATH" );
+	if ( path && access( path, W_OK ) == 0 ) {
+		snprintf( buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_NAME );
+		return 0;
+	}
+
+	path = getenv( "HOME" );
+	if ( !path ) {
+		path = PLAT_TMPDIR;
+	}
+
+	snprintf( buf, len, "%s" PLAT_SEPARATOR "%s", path, CHEWING_DB_PATH );
+	PLAT_MKDIR( buf );
+	strncat( buf, PLAT_SEPARATOR CHEWING_DB_NAME, len - strlen( buf ) );
+	return 0;
+}
+
+sqlite3 * GetSQLiteInstance()
+{
+	char *buf = NULL;
+	int ret;
+	sqlite3 *db = NULL;
+
+	buf = (char *) calloc( CHEWING_MAX_DB_PATH, sizeof( *buf ) );
+	if ( !buf ) exit( -1 );
+
+	ret = GetSQLitePath( buf, CHEWING_MAX_DB_PATH );
+	if ( ret ) goto end;
+
+	ret = sqlite3_open( buf, &db );
+	if ( ret != SQLITE_OK ) goto end;
+
+end:
+	free( buf );
+	return db;
+}
+
+#endif
+
+static int CreateTable( ChewingData *pgdata )
+{
+	int ret;
+
+#if MAX_PHRASE_LEN != 11
+#error update database table
+#endif
+
+	ret = sqlite3_exec(pgdata->static_data.db,
+		"CREATE TABLE IF NOT EXISTS userphrase_v1 ("
+		"time INTEGER,"
+		"user_freq INTEGER,"
+		"max_freq INTEGER,"
+		"orig_freq INTEGER,"
+		"length INTEGER,"
+		"phone_0 INTEGER,"
+		"phone_1 INTEGER,"
+		"phone_2 INTEGER,"
+		"phone_3 INTEGER,"
+		"phone_4 INTEGER,"
+		"phone_5 INTEGER,"
+		"phone_6 INTEGER,"
+		"phone_7 INTEGER,"
+		"phone_8 INTEGER,"
+		"phone_9 INTEGER,"
+		"phone_10 INTEGER,"
+		"phrase TEXT,"
+		"PRIMARY KEY ("
+			"phone_0,"
+			"phone_1,"
+			"phone_2,"
+			"phone_3,"
+			"phone_4,"
+			"phone_5,"
+			"phone_6,"
+			"phone_7,"
+			"phone_8,"
+			"phone_9,"
+			"phone_10,"
+			"phrase)"
+		")",
+		NULL, NULL, NULL );
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_exec(pgdata->static_data.db,
+		"CREATE TABLE IF NOT EXISTS config_v1 ("
+		"id INTEGER,"
+		"value INTEGER,"
+		"PRIMARY KEY (id)"
+		")",
+		NULL, NULL, NULL);
+	if (ret != SQLITE_OK) return -1;
+
+	return 0;
+}
+
+static int SetupUserphraseLiftTime( ChewingData *pgdata )
+{
+	int ret;
+
+	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_clear_bindings(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT],
+		SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_ID],
+		CONFIG_ID_LIFETIME);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT],
+		SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_VALUE], 0);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+	if (ret != SQLITE_DONE) return -1;
+
+
+	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_clear_bindings(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT],
+		SQL_STMT_CONFIG[STMT_CONFIG_SELECT].bind[BIND_CONFIG_ID],
+		CONFIG_ID_LIFETIME);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+	if (ret != SQLITE_ROW) return -1;
+	pgdata->static_data.original_lifetime = sqlite3_column_int(
+		pgdata->static_data.stmt_config[STMT_CONFIG_SELECT],
+		SQL_STMT_CONFIG[STMT_CONFIG_SELECT].column[COLUMN_CONFIG_VALUE]);
+	pgdata->static_data.new_lifetime = pgdata->static_data.original_lifetime;
+	return 0;
+}
+
+static int UpdateLiftTime( ChewingData *pgdata )
+{
+	int ret;
+
+	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_clear_bindings(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE],
+		SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_ID],
+		CONFIG_ID_LIFETIME);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE],
+		SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_VALUE],
+		pgdata->static_data.new_lifetime - pgdata->static_data.original_lifetime);
+	if (ret != SQLITE_OK) return -1;
+
+	ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+	if (ret != SQLITE_DONE) return -1;
+
+	return 0;
+}
+
+static int ConfigDatabase(ChewingData *pgdata)
+{
+	int ret;
+
+	assert(pgdata);
+	assert(pgdata->static_data.db);
+
+	ret = sqlite3_exec(pgdata->static_data.db, "PRAGMA synchronous=OFF", NULL, NULL, NULL);
+	if (ret != SQLITE_OK) return ret;
+
+	return ret;
+}
+
+static int CreateStmt(ChewingData *pgdata)
+{
+	int i;
+	int ret;
+
+	assert(pgdata);
+
+	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config),
+		stmt_config_size_mismatch);
+	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase),
+		stmt_userphrase_size_mismatch);
+
+	for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
+		ret = sqlite3_prepare_v2(pgdata->static_data.db,
+			SQL_STMT_CONFIG[i].stmt, -1,
+			&pgdata->static_data.stmt_config[i], NULL);
+		if (ret != SQLITE_OK) {
+			LOG_ERROR("Cannot create stmt %s", SQL_STMT_CONFIG[i].stmt);
+			return -1;
+		}
+	}
+
+#if 0
+	FIXME: Implemment this
+	for (i = 0; i < ARRAY_SIZE(SQL_STMT_USERPHRASE); ++i) {
+		ret = sqlite3_prepare_v2(pgdata->static_data.db,
+			SQL_STMT_USERPHRASE[i].stmt, -1,
+			&pgdata->static_data.stmt_userphrase[i], NULL);
+		if (ret != SQLITE_OK) {
+			LOG_ERROR("Cannot create stmt %s", SQL_STMT_USERPHRASE[i].stmt);
+			return -1;
+		}
+	}
+#endif
+
+	return 0;
+}
+
+int InitSql(ChewingData *pgdata)
+{
+	int ret;
+
+	assert(!pgdata->static_data.db);
+
+	pgdata->static_data.db = GetSQLiteInstance();
+	if (!pgdata->static_data.db) goto error;
+
+	ret = ConfigDatabase(pgdata);
+	if (ret != SQLITE_OK) goto error;
+
+	ret = CreateTable(pgdata);
+	if (ret != 0) goto error;
+
+	ret = CreateStmt(pgdata);
+	if (ret != 0) goto error;
+
+	ret = SetupUserphraseLiftTime( pgdata );
+	if (ret != 0) return -1;
+
+	// FIXME: Normalize lifttime when necessary.
+	// FIXME: Migrate old uhash.dat here.
+
+	return 0;
+
+	return 0;
+
+error:
+	TerminateSql(pgdata);
+	return -1;
+}
+
+void TerminateSql(ChewingData *pgdata)
+{
+	int i;
+	int ret;
+
+	UpdateLiftTime(pgdata);
+
+	for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_config); ++i) {
+		sqlite3_finalize(pgdata->static_data.stmt_config[i]);
+		pgdata->static_data.stmt_config[i] = NULL;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_userphrase); ++i) {
+		sqlite3_finalize(pgdata->static_data.stmt_userphrase[i]);
+		pgdata->static_data.stmt_userphrase[i] = NULL;
+	}
+
+	sqlite3_finalize(pgdata->static_data.userphrase_enum_stmt);
+
+	ret = sqlite3_close(pgdata->static_data.db);
+	assert(SQLITE_OK == ret);
+	pgdata->static_data.db = NULL;
 }

@@ -31,6 +31,7 @@ typedef SSIZE_T ssize_t;
 #include "plat_mmap.h"
 #include "sqlite3.h"
 #include "userphrase-private.h"
+#include "chewing-sql.h"
 
 #define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
@@ -184,8 +185,11 @@ typedef struct {
 	const char *userphrase_enum_phrase;
 	uint16_t userphrase_enum_phone[ MAX_PHRASE_LEN ];
 
-	unsigned int original_lifttime;
-	unsigned int new_lifttime;
+	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
+	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
+
+	unsigned int original_lifetime;
+	unsigned int new_lifetime;
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
