@@ -1,10 +1,6 @@
 /**
  * chewing-sql.c
  *
- * Copyright (c)
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
- *
  * Copyright (c) 2013
  *	libchewing Core Team. See ChangeLog for details.
  *
