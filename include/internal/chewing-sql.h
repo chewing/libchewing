@@ -67,8 +67,8 @@ enum {
 
 typedef struct SqlStmtUserphrase_ {
 	const char *stmt;
-	const int bind[BIND_USERPHRASE_COUNT];
-	const int column[COLUMN_USERPHRASE_COUNT];
+	const char bind[BIND_USERPHRASE_COUNT];
+	const char column[COLUMN_USERPHRASE_COUNT];
 } SqlStmtUserphrase;
 
 /*
@@ -100,8 +100,8 @@ enum {
 
 typedef struct SqlStmtConfig_ {
 	const char *stmt;
-	const int bind[BIND_USERPHRASE_COUNT];
-	const int column[COLUMN_USERPHRASE_COUNT];
+	const char bind[BIND_USERPHRASE_COUNT];
+	const char column[COLUMN_USERPHRASE_COUNT];
 } SqlStmtConfig;
 
 extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
