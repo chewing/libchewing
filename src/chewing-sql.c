@@ -67,6 +67,15 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 		{ -1, -1, -1, -1, 1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
+	{
+		"SELECT MAX(user_freq) FROM userphrase_v1 WHERE length = ?1 AND "
+			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
+			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
+			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
+			"phone_9 = ?19 AND phone_10 = ?20",
+		{ -1, -1, -1, -1, 1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
+		{ -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+	},
 };
 
 const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
