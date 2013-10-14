@@ -32,7 +32,6 @@ NATIVE_TESTS = \
 	test-key2pho \
 	test-keyboard \
 	test-keyboardless \
-	test-logger \
 	test-mmap \
 	test-path \
 	test-reset \
