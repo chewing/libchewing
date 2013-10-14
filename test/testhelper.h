@@ -64,7 +64,8 @@
 	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
 	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
-#define print_function_name() do { printf("#\n# %s\n#\n", __func__); } while ( 0 )
+#define start_testcase(ctx, file) \
+	internal_start_testcase(__func__, ctx, file)
 
 typedef struct {
 	char * token;
@@ -107,3 +108,4 @@ void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn );
 int internal_has_userphrase( const char *file, int line,
 	ChewingContext *ctx, const char *bopomofo, const char *phrase );
+void internal_start_testcase( const char *func, ChewingContext *ctx, FILE *file );

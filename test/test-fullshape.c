@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "chewing.h"
@@ -95,14 +96,15 @@ static const TestData FULLSHAPE_DATA[] = {
 	{ "-", "\xEF\xBC\x8D" /* － */ },
 };
 
+FILE *fd;
+
 void test_fullshape_input()
 {
 	ChewingContext *ctx;
 	size_t i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
@@ -121,9 +123,8 @@ void test_set_fullshape()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
 		"default is HALFSHAPE_MODE" );
@@ -148,13 +149,22 @@ void test_set_fullshape()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
 	test_set_fullshape();
 	test_fullshape_input();
+
+	fclose( fd );
 
 	return exit_status();
 }

@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,6 +21,8 @@
 #include "plat_types.h"
 #include "hash-private.h"
 #include "testhelper.h"
+
+FILE *fd;
 
 void test_select_candidate_no_rearward()
 {
@@ -42,11 +45,10 @@ void test_select_candidate_no_rearward()
 
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -84,11 +86,10 @@ void test_select_candidate_rearward()
 	};
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
@@ -115,11 +116,10 @@ void test_select_candidate_no_rearward_with_symbol()
 	char *buf;
 	int len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
 
@@ -178,11 +178,10 @@ void test_select_candidate_rearward_with_symbol()
 	char *buf;
 	int len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
 	type_keystroke_by_string( ctx, "hk4g4`31u6vu84" /* 測試，一下 */);
@@ -242,11 +241,10 @@ void test_select_candidate_no_rearward_start_with_symbol()
 	char *buf;
 	int len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "`31hk4g4" /* ，測試 */);
 
@@ -287,11 +285,10 @@ void test_select_candidate_rearward_start_with_symbol()
 	char *buf;
 	int len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
 	type_keystroke_by_string( ctx, "`31hk4g4" /* ，測試 */);
@@ -330,11 +327,10 @@ void test_del_bopomofo_as_mode_switch()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
 	ok_zuin_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
@@ -349,12 +345,10 @@ void test_select_candidate_4_bytes_utf8()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
-
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 	chewing_set_autoShiftCur( ctx, 1 );
@@ -389,9 +383,8 @@ void test_Esc_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<EE>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -402,9 +395,8 @@ void test_Esc_in_select()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "`<EE>" );
 	ok_candidate( ctx, NULL, 0 );
 
@@ -415,9 +407,8 @@ void test_Esc_entering_zuin()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<EE>" );
 	ok_zuin_buffer( ctx, "" );
 
@@ -436,9 +427,8 @@ void test_Del_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<DC>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -449,9 +439,8 @@ void test_Del_in_select()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "`<DC>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
@@ -462,9 +451,8 @@ void test_Del_word()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4u g4<L><L><DC><E>" );
@@ -484,9 +472,8 @@ void test_Backspace_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<B>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -497,9 +484,8 @@ void test_Backspace_in_select()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "`<B>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
 
@@ -510,9 +496,8 @@ void test_Backspace_remove_bopomofo()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<B>" );
 	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
@@ -523,9 +508,8 @@ void test_Backspace_word()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4u g4<L><B><E>" );
@@ -547,9 +531,8 @@ void test_Up_close_candidate_window()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" );
 	ret = chewing_cand_TotalChoice( ctx );
@@ -570,9 +553,8 @@ void test_Up_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<U>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -590,9 +572,8 @@ void test_Down_open_candidate_window()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" );
 	ret = chewing_cand_TotalChoice( ctx );
@@ -614,9 +595,8 @@ void test_Down_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<D>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -634,9 +614,8 @@ void test_Tab_insert_breakpoint_between_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4g4<L>" );
@@ -673,9 +652,8 @@ void test_Tab_connect_word()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "u -4<L>" );
@@ -711,9 +689,8 @@ void test_Tab_at_the_end()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4g4u6vu84" );
 	ok_preedit_buffer( ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE4\xB8\x80\xE4\xB8\x8B" /* 測試一下 */ );
@@ -743,9 +720,8 @@ void test_Capslock()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "<CB>" );
 	ok( chewing_get_ChiEngMode( ctx ) == SYMBOL_MODE,
@@ -759,9 +735,8 @@ void test_Home()
 	ChewingContext *ctx;
 	int cursor;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4g4" );
@@ -780,9 +755,8 @@ void test_End()
 	ChewingContext *ctx;
 	int cursor;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4g4<L><L>" );
@@ -801,9 +775,8 @@ void test_PageUp()
 	ChewingContext *ctx;
 	int cursor;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4g4<L><L>" );
@@ -822,9 +795,8 @@ void test_PageDown()
 	ChewingContext *ctx;
 	int cursor;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	type_keystroke_by_string( ctx, "hk4g4<L><L>" );
@@ -865,9 +837,8 @@ void test_Numlock_numeric_input()
 	size_t i;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	for ( i = 0; i < ARRAY_SIZE( NUMLOCK_INPUT ); ++i ) {
@@ -895,9 +866,8 @@ void test_Numlock_select_candidate()
 	size_t i;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	for ( i = 0; i < ARRAY_SIZE( NUMLOCK_SELECT ); ++i ) {
@@ -920,11 +890,10 @@ void test_Space_selection()
 	char *buf;
 	int len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_spaceAsSelection( ctx, 1 );
 
 	type_keystroke_by_string( ctx, "hk4g4<H>" /* 測試 */ );
@@ -969,9 +938,8 @@ void test_get_phoneSeq()
 	int len;
 	unsigned short *phone;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	for ( i = 0; i < ARRAY_SIZE( DATA ); ++i ) {
@@ -996,9 +964,8 @@ void test_zuin_buffer()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "1ul" );
 	ok_zuin_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
@@ -1026,9 +993,8 @@ void test_longest_phrase()
 	ChewingContext *ctx;
 	IntervalType it;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "rup ji up6ji 1j4bj6y4ru32k7e.3ji "
 		/* ㄐㄧㄣ ㄨㄛ ㄧㄣˊ ㄨㄛ ㄅㄨˋ ㄖㄨˊ ㄗˋ ㄐㄧˇ ㄉㄜ˙ ㄍㄡˇ ㄨㄛ */ );
@@ -1049,9 +1015,8 @@ void test_auto_commit_phrase()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 3 );
 
 	type_keystroke_by_string( ctx, "hk4g4hk4g4" /* 測試測試 */ );
@@ -1065,9 +1030,8 @@ void test_auto_commit_symbol()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 2 );
 
 	type_keystroke_by_string( ctx, "`31hk4g4hk4g4" /* ，測試 */ );
@@ -1084,10 +1048,17 @@ void test_auto_commit()
 	//test_auto_commit_symbol();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_select_candidate();
 	test_Esc();
@@ -1111,6 +1082,8 @@ int main()
 
 	test_longest_phrase();
 	test_auto_commit();
+
+	fclose( fd );
 
 	return exit_status();
 }

@@ -12,23 +12,22 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "chewing.h"
 #include "testhelper.h"
 
+FILE *fd;
+
 void test_reset_shall_not_clean_static_data()
 {
 	const TestData DATA = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ };
 	ChewingContext *ctx;
 
-	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
-	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
-
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
@@ -42,8 +41,21 @@ void test_reset_shall_not_clean_static_data()
 	chewing_delete( ctx );
 }
 
-int main ()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
+	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
+	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
 	test_reset_shall_not_clean_static_data();
+
+	fclose( fd );
+
 	return exit_status();
 }

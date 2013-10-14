@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,14 +33,15 @@ static int ALTERNATE_SELECT_KEY[] = {
 
 const TestData DATA = { "`a", "\xE2\x80\xA6" /* … */ };
 
+FILE *fd;
+
 void test_default_value()
 {
 	int *select_key;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	select_key = chewing_get_selKey( ctx );
 	ok( select_key, "chewing_get_selKey shall not return NULL" );
@@ -100,9 +102,8 @@ void test_set_candPerPage()
 	size_t i;
 	size_t j;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
 		chewing_set_candPerPage( ctx, VALUE[i] );
@@ -125,9 +126,8 @@ void test_set_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	ok( chewing_get_maxChiSymbolLen( ctx ) == 16,
@@ -168,9 +168,8 @@ void test_maxChiSymbolLen()
 	ChewingContext *ctx;
 	int i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, MAX_CHI_SYMBOL_LEN );
 
@@ -190,9 +189,8 @@ void test_set_selKey()
 	ChewingContext *ctx;
 	int *select_key;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -219,9 +217,8 @@ void test_set_addPhraseDirection()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_addPhraseDirection( ctx, value );
@@ -249,9 +246,8 @@ void test_set_spaceAsSelection()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_spaceAsSelection( ctx, value );
@@ -279,9 +275,8 @@ void test_set_escCleanAllBuf()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_escCleanAllBuf( ctx, value );
@@ -309,9 +304,8 @@ void test_set_autoShiftCur()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_autoShiftCur( ctx, value );
@@ -339,9 +333,8 @@ void test_set_easySymbolInput()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_easySymbolInput( ctx, value );
@@ -369,9 +362,8 @@ void test_set_phraseChoiceRearward()
 	int value;
 	int mode;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_phraseChoiceRearward( ctx, value );
@@ -409,9 +401,8 @@ void test_set_ChiEngMode()
 	size_t i;
 	size_t j;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
 		chewing_set_ChiEngMode( ctx, VALUE[i] );
@@ -445,9 +436,8 @@ void test_set_ShapeMode()
 	size_t i;
 	size_t j;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	for ( i = 0; i < ARRAY_SIZE( VALUE ); ++i ) {
 		chewing_set_ShapeMode( ctx, VALUE[i] );
@@ -472,9 +462,8 @@ void test_deprecated()
 	ChewingConfigData configure;
 	memset( &configure, 0, sizeof( ChewingConfigData ) );
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
 	type = chewing_get_hsuSelKeyType( ctx );
@@ -485,10 +474,17 @@ void test_deprecated()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_default_value();
 
@@ -506,6 +502,8 @@ int main()
 	test_set_ShapeMode();
 
 	test_deprecated();
+
+	fclose( fd );
 
 	return exit_status();
 }

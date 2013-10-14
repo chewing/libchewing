@@ -21,7 +21,7 @@
 
 static const char *LOG_PATH = TEST_HASH_DIR "/logger.log";
 
-void logger( void *data UNUSED, int level UNUSED, const char *fmt, ... )
+void logger( void *data, int level UNUSED, const char *fmt, ... )
 {
 	va_list ap;
 	FILE *fd = (FILE *) data;
@@ -36,7 +36,7 @@ void test_set_logger()
 	ChewingContext *ctx;
 	FILE *fd;
 
-	print_function_name();
+
 
 	ctx = chewing_new();
 	fd = fopen( LOG_PATH,  "w" );

@@ -7,19 +7,21 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
+#include <assert.h>
 #include <stdlib.h>
 
 #include "testhelper.h"
 #include "chewing.h"
+
+FILE *fd;
 
 void test_cand_open_word()
 {
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -37,9 +39,8 @@ void test_cand_open_symbol()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "`31" /* ， */ );
 
@@ -57,9 +58,8 @@ void test_cand_open_already_opened()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -84,9 +84,8 @@ void test_cand_open_nothing_in_preedit()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_cand_open( ctx );
 	ok( ret == -1, "chewing_cand_open() returns `%d' shall be `%d'", ret, -1 );
@@ -102,11 +101,10 @@ void test_cand_open_during_bopomofo()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	/* FIXME: shall we clean bopomofo when chewing_cand_open is called? */
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk" /* ㄘㄜ */ );
 
@@ -142,9 +140,8 @@ void test_cand_close_word()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -171,9 +168,8 @@ void test_cand_close_symbol()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "`31" /* ， */ );
 
@@ -199,9 +195,8 @@ void test_cand_close_already_closed()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -219,9 +214,8 @@ void test_cand_close_nothing_in_preedit()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_cand_close( ctx );
 	ok( ret == 0, "chewing_cand_close() returns `%d' shall be `%d'", ret, 0 );
@@ -245,11 +239,10 @@ void test_cand_choose_word()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -272,9 +265,8 @@ void test_cand_choose_symbol()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "`" /* ， */ );
 
@@ -295,11 +287,10 @@ void test_cand_choose_out_of_range()
 	int ret;
 	int total_choice;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -325,9 +316,8 @@ void test_cand_choose_second_layer()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "`" );
 	ret = chewing_cand_TotalChoice( ctx );
@@ -348,11 +338,10 @@ void test_cand_choose_not_in_select()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
 
@@ -380,9 +369,8 @@ void test_cand_list_word_no_rearward()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_phraseChoiceRearward( ctx, 0 );
 
 	type_keystroke_by_string( ctx, "hk4g4<H>" /* 測試 */ );
@@ -430,9 +418,8 @@ void test_cand_list_word_rearward()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_phraseChoiceRearward( ctx, 1 );
 
 	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
@@ -480,9 +467,8 @@ void test_cand_list_symbol()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "`31" /* ， */ );
 
 	ret = chewing_cand_open( ctx );
@@ -517,9 +503,8 @@ void test_cand_list_no_cand_windows()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
 
@@ -550,15 +535,24 @@ void test_cand_list()
 	test_cand_list_no_cand_windows();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_cand_open();
 	test_cand_close();
 	test_cand_choose();
 	test_cand_list();
+
+	fclose( fd );
 
 	return exit_status();
 }

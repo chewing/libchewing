@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,6 +20,8 @@
 #include "plat_types.h"
 #include "hash-private.h"
 #include "testhelper.h"
+
+FILE *fd;
 
 void test_libchewing_googlecode_issue_472()
 {
@@ -33,9 +36,8 @@ void test_libchewing_googlecode_issue_472()
 	size_t i;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
 
@@ -58,9 +60,8 @@ void test_libchewing_googlecode_issue_473()
 	size_t i;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
 	chewing_set_candPerPage( ctx, 9 );
@@ -80,11 +81,10 @@ void test_libchewing_issue_30()
 	ChewingContext *ctx;
 	int cursor;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_autoShiftCur( ctx, 1 );
 	chewing_set_spaceAsSelection( ctx, 1 );
@@ -102,11 +102,10 @@ void test_libchewing_data_issue_1()
 	const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走*/ };
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	type_keystroke_by_string( ctx, DATA.token );
 	ok_preedit_buffer( ctx, DATA.expected );
@@ -114,15 +113,24 @@ void test_libchewing_data_issue_1()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_libchewing_data_issue_1();
 	test_libchewing_issue_30();
 	test_libchewing_googlecode_issue_472();
 	test_libchewing_googlecode_issue_473();
+
+	fclose( fd );
 
 	return exit_status();
 }
