@@ -400,7 +400,7 @@ static int UpdateLifeTime(ChewingData *pgdata)
 	}
 
 	ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
-	if (ret != SQLITE_ROW) {
+	if (ret != SQLITE_DONE) {
 		LOG_ERROR("sqlite3_step returns %d", ret);
 		return ret;
 	}
