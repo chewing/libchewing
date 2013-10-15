@@ -45,7 +45,6 @@ noinst_HEADERS =\
 	include/internal/global-private.h \
 	include/internal/memory-private.h \
 	include/internal/pinyin-private.h \
-	include/internal/hash-private.h \
 	include/internal/key2pho-private.h \
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \

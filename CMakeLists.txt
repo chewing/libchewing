@@ -280,7 +280,6 @@ add_library(chewing OBJECT
 	${INC_DIR}/internal/choice-private.h
 	${INC_DIR}/internal/dict-private.h
 	${INC_DIR}/internal/global-private.h
-	${INC_DIR}/internal/hash-private.h
 	${INC_DIR}/internal/pinyin-private.h
 	${INC_DIR}/internal/tree-private.h
 	${INC_DIR}/internal/userphrase-private.h

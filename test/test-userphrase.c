@@ -18,7 +18,6 @@
 
 #include "chewing.h"
 #include "plat_types.h"
-#include "hash-private.h"
 #include "testhelper.h"
 
 void test_ShiftLeft_not_entering_chewing()

@@ -18,7 +18,6 @@
 #include <stdio.h>
 
 #include "chewing-utf8-util.h"
-#include "hash-private.h"
 #include "dict-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"

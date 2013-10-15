@@ -17,7 +17,6 @@
 
 #include "chewing-private.h"
 #include "chewing-utf8-util.h"
-#include "hash-private.h"
 #include "key2pho-private.h"
 #include "plat_path.h"
 
