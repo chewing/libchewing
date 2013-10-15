@@ -105,6 +105,7 @@ static int LoadMaxFreq(ChewingData *pgdata, const uint16_t phoneSeq[], int len)
 	const TreeType *tree_pos;
 	Phrase *phrase = ALC(Phrase, 1);
 	int maxFreq = FREQ_INIT_VALUE;
+	int max_userphrase_freq;
 	int ret;
 
 	tree_pos = TreeFindPhrase(pgdata, 0, len - 1, phoneSeq);
@@ -133,9 +134,12 @@ static int LoadMaxFreq(ChewingData *pgdata, const uint16_t phoneSeq[], int len)
 	if (ret !=  SQLITE_ROW)
 		return maxFreq;
 
-	maxFreq = sqlite3_column_int(
+	max_userphrase_freq = sqlite3_column_int(
 		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_GET_MAX_FREQ],
 		SQL_STMT_USERPHRASE[STMT_USERPHRASE_GET_MAX_FREQ].column[COLUMN_USERPHRASE_USER_FREQ]);
+
+	if (max_userphrase_freq > maxFreq)
+		maxFreq = max_userphrase_freq;
 
 	return maxFreq;
 }
