@@ -75,17 +75,14 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 	{
 		"SELECT value FROM config_v1 WHERE id = ?1",
-		{ 1, -1 },
 		{ -1, 0 },
 	},
 	{
 		"INSERT OR IGNORE INTO config_v1 (id, value) VALUES (?1, ?2)",
-		{ 1, 2 },
 		{ -1, -1 },
 	},
 	{
-		"UPDATE config_v1 SET value = value + ?1 WHERE id = ?2",
-		{ 2, 1 },
+		"UPDATE config_v1 SET value = value + ?2 WHERE id = ?1",
 		{ -1, -1 },
 	},
 };
@@ -307,22 +304,19 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
 	}
 
 	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT],
-		SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_ID],
-		CONFIG_ID_LIFETIME);
+		BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
-			SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_ID],
-			CONFIG_ID_LIFETIME,
+			BIND_CONFIG_ID, CONFIG_ID_LIFETIME,
 			SQL_STMT_CONFIG[STMT_CONFIG_INSERT].stmt, ret);
 		return -1;
 	}
 
 	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT],
-		SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_VALUE], 0);
+		BIND_CONFIG_VALUE, 0);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
-			SQL_STMT_CONFIG[STMT_CONFIG_INSERT].bind[BIND_CONFIG_VALUE],
-			0,
+			BIND_CONFIG_VALUE, 0,
 			SQL_STMT_CONFIG[STMT_CONFIG_INSERT].stmt, ret);
 		return -1;
 	}
@@ -347,12 +341,10 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
 	}
 
 	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT],
-		SQL_STMT_CONFIG[STMT_CONFIG_SELECT].bind[BIND_CONFIG_ID],
-		CONFIG_ID_LIFETIME);
+		BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
-			SQL_STMT_CONFIG[STMT_CONFIG_SELECT].bind[BIND_CONFIG_ID],
-			CONFIG_ID_LIFETIME,
+			BIND_CONFIG_ID, CONFIG_ID_LIFETIME,
 			SQL_STMT_CONFIG[STMT_CONFIG_SELECT].stmt, ret);
 		return -1;
 	}
@@ -388,22 +380,20 @@ static int UpdateLifeTime(ChewingData *pgdata)
 	}
 
 	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE],
-		SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_ID],
-		CONFIG_ID_LIFETIME);
+		BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
-			SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_ID],
-			CONFIG_ID_LIFETIME,
+			BIND_CONFIG_ID, CONFIG_ID_LIFETIME,
 			SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].stmt, ret);
 		return -1;
 	}
 
 	ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE],
-		SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_VALUE],
+		BIND_CONFIG_VALUE,
 		pgdata->static_data.new_lifetime - pgdata->static_data.original_lifetime);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
-			SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].bind[BIND_CONFIG_VALUE],
+			BIND_CONFIG_VALUE,
 			pgdata->static_data.new_lifetime - pgdata->static_data.original_lifetime,
 			SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].stmt, ret);
 		return -1;

@@ -79,9 +79,8 @@ typedef struct SqlStmtUserphrase_ {
  */
 
 enum {
-	BIND_CONFIG_ID,
-	BIND_CONFIG_VALUE,
-	BIND_CONFIG_COUNT,
+	BIND_CONFIG_ID    = 1,
+	BIND_CONFIG_VALUE = 2,
 };
 
 enum {
@@ -103,7 +102,6 @@ enum {
 
 typedef struct SqlStmtConfig_ {
 	const char *stmt;
-	const char bind[BIND_CONFIG_COUNT];
 	const char column[COLUMN_CONFIG_COUNT];
 } SqlStmtConfig;
 
