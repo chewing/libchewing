@@ -105,8 +105,8 @@ enum {
 
 typedef struct SqlStmtConfig_ {
 	const char *stmt;
-	const char bind[BIND_USERPHRASE_COUNT];
-	const char column[COLUMN_USERPHRASE_COUNT];
+	const char bind[BIND_CONFIG_COUNT];
+	const char column[COLUMN_CONFIG_COUNT];
 } SqlStmtConfig;
 
 extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
