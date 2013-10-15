@@ -178,8 +178,6 @@ typedef struct {
 	plat_mmap dict_mmap;
 
 	sqlite3 *db;
-	sqlite3_stmt *userphrase_stmt;
-
 	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
 	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
 
