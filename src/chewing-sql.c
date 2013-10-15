@@ -28,7 +28,7 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 		{ -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 },
 	},
 	{
-		"SELECT time, user_freq, max_freq, orig_freq, phrase "
+		"SELECT time, orig_freq, max_freq, user_freq, phrase "
 			"FROM userphrase_v1 WHERE length = ?5 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
@@ -37,7 +37,7 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 		{ 0, 1, 2, 3, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
-		"SELECT time, user_freq, max_freq, orig_freq "
+		"SELECT time, orig_freq, max_freq, user_freq "
 			"FROM userphrase_v1 WHERE length = ?5 AND phrase = ?6 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
