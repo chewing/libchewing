@@ -5,23 +5,25 @@
   #include <config.h>
 #endif
 
+#include <libgen.h>
+
 /* Platform-dependent declaration */
 #include "plat_types.h"
 
 #define LOG_VERBOSE(fmt, ...) \
-	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, fmt, ##__VA_ARGS__); } while (0)
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, "[%s:%d %s] " fmt, basename(__FILE__), __LINE__, __func__, ##__VA_ARGS__); } while (0)
 
 #define LOG_DEBUG(fmt, ...) \
-	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_DEBUG, fmt, ##__VA_ARGS__); } while (0)
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_DEBUG, "[%s:%d %s] " fmt, basename(__FILE__), __LINE__, __func__, ##__VA_ARGS__); } while (0)
 
 #define LOG_INFO(fmt, ...) \
-	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_INFO, fmt, ##__VA_ARGS__); } while (0)
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_INFO, "[%s:%d %s] " fmt, basename(__FILE__), __LINE__, __func__, ##__VA_ARGS__); } while (0)
 
 #define LOG_WARN(fmt, ...) \
-	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_WARN, fmt, ##__VA_ARGS__); } while (0)
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_WARN, "[%s:%d %s] " fmt, basename(__FILE__), __LINE__, __func__, ##__VA_ARGS__); } while (0)
 
 #define LOG_ERROR(fmt, ...) \
-	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_ERROR, fmt, ##__VA_ARGS__); } while (0)
+	do { pgdata->logger(pgdata->loggerData, CHEWING_LOG_ERROR, "[%s:%d %s] " fmt, basename(__FILE__), __LINE__, __func__, ##__VA_ARGS__); } while (0)
 
 #define DEBUG_OUT( fmt, ... ) \
 	do { \
