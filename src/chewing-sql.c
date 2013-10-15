@@ -25,55 +25,49 @@ const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 			"phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
 			"phone_6, phone_7, phone_8, phone_9, phone_10 "
 			"FROM userphrase_v1",
-		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 		{ -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 },
 	},
 	{
 		"SELECT time, user_freq, max_freq, orig_freq, phrase "
-			"FROM userphrase_v1 WHERE length = ?1 AND "
+			"FROM userphrase_v1 WHERE length = ?5 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
 			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
 			"phone_9 = ?19 AND phone_10 = ?20",
-		{ -1, -1, -1, -1, 1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ 0, 1, 2, 3, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
 		"SELECT time, user_freq, max_freq, orig_freq "
-			"FROM userphrase_v1 WHERE length = ?1 AND phrase = ?2 AND "
+			"FROM userphrase_v1 WHERE length = ?5 AND phrase = ?6 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
 			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
 			"phone_9 = ?19 AND phone_10 = ?20",
-		{ -1, -1, -1, -1, 1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ 0, 1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
 		"INSERT OR REPLACE INTO userphrase_v1 ("
-			"time, user_freq, max_freq, orig_freq, length, phrase, "
+			"time, orig_freq, max_freq, user_freq, length, phrase, "
 			"phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
 			"phone_6, phone_7, phone_8, phone_9, phone_10) "
 			"VALUES (?1, ?2, ?3, ?4, ?5, ?6, "
 			"?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)",
-		{ 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
-		"DELETE FROM userphrase_v1 WHERE length = ?1 AND phrase = ?2 AND "
+		"DELETE FROM userphrase_v1 WHERE length = ?5 AND phrase = ?6 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
 			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
 			"phone_9 = ?19 AND phone_10 = ?20",
-		{ -1, -1, -1, -1, 1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 	{
-		"SELECT MAX(user_freq) FROM userphrase_v1 WHERE length = ?1 AND "
+		"SELECT MAX(user_freq) FROM userphrase_v1 WHERE length = ?5 AND "
 			"phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
 			"phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
 			"phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND "
 			"phone_9 = ?19 AND phone_10 = ?20",
-		{ -1, -1, -1, -1, 1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 },
 		{ -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	},
 };
