@@ -24,6 +24,10 @@ int main()
 
 	ctx = chewing_new();
 
+	while ( ( ch = getchar() ) != EOF ) {
+		chewing_handle_Default( ctx, ch );
+	}
+
 	chewing_delete( ctx );
 	return 0;
 }
