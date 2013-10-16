@@ -225,15 +225,18 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	ChewingStaticData static_data;
 	ChewingConfigData old_config;
 	void (*logger)( void *data, int level, const char *fmt, ...);
+	void *loggerData;
 
 	/* Backup old config and restore it after clearing pgdata structure. */
 	old_config = pgdata->config;
 	static_data = pgdata->static_data;
 	logger = pgdata->logger;
+	loggerData = pgdata->loggerData;
 	memset( pgdata, 0, sizeof( ChewingData ) );
 	pgdata->config = old_config;
 	pgdata->static_data = static_data;
 	pgdata->logger = logger;
+	pgdata->loggerData = loggerData;
 
 	/* zuinData */
 	memset( &( pgdata->zuinData ), 0, sizeof( ZuinData ) );

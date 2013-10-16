@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,6 +36,8 @@ static char *KEYBOARD_STRING[] = {
 
 static const int KEYBOARD_DEFAULT_TYPE = 0;
 
+FILE *fd;
+
 void test_set_keyboard_type()
 {
 	ChewingContext *ctx;
@@ -42,9 +45,8 @@ void test_set_keyboard_type()
 	char *keyboard_string;
 	int keyboard_type;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	keyboard_string = chewing_get_KBString( ctx );
 	ok( strcmp( keyboard_string, KEYBOARD_STRING[KEYBOARD_DEFAULT_TYPE] ) == 0,
@@ -86,7 +88,7 @@ void test_KBStr2Num()
 	int i;
 	int ret;
 
-	print_function_name();
+	start_testcase( NULL, fd );
 
 	for ( i = 0; i < (int)ARRAY_SIZE( KEYBOARD_STRING ); ++i ) {
 		// XXX: chewing_KBStr2Num shall accept const char *.
@@ -101,9 +103,8 @@ void test_enumerate_keyboard_type()
 	size_t i;
 	char *keyboard_string;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ok( chewing_kbtype_Total( ctx ) == ARRAY_SIZE( KEYBOARD_STRING ),
 		"total keyboard_string type shall be %d", ARRAY_SIZE( KEYBOARD_STRING ) );
@@ -127,14 +128,23 @@ void test_enumerate_keyboard_type()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_set_keyboard_type();
 	test_KBStr2Num();
 	test_enumerate_keyboard_type();
+
+	fclose( fd );
 
 	return exit_status();
 }

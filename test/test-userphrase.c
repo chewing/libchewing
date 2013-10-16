@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,13 +21,14 @@
 #include "plat_types.h"
 #include "testhelper.h"
 
+FILE *fd;
+
 void test_ShiftLeft_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<SL>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -40,11 +42,10 @@ void test_ShiftLeft_add_userphrase()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
@@ -70,9 +71,8 @@ void test_ShiftRight_not_entering_chewing()
 {
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "<SR>" );
 	ok_keystroke_rtn( ctx, KEYSTROKE_IGNORE );
 
@@ -86,11 +86,10 @@ void test_ShiftRight_add_userphrase()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 0,
@@ -119,11 +118,10 @@ void test_CtrlNum_add_phrase_right()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 0 );
 
@@ -147,11 +145,10 @@ void test_CtrlNum_add_phrase_left()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 1 );
 
@@ -174,11 +171,10 @@ void test_CtrlNum_add_phrase_right_symbol_in_between()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 0 );
 
@@ -201,11 +197,10 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
 	int cursor;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 1 );
 
@@ -235,11 +230,10 @@ void test_userphrase_auto_learn()
 	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 1 );
 
@@ -260,11 +254,10 @@ void test_userphrase_auto_learn_hardcode_break()
 	static const char bopomofo[] = "\xE3\x84\x89\xE3\x84\x9C\xCB\x99 \xE3\x84\x89\xE3\x84\x9C\xCB\x99" /* ㄉㄜ˙ ㄉㄜ˙ */;
 	ChewingContext *ctx;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_addPhraseDirection( ctx, 1 );
 
@@ -298,11 +291,10 @@ void test_userphrase_enumerate_normal()
 	char bopomofo_buf[50];
 	unsigned int bopomofo_len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
@@ -338,11 +330,10 @@ void test_userphrase_enumerate_empty()
 	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
 	unsigned int bopomofo_len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
@@ -370,11 +361,10 @@ void test_userphrase_enumerate_rewind()
 	char bopomofo_buf[50];
 	unsigned int bopomofo_len;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_add( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
@@ -426,11 +416,10 @@ void test_userphrase_manipulate_normal()
 	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo );
 	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
 
@@ -510,11 +499,10 @@ void test_userphrase_manipulate_hash_collision()
 
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_add( ctx, phrase_1, bopomofo_1 );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
@@ -544,11 +532,10 @@ void test_userphrase_manipulate_error_handling()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_add( ctx,
 		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
@@ -568,12 +555,84 @@ void test_userphrase_manipulate_error_handling()
 	chewing_delete( ctx );
 }
 
+void test_userphrase_manipulate_remove_same_phone()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	const char phrase_1[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	const char phrase_2[] = "\xE5\x81\xB4\xE5\xAE\xA4" /* 側室 */;
+	const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ret = chewing_userphrase_add( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_add( ctx, phrase_2, bopomofo );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase_1, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+	ret = chewing_userphrase_lookup( ctx, phrase_2, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	ret = chewing_userphrase_remove( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase_1, bopomofo );
+	ok( ret == 0, "chewing_lookup() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase_2, bopomofo );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_manipulate_remove_same_phrase()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	const char phrase[] = "\xE4\xBB\x80\xE9\xBA\xBC" /* 什麼 */;
+	const char bopomofo_1[] = "\xE3\x84\x95\xE3\x84\xA3\xCB\x8A \xE3\x84\x87\xE3\x84\x9C\xCB\x99" /* ㄕㄣˊ ㄇㄜ˙ */;
+	const char bopomofo_2[] = "\xE3\x84\x95\xE3\x84\x9C\xCB\x8A \xE3\x84\x87\xE3\x84\x9C\xCB\x99" /* ㄕㄜˊ ㄇㄜ˙ */;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_add( ctx, phrase, bopomofo_2 );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_1 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_2 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	ret = chewing_userphrase_remove( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_1 );
+	ok( ret == 0, "chewing_lookup() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase, bopomofo_2 );
+	ok( ret == 1, "chewing_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	chewing_delete( ctx );
+}
+
 void test_userphrase_manipulate()
 {
 	test_userphrase_manipulate_normal();
 	test_userphrase_manipulate_maximum();
 	test_userphrase_manipulate_hash_collision();
 	test_userphrase_manipulate_error_handling();
+	test_userphrase_manipulate_remove_same_phone();
+	test_userphrase_manipulate_remove_same_phrase();
 }
 
 void test_userphrase_lookup()
@@ -581,11 +640,10 @@ void test_userphrase_lookup()
 	ChewingContext *ctx;
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_lookup( ctx,
 		"\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */,
@@ -600,10 +658,17 @@ void test_userphrase_lookup()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_ShiftLeft();
 	test_ShiftRight();
@@ -612,6 +677,8 @@ int main()
 	test_userphrase_enumerate();
 	test_userphrase_manipulate();
 	test_userphrase_lookup();
+
+	fclose( fd );
 
 	return exit_status();
 }

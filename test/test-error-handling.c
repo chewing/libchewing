@@ -7,17 +7,19 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <stdlib.h>
 
 #include "testhelper.h"
 #include "chewing.h"
 
+FILE *fd;
+
 void test_null()
 {
 	int ret;
 
-	print_function_name();
+	start_testcase( NULL, fd );
 
 	chewing_set_logger( NULL, NULL, NULL );
 
@@ -67,12 +69,21 @@ void test_null()
 	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
 	test_null();
+
+	fclose( fd );
 
 	return exit_status();
 }

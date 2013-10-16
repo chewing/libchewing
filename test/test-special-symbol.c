@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,6 +51,8 @@ static const TestData SPECIAL_SYMBOL_TABLE[] = {
 	{ ";", "\xEF\xBC\x9B" /* ； */ },
 };
 
+FILE *fd;
+
 int is_bopomofo_collision_key( const char *key )
 {
 	static const char *COLLISION_KEY[] = {
@@ -74,9 +77,8 @@ void test_in_chinese_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 
@@ -100,9 +102,8 @@ void test_in_easy_symbol_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_easySymbolInput( ctx, 1 );
@@ -148,9 +149,8 @@ void test_in_fullshape_mode()
 	ChewingContext *ctx;
 	size_t i;
 
-	print_function_name();
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_maxChiSymbolLen( ctx, 16 );
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
@@ -170,14 +170,23 @@ void test_in_fullshape_mode()
 	chewing_delete( ctx );
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_in_chinese_mode();
 	test_in_easy_symbol_mode();
 	test_in_fullshape_mode();
+
+	fclose( fd );
 
 	return exit_status();
 }

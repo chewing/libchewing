@@ -7,12 +7,15 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "testhelper.h"
 #include "chewing-utf8-util.h"
+
+FILE *fd;
 
 void test_utf8()
 {
@@ -21,7 +24,7 @@ void test_utf8()
 	int len;
 	char u8string2[16];
 
-	print_function_name();
+	start_testcase( NULL, fd );
 
 	u8string = "HelloWorld";
 	u8len = ueStrLen(u8string);
@@ -46,8 +49,18 @@ void test_utf8()
 
 }
 
-int main ()
+int main(int argc, char *argv[])
 {
-test_utf8();
+	char *logname;
+
+	asprintf( &logname, "%s.log", argv[0] );
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
+	test_utf8();
+
+	fclose( fd );
+
 	return exit_status();
 }
