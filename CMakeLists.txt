@@ -294,7 +294,6 @@ add_library(chewing OBJECT
 	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/porting_layer/include/plat_mmap.h
 	${SRC_DIR}/porting_layer/include/plat_path.h
-	${SRC_DIR}/porting_layer/include/plat_sqlite3.h
 	${SRC_DIR}/porting_layer/include/plat_types.h
 	${SRC_DIR}/porting_layer/include/sys/plat_posix.h
 	${SRC_DIR}/porting_layer/include/sys/plat_windows.h
