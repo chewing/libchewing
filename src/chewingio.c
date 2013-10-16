@@ -1502,7 +1502,7 @@ CHEWING_API int chewing_userphrase_get(
 	const char *phrase;
 	int length;
 	int i;
-	uint16_t phone_array[MAX_PHRASE_LEN] = { 0 };
+	uint16_t phone_array[MAX_PHRASE_LEN + 1] = { 0 };
 
 	if ( !ctx || !phrase_buf || !phrase_len ||
 		!bopomofo_buf || !bopomofo_len ) return -1;
