@@ -487,11 +487,13 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 	assert(pgdata);
 	assert(path);
 
-	uhash = calloc(sizeof(*uhash), strlen(path) + 1 + strlen(HASH_NAME) + 1);
+	len = strlen(path) + 1 + strlen(HASH_NAME) + 1;
+	uhash = calloc(sizeof(*uhash), len);
 	if (!uhash) {
 		LOG_ERROR("calloc returns %#p", uhash);
 		exit(-1);
 	}
+	snprintf(uhash, len, "%s" PLAT_SEPARATOR "%s", path, HASH_NAME);
 
 	/*
 	 * The binary format is described as following:
@@ -516,7 +518,7 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 
 	LOG_INFO("Migrate old format from %s", uhash);
 	ret = fread(buf, 4, 1, fd);
-	if (ret < 4) {
+	if (ret != 1) {
 		LOG_WARN("fread returns %d", ret);
 		goto end_remove_hash;
 	}
@@ -532,7 +534,7 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 		goto end_remove_hash;
 	}
 
-	while (fread(buf, HASH_FIELD_SIZE, 1, fd) == HASH_FIELD_SIZE) {
+	while (fread(buf, HASH_FIELD_SIZE, 1, fd) == 1) {
 		pos = &buf[HASH_LENGTH_OFFSET];
 		len = *pos;
 		++pos;
@@ -547,6 +549,8 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 			pos += 2;
 		}
 		phoneSeq[len] = 0;
+
+		++pos;
 		UserUpdatePhrase(pgdata, phoneSeq, pos);
 	}
 
