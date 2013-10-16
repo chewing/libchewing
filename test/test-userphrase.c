@@ -457,11 +457,10 @@ void test_userphrase_manipulate_maximum()
 		/* ㄐㄧㄣ ㄨㄛ ㄧㄣˊ ㄨㄛ ㄅㄨˋ ㄖㄨˊ ㄗˋ ㄐㄧˇ ㄉㄜ˙ ㄍㄡˇ ㄨㄛ ㄇㄚ˙ */
 	int ret;
 
-	print_function_name();
-
 	clean_userphrase();
 
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ret = chewing_userphrase_add( ctx, phrase_in_limit, bopomofo_in_limit );
 	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
