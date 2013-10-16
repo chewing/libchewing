@@ -15,9 +15,11 @@
 #include <malloc.h>
 #include <stdlib.h>
 
-#include "sqlite3.h"
+#include "memory-private.h"
 #include "plat_types.h"
 #include "private.h"
+#include "sqlite3.h"
+#include "userphrase-private.h"
 
 const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT] = {
 	{
@@ -88,6 +90,12 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 };
 
 #define DB_NAME	"chewing.db"
+
+#define HASH_FIELD_SIZE		(125)
+#define HASH_FIELD_START	(8)
+#define HASH_LENGTH_OFFSET	(16)
+#define HASH_NAME		"uhash.dat"
+#define HASH_SIGS		"CBiH"
 
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 
@@ -465,6 +473,90 @@ static int CreateStmt(ChewingData *pgdata)
 	return 0;
 }
 
+static void MigrateOldFormat(ChewingData *pgdata, const char *path)
+{
+	char *uhash;
+	FILE *fd = NULL;
+	char buf[HASH_FIELD_SIZE];
+	uint16_t phoneSeq[MAX_PHRASE_LEN + 1];
+	char *pos;
+	int len;
+	int i;
+	int ret;
+
+	assert(pgdata);
+	assert(path);
+
+	uhash = calloc(sizeof(*uhash), strlen(path) + 1 + strlen(HASH_NAME) + 1);
+	if (!uhash) {
+		LOG_ERROR("calloc returns %#p", uhash);
+		exit(-1);
+	}
+
+	/*
+	 * The binary format is described as following:
+	 *
+	 * 0 ~ 3                signature (CBiH)
+	 * 4 ~ 7                lifttime, platform endianness
+	 * 8 ~ 8 + 125 * n      array of hash item, 125 bytes each
+	 *
+	 * 0 ~ 3                user frequency, platform endianness
+	 * 4 ~ 7                recent time, platform endianness
+	 * 8 ~ 11               max frequency, platform endianness
+	 * 12 ~ 15              original frequency, platform endianness
+	 * 16                   phone length
+	 * 17 ~ 17 + 2 * n      phone sequence, uint16_t, platform endianness
+	 * 17 + 2 * n + 1       phrase length in bytes
+	 * 17 + 2 * n + 2 ~ y   phrase in UTF-8
+	 *
+	 */
+
+	fd = fopen(uhash, "r");
+	if (!fd) goto end;
+
+	LOG_INFO("Migrate old format from %s", uhash);
+	ret = fread(buf, 4, 1, fd);
+	if (ret < 4) {
+		LOG_WARN("fread returns %d", ret);
+		goto end_remove_hash;
+	}
+
+	if (memcmp(buf, HASH_SIGS, 4) != 0) {
+		LOG_WARN("signature is not %d", HASH_SIGS);
+		goto end_remove_hash;
+	}
+
+	ret = fseek(fd, 8, SEEK_SET);
+	if (ret) {
+		LOG_WARN("fseek returns %d", ret);
+		goto end_remove_hash;
+	}
+
+	while (fread(buf, HASH_FIELD_SIZE, 1, fd) == HASH_FIELD_SIZE) {
+		pos = &buf[HASH_LENGTH_OFFSET];
+		len = *pos;
+		++pos;
+
+		if (len > MAX_PHRASE_LEN || len < 1) {
+			LOG_WARN("skip field due to len = %d", len);
+			continue;
+		}
+
+		for (i = 0; i < len; ++i) {
+			phoneSeq[i] = GetUint16PreservedEndian(pos);
+			pos += 2;
+		}
+		phoneSeq[len] = 0;
+		UserUpdatePhrase(pgdata, phoneSeq, pos);
+	}
+
+end_remove_hash:
+	if (fd) fclose(fd);
+	PLAT_UNLINK(uhash);
+end:
+	free(uhash);
+}
+
 int InitSql(ChewingData *pgdata)
 {
 	int ret;
@@ -508,8 +600,9 @@ int InitSql(ChewingData *pgdata)
 		goto error;
 	}
 
-	/* FIXME: Migrate uhash.dat */
 	/* FIXME: Normalize lifttime when necessary. */
+
+	MigrateOldFormat(pgdata, path);
 
 	free(path);
 	return 0;
