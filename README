@@ -356,8 +356,16 @@ implemented in file contrib/simple-select.c
 
 [-] License
 
-GNU LGPL (Lesser General Public License).
-See "COPYING" for details.
+Except the following source code:
+
+* thirdparty/sqlite-amalgamation/ contains sqlite3 source which is in public
+  domain. See http://www.sqlite.org/copyright.html for more information.
+
+* cmake/FindCurses.cmake is modified from CMake source, which is licensed under
+   BSD 3-Clause.
+
+All source code are licensed under GNU LGPL v2.1 (Lesser General Public License
+v2.1). See "COPYING" for details.
 
 
 [-] Authors & Contact Information
