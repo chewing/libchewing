@@ -237,7 +237,7 @@ int SpecialSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBC\x9B"
 			/* "；" */
 	};
-	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ) );
 
 	return InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 }
@@ -295,7 +295,7 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBD\x9D","\xEF\xBC\x8B","\xEF\xBC\x8D"
 			/* "｝","＋","－" */
 	};
-	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ) );
 
 	rtn = InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 	if ( rtn == ZUIN_IGNORE )
@@ -541,7 +541,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 	throwEnd = CountReleaseNum( pgdata );
 
 	/*
-	* When current buffer size exceeds maxChiSymbolLen, 
+	* When current buffer size exceeds maxChiSymbolLen,
 	* we need to throw some of the characters at the head of the buffer and
 	* commit them.
 	*/
