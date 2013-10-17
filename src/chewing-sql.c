@@ -95,6 +95,7 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 #define HASH_FIELD_START	(8)
 #define HASH_LENGTH_OFFSET	(16)
 #define HASH_NAME		"uhash.dat"
+#define HASH_OLD_NAME		"uhash.old"
 #define HASH_SIGS		"CBiH"
 
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
@@ -476,6 +477,7 @@ static int CreateStmt(ChewingData *pgdata)
 static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 {
 	char *uhash;
+	char *old_uhash;
 	FILE *fd = NULL;
 	char buf[HASH_FIELD_SIZE];
 	uint16_t phoneSeq[MAX_PHRASE_LEN + 1];
@@ -494,6 +496,14 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 		exit(-1);
 	}
 	snprintf(uhash, len, "%s" PLAT_SEPARATOR "%s", path, HASH_NAME);
+
+	len = strlen(path) + 1 + strlen(HASH_OLD_NAME) + 1;
+	old_uhash = calloc(sizeof(old_uhash), len);
+	if (!old_uhash) {
+		LOG_ERROR("calloc returns %#p", old_uhash);
+		exit(-1);
+	}
+	snprintf(old_uhash, len, "%s" PLAT_SEPARATOR "%s", path, HASH_OLD_NAME);
 
 	/*
 	 * The binary format is described as following:
@@ -556,8 +566,9 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 
 end_remove_hash:
 	if (fd) fclose(fd);
-	PLAT_UNLINK(uhash);
+	PLAT_RENAME(uhash, old_uhash);
 end:
+	free(old_uhash);
 	free(uhash);
 }
 
