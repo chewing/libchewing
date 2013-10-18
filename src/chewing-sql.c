@@ -89,8 +89,6 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 	},
 };
 
-#define DB_NAME	"chewing.db"
-
 #define HASH_FIELD_SIZE		(125)
 #define HASH_FIELD_START	(8)
 #define HASH_LENGTH_OFFSET	(16)

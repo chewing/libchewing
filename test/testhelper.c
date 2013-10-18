@@ -19,6 +19,7 @@
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"
 #include "plat_path.h"
+#include "chewing-sql.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;
@@ -485,5 +486,5 @@ int exit_status()
 
 void clean_userphrase()
 {
-	remove( TEST_HASH_DIR PLAT_SEPARATOR "chewing.db" );
+	remove( TEST_HASH_DIR PLAT_SEPARATOR DB_NAME );
 }

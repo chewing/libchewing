@@ -14,6 +14,8 @@
 #  include <config.h>
 #endif
 
+#define DB_NAME	"chewing.sqlite3"
+
 /*
  * userphrase_v1 table
  */
