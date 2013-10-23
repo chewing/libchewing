@@ -865,10 +865,10 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	int i;
 
 	/* fill zero to chiSymbolBuf first */
-	pgo->commitBuf[0] = 0;
+	pgo->preeditBuf[0] = 0;
 
 	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
-		strncat( pgo->commitBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->commitBuf) );
+		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) );
 	}
 
 	/* fill point */

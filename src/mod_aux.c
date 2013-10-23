@@ -62,7 +62,7 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
 
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 {
-	return strdup( ctx->output->commitBuf );
+	return strdup( ctx->output->preeditBuf );
 }
 
 

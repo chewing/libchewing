@@ -242,7 +242,7 @@ typedef struct ChewingData {
 
 typedef struct ChewingOutput {
 	/** @brief the content of Edit buffer. */
-	char commitBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+	char preeditBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	/** @brief the length of Edit buffer. */
 	int chiSymbolBufLen;
 	/** @brief current position of the cursor. */
