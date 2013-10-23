@@ -257,8 +257,9 @@ typedef struct ChewingOutput {
 	/** @brief indicate the break points going to display.*/
 	int dispBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/** @brief the string going to commit. */
-	wch_t commitStr[ MAX_PHONE_SEQ_LEN ];
-	int nCommitStr;
+
+	char commitBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+	int commitBufLen;
 	/** @brief information of character selections. */
 	ChoiceInfo* pci;
 	/** @brief indicate English mode or Chinese mode. */

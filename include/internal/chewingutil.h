@@ -33,7 +33,7 @@ int EasySymbolInput( int key, ChewingData *pgdata );
 int SymbolInput( int key, ChewingData *pgdata );
 int SymbolChoice( ChewingData *pgdata, int sel_i );
 int HaninSymbolInput( ChewingData *pgdata );
-int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata );
+void WriteChiSymbolToCommitBuf( ChewingData *pgdata, ChewingOutput *pgo, int len );
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata );
 int CallPhrasing( ChewingData *pgdata, int all_phrasing );

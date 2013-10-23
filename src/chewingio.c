@@ -576,7 +576,7 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 	}
 	else if ( pgdata->config.bEscCleanAllBuf ) {
 		CleanAllBuf( pgdata );
-		pgo->nCommitStr = pgdata->chiSymbolBufLen;
+		pgo->commitBufLen = pgdata->chiSymbolBufLen;
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -624,10 +624,10 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 	}
 	else {
 		keystrokeRtn = KEYSTROKE_COMMIT;
-		WriteChiSymbolToBuf( pgo->commitStr, nCommitStr, pgdata );
+		WriteChiSymbolToCommitBuf( pgdata, pgo, nCommitStr );
 		AutoLearnPhrase( pgdata );
 		CleanAllBuf( pgdata );
-		pgo->nCommitStr = nCommitStr;
+		pgo->commitBufLen = nCommitStr;
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -1232,10 +1232,7 @@ End_keyproc:
 		DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n",
 				pgdata->preeditBuf[ 0 ].char_ );
-		strncpy( ( char * ) pgo->commitStr[ 0 ].s,
-			pgdata->preeditBuf[ 0 ].char_,
-			sizeof( pgo->commitStr[ 0 ].s ) );
-		pgo->nCommitStr = 1;
+		WriteChiSymbolToCommitBuf( pgdata, pgo, 1 );
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
 		keystrokeRtn = KEYSTROKE_COMMIT;
@@ -1385,10 +1382,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		}
 		else if ( QuickCommit ) {
-			strncpy( ( char * ) pgo->commitStr[ 0 ].s,
-				pgdata->preeditBuf[ 0 ].char_,
-				sizeof( pgo->commitStr[ 0 ].s ) );
-			pgo->nCommitStr = 1;
+			WriteChiSymbolToCommitBuf( pgdata, pgo, 1 );
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
 			keystrokeRtn = KEYSTROKE_COMMIT;

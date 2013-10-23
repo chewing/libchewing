@@ -38,16 +38,7 @@ CHEWING_API int chewing_commit_Check( ChewingContext *ctx )
  */
 CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 {
-	int i;
-	char *s = (char *) calloc(
-		1 + ctx->output->nCommitStr,
-		MAX_UTF8_SIZE );
-	if ( s ) {
-		for ( i = 0; i < ctx->output->nCommitStr; i++ ) {
-			strcat( s, (char *) (ctx->output->commitStr[ i ].s) );
-		}
-	}
-	return s;
+	return strdup( ctx->output->commitBuf );
 }
 
 CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )

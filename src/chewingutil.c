@@ -462,16 +462,23 @@ static int FindIntervalFrom( int from, IntervalType inte[], int nInte )
 	return -1;
 }
 
-int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
+void WriteChiSymbolToCommitBuf( ChewingData *pgdata, ChewingOutput *pgo, int len )
 {
 	int i;
+	char *pos;
 
-	for ( i = 0 ; i < csBufLen; i++ ) {
-		strncpy( (char *)csBuf[ i ].s,
-			pgdata->preeditBuf[ i ].char_,
-			sizeof( csBuf[ i ].s ) );
+	assert( pgdata );
+	assert( pgo );
+
+	pgo->commitBufLen = len;
+
+	pos = pgo->commitBuf;
+	for ( i = 0; i < pgo->commitBufLen; ++i ) {
+		assert( pos + MAX_UTF8_SIZE + 1 < pgo->commitBuf + sizeof( pgo->commitBuf ) );
+		strcpy( pos, pgdata->preeditBuf[ i ].char_ );
+		pos += strlen( pgdata->preeditBuf[ i ].char_ );
 	}
-	return 0;
+	*pos = 0;
 }
 
 static int CountReleaseNum( ChewingData *pgdata )
@@ -549,12 +556,11 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 	* commit them.
 	*/
 	if ( throwEnd ) {
-		pgo->nCommitStr = throwEnd;
 		/*
 		 * count how many chinese words in "chiSymbolBuf[ 0 .. (throwEnd - 1)]"
 		 * And release from "chiSymbolBuf" && "phoneSeq"
 		 */
-		WriteChiSymbolToBuf( pgo->commitStr, throwEnd, pgdata );
+		WriteChiSymbolToCommitBuf( pgdata, pgo, throwEnd );
 		KillFromLeft( pgdata, throwEnd );
 	}
 	return throwEnd;
