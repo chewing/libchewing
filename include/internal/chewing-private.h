@@ -65,7 +65,7 @@ static inline int min( int a, int b )
 }
 #endif
 
-typedef union {
+typedef union wch_t {
 	unsigned char s[ MAX_UTF8_SIZE + 1];
 	uint16_t wch;
 } wch_t;
@@ -79,7 +79,7 @@ typedef union {
  * phrase using a specific input method (may be bopomofo or non-phone). Note
  * that key in root represents the number of total elements(nodes) in the tree.
  */
-typedef struct {
+typedef struct TreeType {
 	unsigned char key[2];
 	union {
 		struct {
@@ -93,18 +93,18 @@ typedef struct {
 	};
 } TreeType;
 
-typedef struct {
+typedef struct PhrasingOutput {
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
 	int nNumCut;
 } PhrasingOutput;
 
-typedef struct {
+typedef struct PinYinData {
     int type;
     char keySeq[ PINYIN_SIZE ];
 } PinYinData;
 
-typedef struct {
+typedef struct ZuinData {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
 	int pho_inx_alt[ ZUIN_SIZE ];
@@ -113,7 +113,7 @@ typedef struct {
 	PinYinData pinYinData;
 } ZuinData;
 
-typedef struct {
+typedef struct AvailInfo {
 	/** @brief all kinds of lengths of available phrases. */
 	struct {
 		int len;
@@ -130,7 +130,7 @@ typedef struct {
  *	@brief information of available phrases or characters choices.
  */
 
-typedef struct {
+typedef struct ChoiceInfo {
 	/** @brief total page number. */
 	int nPage;
 	/** @brief current page number. */
@@ -146,7 +146,7 @@ typedef struct {
 } ChoiceInfo;
 
 /** @brief entry of symbol table */
-typedef struct _SymbolEntry {
+typedef struct SymbolEntry {
 	/** @brief  nSymnols is total number of symbols in this category.
 	 * If nSymbols = 0, category is treat as a symbol,
 	 * which is a zero-terminated utf-8 string.
@@ -164,7 +164,7 @@ typedef struct _SymbolEntry {
 	char symbols[][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-typedef struct {
+typedef struct ChewingStaticData {
 	const TreeType *tree;
 	size_t tree_size;
 	plat_mmap tree_mmap;
@@ -176,8 +176,8 @@ typedef struct {
 	int chewing_lifetime;
 
 	char hashfilename[ 200 ];
-	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
-	struct tag_HASH_ITEM *userphrase_enum;
+	struct HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct HASH_ITEM *userphrase_enum;
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
@@ -191,20 +191,18 @@ typedef struct {
 	int HANYU_FINALS;
 } ChewingStaticData;
 
-struct tag_HASH_ITEM;
-
-typedef enum tag_Category {
+typedef enum Category {
 	CHEWING_NONE,
 	CHEWING_CHINESE,
 	CHEWING_SYMBOL,
 } Category;
 
-typedef struct tag_PreeditBuf {
+typedef struct PreeditBuf {
 	Category category;
 	char char_[ MAX_UTF8_SIZE + 1 ];
 } PreeditBuf;
 
-typedef struct tag_ChewingData {
+typedef struct ChewingData {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
@@ -236,13 +234,13 @@ typedef struct tag_ChewingData {
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
-	struct tag_HASH_ITEM *prev_userphrase;
+	struct HASH_ITEM *prev_userphrase;
 	ChewingStaticData static_data;
 	void (*logger)( void *data, int level, const char *fmt, ... );
 	void *loggerData;
 } ChewingData;
 
-typedef struct {
+typedef struct ChewingOutput {
 	/** @brief the content of Edit buffer. */
 	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
 	/** @brief the length of Edit buffer. */
@@ -278,7 +276,7 @@ typedef struct {
  *   @brief  information for Chewing output.
  */
 
-struct _ChewingContext {
+struct ChewingContext {
 	ChewingData *data;
 	ChewingOutput *output;
 	int cand_no;
@@ -290,7 +288,7 @@ struct _ChewingContext {
  * @brief context of Chewing IM
  */
 
-typedef struct {
+typedef struct Phrase {
 	char phrase[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	int freq;
 } Phrase;

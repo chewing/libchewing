@@ -67,7 +67,7 @@
 /**
  * @deprecated Use chewing_set_ series of functions to set parameters instead.
  */
-typedef struct {
+typedef struct ChewingConfigData {
 	int candPerPage;
 	int maxChiSymbolLen;
 	int selKey[ MAX_SELKEY ];
@@ -80,7 +80,7 @@ typedef struct {
 	int hsuSelKeyType; // Deprecated.
 } ChewingConfigData;
 
-typedef struct {
+typedef struct IntervalType {
 	/*@{*/
 	int from;	/**< starting position of certain interval */
 	int to;		/**< ending position of certain interval */
@@ -89,7 +89,7 @@ typedef struct {
 
 /** @brief context handle used for Chewing IM APIs
  */
-typedef struct _ChewingContext ChewingContext;
+typedef struct ChewingContext ChewingContext;
 
 /** @brief use "asdfjkl789" as selection key
  */

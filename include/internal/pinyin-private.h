@@ -21,11 +21,10 @@
   From pinyin sequence to a default-layout sequence.
   Eg: Zhang -> {"zh","5"}, {"ang",";"}
  */
-struct keymap {
+typedef struct keymap {
 	char pinyin[7];
 	char zuin[4];
-};
-typedef struct keymap keymap;
+} keymap;
 
 int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq, char *zuinKeySeqAlt);
 int InitPinyin( ChewingData *pgdata, const char * );
