@@ -865,12 +865,10 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	int i;
 
 	/* fill zero to chiSymbolBuf first */
-	memset( pgo->chiSymbolBuf, 0, sizeof( wch_t ) * MAX_PHONE_SEQ_LEN );
+	pgo->commitBuf[0] = 0;
 
 	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
-		strncpy( (char *)pgo->chiSymbolBuf[ i ].s,
-			pgdata->preeditBuf[ i ].char_,
-			sizeof( pgo->chiSymbolBuf[ 0 ].s ) );
+		strncat( pgo->commitBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->commitBuf) );
 	}
 
 	/* fill point */

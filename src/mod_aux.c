@@ -62,16 +62,7 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
 
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 {
-	int i;
-	char *s = (char *) calloc(
-		1 + ctx->output->chiSymbolBufLen,
-		MAX_UTF8_SIZE );
-	if ( s ) {
-		for ( i = 0; i < ctx->output->chiSymbolBufLen; i++ ) {
-			strcat( s, (char *) (ctx->output->chiSymbolBuf[ i ].s) );
-		}
-	}
-	return s;
+	return strdup( ctx->output->commitBuf );
 }
 
 
