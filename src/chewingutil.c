@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
@@ -82,32 +83,14 @@ void SetUpdatePhraseMsg(
 		ChewingData *pgdata, const char *addWordSeq,
 		int len, int state )
 {
-	const char *insert = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A";
-		/* 加入： */
-	const char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
-		/* 已有： */
-	int begin = 3, i;
-	const char *msg;
-
-	pgdata->showMsgLen = begin + len;
 	if ( state == USER_UPDATE_INSERT ) {
-		msg = insert;
+		/* 加入： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A%s", addWordSeq );
+	} else {
+		/* 已有： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A%s", addWordSeq );
 	}
-	else {
-		msg = modify;
-	}
-	ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, msg, 1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-	           ueConstStrSeek( msg, 1 ),
-		   1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-	           ueConstStrSeek( msg, 2 ),
-		   1, 1 );
-	for ( i = 0; i < len; i++ ) {
-		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
-		           ueConstStrSeek( addWordSeq, i ),
-			   1, 1);
-	}
+	pgdata->showMsgLen = 3 + len;
 }
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
@@ -920,7 +903,7 @@ int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 {
 	pgo->bShowMsg = 1;
-	memcpy( pgo->showMsg, pgdata->showMsg, sizeof( wch_t ) * ( pgdata->showMsgLen ) );
+	strncpy( pgo->showMsg, pgdata->showMsg, sizeof(pgo->showMsg) );
 	pgo->showMsgLen = pgdata->showMsgLen;
 	pgo->nDispInterval = 0;
 }

@@ -179,16 +179,7 @@ CHEWING_API int chewing_aux_Length( ChewingContext *ctx )
 
 CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 {
-	int i;
-	char *msg = (char *) calloc(
-		1 + ctx->output->showMsgLen,
-		MAX_UTF8_SIZE );
-	if ( msg ) {
-		for ( i = 0; i < ctx->output->showMsgLen; ++i )
-			strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
-	}
-	return msg;
-
+	return strdup( ctx->output->showMsg );
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )

@@ -214,7 +214,7 @@ typedef struct ChewingData {
 	int chiSymbolBufLen;
 	int PointStart;
 	int PointEnd;
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
+	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + 3 ) + 1 ];
 	int showMsgLen;
 
 	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -268,7 +268,7 @@ typedef struct ChewingOutput {
 	int keystrokeRtn;
 	int bShowMsg;
 	/** @brief user message. */
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
+	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + 3 ) + 1 ];
 	int showMsgLen;
 } ChewingOutput;
 /**
