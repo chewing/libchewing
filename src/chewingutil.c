@@ -872,6 +872,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 
 	/* fill zero to chiSymbolBuf first */
 	pgo->preeditBuf[0] = 0;
+	pgo->bopomofoBuf[0] = 0;
 
 	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
 		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) );
@@ -887,37 +888,15 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 
 	/* fill zuinBuf */
 	if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
-		const char *p = pgdata->zuinData.pinYinData.keySeq;
-		/*
-		 * Copy from old content in zuinBuf
-		 * NOTE: No Unicode transformation here.
-		 */
-		for ( i = 0; i< ZUIN_SIZE; i++) {
-			int j;
-			for ( j = 0; j < 2; j++ ) {
-				if ( p[ 0 ] ) {
-					pgo->zuinBuf[ i ].s[ j ] = p[ 0 ];
-					p++;
-				}
-				else {
-					pgo->zuinBuf[ i ].s[ j ] = '\0';
-				}
-			}
-			pgo->zuinBuf[ i ].s[ 2 ] = '\0';
-		}
+		strcpy( pgo->bopomofoBuf, pgdata->zuinData.pinYinData.keySeq );
 	} else {
 		for ( i = 0; i < ZUIN_SIZE; i++ ) {
 			if ( pgdata->zuinData.pho_inx[ i ] != 0 ) {
-				/* Here we should use (zhuin_tab[i] + 2) to
-				 * skip the 2 space characters at
-				 * zhuin_tab[0] and zhuin_tab[1]. */
-				ueStrNCpy( (char *) pgo->zuinBuf[ i ].s,
-				           ueConstStrSeek( (zhuin_tab[ i ] + 2),
-						      pgdata->zuinData.pho_inx[ i ] - 1 ),
-				           1, 1);
+				ueStrNCpy( pgo->bopomofoBuf + strlen( pgo->bopomofoBuf ),
+					ueConstStrSeek( (zhuin_tab[ i ] + 2),
+						pgdata->zuinData.pho_inx[ i ] - 1 ),
+					1, STRNCPY_CLOSE );
 			}
-			else
-				pgo->zuinBuf[ i ].wch = 0;
 		}
 	}
 

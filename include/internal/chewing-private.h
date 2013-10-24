@@ -249,8 +249,7 @@ typedef struct ChewingOutput {
 	long chiSymbolCursor;
 	long PointStart;
 	long PointEnd;
-	/** @brief the zuin-yin symbols have already entered. */
-	wch_t zuinBuf[ ZUIN_SIZE ];
+	char bopomofoBuf[ ZUIN_SIZE * MAX_UTF8_SIZE + 1 ];
 	/** @brief indicate the method of showing sentence break. */
 	IntervalType dispInterval[ MAX_INTERVAL ]; /* from prefer, considering symbol */
 	int nDispInterval;
