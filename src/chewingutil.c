@@ -90,7 +90,7 @@ void SetUpdatePhraseMsg(
 		/* 已有： */
 		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A%s", addWordSeq );
 	}
-	pgdata->showMsgLen = 3 + len;
+	pgdata->showMsgLen = AUX_PREFIX_LEN + len;
 }
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )

@@ -44,6 +44,7 @@ typedef SSIZE_T ssize_t;
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
+#define AUX_PREFIX_LEN (3)
 
 /* For isSymbol */
 #define WORD_CHOICE            (0)
@@ -209,7 +210,7 @@ typedef struct ChewingData {
 	int chiSymbolBufLen;
 	int PointStart;
 	int PointEnd;
-	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + 3 ) + 1 ];
+	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + AUX_PREFIX_LEN ) + 1 ];
 	int showMsgLen;
 
 	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
