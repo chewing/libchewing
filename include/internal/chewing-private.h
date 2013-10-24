@@ -65,11 +65,6 @@ static inline int min( int a, int b )
 }
 #endif
 
-typedef union wch_t {
-	unsigned char s[ MAX_UTF8_SIZE + 1];
-	uint16_t wch;
-} wch_t;
-
 /*
  * This structure may represent both internal nodes and leaf nodes of a phrase
  * tree. Two kinds are distinguished by whether key is 0. For an internal node,
