@@ -890,7 +890,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->pci = &( pgdata->choiceInfo );
 	pgo->bChiSym = pgdata->bChiSym;
 	memcpy( pgo->selKey, pgdata->config.selKey, sizeof( pgdata->config.selKey ) );
-	pgo->bShowMsg = 0;
+	pgdata->bShowMsg = 0;
 	return 0;
 }
 
@@ -902,9 +902,7 @@ int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn
 
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 {
-	pgo->bShowMsg = 1;
-	strncpy( pgo->showMsg, pgdata->showMsg, sizeof(pgo->showMsg) );
-	pgo->showMsgLen = pgdata->showMsgLen;
+	pgdata->bShowMsg = 1;
 	pgo->nDispInterval = 0;
 }
 

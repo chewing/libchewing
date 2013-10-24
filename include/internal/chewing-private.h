@@ -210,6 +210,8 @@ typedef struct ChewingData {
 	int chiSymbolBufLen;
 	int PointStart;
 	int PointEnd;
+
+	int bShowMsg;
 	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + AUX_PREFIX_LEN ) + 1 ];
 	int showMsgLen;
 
@@ -262,10 +264,7 @@ typedef struct ChewingOutput {
 	int selKey[ MAX_SELKEY ];
 	/** @brief return value. */
 	int keystrokeRtn;
-	int bShowMsg;
 	/** @brief user message. */
-	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + 3 ) + 1 ];
-	int showMsgLen;
 } ChewingOutput;
 /**
  *   @struct ChewingOutput
