@@ -95,8 +95,8 @@ typedef struct PhrasingOutput {
 } PhrasingOutput;
 
 typedef struct PinYinData {
-    int type;
-    char keySeq[ PINYIN_SIZE ];
+	int type;
+	char keySeq[ PINYIN_SIZE ];
 } PinYinData;
 
 typedef struct ZuinData {
@@ -203,7 +203,7 @@ typedef struct ChewingData {
 	PhrasingOutput phrOut;
 	ZuinData zuinData;
 	ChewingConfigData config;
-    /** @brief current input buffer, content==0 means Chinese code */
+	/** @brief current input buffer, content==0 means Chinese code */
 	PreeditBuf preeditBuf[ MAX_PHONE_SEQ_LEN ];
 	int chiSymbolCursor;
 	int chiSymbolBufLen;
