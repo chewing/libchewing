@@ -97,12 +97,35 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 @chapter Glassary
 
 @table @dfn
-@item zuin
+@item Bopomofo
 @cindex zuin, Zhuyin
 @cindex Bopomofo
-The word ``zuin'' is obsolete. Here ``zuin'' means ``Zhuyin'' or
-``Bopomofo'', a phonetic system for transcribing Chinese, especially
-Mandarin.
+The word ``Bopomofo'' is a phonetic system for transcribing Chinese,
+especially Mandarin. The word ``zuin'', ``Zhuyin'' are obsolete terms for
+``Bopomofo''.
+@end table
+
+@table @dfn
+@item bopomofo buffer
+@cindex bopomofo buffer
+The bopomofo buffer contains bopomofo symbols in current status. After a
+completed bopomofo sequence is provided, the content of bopomofo buffer will
+be cleaned and a word will be added to preedit buffer.
+@end table
+
+@table @dfn
+@item preedit buffer
+@cindex preedit buffer
+The preedit buffer contains string which is not finalized. The string can be
+updated by selecting new one with candidate selecting APIs. Normally, the
+content in preedit buffer will be displayed with underline.
+@end table
+
+@table @dfn
+@item commit buffer
+@cindex commit buffer
+The commit buffer contains string which is finalized. A finalized string will
+not be modified by input method.
 @end table
 
 @node Setup
