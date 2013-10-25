@@ -858,7 +858,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->bopomofoBuf[0] = 0;
 
 	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
-		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) );
+		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) - 1 );
 	}
 
 	/* fill point */
