@@ -1738,3 +1738,29 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
 
 	return ChoicePrevAvail( pgdata );
 }
+
+CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+	int len;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	len = pgdata->chiSymbolBufLen;
+
+	if ( !len ) return -1;
+
+	WriteChiSymbolToCommitBuf( pgdata, pgo, len );
+	AutoLearnPhrase( pgdata );
+	CleanAllBuf( pgdata );
+
+	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_COMMIT );
+
+	return 0;
+}

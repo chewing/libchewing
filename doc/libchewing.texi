@@ -712,6 +712,13 @@ This function changes current candidate list to prev candidate list.
 This function returns @code{0} when success, @code{-1} otherwise.
 @end deftypefun
 
+@deftypefun int chewing_commit_preedit_buf(ChewingContext *@var{ctx})
+This function commits the current preedit buffer content to commit buffer.
+
+This function returns @code{0} when string is committed to commit buffer,
+@code{-1} otherwise.
+@end deftypefun
+
 @node Output Handling
 @chapter Output Handling
 

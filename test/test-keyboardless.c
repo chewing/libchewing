@@ -535,6 +535,72 @@ void test_cand_list()
 	test_cand_list_no_cand_windows();
 }
 
+void test_commit_preedit_normal()
+{
+	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
+	ret = chewing_commit_preedit_buf( ctx );
+	ok( ret == 0, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "" );
+	ok_commit_buffer( ctx, phrase );
+
+	chewing_delete( ctx );
+}
+
+void test_commit_preedit_empty()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ret = chewing_commit_preedit_buf( ctx );
+	ok( ret == -1, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ok_preedit_buffer( ctx, "" );
+	ok_commit_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_commit_preedit_during_cand_selecting()
+{
+	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_commit_preedit_buf( ctx );
+	ok( ret == -1, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ok_preedit_buffer( ctx, phrase );
+	ok_commit_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_commit_preedit()
+{
+	test_commit_preedit_normal();
+	test_commit_preedit_empty();
+	test_commit_preedit_during_cand_selecting();
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
@@ -551,6 +617,8 @@ int main(int argc, char *argv[])
 	test_cand_close();
 	test_cand_choose();
 	test_cand_list();
+
+	test_commit_preedit();
 
 	fclose( fd );
 
