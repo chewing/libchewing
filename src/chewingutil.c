@@ -852,13 +852,17 @@ static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata )
 int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 {
 	int i;
+	char *pos;
 
 	/* fill zero to chiSymbolBuf first */
 	pgo->preeditBuf[0] = 0;
 	pgo->bopomofoBuf[0] = 0;
 
-	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
-		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) - 1 );
+	pos = pgo->preeditBuf;
+	for ( i = 0; i < pgdata->chiSymbolBufLen &&
+		pos < pgo->preeditBuf + sizeof( pgo->preeditBuf ) + MAX_UTF8_SIZE + 1; ++i ) {
+		strncpy( pos, pgdata->preeditBuf[ i ].char_, MAX_UTF8_SIZE + 1 );
+		pos += strlen( pgdata->preeditBuf[ i ].char_ );
 	}
 
 	/* fill point */
