@@ -849,7 +849,7 @@ static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata )
 	}
 }
 
-static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
+int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 {
 	int i;
 

@@ -742,6 +742,13 @@ This function returns @code{0} when string is committed to commit buffer,
 @code{-1} otherwise.
 @end deftypefun
 
+@deftypefun int chewing_clean_preedit_buf(ChewingContext *@var{ctx})
+This function cleans the content in preedit buffer.
+
+This function returns @code{0} when preedit buffer is cleaned, @code{-1}
+otherwise.
+@end deftypefun
+
 @node Output Handling
 @chapter Output Handling
 

@@ -1764,3 +1764,21 @@ CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx )
 
 	return 0;
 }
+
+CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	CleanAllBuf( pgdata );
+
+	MakeOutput( pgo, pgdata );
+	return 0;
+}

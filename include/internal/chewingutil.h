@@ -38,6 +38,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata );
 int CallPhrasing( ChewingData *pgdata, int all_phrasing );
 int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn );
+int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata );
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata );
 int AddSelect( ChewingData *pgdata, int sel_i );
 int CountSelKeyNum( int key, ChewingData *pgdata );
