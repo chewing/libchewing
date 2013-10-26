@@ -735,14 +735,14 @@ This function changes current candidate list to prev candidate list.
 This function returns @code{0} when success, @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun int chewing_commit_preedit_buf(ChewingContext *@var{ctx})
+@deftypefun int chewing_commit_preedit_buf (ChewingContext *@var{ctx})
 This function commits the current preedit buffer content to commit buffer.
 
 This function returns @code{0} when string is committed to commit buffer,
 @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun int chewing_clean_preedit_buf(ChewingContext *@var{ctx})
+@deftypefun int chewing_clean_preedit_buf (ChewingContext *@var{ctx})
 This function cleans the content in preedit buffer.
 
 This function returns @code{0} when preedit buffer is cleaned, @code{-1}
@@ -929,7 +929,7 @@ Chewing IM internal state machine.
 @node Userphrase Handling
 @chapter Userphrase Handling
 
-@deftypefun int chewing_userphrase_enumerate(ChewingContext *@var{ctx})
+@deftypefun int chewing_userphrase_enumerate (ChewingContext *@var{ctx})
 This function starts a userphrase enumeration. Caller shall call this function
 prior @code{chewing_userphrase_has_next} and @code{chewing_userphrase_get} in
 order to enumerate userphrase correctly.
@@ -951,7 +951,7 @@ while (chewing_userphrase_has_next(ctx, &phrase_len, &bopomofo_len)) @{
 @end example
 @end deftypefun
 
-@deftypefun int chewing_userphrase_has_next(ChewingContext *@var{ctx}, unsigned
+@deftypefun int chewing_userphrase_has_next (ChewingContext *@var{ctx}, unsigned
 int *@var{phrase_len}, unsigned int *@var{bopomofo_len})
 
 This function checks if there is another userphrase in current enumeration. The
@@ -962,7 +962,7 @@ The return value is @code{1} if there is another userphrase present, @code{0}
 otherwise.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_get(ChewingContext *@var{ctx}, char
+@deftypefun int chewing_userphrase_get (ChewingContext *@var{ctx}, char
 *@var{phrase_buf}, unsigned int @var{phrase_len}, char *@var{bopomofo_buf},
 unsigned int @var{bopomofo_len})
 This function gets the current enumerated userphrase. The @var{phrase_buf} and
@@ -973,22 +973,22 @@ The length of buffer @var{phrase_len} and @var{bopomofo_len} can be get by
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_add(ChewingContext *@var{ctx}, const char
+@deftypefun int chewing_userphrase_add (ChewingContext *@var{ctx}, const char
 *@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_remove(ChewingContext *@var{ctx}, const char
-*@var{phrase_buf}, const char *@var{bopomofo_buf})
+@deftypefun int chewing_userphrase_remove (ChewingContext *@var{ctx}, const
+char *@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is @code{0} on success, @code{-1} on failure.
 @end deftypefun
 
-@deftypefun int chewing_userphrase_lookup(ChewingContext *@var{ctx}, const char
-*@var{phrase_buf}, const char *@var{bopomofo_buf})
+@deftypefun int chewing_userphrase_lookup (ChewingContext *@var{ctx}, const
+char *@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function lookups if userphrase @var{phrase_buf}(@var{bopomofo_buf}) is in
 userphrase.
 
