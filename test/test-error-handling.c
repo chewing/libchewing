@@ -67,6 +67,12 @@ void test_null()
 
 	ret = chewing_cand_list_prev( NULL );
 	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_commit_preedit_buf( NULL );
+	ok ( ret == -1, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_clean_preedit_buf( NULL );
+	ok ( ret == -1, "chewing_clean_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main(int argc, char *argv[])
