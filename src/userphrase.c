@@ -27,16 +27,19 @@
 static int UserBindPhone(
 	ChewingData *pgdata,
 	int index,
-	const uint16_t phoneSeq[])
+	const uint16_t phoneSeq[],
+	int len)
 {
 	int i;
-	int len;
 	int ret;
 
 	assert(pgdata);
 	assert(phoneSeq);
 
-	len = GetPhoneLen(phoneSeq);
+	if (len > MAX_PHRASE_LEN) {
+		LOG_WARN("phoneSeq length %d > MAX_PHRASE_LEN(%d)", len, MAX_PHRASE_LEN);
+		return -1;
+	}
 
 	ret = sqlite3_bind_int(
 		pgdata->static_data.stmt_userphrase[index],
@@ -123,7 +126,7 @@ static int LoadMaxFreq(ChewingData *pgdata, const uint16_t phoneSeq[], int len)
 		return maxFreq;
 	}
 
-	ret = UserBindPhone(pgdata, STMT_USERPHRASE_GET_MAX_FREQ, phoneSeq);
+	ret = UserBindPhone(pgdata, STMT_USERPHRASE_GET_MAX_FREQ, phoneSeq, len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
 		return maxFreq;
@@ -235,13 +238,18 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 		return USER_UPDATE_FAIL;
 	}
 
+	if (word_len > MAX_PHRASE_LEN) {
+		LOG_WARN("wordSeq length %d > MAX_PHRASE_LEN (%d)", word_len, MAX_PHRASE_LEN);
+		return USER_UPDATE_FAIL;
+	}
+
 	ret = sqlite3_reset(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE]);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);
 		return USER_UPDATE_FAIL;
 	}
 
-	ret = UserBindPhone(pgdata, STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE, phoneSeq);
+	ret = UserBindPhone(pgdata, STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE, phoneSeq, phone_len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
 		return USER_UPDATE_FAIL;
@@ -327,7 +335,7 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 		return USER_UPDATE_FAIL;
 	}
 
-	ret = UserBindPhone(pgdata, STMT_USERPHRASE_UPSERT, phoneSeq);
+	ret = UserBindPhone(pgdata, STMT_USERPHRASE_UPSERT, phoneSeq, phone_len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
 		return USER_UPDATE_FAIL;
@@ -361,6 +369,7 @@ void UserUpdatePhraseEnd( ChewingData *pgdata )
 void UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[])
 {
 	int ret;
+	int len;
 
 	assert(pgdata);
 	assert(phoneSeq);
@@ -372,8 +381,9 @@ void UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char
 		return;
 	}
 
+	len = GetPhoneLen(phoneSeq);
 	ret = UserBindPhone(
-		pgdata, STMT_USERPHRASE_DELETE, phoneSeq);
+		pgdata, STMT_USERPHRASE_DELETE, phoneSeq, len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
 		return;
@@ -399,6 +409,7 @@ void UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char
 UserPhraseData *UserGetPhraseFirst(ChewingData *pgdata, const uint16_t phoneSeq[])
 {
 	int ret;
+	int len;
 
 	assert(pgdata);
 	assert(phoneSeq);
@@ -409,7 +420,8 @@ UserPhraseData *UserGetPhraseFirst(ChewingData *pgdata, const uint16_t phoneSeq[
 		return NULL;
 	}
 
-	ret = UserBindPhone(pgdata, STMT_USERPHRASE_SELECT_BY_PHONE, phoneSeq);
+	len = GetPhoneLen(phoneSeq);
+	ret = UserBindPhone(pgdata, STMT_USERPHRASE_SELECT_BY_PHONE, phoneSeq, len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
 		return NULL;
