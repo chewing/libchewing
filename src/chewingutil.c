@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
@@ -82,42 +83,26 @@ void SetUpdatePhraseMsg(
 		ChewingData *pgdata, const char *addWordSeq,
 		int len, int state )
 {
-	const char *insert = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A";
-		/* 加入： */
-	const char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
-		/* 已有： */
-	int begin = 3, i;
-	const char *msg;
-
-	pgdata->showMsgLen = begin + len;
 	if ( state == USER_UPDATE_INSERT ) {
-		msg = insert;
+		/* 加入： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A%s", addWordSeq );
+	} else {
+		/* 已有： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A%s", addWordSeq );
 	}
-	else {
-		msg = modify;
-	}
-	ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, msg, 1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-	           ueConstStrSeek( msg, 1 ),
-		   1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-	           ueConstStrSeek( msg, 2 ),
-		   1, 1 );
-	for ( i = 0; i < len; i++ ) {
-		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
-		           ueConstStrSeek( addWordSeq, i ),
-			   1, 1);
-	}
+	pgdata->showMsgLen = AUX_PREFIX_LEN + len;
 }
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
 {
 	int i;
-	end = min( end, pgdata->chiSymbolBufLen );
 
-	for ( i = begin; i < end; ++i )
-		if ( pgdata->chiSymbolBuf[ i ].wch != 0 )
+	for ( i = begin; i < end; ++i ) {
+		if ( pgdata->preeditBuf[ i ].category == CHEWING_SYMBOL ) {
 			return 0;
+		}
+	}
+
 	return 1;
 }
 
@@ -167,14 +152,17 @@ static int _Inner_InternalSpecialSymbol(
 
 	if ( key == symkey && NULL != chibuf ) {
 		assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
-		memmove(
-			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
-			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
-			sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
-		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
-				chibuf, 1, 1);
+		PreeditBuf *buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
+
+		memmove( &pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ],
+			&pgdata->preeditBuf[ pgdata->chiSymbolCursor ],
+			sizeof( pgdata->preeditBuf[ 0 ] ) *
+			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
+
+		strncpy( buf->char_, chibuf, sizeof( buf->char_) );
+		buf->category = CHEWING_SYMBOL;
+
 		/* Save Symbol Key */
 		memmove(
 			&( pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor + 1 ] ),
@@ -237,7 +225,7 @@ int SpecialSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBC\x9B"
 			/* "；" */
 	};
-	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ) );
 
 	return InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 }
@@ -295,7 +283,7 @@ int FullShapeSymbolInput( int key, ChewingData *pgdata )
 		"\xEF\xBD\x9D","\xEF\xBC\x8B","\xEF\xBC\x8D"
 			/* "｝","＋","－" */
 	};
-	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ), update_keybuf_and_chibuf );
+	STATIC_ASSERT( ARRAY_SIZE( keybuf ) == ARRAY_SIZE( chibuf ) );
 
 	rtn = InternalSpecialSymbol( key, pgdata, ARRAY_SIZE( keybuf ), keybuf, chibuf );
 	if ( rtn == ZUIN_IGNORE )
@@ -371,16 +359,20 @@ int SymbolChoice( ChewingData *pgdata, int sel_i )
 	}
 	else { /* level 2 symbol or OpenSymbolChoice */
 		/* TODO: FIXME, this part is buggy! */
+		PreeditBuf *buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
+
 		if ( symbol_type == SYMBOL_CHOICE_INSERT ) {
 			assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
-			memmove(
-				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
-				&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
-				sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
+
+			memmove( &pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ],
+				&pgdata->preeditBuf[ pgdata->chiSymbolCursor ],
+				sizeof( pgdata->preeditBuf[ 0 ] ) *
+				( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 		}
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
-		ueStrNCpy( (char *) pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s,
-				pgdata->choiceInfo.totalChoiceStr[ sel_i ], 1, 1);
+		strncpy( buf->char_,
+			pgdata->choiceInfo.totalChoiceStr[ sel_i ],
+			sizeof( buf->char_) );
+		buf->category = CHEWING_SYMBOL;
 
 		/* This is very strange */
 		key = FindSymbolKey( pgdata->choiceInfo.totalChoiceStr[ sel_i ] );
@@ -407,14 +399,18 @@ int SymbolInput( int key, ChewingData *pgdata )
 {
 	if ( isprint( (char) key ) && /* other character was ignored */
 	     (pgdata->chiSymbolBufLen < MAX_PHONE_SEQ_LEN) ) { /* protect the buffer */
-		assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
-		memmove(
-			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
-			&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ),
-			sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
+		PreeditBuf *buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
 
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
-		pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].s[ 0 ] = (char) key;
+		assert( pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen );
+
+		memmove( &pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ],
+			&pgdata->preeditBuf[ pgdata->chiSymbolCursor ],
+			sizeof( pgdata->preeditBuf[ 0 ] ) *
+			( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
+
+		buf->char_[0] = (char) key;
+		buf->char_[1] = 0;
+		buf->category = CHEWING_SYMBOL;
 
 		/* Save Symbol Key */
 		memmove( &( pgdata->symbolKeyBuf[ pgdata->chiSymbolCursor + 1 ] ),
@@ -449,26 +445,23 @@ static int FindIntervalFrom( int from, IntervalType inte[], int nInte )
 	return -1;
 }
 
-int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata )
+void WriteChiSymbolToCommitBuf( ChewingData *pgdata, ChewingOutput *pgo, int len )
 {
-	int i, phoneseq_i = 0;
+	int i;
+	char *pos;
 
-	for ( i = 0 ; i < csBufLen; i++ ) {
-		if ( ChewingIsChiAt( i, pgdata ) ) {
-			/*
-			 * Workaround to avoid different initialization behavior
-			 * among Win32 and Unix-like OSs.
-			 */
-			memset( &( csBuf[ i ].s ), 0, MAX_UTF8_SIZE + 1 );
-			ueStrNCpy( (char *) csBuf[ i ].s,
-			           &( pgdata->phrOut.chiBuf[ phoneseq_i ] ),
-				   1, 1);
-			phoneseq_i += ueBytesFromChar( pgdata->phrOut.chiBuf[ phoneseq_i ] );
-		}
-		else
-			csBuf[ i ] = pgdata->chiSymbolBuf[ i ];
+	assert( pgdata );
+	assert( pgo );
+
+	pgo->commitBufLen = len;
+
+	pos = pgo->commitBuf;
+	for ( i = 0; i < pgo->commitBufLen; ++i ) {
+		assert( pos + MAX_UTF8_SIZE + 1 < pgo->commitBuf + sizeof( pgo->commitBuf ) );
+		strcpy( pos, pgdata->preeditBuf[ i ].char_ );
+		pos += strlen( pgdata->preeditBuf[ i ].char_ );
 	}
-	return 0;
+	*pos = 0;
 }
 
 static int CountReleaseNum( ChewingData *pgdata )
@@ -517,7 +510,7 @@ void CleanAllBuf( ChewingData *pgdata )
 	memset( pgdata->phoneSeq, 0, sizeof( pgdata->phoneSeq ) );
 	/* 2 */
 	pgdata->chiSymbolBufLen = 0;
-	memset( pgdata->chiSymbolBuf, 0, sizeof( pgdata->chiSymbolBuf ) );
+	memset( pgdata->preeditBuf, 0, sizeof( pgdata->preeditBuf ) );
 	/* 3 */
 	memset( pgdata->bUserArrBrkpt, 0, sizeof( pgdata->bUserArrBrkpt ) );
 	/* 4 */
@@ -541,23 +534,16 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 	throwEnd = CountReleaseNum( pgdata );
 
 	/*
-	* When current buffer size exceeds maxChiSymbolLen, 
+	* When current buffer size exceeds maxChiSymbolLen,
 	* we need to throw some of the characters at the head of the buffer and
 	* commit them.
 	*/
 	if ( throwEnd ) {
-		pgo->nCommitStr = throwEnd;
 		/*
 		 * count how many chinese words in "chiSymbolBuf[ 0 .. (throwEnd - 1)]"
 		 * And release from "chiSymbolBuf" && "phoneSeq"
 		 */
-		WriteChiSymbolToBuf( pgo->commitStr, throwEnd, pgdata );
-
-		/*
-		 * FIXME: analyze auto commit string and update userphrase
-		 * according to it.
-		 */
-
+		WriteChiSymbolToCommitBuf( pgdata, pgo, throwEnd );
 		KillFromLeft( pgdata, throwEnd );
 	}
 	return throwEnd;
@@ -565,7 +551,7 @@ int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *pgo )
 
 static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 {
-	static const char * const break_word[] = {
+	static const char * const BREAK_WORD[] = {
 		"\xE6\x98\xAF", "\xE7\x9A\x84", "\xE4\xBA\x86", "\xE4\xB8\x8D",
 		/* 是              的              了              不 */
 		"\xE4\xB9\x9F", "\xE8\x80\x8C", "\xE4\xBD\xA0", "\xE6\x88\x91",
@@ -589,30 +575,24 @@ static int ChewingIsBreakPoint( int cursor, ChewingData *pgdata )
 		"\xE5\x9C\xA8",
 		/* 在 */
 	};
-	char buf[ MAX_UTF8_SIZE + 1 ];
-	int i = 0, symbols = 0;
-	for ( i = 0; i < cursor; i++ )
-		if ( ! ChewingIsChiAt ( i + symbols, pgdata ) )
-			symbols++;
-	if ( ! ChewingIsChiAt( i + symbols, pgdata ) )
+	int i;
+
+	if ( ! ChewingIsChiAt( cursor, pgdata ) )
 		return 1;
-	else {
-		ueStrNCpy( buf,
-				ueStrSeek( (char *) &pgdata->phrOut.chiBuf, cursor ),
-				1, 1 );
-		for ( i = 0; (size_t) i < ARRAY_SIZE( break_word ); i++ ) {
-			if ( ! strcmp ( buf, break_word[ i ] ) )
-				return 1;
-		}
-	}
+
+	for ( i = 0; i < ARRAY_SIZE( BREAK_WORD ); ++i )
+		if ( ! strcmp( pgdata->preeditBuf[ cursor ].char_, BREAK_WORD[ i ]) )
+			return 1;
+
 	return 0;
 }
 
 void AutoLearnPhrase( ChewingData *pgdata )
 {
 	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
-	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ] = { 0 };
 	int i, from, len;
+	int bufWordLen;
 	int prev_pos = 0;
 	int pending = 0;
 
@@ -624,9 +604,10 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		if ( len == 1 && ! ChewingIsBreakPoint( from, pgdata ) ) {
 			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
-			ueStrNCpy( ueStrSeek( bufWordSeq, prev_pos ),
-					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
-					len, 1);
+
+			bufWordLen = strlen( bufWordSeq );
+			copyStringFromPreeditBuf( pgdata, from, len,
+				bufWordSeq + bufWordLen, sizeof( bufWordSeq ) - bufWordLen );
 			prev_pos += len;
 			pending = 1;
 		}
@@ -638,9 +619,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			}
 			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ len ] = (uint16_t) 0;
-			ueStrNCpy( bufWordSeq,
-					ueStrSeek( (char *) &pgdata->phrOut.chiBuf, from ),
-					len, 1);
+			copyStringFromPreeditBuf( pgdata, from, len, bufWordSeq, sizeof( bufWordSeq ) );
 			UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		}
 	}
@@ -693,11 +672,11 @@ int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )
 	/* add to chiSymbolBuf */
 	assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
 	memmove(
-		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor + 1 ] ),
-		&( pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ] ) ,
-		sizeof( wch_t ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
+		&( pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ] ),
+		&( pgdata->preeditBuf[ pgdata->chiSymbolCursor ] ) ,
+		sizeof( pgdata->preeditBuf[0] ) * ( pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor ) );
 	/* "0" means Chinese word */
-	pgdata->chiSymbolBuf[ pgdata->chiSymbolCursor ].wch = 0;
+	pgdata->preeditBuf[ pgdata->chiSymbolCursor ].category = CHEWING_CHINESE;
 	pgdata->chiSymbolBufLen++;
 	pgdata->chiSymbolCursor++;
 
@@ -874,30 +853,20 @@ static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata )
 	}
 }
 
-static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
+int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 {
-	int chi_i, chiSymbol_i, i ;
+	int i;
+	char *pos;
 
 	/* fill zero to chiSymbolBuf first */
-	memset( pgo->chiSymbolBuf, 0, sizeof( wch_t ) * MAX_PHONE_SEQ_LEN );
+	pgo->preeditBuf[0] = 0;
+	pgo->bopomofoBuf[0] = 0;
 
-	/* fill chiSymbolBuf */
-	for (
-		chi_i = chiSymbol_i = 0;
-		chiSymbol_i < pgdata->chiSymbolBufLen;
-		chiSymbol_i ++ ) {
-		if ( pgdata->chiSymbolBuf[ chiSymbol_i ].wch == 0 ) {
-			/* is Chinese, then copy from the PhrasingOutput "phrOut" */
-			pgo->chiSymbolBuf[ chiSymbol_i ].wch = 0;
-			ueStrNCpy( (char *) pgo->chiSymbolBuf[ chiSymbol_i ].s,
-			           &( pgdata->phrOut.chiBuf[ chi_i ] ),
-			           1, 1 );
-			chi_i += ueBytesFromChar( pgo->chiSymbolBuf[ chiSymbol_i ].s[0] );
-		}
-		else {
-			/* is Symbol */
-			pgo->chiSymbolBuf[ chiSymbol_i ] = pgdata->chiSymbolBuf[ chiSymbol_i ];
-		}
+	pos = pgo->preeditBuf;
+	for ( i = 0; i < pgdata->chiSymbolBufLen &&
+		pos < pgo->preeditBuf + sizeof( pgo->preeditBuf ) + MAX_UTF8_SIZE + 1; ++i ) {
+		strncpy( pos, pgdata->preeditBuf[ i ].char_, MAX_UTF8_SIZE + 1 );
+		pos += strlen( pgdata->preeditBuf[ i ].char_ );
 	}
 
 	/* fill point */
@@ -910,37 +879,15 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 
 	/* fill zuinBuf */
 	if ( pgdata->zuinData.kbtype >= KB_HANYU_PINYIN ) {
-		const char *p = pgdata->zuinData.pinYinData.keySeq;
-		/*
-		 * Copy from old content in zuinBuf
-		 * NOTE: No Unicode transformation here.
-		 */
-		for ( i = 0; i< ZUIN_SIZE; i++) {
-			int j;
-			for ( j = 0; j < 2; j++ ) {
-				if ( p[ 0 ] ) {
-					pgo->zuinBuf[ i ].s[ j ] = p[ 0 ];
-					p++;
-				}
-				else {
-					pgo->zuinBuf[ i ].s[ j ] = '\0';
-				}
-			}
-			pgo->zuinBuf[ i ].s[ 2 ] = '\0';
-		}
+		strcpy( pgo->bopomofoBuf, pgdata->zuinData.pinYinData.keySeq );
 	} else {
 		for ( i = 0; i < ZUIN_SIZE; i++ ) {
 			if ( pgdata->zuinData.pho_inx[ i ] != 0 ) {
-				/* Here we should use (zhuin_tab[i] + 2) to
-				 * skip the 2 space characters at
-				 * zhuin_tab[0] and zhuin_tab[1]. */
-				ueStrNCpy( (char *) pgo->zuinBuf[ i ].s,
-				           ueConstStrSeek( (zhuin_tab[ i ] + 2),
-						      pgdata->zuinData.pho_inx[ i ] - 1 ),
-				           1, 1);
+				ueStrNCpy( pgo->bopomofoBuf + strlen( pgo->bopomofoBuf ),
+					ueConstStrSeek( (zhuin_tab[ i ] + 2),
+						pgdata->zuinData.pho_inx[ i ] - 1 ),
+					1, STRNCPY_CLOSE );
 			}
-			else
-				pgo->zuinBuf[ i ].wch = 0;
 		}
 	}
 
@@ -951,7 +898,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->pci = &( pgdata->choiceInfo );
 	pgo->bChiSym = pgdata->bChiSym;
 	memcpy( pgo->selKey, pgdata->config.selKey, sizeof( pgdata->config.selKey ) );
-	pgo->bShowMsg = 0;
+	pgdata->bShowMsg = 0;
 	return 0;
 }
 
@@ -963,9 +910,7 @@ int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn
 
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 {
-	pgo->bShowMsg = 1;
-	memcpy( pgo->showMsg, pgdata->showMsg, sizeof( wch_t ) * ( pgdata->showMsgLen ) );
-	pgo->showMsgLen = pgdata->showMsgLen;
+	pgdata->bShowMsg = 1;
 	pgo->nDispInterval = 0;
 }
 
@@ -1018,11 +963,7 @@ int PhoneSeqCursor( ChewingData *pgdata )
 
 int ChewingIsChiAt( int chiSymbolCursor, ChewingData *pgdata )
 {
-	/* wch == 0 means Chinese */
-	return (
-		( chiSymbolCursor < pgdata->chiSymbolBufLen ) &&
-		( 0 <= chiSymbolCursor ) &&
-		(pgdata->chiSymbolBuf[ chiSymbolCursor ].wch == 0 ) );
+	return pgdata->preeditBuf[ chiSymbolCursor ].category == CHEWING_CHINESE;
 }
 
 void RemoveSelectElement( int i, ChewingData *pgdata )
@@ -1096,9 +1037,9 @@ int ChewingKillChar(
 	pgdata->symbolKeyBuf[ chiSymbolCursorToKill ] = 0;
 	assert( pgdata->chiSymbolBufLen - chiSymbolCursorToKill );
 	memmove(
-		& pgdata->chiSymbolBuf[ chiSymbolCursorToKill ],
-		& pgdata->chiSymbolBuf[ chiSymbolCursorToKill + 1 ],
-		(pgdata->chiSymbolBufLen - chiSymbolCursorToKill) * sizeof( wch_t ) );
+		& pgdata->preeditBuf[ chiSymbolCursorToKill ],
+		& pgdata->preeditBuf[ chiSymbolCursorToKill + 1 ],
+		sizeof ( pgdata->preeditBuf[0] ) * (pgdata->chiSymbolBufLen - chiSymbolCursorToKill) );
 	pgdata->chiSymbolBufLen--;
 	pgdata->chiSymbolCursor -= minus;
 	if (pgdata->chiSymbolCursor < 0)
@@ -1524,3 +1465,25 @@ void TerminateEasySymbolTable( ChewingData *pgdata )
 	}
 }
 
+void copyStringFromPreeditBuf(
+	ChewingData *pgdata, int pos, int len,
+	char *output, int output_len )
+{
+	int i;
+	int x;
+
+	assert( pgdata );
+	assert( 0 <= pos && pos + len < ARRAY_SIZE( pgdata->preeditBuf ) );
+	assert( output );
+	assert( output_len );
+
+	for ( i = pos; i < pos + len; ++i ) {
+		x = strlen( pgdata->preeditBuf[ i ].char_ );
+		if ( x >= output_len ) // overflow
+			return;
+		memcpy( output, pgdata->preeditBuf[ i ].char_, x );
+		output += x;
+		output_len -= x;
+	}
+	output[0] = 0;
+}

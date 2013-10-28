@@ -67,12 +67,12 @@
 #define start_testcase(ctx, file) \
 	internal_start_testcase(__func__, ctx, file)
 
-typedef struct {
+typedef struct TestData {
 	char * token;
 	char * expected;
 } TestData;
 
-typedef struct {
+typedef struct BufferType {
 	char *name;
 	int (*check)(ChewingContext *ctx);
 	int (*check_alt)(ChewingContext *ctx);

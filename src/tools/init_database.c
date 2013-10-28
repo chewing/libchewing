@@ -236,7 +236,7 @@ void store_phrase(const char *line, int line_num)
 	char bopomofo_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
 	size_t phrase_len;
 	WordData word; /* For check. */
-	WordData *found_word;
+	WordData *found_word = NULL;
 	int i;
 	int j;
 

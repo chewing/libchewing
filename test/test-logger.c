@@ -1,8 +1,8 @@
 /**
- * test-reset.c
+ * test-logger.c
  *
- * Copyright (c) 2012
- *	libchewing Core Team. See ChangeLog for details.
+ * Copyright (c) 2013
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -13,35 +13,29 @@
 #endif
 
 #include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "chewing.h"
 #include "testhelper.h"
 
 FILE *fd;
 
-void test_reset_shall_not_clean_static_data()
+void test_set_null_logger()
 {
-	const TestData DATA = { "hk4g4<E>", "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ };
 	ChewingContext *ctx;
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 
-	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
-
-	chewing_set_maxChiSymbolLen( ctx, 16 );
-
-	chewing_Reset( ctx );
-
-	type_keystroke_by_string( ctx, DATA.token );
-	ok_commit_buffer( ctx, DATA.expected );
+	chewing_set_logger( ctx, NULL, 0 );
+	type_keystroke_by_string( ctx, "hk4g4" );
 
 	chewing_delete( ctx );
 }
 
-int main(int argc, char *argv[])
+int main( int argc, char *argv[] )
 {
 	char *logname;
 	int ret;
@@ -55,7 +49,8 @@ int main(int argc, char *argv[])
 	assert( fd );
 	free( logname );
 
-	test_reset_shall_not_clean_static_data();
+
+	test_set_null_logger();
 
 	fclose( fd );
 

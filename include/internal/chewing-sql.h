@@ -107,9 +107,9 @@ typedef struct SqlStmtConfig_ {
 
 extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
 
-struct tag_ChewingData;
+struct ChewingData;
 
-int InitSql(struct tag_ChewingData *pgdata);
-void TerminateSql(struct tag_ChewingData *pgdata);
+int InitSql(struct ChewingData *pgdata);
+void TerminateSql(struct ChewingData *pgdata);
 
 #endif

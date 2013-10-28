@@ -554,39 +554,32 @@ static void Discard2( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
-static void LoadChar( ChewingData *pgdata, char *buf, int buf_len, const uint16_t phoneSeq[], int nPhoneSeq )
-{
-	int i;
-	Phrase word;
-
-	memset(buf, 0, buf_len);
-	for ( i = 0; i < nPhoneSeq; i++ ) {
-		GetCharFirst( pgdata, &word, phoneSeq[ i ] );
-		strncat(buf, word.phrase, buf_len - strlen(buf) - 1);
-	}
-	buf[ buf_len - 1 ] = '\0';
-}
-
 /* kpchen said, record is the index array of interval */
 static void OutputRecordStr( ChewingData *pgdata, const TreeDataType *ptd )
 {
 	PhraseIntervalType inter;
 	int i;
+	int j;
 
-	LoadChar( pgdata, pgdata->phrOut.chiBuf, ARRAY_SIZE( pgdata->phrOut.chiBuf ), pgdata->phoneSeq, pgdata->nPhoneSeq );
 	for ( i = 0; i < ptd->phList->nInter; i++ ) {
 		inter = ptd->interval[ ptd->phList->arrIndex[ i ] ];
-		ueStrNCpy(
-				ueStrSeek( pgdata->phrOut.chiBuf, inter.from ),
-				( inter.p_phr )->phrase,
-				( inter.to - inter.from ), -1);
+
+		for ( j = inter.from; j < inter.to; ++j ) {
+			ueStrNCpy( pgdata->preeditBuf[ j ].char_,
+				ueStrSeek( inter.p_phr->phrase, j - inter.from ),
+				1, STRNCPY_CLOSE );
+		}
 	}
+
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
 		inter.from = pgdata->selectInterval[ i ].from;
 		inter.to = pgdata->selectInterval[ i ].to ;
-		ueStrNCpy(
-				ueStrSeek( pgdata->phrOut.chiBuf, inter.from ),
-				pgdata->selectStr[ i ], ( inter.to - inter.from ), -1);
+
+		for ( j = inter.from; j < inter.to; ++j ) {
+			ueStrNCpy( pgdata->preeditBuf[ j ].char_,
+				ueStrSeek( pgdata->selectStr[ i ], j - inter.from ),
+				1, STRNCPY_CLOSE );
+		}
 	}
 }
 

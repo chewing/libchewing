@@ -173,14 +173,17 @@ void test_in_fullshape_mode()
 int main(int argc, char *argv[])
 {
 	char *logname;
+	int ret;
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
-	asprintf( &logname, "%s.log", argv[0] );
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
 	fd = fopen( logname, "w" );
 	assert( fd );
 	free( logname );
+
 
 	test_in_chinese_mode();
 	test_in_easy_symbol_mode();

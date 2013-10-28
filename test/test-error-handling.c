@@ -67,19 +67,28 @@ void test_null()
 
 	ret = chewing_cand_list_prev( NULL );
 	ok ( ret == -1, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_commit_preedit_buf( NULL );
+	ok ( ret == -1, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_clean_preedit_buf( NULL );
+	ok ( ret == -1, "chewing_clean_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main(int argc, char *argv[])
 {
 	char *logname;
+	int ret;
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
-	asprintf( &logname, "%s.log", argv[0] );
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
 	fd = fopen( logname, "w" );
 	assert( fd );
 	free( logname );
+
 
 	test_null();
 

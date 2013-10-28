@@ -246,7 +246,7 @@ static int CreateTable(ChewingData *pgdata)
 {
 	int ret;
 
-	STATIC_ASSERT(MAX_PHRASE_LEN == 11, update_database_schema_for_max_phrase_len);
+	STATIC_ASSERT(MAX_PHRASE_LEN == 11);
 
 	ret = sqlite3_exec(pgdata->static_data.db,
 		"CREATE TABLE IF NOT EXISTS userphrase_v1 ("
@@ -446,10 +446,8 @@ static int CreateStmt(ChewingData *pgdata)
 
 	assert(pgdata);
 
-	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config),
-		stmt_config_size_mismatch);
-	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase),
-		stmt_userphrase_size_mismatch);
+	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config));
+	STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase))
 
 	for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
 		ret = sqlite3_prepare_v2(pgdata->static_data.db,

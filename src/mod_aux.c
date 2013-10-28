@@ -20,6 +20,7 @@
 #include "chewing-private.h"
 #include "zuin-private.h"
 #include "chewingio.h"
+#include "chewing-utf8-util.h"
 
 /**
  * @param ctx handle to Chewing IM context
@@ -38,16 +39,7 @@ CHEWING_API int chewing_commit_Check( ChewingContext *ctx )
  */
 CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 {
-	int i;
-	char *s = (char *) calloc(
-		1 + ctx->output->nCommitStr,
-		MAX_UTF8_SIZE );
-	if ( s ) {
-		for ( i = 0; i < ctx->output->nCommitStr; i++ ) {
-			strcat( s, (char *) (ctx->output->commitStr[ i ].s) );
-		}
-	}
-	return s;
+	return strdup( ctx->output->commitBuf );
 }
 
 CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )
@@ -62,16 +54,7 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
 
 CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 {
-	int i;
-	char *s = (char *) calloc(
-		1 + ctx->output->chiSymbolBufLen,
-		MAX_UTF8_SIZE );
-	if ( s ) {
-		for ( i = 0; i < ctx->output->chiSymbolBufLen; i++ ) {
-			strcat( s, (char *) (ctx->output->chiSymbolBuf[ i ].s) );
-		}
-	}
-	return s;
+	return strdup( ctx->output->preeditBuf );
 }
 
 
@@ -82,21 +65,7 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
  */
 CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx)
 {
-	char *s;
-	int i;
-
-	s = (char*) calloc(
-		1 + ZUIN_SIZE,
-		sizeof(ctx->output->zuinBuf[ 0 ].s) );
-
-	if ( s ) {
-		for ( i = 0; i < ZUIN_SIZE; i++ ) {
-			if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
-				strcat( s, (char *) (ctx->output->zuinBuf[ i ].s) );
-			}
-		}
-	}
-	return s;
+	return strdup( ctx->output->bopomofoBuf );
 }
 
 /**
@@ -108,33 +77,16 @@ CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx)
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
 	char *s = chewing_bopomofo_String(ctx);
-	int i;
 
 	if ( zuin_count )
-		*zuin_count = 0;
+		*zuin_count = ueStrLen(s);
 
-	if ( s ) {
-		for ( i = 0; i < ZUIN_SIZE; i++ ) {
-			if ( *(s+(i * (MAX_UTF8_SIZE - 1))) != '\0' ) {
-				if ( zuin_count )
-					(*zuin_count)++;
-			}
-		}
-	}
 	return s;
-
 }
 
 CHEWING_API int chewing_bopomofo_Check( ChewingContext *ctx )
 {
-	int i;
-
-	for ( i = 0; i < ZUIN_SIZE; ++i ) {
-		if ( ctx->output->zuinBuf[ i ].s[ 0 ] != '\0' ) {
-			return 1;
-		}
-	}
-	return 0;
+	return ctx->output->bopomofoBuf[0] != 0;
 }
 
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx )
@@ -217,26 +169,17 @@ CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx )
 {
-	return (ctx->output->bShowMsg);
+	return (ctx->data->bShowMsg);
 }
 
 CHEWING_API int chewing_aux_Length( ChewingContext *ctx )
 {
-	return (ctx->output->bShowMsg ? ctx->output->showMsgLen : 0);
+	return (ctx->data->bShowMsg ? ctx->data->showMsgLen : 0);
 }
 
 CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 {
-	int i;
-	char *msg = (char *) calloc(
-		1 + ctx->output->showMsgLen,
-		MAX_UTF8_SIZE );
-	if ( msg ) {
-		for ( i = 0; i < ctx->output->showMsgLen; ++i )
-			strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
-	}
-	return msg;
-
+	return strdup( ctx->data->showMsg );
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )

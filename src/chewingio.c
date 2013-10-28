@@ -81,7 +81,7 @@ CHEWING_API int chewing_KBStr2Num( char str[] )
 {
 	int i;
 
-	STATIC_ASSERT( KB_TYPE_NUM == ARRAY_SIZE( kb_type_str ), kb_type_str_needs_update);
+	STATIC_ASSERT( KB_TYPE_NUM == ARRAY_SIZE( kb_type_str ));
 	for ( i = 0; i < KB_TYPE_NUM; i++) {
 		if ( ! strcmp( str, kb_type_str[ i ] ) )
 			return i;
@@ -576,7 +576,7 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 	}
 	else if ( pgdata->config.bEscCleanAllBuf ) {
 		CleanAllBuf( pgdata );
-		pgo->nCommitStr = pgdata->chiSymbolBufLen;
+		pgo->commitBufLen = pgdata->chiSymbolBufLen;
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -624,10 +624,10 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 	}
 	else {
 		keystrokeRtn = KEYSTROKE_COMMIT;
-		WriteChiSymbolToBuf( pgo->commitStr, nCommitStr, pgdata );
+		WriteChiSymbolToCommitBuf( pgdata, pgo, nCommitStr );
 		AutoLearnPhrase( pgdata );
 		CleanAllBuf( pgdata );
-		pgo->nCommitStr = nCommitStr;
+		pgo->commitBufLen = nCommitStr;
 	}
 
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
@@ -1035,7 +1035,7 @@ static int dvorak_convert( int key )
 		',','<','.','>','/','?'};
 	size_t i;
 
-	STATIC_ASSERT( ARRAY_SIZE( dkey ) == ARRAY_SIZE( qkey ), update_dkey_and_qkey );
+	STATIC_ASSERT( ARRAY_SIZE( dkey ) == ARRAY_SIZE( qkey ) );
 
 	for ( i = 0; i < ARRAY_SIZE( dkey ); i++ ) {
 		if ( key == qkey[ i ] ) {
@@ -1231,9 +1231,8 @@ End_keyproc:
 	else {
 		DEBUG_OUT(
 				"\t\tQuick commit buf[0]=%c\n",
-				pgdata->chiSymbolBuf[ 0 ].s[ 0 ] );
-		pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
-		pgo->nCommitStr = 1;
+				pgdata->preeditBuf[ 0 ].char_ );
+		WriteChiSymbolToCommitBuf( pgdata, pgo, 1 );
 		pgdata->chiSymbolBufLen = 0;
 		pgdata->chiSymbolCursor = 0;
 		keystrokeRtn = KEYSTROKE_COMMIT;
@@ -1299,11 +1298,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				        &pgdata->phoneSeq[ cursor ],
 				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy( addWordSeq,
-				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				                      cursor ),
-				           newPhraseLen, 1);
 
+				copyStringFromPreeditBuf( pgdata, cursor, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
 
 				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg(
@@ -1330,10 +1326,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
 				        sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
-				ueStrNCpy( addWordSeq,
-				           ueStrSeek( (char *) &pgdata->phrOut.chiBuf,
-				           cursor - newPhraseLen ),
-				           newPhraseLen, 1);
+
+				copyStringFromPreeditBuf( pgdata, cursor - newPhraseLen, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
 
 				phraseState = UserUpdatePhrase( pgdata, addPhoneSeq, addWordSeq );
 				SetUpdatePhraseMsg(
@@ -1388,8 +1382,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 			keystrokeRtn = KEYSTROKE_IGNORE ;
 		}
 		else if ( QuickCommit ) {
-			pgo->commitStr[ 0 ] = pgdata->chiSymbolBuf[ 0 ];
-			pgo->nCommitStr = 1;
+			WriteChiSymbolToCommitBuf( pgdata, pgo, 1 );
 			pgdata->chiSymbolBufLen = 0;
 			pgdata->chiSymbolCursor = 0;
 			keystrokeRtn = KEYSTROKE_COMMIT;
@@ -1780,4 +1773,48 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
 	if ( !pgdata->bSelect ) return -1;
 
 	return ChoicePrevAvail( pgdata );
+}
+
+CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+	int len;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	len = pgdata->chiSymbolBufLen;
+
+	if ( !len ) return -1;
+
+	WriteChiSymbolToCommitBuf( pgdata, pgo, len );
+	AutoLearnPhrase( pgdata );
+	CleanAllBuf( pgdata );
+
+	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_COMMIT );
+
+	return 0;
+}
+
+CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	CleanAllBuf( pgdata );
+
+	MakeOutput( pgo, pgdata );
+	return 0;
 }

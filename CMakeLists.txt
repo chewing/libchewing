@@ -195,6 +195,7 @@ set(ALL_TESTCASES
 	test-key2pho
 	test-keyboard
 	test-keyboardless
+	test-logger
 	test-mmap
 	test-path
 	test-regression
