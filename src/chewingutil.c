@@ -591,8 +591,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 {
 	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
 	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ] = { 0 };
+	char *pos;
 	int i, from, len;
-	int bufWordLen;
 	int prev_pos = 0;
 	int pending = 0;
 
@@ -603,9 +603,9 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
 
-			bufWordLen = strlen( bufWordSeq );
+			pos = ueStrSeek( bufWordSeq, prev_pos );
 			copyStringFromPreeditBuf( pgdata, from, len,
-				bufWordSeq + bufWordLen, sizeof( bufWordSeq ) - bufWordLen );
+				pos, bufWordSeq + sizeof( bufWordSeq ) - pos );
 			prev_pos += len;
 			pending = 1;
 		}
