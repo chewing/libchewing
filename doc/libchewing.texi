@@ -416,7 +416,8 @@ This functions sets the current keyboard layout for @var{ctx}. The
 @var{kbtype} argument should be a value returned from function
 @code{chewing_KBStr2Num}.
 
-The return value is @code{0} on success and @code{-1} on failure.
+The return value is @code{0} on success and @code{-1} on failure. The keyboard
+type will set to @code{KB_DEFAULT} if return value is @code{-1}.
 @end deftypefun
 
 @c Seems not very useful, no?
