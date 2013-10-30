@@ -333,10 +333,10 @@ void test_del_bopomofo_as_mode_switch()
 	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
-	ok_zuin_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
+	ok_bopomofo_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
 
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -410,7 +410,7 @@ void test_Esc_entering_zuin()
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<EE>" );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -499,7 +499,7 @@ void test_Backspace_remove_bopomofo()
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<B>" );
-	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
 	chewing_delete( ctx );
 }
@@ -968,22 +968,22 @@ void test_zuin_buffer()
 	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "1ul" );
-	ok_zuin_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	type_keystroke_by_string( ctx, "ul" );
-	ok_zuin_buffer( ctx, "\xE3\x84\xA7\xE3\x84\xA0" /* ㄧㄠ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\xA7\xE3\x84\xA0" /* ㄧㄠ */ );
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	type_keystroke_by_string( ctx, "3");
-	ok_zuin_buffer( ctx, "\xCB\x87" /* ˇ */);
+	ok_bopomofo_buffer( ctx, "\xCB\x87" /* ˇ */);
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }

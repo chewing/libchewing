@@ -678,7 +678,7 @@ void test_clean_bopomofo_normal()
 	ret = chewing_clean_bopomofo_buf( ctx );
 	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
 
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -694,7 +694,7 @@ void test_clean_bopomofo_empty()
 	ret = chewing_clean_bopomofo_buf( ctx );
 	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
 
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -712,7 +712,7 @@ void test_clean_bopomofo_after_complete()
 	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
 
 	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -734,7 +734,7 @@ void test_clean_bopomofo_during_cand_selecting()
 	ret = chewing_clean_bopomofo_buf( ctx );
 	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
 
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }

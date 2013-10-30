@@ -52,8 +52,8 @@
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &COMMIT_BUFFER)
 #define ok_preedit_buffer(ctx, expected) \
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &PREEDIT_BUFFER)
-#define ok_zuin_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &ZUIN_BUFFER)
+#define ok_bopomofo_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &BOPOMOFO_BUFFER)
 #define ok_aux_buffer(ctx, expected) \
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
@@ -83,7 +83,7 @@ typedef struct BufferType {
 
 extern BufferType COMMIT_BUFFER;
 extern BufferType PREEDIT_BUFFER;
-extern BufferType ZUIN_BUFFER;
+extern BufferType BOPOMOFO_BUFFER;
 extern BufferType AUX_BUFFER;
 
 typedef int (*get_char_func) ( void *param );
