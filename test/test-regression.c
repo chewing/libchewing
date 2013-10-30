@@ -99,7 +99,6 @@ void test_libchewing_issue_30()
 void test_libchewing_issue_108()
 {
 	ChewingContext *ctx;
-	int cursor;
 
 	clean_userphrase();
 
