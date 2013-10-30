@@ -73,6 +73,9 @@ void test_null()
 
 	ret = chewing_clean_preedit_buf( NULL );
 	ok ( ret == -1, "chewing_clean_preedit_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_clean_bopomofo_buf( NULL );
+	ok ( ret == -1, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, -1 );
 }
 
 int main(int argc, char *argv[])

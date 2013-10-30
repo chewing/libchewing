@@ -666,6 +666,87 @@ void test_clean_preedit()
 	test_clean_preedit_during_cand_selecting();
 }
 
+void test_clean_bopomofo_normal()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "hk" /* ㄘㄜ */ );
+	ret = chewing_clean_bopomofo_buf( ctx );
+	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_clean_bopomofo_empty()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ret = chewing_clean_bopomofo_buf( ctx );
+	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_clean_bopomofo_after_complete()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "hk4" /* ㄘㄜˋ */ );
+	ret = chewing_clean_bopomofo_buf( ctx );
+	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE5\x86\x8A" /* 冊 */ );
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_clean_bopomofo_during_cand_selecting()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "hk4g4" /* 測試 */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	/* XXX: Shall return 0 in select mode? */
+	ret = chewing_clean_bopomofo_buf( ctx );
+	ok( ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_zuin_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
+void test_clean_bopomofo()
+{
+	test_clean_bopomofo_normal();
+	test_clean_bopomofo_empty();
+	test_clean_bopomofo_after_complete();
+	test_clean_bopomofo_during_cand_selecting();
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
@@ -688,6 +769,8 @@ int main(int argc, char *argv[])
 
 	test_commit_preedit();
 	test_clean_preedit();
+
+	test_clean_bopomofo();
 
 	fclose( fd );
 

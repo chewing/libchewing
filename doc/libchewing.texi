@@ -750,6 +750,13 @@ This function returns @code{0} when preedit buffer is cleaned, @code{-1}
 otherwise.
 @end deftypefun
 
+@deftypefun int chewing_clean_bopomofo_buf (ChewingContext *@var{ctx})
+This function cleans the content in bopomofo buffer.
+
+This function returns @code{0} when bopomofo buffer is cleaned, @code{-1}
+otherwise.
+@end deftypefun
+
 @node Output Handling
 @chapter Output Handling
 

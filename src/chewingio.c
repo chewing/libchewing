@@ -1779,3 +1779,21 @@ CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx )
 	MakeOutput( pgo, pgdata );
 	return 0;
 }
+
+CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( ZuinIsEntering( &pgdata->zuinData ) ) {
+		ZuinRemoveAll( &pgdata->zuinData );
+	}
+
+	MakeOutput( pgo, pgdata );
+	return 0;
+}

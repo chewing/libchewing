@@ -588,4 +588,6 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx );
 CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx );
 CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx );
 
+CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx );
+
 #endif /* _CHEWING_IO_H */
