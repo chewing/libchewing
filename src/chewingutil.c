@@ -149,11 +149,12 @@ static int _Inner_InternalSpecialSymbol(
 		char symkey, const char * const chibuf )
 {
 	int kbtype;
+	PreeditBuf *buf;
 
 	if ( key == symkey && NULL != chibuf ) {
 		assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
 
-		PreeditBuf *buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
+		buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
 
 		memmove( &pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ],
 			&pgdata->preeditBuf[ pgdata->chiSymbolCursor ],
