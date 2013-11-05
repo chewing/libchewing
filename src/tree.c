@@ -34,19 +34,19 @@
 
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 
-typedef struct {
+typedef struct PhraseIntervalType {
 	int from, to, source;
 	Phrase *p_phr;
 } PhraseIntervalType;
 
-typedef struct tagRecordNode {
+typedef struct RecordNode {
 	int *arrIndex;		/* the index array of the things in "interval" */
 	int nInter, score;
-	struct tagRecordNode *next;
+	struct RecordNode *next;
 	int nMatchCnnct;	/* match how many Cnnct. */
 } RecordNode;
 
-typedef struct {
+typedef struct TreeDataType {
 	int leftmost[ MAX_PHONE_SEQ_LEN + 1 ] ;
 	char graph[ MAX_PHONE_SEQ_LEN + 1 ][ MAX_PHONE_SEQ_LEN + 1 ];
 	PhraseIntervalType interval[ MAX_INTERVAL ];
