@@ -1048,6 +1048,35 @@ void test_auto_commit()
 	//test_auto_commit_symbol();
 }
 
+void test_interval()
+{
+	ChewingContext *ctx;
+	IntervalType it;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "`31hk4g4`31hk4g4`31" /* ，測試，測試， */ );
+
+	ok_preedit_buffer( ctx, "\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C" /* ，測試，測試， */ );
+
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 1 && it.to == 3, "interval (%d, %d) shall be (1, 3)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 4 && it.to == 6, "interval (%d, %d) shall be (4, 6)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	chewing_delete( ctx );
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
@@ -1085,6 +1114,8 @@ int main(int argc, char *argv[])
 
 	test_longest_phrase();
 	test_auto_commit();
+
+	test_interval();
 
 	fclose( fd );
 
