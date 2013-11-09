@@ -1,32 +1,37 @@
-      _                   _
-  ___| |__   _____      _(_)_ __   __ _
- / __| '_ \ / _ \ \ /\ / / | '_ \ / _` |
-| (__| | | |  __/\ V  V /| | | | | (_| |
- \___|_| |_|\___| \_/\_/ |_|_| |_|\__, |
-                                  |___/
+	           _                   _
+	       ___| |__   _____      _(_)_ __   __ _
+	      / __| '_ \ / _ \ \ /\ / / | '_ \ / _` |
+	     | (__| | | |  __/\ V  V /| | | | | (_| |
+	      \___|_| |_|\___| \_/\_/ |_|_| |_|\__, |
+	                                       |___/
+	               http://chewing.im/
 
-libchewing - The intelligent phonetic input method library
-  http://chewing.im/
-
-[-] Summary
+# libchewing - The intelligent phonetic input method library
 
 The Chewing (酷音) input method is an intelligent phonetic (Zhuyin/Bopomofo)
 input method. It is one of the most popular input methods among Traditional
-Chinese users.  Chewing was inspired by other proprietary intelligent Zhuyin
-input methods under Microsoft Windows, namely, Wang-Xin by Eten, Microsoft New
-Zhuyin, and Nature Zhuyin.
+Chinese users. Chewing was inspired by other proprietary intelligent Zhuyin
+input methods under Microsoft Windows, namely, Wang-Xin by Eten, Microsoft 
+New Zhuyin, and Nature Zhuyin.
 
-The Chewing core team extended their work and actively maintains the project
+The Chewing core team extended their work and actively maintains the project 
 as full open source efforts.
 
-Website: http://chewing.im/
-Mailing lists:
-  - Development: http://groups.google.com/group/chewing-devel
-  - General: http://groups.google.com/group/chewing
-Issue tracker: http://code.google.com/p/chewing/issues/list
++ Website: http://chewing.im/  
++ Issue tracker: http://code.google.com/p/chewing/issues/list  
++ Mailing lists:
+   - Development: http://groups.google.com/group/chewing-devel
+   - General: http://groups.google.com/group/chewing
++ Bild Status:
+   - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.png)]
+    (https://travis-ci.org/chewing/libchewing)
+   - Drone.io: [![Status-Icon](https://drone.io/github.com/chewing/libchewing/status.png)]
+    (https://drone.io/github.com/chewing/libchewing)
+   - Coveralls: [![Status-Icon](https://coveralls.io/repos/chewing/libchewing/badge.png?branch=master)]
+    (https://coveralls.io/r/chewing/libchewing)
 
 
-[-] History
+## History
 
 libchewing is derived from Chewing input method, a xcin module focusing on
 intelligent phonetic (Bopomofo/Zhuyin) processing by Lu-chuan Kung (lckung)
@@ -38,7 +43,7 @@ which was bundled in XCIN server. However, it did not provide a convenient
 API for further development, either.
 
 
-[-] Motivation
+## Motivation
 
 Jim Huang, et al. formed the Chewing core team and extended Kung and Chen's
 work since 2002.  The chewing core team renamed the project as "new" chewing
@@ -50,23 +55,24 @@ In 2004, Chewing core team successfully ported the input method to several
 platforms and framework along with community collaboration.
 
 
-[-] Development Goal of libchewing
+## Development Goal of libchewing
 
 - Split logic and view.
 - Support multiple operating systems, and input framework.
 - Provide a universal API for input framework and further development.
 
 
-[-] Status
+## Status
 
-1. System bridge integration
+
+### 1. System bridge integration  
 
 Chewing has been adopted by various input frameworks in Unix-like systems and
 even Microsoft Windows.  On these systems, the chewing package is usually
 split into two parts: libchewing, which handles the actual character selection
 logic; and input framework interface for display and preference setting.
 
-The active integration:
++ The active integration:
   - JMCCE
   - SCIM
   - standalone Microsoft Windows 32/64-bit (windows-chewing)
@@ -76,8 +82,7 @@ The active integration:
   - mozc
   - gcin/HIME
   - fcitx
-
-The inactive one:
++ The inactive one:
   - xcin
   - IIIMF
   - MacOS X (SpaceChewing)
@@ -85,7 +90,9 @@ The inactive one:
   - OpenVanilla Input Method Framework (previous than version 1.0)
   - OXIM
 
-2. support phonetic keyboard layout
+
+### 2. support phonetic keyboard layout
+
   - Hsu
   - IBM
   - Gin-Yieh
@@ -97,28 +104,29 @@ The inactive one:
   - Taiwan Huayu Luomapinyin
   - MPS2 Pinyin
 
-3. External and unmerged projects
+
+### 3. External and unmerged projects  
 
 libchewing provides straightforward API and design, which enables third-party
 projects to deploy the innovative.  Here are the examples:
 
   * FreeArray: utilizing libchewing for selecting phrases of Array input
-    method.
-    https://github.com/shaform/libfreearray
-    https://github.com/shaform/ibus-freearray
+   method.  
+   https://github.com/shaform/libfreearray  
+   https://github.com/shaform/ibus-freearray  
 
-  * CitC (Chewing in the Cloud): extending cloud services for real-time
-    training and phrase selection based on Chewing IM.
-    https://code.google.com/p/citc/
+  * CitC (Chewing in the Cloud): extending cloud services for real-time  
+   training and phrase selection based on Chewing IM.  
+   https://code.google.com/p/citc/  
 
-  * KindleChewing: Chewing IM for Kindle DX device
-    https://github.com/tjwei/KindleChewing
+  * KindleChewing: Chewing IM for Kindle DX device  
+   https://github.com/tjwei/KindleChewing  
 
-  * NTNU-Master Input Method: A Faster Chinese IM based on windows-chewing
-    https://sites.google.com/site/ntnumaster001/
+  * NTNU-Master Input Method: A Faster Chinese IM based on windows-chewing  
+   https://sites.google.com/site/ntnumaster001/  
 
 
-[-] Minimal Build Tools Requirement
+## Minimal Build Tools Requirement
 
 The following tools are used to build libchewing. Not all tools are necessary
 during building. For example, if the compiler you used is clang, gcc & Visual
@@ -126,52 +134,52 @@ Studio are not needed. The versions listed here is the minimal version known to
 build libchewing. If any tools you use below this version, libchewing might not
 be built.
 
-Build tools:
-- autoconf >= 2.67
-- automake >= 1.11.6
-- libtool >= 2.4.2
-- cmake >= 2.8.8 (optional)
-
-Toolchain / IDE:
-- clang >= 3.2
-- gcc >= 4.7.3
-- Visual Studio Express 2012
-
-Documentation tools:
-- texinfo >= 4.12
++ Build tools:
+   - autoconf >= 2.67
+   - automake >= 1.11.6
+   - libtool >= 2.4.2
+   - cmake >= 2.8.8 (optional)
++ Toolchain / IDE:
+   - clang >= 3.2
+   - gcc >= 4.7.3
+   - Visual Studio Express 2012
++ Documentation tools:
+   - texinfo >= 4.12
 
 
-[-] Continuous Integration (CI) Service
+## Continuous Integration (CI) Service
 
 libchewing uses the following CI services:
 
-- https://travis-ci.org/chewing/libchewing (testing)
-- https://drone.io/github.com/chewing/libchewing (testing)
-- https://coveralls.io/r/chewing/libchewing (coverage report)
+- https://travis-ci.org/chewing/libchewing (testing) 
+- https://drone.io/github.com/chewing/libchewing (testing) 
+- https://coveralls.io/r/chewing/libchewing (coverage report) 
 - https://launchpad.net/~chewing/+archive/chewing (ubuntu PPA)
 
 
-[-] Installation
+## Installation
 
-# ./configure --prefix=/usr
-  (If you checkout from GIT, make sure running ./autogen.sh
-   before this.)
-# make
-# make install
+
+	# ./configure --prefix=/usr
+	  (If you checkout from GIT, make sure running ./autogen.sh
+	   before this.)
+	# make
+	# make install
 
 see "INSTALL" for details.
 
 
-[-] Cross-build
+## Cross-build
 
 Example cross-build instructions:
-# CC=arm-none-linux-gnueabi-gcc ./configure \
-    --host=arm-none-linux-gnueabi \
-    --disable-shared --enable-static
-# make CC_FOR_BUILD=gcc
+
+	# CC=arm-none-linux-gnueabi-gcc ./configure \
+	    --host=arm-none-linux-gnueabi \
+	    --disable-shared --enable-static
+	# make CC_FOR_BUILD=gcc
 
 
-[-] Build on Windows with MinGW
+## Build on Windows with MinGW
 
 To build libchewing on Windows, you need to setup MinGW and MSYS in your
 system. The installer of MinGW and MSYS is in the following link:
@@ -190,28 +198,28 @@ If you get the source from the git repository you need additional step
 to make the source buildable; use the following commands to install
 necessary packages.
 
-- mingw-get install automake
-- mingw-get install autoconf
-- mingw-get install libtool
+	- mingw-get install automake
+	- mingw-get install autoconf
+	- mingw-get install libtool
 
 Now you have the build environment for libchewing. However, you need to check
 the line end of source code is LF instead of CR/LF before running autogen.sh.
 The easily way to do this is using git:
 
-- git config core.autocrlf input
-- rm -rf *
-- git reset --hard
+	- git config core.autocrlf input
+	- rm -rf *
+	- git reset --hard
 
 Now you can run the following commands in MSYS shell to build libchewing:
 
 If you get the source from the git repository, run:
 
-- autogen.sh
+	- autogen.sh
 
 Then
 
-- configure
-- make
+	- configure
+	- make
 
 If you run testchewing.exe (available after `make check') you will
 find that testchewing.exe cannot print the correct string. This is
@@ -219,45 +227,47 @@ because testchewing.exe prints the UTF-8 string, while Windows cannot
 print it to console.
 
 
-[-] Build with CMake
+## Build with CMake
 
 libchewing supports cmake (http://www.cmake.org/) build system. You can use the
 following command to build with cmake:
 
-- cmake .
-- make
+	- cmake .
+	- make
 
 cmake is also the preferred way to build libchewing on Windows platform due to
 better Windows integrated. You can use the following command to create Visual
 Studio project in 32-bits Windows platform:
 
-- cmake . -G "Visual Studio 11"
+	- cmake . -G "Visual Studio 11"
 
 or the following command to create Visual Studio project in 64-bits Windows
 platform:
 
-- cmake . -G "Visual Studio 11 Win64" (64-bits Windows)
+	- cmake . -G "Visual Studio 11 Win64" (64-bits Windows)
 
 
-[-] Usage
+## Usage
 
 ( modified from http://code.google.com/p/ibus/wiki/ChewingUserGuide )
 
 Chewing guides the user to input Chinese by its pronunciation, in the form of
-either Bopomofo/Zhuyin[1] or Hanyu pinyin[2], as well as Chinese punctuation
+either [Bopomofo/Zhuyin][1] or [Hanyu pinyin][2], as well as Chinese punctuation
 marks and normal and full shape number and English alphabets.
 
 The following sections assume you are using the default configuration, that is,
 with default/DaChen Bopomofo keyboard layout, on an en_US keyboard, and default
 key-binding.
 
-= Glossary =
+
+### Glossary
 Preedit buffer: The places for storing your typing before sending to the
 applications (such as firefox) you are using.
 
 Mode: Mode determines how Chewing reacts on keyboard input.
 
-= Editing mode =
+
+### Editing mode
 This mode is for normal Chinese character and punctuation typing. You are more
 likely working on this mode.
 
@@ -290,38 +300,42 @@ mode, you can also press {Ctrl-1} or {`} to open up a symbol selection dialog,
 select the category, then use {Down} key to choose the symbols as you would do
 for characters.
 
-Key binding   API name                   Functionality
------------   --------                   -------------
-Caps Lock     chewing_handle_Capslock    Toggle Temporary English sub-mode
-Down          chewing_handle_Down        Enter Candidate Selection mode
-Shift-Space   chewing_handle_ShiftSpace  Toggle Half/Full Shape sub-mode
-Enter         chewing_handle_Enter       Commit the content in preedit buffer
-                                         to active application window
-Tab           chewing_handle_Tab         Break the auto-correction.
-Ctrl-1        chewing_handle_CtrlNum     Open symbol selection dialog
-Ctrl-2        chewing_handle_CtrlNum     Remember 2-word phrase.
-Ctrl-3        chewing_handle_CtrlNum     Remember 3-word phrase.
-Ctrl-4        chewing_handle_CtrlNum     Remember 4-word phrase.
 
-= Half/Full Shape sub-mode =
+	Key binding   API name                   Functionality
+	-----------   --------                   -------------
+	Caps Lock     chewing_handle_Capslock    Toggle Temporary English sub-mode
+	Down          chewing_handle_Down        Enter Candidate Selection mode
+	Shift-Space   chewing_handle_ShiftSpace  Toggle Half/Full Shape sub-mode
+	Enter         chewing_handle_Enter       Commit the content in preedit buffer
+	                                         to active application window
+	Tab           chewing_handle_Tab         Break the auto-correction.
+	Ctrl-1        chewing_handle_CtrlNum     Open symbol selection dialog
+	Ctrl-2        chewing_handle_CtrlNum     Remember 2-word phrase.
+	Ctrl-3        chewing_handle_CtrlNum     Remember 3-word phrase.
+	Ctrl-4        chewing_handle_CtrlNum     Remember 4-word phrase.
+
+
+### Half/Full Shape sub-mode
 
 This sub-mode is for inputing half shape and full shape characters. Half shape
 characters are essentially normal English characters; while the full shape
 characters are full-width pretty symbols that resemble English characters.
 
-Key binding   API name                   Functionality
------------   --------                   -------------
-Shift-Space   chewing_handle_ShiftSpace  Toggle Half/Full Shape sub-mode
+	Key binding   API name                   Functionality
+	-----------   --------                   -------------
+	Shift-Space   chewing_handle_ShiftSpace  Toggle Half/Full Shape sub-mode
 
-= Temporary English sub-mode =
-
+	
+### Temporary English sub-mode
+	
 This sub-mode is for temporary English inputting.
+	
+	Key binding   API name                   Functionality
+	-----------   --------                   -------------
+	Caps Lock     chewing_handle_Capslock    Toggle Temporary English sub-mode
 
-Key binding   API name                   Functionality
------------   --------                   -------------
-Caps Lock     chewing_handle_Capslock    Toggle Temporary English sub-mode
-
-= Candidate Selection mode =
+	
+### Candidate Selection mode
 
 This mode is for Choosing the candidate. Firstly, the longest phrases that fit
 the pronunciation are shown, then the second shortest, till the single
@@ -333,15 +347,16 @@ candidate "北市"; pressing {Down} again makes Chewing displays 1-word
 candidates "市","是"; pressing {Down} again makes Chewing displays back the
 3-word candidates "台北市";
 
-Key binding   API name                   Functionality
------------   --------                   -------------
-Down          chewing_handle_Down        Next bunch of candidates in
-                                         different length
-Left          chewing_handle_Left        Previous page of candidates
-Right         chewing_handle_Right       Next page of candidates
-1, 2, ...0    chewing_handle_Default     Select 1st, 2nd, ... 10th candidate
+	Key binding   API name                   Functionality
+	-----------   --------                   -------------
+	Down          chewing_handle_Down        Next bunch of candidates in
+	                                         different length
+	Left          chewing_handle_Left        Previous page of candidates
+	Right         chewing_handle_Right       Next page of candidates
+	1, 2, ...0    chewing_handle_Default     Select 1st, 2nd, ... 10th candidate
 
-= Bypass mode =
+	
+### Bypass mode
 
 This mode is on whenever the preedit buffer is empty. This allows you to use
 movement keys (such as cursor keys and page up/page down) and popular key
@@ -350,16 +365,16 @@ binding (Ctrl-A, Ctrl-S).
 For the brief usage of libchewing APIs, please check the simplified example
 implemented in file contrib/simple-select.c
 
-*1 http://en.wikipedia.org/wiki/Bopomofo
-*2 http://en.wikipedia.org/wiki/Pinyin
+[1]: http://en.wikipedia.org/wiki/Bopomofo
+[2]: http://en.wikipedia.org/wiki/Pinyin
 
 
-[-] License
+## License
 
 GNU LGPL (Lesser General Public License).
 See "COPYING" for details.
 
 
-[-] Authors & Contact Information
+## Authors & Contact Information
 
 See "AUTHORS" for details.

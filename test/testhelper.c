@@ -45,8 +45,8 @@ BufferType PREEDIT_BUFFER = {
 	chewing_buffer_String_static
 };
 
-BufferType ZUIN_BUFFER = {
-	"zuin buffer",
+BufferType BOPOMOFO_BUFFER = {
+	"bopomofo buffer",
 	chewing_bopomofo_Check,
 	chewing_zuin_Check,
 	0,

@@ -445,17 +445,14 @@ CHEWING_API int chewing_get_phraseChoiceRearward( ChewingContext *ctx )
 	return ctx->data->config.bPhraseChoiceRearward;
 }
 
-static void CheckAndResetRange( ChewingData *pgdata );
 CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode )
 {
-
 	if ( mode == CHINESE_MODE || mode == SYMBOL_MODE ) {
-        // remove all data inside buffer as switching mode.
-        ZuinRemoveAll( &( ctx->data->zuinData ) );
-        MakeOutputWithRtn( ctx->output, ctx->data, KEYSTROKE_ABSORB);
-
+		// remove all data inside buffer as switching mode.
+		ZuinRemoveAll( &( ctx->data->zuinData ) );
+		MakeOutputWithRtn( ctx->output, ctx->data, KEYSTROKE_ABSORB);
 		ctx->data->bChiSym = mode;
-    }
+	}
 }
 
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx )
@@ -1742,4 +1739,66 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
 	if ( !pgdata->bSelect ) return -1;
 
 	return ChoicePrevAvail( pgdata );
+}
+
+CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+	int len;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	len = pgdata->chiSymbolBufLen;
+
+	if ( !len ) return -1;
+
+	WriteChiSymbolToCommitBuf( pgdata, pgo, len );
+	AutoLearnPhrase( pgdata );
+	CleanAllBuf( pgdata );
+
+	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_COMMIT );
+
+	return 0;
+}
+
+CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( pgdata->bSelect ) return -1;
+
+	CleanAllBuf( pgdata );
+
+	MakeOutput( pgo, pgdata );
+	return 0;
+}
+
+CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx )
+{
+	ChewingData *pgdata;
+	ChewingOutput *pgo;
+
+	if ( !ctx ) return -1;
+
+	pgdata = ctx->data;
+	pgo = ctx->output;
+
+	if ( ZuinIsEntering( &pgdata->zuinData ) ) {
+		ZuinRemoveAll( &pgdata->zuinData );
+	}
+
+	MakeOutput( pgo, pgdata );
+	return 0;
 }

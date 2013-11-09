@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "chewing-utf8-util.h"
 #include "global.h"
@@ -82,32 +83,14 @@ void SetUpdatePhraseMsg(
 		ChewingData *pgdata, const char *addWordSeq,
 		int len, int state )
 {
-	const char *insert = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A";
-		/* 加入： */
-	const char *modify = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A";
-		/* 已有： */
-	int begin = 3, i;
-	const char *msg;
-
-	pgdata->showMsgLen = begin + len;
 	if ( state == USER_UPDATE_INSERT ) {
-		msg = insert;
+		/* 加入： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A%s", addWordSeq );
+	} else {
+		/* 已有： */
+		snprintf( pgdata->showMsg, sizeof( pgdata->showMsg ), "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A%s", addWordSeq );
 	}
-	else {
-		msg = modify;
-	}
-	ueStrNCpy( (char *) pgdata->showMsg[ 0 ].s, msg, 1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 1 ].s,
-	           ueConstStrSeek( msg, 1 ),
-		   1, 1 );
-	ueStrNCpy( (char *) pgdata->showMsg[ 2 ].s,
-	           ueConstStrSeek( msg, 2 ),
-		   1, 1 );
-	for ( i = 0; i < len; i++ ) {
-		ueStrNCpy( (char *) pgdata->showMsg[ begin + i ].s,
-		           ueConstStrSeek( addWordSeq, i ),
-			   1, 1);
-	}
+	pgdata->showMsgLen = AUX_PREFIX_LEN + len;
 }
 
 int NoSymbolBetween( ChewingData *pgdata, int begin, int end )
@@ -166,11 +149,12 @@ static int _Inner_InternalSpecialSymbol(
 		char symkey, const char * const chibuf )
 {
 	int kbtype;
+	PreeditBuf *buf;
 
 	if ( key == symkey && NULL != chibuf ) {
 		assert( pgdata->chiSymbolBufLen >= pgdata->chiSymbolCursor );
 
-		PreeditBuf *buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
+		buf = &pgdata->preeditBuf[ pgdata->chiSymbolCursor ];
 
 		memmove( &pgdata->preeditBuf[ pgdata->chiSymbolCursor + 1 ],
 			&pgdata->preeditBuf[ pgdata->chiSymbolCursor ],
@@ -608,8 +592,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 {
 	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
 	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ] = { 0 };
+	char *pos;
 	int i, from, len;
-	int bufWordLen;
 	int prev_pos = 0;
 	int pending = 0;
 
@@ -620,9 +604,9 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
 
-			bufWordLen = strlen( bufWordSeq );
+			pos = ueStrSeek( bufWordSeq, prev_pos );
 			copyStringFromPreeditBuf( pgdata, from, len,
-				bufWordSeq + bufWordLen, sizeof( bufWordSeq ) - bufWordLen );
+				pos, bufWordSeq + sizeof( bufWordSeq ) - pos );
 			prev_pos += len;
 			pending = 1;
 		}
@@ -866,16 +850,20 @@ static void ShiftInterval( ChewingOutput *pgo, ChewingData *pgdata )
 	}
 }
 
-static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
+int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 {
 	int i;
+	char *pos;
 
 	/* fill zero to chiSymbolBuf first */
 	pgo->preeditBuf[0] = 0;
 	pgo->bopomofoBuf[0] = 0;
 
-	for ( i = 0; i < pgdata->chiSymbolBufLen; ++i ) {
-		strncat( pgo->preeditBuf, pgdata->preeditBuf[ i ].char_, sizeof(pgo->preeditBuf) );
+	pos = pgo->preeditBuf;
+	for ( i = 0; i < pgdata->chiSymbolBufLen &&
+		pos < pgo->preeditBuf + sizeof( pgo->preeditBuf ) + MAX_UTF8_SIZE + 1; ++i ) {
+		strncpy( pos, pgdata->preeditBuf[ i ].char_, MAX_UTF8_SIZE + 1 );
+		pos += strlen( pgdata->preeditBuf[ i ].char_ );
 	}
 
 	/* fill point */
@@ -907,7 +895,7 @@ static int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata )
 	pgo->pci = &( pgdata->choiceInfo );
 	pgo->bChiSym = pgdata->bChiSym;
 	memcpy( pgo->selKey, pgdata->config.selKey, sizeof( pgdata->config.selKey ) );
-	pgo->bShowMsg = 0;
+	pgdata->bShowMsg = 0;
 	return 0;
 }
 
@@ -919,9 +907,7 @@ int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn
 
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata )
 {
-	pgo->bShowMsg = 1;
-	memcpy( pgo->showMsg, pgdata->showMsg, sizeof( wch_t ) * ( pgdata->showMsgLen ) );
-	pgo->showMsgLen = pgdata->showMsgLen;
+	pgdata->bShowMsg = 1;
 	pgo->nDispInterval = 0;
 }
 

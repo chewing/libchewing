@@ -34,19 +34,19 @@
 
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 
-typedef struct {
+typedef struct PhraseIntervalType {
 	int from, to, source;
 	Phrase *p_phr;
 } PhraseIntervalType;
 
-typedef struct tagRecordNode {
+typedef struct RecordNode {
 	int *arrIndex;		/* the index array of the things in "interval" */
 	int nInter, score;
-	struct tagRecordNode *next;
+	struct RecordNode *next;
 	int nMatchCnnct;	/* match how many Cnnct. */
 } RecordNode;
 
-typedef struct {
+typedef struct TreeDataType {
 	int leftmost[ MAX_PHONE_SEQ_LEN + 1 ] ;
 	char graph[ MAX_PHONE_SEQ_LEN + 1 ][ MAX_PHONE_SEQ_LEN + 1 ];
 	PhraseIntervalType interval[ MAX_INTERVAL ];
@@ -259,6 +259,7 @@ const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const u
 		PutUint16(phoneSeq[i], target.key);
 		range[0] = GetUint24(tree_p->child.begin);
 		range[1] = GetUint24(tree_p->child.end);
+		assert(range[1] >= range[0]);
 		tree_p = (const TreeType*)bsearch(&target, pgdata->static_data.tree + range[0],
 						  range[1] - range[0], sizeof(TreeType), CompTreeType);
 
@@ -551,32 +552,54 @@ static void Discard2( TreeDataType *ptd )
 	ptd->nInterval = nInterval2;
 }
 
+static void FillPreeditBuf( ChewingData *pgdata, char *phrase, int from, int to )
+{
+	int i;
+	int start = 0;
+	int word_count = 0;
+
+	assert( pgdata );
+	assert( phrase );
+	assert( from < to );
+
+	/*
+	 * FIXME: from, to count only word, while preeditBuf contains word and
+	 * symbols, so we need to some translation here.
+	 */
+
+	for ( ;; ) {
+		if ( pgdata->preeditBuf[ start ].category == CHEWING_CHINESE ) {
+			++word_count;
+			if ( word_count == from + 1 )
+				break;
+		}
+		++start;
+	}
+
+	LOG_VERBOSE( "Fill preeditBuf start %d, from = %d, to = %d", start, from, to );
+
+	for ( i = start; i < start - from + to; ++i ) {
+		ueStrNCpy( pgdata->preeditBuf[ i ].char_,
+			ueStrSeek( phrase, i - start ), 1, STRNCPY_CLOSE );
+	}
+}
+
 /* kpchen said, record is the index array of interval */
 static void OutputRecordStr( ChewingData *pgdata, const TreeDataType *ptd )
 {
 	PhraseIntervalType inter;
 	int i;
-	int j;
 
 	for ( i = 0; i < ptd->phList->nInter; i++ ) {
 		inter = ptd->interval[ ptd->phList->arrIndex[ i ] ];
-
-		for ( j = inter.from; j < inter.to; ++j ) {
-			ueStrNCpy( pgdata->preeditBuf[ j ].char_,
-				ueStrSeek( inter.p_phr->phrase, j - inter.from ),
-				1, STRNCPY_CLOSE );
-		}
+		FillPreeditBuf( pgdata, inter.p_phr->phrase, inter.from, inter.to );
 	}
 
 	for ( i = 0; i < pgdata->nSelect; i++ ) {
-		inter.from = pgdata->selectInterval[ i ].from;
-		inter.to = pgdata->selectInterval[ i ].to ;
-
-		for ( j = inter.from; j < inter.to; ++j ) {
-			ueStrNCpy( pgdata->preeditBuf[ j ].char_,
-				ueStrSeek( pgdata->selectStr[ i ], j - inter.from ),
-				1, STRNCPY_CLOSE );
-		}
+		FillPreeditBuf( pgdata,
+			pgdata->selectStr[ i ],
+			pgdata->selectInterval[ i ].from,
+			pgdata->selectInterval[ i ].to);
 	}
 }
 

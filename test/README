@@ -51,3 +51,6 @@ Note:
   Alternately, the automated script "debug-chewing-shell.sh" covers the above
   actions.  Change the variable $PREFERABLE_XTERM to other X terminals like
   xterm as you wish.
+
+3. Please do not change the content of default-test.txt, put your own test case
+   in other txt file.

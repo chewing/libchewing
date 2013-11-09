@@ -44,6 +44,7 @@ typedef SSIZE_T ssize_t;
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
+#define AUX_PREFIX_LEN (3)
 
 /* For isSymbol */
 #define WORD_CHOICE            (0)
@@ -64,11 +65,6 @@ static inline int min( int a, int b )
 	return a < b ? a : b;
 }
 #endif
-
-typedef union wch_t {
-	unsigned char s[ MAX_UTF8_SIZE + 1];
-	uint16_t wch;
-} wch_t;
 
 /*
  * This structure may represent both internal nodes and leaf nodes of a phrase
@@ -100,8 +96,8 @@ typedef struct PhrasingOutput {
 } PhrasingOutput;
 
 typedef struct PinYinData {
-    int type;
-    char keySeq[ PINYIN_SIZE ];
+	int type;
+	char keySeq[ PINYIN_SIZE ];
 } PinYinData;
 
 typedef struct ZuinData {
@@ -208,13 +204,15 @@ typedef struct ChewingData {
 	PhrasingOutput phrOut;
 	ZuinData zuinData;
 	ChewingConfigData config;
-    /** @brief current input buffer, content==0 means Chinese code */
+	/** @brief current input buffer, content==0 means Chinese code */
 	PreeditBuf preeditBuf[ MAX_PHONE_SEQ_LEN ];
 	int chiSymbolCursor;
 	int chiSymbolBufLen;
 	int PointStart;
 	int PointEnd;
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
+
+	int bShowMsg;
+	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + AUX_PREFIX_LEN ) + 1 ];
 	int showMsgLen;
 
 	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -266,10 +264,7 @@ typedef struct ChewingOutput {
 	int selKey[ MAX_SELKEY ];
 	/** @brief return value. */
 	int keystrokeRtn;
-	int bShowMsg;
 	/** @brief user message. */
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
-	int showMsgLen;
 } ChewingOutput;
 /**
  *   @struct ChewingOutput

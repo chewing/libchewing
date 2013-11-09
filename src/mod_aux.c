@@ -199,26 +199,17 @@ CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
 
 CHEWING_API int chewing_aux_Check( ChewingContext *ctx )
 {
-	return (ctx->output->bShowMsg);
+	return (ctx->data->bShowMsg);
 }
 
 CHEWING_API int chewing_aux_Length( ChewingContext *ctx )
 {
-	return (ctx->output->bShowMsg ? ctx->output->showMsgLen : 0);
+	return (ctx->data->bShowMsg ? ctx->data->showMsgLen : 0);
 }
 
 CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 {
-	int i;
-	char *msg = (char *) calloc(
-		1 + ctx->output->showMsgLen,
-		MAX_UTF8_SIZE );
-	if ( msg ) {
-		for ( i = 0; i < ctx->output->showMsgLen; ++i )
-			strcat( msg, (char *)(ctx->output->showMsg[ i ].s) );
-	}
-	return msg;
-
+	return strdup( ctx->data->showMsg );
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )

@@ -116,6 +116,8 @@ void test_CtrlNum_add_phrase_right()
 {
 	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
 	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
+	static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */;
+	static const char msg_already_have[] = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */;
 	int cursor;
 	ChewingContext *ctx;
 
@@ -130,11 +132,15 @@ void test_CtrlNum_add_phrase_right()
 		"`%s' shall not be in userphrase", phrase );
 
 	type_keystroke_by_string( ctx, "hk4g4<H><C2>" );
+	ok_aux_buffer( ctx, msg );
 	ok_preedit_buffer( ctx, phrase );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 0, "cursor position `%d' shall be 0", cursor );
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 1,
 		"`%s' shall be in userphrase", phrase );
+
+	type_keystroke_by_string( ctx, "<C2>" );
+	ok_aux_buffer( ctx, msg_already_have );
 
 	chewing_delete( ctx );
 }
@@ -143,6 +149,8 @@ void test_CtrlNum_add_phrase_left()
 {
 	static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */;
 	static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */;
+	static const char msg_add[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */;
+	static const char msg_already_have[] = "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */;
 	int cursor;
 	ChewingContext *ctx;
 
@@ -157,11 +165,15 @@ void test_CtrlNum_add_phrase_left()
 		"`%s' shall not be in userphrase", phrase );
 
 	type_keystroke_by_string( ctx, "hk4g4<C2>" );
+	ok_aux_buffer( ctx, msg_add );
 	ok_preedit_buffer( ctx, phrase );
 	cursor = chewing_cursor_Current( ctx );
 	ok( cursor == 2, "cursor position `%d' shall be 2", cursor );
 	ok( has_userphrase( ctx, bopomofo, phrase ) == 1,
 		"`%s' shall be in userphrase", phrase );
+
+	type_keystroke_by_string( ctx, "<C2>" );
+	ok_aux_buffer( ctx, msg_already_have );
 
 	chewing_delete( ctx );
 }
@@ -629,11 +641,13 @@ void test_userphrase_lookup()
 int main(int argc, char *argv[])
 {
 	char *logname;
+	int ret;
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
-	asprintf( &logname, "%s.log", argv[0] );
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
 	fd = fopen( logname, "w" );
 	assert( fd );
 	free( logname );

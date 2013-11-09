@@ -333,10 +333,10 @@ void test_del_bopomofo_as_mode_switch()
 	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
-	ok_zuin_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
+	ok_bopomofo_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
 
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -410,7 +410,7 @@ void test_Esc_entering_zuin()
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<EE>" );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -499,7 +499,7 @@ void test_Backspace_remove_bopomofo()
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 	type_keystroke_by_string( ctx, "hk<B>" );
-	ok_zuin_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\x98" /* ㄘ */ );
 
 	chewing_delete( ctx );
 }
@@ -968,22 +968,22 @@ void test_zuin_buffer()
 	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "1ul" );
-	ok_zuin_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\x85\xE3\x84\xA7\xE3\x84\xA0" /* ㄅㄧㄠ */ );
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	type_keystroke_by_string( ctx, "ul" );
-	ok_zuin_buffer( ctx, "\xE3\x84\xA7\xE3\x84\xA0" /* ㄧㄠ */ );
+	ok_bopomofo_buffer( ctx, "\xE3\x84\xA7\xE3\x84\xA0" /* ㄧㄠ */ );
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	type_keystroke_by_string( ctx, "3");
-	ok_zuin_buffer( ctx, "\xCB\x87" /* ˇ */);
+	ok_bopomofo_buffer( ctx, "\xCB\x87" /* ˇ */);
 
 	type_keystroke_by_string( ctx, " " );
-	ok_zuin_buffer( ctx, "" );
+	ok_bopomofo_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
@@ -1048,17 +1048,49 @@ void test_auto_commit()
 	//test_auto_commit_symbol();
 }
 
+void test_interval()
+{
+	ChewingContext *ctx;
+	IntervalType it;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "`31hk4g4`31hk4g4`31" /* ，測試，測試， */ );
+
+	ok_preedit_buffer( ctx, "\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C" /* ，測試，測試， */ );
+
+	chewing_interval_Enumerate( ctx );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 1 && it.to == 3, "interval (%d, %d) shall be (1, 3)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 1, "shall have next interval" );
+	chewing_interval_Get( ctx, &it );
+	ok( it.from == 4 && it.to == 6, "interval (%d, %d) shall be (4, 6)",
+		it.from, it.to );
+
+	ok( chewing_interval_hasNext( ctx ) == 0, "shall not have next interval" );
+
+	chewing_delete( ctx );
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
+	int ret;
 
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
-	asprintf( &logname, "%s.log", argv[0] );
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
 	fd = fopen( logname, "w" );
 	assert( fd );
 	free( logname );
+
 
 	test_select_candidate();
 	test_Esc();
@@ -1082,6 +1114,8 @@ int main(int argc, char *argv[])
 
 	test_longest_phrase();
 	test_auto_commit();
+
+	test_interval();
 
 	fclose( fd );
 

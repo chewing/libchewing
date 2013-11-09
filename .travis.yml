@@ -13,8 +13,8 @@ matrix:
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
-  - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make check; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure && make CFLAGS="-Wall -Werror" && make check; fi
+  - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
   - sudo pip install cpp-coveralls --use-mirrors
