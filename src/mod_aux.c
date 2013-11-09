@@ -42,6 +42,17 @@ CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 	return strdup( ctx->output->commitBuf );
 }
 
+/**
+ * @param ctx handle to Chewing IM context
+ * retrun current commit string, regardless current input state.
+ * Alwasy returns a const char pointer, you have to clone them immediately,
+ * if you need.
+ */
+CHEWING_API const char *chewing_commit_String_static( ChewingContext *ctx )
+{
+	return ctx->output->commitBuf;
+}
+
 CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )
 {
 	return (ctx->output->chiSymbolBufLen != 0);
@@ -57,6 +68,10 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 	return strdup( ctx->output->preeditBuf );
 }
 
+CHEWING_API const char *chewing_buffer_String_static( ChewingContext *ctx )
+{
+	return ctx->output->preeditBuf;
+}
 
 /**
  * @param ctx handle to Chewing IM context
@@ -68,6 +83,16 @@ CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx)
 	return strdup( ctx->output->bopomofoBuf );
 }
 
+/**
+ * @param ctx handle to Chewing IM context
+ *
+ * Alwasy returns a const char pointer, you have to clone them immediately,
+ * if you need.
+ */
+CHEWING_API const char *chewing_bopomofo_String_static( ChewingContext *ctx)
+{
+	return ctx->output->bopomofoBuf;
+}
 /**
  * @param ctx handle to Chewing IM context
  * @param zuin_count pointer to the integer of available Zuin preedit string
@@ -134,16 +159,21 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 	return (ctx->cand_no < ctx->output->pci->nTotalChoice);
 }
 
-CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
+CHEWING_API const char *chewing_cand_String_static( ChewingContext *ctx )
 {
 	char *s;
 	if ( chewing_cand_hasNext( ctx ) ) {
-		s = strdup( ctx->output->pci->totalChoiceStr[ ctx->cand_no ] );
+		s = ctx->output->pci->totalChoiceStr[ ctx->cand_no ];
 		ctx->cand_no++;
 	} else {
-		s = strdup( "" );
+		s = "";
 	}
 	return s;
+}
+
+CHEWING_API char *chewing_cand_String( ChewingContext *ctx )
+{
+	return strdup(chewing_cand_String_static(ctx));
 }
 
 CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx )
@@ -218,15 +248,21 @@ CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx )
 
 extern const char * const kb_type_str[];
 
-CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
+CHEWING_API const char *chewing_kbtype_String_static( ChewingContext *ctx )
 {
 	char *s;
 	if ( chewing_kbtype_hasNext( ctx ) ) {
-		s = strdup( kb_type_str[ ctx->kb_no ] );
+		s = (char *)kb_type_str[ ctx->kb_no ];
 		ctx->kb_no++;
 	}
 	else {
-		s = strdup( "" );
+		s =  "";
 	}
 	return s;
 }
+
+CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
+{
+	return strdup(chewing_kbtype_String_static(ctx));
+}
+

@@ -1602,17 +1602,22 @@ CHEWING_API int chewing_userphrase_lookup(
 	return user_phrase_data == NULL ? 0 : 1;
 }
 
-
 CHEWING_API char *chewing_cand_string_by_index( ChewingContext *ctx, int index )
+{
+	return strdup(chewing_cand_string_by_index_static(ctx, index));
+}
+
+
+CHEWING_API const char *chewing_cand_string_by_index_static( ChewingContext *ctx, int index )
 {
 	char *s;
 
 	if ( !ctx ) return NULL;
 
 	if ( 0 <= index && index < ctx->output->pci->nTotalChoice ) {
-		s = strdup( ctx->output->pci->totalChoiceStr[ index ] );
+		s = ctx->output->pci->totalChoiceStr[ index ];
 	} else {
-		s = strdup( "" );
+		s = "";
 	}
 	return s;
 }

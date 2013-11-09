@@ -79,6 +79,7 @@ typedef struct BufferType {
 	int (*get_length)(ChewingContext *ctx);
 	char * (*get_string)(ChewingContext *ctx);
 	char * (*get_string_alt)(ChewingContext *ctx, int *len);
+	const char * (*get_string_static)(ChewingContext *ctx);
 } BufferType;
 
 extern BufferType COMMIT_BUFFER;

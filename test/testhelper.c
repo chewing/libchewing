@@ -32,6 +32,7 @@ BufferType COMMIT_BUFFER = {
 	0,
 	chewing_commit_String,
 	0,
+	chewing_commit_String_static
 };
 
 BufferType PREEDIT_BUFFER = {
@@ -41,6 +42,7 @@ BufferType PREEDIT_BUFFER = {
 	chewing_buffer_Len,
 	chewing_buffer_String,
 	0,
+	chewing_buffer_String_static
 };
 
 BufferType ZUIN_BUFFER = {
@@ -50,6 +52,7 @@ BufferType ZUIN_BUFFER = {
 	0,
 	chewing_bopomofo_String,
 	chewing_zuin_String,
+	chewing_bopomofo_String_static
 };
 
 BufferType AUX_BUFFER = {
@@ -58,6 +61,7 @@ BufferType AUX_BUFFER = {
 	0,
 	chewing_aux_Length,
 	chewing_aux_String,
+	0,
 	0,
 };
 
@@ -331,6 +335,13 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
 			"%s string function returned parameter `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
+		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
+		chewing_free( buf );
+	}
+
+	if ( buffer->get_string_static ) {
+		buf = strdup(buffer->get_string_static( ctx ));
 		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
 			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
 		chewing_free( buf );

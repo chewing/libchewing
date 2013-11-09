@@ -461,6 +461,15 @@ The returned value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
+@deftypefun char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
+This function returns the current enumerated keyboard layout name. The returnd
+string is emtpy string when enumeration is over. This function returns
+@code{NULL} when no memory.
+
+The return value is a const pointer to a character string. The memory will
+be freed by the next time be used.
+@end deftypefun
+
 @node Operating Modes
 @chapter Operating Modes
 
@@ -573,6 +582,14 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
+@deftypefun char* chewing_cand_String_static (ChewingContext *@var{ctx})
+This function returns the current enumerated candidate string. This function
+returns @code{NULL} when no memory.
+
+The return value is a const pointer to a character string. The memory will
+be freed by the next time be used.
+@end deftypefun
+
 @deftypefun int chewing_cand_CheckDone (ChewingContext *@var{ctx})
 @quotation Deprecated
 The @code{chewing_cand_TotalPage} function could achieve the same
@@ -667,6 +684,17 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
+@deftypefun char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
+@var{index})
+This function returns the candidate string by its index. The range of
+@var{index} shall be @code{0} @leq{} @var{index} <
+@code{chewing_cand_TotalChoice}. This function returns @code{NULL} when no
+memory.
+
+The return value is a const pointer to a character string. The memory will
+be freed by the next time be used.
+@end deftypefun
+
 @deftypefun int chewing_cand_choose_by_index (ChewingContext *@var{ctx}, int
 @var{index})
 This function chooses the candidate by its index. The range of @var{index}
@@ -725,12 +753,21 @@ The return value is @code{1} on success, @code{0} on failure.
 @end deftypefun
 
 @deftypefun char* chewing_commit_String (ChewingContext *@var{ctx})
-This function returns the string in the commit buffer and clears the
-buffer. This function returns @code{NULL} when no memory.
+This function returns the string in the commit buffer This function returns
+@code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
+
+@deftypefun const char* chewing_commit_String_static (ChewingContext *@var{ctx})
+This function returns the string in the commit buffer This function returns
+@code{NULL} when no memory.
+
+The return value is a const pointer to a character string. The memory will
+be freed by the next time be used.
+@end deftypefun
+
 
 @deftypefun int chewing_keystroke_CheckIgnore (ChewingContext *@var{ctx})
 This function checks whether the previous keystroke is ignored or not.
@@ -762,6 +799,14 @@ returns @code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun const char* chewing_buffer_String_static (ChewingContext *@var{ctx})
+This function returns the current output in the pre-edit buffer. This function
+returns @code{NULL} when no memory.
+
+The return value is a const pointer to a character string. The memory will
+be freed by the next time be used.
 @end deftypefun
 
 @deftypefun int chewing_bopomofo_Check (ChewingContext *@var{ctx})
@@ -802,6 +847,18 @@ The return value is a pointer to a character string. This function returns
 function @code{chewing_free}.
 
 @end deftypefun
+
+@deftypefun const char* chewing_bopomofo_String_static (ChewingContext *@var{ctx})
+This function returns the phonetic characters in the pre-edit buffer.
+
+It will contain the number of phonetic characters in the returned string.
+This function returns @code{NULL} when no memory.
+
+The return value is a const pointer to a character string. This function returns
+@code{NULL} when no memory. The memory will be freed by the next time be
+used.
+@end deftypefun
+
 
 @deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
 This function returns the phonetic characters in the pre-edit buffer.
