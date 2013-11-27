@@ -597,15 +597,20 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	int prev_pos = 0;
 	int pending = 0;
 
+	/*
+	 * FIXME: pgdata->preferInterval does not consider symbol, so we need to
+	 * do translate when using APIs that considering symbol.
+	 */
+
 	for ( i = 0; i < pgdata->nPrefer; i++ ) {
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
-		if ( len == 1 && ! ChewingIsBreakPoint( from, pgdata ) ) {
+		if ( len == 1 && ! ChewingIsBreakPoint( CountSymbols( pgdata, from ), pgdata ) ) {
 			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
 
 			pos = ueStrSeek( bufWordSeq, prev_pos );
-			copyStringFromPreeditBuf( pgdata, from, len,
+			copyStringFromPreeditBuf( pgdata, CountSymbols( pgdata, from ), len,
 				pos, bufWordSeq + sizeof( bufWordSeq ) - pos );
 			prev_pos += len;
 			pending = 1;
@@ -618,7 +623,7 @@ void AutoLearnPhrase( ChewingData *pgdata )
 			}
 			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ len ] = (uint16_t) 0;
-			copyStringFromPreeditBuf( pgdata, from, len, bufWordSeq, sizeof( bufWordSeq ) );
+			copyStringFromPreeditBuf( pgdata, CountSymbols( pgdata, from ), len, bufWordSeq, sizeof( bufWordSeq ) );
 			UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		}
 	}

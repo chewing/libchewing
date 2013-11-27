@@ -240,22 +240,35 @@ void test_CtrlNum()
 
 void test_userphrase_auto_learn()
 {
-	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
+	static const char bopomofo_1[] = "\xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ */;
+	static const char bopomofo_2[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
+	static const char bopomofo_3[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ ㄎㄜ */;
 	ChewingContext *ctx;
 
 	clean_userphrase();
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
-	chewing_set_maxChiSymbolLen( ctx, 16 );
-	chewing_set_addPhraseDirection( ctx, 1 );
 
-	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
-		"`%s' shall not be in userphrase", bopomofo );
+	ok( has_userphrase( ctx, bopomofo_1, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_1 );
 
-	type_keystroke_by_string( ctx, "dk dk <E>" );
-	ok( has_userphrase( ctx, bopomofo, NULL ) == 1,
-		"`%s' shall be in userphrase", bopomofo );
+	ok( has_userphrase( ctx, bopomofo_2, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_2 );
+
+	ok( has_userphrase( ctx, bopomofo_3, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_3 );
+
+	type_keystroke_by_string( ctx, "`31dk `31dk dk `31<E>" );
+
+	ok( has_userphrase( ctx, bopomofo_1, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo_1 );
+
+	ok( has_userphrase( ctx, bopomofo_2, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo_2 );
+
+	ok( has_userphrase( ctx, bopomofo_3, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_3 );
 
 	chewing_delete( ctx );
 }
