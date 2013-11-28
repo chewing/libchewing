@@ -240,7 +240,8 @@ void test_CtrlNum()
 
 void test_userphrase_auto_learn()
 {
-	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ ㄎㄜ */;
+	static const char bopomofo_1[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ ㄎㄜ */;
+	static const char bopomofo_2[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B"; /* ㄘㄜˋ ㄕˋ */
 	ChewingContext *ctx;
 
 	clean_userphrase();
@@ -248,13 +249,17 @@ void test_userphrase_auto_learn()
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 
-	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
-		"`%s' shall not be in userphrase", bopomofo );
+	ok( has_userphrase( ctx, bopomofo_1, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_2 );
+	ok( has_userphrase( ctx, bopomofo_2, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo_2 );
 
-	type_keystroke_by_string( ctx, "dk dk dk <E>" );
+	type_keystroke_by_string( ctx, "dk dk dk hk4g4<E>" );
 
-	ok( has_userphrase( ctx, bopomofo, NULL ) == 1,
-		"`%s' shall be in userphrase", bopomofo );
+	ok( has_userphrase( ctx, bopomofo_1, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo_2 );
+	ok( has_userphrase( ctx, bopomofo_2, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo_2 );
 
 	chewing_delete( ctx );
 }
