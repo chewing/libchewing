@@ -499,7 +499,6 @@ void TerminateHash( ChewingData *pgdata )
 	int i;
 	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
 		pItem = pgdata->static_data.hashtable[ i ];
-		DEBUG_CHECKPOINT();
 		FreeHashItem( pItem );
 	}
 }
