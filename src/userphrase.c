@@ -131,7 +131,7 @@ static void LogUserPhrase(
 		snprintf( buf + 7 * i, 7 + 1, "%#06x ", phoneSeq[i] );
 	}
 
-	LOG_INFO( "userphrase %s, phone = %s, orig_freq = %d, max_freq = %d, user_freq = %d, recent_time = %d\n",
+	LOG_INFO( "userphrase %s, phone = %s, orig_freq = %d, max_freq = %d, user_freq = %d, recent_time = %d",
 		wordSeq, buf, orig_freq, max_freq, user_freq, recent_time );
 }
 
