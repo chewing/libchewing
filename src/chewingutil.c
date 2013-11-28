@@ -593,9 +593,12 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	uint16_t bufPhoneSeq[ MAX_PHONE_SEQ_LEN + 1 ];
 	char bufWordSeq[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ] = { 0 };
 	char *pos;
-	int i, from, len;
+	int i;
+	int from;
+	int fromPreeditBuf;
+	int len;
 	int prev_pos = 0;
-	int pending = 0;
+	int pending_pos = 0;
 
 	/*
 	 * FIXME: pgdata->preferInterval does not consider symbol, so we need to
@@ -605,32 +608,57 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	for ( i = 0; i < pgdata->nPrefer; i++ ) {
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
-		if ( len == 1 && ! ChewingIsBreakPoint( CountSymbols( pgdata, from ), pgdata ) ) {
+		fromPreeditBuf = toPreeditBufIndex( pgdata, from );
+
+		LOG_VERBOSE( "interval from = %d, fromPreeditBuf = %d, len = %d, pending_pos = %d", from, fromPreeditBuf, len, pending_pos );
+
+		if ( pending_pos != 0 && pending_pos < fromPreeditBuf ) {
+			/*
+			 * There is a pending phrase in buffer and it is not
+			 * connected to current phrase. We store it as
+			 * userphrase here.
+			 */
+			UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
+			prev_pos = 0;
+			pending_pos = 0;
+		}
+
+		if ( len == 1 && !ChewingIsBreakPoint( fromPreeditBuf, pgdata ) ) {
+			/*
+			 * There is a length one phrase and it is not a break
+			 * point. We store it and try to connect to other length
+			 * one phrase if possible.
+			 */
 			memcpy( bufPhoneSeq + prev_pos, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ prev_pos + len ] = (uint16_t) 0;
 
 			pos = ueStrSeek( bufWordSeq, prev_pos );
-			copyStringFromPreeditBuf( pgdata, CountSymbols( pgdata, from ), len,
+			copyStringFromPreeditBuf( pgdata, fromPreeditBuf, len,
 				pos, bufWordSeq + sizeof( bufWordSeq ) - pos );
 			prev_pos += len;
-			pending = 1;
-		}
-		else {
-			if ( pending ) {
+			pending_pos = fromPreeditBuf + len;
+
+		} else {
+			if ( pending_pos ) {
+				/*
+				 * Clean pending phrase because we cannot join
+				 * it with current phrase.
+				 */
 				UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 				prev_pos = 0;
-				pending = 0;
+				pending_pos = 0;
 			}
 			memcpy( bufPhoneSeq, &pgdata->phoneSeq[ from ], sizeof( uint16_t ) * len );
 			bufPhoneSeq[ len ] = (uint16_t) 0;
-			copyStringFromPreeditBuf( pgdata, CountSymbols( pgdata, from ), len, bufWordSeq, sizeof( bufWordSeq ) );
+			copyStringFromPreeditBuf( pgdata, fromPreeditBuf, len, bufWordSeq, sizeof( bufWordSeq ) );
 			UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		}
 	}
-	if ( pending ) {
+
+	if ( pending_pos ) {
 		UserUpdatePhrase( pgdata, bufPhoneSeq, bufWordSeq );
 		prev_pos = 0;
-		pending = 0;
+		pending_pos = 0;
 	}
 }
 
@@ -1479,6 +1507,8 @@ void copyStringFromPreeditBuf(
 	assert( output );
 	assert( output_len );
 
+	LOG_VERBOSE("Copy pos %d, len %d from preeditBuf", pos, len);
+
 	for ( i = pos; i < pos + len; ++i ) {
 		x = strlen( pgdata->preeditBuf[ i ].char_ );
 		if ( x >= output_len ) // overflow
@@ -1496,7 +1526,7 @@ void copyStringFromPreeditBuf(
  */
 int toPreeditBufIndex( ChewingData *pgdata, int pos )
 {
-	int word_count = 0;
+	int word_count;
 	int i;
 
 	assert( pgdata );

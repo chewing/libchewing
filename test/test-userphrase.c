@@ -240,6 +240,27 @@ void test_CtrlNum()
 
 void test_userphrase_auto_learn()
 {
+	static const char bopomofo[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ ㄎㄜ */;
+	ChewingContext *ctx;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 0,
+		"`%s' shall not be in userphrase", bopomofo );
+
+	type_keystroke_by_string( ctx, "dk dk dk <E>" );
+
+	ok( has_userphrase( ctx, bopomofo, NULL ) == 1,
+		"`%s' shall be in userphrase", bopomofo );
+
+	chewing_delete( ctx );
+}
+
+void test_userphrase_auto_learn_with_symbol()
+{
 	static const char bopomofo_1[] = "\xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ */;
 	static const char bopomofo_2[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ */;
 	static const char bopomofo_3[] = "\xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C \xE3\x84\x8E\xE3\x84\x9C" /* ㄎㄜ ㄎㄜ ㄎㄜ */;
@@ -300,6 +321,7 @@ void test_userphrase_auto_learn_hardcode_break()
 void test_userphrase()
 {
 	test_userphrase_auto_learn();
+	test_userphrase_auto_learn_with_symbol();
 	test_userphrase_auto_learn_hardcode_break();
 }
 
