@@ -61,6 +61,6 @@ void TerminateEasySymbolTable( ChewingData *pgdata );
 void copyStringFromPreeditBuf(
 	ChewingData *pgdata, int pos, int len,
 	char *output, int output_len );
-
+int toPreeditBufIndex( ChewingData *pgdata, int pos );
 #endif
 

@@ -1489,3 +1489,33 @@ void copyStringFromPreeditBuf(
 	}
 	output[0] = 0;
 }
+
+/*
+ * This function converts phoneSeq index (which does not count symbol) to
+ * preeditBuf index (which does count symbol).
+ */
+int toPreeditBufIndex( ChewingData *pgdata, int pos )
+{
+	int word_count = 0;
+	int i;
+
+	assert( pgdata );
+	assert( 0 <= pos && pos <= MAX_CHI_SYMBOL_LEN );
+
+	for ( i = 0, word_count = 0 ; i < MAX_CHI_SYMBOL_LEN ; ++i ) {
+		if ( ChewingIsChiAt( i, pgdata ) )
+			++word_count;
+
+		/*
+		 * pos = 0 means finding the first word, so we need to add one
+		 * here.
+		 */
+		if ( word_count == pos + 1 )
+			break;
+	}
+
+	LOG_VERBOSE( "translate phoneSeq index %d to preeditBuf index %d",
+		pos, i );
+
+	return i;
+}

@@ -31,6 +31,7 @@
 #include "tree-private.h"
 #include "private.h"
 #include "plat_mmap.h"
+#include "chewingutil.h"
 
 #define INTERVAL_SIZE ( ( MAX_PHONE_SEQ_LEN + 1 ) * MAX_PHONE_SEQ_LEN / 2 )
 
@@ -556,25 +557,12 @@ static void FillPreeditBuf( ChewingData *pgdata, char *phrase, int from, int to 
 {
 	int i;
 	int start = 0;
-	int word_count = 0;
 
 	assert( pgdata );
 	assert( phrase );
 	assert( from < to );
 
-	/*
-	 * FIXME: from, to count only word, while preeditBuf contains word and
-	 * symbols, so we need to some translation here.
-	 */
-
-	for ( ;; ) {
-		if ( pgdata->preeditBuf[ start ].category == CHEWING_CHINESE ) {
-			++word_count;
-			if ( word_count == from + 1 )
-				break;
-		}
-		++start;
-	}
+	start = toPreeditBufIndex( pgdata, from );
 
 	LOG_VERBOSE( "Fill preeditBuf start %d, from = %d, to = %d", start, from, to );
 
