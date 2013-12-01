@@ -8,11 +8,10 @@
 
 # libchewing - The intelligent phonetic input method library
 
-The Chewing (酷音) input method is an intelligent phonetic (Zhuyin/Bopomofo)
-input method. It is one of the most popular input methods among Traditional
-Chinese users. Chewing was inspired by other proprietary intelligent Zhuyin
-input methods under Microsoft Windows, namely, Wang-Xin by Eten, Microsoft 
-New Zhuyin, and Nature Zhuyin.
+The Chewing (酷音) is an intelligent phonetic (Zhuyin/Bopomofo) input method,
+one of the most popular choices for Traditional Chinese users. Chewing was
+inspired by other proprietary intelligent Zhuyin input methods under Microsoft
+Windows, namely, Wang-Xin by Eten, Microsoft New Zhuyin, and Nature Zhuyin.
 
 The Chewing core team extended their work and actively maintains the project 
 as full open source efforts.
@@ -22,7 +21,7 @@ as full open source efforts.
 + Mailing lists:
    - Development: http://groups.google.com/group/chewing-devel
    - General: http://groups.google.com/group/chewing
-+ Bild Status:
++ Build Status:
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.png)]
     (https://travis-ci.org/chewing/libchewing)
    - Drone.io: [![Status-Icon](https://drone.io/github.com/chewing/libchewing/status.png)]
@@ -33,14 +32,14 @@ as full open source efforts.
 
 ## History
 
-libchewing is derived from Chewing input method, a xcin module focusing on
-intelligent phonetic (Bopomofo/Zhuyin) processing by Lu-chuan Kung (lckung)
-and Kang-pen Chen (kpchen) sponsored by Tsan-sheng Hsu from Academia Sinica
-during 1999-2001.  However, the original authors of Chewing dropped its
-development, and Chewing was highly coupled with xcin, which prevents from
-comprehensive applications.  There was a similar input method, bimsphone,
-which was bundled in XCIN server. However, it did not provide a convenient
-API for further development, either.
+libchewing is derived from the original Chewing input method, a xcin module
+focusing on intelligent phonetic (Bopomofo/Zhuyin) processing by Lu-chuan
+Kung (lckung) and Kang-pen Chen (kpchen) sponsored by Tsan-sheng Hsu from
+Academia Sinica during 1999-2001.  However, the original authors of Chewing
+dropped its development, and Chewing was highly coupled with xcin, which
+prevents from comprehensive applications.  There was a similar input method,
+bimsphone, which was bundled in XCIN server. However, it did not provide a
+convenient API for further development, either.
 
 
 ## Motivation
@@ -261,6 +260,7 @@ key-binding.
 
 
 ### Glossary
+
 Preedit buffer: The places for storing your typing before sending to the
 applications (such as firefox) you are using.
 
@@ -268,6 +268,7 @@ Mode: Mode determines how Chewing reacts on keyboard input.
 
 
 ### Editing mode
+
 This mode is for normal Chinese character and punctuation typing. You are more
 likely working on this mode.
 
