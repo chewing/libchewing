@@ -19,7 +19,6 @@
 
 #include "chewing.h"
 #include "plat_types.h"
-#include "hash-private.h"
 #include "testhelper.h"
 
 FILE *fd;

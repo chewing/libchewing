@@ -182,6 +182,7 @@ static int CheckUserChoose(
 			}
 		}
 	} while ( ( pUserPhraseData = UserGetPhraseNext( pgdata, new_phoneSeq ) ) != NULL );
+	UserGetPhraseEnd( pgdata, new_phoneSeq );
 
 	if ( p_phr->freq != -1 )
 		return 1;
@@ -330,6 +331,7 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 	Phrase *p_phrase, *puserphrase, *pdictphrase;
 	UsedPhraseMode i_used_phrase;
 	uint16_t new_phoneSeq[ MAX_PHONE_SEQ_LEN ];
+	UserPhraseData *userphrase;
 
 	for ( begin = 0; begin < pgdata->nPhoneSeq; begin++ ) {
 		for ( end = begin; end < min( pgdata->nPhoneSeq, begin + MAX_PHRASE_LEN ); end++ ) {
@@ -345,10 +347,11 @@ static void FindInterval( ChewingData *pgdata, TreeDataType *ptd )
 			puserphrase = pdictphrase = NULL;
 			i_used_phrase = USED_PHRASE_NONE;
 
-			/* check user phrase */
-			if ( UserGetPhraseFirst( pgdata, new_phoneSeq ) &&
-					CheckUserChoose( pgdata, new_phoneSeq, begin, end + 1,
-					&p_phrase, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect ) ) {
+			userphrase = UserGetPhraseFirst(pgdata, new_phoneSeq);
+			UserGetPhraseEnd( pgdata, new_phoneSeq );
+
+			if ( userphrase && CheckUserChoose( pgdata, new_phoneSeq, begin, end + 1,
+				&p_phrase, pgdata->selectStr, pgdata->selectInterval, pgdata->nSelect )) {
 				puserphrase = p_phrase;
 			}
 

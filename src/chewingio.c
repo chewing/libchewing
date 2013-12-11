@@ -30,7 +30,6 @@
 #include "userphrase-private.h"
 #include "choice-private.h"
 #include "dict-private.h"
-#include "hash-private.h"
 #include "tree-private.h"
 #include "pinyin-private.h"
 #include "private.h"
@@ -40,6 +39,7 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 #include "key2pho-private.h"
+#include "chewing-sql.h"
 
 const char * const kb_type_str[] = {
 	"KB_DEFAULT",
@@ -176,8 +176,8 @@ CHEWING_API ChewingContext *chewing_new()
 	if ( ret )
 		goto error;
 
-	ret = InitHash( ctx->data );
-	if ( !ret )
+	ret = InitSql( ctx-> data );
+	if ( ret )
 		goto error;
 
 	ctx->cand_no = 0;
@@ -291,7 +291,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminatePinyin( ctx->data );
 			TerminateEasySymbolTable( ctx->data );
 			TerminateSymbolTable( ctx->data );
-			TerminateHash( ctx->data );
+			TerminateSql( ctx->data );
 			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
 			free( ctx->data );
@@ -1052,7 +1052,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	int bQuickCommit = 0;
 
 	/* Update lifetime */
-	ctx->data->static_data.chewing_lifetime++;
+	IncreaseLifeTime( ctx->data );
 
 	/* Skip the special key */
 	if ( key & 0xFF00 ) {
@@ -1440,11 +1440,18 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 {
 	ChewingData *pgdata;
+	int ret;
 
 	if ( !ctx ) return -1;
 
 	pgdata = ctx->data;
-	pgdata->static_data.userphrase_enum = FindNextHash( pgdata, NULL );
+
+	ret = sqlite3_reset( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
+	if ( ret != SQLITE_OK ) {
+		LOG_ERROR("sqlite3_reset returns %d", ret);
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -1454,19 +1461,29 @@ CHEWING_API int chewing_userphrase_has_next(
 	unsigned int *bopomofo_len)
 {
 	ChewingData *pgdata;
+	int ret;
 
 	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
 
 	pgdata = ctx->data;
-	if ( pgdata->static_data.userphrase_enum ) {
-		*phrase_len = strlen(
-			pgdata->static_data.userphrase_enum->data.wordSeq ) + 1;
-		*bopomofo_len = BopomofoFromUintArray(
-			NULL, 0, pgdata->static_data.userphrase_enum->data.phoneSeq );
-		return 1;
 
+	ret = sqlite3_step( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
+	if ( ret != SQLITE_ROW ) {
+		if ( ret != SQLITE_DONE ) {
+			LOG_ERROR( "sqlite3_step returns %d", ret );
+		}
+		return 0;
 	}
-	return 0;
+
+	*phrase_len = strlen( (const char *) sqlite3_column_text(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] ) ) + 1;
+
+	*bopomofo_len = GetBopomofoBufLen( sqlite3_column_int(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH] ) );
+
+	return 1;
 }
 
 CHEWING_API int chewing_userphrase_get(
@@ -1475,25 +1492,43 @@ CHEWING_API int chewing_userphrase_get(
 	char *bopomofo_buf, unsigned int bopomofo_len)
 {
 	ChewingData *pgdata;
+	const char *phrase;
+	int length;
+	int i;
+	uint16_t phone_array[MAX_PHRASE_LEN + 1] = { 0 };
 
 	if ( !ctx || !phrase_buf || !phrase_len ||
 		!bopomofo_buf || !bopomofo_len ) return -1;
 
 	pgdata = ctx->data;
-	if ( pgdata->static_data.userphrase_enum ) {
-		strncpy( phrase_buf, pgdata->static_data.userphrase_enum->data.wordSeq, phrase_len );
-		phrase_buf[ phrase_len - 1 ] = 0;
 
-		BopomofoFromUintArray( bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum->data.phoneSeq );
-		bopomofo_buf[ bopomofo_len - 1 ] = 0;
+	phrase = (const char *) sqlite3_column_text(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] );
+	length = sqlite3_column_int(
+		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH] );
 
-		pgdata->static_data.userphrase_enum = FindNextHash(
-			pgdata, pgdata->static_data.userphrase_enum );
-
-		return 0;
+	if ( phrase_len < strlen( phrase ) + 1 ) {
+		LOG_ERROR("phrase_len %d is smaller than %d", phrase_len, strlen( phrase ) + 1 );
+		return -1;
 	}
 
-	return -1;
+	if ( bopomofo_len < GetBopomofoBufLen( length ) ) {
+		LOG_ERROR("bopomofo_len %d is smaller than %d", bopomofo_len, GetBopomofoBufLen( length ) );
+		return -1;
+	}
+
+	for ( i = 0; i < length && i < ARRAY_SIZE(phone_array); ++i ) {
+		phone_array[i] = sqlite3_column_int(
+			pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+			SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHONE_0 + i]);
+	}
+
+	strncpy( phrase_buf, phrase, phrase_len );
+	BopomofoFromUintArray( bopomofo_buf, bopomofo_len, phone_array );
+
+	return 0;
 }
 
 CHEWING_API int chewing_userphrase_add(
@@ -1591,10 +1626,11 @@ CHEWING_API int chewing_userphrase_lookup(
 
 	user_phrase_data = UserGetPhraseFirst( pgdata, phone_buf );
 	while ( user_phrase_data ) {
-		if ( strcmp( phrase_buf, user_phrase_data->wordSeq) == 0 )
+		if ( strcmp( phrase_buf, user_phrase_data->wordSeq ) == 0 )
 			break;
 		user_phrase_data = UserGetPhraseNext( pgdata, phone_buf );
 	}
+	UserGetPhraseEnd( pgdata, phone_buf );
 	free( phone_buf );
 	return user_phrase_data == NULL ? 0 : 1;
 }

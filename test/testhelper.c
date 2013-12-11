@@ -17,9 +17,9 @@
 
 #include "chewing-private.h"
 #include "chewing-utf8-util.h"
-#include "hash-private.h"
 #include "key2pho-private.h"
 #include "plat_path.h"
+#include "chewing-sql.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;
@@ -432,7 +432,7 @@ int internal_has_userphrase( const char *file UNUSED, int line UNUSED,
 	int i;
 	char *p;
 	char *save_ptr = NULL;
-	HASH_ITEM *item = NULL;
+	UserPhraseData *userphrase;
 	int ret = 0;
 
 	phone = calloc( MAX_PHONE_SEQ_LEN, sizeof (*phone) );
@@ -453,14 +453,18 @@ int internal_has_userphrase( const char *file UNUSED, int line UNUSED,
 		phone[i] = UintFromPhone( p );
 	}
 
-	while ( ( item = HashFindPhonePhrase( ctx->data, phone, item ) ) != NULL ) {
-		if ( phrase == NULL || strcmp( item->data.wordSeq, phrase ) == 0 ) {
+	for ( userphrase = UserGetPhraseFirst( ctx->data, phone );
+		userphrase != NULL;
+		userphrase = UserGetPhraseNext( ctx->data, phone ) ) {
+		if ( phrase == NULL || strcmp( userphrase->wordSeq, phrase ) == 0 ) {
 			ret = 1;
 			goto end;
 		}
+
 	}
 
 end:
+	UserGetPhraseEnd( ctx->data, phone );
 	free( bopomofo_buf );
 	free( phone );
 
@@ -493,5 +497,5 @@ int exit_status()
 
 void clean_userphrase()
 {
-	remove( TEST_HASH_DIR PLAT_SEPARATOR HASH_FILE );
+	remove( TEST_HASH_DIR PLAT_SEPARATOR DB_NAME );
 }

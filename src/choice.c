@@ -155,6 +155,7 @@ static void SetAvailInfo( ChewingData *pgdata, int begin, int end)
 				pai->avail[ pai->nAvail ].len = 0;
 				pai->avail[ pai->nAvail ].id = NULL;
 			}
+			UserGetPhraseEnd( pgdata, userPhoneSeq );
 		}
 
 		if ( pgdata->config.bPhraseChoiceRearward ) {
@@ -338,6 +339,7 @@ static void SetChoiceInfo( ChewingData *pgdata )
 			} while ( ( pUserPhraseData =
 				    UserGetPhraseNext( pgdata, userPhoneSeq ) ) != NULL );
 		}
+		UserGetPhraseEnd( pgdata, userPhoneSeq );
 
 	}
 

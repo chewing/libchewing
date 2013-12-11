@@ -44,6 +44,7 @@ typedef struct UserPhraseData {
 	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
 } UserPhraseData ;
 
+void UserUpdatePhraseBegin( struct ChewingData *pgdata );
 /**
  * @brief Update or add a new UserPhrase.
  *
@@ -57,6 +58,7 @@ typedef struct UserPhraseData {
  */
 int UserUpdatePhrase( struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
+void UserUpdatePhraseEnd( struct ChewingData *pgdata );
 void UserRemovePhrase( struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
 /**
@@ -76,5 +78,9 @@ UserPhraseData *UserGetPhraseFirst( struct ChewingData *pgdata, const uint16_t p
  * @return UserPhraseData, if it's not existing then return NULL.
  */
 UserPhraseData *UserGetPhraseNext( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
+
+void UserGetPhraseEnd( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
+
+void IncreaseLifeTime( struct ChewingData *pgdata );
 
 #endif

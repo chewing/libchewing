@@ -54,6 +54,7 @@ check_PROGRAMS = \
 	randkeystroke \
 	$(TEXT_UI_BIN) \
 	$(NATIVE_TESTS) \
+	sqlite3 \
 	$(NULL)
 
 test_mmap_CPPFLAGS = -DTESTDATA="\"$(srcdir)/default-test.txt\""
@@ -70,7 +71,8 @@ INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-I$(top_srcdir)/test \
+	-I$(top_srcdir)/test/ \
+	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
 	$(CHECK_CFLAGS) \
@@ -83,5 +85,10 @@ LDADD = \
 	$(NULL)
 
 AM_LDFLAGS = -static
+
+sqlite3_SOURCES = \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
+	$(NULL)
 
 CLEANFILES = uhash.dat materials.txt-random test.txt

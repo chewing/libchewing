@@ -18,6 +18,7 @@
  */
 
 /* This file is encoded in UTF-8 */
+#include "key2pho-private.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -200,7 +201,7 @@ uint16_t UintFromPhoneInx( const int ph_inx[] )
 	return result;
 }
 
-static size_t GetPhoneLen( const uint16_t *phoneSeq )
+size_t GetPhoneLen( const uint16_t *phoneSeq )
 {
 	size_t len = 0;
 	assert( phoneSeq );
@@ -233,7 +234,7 @@ size_t BopomofoFromUintArray( char * const bopomofo_buf, const size_t bopomofo_l
 	assert( phoneSeq );
 
 	len = GetPhoneLen( phoneSeq );
-	buf_len = len * ( MAX_UTF8_SIZE * ZUIN_SIZE + 1 );
+	buf_len = GetBopomofoBufLen( len );
 
 	if ( bopomofo_buf && bopomofo_len >= buf_len ) {
 		for ( i = 0; i < len; ++i ) {
@@ -270,4 +271,9 @@ ssize_t UintArrayFromBopomofo( uint16_t *phone_seq, const size_t phone_len, cons
 	phone_seq[ len ] = 0;
 
 	return len;
+}
+
+size_t GetBopomofoBufLen( size_t len )
+{
+	return ( MAX_UTF8_SIZE * ZUIN_SIZE + 1 ) * len;
 }

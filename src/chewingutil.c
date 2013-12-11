@@ -605,6 +605,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 	 * do translate when using APIs that considering symbol.
 	 */
 
+	UserUpdatePhraseBegin( pgdata );
+
 	for ( i = 0; i < pgdata->nPrefer; i++ ) {
 		from = pgdata->preferInterval[ i ].from;
 		len = pgdata->preferInterval[i].to - from;
@@ -660,6 +662,8 @@ void AutoLearnPhrase( ChewingData *pgdata )
 		prev_pos = 0;
 		pending_pos = 0;
 	}
+
+	UserUpdatePhraseEnd( pgdata );
 }
 
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata )

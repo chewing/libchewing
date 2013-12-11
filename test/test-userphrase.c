@@ -19,7 +19,6 @@
 
 #include "chewing.h"
 #include "plat_types.h"
-#include "hash-private.h"
 #include "testhelper.h"
 
 FILE *fd;
@@ -497,6 +496,37 @@ void test_userphrase_manipulate_normal()
 	chewing_delete( ctx );
 }
 
+void test_userphrase_manipulate_maximum()
+{
+	ChewingContext *ctx;
+	const char phrase_in_limit[] = "\xE9\x87\x91\xE7\xAA\xA9\xE9\x8A\x80\xE7\xAA\xA9\xE4\xB8\x8D\xE5\xA6\x82\xE8\x87\xAA\xE5\xB7\xB1\xE7\x9A\x84\xE7\x8B\x97\xE7\xAA\xA9";
+		/* 金窩銀窩不如自己的狗窩 */
+	const char bopomofo_in_limit[] = "\xE3\x84\x90\xE3\x84\xA7\xE3\x84\xA3\x20\xE3\x84\xA8\xE3\x84\x9B\x20\xE3\x84\xA7\xE3\x84\xA3\xCB\x8A\x20\xE3\x84\xA8\xE3\x84\x9B\x20\xE3\x84\x85\xE3\x84\xA8\xCB\x8B\x20\xE3\x84\x96\xE3\x84\xA8\xCB\x8A\x20\xE3\x84\x97\xCB\x8B\x20\xE3\x84\x90\xE3\x84\xA7\xCB\x87\x20\xE3\x84\x89\xE3\x84\x9C\xCB\x99\x20\xE3\x84\x8D\xE3\x84\xA1\xCB\x87\x20\xE3\x84\xA8\xE3\x84\x9B";
+		/* ㄐㄧㄣ ㄨㄛ ㄧㄣˊ ㄨㄛ ㄅㄨˋ ㄖㄨˊ ㄗˋ ㄐㄧˇ ㄉㄜ˙ ㄍㄡˇ ㄨㄛ */
+	const char phrase_out_of_limit[] = "\xE9\x87\x91\xE7\xAA\xA9\xE9\x8A\x80\xE7\xAA\xA9\xE4\xB8\x8D\xE5\xA6\x82\xE8\x87\xAA\xE5\xB7\xB1\xE7\x9A\x84\xE7\x8B\x97\xE7\xAA\xA9\xE5\x97\x8E";
+		/* 金窩銀窩不如自己的狗窩嗎 */
+	const char bopomofo_out_of_limit[] = "\xE3\x84\x90\xE3\x84\xA7\xE3\x84\xA3\x20\xE3\x84\xA8\xE3\x84\x9B\x20\xE3\x84\xA7\xE3\x84\xA3\xCB\x8A\x20\xE3\x84\xA8\xE3\x84\x9B\x20\xE3\x84\x85\xE3\x84\xA8\xCB\x8B\x20\xE3\x84\x96\xE3\x84\xA8\xCB\x8A\x20\xE3\x84\x97\xCB\x8B\x20\xE3\x84\x90\xE3\x84\xA7\xCB\x87\x20\xE3\x84\x89\xE3\x84\x9C\xCB\x99\x20\xE3\x84\x8D\xE3\x84\xA1\xCB\x87\x20\xE3\x84\xA8\xE3\x84\x9B \xE3\x84\x87\xE3\x84\x9A\xCB\x99";
+		/* ㄐㄧㄣ ㄨㄛ ㄧㄣˊ ㄨㄛ ㄅㄨˋ ㄖㄨˊ ㄗˋ ㄐㄧˇ ㄉㄜ˙ ㄍㄡˇ ㄨㄛ ㄇㄚ˙ */
+	int ret;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	ret = chewing_userphrase_add( ctx, phrase_in_limit, bopomofo_in_limit );
+	ok( ret == 0, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 0 );
+	ret = chewing_userphrase_lookup( ctx, phrase_in_limit, bopomofo_in_limit );
+	ok( ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1 );
+
+	ret = chewing_userphrase_add( ctx, phrase_out_of_limit, bopomofo_out_of_limit );
+	ok( ret == -1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, -1 );
+	ret = chewing_userphrase_lookup( ctx, phrase_out_of_limit, bopomofo_out_of_limit );
+	ok( ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
 void test_userphrase_manipulate_hash_collision()
 {
 	ChewingContext *ctx;
@@ -649,6 +679,7 @@ void test_userphrase_manipulate_remove_same_phrase()
 void test_userphrase_manipulate()
 {
 	test_userphrase_manipulate_normal();
+	test_userphrase_manipulate_maximum();
 	test_userphrase_manipulate_hash_collision();
 	test_userphrase_manipulate_error_handling();
 	test_userphrase_manipulate_remove_same_phone();

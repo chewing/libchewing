@@ -3,6 +3,7 @@ INCLUDES = \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/porting_layer/include \
+	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	$(NULL)
 
 CC = $(CC_FOR_BUILD)

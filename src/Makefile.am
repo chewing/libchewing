@@ -3,6 +3,7 @@ INCLUDES = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
+	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
 	$(NULL)
 
@@ -12,16 +13,17 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
+	chewing-sql.c \
 	chewingio.c \
 	chewingutil.c \
 	choice.c \
 	dict.c \
-	hash.c \
 	tree.c \
 	userphrase.c \
 	zuin.c \
 	pinyin.c \
 	mod_aux.c \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
 	$(NULL)
 
 libchewing_la_LIBADD = \
