@@ -380,6 +380,11 @@ static int UpdateLifeTime(ChewingData *pgdata)
 {
 	int ret;
 
+	if (!pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]) {
+		LOG_ERROR("pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE] is NULL");
+		return -1;
+	}
+
 	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);
