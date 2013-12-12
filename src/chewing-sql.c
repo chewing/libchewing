@@ -304,6 +304,7 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
 {
 	int ret;
 
+	assert(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
 	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);
@@ -340,7 +341,7 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
 		return -1;
 	}
 
-
+	assert(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
 	ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);

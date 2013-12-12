@@ -1446,6 +1446,7 @@ CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 
 	pgdata = ctx->data;
 
+	assert( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	ret = sqlite3_reset( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_OK ) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);
