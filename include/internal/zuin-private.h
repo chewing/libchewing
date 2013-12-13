@@ -20,6 +20,7 @@
 #define ZUIN_KEY_ERROR 4
 #define ZUIN_ERROR 8
 #define ZUIN_NO_WORD 16
+#define ZUIN_OPEN_SYMBOL_TABLE 32
 
 /** keyboard layout */
 enum {

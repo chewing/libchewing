@@ -1131,15 +1131,6 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				goto End_keyproc;
 			}
 
-			/* open symbol table */
-			if ( key == '`' ) {
-				pgdata->bSelect = 1;
-				pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
-
-				HaninSymbolInput( pgdata );
-				goto End_KeyDefault;
-			}
-
 			rtn = ZuinPhoInput( pgdata, key );
 			DEBUG_OUT(
 				"\t\tChinese mode key, "
@@ -1195,7 +1186,8 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 						keystrokeRtn = KEYSTROKE_ABSORB;
 
 					break;
-
+				default:
+					goto End_KeyDefault;
 			}
 		}
 		/* English mode */
