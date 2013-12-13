@@ -55,6 +55,8 @@ test/randkeystroke
 test/randkeystroke.exe
 test/simulate
 test/simulate.exe
+test/sqlite3
+test/sqlite3.exe
 test/testchewing
 test/testchewing.exe
 test/test-bopomofo
@@ -97,6 +99,7 @@ test/do-test.xml
 test/test.txt
 test/*.log
 test/*.trs
+test/chewing.sqlite3
 
 # Generated tools/headers
 src/tools/init_database
