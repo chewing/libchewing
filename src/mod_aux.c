@@ -207,9 +207,14 @@ CHEWING_API int chewing_aux_Length( ChewingContext *ctx )
 	return (ctx->data->bShowMsg ? ctx->data->showMsgLen : 0);
 }
 
+CHEWING_API char *chewing_aux_String_static( ChewingContext *ctx )
+{
+	return ctx->data->showMsg;
+}
+
 CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 {
-	return strdup( ctx->data->showMsg );
+	return strdup(chewing_aux_String_static(ctx));
 }
 
 CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
