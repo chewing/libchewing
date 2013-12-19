@@ -184,15 +184,13 @@ void test_maxChiSymbolLen()
 	chewing_delete( ctx );
 }
 
-void test_set_selKey()
+void test_set_selKey_normal()
 {
 	ChewingContext *ctx;
 	int *select_key;
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
-
-	chewing_set_maxChiSymbolLen( ctx, 16 );
 
 	// XXX: chewing_set_selKey shall accept const char *.
 	chewing_set_selKey( ctx,
@@ -209,6 +207,55 @@ void test_set_selKey()
 	chewing_free( select_key );
 
 	chewing_delete( ctx );
+}
+
+void test_set_selKey_error_handling()
+{
+	ChewingContext *ctx;
+	int *select_key;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	chewing_set_selKey( NULL, ALTERNATE_SELECT_KEY, ARRAY_SIZE( ALTERNATE_SELECT_KEY ) );
+	select_key = chewing_get_selKey( ctx );
+	ok( select_key, "chewing_get_selKey shall not return NULL" );
+	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
+		sizeof( DEFAULT_SELECT_KEY )),
+		"select key shall be DEFAULT_SELECT_KEY");
+	chewing_free( select_key );
+
+	chewing_set_selKey( ctx, NULL, ARRAY_SIZE( ALTERNATE_SELECT_KEY ) );
+	select_key = chewing_get_selKey( ctx );
+	ok( select_key, "chewing_get_selKey shall not return NULL" );
+	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
+		sizeof( DEFAULT_SELECT_KEY )),
+		"select key shall be DEFAULT_SELECT_KEY");
+	chewing_free( select_key );
+
+	chewing_set_selKey( ctx, ALTERNATE_SELECT_KEY, 0 );
+	select_key = chewing_get_selKey( ctx );
+	ok( select_key, "chewing_get_selKey shall not return NULL" );
+	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
+		sizeof( DEFAULT_SELECT_KEY )),
+		"select key shall be DEFAULT_SELECT_KEY");
+	chewing_free( select_key );
+
+	chewing_set_selKey( ctx, ALTERNATE_SELECT_KEY, 11 );
+	select_key = chewing_get_selKey( ctx );
+	ok( select_key, "chewing_get_selKey shall not return NULL" );
+	ok( !memcmp( select_key, DEFAULT_SELECT_KEY,
+		sizeof( DEFAULT_SELECT_KEY )),
+		"select key shall be DEFAULT_SELECT_KEY");
+	chewing_free( select_key );
+
+	chewing_delete( ctx );
+}
+
+void test_set_selKey()
+{
+	test_set_selKey_normal();
+	test_set_selKey_error_handling();
 }
 
 void test_set_addPhraseDirection()

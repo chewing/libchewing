@@ -349,12 +349,15 @@ CHEWING_API int chewing_get_maxChiSymbolLen( ChewingContext *ctx )
 }
 
 CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys,
-                                     int len UNUSED)
+                                     int len)
 {
-	memcpy(
-		ctx->data->config.selKey,
-		selkeys,
-		sizeof( selkeys[ 0 ] ) * MAX_SELKEY );
+	if ( !ctx || !selkeys )
+		return;
+
+	if ( MIN_SELKEY <= len && len <= MAX_SELKEY ) {
+		memset( ctx->data->config.selKey, 0, sizeof( ctx->data->config.selKey ) );
+		memcpy( ctx->data->config.selKey, selkeys, sizeof( *selkeys ) * len );
+	}
 }
 
 CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
