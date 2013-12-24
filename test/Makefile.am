@@ -57,8 +57,6 @@ check_PROGRAMS = \
 	sqlite3 \
 	$(NULL)
 
-test_mmap_CPPFLAGS = -DTESTDATA="\"$(srcdir)/default-test.txt\""
-
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke
 genkeystroke_SOURCES = genkeystroke.c
@@ -67,7 +65,7 @@ else
 TEXT_UI_BIN=
 endif
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
@@ -75,6 +73,8 @@ INCLUDES = \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
+	-DTESTDATA="\"$(srcdir)/default-test.txt\"" \
+	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \
 	$(NULL)
 

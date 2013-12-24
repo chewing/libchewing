@@ -1,10 +1,11 @@
 SUBDIRS = common porting_layer
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
+	$(DEFAULT_CPPFLAGS) \
 	$(NULL)
 
 noinst_HEADERS = \
