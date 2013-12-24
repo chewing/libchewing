@@ -192,5 +192,6 @@ Build options:
   Enable gcov             $ENABLE_GCOV
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
+  Default CPPFLAGS        $DEFAULT_CPPFLAGS
   Default LDFLAGS         $AM_LDFLAGS
 ])
