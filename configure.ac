@@ -103,7 +103,7 @@ AM_CFLAGS="$AM_CFLAGS -Wall $CFLAGS"
 
 # Add '_GNU_SOURCE' for asprintf
 AS_IF([test x$ac_cv_func_asprintf == xyes],
-      [DEFAULT_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
+      [DEFAULT_CPPFLAGS="$DEFAULT_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
