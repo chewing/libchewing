@@ -111,7 +111,8 @@ extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
 
 struct ChewingData;
 
-int InitSql(struct ChewingData *pgdata);
+int InitSql(struct ChewingData *pgdata, const char *path);
 void TerminateSql(struct ChewingData *pgdata);
+char *GetDefaultUserPhrasePath(struct ChewingData *pgdata);
 
 #endif

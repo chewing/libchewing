@@ -101,7 +101,7 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
 #include <Shlobj.h>
 #define USERPHRASE_DIR	"ChewingTextService"
 
-static char *GetUserPhraseStoregePath(ChewingData *pgdata)
+char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
 	wchar_t *tmp;
 	char *path;
@@ -121,14 +121,14 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 		GetEnvironmentVariableW(L"CHEWING_USER_PATH", tmp, len);
 
 		len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, NULL, 0, NULL, NULL);
-		++len;
-		path = calloc(sizeof(*path), len);
+		path = calloc(sizeof(*path), len + 1 + strlen(DB_NAME) + 1);
 		if (!path) {
 			free(tmp);
 			LOG_ERROR("calloc returns %#p", path);
 			exit(-1);
 		}
 		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
+		strcat(path + len, "\\" DB_NAME);
 
 		free(tmp);
 		return path;
@@ -145,15 +145,14 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 		GetEnvironmentVariableW(L"USERPROFILE", tmp, len);
 
 		len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, NULL, 0, NULL, NULL);
-		len += 1 + strlen(USERPHRASE_DIR);
-		path = calloc(sizeof(*path), len);
+		path = calloc(sizeof(*path), len + 1 + strlen(USERPHRASE_DIR) + 1 + strlen(DB_NAME) + 1);
 		if (!path) {
 			free(tmp);
 			LOG_ERROR("calloc returns %#p", path);
 			exit(-1);
 		}
 		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
-		strncat(path, USERPHRASE_DIR, len);
+		strcat(path + len, "\\" USERPHRASE_DIR "\\" DB_NAME);
 
 		free(tmp);
 		return path;
@@ -174,7 +173,7 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 #include <string.h>
 #include <unistd.h>
 
-static char *GetUserPhraseStoregePath(ChewingData *pgdata)
+char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
 	char *tmp;
 	char *path;
@@ -184,7 +183,7 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 
 	tmp = getenv("CHEWING_USER_PATH");
 	if (tmp && access(tmp, W_OK) == 0) {
-		ret = asprintf(&path, "%s", tmp);
+		ret = asprintf(&path, "%s/%s", tmp, DB_NAME);
 		if (ret == -1) {
 			LOG_ERROR("asprintf returns %d", ret);
 			exit(-1);
@@ -197,7 +196,7 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 		tmp = PLAT_TMPDIR;
 	}
 
-	ret = asprintf(&path, "%s" PLAT_SEPARATOR "%s", tmp, USERPHRASE_DIR);
+	ret = asprintf(&path, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
 	if (ret == -1) {
 		LOG_ERROR("asprintf returns %d", ret);
 		exit(-1);
@@ -212,30 +211,19 @@ static char *GetUserPhraseStoregePath(ChewingData *pgdata)
 
 static sqlite3 *GetSQLiteInstance(ChewingData *pgdata, const char *path)
 {
-	int len;
-	char *buf;
 	int ret;
 	sqlite3 *db = NULL;
 
 	assert(pgdata);
 	assert(path);
 
-	len = strlen(path) + strlen(DB_NAME) + 1 + 1;
-	buf = calloc(sizeof(*buf), len);
-	if (!buf) {
-		LOG_ERROR("calloc returns %#p, length = %d", buf, len);
-		exit(-1);
-	}
-
-	snprintf(buf, len, "%s" PLAT_SEPARATOR "%s", path, DB_NAME);
-	ret = sqlite3_open(buf, &db);
+	ret = sqlite3_open(path, &db);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_open returns %d", ret);
 		goto end;
 	}
 
 end:
-	free(buf);
 	return db;
 }
 
@@ -574,18 +562,12 @@ end:
 	free(uhash);
 }
 
-int InitSql(ChewingData *pgdata)
+int InitSql(ChewingData *pgdata, const char *path)
 {
 	int ret;
-	char *path = NULL;
 
 	assert(!pgdata->static_data.db);
-
-	path = GetUserPhraseStoregePath(pgdata);
-	if (!path) {
-		LOG_ERROR("GetUserPhraseStoregePath returns %#p", path);
-		goto error;
-	}
+	assert(path);
 
 	pgdata->static_data.db = GetSQLiteInstance(pgdata, path);
 	if (!pgdata->static_data.db) {
@@ -621,12 +603,10 @@ int InitSql(ChewingData *pgdata)
 
 	MigrateOldFormat(pgdata, path);
 
-	free(path);
 	return 0;
 
 error:
 	TerminateSql(pgdata);
-	free(path);
 	return -1;
 }
 

@@ -590,4 +590,11 @@ CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx );
 
 CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx );
 
+CHEWING_API ChewingContext *chewing_new2(
+	const char *syspath,
+	const char *userpath,
+	void (*logger)( void *data, int level, const char *fmt, ... ),
+	void *loggerdata
+);
+
 #endif /* _CHEWING_IO_H */
