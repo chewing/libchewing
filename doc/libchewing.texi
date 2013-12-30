@@ -188,7 +188,19 @@ Context handle used for Chewing @acronym{IM} @acronym{API}s
 The @code{chewing_new} function creates a new instance of the Chewing IM.
 
 The return value is a pointer to the new Chewing IM instance. See also
-the @code{chewing_delete} function.
+the @code{chewing_new2}, @code{chewing_delete} functions.
+@end deftypefun
+
+@deftypefun ChewingContext* chewing_new2 ( const char *@var{syspath}, const char *@var{userpath}, void (*@var{logger})( void *data, int level, const char *fmt, ... ), void *@var{loggerdata})
+The @code{chewing_new2} function creates a new instance of the Chewing IM. The
+@var{syspath} is the directory path to system dictionary. The @var{userpath} is
+file path to user dictionary. User shall have enough permission to update this
+file. The @var{logger} and @var{loggerdata} is logger function and its data.
+
+All parameters will be default if set to @code{NULL}.
+
+The return value is a pointer to the new Chewing IM instance. See also
+the @code{chewing_new}, @code{chewing_delete} function.
 @end deftypefun
 
 @deftypefun void chewing_delete (ChewingContext *@var{ctx})
