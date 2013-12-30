@@ -110,3 +110,4 @@ void internal_ok_keystroke_rtn( const char *file, int line,
 int internal_has_userphrase( const char *file, int line,
 	ChewingContext *ctx, const char *bopomofo, const char *phrase );
 void internal_start_testcase( const char *func, ChewingContext *ctx, FILE *file );
+void logger( void *data, int level, const char *fmt, ... );

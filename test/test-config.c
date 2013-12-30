@@ -521,6 +521,72 @@ void test_deprecated()
 	chewing_delete( ctx );
 }
 
+void test_new2_syspath_alternative()
+{
+	ChewingContext *ctx;
+
+	printf("#\n# %s\n#\n", __func__);
+	fprintf( fd, "#\n# %s\n#\n", __func__ );
+
+	ctx = chewing_new2( TEST_DATA_DIR, NULL, logger, fd );
+	ok( ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL );
+
+	chewing_delete( ctx );
+}
+
+void test_new2_syspath_error()
+{
+	ChewingContext *ctx;
+
+	printf("#\n# %s\n#\n", __func__);
+	fprintf( fd, "#\n# %s\n#\n", __func__ );
+
+	ctx = chewing_new2( "NoSuchPath", NULL, logger, fd );
+	ok( ctx == NULL, "chewing_new2 returns `%#p' shall be `%#p'", ctx, NULL );
+}
+
+void test_new2_syspath()
+{
+	test_new2_syspath_alternative();
+	test_new2_syspath_error();
+}
+
+void test_new2_userpath_alternative()
+{
+	ChewingContext *ctx;
+
+	printf("#\n# %s\n#\n", __func__);
+	fprintf( fd, "#\n# %s\n#\n", __func__ );
+
+	ctx = chewing_new2( NULL, TEST_HASH_DIR "/test.sqlite3", logger, fd );
+	ok( ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL );
+
+	chewing_delete( ctx );
+}
+
+void test_new2_userpath_error()
+{
+	ChewingContext *ctx;
+
+	printf("#\n# %s\n#\n", __func__);
+	fprintf( fd, "#\n# %s\n#\n", __func__ );
+
+	ctx = chewing_new2( NULL, TEST_HASH_DIR , logger, fd );
+	ok( ctx == NULL, "chewing_new2 returns `%#p' shall be `%#p'", ctx, NULL );
+}
+
+void test_new2_userpath()
+{
+	test_new2_userpath_alternative();
+	test_new2_userpath_error();
+}
+
+void test_new2()
+{
+	test_new2_syspath();
+	test_new2_userpath();
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
@@ -552,6 +618,8 @@ int main(int argc, char *argv[])
 	test_set_ShapeMode();
 
 	test_deprecated();
+
+	test_new2();
 
 	fclose( fd );
 

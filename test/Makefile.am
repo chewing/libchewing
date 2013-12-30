@@ -73,6 +73,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
+	-DTEST_DATA_DIR="\"$(top_srcdir)/test/data\"" \
 	-DTESTDATA="\"$(srcdir)/default-test.txt\"" \
 	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \

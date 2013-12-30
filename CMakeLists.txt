@@ -248,7 +248,7 @@ add_library(testhelper STATIC
 target_link_libraries(testhelper sqlite3_static)
 set_target_properties(testhelper PROPERTIES
 	COMPILE_DEFINITIONS
-		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
+		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
 )
 
 set_target_properties(${ALL_TESTS} PROPERTIES
@@ -258,7 +258,7 @@ set_target_properties(${ALL_TESTS} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
 	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 	COMPILE_DEFINITIONS
-		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
+		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
 )
 foreach(target ${ALL_TESTS})
 	target_link_libraries(${target} testhelper)

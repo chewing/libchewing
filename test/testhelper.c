@@ -471,7 +471,7 @@ end:
 	return ret;
 }
 
-static void logger( void *data, int level, const char *fmt, ... )
+void logger( void *data, int level, const char *fmt, ... )
 {
 	va_list ap;
 	FILE *fd = (FILE *) data;
