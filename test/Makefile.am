@@ -1,16 +1,9 @@
-valgrind-check: testchewing test.txt
+valgrind-check: testchewing
 	@echo "Please waiting for the valgrind results..."
 	libtool --mode=execute valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
-		./testchewing < test.txt
-
-test.txt: default-test.txt
-	@if [ ! -f test.txt ]; then cp $(srcdir)/default-test.txt test.txt ; fi
-
-dist_noinst_DATA = \
-	default-test.txt \
-	$(NULL)
+		./testchewing < $(srcdir)/data/default-test.txt
 
 noinst_LTLIBRARIES = libtesthelper.la
 
@@ -73,8 +66,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
-	-DTEST_DATA_DIR="\"$(top_srcdir)/test/data\"" \
-	-DTESTDATA="\"$(srcdir)/default-test.txt\"" \
+	-DTEST_DATA_DIR="\"$(srcdir)/data\"" \
 	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \
 	$(NULL)

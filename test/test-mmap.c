@@ -38,7 +38,7 @@ void test_UnitFromPlatMmap()
 
 	start_testcase( NULL, fd );
 
-	idx = plat_mmap_create(&m_mmap, TESTDATA, FLAG_ATTRIBUTE_READ);
+	idx = plat_mmap_create(&m_mmap, TEST_DATA_DIR PLAT_SEPARATOR "default-test.txt", FLAG_ATTRIBUTE_READ);
 	ok (idx == 28, "plat_mmap_create");
 	if (idx > 0) {
 		csize = idx;
