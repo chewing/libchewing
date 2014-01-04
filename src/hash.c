@@ -503,38 +503,13 @@ void TerminateUserphrase( ChewingData *pgdata )
 	}
 }
 
-void setHashFileName( ChewingData *pgdata )
-{
-	char *path;
-
-	path = getenv( "CHEWING_USER_PATH" );
-
-	/* make sure of write permission */
-	if ( path && access( path, W_OK ) == 0 ) {
-		snprintf( pgdata->static_data.hashfilename, sizeof( pgdata->static_data.hashfilename ),
-			"%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
-		return;
-	}
-
-	path = getenv( "HOME" );
-	if ( !path ) {
-		path = PLAT_TMPDIR;
-	}
-
-	snprintf( pgdata->static_data.hashfilename, sizeof( pgdata->static_data.hashfilename ),
-		"%s%s", path, CHEWING_HASH_PATH);
-	PLAT_MKDIR( pgdata->static_data.hashfilename );
-	strcat( pgdata->static_data.hashfilename, PLAT_SEPARATOR );
-	strcat( pgdata->static_data.hashfilename, HASH_FILE );
-}
-
 int InitUserphrase( struct ChewingData *pgdata, const char *path )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
-	setHashFileName( pgdata );
+	strncpy( pgdata->static_data.hashfilename, path, sizeof( pgdata->static_data.hashfilename ) );
 	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
 
 open_hash_file:
