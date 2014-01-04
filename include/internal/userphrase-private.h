@@ -21,6 +21,12 @@
 #  include <stdint.h>
 #endif
 
+#if WITH_SQLITE
+#define DB_NAME	"chewing.sqlite3"
+#else
+#define DB_NAME	"uhash.dat"
+#endif
+
 #define FREQ_INIT_VALUE (1)
 #define SHORT_INCREASE_FREQ (10)
 #define MEDIUM_INCREASE_FREQ (5)
@@ -82,5 +88,7 @@ UserPhraseData *UserGetPhraseNext( struct ChewingData *pgdata, const uint16_t ph
 void UserGetPhraseEnd( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
 
 void IncreaseLifeTime( struct ChewingData *pgdata );
+
+char *GetDefaultUserPhrasePath( struct ChewingData *pgdata );
 
 #endif

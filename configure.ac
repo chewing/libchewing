@@ -91,6 +91,7 @@ AS_IF([test x"$with_sqlite" == x"yes"], [
     AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
     AM_LDFLAGS="$AM_LDFLAGS $PTHREAD_LIBS"
   ], [AC_MSG_ERROR([cannot find pthread])])
+  AC_DEFINE([WITH_SQLITE], [1], [Use SQLite to store userphrase])
 ])
 
 # plat_mmap_posix

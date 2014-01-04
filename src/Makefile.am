@@ -23,6 +23,7 @@ libchewing_la_SOURCES = \
 	zuin.c \
 	pinyin.c \
 	mod_aux.c \
+	userphrase.c \
 	$(USERPHRASE_SOURCES) \
 	$(NULL)
 
@@ -48,5 +49,10 @@ libchewing_la_SOURCES += \
 	chewing-sql.c \
 	userphrase-sql.c \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
+	$(NULL)
+else
+libchewing_la_SOURCES += \
+	hash.c \
+	userphrase-hash.c \
 	$(NULL)
 endif

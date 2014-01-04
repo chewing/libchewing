@@ -14,7 +14,6 @@
 #  include <config.h>
 #endif
 
-#define DB_NAME	"chewing.sqlite3"
 
 /*
  * userphrase_v1 table
@@ -111,8 +110,7 @@ extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
 
 struct ChewingData;
 
-int InitSql(struct ChewingData *pgdata, const char *path);
-void TerminateSql(struct ChewingData *pgdata);
-char *GetDefaultUserPhrasePath(struct ChewingData *pgdata);
+int InitUserphrase(struct ChewingData *pgdata, const char *path);
+void TerminateUserphrase(struct ChewingData *pgdata);
 
 #endif

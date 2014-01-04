@@ -16,6 +16,9 @@
  * @file chewingio.c
  * @brief Implement basic I/O routines for Chewing manipulation.
  */
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>
@@ -39,7 +42,12 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 #include "key2pho-private.h"
+
+#if WITH_SQLITE
 #include "chewing-sql.h"
+#else
+#include "hash-private.h"
+#endif
 
 const char * const kb_type_str[] = {
 	"KB_DEFAULT",
@@ -217,7 +225,7 @@ CHEWING_API ChewingContext *chewing_new2(
 		goto error;
 	}
 
-	ret = InitSql( ctx-> data, userphrase_path );
+	ret = InitUserphrase( ctx-> data, userphrase_path );
 	free( userphrase_path );
 
 	if ( ret ) {
@@ -356,7 +364,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 			TerminatePinyin( ctx->data );
 			TerminateEasySymbolTable( ctx->data );
 			TerminateSymbolTable( ctx->data );
-			TerminateSql( ctx->data );
+			TerminateUserphrase( ctx->data );
 			TerminateTree( ctx->data );
 			TerminateDict( ctx->data );
 			free( ctx->data );
@@ -1500,19 +1508,23 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 {
 	ChewingData *pgdata;
+#if WITH_SQLITE
 	int ret;
+#endif
 
 	if ( !ctx ) return -1;
 
 	pgdata = ctx->data;
-
+#if WITH_SQLITE
 	assert( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	ret = sqlite3_reset( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_OK ) {
 		LOG_ERROR("sqlite3_reset returns %d", ret);
 		return -1;
 	}
-
+#else
+	pgdata->static_data.userphrase_enum = FindNextHash( pgdata, NULL );
+#endif
 	return 0;
 }
 
@@ -1522,12 +1534,15 @@ CHEWING_API int chewing_userphrase_has_next(
 	unsigned int *bopomofo_len)
 {
 	ChewingData *pgdata;
+#if WITH_SQLITE
 	int ret;
+#endif
 
 	if ( !ctx || !phrase_len || !bopomofo_len ) return 0;
 
 	pgdata = ctx->data;
 
+#if WITH_SQLITE
 	ret = sqlite3_step( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_ROW ) {
 		if ( ret != SQLITE_DONE ) {
@@ -1545,6 +1560,17 @@ CHEWING_API int chewing_userphrase_has_next(
 		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH] ) );
 
 	return 1;
+#else
+	if ( pgdata->static_data.userphrase_enum ) {
+		*phrase_len = strlen(
+			pgdata->static_data.userphrase_enum->data.wordSeq ) + 1;
+		*bopomofo_len = BopomofoFromUintArray(
+			NULL, 0, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		return 1;
+
+	}
+	return 0;
+#endif
 }
 
 CHEWING_API int chewing_userphrase_get(
@@ -1553,16 +1579,18 @@ CHEWING_API int chewing_userphrase_get(
 	char *bopomofo_buf, unsigned int bopomofo_len)
 {
 	ChewingData *pgdata;
+#if WITH_SQLITE
 	const char *phrase;
 	int length;
 	int i;
 	uint16_t phone_array[MAX_PHRASE_LEN + 1] = { 0 };
+#endif
 
 	if ( !ctx || !phrase_buf || !phrase_len ||
 		!bopomofo_buf || !bopomofo_len ) return -1;
 
 	pgdata = ctx->data;
-
+#if WITH_SQLITE
 	phrase = (const char *) sqlite3_column_text(
 		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
 		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] );
@@ -1590,6 +1618,22 @@ CHEWING_API int chewing_userphrase_get(
 	BopomofoFromUintArray( bopomofo_buf, bopomofo_len, phone_array );
 
 	return 0;
+#else
+	if ( pgdata->static_data.userphrase_enum ) {
+		strncpy( phrase_buf, pgdata->static_data.userphrase_enum->data.wordSeq, phrase_len );
+		phrase_buf[ phrase_len - 1 ] = 0;
+
+		BopomofoFromUintArray( bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum->data.phoneSeq );
+		bopomofo_buf[ bopomofo_len - 1 ] = 0;
+
+		pgdata->static_data.userphrase_enum = FindNextHash(
+			pgdata, pgdata->static_data.userphrase_enum );
+
+		return 0;
+	}
+
+	return -1;
+#endif
 }
 
 CHEWING_API int chewing_userphrase_add(

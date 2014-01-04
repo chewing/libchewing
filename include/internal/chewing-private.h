@@ -29,9 +29,12 @@ typedef SSIZE_T ssize_t;
 
 #include "global.h"
 #include "plat_mmap.h"
-#include "sqlite3.h"
+
 #include "userphrase-private.h"
+#if WITH_SQLITE
+#include "sqlite3.h"
 #include "chewing-sql.h"
+#endif
 
 #define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
@@ -172,12 +175,20 @@ typedef struct ChewingStaticData {
 	const char *dict;
 	plat_mmap dict_mmap;
 
+#if WITH_SQLITE
 	sqlite3 *db;
 	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
 	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
 
 	unsigned int original_lifetime;
 	unsigned int new_lifetime;
+#else
+	int chewing_lifetime;
+
+	char hashfilename[ 200 ];
+	struct HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct HASH_ITEM *userphrase_enum; /* FIXME: Shall be in ChewingData? */
+#endif
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
@@ -236,7 +247,12 @@ typedef struct ChewingData {
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
+#if WITH_SQLITE
 	UserPhraseData userphrase_data;
+#else
+	struct HASH_ITEM *prev_userphrase;
+#endif
+
 	ChewingStaticData static_data;
 	void (*logger)( void *data, int level, const char *fmt, ... );
 	void *loggerData;

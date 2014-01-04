@@ -11,9 +11,13 @@ matrix:
       env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
+    - compiler: gcc
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_SQLITE=no"
+    - compiler: clang
+      env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite=no"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure && make CFLAGS="-Wall -Werror" && make check; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check; fi
   - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:

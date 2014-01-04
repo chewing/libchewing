@@ -19,7 +19,7 @@
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"
 #include "plat_path.h"
-#include "chewing-sql.h"
+#include "userphrase-private.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;

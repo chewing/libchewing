@@ -1,11 +1,7 @@
 /**
- * userphrase.c
+ * userphrase-sql.c
  *
- * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
- *
- * Copyright (c) 2004, 2006
+ * Copyright (c) 2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution

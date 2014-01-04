@@ -47,7 +47,6 @@ check_PROGRAMS = \
 	randkeystroke \
 	$(TEXT_UI_BIN) \
 	$(NATIVE_TESTS) \
-	sqlite3 \
 	$(NULL)
 
 if ENABLE_TEXT_UI
@@ -79,9 +78,15 @@ LDADD = \
 
 AM_LDFLAGS = -static
 
+if WITH_SQLITE
 sqlite3_SOURCES = \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
 	$(NULL)
 
-CLEANFILES = uhash.dat materials.txt-random test.txt
+check_PROGRAMS += \
+	sqlite3 \
+	$(NULL)
+endif
+
+CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3

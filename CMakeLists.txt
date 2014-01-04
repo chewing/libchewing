@@ -306,7 +306,7 @@ add_library(chewing OBJECT
 	${SRC_DIR}/porting_layer/src/plat_path.c
 	${SRC_DIR}/private.h
 	${SRC_DIR}/tree.c
-
+	${SRC_DIR}/userphrase.c
 	${SRC_DIR}/zuin.c
 )
 set_target_properties(chewing PROPERTIES
@@ -340,6 +340,13 @@ if (WITH_SQLITE)
 		${SRC_DIR}/userphrase-sql.c
 	)
 	target_link_libraries(userphrase sqlite3_static)
+else()
+	add_library(userphrase STATIC
+		${INC_DIR}/internal/hash-private.h
+
+		${SRC_DIR}/hash.c
+		${SRC_DIR}/userphrase-hash.c
+	)
 endif()
 
 if (NOT MSVC)
