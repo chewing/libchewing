@@ -147,6 +147,9 @@ int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 	int len;
 
 	len = ueStrLen( wordSeq );
+	if ( len > MAX_PHRASE_LEN )
+		return USER_UPDATE_FAIL;
+
 	pItem = HashFindEntry( pgdata, phoneSeq, wordSeq );
 	if ( ! pItem ) {
 		if ( ! AlcUserPhraseSeq( &data, len, strlen( wordSeq ) ) ) {
