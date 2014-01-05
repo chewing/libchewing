@@ -45,7 +45,8 @@ endif()
 # automake compatibility
 add_definitions(-DHAVE_CONFIG_H=1)
 
-option(WITH_SQLITE "Use SQLite to store userphrase" true)
+option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
+option(WITH_STATIC_SQLITE3 "Use static sqlite3" false)
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
@@ -56,6 +57,25 @@ check_type_size(uint16_t UINT16_T)
 
 set(CURSES_NEED_WIDE true)
 find_package(Curses)
+
+if (WITH_SQLITE3)
+	if (WITH_STATIC_SQLITE3)
+		set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
+		include_directories(
+			${SQLITE3_SRC_DIR}
+		)
+	else()
+		find_library(SQLITE3_LIBRARY sqlite3)
+		find_file(SQLITE3_HEADER sqlite3.h)
+		get_filename_component(SQLITE3_INCLUDE ${SQLITE3_HEADER} PATH)
+
+		if (NOT (SQLITE3_LIBRARY AND SQLITE3_INCLUDE))
+			message(SEND_ERROR "Cannot find sqlite3 library")
+		endif()
+
+		include_directories(SQLITE3_INCLUDE)
+	endif()
+endif()
 
 include(CheckFunctionExists)
 check_function_exists(strtok_r HAVE_STRTOK_R)
@@ -100,13 +120,6 @@ set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
-
-if (WITH_SQLITE)
-	set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
-	include_directories(
-		${SQLITE3_SRC_DIR}
-	)
-endif()
 
 include_directories(
 	${PROJECT_BINARY_DIR}/include
@@ -313,33 +326,37 @@ set_target_properties(chewing PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
 
-if (WITH_SQLITE)
-	find_package (Threads)
-	add_library(sqlite3_static STATIC
-		${SQLITE3_SRC_DIR}/sqlite3.c
-		${SQLITE3_SRC_DIR}/sqlite3.h
-	)
-	target_link_libraries(sqlite3_static ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-
-	add_executable(sqlite3
-		${SQLITE3_SRC_DIR}/shell.c
-	)
-	target_link_libraries(sqlite3 sqlite3_static)
-	set_target_properties(sqlite3 PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
-	)
-
+if (WITH_SQLITE3)
 	add_library(userphrase STATIC
 		${INC_DIR}/internal/chewing-sql.h
 
 		${SRC_DIR}/chewing-sql.c
 		${SRC_DIR}/userphrase-sql.c
 	)
-	target_link_libraries(userphrase sqlite3_static)
+
+	if (WITH_STATIC_SQLITE3)
+		find_package (Threads)
+		add_library(sqlite3_library STATIC
+			${SQLITE3_SRC_DIR}/sqlite3.c
+			${SQLITE3_SRC_DIR}/sqlite3.h
+		)
+		target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
+		add_executable(sqlite3
+			${SQLITE3_SRC_DIR}/shell.c
+		)
+		target_link_libraries(sqlite3 sqlite3_library)
+		set_target_properties(sqlite3 PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
+		)
+		target_link_libraries(userphrase sqlite3_library)
+	else()
+		target_link_libraries(testhelper ${SQLITE3_LIBRARY})
+	endif()
 else()
 	add_library(userphrase STATIC
 		${INC_DIR}/internal/hash-private.h
@@ -354,7 +371,6 @@ if (NOT MSVC)
 		$<TARGET_OBJECTS:chewing>
 		$<TARGET_OBJECTS:common>
 	)
-	target_link_libraries(chewing_shared userphrase)
 	list(APPEND LIBS chewing_shared)
 endif()
 
@@ -362,8 +378,14 @@ add_library(chewing_static STATIC
 	$<TARGET_OBJECTS:chewing>
 	$<TARGET_OBJECTS:common>
 )
-target_link_libraries(chewing_static userphrase)
 list(APPEND LIBS chewing_static)
+
+foreach(lib ${LIBS})
+	target_link_libraries(${lib} userphrase)
+	if (WITH_SQLITE3 AND NOT WITH_STATIC_SQLITE3)
+		target_link_libraries(${lib} ${SQLITE3_LIBRARY})
+	endif()
+endforeach()
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing

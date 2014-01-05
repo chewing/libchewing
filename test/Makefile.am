@@ -78,7 +78,8 @@ LDADD = \
 
 AM_LDFLAGS = -static
 
-if WITH_SQLITE
+if WITH_SQLITE3
+if WITH_STATIC_SQLITE3
 sqlite3_SOURCES = \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
@@ -87,6 +88,7 @@ sqlite3_SOURCES = \
 check_PROGRAMS += \
 	sqlite3 \
 	$(NULL)
+endif
 endif
 
 CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3

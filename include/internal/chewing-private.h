@@ -31,7 +31,7 @@ typedef SSIZE_T ssize_t;
 #include "plat_mmap.h"
 
 #include "userphrase-private.h"
-#if WITH_SQLITE
+#if WITH_SQLITE3
 #include "sqlite3.h"
 #include "chewing-sql.h"
 #endif
@@ -175,7 +175,7 @@ typedef struct ChewingStaticData {
 	const char *dict;
 	plat_mmap dict_mmap;
 
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	sqlite3 *db;
 	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
 	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
@@ -247,7 +247,7 @@ typedef struct ChewingData {
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	UserPhraseData userphrase_data;
 #else
 	struct HASH_ITEM *prev_userphrase;

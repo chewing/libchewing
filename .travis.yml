@@ -11,10 +11,14 @@ matrix:
       env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
-    - compiler: gcc
-      env: BUILD=cmake CMAKE_OPTION="-DWITH_SQLITE=no"
     - compiler: clang
-      env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite=no"
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_STATIC_SQLITE3=yes"
+    - compiler: gcc
+      env: BUILD=autotools CONFIGURE_OPTION="--with-static_sqlite3=yes"
+    - compiler: gcc
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_SQLITE3=no"
+    - compiler: clang
+      env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite3=no"
 
 script:
   - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check; fi
@@ -24,7 +28,7 @@ before_install:
   - sudo pip install cpp-coveralls --use-mirrors
   - sudo add-apt-repository --yes ppa:chewing/travis-ci
   - sudo apt-get update -qq
-  - sudo apt-get install -qq texinfo cmake valgrind
+  - sudo apt-get install -qq texinfo cmake valgrind libsqlite3-dev
 
 after_success:
   - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern 'CMake[^\.]*\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi

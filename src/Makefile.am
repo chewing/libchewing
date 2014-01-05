@@ -40,16 +40,22 @@ libchewing_la_LDFLAGS = \
 	-export-symbols-regex "^(chewing)_" \
 	$(NULL)
 
-if WITH_SQLITE
+if WITH_SQLITE3
+libchewing_la_SOURCES += \
+	chewing-sql.c \
+	userphrase-sql.c \
+	$(NULL)
+
+if WITH_STATIC_SQLITE3
 AM_CPPFLAGS += \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	$(NULL)
 
 libchewing_la_SOURCES += \
-	chewing-sql.c \
-	userphrase-sql.c \
 	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
 	$(NULL)
+endif
+
 else
 libchewing_la_SOURCES += \
 	hash.c \

@@ -43,7 +43,7 @@
 #include "chewing-private.h"
 #include "key2pho-private.h"
 
-#if WITH_SQLITE
+#if WITH_SQLITE3
 #include "chewing-sql.h"
 #else
 #include "hash-private.h"
@@ -1508,14 +1508,14 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 {
 	ChewingData *pgdata;
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	int ret;
 #endif
 
 	if ( !ctx ) return -1;
 
 	pgdata = ctx->data;
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	assert( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	ret = sqlite3_reset( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_OK ) {
@@ -1534,7 +1534,7 @@ CHEWING_API int chewing_userphrase_has_next(
 	unsigned int *bopomofo_len)
 {
 	ChewingData *pgdata;
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	int ret;
 #endif
 
@@ -1542,7 +1542,7 @@ CHEWING_API int chewing_userphrase_has_next(
 
 	pgdata = ctx->data;
 
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	ret = sqlite3_step( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
 	if ( ret != SQLITE_ROW ) {
 		if ( ret != SQLITE_DONE ) {
@@ -1579,7 +1579,7 @@ CHEWING_API int chewing_userphrase_get(
 	char *bopomofo_buf, unsigned int bopomofo_len)
 {
 	ChewingData *pgdata;
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	const char *phrase;
 	int length;
 	int i;
@@ -1590,7 +1590,7 @@ CHEWING_API int chewing_userphrase_get(
 		!bopomofo_buf || !bopomofo_len ) return -1;
 
 	pgdata = ctx->data;
-#if WITH_SQLITE
+#if WITH_SQLITE3
 	phrase = (const char *) sqlite3_column_text(
 		pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
 		SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHRASE] );

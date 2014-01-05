@@ -74,24 +74,38 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strtok_r asprintf])
 
 # options
-AC_ARG_WITH(
-  [sqlite],
-  AS_HELP_STRING([--with-sqlite], [Use SQLite to store userphrase @<:@default=yes@:>@]),
-  [],
-  [with_sqlite=yes])
-AM_CONDITIONAL([WITH_SQLITE], [test x"$with_sqlite" == x"yes"])
+AC_ARG_WITH([sqlite3],
+            AS_HELP_STRING([--with-sqlite3], [Use sqlite3 to store userphrase @<:@default=yes@:>@]),
+            [],
+            [with_sqlite3=yes])
+AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
+
+AC_ARG_WITH([static-sqlite3],
+            AS_HELP_STRING([--with-static-sqlite3], [Use static sqlite3 @<:@default=no@:>@]),
+            [],
+            [with_static_sqlite3=no])
+AM_CONDITIONAL([WITH_STATIC_SQLITE3], [test x"$with_static_sqlite3" == x"yes"])
 
 # for sqlite
-AS_IF([test x"$with_sqlite" == x"yes"], [
-  AC_SEARCH_LIBS([dlopen], [dl dld],
-    [AS_IF([test x$ac_cv_search_dlopen != x"none required"],
-           [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_dlopen"])],
-    [AC_MSG_ERROR([unable to find the dlopen() function])])
-  AX_PTHREAD([
-    AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
-    AM_LDFLAGS="$AM_LDFLAGS $PTHREAD_LIBS"
-  ], [AC_MSG_ERROR([cannot find pthread])])
-  AC_DEFINE([WITH_SQLITE], [1], [Use SQLite to store userphrase])
+AS_IF([test x"$with_sqlite3" == x"yes"], [
+       AC_DEFINE([WITH_SQLITE3], [1], [Use sqlite3 to store userphrase])
+       AS_IF([test x"$with_static_sqlite3" == x"no"],
+             [
+              AC_SEARCH_LIBS([sqlite3_open], [sqlite3],
+                             [AS_IF([test x$ac_cv_search_sqlite3_open != x"none required"],
+                                    [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_sqlite3_open"])],
+                                    [AC_MSG_ERROR([unable to find the sqlite3() function])])
+             ],
+             [
+              AC_SEARCH_LIBS([dlopen], [dl dld],
+                             [AS_IF([test x$ac_cv_search_dlopen != x"none required"],
+                                    [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_dlopen"])],
+                                    [AC_MSG_ERROR([unable to find the dlopen() function])])
+              AX_PTHREAD([
+                          AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
+                          AM_LDFLAGS="$AM_LDFLAGS $PTHREAD_LIBS"
+                          ], [AC_MSG_ERROR([cannot find pthread])])
+              ])
 ])
 
 # plat_mmap_posix
@@ -199,7 +213,8 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable gcov             $ENABLE_GCOV
-  With sqlite             $with_sqlite
+  With sqlite3            $with_sqlite3
+  With static sqlite3     $with_static_sqlite3
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
   Default CPPFLAGS        $DEFAULT_CPPFLAGS

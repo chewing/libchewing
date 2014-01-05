@@ -21,7 +21,7 @@
 #  include <stdint.h>
 #endif
 
-#if WITH_SQLITE
+#if WITH_SQLITE3
 #define DB_NAME	"chewing.sqlite3"
 #else
 #define DB_NAME	"uhash.dat"
