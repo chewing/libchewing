@@ -80,16 +80,16 @@ AC_ARG_WITH([sqlite3],
             [with_sqlite3=yes])
 AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
 
-AC_ARG_WITH([static-sqlite3],
-            AS_HELP_STRING([--with-static-sqlite3], [Use static sqlite3 @<:@default=no@:>@]),
+AC_ARG_WITH([internal-sqlite3],
+            AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 @<:@default=no@:>@]),
             [],
-            [with_static_sqlite3=no])
-AM_CONDITIONAL([WITH_STATIC_SQLITE3], [test x"$with_static_sqlite3" == x"yes"])
+            [with_internal_sqlite3=no])
+AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" == x"yes"])
 
 # for sqlite
 AS_IF([test x"$with_sqlite3" == x"yes"], [
        AC_DEFINE([WITH_SQLITE3], [1], [Use sqlite3 to store userphrase])
-       AS_IF([test x"$with_static_sqlite3" == x"no"],
+       AS_IF([test x"$with_internal_sqlite3" == x"no"],
              [
               AC_SEARCH_LIBS([sqlite3_open], [sqlite3],
                              [AS_IF([test x$ac_cv_search_sqlite3_open != x"none required"],
@@ -214,7 +214,7 @@ Build options:
   Install prefix          $prefix
   Enable gcov             $ENABLE_GCOV
   With sqlite3            $with_sqlite3
-  With static sqlite3     $with_static_sqlite3
+  With internal sqlite3   $with_internal_sqlite3
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
   Default CPPFLAGS        $DEFAULT_CPPFLAGS

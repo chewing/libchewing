@@ -46,7 +46,7 @@ endif()
 add_definitions(-DHAVE_CONFIG_H=1)
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
-option(WITH_STATIC_SQLITE3 "Use static sqlite3" false)
+option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
@@ -59,7 +59,7 @@ set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
 if (WITH_SQLITE3)
-	if (WITH_STATIC_SQLITE3)
+	if (WITH_INTERNAL_SQLITE3)
 		set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
 		include_directories(
 			${SQLITE3_SRC_DIR}
@@ -334,7 +334,7 @@ if (WITH_SQLITE3)
 		${SRC_DIR}/userphrase-sql.c
 	)
 
-	if (WITH_STATIC_SQLITE3)
+	if (WITH_INTERNAL_SQLITE3)
 		find_package (Threads)
 		add_library(sqlite3_library STATIC
 			${SQLITE3_SRC_DIR}/sqlite3.c
@@ -382,7 +382,7 @@ list(APPEND LIBS chewing_static)
 
 foreach(lib ${LIBS})
 	target_link_libraries(${lib} userphrase)
-	if (WITH_SQLITE3 AND NOT WITH_STATIC_SQLITE3)
+	if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
 		target_link_libraries(${lib} ${SQLITE3_LIBRARY})
 	endif()
 endforeach()

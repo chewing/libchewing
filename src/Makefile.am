@@ -46,7 +46,7 @@ libchewing_la_SOURCES += \
 	userphrase-sql.c \
 	$(NULL)
 
-if WITH_STATIC_SQLITE3
+if WITH_INTERNAL_SQLITE3
 AM_CPPFLAGS += \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	$(NULL)
