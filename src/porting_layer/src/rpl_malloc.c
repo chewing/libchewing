@@ -1,6 +1,8 @@
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
+
+#if defined(malloc)
 #undef malloc
 
 #include <sys/types.h>
@@ -15,3 +17,4 @@ void* rpl_malloc (size_t n)
     n = 1;
   return malloc (n);
 }
+#endif
