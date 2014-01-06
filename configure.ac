@@ -81,7 +81,7 @@ AC_ARG_WITH([sqlite3],
 AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
 
 AC_ARG_WITH([internal-sqlite3],
-            AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 @<:@default=no@:>@]),
+            AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 instead of system-wide @<:@default=no@:>@]),
             [],
             [with_internal_sqlite3=no])
 AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" == x"yes"])
