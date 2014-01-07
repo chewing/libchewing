@@ -26,3 +26,6 @@
 #ifdef CURSES_HAVE_NCURSES_CURSES_H
 #define HAVE_NCURSES_CURSES_H 1
 #endif
+
+/* For autotools cross-compilation compatibility */
+#define HAVE_MALLOC 1

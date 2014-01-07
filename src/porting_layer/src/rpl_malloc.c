@@ -2,7 +2,7 @@
 # include <config.h>
 #endif
 
-#if defined(malloc)
+#if !HAVE_MALLOC
 #undef malloc
 
 #include <sys/types.h>
