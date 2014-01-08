@@ -14,4 +14,5 @@ libporting_layer_la_SOURCES = \
 	plat_mmap_posix.c \
 	plat_mmap_windows.c \
 	plat_path.c \
+	rpl_malloc.c \
 	$(NULL)

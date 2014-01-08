@@ -172,10 +172,10 @@ see "INSTALL" for details.
 
 Example cross-build instructions:
 
-	# CC=arm-none-linux-gnueabi-gcc ./configure \
+	# CC_FOR_BUILD=gcc ./configure \
 	    --host=arm-none-linux-gnueabi \
 	    --disable-shared --enable-static
-	# make CC_FOR_BUILD=gcc
+	# make
 
 
 ## Build on Windows with MinGW

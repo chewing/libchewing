@@ -317,6 +317,7 @@ add_library(chewing OBJECT
 	${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
 	${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
 	${SRC_DIR}/porting_layer/src/plat_path.c
+	${SRC_DIR}/porting_layer/src/rpl_malloc.c
 	${SRC_DIR}/private.h
 	${SRC_DIR}/tree.c
 	${SRC_DIR}/userphrase.c
