@@ -21,15 +21,23 @@
 #  include <stdint.h>
 #endif
 
-#ifndef USE_BINARY_DATA
-#include <stdio.h>
+/* visual C++ does not have ssize_t type */
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
 #endif
 
 #include "global.h"
 #include "plat_mmap.h"
 
+#include "userphrase-private.h"
+#if WITH_SQLITE3
+#include "sqlite3.h"
+#include "chewing-sql.h"
+#endif
+
 #define MAX_KBTYPE 13
-#define MAX_UTF8_SIZE 6
+#define MAX_UTF8_SIZE 4
 #define ZUIN_SIZE 4
 #define PINYIN_SIZE 10
 #define MAX_PHRASE_LEN 11
@@ -42,6 +50,7 @@
 #define N_HASH_BIT (14)
 #define HASH_TABLE_SIZE (1<<N_HASH_BIT)
 #define EASY_SYMBOL_KEY_TAB_LEN (36)
+#define AUX_PREFIX_LEN (3)
 
 /* For isSymbol */
 #define WORD_CHOICE            (0)
@@ -63,30 +72,41 @@ static inline int min( int a, int b )
 }
 #endif
 
-typedef union {
-	unsigned char s[ MAX_UTF8_SIZE + 1];
-	uint16_t wch;
-} wch_t;
-
-typedef struct {
-	uint16_t phone_id;
-	int phrase_id;
-	int child_begin, child_end;
+/*
+ * This structure may represent both internal nodes and leaf nodes of a phrase
+ * tree. Two kinds are distinguished by whether key is 0. For an internal node,
+ * child.begin and child.end give a list of children in the position
+ * [child.begin, child.end). For a leaf node, phrase.pos offers the position
+ * of the phrase in system dictionary, and phrase.freq offers frequency of this
+ * phrase using a specific input method (may be bopomofo or non-phone). Note
+ * that key in root represents the number of total elements(nodes) in the tree.
+ */
+typedef struct TreeType {
+	unsigned char key[2];
+	union {
+		struct {
+			unsigned char begin[3];
+			unsigned char end[3];
+		} child;
+		struct {
+			unsigned char pos[3];
+			unsigned char freq[3];
+		} phrase;
+	};
 } TreeType;
 
-typedef struct {
-	char chiBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+typedef struct PhrasingOutput {
 	IntervalType dispInterval[ MAX_INTERVAL ];
 	int nDispInterval;
 	int nNumCut;
 } PhrasingOutput;
 
-typedef struct {
-    int type;
-    char keySeq[ PINYIN_SIZE ];
+typedef struct PinYinData {
+	int type;
+	char keySeq[ PINYIN_SIZE ];
 } PinYinData;
 
-typedef struct {
+typedef struct ZuinData {
 	int kbtype;
 	int pho_inx[ ZUIN_SIZE ];
 	int pho_inx_alt[ ZUIN_SIZE ];
@@ -95,13 +115,13 @@ typedef struct {
 	PinYinData pinYinData;
 } ZuinData;
 
-typedef struct {
+typedef struct AvailInfo {
 	/** @brief all kinds of lengths of available phrases. */
 	struct {
 		int len;
 		/** @brief phone id. */
-		int id;
-	} avail[ MAX_PHRASE_LEN ];  
+		const TreeType *id;
+	} avail[ MAX_PHRASE_LEN ];
 	/** @brief total number of availble lengths. */
 	int nAvail;
 	/** @brief the current choosing available length. */
@@ -112,7 +132,7 @@ typedef struct {
  *	@brief information of available phrases or characters choices.
  */
 
-typedef struct {
+typedef struct ChoiceInfo {
 	/** @brief total page number. */
 	int nPage;
 	/** @brief current page number. */
@@ -128,10 +148,10 @@ typedef struct {
 } ChoiceInfo;
 
 /** @brief entry of symbol table */
-typedef struct _SymbolEntry {
+typedef struct SymbolEntry {
 	/** @brief  nSymnols is total number of symbols in this category.
-	 * If nSymbols = 0, category is treat as a symbol, 
-	 * which is a zero-terminated utf-8 string. 
+	 * If nSymbols = 0, category is treat as a symbol,
+	 * which is a zero-terminated utf-8 string.
 	 * In that case, symbols[] is unused and isn't allocated at all.
 	 */
 	int nSymbols;
@@ -146,45 +166,29 @@ typedef struct _SymbolEntry {
 	char symbols[][ MAX_UTF8_SIZE + 1 ];
 } SymbolEntry;
 
-typedef struct {
-	TreeType *tree;
+typedef struct ChewingStaticData {
+	const TreeType *tree;
 	size_t tree_size;
-#ifdef USE_BINARY_DATA
 	plat_mmap tree_mmap;
-#endif
+	const TreeType *tree_cur_pos, *tree_end_pos;
 
-	uint16_t *arrPhone;
-	int *char_begin;
-	size_t phone_num;
-	void *char_;
-	void *char_cur_pos;
-	int char_end_pos;
-#ifdef USE_BINARY_DATA
-	plat_mmap char_mmap;
-	plat_mmap char_begin_mmap;
-	plat_mmap char_phone_mmap;
-#else
-	FILE *charfile;
-#endif
-
-	int *dict_begin;
-	void *dict_cur_pos;
-	int dict_end_pos;
-
-	void *dict;
-
-#ifdef USE_BINARY_DATA
+	const char *dict;
 	plat_mmap dict_mmap;
-	plat_mmap index_mmap;
+
+#if WITH_SQLITE3
+	sqlite3 *db;
+	sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
+	sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
+
+	unsigned int original_lifetime;
+	unsigned int new_lifetime;
 #else
-	FILE *dictfile;
-#endif
-
-
 	int chewing_lifetime;
 
 	char hashfilename[ 200 ];
-	struct tag_HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
+	struct HASH_ITEM *userphrase_enum; /* FIXME: Shall be in ChewingData? */
+#endif
 
 	unsigned int n_symbol_entry;
 	SymbolEntry ** symbol_table;
@@ -198,21 +202,32 @@ typedef struct {
 	int HANYU_FINALS;
 } ChewingStaticData;
 
-struct tag_HASH_ITEM;
+typedef enum Category {
+	CHEWING_NONE,
+	CHEWING_CHINESE,
+	CHEWING_SYMBOL,
+} Category;
 
-typedef struct tag_ChewingData {
+typedef struct PreeditBuf {
+	Category category;
+	char char_[ MAX_UTF8_SIZE + 1 ];
+} PreeditBuf;
+
+typedef struct ChewingData {
 	AvailInfo availInfo;
 	ChoiceInfo choiceInfo;
 	PhrasingOutput phrOut;
 	ZuinData zuinData;
 	ChewingConfigData config;
-    /** @brief current input buffer, content==0 means Chinese code */
-	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
+	/** @brief current input buffer, content==0 means Chinese code */
+	PreeditBuf preeditBuf[ MAX_PHONE_SEQ_LEN ];
 	int chiSymbolCursor;
 	int chiSymbolBufLen;
 	int PointStart;
 	int PointEnd;
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
+
+	int bShowMsg;
+	char showMsg[ MAX_UTF8_SIZE * ( MAX_PHRASE_LEN + AUX_PREFIX_LEN ) + 1 ];
 	int showMsgLen;
 
 	uint16_t phoneSeq[ MAX_PHONE_SEQ_LEN ];
@@ -224,7 +239,7 @@ typedef struct tag_ChewingData {
 	IntervalType preferInterval[ MAX_INTERVAL ]; /* add connect points */
 	int nPrefer;
 	int bUserArrCnnct[ MAX_PHONE_SEQ_LEN + 1 ];
-	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];   
+	int bUserArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	int bSymbolArrBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/* "bArrBrkpt[10]=True" means "it breaks between 9 and 10" */
@@ -232,31 +247,36 @@ typedef struct tag_ChewingData {
 	/* Symbol Key buffer */
 	char symbolKeyBuf[ MAX_PHONE_SEQ_LEN ];
 
-	struct tag_HASH_ITEM *prev_userphrase;
+#if WITH_SQLITE3
+	UserPhraseData userphrase_data;
+#else
+	struct HASH_ITEM *prev_userphrase;
+#endif
+
 	ChewingStaticData static_data;
 	void (*logger)( void *data, int level, const char *fmt, ... );
 	void *loggerData;
 } ChewingData;
 
-typedef struct {
+typedef struct ChewingOutput {
 	/** @brief the content of Edit buffer. */
-	wch_t chiSymbolBuf[ MAX_PHONE_SEQ_LEN ];
+	char preeditBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
 	/** @brief the length of Edit buffer. */
 	int chiSymbolBufLen;
 	/** @brief current position of the cursor. */
 	long chiSymbolCursor;
 	long PointStart;
 	long PointEnd;
-	/** @brief the zuin-yin symbols have already entered. */
-	wch_t zuinBuf[ ZUIN_SIZE ];
+	char bopomofoBuf[ ZUIN_SIZE * MAX_UTF8_SIZE + 1 ];
 	/** @brief indicate the method of showing sentence break. */
 	IntervalType dispInterval[ MAX_INTERVAL ]; /* from prefer, considering symbol */
 	int nDispInterval;
-	/** @brief indicate the break points going to display.*/ 
+	/** @brief indicate the break points going to display.*/
 	int dispBrkpt[ MAX_PHONE_SEQ_LEN + 1 ];
 	/** @brief the string going to commit. */
-	wch_t commitStr[ MAX_PHONE_SEQ_LEN ];
-	int nCommitStr;
+
+	char commitBuf[ MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1 ];
+	int commitBufLen;
 	/** @brief information of character selections. */
 	ChoiceInfo* pci;
 	/** @brief indicate English mode or Chinese mode. */
@@ -264,17 +284,14 @@ typedef struct {
 	int selKey[ MAX_SELKEY ];
 	/** @brief return value. */
 	int keystrokeRtn;
-	int bShowMsg; 
 	/** @brief user message. */
-	wch_t showMsg[ MAX_PHONE_SEQ_LEN ];
-	int showMsgLen;
 } ChewingOutput;
 /**
  *   @struct ChewingOutput
  *   @brief  information for Chewing output.
  */
 
-struct _ChewingContext {
+struct ChewingContext {
 	ChewingData *data;
 	ChewingOutput *output;
 	int cand_no;
@@ -286,7 +303,7 @@ struct _ChewingContext {
  * @brief context of Chewing IM
  */
 
-typedef struct {
+typedef struct Phrase {
 	char phrase[ MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1 ];
 	int freq;
 } Phrase;

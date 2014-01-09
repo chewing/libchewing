@@ -13,6 +13,7 @@ INSTALL
 Makefile
 Makefile.in
 aclocal.m4
+mkinstalldirs
 autom4te.cache
 build-aux/
 chewing.pc
@@ -23,6 +24,7 @@ libchewing.spec
 libtool
 /m4/libtool.m4
 /m4/lt*.m4
+include/config.h.in~
 
 # compiling output
 *.dat
@@ -32,7 +34,6 @@ libtool
 .deps
 .libs
 
-data/checkdata_stamp
 data/gendata_stamp
 
 include/config.h
@@ -41,15 +42,21 @@ include/stamp-h1
 
 # cmake generated files
 config.h
-chewing-definition.h
+/libchewing.*
+/libtesthelper.a
+/Testing
 
 # test suite
 test/genkeystroke
 test/genkeystroke.exe
+test/performance
+test/performance.exe
 test/randkeystroke
 test/randkeystroke.exe
 test/simulate
 test/simulate.exe
+test/sqlite3
+test/sqlite3.exe
 test/testchewing
 test/testchewing.exe
 test/test-bopomofo
@@ -58,12 +65,16 @@ test/test-config
 test/test-config.exe
 test/test-easy-symbol
 test/test-easy-symbol.exe
+test/test-error-handling
+test/test-error-handling.exe
 test/test-fullshape
 test/test-fullshape.exe
 test/test-key2pho
 test/test-key2pho.exe
 test/test-keyboard
 test/test-keyboard.exe
+test/test-keyboardless
+test/test-keyboardless.exe
 test/test-logger
 test/test-logger.exe
 test/test-memory-fail
@@ -88,13 +99,11 @@ test/do-test.xml
 test/test.txt
 test/*.log
 test/*.trs
+test/chewing.sqlite3
 
 # Generated tools/headers
-src/chewing-definition.h
-src/tools/maketree
-src/tools/maketree.exe
-src/tools/sort
-src/tools/sort.exe
+src/tools/init_database
+src/tools/init_database.exe
 
 # gcov output
 *.gcda

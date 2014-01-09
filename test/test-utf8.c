@@ -7,19 +7,24 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "testhelper.h"
 #include "chewing-utf8-util.h"
 
-int main ()
+FILE *fd;
+
+void test_utf8()
 {
 	char *u8string;
 	int u8len;
 	int len;
 	char u8string2[16];
+
+	start_testcase( NULL, fd );
 
 	u8string = "HelloWorld";
 	u8len = ueStrLen(u8string);
@@ -41,6 +46,26 @@ int main ()
 	u8string = "\xE6\xB8\xAC\xE8\xA9\xA6\xE8\xA8\x88\xE7\xAE\x97\xE9\x95\xB7\xE5\xBA\xA6"; /* 測試計算長度 */
 	u8string = ueStrSeek(u8string, 0);
 	ok (!strcmp(u8string, "\xE6\xB8\xAC\xE8\xA9\xA6\xE8\xA8\x88\xE7\xAE\x97\xE9\x95\xB7\xE5\xBA\xA6" /* 測試計算長度 */ ), "ueStrSeek");
+
+}
+
+int main(int argc, char *argv[])
+{
+	char *logname;
+	int ret;
+
+	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
+	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
+	test_utf8();
+
+	fclose( fd );
 
 	return exit_status();
 }

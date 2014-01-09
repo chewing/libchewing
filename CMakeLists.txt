@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
-set(LIBCHEWING_VERSION 0.3.4)
+# Update configure.ac if LIBCHEWING_VERSION is changed.
+set(LIBCHEWING_VERSION 0.3.5)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 if(UNIX)
@@ -44,11 +45,8 @@ endif()
 # automake compatibility
 add_definitions(-DHAVE_CONFIG_H=1)
 
-# binary data representation
-option(USE_BINARY_DATA "Use binary representation for internal data manipulation" true)
-if (USE_BINARY_DATA)
-	add_definitions(-DUSE_BINARY_DATA=1)
-endif()
+option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
+option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
@@ -59,6 +57,25 @@ check_type_size(uint16_t UINT16_T)
 
 set(CURSES_NEED_WIDE true)
 find_package(Curses)
+
+if (WITH_SQLITE3)
+	if (WITH_INTERNAL_SQLITE3)
+		set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
+		include_directories(
+			${SQLITE3_SRC_DIR}
+		)
+	else()
+		find_library(SQLITE3_LIBRARY sqlite3)
+		find_file(SQLITE3_HEADER sqlite3.h)
+		get_filename_component(SQLITE3_INCLUDE ${SQLITE3_HEADER} PATH)
+
+		if (NOT (SQLITE3_LIBRARY AND SQLITE3_INCLUDE))
+			message(SEND_ERROR "Cannot find sqlite3 library")
+		endif()
+
+		include_directories(SQLITE3_INCLUDE)
+	endif()
+endif()
 
 include(CheckFunctionExists)
 check_function_exists(strtok_r HAVE_STRTOK_R)
@@ -73,7 +90,7 @@ test_big_endian(WORDS_BIGENDIAN)
 
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/config.h.in
-	${PROJECT_BINARY_DIR}/config.h
+	${PROJECT_BINARY_DIR}/include/config.h
 )
 
 configure_file(
@@ -85,14 +102,6 @@ configure_file(
 configure_file(
 	${PROJECT_SOURCE_DIR}/cmake/version.texi.in
 	${PROJECT_BINARY_DIR}/doc/version.texi
-)
-
-include_directories(
-	${PROJECT_BINARY_DIR}
-	${PROJECT_SOURCE_DIR}/include
-	${PROJECT_SOURCE_DIR}/include/internal
-	${PROJECT_SOURCE_DIR}/src/porting_layer/include
-	${PROJECT_SOURCE_DIR}/data/chewing
 )
 
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
@@ -112,24 +121,18 @@ set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
 
-set(ALL_DATA
-	${DATA_BIN_DIR}/dict.dat
-	${DATA_BIN_DIR}/fonetree.dat
-	${DATA_BIN_DIR}/ph_index.dat
-	${DATA_BIN_DIR}/us_freq.dat
+include_directories(
+	${PROJECT_BINARY_DIR}/include
+	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}/include/internal
+	${PROJECT_SOURCE_DIR}/src
+	${PROJECT_SOURCE_DIR}/src/porting_layer/include
 )
 
-if (USE_BINARY_DATA)
-	list(APPEND ALL_DATA
-		${DATA_BIN_DIR}/ch_index_begin.dat
-		${DATA_BIN_DIR}/ch_index_phone.dat
-	)
-else()
-	list(APPEND ALL_DATA
-		${DATA_BIN_DIR}/ch_index.dat
-	)
-endif()
-
+set(ALL_DATA
+	${DATA_BIN_DIR}/dictionary.dat
+	${DATA_BIN_DIR}/index_tree.dat
+)
 
 set(ALL_INC
 	${INC_DIR}/chewing.h
@@ -158,14 +161,18 @@ if (MAKEINFO)
 endif()
 
 
-# static target
 # We need to copy static data to binary tree when using out of tree build.
-set(ALL_STATIC_DATA pinyin.tab swkb.dat symbols.dat)
-foreach(target ${ALL_STATIC_DATA})
-	add_custom_target(${target} ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/${target} ${DATA_BIN_DIR}/${target}
-	)
-endforeach()
+set(ALL_STATIC_DATA
+	${DATA_BIN_DIR}/pinyin.tab
+	${DATA_BIN_DIR}/swkb.dat
+	${DATA_BIN_DIR}/symbols.dat
+)
+
+add_custom_target(all_static_data
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/pinyin.tab ${DATA_BIN_DIR}/pinyin.tab
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/swkb.dat ${DATA_BIN_DIR}/swkb.dat
+	COMMAND	${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/symbols.dat ${DATA_BIN_DIR}/symbols.dat
+)
 
 set(ALL_STATIC_TEST stresstest.py)
 foreach(target ${ALL_STATIC_TEST})
@@ -175,9 +182,8 @@ foreach(target ${ALL_STATIC_TEST})
 endforeach()
 
 # tools
-set(ALL_TOOLS sort maketree)
-add_executable(sort ${TOOLS_SRC_DIR}/sort.c $<TARGET_OBJECTS:common>)
-add_executable(maketree ${TOOLS_SRC_DIR}/maketree.c)
+set(ALL_TOOLS init_database)
+add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
 set_target_properties(${ALL_TOOLS} PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
 		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
@@ -190,12 +196,8 @@ set_target_properties(${ALL_TOOLS} PROPERTIES
 add_custom_command(
 	OUTPUT
 		${ALL_DATA}
-		${PROJECT_BINARY_DIR}/chewing-definition.h
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/sort ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
-	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/maketree ${DATA_BIN_DIR}/phoneid.dic
-	COMMAND ${CMAKE_COMMAND} -E copy ${DATA_BIN_DIR}/chewing-definition.h ${PROJECT_BINARY_DIR}/chewing-definition.h
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${DATA_BIN_DIR}/chewing-definition.h ${DATA_BIN_DIR}/phoneid.dic
+	COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/init_database ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
 	DEPENDS
 		${ALL_TOOLS}
 		${DATA_SRC_DIR}/phone.cin
@@ -207,9 +209,11 @@ set(ALL_TESTCASES
 	test-bopomofo
 	test-config
 	test-easy-symbol
+	test-error-handling
 	test-fullshape
 	test-key2pho
 	test-keyboard
+	test-keyboardless
 	test-logger
 	test-mmap
 	test-path
@@ -221,13 +225,14 @@ set(ALL_TESTCASES
 	test-utf8
 )
 set(ALL_TESTTOOLS
+	performance
 	randkeystroke
 	simulate
 	testchewing
 )
 
 if(${CURSES_FOUND})
-	set(ALL_TESTTOOLS ${ALL_TESTTOOLS} gen_keystroke)
+	set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
 endif()
 
 enable_testing()
@@ -247,8 +252,11 @@ if(USE_VALGRIND)
 	endif()
 endif()
 
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 foreach(target ${ALL_TESTS})
 	add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
+	add_dependencies(${target} data all_static_data)
+	add_dependencies(check ${target})
 endforeach()
 
 add_library(testhelper STATIC
@@ -256,20 +264,27 @@ add_library(testhelper STATIC
 	$<TARGET_OBJECTS:chewing>
 	$<TARGET_OBJECTS:common>
 )
+target_link_libraries(testhelper userphrase)
+set_target_properties(testhelper PROPERTIES
+	COMPILE_DEFINITIONS
+		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
+)
 
 set_target_properties(${ALL_TESTS} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 	COMPILE_DEFINITIONS
-		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
+		"CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\""
 )
 foreach(target ${ALL_TESTS})
 	target_link_libraries(${target} testhelper)
 endforeach()
 
 if (${CURSES_FOUND})
-	target_link_libraries(gen_keystroke ${CURSES_LIBRARIES})
+	target_link_libraries(genkeystroke ${CURSES_LIBRARIES})
 endif()
 
 # data
@@ -278,24 +293,20 @@ add_custom_target(data ALL DEPENDS ${ALL_DATA})
 # library
 add_library(chewing OBJECT
 	${ALL_INC}
-	${INC_DIR}/internal/char-private.h
 	${INC_DIR}/internal/chewing-private.h
 	${INC_DIR}/internal/chewingutil.h
 	${INC_DIR}/internal/choice-private.h
 	${INC_DIR}/internal/dict-private.h
 	${INC_DIR}/internal/global-private.h
-	${INC_DIR}/internal/hash-private.h
 	${INC_DIR}/internal/pinyin-private.h
 	${INC_DIR}/internal/tree-private.h
 	${INC_DIR}/internal/userphrase-private.h
 	${INC_DIR}/internal/zuin-private.h
 
-	${SRC_DIR}/char.c
 	${SRC_DIR}/chewingio.c
 	${SRC_DIR}/chewingutil.c
 	${SRC_DIR}/choice.c
 	${SRC_DIR}/dict.c
-	${SRC_DIR}/hash.c
 	${SRC_DIR}/mod_aux.c
 	${SRC_DIR}/pinyin.c
 	${SRC_DIR}/porting_layer/include/plat_mmap.h
@@ -306,16 +317,55 @@ add_library(chewing OBJECT
 	${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
 	${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
 	${SRC_DIR}/porting_layer/src/plat_path.c
+	${SRC_DIR}/porting_layer/src/rpl_malloc.c
 	${SRC_DIR}/private.h
 	${SRC_DIR}/tree.c
 	${SRC_DIR}/userphrase.c
 	${SRC_DIR}/zuin.c
 )
-add_custom_target(chewing-definition DEPENDS ${PROJECT_BINARY_DIR}/chewing-definition.h)
-add_dependencies(chewing chewing-definition)
 set_target_properties(chewing PROPERTIES
 	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
 )
+
+if (WITH_SQLITE3)
+	add_library(userphrase STATIC
+		${INC_DIR}/internal/chewing-sql.h
+
+		${SRC_DIR}/chewing-sql.c
+		${SRC_DIR}/userphrase-sql.c
+	)
+
+	if (WITH_INTERNAL_SQLITE3)
+		find_package (Threads)
+		add_library(sqlite3_library STATIC
+			${SQLITE3_SRC_DIR}/sqlite3.c
+			${SQLITE3_SRC_DIR}/sqlite3.h
+		)
+		target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
+		add_executable(sqlite3
+			${SQLITE3_SRC_DIR}/shell.c
+		)
+		target_link_libraries(sqlite3 sqlite3_library)
+		set_target_properties(sqlite3 PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
+		)
+		target_link_libraries(userphrase sqlite3_library)
+	else()
+		target_link_libraries(testhelper ${SQLITE3_LIBRARY})
+	endif()
+else()
+	add_library(userphrase STATIC
+		${INC_DIR}/internal/hash-private.h
+
+		${SRC_DIR}/hash.c
+		${SRC_DIR}/userphrase-hash.c
+	)
+endif()
 
 if (NOT MSVC)
 	add_library(chewing_shared SHARED
@@ -330,6 +380,13 @@ add_library(chewing_static STATIC
 	$<TARGET_OBJECTS:common>
 )
 list(APPEND LIBS chewing_static)
+
+foreach(lib ${LIBS})
+	target_link_libraries(${lib} userphrase)
+	if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
+		target_link_libraries(${lib} ${SQLITE3_LIBRARY})
+	endif()
+endforeach()
 
 set_target_properties(${LIBS} PROPERTIES
 	OUTPUT_NAME chewing
@@ -348,8 +405,10 @@ add_library(common OBJECT
 	${SRC_DIR}/common/key2pho.c
 )
 
+
 # install
 install(FILES ${ALL_DATA} DESTINATION ${INSTALL_DATA_DIR})
+install(FILES ${ALL_STATIC_DATA} DESTINATION ${INSTALL_DATA_DIR})
 install(FILES ${ALL_INC} DESTINATION ${INSTALL_INC_DIR})
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
 	DESTINATION ${INSTALL_LIB_DIR}/pkgconfig)

@@ -11,9 +11,11 @@
 #endif
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "chewing.h"
 #include "chewingio.h"
+#include "chewing-utf8-util.h"
 
 #define KEY_DBLTAB	892 // <TT>
 #define KEY_SSPACE	893 // <SS>
@@ -50,33 +52,39 @@
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &COMMIT_BUFFER)
 #define ok_preedit_buffer(ctx, expected) \
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &PREEDIT_BUFFER)
-#define ok_zuin_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &ZUIN_BUFFER)
+#define ok_bopomofo_buffer(ctx, expected) \
+	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &BOPOMOFO_BUFFER)
 #define ok_aux_buffer(ctx, expected) \
 	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
 	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
+#define ok_candidate_len(ctx, expected_len) \
+	internal_ok_candidate_len(__FILE__, __LINE__, ctx, expected_len)
 #define ok_keystroke_rtn(ctx, rtn) \
 	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
 	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
+#define start_testcase(ctx, file) \
+	internal_start_testcase(__func__, ctx, file)
 
-typedef struct {
+typedef struct TestData {
 	char * token;
 	char * expected;
 } TestData;
 
-typedef struct {
+typedef struct BufferType {
+	char *name;
 	int (*check)(ChewingContext *ctx);
 	int (*check_alt)(ChewingContext *ctx);
 	int (*get_length)(ChewingContext *ctx);
 	char * (*get_string)(ChewingContext *ctx);
 	char * (*get_string_alt)(ChewingContext *ctx, int *len);
+	const char * (*get_string_static)(ChewingContext *ctx);
 } BufferType;
 
 extern BufferType COMMIT_BUFFER;
 extern BufferType PREEDIT_BUFFER;
-extern BufferType ZUIN_BUFFER;
+extern BufferType BOPOMOFO_BUFFER;
 extern BufferType AUX_BUFFER;
 
 typedef int (*get_char_func) ( void *param );
@@ -85,6 +93,7 @@ int get_keystroke( get_char_func get_char, void *param );
 void type_keystroke_by_string( ChewingContext *ctx, char* keystroke );
 void type_single_keystroke( ChewingContext *ctx, int ch );
 int exit_status();
+void clean_userphrase();
 
 // The internal_xxx function shall be used indirectly by macro in order to
 // get correct __FILE__ and __LINE__ information.
@@ -94,7 +103,11 @@ void internal_ok( const char *file, int line, int test, const char * test_txt,
 	const char *message, ...);
 void internal_ok_candidate( const char *file, int line,
 	ChewingContext *ctx, const char *cand[], size_t cand_len );
+void internal_ok_candidate_len( const char *file, int line,
+	ChewingContext *ctx, size_t expected_len );
 void internal_ok_keystroke_rtn( const char *file, int line,
 	ChewingContext *ctx, int rtn );
 int internal_has_userphrase( const char *file, int line,
 	ChewingContext *ctx, const char *bopomofo, const char *phrase );
+void internal_start_testcase( const char *func, ChewingContext *ctx, FILE *file );
+void logger( void *data, int level, const char *fmt, ... );

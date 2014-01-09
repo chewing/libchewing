@@ -17,9 +17,10 @@
 int InitTree( ChewingData *pgdata, const char *prefix );
 void TerminateTree( ChewingData *pgdata );
 
-int Phrasing( ChewingData *pgdata );
+int Phrasing( ChewingData *pgdata, int all_phrasing );
 int IsIntersect( IntervalType in1, IntervalType in2 );
 
-int TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq );
+const TreeType *TreeFindPhrase( ChewingData *pgdata, int begin, int end, const uint16_t *phoneSeq );
+void TreeChildRange( ChewingData *pgdata, const TreeType *parent );
 
 #endif

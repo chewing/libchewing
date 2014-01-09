@@ -36,8 +36,8 @@ chewing_include_HEADERS = \
 	$(NULL)
 
 noinst_HEADERS =\
-	include/internal/char-private.h \
 	include/internal/chewing-private.h \
+	include/internal/chewing-sql.h \
 	include/internal/chewing-utf8-util.h \
 	include/internal/chewingutil.h \
 	include/internal/choice-private.h \
@@ -45,7 +45,6 @@ noinst_HEADERS =\
 	include/internal/global-private.h \
 	include/internal/memory-private.h \
 	include/internal/pinyin-private.h \
-	include/internal/hash-private.h \
 	include/internal/key2pho-private.h \
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \

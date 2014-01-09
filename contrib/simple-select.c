@@ -61,15 +61,15 @@ int main()
 	 * If 'Down' is not triggered, we can not use the further
 	 * chewing_cand_Enumerate() to get the detailed listing.
 	 */
-	chewing_handle_Down(ct); 
+	chewing_handle_Down(ct);
 
-	/* 
+	/*
 	 * Start the enumeration of candidate.  It follows the typical iterator design.
 	 * (1) chewing_cand_Enumerate(): specify the iterator by ChewingContext
 	 * (2) chewing_cand_hasNext(): find out the next element in iterator
 	 * (3) chewing_cand_String(): get the current element and advance
 	 */
-	chewing_cand_Enumerate(ct);  
+	chewing_cand_Enumerate(ct);
 	counter = 0;
 	while (chewing_cand_hasNext(ct)) {
 		counter += 1;
@@ -83,7 +83,7 @@ int main()
 	}
 	printf("\nSelecting 13rd:");
 
-	/* 
+	/*
 	 * 剛才按下了↓，目前正在選字。
 	 * 我想選第13個字，那就必須換頁，然後選第二頁的第4個字（9+4=13）
 	 * 換頁的按鍵是空白鍵

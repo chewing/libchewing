@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -332,14 +333,15 @@ static const char *CAND[] = {
 	"\xE7\xB7\x9A\xE6\xAE\xB5" /* 線段 */,
 };
 
+FILE *fd;
+
 void test_type_symbol()
 {
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -351,16 +353,14 @@ void test_type_symbol()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_symbol_cand_page()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_candPerPage( ctx, 10 );
 	chewing_set_maxChiSymbolLen( ctx, 16 );
@@ -372,16 +372,26 @@ void test_symbol_cand_page()
 	ok_candidate( ctx, CAND, ARRAY_SIZE( CAND ) );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
-int main ()
+int main(int argc, char *argv[])
 {
+	char *logname;
+	int ret;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
 	test_type_symbol();
 	test_symbol_cand_page();
+
+	fclose( fd );
 
 	return exit_status();
 }

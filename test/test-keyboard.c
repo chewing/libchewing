@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,6 +36,8 @@ static char *KEYBOARD_STRING[] = {
 
 static const int KEYBOARD_DEFAULT_TYPE = 0;
 
+FILE *fd;
+
 void test_set_keyboard_type()
 {
 	ChewingContext *ctx;
@@ -42,9 +45,8 @@ void test_set_keyboard_type()
 	char *keyboard_string;
 	int keyboard_type;
 
-	chewing_Init( 0, 0 );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	keyboard_string = chewing_get_KBString( ctx );
 	ok( strcmp( keyboard_string, KEYBOARD_STRING[KEYBOARD_DEFAULT_TYPE] ) == 0,
@@ -79,13 +81,14 @@ void test_set_keyboard_type()
 		"`%d' shall be `%d'", keyboard_type, KEYBOARD_DEFAULT_TYPE );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_KBStr2Num()
 {
 	int i;
 	int ret;
+
+	start_testcase( NULL, fd );
 
 	for ( i = 0; i < (int)ARRAY_SIZE( KEYBOARD_STRING ); ++i ) {
 		// XXX: chewing_KBStr2Num shall accept const char *.
@@ -100,9 +103,8 @@ void test_enumerate_keyboard_type()
 	size_t i;
 	char *keyboard_string;
 
-	chewing_Init( 0, 0 );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ok( chewing_kbtype_Total( ctx ) == ARRAY_SIZE( KEYBOARD_STRING ),
 		"total keyboard_string type shall be %d", ARRAY_SIZE( KEYBOARD_STRING ) );
@@ -124,17 +126,27 @@ void test_enumerate_keyboard_type()
 	chewing_free( keyboard_string );
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+	int ret;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
 
 	test_set_keyboard_type();
 	test_KBStr2Num();
 	test_enumerate_keyboard_type();
+
+	fclose( fd );
 
 	return exit_status();
 }

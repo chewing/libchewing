@@ -86,7 +86,7 @@ int InitPinyin( ChewingData *pgdata, const char *prefix )
  * @retval 0 Success
  */
 int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
-                  char *zuinKeySeq, char *zuinKeySeqAlt )
+		  char *zuinKeySeq, char *zuinKeySeqAlt )
 {
 	const char *p, *cursor = NULL;
 	const char *initial = 0;
@@ -99,7 +99,7 @@ int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
 		seq = "y yj";   /* ㄗ|ㄗㄨ */
 	}
 	else if ( ! strcmp( pinyinKeySeq, "ssu" ) ||
-	          ! strcmp( pinyinKeySeq, "szu" ) ) {
+		  ! strcmp( pinyinKeySeq, "szu" ) ) {
 		seq = "n n";    /* ㄙ|ㄙㄨ */
 	}
 
@@ -166,7 +166,7 @@ int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
 				seq = "n vu";	/* ㄙ|ㄒㄧ */
 			}
 			break;
-                case KB_THL_PINYIN:
+		case KB_THL_PINYIN:
 			if ( ! strcmp( pinyinKeySeq, "chi" ) ) {
 				seq = "fu t";   /* ㄑㄧ|ㄔ */
 			}
@@ -203,10 +203,10 @@ int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
 				seq = "rm ru."; /* ㄐㄩ|ㄐㄧㄡ */
 			}
 			else if ( ! strcmp( pinyinKeySeq, "chiu" ) ) {
-                                seq = "fm fu."; /* ㄑㄩ|ㄑㄧㄡ */
-                        }
+				seq = "fm fu."; /* ㄑㄩ|ㄑㄧㄡ */
+			}
 			else if ( ! strcmp( pinyinKeySeq, "shiu" ) ) {
-                                seq = "vm vu."; /* ㄒㄩ|ㄒㄧㄡ */
+				seq = "vm vu."; /* ㄒㄩ|ㄒㄧㄡ */
 			}
 			else if ( ! strcmp( pinyinKeySeq, "ju" ) ) {
 				seq = "5j rm";  /* ㄓㄨ|ㄐㄩ */
@@ -264,96 +264,96 @@ int PinyinToZuin( ChewingData *pgdata, const char *pinyinKeySeq,
 	}
 
 
-        /* THL empty rime
-         * we use '=' in pinyin.tab as empty rime, restore it to ''
-         */
-        if( ! strcmp( final, "=" ) ) {
-                final = "";
-        }
+	/* THL empty rime
+	 * we use '=' in pinyin.tab as empty rime, restore it to ''
+	 */
+	if( ! strcmp( final, "=" ) ) {
+		final = "";
+	}
 
-        /* Hanyu empty rime
-         * ㄓ/ㄔ/ㄕ/ㄖ/ㄗ/ㄘ/ㄙ + -i, -i is empty rime, not ㄧ
-         * */
-        if ( ! strcmp( final, "u" ) ) {
-                if ( ! strcmp( initial, "5" ) ||
-                     ! strcmp( initial, "t" ) ||
-                     ! strcmp( initial, "g" ) ||
-                     ! strcmp( initial, "b" ) ||
-                     ! strcmp( initial, "y" ) ||
-                     ! strcmp( initial, "h" ) ||
-                     ! strcmp( initial, "n" ) ) {
-                        final = "";
-                }
-        }
+	/* Hanyu empty rime
+	 * ㄓ/ㄔ/ㄕ/ㄖ/ㄗ/ㄘ/ㄙ + -i, -i is empty rime, not ㄧ
+	 * */
+	if ( ! strcmp( final, "u" ) ) {
+		if ( ! strcmp( initial, "5" ) ||
+		     ! strcmp( initial, "t" ) ||
+		     ! strcmp( initial, "g" ) ||
+		     ! strcmp( initial, "b" ) ||
+		     ! strcmp( initial, "y" ) ||
+		     ! strcmp( initial, "h" ) ||
+		     ! strcmp( initial, "n" ) ) {
+			final = "";
+		}
+	}
 
-        /* Hanyu uan/un/u :
-         * ㄐ/ㄑ/ㄒ + -uan, -uan is ㄩㄢ, not ㄨㄢ
-         * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
-         * ㄐ/ㄑ/ㄒ + -u,   -u is ㄧ, not ㄨ
-         */
-        if ( ! strcmp( initial, "f" ) ||
-             ! strcmp( initial, "r" ) ||
-             ! strcmp( initial, "v" ) ) {
-                if ( ! strcmp( final, "j0" ) ) {
-                        final = "m0";
-                }
+	/* Hanyu uan/un/u :
+	 * ㄐ/ㄑ/ㄒ + -uan, -uan is ㄩㄢ, not ㄨㄢ
+	 * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
+	 * ㄐ/ㄑ/ㄒ + -u,   -u is ㄧ, not ㄨ
+	 */
+	if ( ! strcmp( initial, "f" ) ||
+	     ! strcmp( initial, "r" ) ||
+	     ! strcmp( initial, "v" ) ) {
+		if ( ! strcmp( final, "j0" ) ) {
+			final = "m0";
+		}
 		else if ( ! strcmp( final, "jp" ) ) {
-                        final = "mp";
-                }
+			final = "mp";
+		}
 		else if ( ! strcmp( final, "j" ) ) {
-                        final = "m";
-                }
+			final = "m";
+		}
 
-        }
+	}
 
-        /* THL/MPS2 s/sh/c/ch/j :
+	/* THL/MPS2 s/sh/c/ch/j :
 	 * s-  + ー/ㄩ, s-  is ㄒ, not ㄙ (THL/Tongyong)
 	 * sh- + ー/ㄩ, sh- is ㄒ, not ㄕ (MPS2)
 	 * c-  + ー/ㄩ, c-  is ㄑ, not ㄘ (Tongyong)
 	 * ch- + ㄧ/ㄩ, ch- is ㄑ, not ㄔ (THL)
 	 * j-  + other than ー/ㄩ, j-  is ㄓ, not ㄐ (MPS2)
-         */
+	 */
 
-        if ( final == strstr( final, "u" ) ||
+	if ( final == strstr( final, "u" ) ||
 	     final == strstr( final, "m" ) ) {
-                if ( ! strcmp( initial, "n" ) ) {
-                        initial = "v";
-                }
+		if ( ! strcmp( initial, "n" ) ) {
+			initial = "v";
+		}
 		else if ( ! strcmp( initial, "g" ) ) {
-                        initial = "v";
-                }
+			initial = "v";
+		}
 		else if ( ! strcmp( initial, "h" ) ) {
-                        initial = "f";
-                }
+			initial = "f";
+		}
 		else if ( ! strcmp( initial, "t" ) ) {
-                        initial = "f";
-                }
-        }
+			initial = "f";
+		}
+	}
 	else {
 		if ( ! strcmp( initial, "r" ) ) {
 			initial = "5";
 		}
 	}
 
-        /* THL supplemental set
-         * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄥ, -ㄨㄥ is another reading of -ㄥ
-         * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄛ, -ㄨㄛ is another reading of -ㄛ
-         */
-        if (
-                ! strcmp( initial, "1" ) ||
-                ! strcmp( initial, "q" ) ||
-                ! strcmp( initial, "a" ) ||
-                ! strcmp( initial, "z" ) ) {
+	/* THL supplemental set
+	 * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄥ, -ㄨㄥ is another reading of -ㄥ
+	 * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄛ, -ㄨㄛ is another reading of -ㄛ
+	 */
+	if (
+		! strcmp( initial, "1" ) ||
+		! strcmp( initial, "q" ) ||
+		! strcmp( initial, "a" ) ||
+		! strcmp( initial, "z" ) ) {
 
-                if ( ! strcmp( final, "ji" ) ) {
-                        final = "i";
-                } else if ( ! strcmp( final, "j/" ) ) {
-                        final = "/";
-                }
+		if ( ! strcmp( final, "ji" ) ) {
+			final = "i";
+		} else if ( ! strcmp( final, "j/" ) ) {
+			final = "/";
+		}
 
-        }
+	}
 
-        sprintf( zuinKeySeq, "%s%s", initial, final );
+	sprintf( zuinKeySeq, "%s%s", initial, final );
 	strcpy( zuinKeySeqAlt, zuinKeySeq );
-        return 0;
+	return 0;
 }

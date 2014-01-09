@@ -1,16 +1,9 @@
-valgrind-check: testchewing test.txt
+valgrind-check: testchewing
 	@echo "Please waiting for the valgrind results..."
 	libtool --mode=execute valgrind \
 		--leak-check=full \
 		--show-reachable=yes \
-		./testchewing < test.txt
-
-test.txt: default-test.txt
-	@if [ ! -f test.txt ]; then cp $(srcdir)/default-test.txt test.txt ; fi
-
-dist_noinst_DATA = \
-	default-test.txt \
-	$(NULL)
+		./testchewing < $(srcdir)/data/default-test.txt
 
 noinst_LTLIBRARIES = libtesthelper.la
 
@@ -27,9 +20,11 @@ NATIVE_TESTS = \
 	test-bopomofo \
 	test-config \
 	test-easy-symbol \
+	test-error-handling \
 	test-fullshape \
 	test-key2pho \
 	test-keyboard \
+	test-keyboardless \
 	test-logger \
 	test-mmap \
 	test-path \
@@ -46,6 +41,7 @@ check_HEADERS = \
 	$(NULL)
 
 check_PROGRAMS = \
+	performance \
 	testchewing \
 	simulate \
 	randkeystroke \
@@ -53,23 +49,24 @@ check_PROGRAMS = \
 	$(NATIVE_TESTS) \
 	$(NULL)
 
-test_mmap_CPPFLAGS = -DTESTDATA="\"$(srcdir)/default-test.txt\""
-
 if ENABLE_TEXT_UI
 TEXT_UI_BIN=genkeystroke
-genkeystroke_SOURCES = gen_keystroke.c
+genkeystroke_SOURCES = genkeystroke.c
 genkeystroke_LDADD = $(LDADD) @CURSES_LIB@
 else
 TEXT_UI_BIN=
 endif
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-I$(top_srcdir)/test \
+	-I$(top_srcdir)/test/ \
+	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
+	-DTEST_DATA_DIR="\"$(srcdir)/data\"" \
+	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \
 	$(NULL)
 
@@ -81,4 +78,17 @@ LDADD = \
 
 AM_LDFLAGS = -static
 
-CLEANFILES = uhash.dat materials.txt-random test.txt
+if WITH_SQLITE3
+if WITH_INTERNAL_SQLITE3
+sqlite3_SOURCES = \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
+	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
+	$(NULL)
+
+check_PROGRAMS += \
+	sqlite3 \
+	$(NULL)
+endif
+endif
+
+CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3

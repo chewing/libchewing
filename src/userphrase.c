@@ -1,168 +1,131 @@
 /**
  * userphrase.c
  *
- * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
- *
- * Copyright (c) 2004, 2006
+ * Copyright (c) 2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
 
-#include <stdlib.h>
-#include <string.h>
-
-#include "chewing-utf8-util.h"
-#include "hash-private.h"
-#include "dict-private.h"
-#include "tree-private.h"
 #include "userphrase-private.h"
+
+#include <assert.h>
+
+#include "chewing-private.h"
+#include "chewing-sql.h"
 #include "private.h"
 
-/* load the orginal frequency from the static dict */
-static int LoadOriginalFreq( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len )
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+
+#include <Shlobj.h>
+#define USERPHRASE_DIR	"ChewingTextService"
+
+char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
-	int pho_id;
-	int retval;
-	Phrase *phrase = ALC( Phrase, 1 );
-
-	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
-	if ( pho_id != -1 ) {
-		GetPhraseFirst( pgdata, phrase, pho_id );
-		do {
-			/* find the same phrase */
-			if ( ! strcmp(
-				phrase->phrase,
-				wordSeq ) ) {
-				retval = phrase->freq;
-				free( phrase );
-				return retval;
-			}
-		} while ( GetPhraseNext( pgdata, phrase ) );
-	}
-
-	free( phrase );
-	return FREQ_INIT_VALUE;
-}
-
-/* find the maximum frequency of the same phrase */
-static int LoadMaxFreq( ChewingData *pgdata, const uint16_t phoneSeq[], int len )
-{
-	int pho_id;
-	Phrase *phrase = ALC( Phrase, 1 );
-	int maxFreq = FREQ_INIT_VALUE;
-	UserPhraseData *uphrase;
-
-	pho_id = TreeFindPhrase( pgdata, 0, len - 1, phoneSeq );
-	if ( pho_id != -1 ) {
-		GetPhraseFirst( pgdata, phrase, pho_id );
-		do {
-			if ( phrase->freq > maxFreq )
-				maxFreq = phrase->freq;
-		} while( GetPhraseNext( pgdata, phrase ) );
-	}
-	free( phrase );
-
-	uphrase = UserGetPhraseFirst( pgdata, phoneSeq );
-	while ( uphrase ) {
-		if ( uphrase->userfreq > maxFreq )
-			maxFreq = uphrase->userfreq;
-		uphrase = UserGetPhraseNext( pgdata, phoneSeq );
-	}
-
-	return maxFreq;
-}
-
-/* compute the new updated freqency */
-static int UpdateFreq( int freq, int maxfreq, int origfreq, int deltatime )
-{
-	int delta;
-
-	/* Short interval */
-	if ( deltatime < 4000 ) {
-		delta = ( freq >= maxfreq ) ?
-			min(
-				( maxfreq - origfreq ) / 5 + 1,
-				SHORT_INCREASE_FREQ ) :
-			max(
-				( maxfreq - origfreq ) / 5 + 1,
-				SHORT_INCREASE_FREQ );
-		return min( freq + delta, MAX_ALLOW_FREQ );
-	}
-	/* Medium interval */
-	else if ( deltatime < 50000 ) {
-		delta = ( freq >= maxfreq ) ?
-			min(
-				( maxfreq - origfreq ) / 10 + 1,
-				MEDIUM_INCREASE_FREQ ) :
-			max(
-				( maxfreq - origfreq ) / 10 + 1,
-				MEDIUM_INCREASE_FREQ );
-		return min( freq + delta, MAX_ALLOW_FREQ );
-	}
-	/* long interval */
-	else {
-		delta = max( ( freq - origfreq ) / 5, LONG_DECREASE_FREQ );
-		return max( freq - delta, origfreq );
-	}
-}
-
-int UserUpdatePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
-{
-	HASH_ITEM *pItem;
-	UserPhraseData data;
+	wchar_t *tmp;
+	char *path;
+	int i;
 	int len;
 
-	len = ueStrLen( (char *) wordSeq );
-	pItem = HashFindEntry( pgdata, phoneSeq, wordSeq );
-	if ( ! pItem ) {
-		if ( ! AlcUserPhraseSeq( &data, len, strlen( wordSeq ) ) ) {
-			return USER_UPDATE_FAIL;
+	assert(pgdata);
+
+	len = GetEnvironmentVariableW(L"CHEWING_USER_PATH", NULL, 0);
+	if (len) {
+		tmp = calloc(sizeof(*tmp), len);
+		if (!tmp) {
+			LOG_ERROR("calloc returns %#p", tmp);
+			exit(-1);
 		}
 
-		memcpy( data.phoneSeq, phoneSeq, len * sizeof( phoneSeq[ 0 ] ) );
-		data.phoneSeq[ len ] = 0;
-		strcpy( data.wordSeq, wordSeq );
+		GetEnvironmentVariableW(L"CHEWING_USER_PATH", tmp, len);
 
-		/* load initial freq */
-		data.origfreq = LoadOriginalFreq( pgdata, phoneSeq, wordSeq, len );
-		data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
+		len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, NULL, 0, NULL, NULL);
+		path = calloc(sizeof(*path), len + 1 + strlen(DB_NAME) + 1);
+		if (!path) {
+			free(tmp);
+			LOG_ERROR("calloc returns %#p", path);
+			exit(-1);
+		}
+		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
+		strcat(path + len, "\\" DB_NAME);
 
-		data.userfreq = data.origfreq;
-		data.recentTime = pgdata->static_data.chewing_lifetime;
-		pItem = HashInsert( pgdata, &data );
-		HashModify( pgdata, pItem );
-		return USER_UPDATE_INSERT;
+		free(tmp);
+		return path;
 	}
-	else {
-		pItem->data.maxfreq = LoadMaxFreq( pgdata, phoneSeq, len );
-		pItem->data.userfreq = UpdateFreq(
-			pItem->data.userfreq,
-			pItem->data.maxfreq,
-			pItem->data.origfreq,
-			pgdata->static_data.chewing_lifetime - pItem->data.recentTime );
-		pItem->data.recentTime = pgdata->static_data.chewing_lifetime;
-		HashModify( pgdata, pItem );
-		return USER_UPDATE_MODIFY;
+
+	len = GetEnvironmentVariableW(L"USERPROFILE", NULL, 0);
+	if (len) {
+		tmp = calloc(sizeof(*tmp), len);
+		if (!tmp) {
+			LOG_ERROR("calloc returns %#p", tmp);
+			exit(-1);
+		}
+
+		GetEnvironmentVariableW(L"USERPROFILE", tmp, len);
+
+		len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, NULL, 0, NULL, NULL);
+		path = calloc(sizeof(*path), len + 1 + strlen(USERPHRASE_DIR) + 1 + strlen(DB_NAME) + 1);
+		if (!path) {
+			free(tmp);
+			LOG_ERROR("calloc returns %#p", path);
+			exit(-1);
+		}
+		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
+		strcat(path + len, "\\" USERPHRASE_DIR "\\" DB_NAME);
+
+		free(tmp);
+		return path;
 	}
+
+	return NULL;
 }
 
-UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] )
+#else
+
+#ifdef __MaxOSX__
+/* FIXME: Shall this path pre user? */
+#define USERPHRASE_DIR	"/Library/ChewingOSX"
+#else
+#define USERPHRASE_DIR	".chewing"
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
-	pgdata->prev_userphrase = HashFindPhonePhrase( pgdata, phoneSeq, NULL );
-	if ( ! pgdata->prev_userphrase )
-		return NULL;
-	return &( pgdata->prev_userphrase->data );
+	char *tmp;
+	char *path;
+	int ret;
+
+	assert(pgdata);
+
+	tmp = getenv("CHEWING_USER_PATH");
+	if (tmp && access(tmp, W_OK) == 0) {
+		ret = asprintf(&path, "%s/%s", tmp, DB_NAME);
+		if (ret == -1) {
+			LOG_ERROR("asprintf returns %d", ret);
+			exit(-1);
+		}
+		return path;
+	}
+
+	tmp = getenv("HOME");
+	if (!tmp) {
+		tmp = PLAT_TMPDIR;
+	}
+
+	ret = asprintf(&path, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
+	if (ret == -1) {
+		LOG_ERROR("asprintf returns %d", ret);
+		exit(-1);
+	}
+	PLAT_MKDIR(path);
+
+	return path;
 }
 
-UserPhraseData *UserGetPhraseNext( ChewingData *pgdata, const uint16_t phoneSeq[] )
-{
-	pgdata->prev_userphrase = HashFindPhonePhrase( pgdata, phoneSeq, pgdata->prev_userphrase );
-	if ( ! pgdata->prev_userphrase )
-		return NULL;
-	return &( pgdata->prev_userphrase->data );
-}
-
+#endif

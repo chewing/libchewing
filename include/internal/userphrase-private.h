@@ -21,6 +21,12 @@
 #  include <stdint.h>
 #endif
 
+#if WITH_SQLITE3
+#define DB_NAME	"chewing.sqlite3"
+#else
+#define DB_NAME	"uhash.dat"
+#endif
+
 #define FREQ_INIT_VALUE (1)
 #define SHORT_INCREASE_FREQ (10)
 #define MEDIUM_INCREASE_FREQ (5)
@@ -33,9 +39,9 @@
 #define USER_UPDATE_IGNORE (8)
 
 /* Forward declaration */
-struct tag_ChewingData;
+struct ChewingData;
 
-typedef struct tag_UserPhraseData {
+typedef struct UserPhraseData {
 	uint16_t *phoneSeq;
 	char *wordSeq;
 	int userfreq;
@@ -44,6 +50,7 @@ typedef struct tag_UserPhraseData {
 	int maxfreq;	/* the maximum frequency of the phrase of the same pid */
 } UserPhraseData ;
 
+void UserUpdatePhraseBegin( struct ChewingData *pgdata );
 /**
  * @brief Update or add a new UserPhrase.
  *
@@ -55,24 +62,33 @@ typedef struct tag_UserPhraseData {
  * @retval USER_UPDATE_INSERT Sequence is new, add new entry.
  * @retval USER_UPDATE_MODIFY Sequence is existing, update it's data.
  */
-int UserUpdatePhrase( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
+int UserUpdatePhrase( struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
+
+void UserUpdatePhraseEnd( struct ChewingData *pgdata );
+void UserRemovePhrase( struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] );
 
 /**
  * @brief Read the first phrase of the phone in user phrase database.
  *
  * @param phoneSeq[] Phone sequence
- * 
+ *
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseFirst( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[] );
+UserPhraseData *UserGetPhraseFirst( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
 
 /**
  * @brief Read the next phrase of the phone in user phrase database.
- * 
+ *
  * @param phoneSeq[] Phone sequence
  *
  * @return UserPhraseData, if it's not existing then return NULL.
  */
-UserPhraseData *UserGetPhraseNext( struct tag_ChewingData *pgdata, const uint16_t phoneSeq[] );
+UserPhraseData *UserGetPhraseNext( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
+
+void UserGetPhraseEnd( struct ChewingData *pgdata, const uint16_t phoneSeq[] );
+
+void IncreaseLifeTime( struct ChewingData *pgdata );
+
+char *GetDefaultUserPhrasePath( struct ChewingData *pgdata );
 
 #endif

@@ -17,42 +17,51 @@
 
 #include "chewing-private.h"
 #include "chewing-utf8-util.h"
-#include "hash-private.h"
 #include "key2pho-private.h"
+#include "plat_path.h"
+#include "userphrase-private.h"
 
 static unsigned int test_run;
 static unsigned int test_ok;
 
 /* We cannot use designated initializer here due to Visual Studio */
 BufferType COMMIT_BUFFER = {
+	"commit buffer",
 	chewing_commit_Check,
 	0,
 	0,
 	chewing_commit_String,
 	0,
+	chewing_commit_String_static
 };
 
 BufferType PREEDIT_BUFFER = {
+	"preedit buffer",
 	chewing_buffer_Check,
 	0,
 	chewing_buffer_Len,
 	chewing_buffer_String,
 	0,
+	chewing_buffer_String_static
 };
 
-BufferType ZUIN_BUFFER = {
-	0,
+BufferType BOPOMOFO_BUFFER = {
+	"bopomofo buffer",
+	chewing_bopomofo_Check,
 	chewing_zuin_Check,
 	0,
-	0,
+	chewing_bopomofo_String,
 	chewing_zuin_String,
+	chewing_bopomofo_String_static
 };
 
 BufferType AUX_BUFFER = {
+	"aux buffer",
 	chewing_aux_Check,
 	0,
 	chewing_aux_Length,
 	chewing_aux_String,
+	0,
 	0,
 };
 
@@ -294,7 +303,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = !!expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s check function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->check_alt ) {
@@ -302,7 +311,7 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = !expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"check function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s check function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->get_length ) {
@@ -310,13 +319,13 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"get length function returned `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s get length function returned `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 	}
 
 	if ( buffer->get_string ) {
 		buf = buffer->get_string( ctx );
 		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
-			"string function returned `%s' shall be `%s'", buf, expected );
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
 		chewing_free( buf );
 	}
 
@@ -325,9 +334,16 @@ void internal_ok_buffer( const char *file, int line, ChewingContext *ctx,
 		expected_ret = expected_len;
 		internal_ok( file, line, actual_ret == expected_ret,
 			"actual_ret == expected_ret",
-			"string function returned parameter `%d' shall be `%d'", actual_ret, expected_ret );
+			"%s string function returned parameter `%d' shall be `%d'", buffer->name, actual_ret, expected_ret );
 		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
-			"string function returned `%s' shall be `%s'", buf, expected );
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
+		chewing_free( buf );
+	}
+
+	if ( buffer->get_string_static ) {
+		buf = strdup(buffer->get_string_static( ctx ));
+		internal_ok( file, line, !strcmp( buf, expected ), "!strcmp( buf, expected )",
+			"%s string function returned `%s' shall be `%s'", buffer->name, buf, expected );
 		chewing_free( buf );
 	}
 }
@@ -344,7 +360,13 @@ void internal_ok_candidate( const char *file, int line,
 	for ( i = 0; i < cand_len; ++i ) {
 		internal_ok( file, line, chewing_cand_hasNext( ctx ), __func__,
 			"shall has next candidate" );
+
 		buf = chewing_cand_String( ctx );
+		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
+			"candidate `%s' shall be `%s'", buf, cand[i] );
+		chewing_free( buf );
+
+		buf = chewing_cand_string_by_index( ctx, i );
 		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
 			"candndate `%s' shall be `%s'", buf, cand[i] );
 		chewing_free( buf );
@@ -357,6 +379,21 @@ void internal_ok_candidate( const char *file, int line,
 	internal_ok( file, line, strcmp( buf, "" ) == 0, __func__,
 		"candndate `%s' shall be `%s'", buf, "" );
 
+	chewing_free( buf );
+}
+
+void internal_ok_candidate_len( const char *file, int line,
+	ChewingContext *ctx, size_t expected_len )
+{
+	char *buf;
+	int actual_len;
+
+	assert( ctx );
+
+	buf = chewing_cand_string_by_index( ctx, 0 );
+	actual_len = ueStrLen( buf );
+	internal_ok( file, line, actual_len == expected_len, __func__,
+			"candidate length `%d' shall be `%d'", actual_len, expected_len );
 	chewing_free( buf );
 }
 
@@ -395,7 +432,7 @@ int internal_has_userphrase( const char *file UNUSED, int line UNUSED,
 	int i;
 	char *p;
 	char *save_ptr = NULL;
-	HASH_ITEM *item = NULL;
+	UserPhraseData *userphrase;
 	int ret = 0;
 
 	phone = calloc( MAX_PHONE_SEQ_LEN, sizeof (*phone) );
@@ -416,21 +453,49 @@ int internal_has_userphrase( const char *file UNUSED, int line UNUSED,
 		phone[i] = UintFromPhone( p );
 	}
 
-	while ( ( item = HashFindPhonePhrase( ctx->data, phone, item ) ) != NULL ) {
-		if ( phrase == NULL || strcmp( item->data.wordSeq, phrase ) == 0 ) {
+	for ( userphrase = UserGetPhraseFirst( ctx->data, phone );
+		userphrase != NULL;
+		userphrase = UserGetPhraseNext( ctx->data, phone ) ) {
+		if ( phrase == NULL || strcmp( userphrase->wordSeq, phrase ) == 0 ) {
 			ret = 1;
 			goto end;
 		}
+
 	}
 
 end:
+	UserGetPhraseEnd( ctx->data, phone );
 	free( bopomofo_buf );
 	free( phone );
 
 	return ret;
 }
 
+void logger( void *data, int level, const char *fmt, ... )
+{
+	va_list ap;
+	FILE *fd = (FILE *) data;
+
+	va_start( ap, fmt );
+	vfprintf( fd, fmt, ap );
+	va_end( ap );
+}
+
+void internal_start_testcase( const char *func, ChewingContext *ctx, FILE *file )
+{
+	assert( func );
+
+	printf("#\n# %s\n#\n", func);
+	fprintf( file, "#\n# %s\n#\n", func );
+	chewing_set_logger( ctx, logger, file );
+}
+
 int exit_status()
 {
 	return test_run == test_ok ? 0 : -1;
+}
+
+void clean_userphrase()
+{
+	remove( TEST_HASH_DIR PLAT_SEPARATOR DB_NAME );
 }

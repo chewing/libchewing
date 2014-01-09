@@ -1,8 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.67])
+AC_PREREQ([2.65])
 
-AC_INIT([libchewing],[0.3.4],[chewing-devel@googlegroups.com])
+# Update CMakeLists.txt if version is changed.
+AC_INIT([libchewing],[0.3.5],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -72,6 +73,41 @@ AC_C_BIGENDIAN
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strtok_r asprintf])
 
+# options
+AC_ARG_WITH([sqlite3],
+            AS_HELP_STRING([--with-sqlite3], [Use sqlite3 to store userphrase @<:@default=yes@:>@]),
+            [],
+            [with_sqlite3=yes])
+AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
+
+AC_ARG_WITH([internal-sqlite3],
+            AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 instead of system-wide @<:@default=no@:>@]),
+            [],
+            [with_internal_sqlite3=no])
+AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" == x"yes"])
+
+# for sqlite
+AS_IF([test x"$with_sqlite3" == x"yes"], [
+       AC_DEFINE([WITH_SQLITE3], [1], [Use sqlite3 to store userphrase])
+       AS_IF([test x"$with_internal_sqlite3" == x"no"],
+             [
+              AC_SEARCH_LIBS([sqlite3_open], [sqlite3],
+                             [AS_IF([test x$ac_cv_search_sqlite3_open != x"none required"],
+                                    [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_sqlite3_open"])],
+                                    [AC_MSG_ERROR([unable to find the sqlite3() function])])
+             ],
+             [
+              AC_SEARCH_LIBS([dlopen], [dl dld],
+                             [AS_IF([test x$ac_cv_search_dlopen != x"none required"],
+                                    [AM_LDFLAGS="$AM_LDFLAGS $ac_cv_search_dlopen"])],
+                                    [AC_MSG_ERROR([unable to find the dlopen() function])])
+              AX_PTHREAD([
+                          AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
+                          AM_LDFLAGS="$AM_LDFLAGS $PTHREAD_LIBS"
+                          ], [AC_MSG_ERROR([cannot find pthread])])
+              ])
+])
+
 # plat_mmap_posix
 AC_FUNC_MMAP
 
@@ -86,9 +122,11 @@ CC_FOR_BUILD=${CC_FOR_BUILD-${CC}}
 AC_SUBST(CC_FOR_BUILD)
 
 # Default CFLAGS
-AM_CFLAGS="$CFLAGS -Wall"
+AM_CFLAGS="$AM_CFLAGS -Wall $CFLAGS"
+
+# Add '_GNU_SOURCE' for asprintf
 AS_IF([test x$ac_cv_func_asprintf == xyes],
-      [AM_CPPFLAGS="$AM_CPPFLAGS -D_GNU_SOURCE"])
+      [DEFAULT_CPPFLAGS="$DEFAULT_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
 AM_CONDITIONAL([ENABLE_TEXT_UI], [test x$ax_cv_ncursesw = "xyes"])
@@ -117,24 +155,6 @@ foo () {};
 ])
 AC_MSG_RESULT($has_visibility)
 
-dnl binary form of chewing data
-AC_ARG_ENABLE([binary-data],
-                [AS_HELP_STRING([--enable-binary-data],
-                                [Experimental use of binary data @<:@default=yes@:>@])],
-                [case "${enableval}" in
-                no)
-                binary_data="no"
-                ;;
-                *)
-                binary_data="yes"
-                ;;
-                esac],binary_data="yes")
-if test x$binary_data = "xyes"; then
-        AC_DEFINE(USE_BINARY_DATA, 1, [Experimental use of binary data])
-fi
-AC_SUBST(ENABLE_BINARY_DATA)
-AM_CONDITIONAL(ENABLE_BINARY_DATA, test x$binary_data = "xyes")
-
 # Platform-dependent
 dnl What kind of system are we using?
 case $host_os in
@@ -161,7 +181,8 @@ AC_DEFINE(UNDER_POSIX, 1,
 esac
 
 AC_SUBST(AM_CFLAGS)
-AC_SUBST(AM_CPPFLAGS)
+AC_SUBST(AM_LDFLAGS)
+AC_SUBST(DEFAULT_CPPFLAGS)
 
 AC_CONFIG_LINKS([
         data/pinyin.tab:data/pinyin.tab
@@ -192,7 +213,10 @@ Build options:
   Version                 $PACKAGE_VERSION
   Install prefix          $prefix
   Enable gcov             $ENABLE_GCOV
-  Enable binary data      $binary_data
+  With sqlite3            $with_sqlite3
+  With internal sqlite3   $with_internal_sqlite3
   Build TextUI sample     $ax_cv_ncursesw
   Default CFLAGS          $AM_CFLAGS
+  Default CPPFLAGS        $DEFAULT_CPPFLAGS
+  Default LDFLAGS         $AM_LDFLAGS
 ])

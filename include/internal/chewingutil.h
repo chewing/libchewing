@@ -33,11 +33,12 @@ int EasySymbolInput( int key, ChewingData *pgdata );
 int SymbolInput( int key, ChewingData *pgdata );
 int SymbolChoice( ChewingData *pgdata, int sel_i );
 int HaninSymbolInput( ChewingData *pgdata );
-int WriteChiSymbolToBuf( wch_t csBuf[], int csBufLen, ChewingData *pgdata );
+void WriteChiSymbolToCommitBuf( ChewingData *pgdata, ChewingOutput *pgo, int len );
 int ReleaseChiSymbolBuf( ChewingData *pgdata, ChewingOutput *);
 int AddChi( uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata );
-int CallPhrasing( ChewingData *pgdata );
+int CallPhrasing( ChewingData *pgdata, int all_phrasing );
 int MakeOutputWithRtn( ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn );
+int MakeOutput( ChewingOutput *pgo, ChewingData *pgdata );
 void MakeOutputAddMsgAndCleanInterval( ChewingOutput *pgo, ChewingData *pgdata );
 int AddSelect( ChewingData *pgdata, int sel_i );
 int CountSelKeyNum( int key, ChewingData *pgdata );
@@ -45,8 +46,8 @@ int CountSymbols( ChewingData *pgdata, int to );
 int PhoneSeqCursor( ChewingData *pgdata );
 int ChewingIsChiAt( int cursor, ChewingData *pgdata );
 int ChewingKillChar(
-		ChewingData *pgdata, 
-		int chiSymbolCursorToKill, 
+		ChewingData *pgdata,
+		int chiSymbolCursorToKill,
 		int minus );
 void RemoveSelectElement( int i, ChewingData *pgdata );
 int IsPreferIntervalConnted( int cursor, ChewingData *pgdata );
@@ -57,6 +58,9 @@ void TerminateSymbolTable( ChewingData *pgdata );
 
 int InitEasySymbolInput( ChewingData *pgdata, const char *prefix );
 void TerminateEasySymbolTable( ChewingData *pgdata );
-
+void copyStringFromPreeditBuf(
+	ChewingData *pgdata, int pos, int len,
+	char *output, int output_len );
+int toPreeditBufIndex( ChewingData *pgdata, int pos );
 #endif
 

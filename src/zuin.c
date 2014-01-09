@@ -23,7 +23,8 @@
 #include <string.h>
 
 #include "zuin-private.h"
-#include "char-private.h"
+#include "chewingutil.h"
+#include "dict-private.h"
 #include "key2pho-private.h"
 #include "pinyin-private.h"
 #include "private.h"
@@ -94,7 +95,7 @@ static int EndKeyProcess( ChewingData *pgdata, int key, int searchTimes )
 {
 	ZuinData *pZuin = &(pgdata->zuinData);
 	uint16_t u16Pho, u16PhoAlt;
-	Word tempword;
+	Phrase tempword;
 	int pho_inx;
 
 	if (
@@ -642,6 +643,14 @@ static int PinYinInput( ChewingData *pgdata, int key )
 int ZuinPhoInput( ChewingData *pgdata, int key )
 {
 	ZuinData *pZuin = &(pgdata->zuinData);
+
+	/* open symbol table */
+	if ( key == '`' ) {
+		pgdata->bSelect = 1;
+		pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
+		HaninSymbolInput( pgdata );
+		return ZUIN_OPEN_SYMBOL_TABLE;
+	}
 	switch ( pZuin->kbtype ) {
 		case KB_HSU:
 		case KB_DVORAK_HSU:
@@ -693,13 +702,13 @@ int ZuinRemoveAll( ZuinData *pZuin )
 int ZuinIsEntering( ZuinData *pZuin )
 {
 	int i;
-        if ( pZuin->kbtype >= KB_HANYU_PINYIN ) {
-	    if ( pZuin->pinYinData.keySeq[0] )
-		return 1;
+	if ( pZuin->kbtype >= KB_HANYU_PINYIN ) {
+		if ( pZuin->pinYinData.keySeq[0] )
+			return 1;
 	} else {
-	    for ( i = 0; i < ZUIN_SIZE; i++ )
-		if ( pZuin->pho_inx[ i ] )
-		    return 1;
+		for ( i = 0; i < ZUIN_SIZE; i++ )
+			if ( pZuin->pho_inx[ i ] )
+				return 1;
 	}
 	return 0;
 }

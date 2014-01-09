@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
-
+#include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
@@ -78,6 +78,14 @@ HASH_ITEM *HashFindPhonePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], 
 	return NULL;
 }
 
+HASH_ITEM **HashFindHead( ChewingData *pgdata, const uint16_t phoneSeq[] )
+{
+	assert( pgdata );
+	assert( phoneSeq );
+
+	return &pgdata->static_data.hashtable[ HashFunc( phoneSeq ) ];
+}
+
 HASH_ITEM *HashFindEntry( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM *pItem;
@@ -121,6 +129,25 @@ HASH_ITEM *HashInsert( ChewingData *pgdata, UserPhraseData *pData )
 	return pItem;
 }
 
+HASH_ITEM *FindNextHash( const ChewingData *pgdata, HASH_ITEM *curr )
+{
+	unsigned int hash_value = 0;
+
+	assert( pgdata );
+
+	if ( curr ) {
+		if ( curr->next )
+			return curr->next;
+		/* Find next entry in hash table. */
+		hash_value = HashFunc( curr->data.phoneSeq ) + 1;
+	}
+
+	for (; hash_value < HASH_TABLE_SIZE; ++hash_value )
+		if ( pgdata->static_data.hashtable[hash_value] )
+			return pgdata->static_data.hashtable[hash_value];
+	return NULL;
+}
+
 static void HashItem2String( char *str, HASH_ITEM *pItem )
 {
 	int i, len;
@@ -142,7 +169,7 @@ static void HashItem2String( char *str, HASH_ITEM *pItem )
 /*
  * capacity of 'str' MUST bigger then FIELD_SIZE !
  */
-void HashItem2Binary( char *str, HASH_ITEM *pItem )
+static void HashItem2Binary( char *str, HASH_ITEM *pItem )
 {
 	int i, phraselen;
 	char *pc;
@@ -155,17 +182,17 @@ void HashItem2Binary( char *str, HASH_ITEM *pItem )
 	}
 
 	/* freq info */
-	PutInt32( pItem->data.userfreq, &str[ 0 ] );
-	PutInt32( pItem->data.recentTime, &str[ 4 ] );
-	PutInt32( pItem->data.maxfreq, &str[ 8 ] );
-	PutInt32( pItem->data.origfreq, &str[ 12 ] );
+	PutInt32PreservedEndian( pItem->data.userfreq, &str[ 0 ] );
+	PutInt32PreservedEndian( pItem->data.recentTime, &str[ 4 ] );
+	PutInt32PreservedEndian( pItem->data.maxfreq, &str[ 8 ] );
+	PutInt32PreservedEndian( pItem->data.origfreq, &str[ 12 ] );
 
 	/* phone seq*/
 	phraselen = ueStrLen( pItem->data.wordSeq );
 	str[ 16 ] = phraselen;
 	pc = &str[ 17 ];
 	for ( i = 0; i < phraselen; i++ ) {
-		PutUint16( pItem->data.phoneSeq[ i ], pc );
+		PutUint16PreservedEndian( pItem->data.phoneSeq[ i ], pc );
 		pc += 2;
 	}
 
@@ -232,7 +259,7 @@ static int isValidChineseString( char *str )
  * retval 1	continue
  * retval -1	ignore this record
  */
-int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
+static int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 {
 	int len, i;
 	const char *pc;
@@ -240,17 +267,27 @@ int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 	memset( pItem, 0, sizeof(HASH_ITEM) );
 
 	/* freq info */
-	pItem->data.userfreq	= GetInt32(&srcbuf[ 0 ]);
-	pItem->data.recentTime	= GetInt32(&srcbuf[ 4 ]);
-	pItem->data.maxfreq	= GetInt32(&srcbuf[ 8 ]);
-	pItem->data.origfreq	= GetInt32(&srcbuf[ 12 ]);
+	pItem->data.userfreq	= GetInt32PreservedEndian(&srcbuf[ 0 ]);
+	pItem->data.recentTime	= GetInt32PreservedEndian(&srcbuf[ 4 ]);
+	pItem->data.maxfreq	= GetInt32PreservedEndian(&srcbuf[ 8 ]);
+	pItem->data.origfreq	= GetInt32PreservedEndian(&srcbuf[ 12 ]);
+
+	/*
+	 * Due to a bug in 0.3.5, some userphrase has negative frequency value.
+	 * In this case, we just skip this record.
+	 *
+	 * See https://github.com/chewing/libchewing/issues/75
+	 */
+	if ( pItem->data.userfreq < 0 || pItem->data.recentTime < 0 ||
+		pItem->data.maxfreq < 0 || pItem->data.origfreq < 0 )
+		goto ignore_corrupted_record;
 
 	/* phone seq, length in num of chi words */
 	len = (int) srcbuf[ 16 ];
 	pItem->data.phoneSeq = ALC( uint16_t, len + 1 );
 	pc = &srcbuf[ 17 ];
 	for ( i = 0; i < len; i++ ) {
-		pItem->data.phoneSeq[ i ] = GetUint16( pc );
+		pItem->data.phoneSeq[ i ] = GetUint16PreservedEndian( pc );
 		pc += 2;
 	}
 	pItem->data.phoneSeq[ i ] = 0;
@@ -259,6 +296,10 @@ int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index )
 	pItem->data.wordSeq = ALC( char, (*pc) + 1 );
 	strcpy( pItem->data.wordSeq, (char *) (pc + 1) );
 	pItem->data.wordSeq[ (unsigned int) *pc ] = '\0';
+
+	/* This record is removed by UserRemovePhrase */
+	if ( pItem->data.wordSeq[0] == 0 && pItem->data.phoneSeq[0] == 0 )
+		goto ignore_corrupted_record;
 
 	/* Invalid UTF-8 Chinese characters found */
 	if ( ! isValidChineseString( pItem->data.wordSeq ) ) {
@@ -286,7 +327,7 @@ ignore_corrupted_record:
  * @return 1, 0 or -1
  * retval -1 Ignore bad data item
  */
-int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
+static int ReadHashItem_txt( FILE *infile, HASH_ITEM *pItem, int item_index )
 {
 	int len, i, word_len;
 	char wordbuf[ 64 ];
@@ -343,7 +384,7 @@ static FILE *open_file_get_length(
 	return tf;
 }
 
-char *_load_hash_file( const char *filename, int *size )
+static char *_load_hash_file( const char *filename, int *size )
 {
 	int flen;
 	char *pd = NULL;
@@ -426,9 +467,7 @@ static int migrate_hash_to_bin( ChewingData *pgdata )
 	fclose( txtfile );
 
 	/* backup as *.old */
-	strncpy( oldname, ofilename, sizeof(oldname) );
-	strncat( oldname, ".old", sizeof(oldname) - strlen(oldname) - 1 );
-	oldname[ sizeof(oldname) - 1 ] = '\0';
+	snprintf( oldname, sizeof(oldname), "%s%s", ofilename, ".old" );
 	PLAT_UNLINK( oldname );
 	PLAT_RENAME( ofilename, oldname );
 
@@ -443,56 +482,34 @@ static int migrate_hash_to_bin( ChewingData *pgdata )
 	return 1;
 }
 
-static void FreeHashItem( HASH_ITEM *aItem )
+void FreeHashItem( HASH_ITEM *pItem )
 {
-	if ( aItem ) {
-		HASH_ITEM *pItem = aItem->next;
-		free( aItem->data.phoneSeq );
-		free( aItem->data.wordSeq );
-		free( aItem );
-		if ( pItem ) {
-			FreeHashItem( pItem );
-		}
+	while ( pItem ) {
+		HASH_ITEM *next = pItem->next;
+		free( pItem->data.phoneSeq );
+		free( pItem->data.wordSeq );
+		free( pItem );
+		pItem = next;
 	}
 }
 
-void TerminateHash( ChewingData *pgdata )
+void TerminateUserphrase( ChewingData *pgdata )
 {
 	HASH_ITEM *pItem;
 	int i;
 	for ( i = 0; i < HASH_TABLE_SIZE; ++i ) {
 		pItem = pgdata->static_data.hashtable[ i ];
-		DEBUG_CHECKPOINT();
 		FreeHashItem( pItem );
 	}
 }
 
-int InitHash( ChewingData *pgdata )
+int InitUserphrase( struct ChewingData *pgdata, const char *path )
 {
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
 
-	const char *path = getenv( "CHEWING_USER_PATH" );
-
-	/* make sure of write permission */
-	if ( path && access( path, W_OK ) == 0 ) {
-		sprintf( pgdata->static_data.hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
-	} else {
-		if ( getenv( "HOME" ) ) {
-			sprintf(
-				pgdata->static_data.hashfilename, "%s%s",
-				getenv( "HOME" ), CHEWING_HASH_PATH );
-		}
-		else {
-			sprintf(
-				pgdata->static_data.hashfilename, "%s%s",
-				PLAT_TMPDIR, CHEWING_HASH_PATH );
-		}
-		PLAT_MKDIR( pgdata->static_data.hashfilename );
-		strcat( pgdata->static_data.hashfilename, PLAT_SEPARATOR );
-		strcat( pgdata->static_data.hashfilename, HASH_FILE );
-	}
+	strncpy( pgdata->static_data.hashfilename, path, sizeof( pgdata->static_data.hashfilename ) );
 	memset( pgdata->static_data.hashtable, 0, sizeof( pgdata->static_data.hashtable ) );
 
 open_hash_file:
@@ -506,7 +523,7 @@ open_hash_file:
 			if ( dump ) {
 				free( dump );
 			}
-			return 0;
+			return -1;
 		}
 		pgdata->static_data.chewing_lifetime = 0;
 		fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
@@ -519,7 +536,7 @@ open_hash_file:
 			/* perform migrate from text-based to binary form */
 			free( dump );
 			if ( ! migrate_hash_to_bin( pgdata ) ) {
-				return  0;
+				return  -1;
 			}
 			goto open_hash_file;
 		}
@@ -565,6 +582,5 @@ open_hash_file:
 		}
 		pgdata->static_data.chewing_lifetime -= oldest;
 	}
-	return 1;
+	return 0;
 }
-

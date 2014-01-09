@@ -8,6 +8,7 @@
 #cmakedefine CURSES_HAVE_NCURSES_NCURSES_H 1
 #cmakedefine CURSES_HAVE_NCURSES_CURSES_H 1
 #cmakedefine WORDS_BIGENDIAN 1
+#cmakedefine WITH_SQLITE3 1
 
 /* Change cmake curses macro name to autotools curses macro name */
 #ifdef CURSES_HAVE_CURSES_H
@@ -25,3 +26,6 @@
 #ifdef CURSES_HAVE_NCURSES_CURSES_H
 #define HAVE_NCURSES_CURSES_H 1
 #endif
+
+/* For autotools cross-compilation compatibility */
+#define HAVE_MALLOC 1

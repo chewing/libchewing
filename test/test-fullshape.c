@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "chewing.h"
@@ -95,14 +96,15 @@ static const TestData FULLSHAPE_DATA[] = {
 	{ "-", "\xEF\xBC\x8D" /* － */ },
 };
 
+FILE *fd;
+
 void test_fullshape_input()
 {
 	ChewingContext *ctx;
 	size_t i;
 
-	chewing_Init( NULL, NULL );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
 	chewing_set_ShapeMode( ctx, FULLSHAPE_MODE );
@@ -115,16 +117,14 @@ void test_fullshape_input()
 	}
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
 void test_set_fullshape()
 {
 	ChewingContext *ctx;
 
-	chewing_Init( NULL, NULL );
-
 	ctx = chewing_new();
+	start_testcase( ctx, fd );
 
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
 		"default is HALFSHAPE_MODE" );
@@ -133,10 +133,9 @@ void test_set_fullshape()
 	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
 		"mode shall change to FULLSHAPE_MODE" );
 
-	// XXX: What is the correct behavior when input parameter is wrong?
-//	chewing_set_ShapeMode( ctx, -1 );
-//	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
-//		"mode shall not change when parameter is invalid" );
+	chewing_set_ShapeMode( ctx, -1 );
+	ok( chewing_get_ShapeMode( ctx ) == FULLSHAPE_MODE,
+		"mode shall not change when parameter is invalid" );
 
 	chewing_set_ShapeMode( ctx, HALFSHAPE_MODE );
 	ok( chewing_get_ShapeMode( ctx ) == HALFSHAPE_MODE,
@@ -148,16 +147,27 @@ void test_set_fullshape()
 
 
 	chewing_delete( ctx );
-	chewing_Terminate();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	char *logname;
+	int ret;
+
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
+	ret = asprintf( &logname, "%s.log", argv[0] );
+	if ( ret == -1 ) return -1;
+	fd = fopen( logname, "w" );
+	assert( fd );
+	free( logname );
+
+
 	test_set_fullshape();
 	test_fullshape_input();
+
+	fclose( fd );
 
 	return exit_status();
 }

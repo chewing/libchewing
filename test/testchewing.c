@@ -1,5 +1,5 @@
 /**
- * testhelper.hewing.c
+ * testchewing.c
  *
  * Copyright (c) 2004, 2005, 2008, 2011
  *	libchewing Core Team. See ChangeLog for details.
@@ -86,19 +86,17 @@ int main()
 #endif
 {
 	ChewingContext *ctx;
-	char *prefix = CHEWING_DATA_PREFIX;
 	int i;
 
 	/* Initialize libchewing */
 	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
 	/* for the sake of testing, we should not change existing hash data */
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
-	chewing_Init( prefix, TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */
 	ctx = chewing_new();
 
-	/* Set keyboard type */ 
+	/* Set keyboard type */
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
 
 	chewing_set_candPerPage( ctx, 9 );
@@ -121,9 +119,8 @@ int main()
 end:
 	/* Free Chewing IM handle */
 	chewing_delete( ctx );
-	
+
 	/* Termate Chewing services */
-	chewing_Terminate();
 #ifndef USED_IN_SIMULATION
 	printf( "\n" );
 #endif

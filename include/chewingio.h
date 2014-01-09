@@ -287,7 +287,7 @@ CHEWING_API void chewing_set_ChiEngMode( ChewingContext *ctx, int mode );
  * @brief Get current operating language mode: English / Chinese
  *
  * @param ctx
- * 
+ *
  * @return CHINESE_MODE or ENGLISH_MODE
  */
 CHEWING_API int chewing_get_ChiEngMode( ChewingContext *ctx );
@@ -310,7 +310,7 @@ CHEWING_API void chewing_set_ShapeMode( ChewingContext *ctx, int mode );
  * @brief Get current shape mode of output symbols
  *
  * @param ctx
- * 
+ *
  * @return FULLSHAPE_MODE or HALFSHAPE_MODE
  */
 CHEWING_API int chewing_get_ShapeMode( ChewingContext *ctx );
@@ -550,5 +550,51 @@ CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
 CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 	void (*logger)( void *data, int level, const char *fmt, ... ),
 	void *data );
+
+CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx );
+
+CHEWING_API int chewing_userphrase_has_next(
+	ChewingContext *ctx,
+	unsigned int *phrase_len,
+	unsigned int *bopomofo_len);
+
+CHEWING_API int chewing_userphrase_get(
+	ChewingContext *ctx,
+	char *phrase_buf, unsigned int phrase_len,
+	char *bopomofo_buf, unsigned int bopomofo_len);
+
+CHEWING_API int chewing_userphrase_add(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf);
+
+CHEWING_API int chewing_userphrase_remove(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf);
+
+CHEWING_API int chewing_userphrase_lookup(
+	ChewingContext *ctx,
+	const char *phrase_buf,
+	const char *bopomofo_buf);
+
+CHEWING_API int chewing_cand_list_first( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_last( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_next( ChewingContext *ctx );
+CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx );
+
+CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx );
+CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx );
+
+CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx );
+
+CHEWING_API ChewingContext *chewing_new2(
+	const char *syspath,
+	const char *userpath,
+	void (*logger)( void *data, int level, const char *fmt, ... ),
+	void *loggerdata
+);
 
 #endif /* _CHEWING_IO_H */

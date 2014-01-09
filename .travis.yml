@@ -5,18 +5,30 @@ env: BUILD=autotools
 
 matrix:
   include:
-    - compiler: clang
-      env: BUILD=autotools CONFIGURE_OPTION=--disable-binary-data
     - compiler: gcc
       env: BUILD=cmake
     - compiler: clang
       env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
+    - compiler: gcc
+      env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
+    - compiler: clang
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_STATIC_SQLITE3=yes"
+    - compiler: gcc
+      env: BUILD=autotools CONFIGURE_OPTION="--with-static_sqlite3=yes"
+    - compiler: gcc
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_SQLITE3=no"
+    - compiler: clang
+      env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite3=no"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make && make check; fi
-  - if [ x$BUILD == xcmake ]; then cmake . $CMAKE_OPTION && make && make test; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check; fi
+  - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
-  - sudo add-apt-repository --yes ppa:czchen/travis-ci # For cmake 2.8.9
+  - sudo pip install cpp-coveralls --use-mirrors
+  - sudo add-apt-repository --yes ppa:chewing/travis-ci
   - sudo apt-get update -qq
-  - sudo apt-get install -qq texinfo cmake valgrind
+  - sudo apt-get install -qq texinfo cmake valgrind libsqlite3-dev
+
+after_success:
+  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern 'CMake[^\.]*\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi
