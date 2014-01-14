@@ -43,12 +43,19 @@ noinst_HEADERS =\
 	include/internal/choice-private.h \
 	include/internal/dict-private.h \
 	include/internal/global-private.h \
+	include/internal/hash-private.h \
+	include/internal/key2pho-private.h \
 	include/internal/memory-private.h \
 	include/internal/pinyin-private.h \
-	include/internal/key2pho-private.h \
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \
 	include/internal/zuin-private.h \
+	thirdparty/sqlite-amalgamation/sqlite3ext.h \
+	thirdparty/sqlite-amalgamation/sqlite3.h \
+	$(NULL)
+
+dist_noinst_DATA = \
+	README.md \
 	$(NULL)
 
 # Maintainer's release target

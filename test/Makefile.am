@@ -7,6 +7,15 @@ valgrind-check: testchewing
 
 noinst_LTLIBRARIES = libtesthelper.la
 
+dist_noinst_DATA = \
+	data/default-test.txt \
+	data/dictionary.dat \
+	data/index_tree.dat \
+	data/pinyin.tab \
+	data/swkb.dat \
+	data/symbols.dat \
+	$(NULL)
+
 libtesthelper_la_SOURCES = \
 	testhelper.c \
 	$(NULL)
