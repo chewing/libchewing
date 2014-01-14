@@ -190,7 +190,7 @@ void UserUpdatePhraseEnd( ChewingData *pgdata )
 	/* compatibile with sqlite userphrase */
 }
 
-void UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
+int UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[] )
 {
 	HASH_ITEM **prev = NULL;
 	HASH_ITEM *item = NULL;
@@ -217,6 +217,8 @@ void UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const cha
 		prev = &item->next;
 		item = item->next;
 	}
+
+	return 0;
 }
 
 UserPhraseData *UserGetPhraseFirst( ChewingData *pgdata, const uint16_t phoneSeq[] )

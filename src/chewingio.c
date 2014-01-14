@@ -1698,10 +1698,10 @@ CHEWING_API int chewing_userphrase_remove(
 		free( phone_buf );
 		return -1;
 	}
-	UserRemovePhrase( pgdata, phone_buf, phrase_buf );
+	ret = UserRemovePhrase( pgdata, phone_buf, phrase_buf );
 	free( phone_buf );
 
-	return 0;
+	return ret;
 }
 
 CHEWING_API int chewing_userphrase_lookup(
