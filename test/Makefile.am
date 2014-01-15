@@ -100,4 +100,4 @@ check_PROGRAMS += \
 endif
 endif
 
-CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3
+CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3 test.sqlite3
