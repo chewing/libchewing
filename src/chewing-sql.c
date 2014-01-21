@@ -373,7 +373,7 @@ static void MigrateOldFormat(ChewingData *pgdata, const char *path)
 	snprintf(uhash, len, "%s" PLAT_SEPARATOR "%s", path, HASH_NAME);
 
 	len = strlen(path) + 1 + strlen(HASH_OLD_NAME) + 1;
-	old_uhash = calloc(sizeof(old_uhash), len);
+	old_uhash = calloc(sizeof(*old_uhash), len);
 	if (!old_uhash) {
 		LOG_ERROR("calloc returns %#p", old_uhash);
 		exit(-1);
