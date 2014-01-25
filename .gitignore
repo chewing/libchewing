@@ -44,6 +44,7 @@ include/stamp-h1
 config.h
 /libchewing.*
 /libtesthelper.a
+/libuserphrase.a
 /Testing
 
 # test suite
