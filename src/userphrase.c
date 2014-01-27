@@ -99,6 +99,7 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
 	char *tmp;
 	char *path;
+	int len;
 	int ret;
 
 	assert(pgdata);
@@ -118,12 +119,17 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 		tmp = PLAT_TMPDIR;
 	}
 
-	ret = asprintf(&path, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
-	if (ret == -1) {
-		LOG_ERROR("asprintf returns %d", ret);
+	len = snprintf(NULL, 0, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
+	++len;
+	path = malloc(len + 1);
+	if (!path) {
+		LOG_ERROR("malloc returns %#p", path);
 		exit(-1);
 	}
+
+	snprintf(path, len, "%s/%s", tmp, USERPHRASE_DIR);
 	PLAT_MKDIR(path);
+	snprintf(path, len, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
 
 	return path;
 }
