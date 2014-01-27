@@ -121,7 +121,7 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 
 	len = snprintf(NULL, 0, "%s/%s/%s", tmp, USERPHRASE_DIR, DB_NAME);
 	++len;
-	path = malloc(len + 1);
+	path = malloc(len);
 	if (!path) {
 		LOG_ERROR("malloc returns %#p", path);
 		exit(-1);
