@@ -40,7 +40,7 @@ static const TestData SPECIAL_SYMBOL_TABLE[] = {
 	{ "*", "\xEF\xBC\x8A" /* ＊ */ },
 	{ "(", "\xEF\xBC\x88" /* （ */ },
 	{ ")", "\xEF\xBC\x89" /* ） */ },
-	{ "_", "\xEF\xB9\x8D" /* ﹍ */ },
+	{ "_", "\xE2\x80\x94" /* — */ },
 	{ "+", "\xEF\xBC\x8B" /* ＋ */ },
 	{ "=", "\xEF\xBC\x9D" /* ＝ */ },
 	{ "\\", "\xEF\xBC\xBC" /* ＼ */ },
