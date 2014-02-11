@@ -11,9 +11,11 @@ dist_noinst_DATA = \
 	data/default-test.txt \
 	data/dictionary.dat \
 	data/index_tree.dat \
+	data/phone.cin \
 	data/pinyin.tab \
 	data/swkb.dat \
 	data/symbols.dat \
+	data/tsi.src \
 	$(NULL)
 
 libtesthelper_la_SOURCES = \
