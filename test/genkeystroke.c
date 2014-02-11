@@ -63,6 +63,8 @@
 #define FILL_LINE  "--------------------------------------------------------"
 #define FILL_BLANK "                                                               "
 
+#define LOGNAME "genkeystroke.log"
+
 static int hasColor = 0;
 static int selKey_define[ 11 ] = {'1','2','3','4','5','6','7','8','9','0',0}; /* Default */
 
@@ -263,10 +265,21 @@ void show_commit_string( int x, int y, ChewingContext *ctx )
 	}
 }
 
+static void logger( void *data, int level, const char *fmt, ... )
+{
+	va_list ap;
+	FILE *fd = (FILE *) data;
+
+	va_start( ap, fmt );
+	vfprintf( fd, fmt, ap );
+	va_end( ap );
+}
+
 int main( int argc, char *argv[] )
 {
-	ChewingContext *ctx;
-	FILE *fout;
+	ChewingContext *ctx = NULL;
+	FILE *fout = NULL;
+	FILE *log = NULL;
 	int ch;
 	int add_phrase_length;
 
@@ -280,6 +293,12 @@ int main( int argc, char *argv[] )
 			fprintf( stderr, "Error: failed to open %s\n", argv[ 1 ] );
 			exit( 1 );
 		}
+	}
+
+	log = fopen( LOGNAME, "w" );
+	if ( !log ) {
+		fprintf( stderr, "Error: failed to open %s\n", LOGNAME );
+		goto end;
 	}
 
 	/* Initialize curses library */
@@ -305,7 +324,7 @@ int main( int argc, char *argv[] )
 	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
 
 	/* Request handle to ChewingContext */
-	ctx = chewing_new();
+	ctx = chewing_new2( NULL, NULL, logger, log );
 
 	/* Set keyboard type */
 	chewing_set_KBType( ctx, chewing_KBStr2Num( "KB_DEFAULT" ) );
