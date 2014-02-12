@@ -374,6 +374,27 @@ void test_symbol_cand_page()
 	chewing_delete( ctx );
 }
 
+void test_symbol_count()
+{
+	ChewingContext *ctx;
+	int total;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "`3" );
+	total = chewing_cand_TotalChoice( ctx );
+	ok( total == 30, "total candidate for `3 is %d, shall be %d", total, 30 );
+
+	chewing_delete( ctx );
+}
+
+void test_symbol()
+{
+	test_symbol_cand_page();
+	test_symbol_count();
+}
+
 int main(int argc, char *argv[])
 {
 	char *logname;
@@ -389,7 +410,7 @@ int main(int argc, char *argv[])
 	free( logname );
 
 	test_type_symbol();
-	test_symbol_cand_page();
+	test_symbol();
 
 	fclose( fd );
 
