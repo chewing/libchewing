@@ -1323,7 +1323,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 	SymbolEntry **entry = NULL;
 	char *category_end;
 	const char *symbols;
-	const char *symbols_end;
+	char *symbols_end;
 	const char *symbol;
 	size_t i;
 	size_t len;
@@ -1360,6 +1360,7 @@ int InitSymbolTable( ChewingData *pgdata, const char *prefix )
 		symbols = category_end + 1;
 		symbols_end = strpbrk( symbols, "\r\n" );
 		if ( symbols_end ) {
+			*symbols_end = 0;
 			len = ueStrLen( symbols );
 
 			entry[ pgdata->static_data.n_symbol_entry ] =
