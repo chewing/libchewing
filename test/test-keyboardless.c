@@ -388,6 +388,7 @@ void test_cand_list_word_no_rearward()
 	ret = chewing_cand_list_has_next( ctx );
 	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
 	ret = chewing_cand_list_next( ctx );
+	ok ( ret == -1, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, -1 );
 	ok_candidate_len( ctx, 1 );
 
 	ret = chewing_cand_list_has_prev( ctx );
@@ -437,6 +438,7 @@ void test_cand_list_word_rearward()
 	ret = chewing_cand_list_has_next( ctx );
 	ok ( ret == 0, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 0 );
 	ret = chewing_cand_list_next( ctx );
+	ok ( ret == -1, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, -1 );
 	ok_candidate_len( ctx, 1 );
 
 	ret = chewing_cand_list_has_prev( ctx );
