@@ -8,6 +8,9 @@
  * of this file.
  */
 
+#ifndef _CHEWING_MEMORY_PRIVATE_H
+#define _CHEWING_MEMORY_PRIVATE_H
+
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
@@ -131,3 +134,5 @@ static inline void PutInt32PreservedEndian( int val, void *ptr )
 	uptr[3] = ( val >> 24 ) & 0xff;
 #endif
 }
+
+#endif
