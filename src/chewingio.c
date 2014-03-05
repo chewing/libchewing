@@ -758,8 +758,11 @@ CHEWING_API int chewing_handle_Backspace( ChewingContext *ctx )
 		}
 		CallPhrasing( pgdata, 0 );
 	}
-	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
+	else if ( pgdata->bSelect ) {
+		chewing_cand_close( ctx );
+	}
 
+	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
 
