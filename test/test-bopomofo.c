@@ -482,11 +482,25 @@ void test_Backspace_not_entering_chewing()
 void test_Backspace_in_select()
 {
 	ChewingContext *ctx;
+	int ret;
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
+	
 	type_keystroke_by_string( ctx, "`<B>" );
-	ok_keystroke_rtn( ctx, KEYSTROKE_ABSORB ); /* XXX: shall be ignore? */
+	ok_candidate( ctx, NULL, 0 );
+
+	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<B>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
 
 	chewing_delete( ctx );
 }
