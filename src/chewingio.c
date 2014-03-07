@@ -1070,6 +1070,13 @@ CHEWING_API int chewing_handle_PageUp( ChewingContext *ctx )
 	else if ( ! pgdata->bSelect ) {
 		pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
 	}
+	else if ( pgdata->bSelect ) {
+		assert( pgdata->choiceInfo.nPage > 0 );
+		if ( pgdata->choiceInfo.pageNo > 0 )
+			pgdata->choiceInfo.pageNo--;
+		else
+			pgdata->choiceInfo.pageNo = pgdata->choiceInfo.nPage - 1;
+	}
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
 }
@@ -1087,6 +1094,12 @@ CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
 	}
 	else if ( ! pgdata->bSelect ) {
 		pgdata->chiSymbolCursor = pgdata->chiSymbolBufLen;
+	}
+	else if ( pgdata->bSelect ) {
+		if ( pgdata->choiceInfo.pageNo < pgdata->choiceInfo.nPage - 1)
+			pgdata->choiceInfo.pageNo++;
+		else
+			pgdata->choiceInfo.pageNo = 0;
 	}
 	MakeOutputWithRtn( pgo, pgdata, keystrokeRtn );
 	return 0;
