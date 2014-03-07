@@ -783,7 +783,7 @@ void test_End()
 	chewing_delete( ctx );
 }
 
-void test_PageUp()
+void test_PageUp_not_entering_chewing()
 {
 	ChewingContext *ctx;
 	int cursor;
@@ -803,7 +803,32 @@ void test_PageUp()
 	chewing_delete( ctx );
 }
 
-void test_PageDown()
+void test_PageUp_in_select()
+{
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	chewing_set_candPerPage( ctx, 10 );
+
+	type_keystroke_by_string( ctx, "hk4<D>" );
+	ok( chewing_cand_TotalPage( ctx ) == 3, "total page shall be 3" );
+	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
+
+	type_keystroke_by_string( ctx, "<PU>" );
+	ok( chewing_cand_CurrentPage( ctx ) == 2, "current page shall be 2" );
+
+	chewing_delete( ctx );
+}
+
+void test_PageUp()
+{
+	test_PageUp_not_entering_chewing();
+	test_PageUp_in_select();
+}
+
+void test_PageDown_not_entering_chewing()
 {
 	ChewingContext *ctx;
 	int cursor;
@@ -821,6 +846,34 @@ void test_PageDown()
 	ok( cursor == 2, "cursor `%d' shall be 2", cursor );
 
 	chewing_delete( ctx );
+}
+
+void test_PageDown_in_select()
+{
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	chewing_set_candPerPage( ctx, 10 );
+
+	type_keystroke_by_string( ctx, "hk4<D>" );
+	ok( chewing_cand_TotalPage( ctx ) == 3, "total page shall be 3" );
+	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
+
+	type_keystroke_by_string( ctx, "<PD>" );
+	ok( chewing_cand_CurrentPage( ctx ) == 1, "current page shall be 1" );
+
+	type_keystroke_by_string( ctx, "<PD><PD>" ); /* rollover */
+	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
+
+	chewing_delete( ctx );
+}
+
+void test_PageDown()
+{
+	test_PageDown_not_entering_chewing();
+	test_PageDown_in_select();
 }
 
 void test_ShiftSpace()
