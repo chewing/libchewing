@@ -13,7 +13,7 @@ dist_noinst_DATA = \
 	tsi.src \
 	$(NULL)
 
-chewing_datadir = $(pkglibdir)
+chewing_datadir = $(pkgdatadir)
 chewing_data_DATA = \
 	$(static_tables) \
 	$(datas) \

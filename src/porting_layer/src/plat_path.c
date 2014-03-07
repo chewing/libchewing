@@ -37,10 +37,10 @@ int get_search_path( char * path, size_t path_len )
 		home = getenv( "HOME" );
 		if ( home ) {
 			snprintf( path, path_len, "%s/.chewing" SEARCH_PATH_SEP
-				LIBDIR "/libchewing", home );
+				DATADIR "/libchewing", home );
 		} else {
 			// No HOME ?
-			strncpy( path, SEARCH_PATH_SEP LIBDIR "/libchewing", path_len );
+			strncpy( path, SEARCH_PATH_SEP DATADIR "/libchewing", path_len );
 		}
 	}
 

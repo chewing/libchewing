@@ -115,7 +115,7 @@ set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/test)
 
 set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include/chewing)
 set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/lib/libchewing)
+set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share/libchewing)
 set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
@@ -324,7 +324,7 @@ add_library(chewing OBJECT
 	${SRC_DIR}/zuin.c
 )
 set_target_properties(chewing PROPERTIES
-	COMPILE_DEFINITIONS "LIBDIR=\"${INSTALL_DATA}\""
+	COMPILE_DEFINITIONS "DATADIR=\"${INSTALL_DATA_DIR}\""
 )
 
 if (WITH_SQLITE3)
