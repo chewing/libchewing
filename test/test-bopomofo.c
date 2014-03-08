@@ -333,9 +333,19 @@ void test_del_bopomofo_as_mode_switch()
 
 	type_keystroke_by_string( ctx, "2k" ); /* ㄉㄜ */
 	ok_bopomofo_buffer( ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
-
+	ok_preedit_buffer( ctx, "" );
 	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
 	ok_bopomofo_buffer( ctx, "" );
+	ok_preedit_buffer( ctx, "" );
+
+	chewing_set_ChiEngMode( ctx, CHINESE_MODE );
+
+	type_keystroke_by_string( ctx, "ji" ); /* ㄨㄛ */
+	ok_bopomofo_buffer( ctx, "\xe3\x84\xa8\xe3\x84\x9b" /* ㄨㄛ */ );
+	ok_preedit_buffer( ctx, "" );
+	chewing_set_ChiEngMode( ctx, SYMBOL_MODE );
+	ok_bopomofo_buffer( ctx, "" );
+	ok_preedit_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
