@@ -496,7 +496,7 @@ void test_Backspace_in_select()
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
-	
+
 	type_keystroke_by_string( ctx, "`<B>" );
 	ok_candidate( ctx, NULL, 0 );
 
