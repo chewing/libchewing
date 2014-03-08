@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/tools data src test doc
 
 CMAKE_FILES = \
-	cmake/chewing.pc.in \
 	cmake/config.h.in \
 	cmake/FindCurses.cmake \
 	cmake/version.texi.in \
