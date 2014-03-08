@@ -3,6 +3,9 @@ project(libchewing)
 
 # Update configure.ac if LIBCHEWING_VERSION is changed.
 set(LIBCHEWING_VERSION 0.3.5)
+set(PACKAGE_VERSION ${LIBCHEWING_VERSION})
+# Update configure.ac if LIBCHEWING_BINARY_VERSION is changed.
+set(LIBCHEWING_BINARY_VERSION 1.0.0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 if(UNIX)
@@ -88,22 +91,6 @@ check_include_files(stdint.h HAVE_STDINT_H)
 include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
 
-configure_file(
-	${PROJECT_SOURCE_DIR}/cmake/config.h.in
-	${PROJECT_BINARY_DIR}/include/config.h
-)
-
-configure_file(
-	${PROJECT_SOURCE_DIR}/cmake/chewing.pc.in
-	${PROJECT_BINARY_DIR}/chewing.pc
-	@ONLY
-)
-
-configure_file(
-	${PROJECT_SOURCE_DIR}/cmake/version.texi.in
-	${PROJECT_BINARY_DIR}/doc/version.texi
-)
-
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
 set(TOOLS_SRC_DIR ${PROJECT_SOURCE_DIR}/src/tools)
@@ -120,6 +107,29 @@ set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
+
+configure_file(
+	${PROJECT_SOURCE_DIR}/cmake/config.h.in
+	${PROJECT_BINARY_DIR}/include/config.h
+)
+
+configure_file(
+	${PROJECT_SOURCE_DIR}/cmake/version.texi.in
+	${PROJECT_BINARY_DIR}/doc/version.texi
+)
+
+set(prefix "${CMAKE_INSTALL_PREFIX}")
+set(exec_prefix "\${prefix}")
+set(libdir "\${exec_prefix}/lib")
+set(includedir "\${prefix}/include")
+set(datarootdir "\${prefix}/share")
+set(datadir "\${datarootdir}")
+set(sysconfdir "\${prefix}/etc")
+configure_file(
+	${PROJECT_SOURCE_DIR}/chewing.pc.in
+	${PROJECT_BINARY_DIR}/chewing.pc
+	@ONLY
+)
 
 include_directories(
 	${PROJECT_BINARY_DIR}/include

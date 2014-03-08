@@ -42,6 +42,7 @@ AC_SUBST(LIBCHEWING_REVISION)
 # Define a string for the earliest version that this release has
 # binary compatibility with. This is used for module locations.
 #
+# Update CMakeFiles.txt if LIBCHEWING_BINARY_VERSION is changed.
 LIBCHEWING_BINARY_VERSION=1.0.0
 AC_SUBST(LIBCHEWING_BINARY_VERSION)
 
