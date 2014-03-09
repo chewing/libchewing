@@ -424,12 +424,28 @@ void test_Esc_entering_zuin()
 	chewing_delete( ctx );
 }
 
+void test_Esc_escCleanAllBuf()
+{
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+	chewing_set_escCleanAllBuf( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "hk4g4<EE>" );
+	ok_bopomofo_buffer( ctx, "" );
+	ok_preedit_buffer( ctx, "" );
+	ok_commit_buffer( ctx, "" );
+
+	chewing_delete( ctx );
+}
+
 void test_Esc()
 {
 	test_Esc_not_entering_chewing();
 	test_Esc_in_select();
 	test_Esc_entering_zuin();
-	/* XXX: Test escCleanAllBuf here */
+	test_Esc_escCleanAllBuf();
 }
 
 void test_Del_not_entering_chewing()
@@ -826,8 +842,11 @@ void test_PageUp_in_select()
 	ok( chewing_cand_TotalPage( ctx ) == 3, "total page shall be 3" );
 	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
 
-	type_keystroke_by_string( ctx, "<PU>" );
+	type_keystroke_by_string( ctx, "<PU>" ); /* rollover */
 	ok( chewing_cand_CurrentPage( ctx ) == 2, "current page shall be 2" );
+
+	type_keystroke_by_string( ctx, "<PU>" ); /* to previous page */
+	ok( chewing_cand_CurrentPage( ctx ) == 1, "current page shall be 1" );
 
 	chewing_delete( ctx );
 }
@@ -974,21 +993,24 @@ void test_Space_selection()
 
 	type_keystroke_by_string( ctx, "hk4g4<H>" /* 測試 */ );
 
-	type_keystroke_by_string( ctx, " " );
+	type_keystroke_by_string( ctx, " " ); /* open candidate window */
 
 	chewing_cand_Enumerate( ctx );
 	buf = chewing_cand_String( ctx );
-	len = ueStrLen(buf);
+	len = ueStrLen( buf );
 	ok( len == 2, "candidate `%s' length `%d' shall be `%d'", buf, len, 2 );
 	chewing_free( buf );
 
-	type_keystroke_by_string( ctx, " " );
+	type_keystroke_by_string( ctx, " " ); /* next candidate list */
 
 	chewing_cand_Enumerate( ctx );
 	buf = chewing_cand_String( ctx );
-	len = ueStrLen(buf);
+	len = ueStrLen( buf );
 	ok( len == 1, "candidate `%s' length `%d' shall be `%d'", buf, len, 1 );
 	chewing_free( buf );
+
+	type_keystroke_by_string( ctx, " " ); /* next page */
+	ok( chewing_cand_CurrentPage( ctx ) == 1, "current page shall be 1" );
 
 	chewing_delete( ctx );
 }
