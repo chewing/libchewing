@@ -415,9 +415,7 @@ CHEWING_API void chewing_delete( ChewingContext *ctx )
 
 CHEWING_API void chewing_free( void *p )
 {
-	if ( p )
-		free( p );
-	return;
+	free( p );
 }
 
 CHEWING_API int chewing_Configure( ChewingContext *ctx, ChewingConfigData *pcd )
