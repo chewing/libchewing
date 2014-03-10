@@ -357,17 +357,17 @@ void test_set_autoShiftCur()
 	for ( value = 0; value < 2; ++value ) {
 		chewing_set_autoShiftCur( ctx, value );
 		mode = chewing_get_autoShiftCur( ctx );
-		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+		ok( mode == value,
 			"autoShiftCur shall be `%d'", value );
 
 		chewing_set_autoShiftCur( ctx, -1 );
 		mode = chewing_get_autoShiftCur( ctx );
-		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+		ok( mode == value,
 			"autoShiftCur shall be `%d'", value );
 
 		chewing_set_autoShiftCur( ctx, 2 );
 		mode = chewing_get_autoShiftCur( ctx );
-		ok( mode = chewing_get_autoShiftCur( ctx ) == value,
+		ok( mode == value,
 			"autoShiftCur shall be `%d'", value );
 	}
 
