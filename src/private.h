@@ -34,6 +34,9 @@
 			__FILE__, __FUNCTION__, __LINE__ ); \
 	} while (0)
 
+// Use LOG_API to log all public API call.
+#define LOG_API(fmt, ...) do { LOG_INFO(fmt, ##__VA_ARGS__); } while (0);
+
 #define ALC(type, size) \
 	(type *) calloc( size, sizeof( type ) )
 

@@ -9,6 +9,7 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "testhelper.h"
 #include "chewing.h"
@@ -18,8 +19,150 @@ FILE *fd;
 void test_null()
 {
 	int ret;
+	char *buf;
+	int *key;
+	unsigned short *phone;
 
 	start_testcase( NULL, fd );
+
+	chewing_Reset( NULL ); // shall not crash
+
+	ret = chewing_set_KBType( NULL, 0 );
+	ok( ret == -1, "chewing_set_KBType() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_get_KBType( NULL );
+	ok( ret == -1, "chewing_get_KBType() returns `%d' shall be `%d'", ret, -1 );
+
+	buf = chewing_get_KBString( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_get_KBString() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	chewing_delete( NULL ); // shall not crash
+
+	chewing_free( NULL ); // shall not crash
+
+	chewing_set_candPerPage( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_candPerPage( NULL );
+	ok( ret == -1, "chewing_get_candPerPage() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_maxChiSymbolLen( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_maxChiSymbolLen( NULL );
+	ok( ret == -1, "chewing_get_maxChiSymbolLen() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_selKey( NULL, NULL, 0 ); // shall not crash
+
+	key = chewing_get_selKey( NULL );
+	ok ( key == NULL, "chewing_get_selKey() returns NULL" );
+	chewing_free( key );
+
+	chewing_set_addPhraseDirection( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_addPhraseDirection( NULL );
+	ok( ret == -1, "chewing_get_addPhraseDirection() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_spaceAsSelection( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_spaceAsSelection( NULL );
+	ok( ret == -1, "chewing_get_spaceAsSelection() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_escCleanAllBuf( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_escCleanAllBuf( NULL );
+	ok( ret == -1, "chewing_get_escCleanAllBuf() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_autoShiftCur( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_autoShiftCur( NULL );
+	ok( ret == -1, "chewing_get_autoShiftCur() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_easySymbolInput( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_easySymbolInput( NULL );
+	ok( ret == -1, "chewing_get_easySymbolInput() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_phraseChoiceRearward( NULL, 0 );
+
+	ret = chewing_get_phraseChoiceRearward( NULL );
+	ok( ret == -1, "chewing_get_phraseChoiceRearward() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_ChiEngMode( NULL, 0 ); // shall not crash
+
+	ret = chewing_get_ChiEngMode( NULL );
+	ok( ret == -1, "chewing_get_ChiEngMode() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_set_ShapeMode( NULL, 0 ); // shall not crash
+
+	ret = chewing_handle_Space( NULL );
+	ok( ret == -1, "chewing_handle_Space() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Esc( NULL );
+	ok( ret == -1, "chewing_handle_Esc() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Enter( NULL );
+	ok( ret == -1, "chewing_handle_Enter() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Del( NULL );
+	ok( ret == -1, "chewing_handle_Del() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Backspace( NULL );
+	ok( ret == -1, "chewing_handle_Backspace() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Up( NULL );
+	ok( ret == -1, "chewing_handle_Up() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Down( NULL );
+	ok( ret == -1, "chewing_handle_Down() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_ShiftLeft( NULL );
+	ok( ret == -1, "chewing_handle_ShiftLeft() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Left( NULL );
+	ok( ret == -1, "chewing_handle_Left() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_ShiftRight( NULL );
+	ok( ret == -1, "chewing_handle_ShiftRight() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Right( NULL );
+	ok( ret == -1, "chewing_handle_Right() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Tab( NULL );
+	ok( ret == -1, "chewing_handle_Tab() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_DblTab( NULL );
+	ok( ret == -1, "chewing_handle_DblTab() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Capslock( NULL );
+	ok( ret == -1, "chewing_handle_Capslock() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Home( NULL );
+	ok( ret == -1, "chewing_handle_Home() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_PageUp( NULL );
+	ok( ret == -1, "chewing_handle_PageUp() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_PageDown( NULL );
+	ok( ret == -1, "chewing_handle_PageDown() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Default( NULL, 0 );
+	ok( ret == -1, "chewing_handle_Default() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_CtrlNum( NULL, 0 );
+	ok( ret == -1, "chewing_handle_CtrlNum() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_ShiftSpace( NULL );
+	ok( ret == -1, "chewing_handle_ShiftSpace() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_handle_Numlock( NULL, 0 );
+	ok( ret == -1, "chewing_handle_Numlock() returns `%d' shall be `%d'", ret, -1 );
+
+	phone = chewing_get_phoneSeq( NULL );
+	ok ( phone == NULL, "chewing_get_phoneSeq() returns NULL" );
+	chewing_free( phone );
+
+	ret = chewing_get_phoneSeqLen( NULL );
+	ok( ret == -1, "chewing_get_phoneSeqLen() returns `%d' shall be `%d'", ret, -1 );
 
 	chewing_set_logger( NULL, NULL, NULL );
 
