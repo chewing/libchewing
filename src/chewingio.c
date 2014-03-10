@@ -1015,7 +1015,7 @@ CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx )
 	ChewingData *pgdata = ctx->data;
 	ChewingOutput *pgo = ctx->output;
 
-	pgdata->bChiSym = 1 - pgdata->bChiSym;
+	chewing_set_ChiEngMode( ctx, 1 - chewing_get_ChiEngMode(ctx) );
 	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_ABSORB );
 	return 0;
 }

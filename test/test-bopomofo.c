@@ -758,13 +758,27 @@ void test_DblTab()
 void test_Capslock()
 {
 	ChewingContext *ctx;
+	int mode;
 
 	ctx = chewing_new();
 	start_testcase( ctx, fd );
 
+	mode = chewing_get_ChiEngMode( ctx );
+	ok( mode == CHINESE_MODE, "mode shall be CHINESE_MODE" );
+
+	type_keystroke_by_string( ctx, "ji" ); /* ㄨㄛ */
+	ok_bopomofo_buffer( ctx, "\xe3\x84\xa8\xe3\x84\x9b" /* ㄨㄛ */ );
+	ok_preedit_buffer( ctx, "" );
+	ok_commit_buffer( ctx, "" );
+
 	type_keystroke_by_string( ctx, "<CB>" );
-	ok( chewing_get_ChiEngMode( ctx ) == SYMBOL_MODE,
-		"mode shall change to SYMBOL_MODE" );
+
+	mode = chewing_get_ChiEngMode( ctx );
+	ok( mode == SYMBOL_MODE, "mode shall change to SYMBOL_MODE" );
+
+	ok_bopomofo_buffer( ctx, "" );
+	ok_preedit_buffer( ctx, "" );
+	ok_commit_buffer( ctx, "" );
 
 	chewing_delete( ctx );
 }
