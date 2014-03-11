@@ -12,19 +12,53 @@ What's New in libchewing GIT
     - chewing_cand_open
     - chewing_cand_close
     - chewing_cand_string_by_index
+    - chewing_cand_string_by_index_static
     - chewing_cand_choose_by_index
-* Support SQLite-based user phrase storage and manipulation,
-  which is suitable for concurrent acesss.
-* Fix chewing_zuin_Check wrong return value
-* Add `make check' in cmake build
-* Change MAX_UTF8_SIZE to 4
-* Fix numlock key cannot output number
-* Remove text data support
-* Fix negative frequency problem
-* Fix cannot select candidate when symbol exists
-* Fix auto commit create problematic user phrase
-* Introduce platform independent binary data representation
-
+    - chewing_cand_list_first
+    - chewing_cand_list_last
+    - chewing_cand_list_has_next
+    - chewing_cand_list_has_prev
+    - chewing_cand_list_next
+    - chewing_cand_list_prev
+    - chewing_commit_preedit_buf
+    - chewing_clean_preedit_buf
+    - chewing_clean_bopomofo_buf
+  - Bopomofo buffer
+    - chewing_bopomofo_Check
+    - chewing_bopomofo_String
+  - Static API
+    - chewing_aux_String_static
+    - chewing_bopomofo_String_static
+    - chewing_buffer_String_static
+    - chewing_cand_String_static
+    - chewing_commit_String_static
+    - chewing_kbtype_String_static
+  - Misc
+    - chewing_new2
+* Dictionary format:
+  - Introduce platform independent binary data representation
+  - Move binary data to share/libchewing/*
+  - Remove text data support
+* Userphrase format:
+  - Support SQLite-based user phrase storage and manipulation
+* Bug fixed:
+  - Fix chewing_zuin_Check wrong return value
+  - Fix numlock key cannot output number
+  - Fix negative frequency problem
+  - Fix cannot select candidate when symbol exists
+  - Fix auto commit create problematic user phrase
+  - Fix '\n' appear in symbol table
+  - Fix missing rpl_malloc for cross compilation
+  - Fix invalid characters are committed when pre-edit buffer is full
+  - Avoid clearing the buffer when Up arrow key is pressed and escCleanAllBuf is 1.
+* Misc:
+  - Add `make check' in cmake build
+  - Change MAX_UTF8_SIZE to 4
+  - Replace 'INCLUDE' with 'AM_CPPFLAGS'. #116.
+  - Update README to GFM.
+  - Clean bopomofo buffer when mode change to English mode.
+  - Implement dynamic programming phrasing algorithm.
+  - Use CreateFileA() instead of CreateFile() to stick with  the ANSI API.
 
 What's New in libchewing 0.3.5 (Jul 28, 2013)
 ---------------------------------------------------------
