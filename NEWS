@@ -50,6 +50,7 @@ What's New in libchewing GIT
   - Fix missing rpl_malloc for cross compilation
   - Fix invalid characters are committed when pre-edit buffer is full
   - Avoid clearing the buffer when Up arrow key is pressed and escCleanAllBuf is 1.
+  - Fix AutoLearnPhrase cannot fill correct wordSe.
 * Misc:
   - Add `make check' in cmake build
   - Change MAX_UTF8_SIZE to 4
@@ -58,6 +59,9 @@ What's New in libchewing GIT
   - Clean bopomofo buffer when mode change to English mode.
   - Implement dynamic programming phrasing algorithm.
   - Use CreateFileA() instead of CreateFile() to stick with  the ANSI API.
+  - Use PgUp/PgDn to turn pages of candidates
+  - Use Backspace to close candidate window
+  - Use [Shift]+[-] to input EM DASH (u+2014) as default
 
 What's New in libchewing 0.3.5 (Jul 28, 2013)
 ---------------------------------------------------------
