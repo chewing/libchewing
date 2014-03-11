@@ -20,6 +20,7 @@ void test_null()
 {
 	int ret;
 	char *buf;
+	const char *const_buf;
 	int *key;
 	unsigned short *phone;
 
@@ -219,6 +220,114 @@ void test_null()
 
 	ret = chewing_clean_bopomofo_buf( NULL );
 	ok ( ret == -1, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_commit_Check( NULL );
+	ok ( ret == -1, "chewing_commit_Check() returns `%d' shall be `%d'", ret, -1 );
+
+	buf = chewing_commit_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_commit_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	const_buf = chewing_commit_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_commit_String() returns `%s' shall be `%s'", const_buf, "" );
+
+	ret = chewing_buffer_Check( NULL );
+	ok ( ret == -1, "chewing_buffer_Check() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_buffer_Len( NULL );
+	ok ( ret == -1, "chewing_buffer_Len() returns `%d' shall be `%d'", ret, -1 );
+
+	buf = chewing_buffer_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_buffer_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	const_buf = chewing_buffer_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_buffer_String_static() returns `%s' shall be `%s'", const_buf, "" );
+
+	buf = chewing_bopomofo_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_bopomofo_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	const_buf = chewing_bopomofo_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_bopomofo_String_static() returns `%s' shall be `%s'", const_buf, "" );
+
+	buf = chewing_zuin_String( NULL, NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_zuin_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	ret = chewing_bopomofo_Check( NULL );
+	ok ( ret == -1, "chewing_bopomofo_Check() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_zuin_Check( NULL );
+	ok ( ret == -1, "chewing_zuin_Check() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cursor_Current( NULL );
+	ok ( ret == -1, "chewing_cursor_Current() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_CheckDone( NULL );
+	ok ( ret == -1, "chewing_cand_CheckDone() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_TotalPage( NULL );
+	ok ( ret == -1, "chewing_cand_TotalPage() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_ChoicePerPage( NULL );
+	ok ( ret == -1, "chewing_cand_ChoicePerPage() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_TotalChoice( NULL );
+	ok ( ret == -1, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_cand_CurrentPage( NULL );
+	ok ( ret == -1, "chewing_cand_CurrentPage() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_cand_Enumerate( NULL ); // shall not crash
+
+	ret = chewing_cand_hasNext( NULL );
+	ok ( ret == -1, "chewing_cand_hasNext() returns `%d' shall be `%d'", ret, -1 );
+
+	const_buf = chewing_cand_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_cand_String_static() returns `%s' shall be `%s'", const_buf, "" );
+
+	buf = chewing_cand_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_cand_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	chewing_interval_Enumerate( NULL ); // shall not crash
+
+	ret = chewing_interval_hasNext( NULL );
+	ok ( ret == -1, "chewing_interval_hasNext() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_interval_Get( NULL, NULL ); // shall not crash
+
+	ret = chewing_aux_Check( NULL );
+	ok ( ret == -1, "chewing_aux_Check() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_aux_Length( NULL );
+	ok ( ret == -1, "chewing_aux_Length() returns `%d' shall be `%d'", ret, -1 );
+
+	const_buf = chewing_aux_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_aux_String_static() returns `%s' shall be `%s'", const_buf, "" );
+
+	buf = chewing_aux_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_aux_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
+
+	ret = chewing_keystroke_CheckIgnore( NULL );
+	ok ( ret == -1, "chewing_keystroke_CheckIgnore() returns `%d' shall be `%d'", ret, -1 );
+
+	ret = chewing_keystroke_CheckAbsorb( NULL );
+	ok ( ret == -1, "chewing_keystroke_CheckAbsorb() returns `%d' shall be `%d'", ret, -1 );
+
+	chewing_kbtype_Enumerate( NULL ); // shall not crash
+
+	ret = chewing_kbtype_hasNext( NULL );
+	ok ( ret == -1, "chewing_kbtype_hasNext() returns `%d' shall be `%d'", ret, -1 );
+
+	const_buf = chewing_kbtype_String_static( NULL );
+	ok ( strcmp( const_buf, "" ) == 0, "chewing_kbtype_String_static() returns `%s' shall be `%s'", const_buf, "" );
+
+	buf = chewing_kbtype_String( NULL );
+	ok ( strcmp( buf, "" ) == 0, "chewing_kbtype_String() returns `%s' shall be `%s'", buf, "" );
+	chewing_free( buf );
 }
 
 int main(int argc, char *argv[])
