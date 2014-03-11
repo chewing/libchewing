@@ -1530,7 +1530,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "key = %d", key );
 
 	/* Update lifetime */
 	IncreaseLifeTime( ctx->data );
