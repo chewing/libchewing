@@ -140,25 +140,6 @@ CHEWING_API const char *chewing_buffer_String_static( ChewingContext *ctx )
 /**
  * @param ctx handle to Chewing IM context
  *
- * Always returns a char pointer, caller must free it.
- */
-CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx)
-{
-	ChewingData *pgdata;
-
-	if ( !ctx ) {
-		return strdup("");
-	}
-	pgdata = ctx->data;
-
-	LOG_API();
-
-	return strdup( ctx->output->bopomofoBuf );
-}
-
-/**
- * @param ctx handle to Chewing IM context
- *
  * Alwasy returns a const char pointer, you have to clone them immediately,
  * if you need.
  */
@@ -183,7 +164,7 @@ CHEWING_API const char *chewing_bopomofo_String_static( ChewingContext *ctx)
  */
 CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count )
 {
-	char *s = chewing_bopomofo_String(ctx);
+	char *s = strdup(chewing_bopomofo_String_static(ctx));
 
 	if ( zuin_count )
 		*zuin_count = ueStrLen(s);

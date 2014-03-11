@@ -58,7 +58,6 @@ CHEWING_API char *chewing_zuin_String( ChewingContext *ctx, int *zuin_count );
 // deprecated
 CHEWING_API int chewing_zuin_Check( ChewingContext *ctx );
 
-CHEWING_API char *chewing_bopomofo_String( ChewingContext *ctx);
 CHEWING_API const char *chewing_bopomofo_String_static( ChewingContext *ctx);
 CHEWING_API int chewing_bopomofo_Check( ChewingContext *ctx );
 /*@}*/

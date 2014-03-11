@@ -882,18 +882,6 @@ because it provides more consistent interface
 @end quotation
 @end deftypefun
 
-@deftypefun char* chewing_bopomofo_String (ChewingContext *@var{ctx})
-This function returns the phonetic characters in the pre-edit buffer.
-
-It will contain the number of phonetic characters in the returned string.
-This function returns @code{NULL} when no memory.
-
-The return value is a pointer to a character string. This function returns
-@code{NULL} when no memory. The memory @emph{must} be freed by the caller using
-function @code{chewing_free}.
-
-@end deftypefun
-
 @deftypefun const char* chewing_bopomofo_String_static (ChewingContext *@var{ctx})
 This function returns the phonetic characters in the pre-edit buffer.
 

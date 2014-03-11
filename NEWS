@@ -24,10 +24,9 @@ What's New in libchewing GIT
     - chewing_clean_bopomofo_buf
   - Bopomofo buffer
     - chewing_bopomofo_Check
-    - chewing_bopomofo_String
+    - chewing_bopomofo_String_static
   - Static API
     - chewing_aux_String_static
-    - chewing_bopomofo_String_static
     - chewing_buffer_String_static
     - chewing_cand_String_static
     - chewing_commit_String_static
