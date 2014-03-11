@@ -353,6 +353,7 @@ void internal_ok_candidate( const char *file, int line,
 {
 	size_t i;
 	char *buf;
+	const char *const_buf;
 
 	assert( ctx );
 
@@ -366,10 +367,9 @@ void internal_ok_candidate( const char *file, int line,
 			"candidate `%s' shall be `%s'", buf, cand[i] );
 		chewing_free( buf );
 
-		buf = chewing_cand_string_by_index( ctx, i );
-		internal_ok( file, line, strcmp( buf, cand[i] ) == 0, __func__,
-			"candndate `%s' shall be `%s'", buf, cand[i] );
-		chewing_free( buf );
+		const_buf = chewing_cand_string_by_index_static( ctx, i );
+		internal_ok( file, line, strcmp( const_buf, cand[i] ) == 0, __func__,
+			"candndate `%s' shall be `%s'", const_buf, cand[i] );
 	}
 
 	internal_ok( file, line , !chewing_cand_hasNext( ctx ), __func__,
@@ -379,22 +379,25 @@ void internal_ok_candidate( const char *file, int line,
 	internal_ok( file, line, strcmp( buf, "" ) == 0, __func__,
 		"candndate `%s' shall be `%s'", buf, "" );
 
+	const_buf = chewing_cand_string_by_index_static( ctx, i );
+	internal_ok( file, line, strcmp( const_buf, "" ) == 0, __func__,
+		"candndate `%s' shall be `%s'", const_buf, "" );
+
 	chewing_free( buf );
 }
 
 void internal_ok_candidate_len( const char *file, int line,
 	ChewingContext *ctx, size_t expected_len )
 {
-	char *buf;
+	const char *buf;
 	int actual_len;
 
 	assert( ctx );
 
-	buf = chewing_cand_string_by_index( ctx, 0 );
+	buf = chewing_cand_string_by_index_static( ctx, 0 );
 	actual_len = ueStrLen( buf );
 	internal_ok( file, line, actual_len == expected_len, __func__,
 			"candidate length `%d' shall be `%d'", actual_len, expected_len );
-	chewing_free( buf );
 }
 
 void internal_ok_keystroke_rtn( const char *file, int line,

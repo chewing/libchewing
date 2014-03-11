@@ -709,17 +709,6 @@ This function closes the candidate windows. It returns @code{0} when success,
 @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun char* chewing_cand_string_by_index (ChewingContext *@var{ctx}, int
-@var{index})
-This function returns the candidate string by its index. The range of
-@var{index} shall be @code{0} @leq{} @var{index} <
-@code{chewing_cand_TotalChoice}. This function returns @code{NULL} when no
-memory.
-
-The return value @emph{must} be freed by the @code{chewing_free}
-function.
-@end deftypefun
-
 @deftypefun char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
 @var{index})
 This function returns the candidate string by its index. The range of
