@@ -1773,8 +1773,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				cursor + newPhraseLen ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
-				        &pgdata->phoneSeq[ cursor ],
-				        sizeof( uint16_t ) * newPhraseLen );
+					&pgdata->phoneSeq[ cursor ],
+					sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 
 				copyStringFromPreeditBuf( pgdata, cursor, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
@@ -1801,8 +1801,8 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 				cursor ) ) {
 				/* Manually add phrase to the user phrase database. */
 				memcpy( addPhoneSeq,
-				        &pgdata->phoneSeq[ cursor - newPhraseLen ],
-				        sizeof( uint16_t ) * newPhraseLen );
+					&pgdata->phoneSeq[ cursor - newPhraseLen ],
+					sizeof( uint16_t ) * newPhraseLen );
 				addPhoneSeq[ newPhraseLen ] = 0;
 
 				copyStringFromPreeditBuf( pgdata, cursor - newPhraseLen, newPhraseLen, addWordSeq, sizeof( addWordSeq ) );
