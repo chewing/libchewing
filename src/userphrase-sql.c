@@ -378,7 +378,7 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 {
 	int ret;
 	int len;
-	int result = 0;
+	int affected = 0;
 
 	assert(pgdata);
 	assert(phoneSeq);
@@ -391,7 +391,6 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 		pgdata, STMT_USERPHRASE_DELETE, phoneSeq, len);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("UserBindPhone returns %d", ret);
-		result = -1;
 		goto end;
 	}
 
@@ -401,16 +400,16 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
 		wordSeq, -1, SQLITE_STATIC);
 	if (ret != SQLITE_OK) {
 		LOG_ERROR("sqlite3_bind_text returns %d", ret);
-		result = -1;
 		goto end;
 	}
 
 	ret = sqlite3_step(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_DELETE]);
 	if (ret != SQLITE_DONE) {
 		LOG_ERROR("sqlite3_step returns %d", ret);
-		result = -1;
 		goto end;
 	}
+
+	affected = sqlite3_changes(pgdata->static_data.db);
 
 end:
 	ret = sqlite3_reset(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_DELETE]);
@@ -418,7 +417,7 @@ end:
 		LOG_ERROR("sqlite3_reset returns %d", ret);
 	}
 
-	return result;
+	return affected;
 }
 
 

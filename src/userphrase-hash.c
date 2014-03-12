@@ -212,7 +212,7 @@ int UserRemovePhrase( ChewingData *pgdata, const uint16_t phoneSeq[], const char
 			*prev = item->next;
 			FreeHashItem( item );
 
-			return 0;
+			return 1;
 		}
 		prev = &item->next;
 		item = item->next;

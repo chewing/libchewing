@@ -2124,24 +2124,26 @@ CHEWING_API int chewing_userphrase_add(
 	phrase_len = ueStrLen( phrase_buf );
 	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
 
-	if ( phrase_len != phone_len )
-		return -1;
+	if ( phrase_len != phone_len ) {
+		return 0;
+	}
 
 	phone_buf = ALC( uint16_t, phone_len + 1 );
 	if ( !phone_buf ) return -1;
 	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
 	if ( ret == -1 ) {
 		free( phone_buf );
-		return -1;
+		return 0;
 	}
 
 	ret = UserUpdatePhrase( pgdata, phone_buf, phrase_buf );
 	free( phone_buf );
 
-	if ( ret == USER_UPDATE_FAIL )
-		return -1;
+	if ( ret == USER_UPDATE_FAIL ) {
+		return 0;
+	}
 
-	return 0;
+	return 1;
 }
 
 CHEWING_API int chewing_userphrase_remove(
@@ -2167,7 +2169,7 @@ CHEWING_API int chewing_userphrase_remove(
 	ret = UintArrayFromBopomofo( phone_buf, phone_len + 1, bopomofo_buf );
 	if ( ret == -1 ) {
 		free( phone_buf );
-		return -1;
+		return 0;
 	}
 	ret = UserRemovePhrase( pgdata, phone_buf, phrase_buf );
 	free( phone_buf );

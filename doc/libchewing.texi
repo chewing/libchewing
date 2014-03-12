@@ -1031,14 +1031,14 @@ The return value is @code{0} on success, @code{-1} on failure.
 *@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
-The return value is @code{0} on success, @code{-1} on failure.
+The return value is how many phrases are added, @code{-1} on failure.
 @end deftypefun
 
 @deftypefun int chewing_userphrase_remove (ChewingContext *@var{ctx}, const
 char *@var{phrase_buf}, const char *@var{bopomofo_buf})
 This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
-The return value is @code{0} on success, @code{-1} on failure.
+The return value is how many phrases are removed, @code{-1} on failure.
 @end deftypefun
 
 @deftypefun int chewing_userphrase_lookup (ChewingContext *@var{ctx}, const
