@@ -45,4 +45,36 @@ find \
         --space-after-for \
         --space-after-if \
         --space-after-while \
+        -T AvailInfo \
+        -T BufferType \
+        -T Category \
+        -T ChewingContext \
+        -T ChewingData \
+        -T ChewingOutput \
+        -T ChewingStaticData \
+        -T ChoiceInfo \
+        -T HASH_ITEM \
+        -T keymap \
+        -T Phrase \
+        -T PhraseData \
+        -T PhraseData \
+        -T PhraseIntervalType \
+        -T PhraseIntervalType \
+        -T PhrasingOutput \
+        -T PinYinData \
+        -T plat_mmap \
+        -T PreeditBuf \
+        -T RecordNode \
+        -T RecordNode \
+        -T SqlStmtConfig_ \
+        -T SqlStmtUserphrase_ \
+        -T SymbolEntry \
+        -T TestData \
+        -T _tNODE \
+        -T TreeDataType \
+        -T TreeDataType \
+        -T TreeType \
+        -T uint16_t \
+        -T UserPhraseData \
+        -T ZuinData \
         {} \;
