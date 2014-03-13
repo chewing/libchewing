@@ -630,6 +630,22 @@ void test_Down_open_candidate_window()
 	chewing_delete( ctx );
 }
 
+void test_Down_reopen_symbol_candidate()
+{
+	ChewingContext *ctx;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "_<D><R>");
+	ok( chewing_cand_CurrentPage( ctx ) == 1, "current page shall be 1" );
+
+	type_keystroke_by_string( ctx, "<D>");
+	ok( chewing_cand_CurrentPage( ctx ) == 0, "current page shall be 0" );
+
+	chewing_delete( ctx );
+}
+
 void test_Down_not_entering_chewing()
 {
 	ChewingContext *ctx;
