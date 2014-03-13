@@ -158,3 +158,6 @@ doc/libchewing.vrs
 *.suo
 *.dir
 *.ilk
+
+# indent backup
+*~
