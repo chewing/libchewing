@@ -129,11 +129,21 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 		}
 		/**
 		 * If these's only one candidate list available, ChoiceFirstAvail
-		 * will re-open the list, namely turn back to the firt page. 
-		 * However, it doesn't work for symbols, therefore we 
+		 * will re-open the list, namely turn back to the firt page.
+		 * However, it doesn't work for symbols, therefore we
 		 * set the page number to 0 directly.
 		 */
 		else if ( pgdata->bSelect ) {
+			pgdata->choiceInfo.pageNo = 0;
+		}
+	} else {
+		/*
+		 * The cursor position is not word, nor symbol. The only
+		 * possible case is that user just uses ` to open symbol
+		 * selection. In this case, when chooseCandidate is called,
+		 * libchewing needs to reset pageNo to 0 to do rollover.
+		 */
+		if ( pgdata-> bSelect ) {
 			pgdata->choiceInfo.pageNo = 0;
 		}
 	}

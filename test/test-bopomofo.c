@@ -1081,8 +1081,7 @@ void test_Space_selection_symbol()
 void test_Space()
 {
 	test_Space_selection_word();
-	// FIXME: #127
-	//test_Space_selection_symbol();
+	test_Space_selection_symbol();
 }
 
 void test_get_phoneSeq()
