@@ -1009,7 +1009,7 @@ void test_Numlock()
 	test_Numlock_select_candidate();
 }
 
-void test_Space_selection()
+void test_Space_selection_word()
 {
 	ChewingContext *ctx;
 	char *buf;
@@ -1045,9 +1045,44 @@ void test_Space_selection()
 	chewing_delete( ctx );
 }
 
+void test_Space_selection_symbol()
+{
+	const char CAND_1[] = "\xE2\x80\xA6" /* … */;
+	const char CAND_2[] = "\xE9\x9B\x99\xE7\xB7\x9A\xE6\xA1\x86" /* 雙線框 */;
+
+	ChewingContext *ctx;
+	const char *const_buf;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+	chewing_set_spaceAsSelection( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "`" );
+	chewing_cand_Enumerate( ctx );
+	const_buf = chewing_cand_String_static( ctx );
+	ok( strcmp( const_buf, CAND_1 ) == 0, "first candidate list head `%s' shall be `%s'", const_buf, CAND_1 );
+
+	type_keystroke_by_string( ctx, " " );
+	chewing_cand_Enumerate( ctx );
+	const_buf = chewing_cand_String_static( ctx );
+	ok( strcmp( const_buf, CAND_2 ) == 0, "second candidate list head `%s' shall be `%s'", const_buf, CAND_2 );
+
+	/* rollover */
+	type_keystroke_by_string( ctx, " " );
+	chewing_cand_Enumerate( ctx );
+	const_buf = chewing_cand_String_static( ctx );
+	ok( strcmp( const_buf, CAND_1 ) == 0, "first candidate list head `%s' shall be `%s'", const_buf, CAND_1 );
+
+	chewing_delete( ctx );
+}
+
 void test_Space()
 {
-	test_Space_selection();
+	test_Space_selection_word();
+	// FIXME: #127
+	//test_Space_selection_symbol();
 }
 
 void test_get_phoneSeq()
