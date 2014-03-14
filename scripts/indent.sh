@@ -41,6 +41,7 @@ find \
         --no-space-after-parentheses \
         --no-tabs \
         --parameter-indentation 0 \
+        --preprocessor-indentation 4 \
         --space-after-cast \
         --space-after-for \
         --space-after-if \
