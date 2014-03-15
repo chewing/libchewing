@@ -565,7 +565,7 @@ void test_Backspace()
 	test_Backspace_word();
 }
 
-void test_Up_close_candidate_window()
+void test_Up_close_candidate_window_word()
 {
 	ChewingContext *ctx;
 	int ret;
@@ -574,6 +574,29 @@ void test_Up_close_candidate_window()
 	start_testcase( ctx, fd );
 
 	type_keystroke_by_string( ctx, "hk4" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<D>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+
+	type_keystroke_by_string( ctx, "<U>" );
+	ret = chewing_cand_TotalChoice( ctx );
+	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
+
+	chewing_delete( ctx );
+}
+
+void test_Up_close_candidate_window_symbol()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "_" );
 	ret = chewing_cand_TotalChoice( ctx );
 	ok( ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0 );
 
@@ -602,7 +625,8 @@ void test_Up_not_entering_chewing()
 
 void test_Up()
 {
-	test_Up_close_candidate_window();
+	test_Up_close_candidate_window_word();
+	test_Up_close_candidate_window_symbol();
 	test_Up_not_entering_chewing();
 }
 
