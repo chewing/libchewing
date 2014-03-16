@@ -334,7 +334,7 @@ add_library(chewing OBJECT
 	${SRC_DIR}/zuin.c
 )
 set_target_properties(chewing PROPERTIES
-	COMPILE_DEFINITIONS "DATADIR=\"${INSTALL_DATA_DIR}\""
+	COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${INSTALL_DATA_DIR}\""
 )
 
 if (WITH_SQLITE3)

@@ -1,7 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 AM_CPPFLAGS = \
-	-DDATADIR=\"@datadir@\" \
+	-DCHEWING_DATADIR=\"@datadir@\" \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
