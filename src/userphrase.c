@@ -50,7 +50,7 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 		}
 		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
 
-		strcat(path, "/" DB_NAME);
+		strcpy(path + len - 1, "/" DB_NAME);
 		LOG_INFO("userphrase is at %s", path);
 
 		free(tmp);
