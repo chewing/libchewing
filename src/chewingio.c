@@ -535,6 +535,7 @@ CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len)
 CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
 {
 	ChewingData *pgdata;
+	int *selkeys;
 
 	if ( !ctx ) {
 		return NULL;
@@ -543,7 +544,7 @@ CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
 
 	LOG_API( "" );
 
-	int *selkeys = ALC( int , MAX_SELKEY );
+	selkeys = ALC( int , MAX_SELKEY );
 	if ( selkeys ) {
 		memcpy( selkeys, ctx->data->config.selKey,
 			sizeof( *selkeys ) * MAX_SELKEY );
