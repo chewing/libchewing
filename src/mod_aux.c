@@ -36,7 +36,7 @@ CHEWING_API int chewing_commit_Check( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return !!(ctx->output->keystrokeRtn & KEYSTROKE_COMMIT);
 }
@@ -56,7 +56,7 @@ CHEWING_API char *chewing_commit_String( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return strdup( ctx->output->commitBuf );
 }
@@ -76,7 +76,7 @@ CHEWING_API const char *chewing_commit_String_static( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->output->commitBuf;
 }
@@ -90,7 +90,7 @@ CHEWING_API int chewing_buffer_Check( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->chiSymbolBufLen != 0);
 }
@@ -104,7 +104,7 @@ CHEWING_API int chewing_buffer_Len( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->output->chiSymbolBufLen;
 }
@@ -118,7 +118,7 @@ CHEWING_API char *chewing_buffer_String( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return strdup( ctx->output->preeditBuf );
 }
@@ -132,7 +132,7 @@ CHEWING_API const char *chewing_buffer_String_static( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->output->preeditBuf;
 }
@@ -152,7 +152,7 @@ CHEWING_API const char *chewing_bopomofo_String_static( ChewingContext *ctx)
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->output->bopomofoBuf;
 }
@@ -181,7 +181,7 @@ CHEWING_API int chewing_bopomofo_Check( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->output->bopomofoBuf[0] != 0;
 }
@@ -204,7 +204,7 @@ CHEWING_API int chewing_cursor_Current( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->chiSymbolCursor);
 }
@@ -218,7 +218,7 @@ CHEWING_API int chewing_cand_CheckDone( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (! ctx->output->pci);
 }
@@ -232,7 +232,7 @@ CHEWING_API int chewing_cand_TotalPage( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->pci ? ctx->output->pci->nPage : 0);
 }
@@ -246,7 +246,7 @@ CHEWING_API int chewing_cand_ChoicePerPage( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->pci ? ctx->output->pci->nChoicePerPage : 0);
 }
@@ -260,7 +260,7 @@ CHEWING_API int chewing_cand_TotalChoice( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->pci ? ctx->output->pci->nTotalChoice : 0);
 }
@@ -274,7 +274,7 @@ CHEWING_API int chewing_cand_CurrentPage( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->output->pci ? ctx->output->pci->pageNo : -1);
 }
@@ -288,7 +288,7 @@ CHEWING_API void chewing_cand_Enumerate( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	ctx->cand_no = ctx->output->pci->pageNo * ctx->output->pci->nChoicePerPage;
 }
@@ -302,7 +302,7 @@ CHEWING_API int chewing_cand_hasNext( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->cand_no < ctx->output->pci->nTotalChoice);
 }
@@ -316,7 +316,7 @@ CHEWING_API const char *chewing_cand_String_static( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	char *s;
 	if ( chewing_cand_hasNext( ctx ) ) {
@@ -342,7 +342,7 @@ CHEWING_API void chewing_interval_Enumerate( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	ctx->it_no = 0;
 }
@@ -356,7 +356,7 @@ CHEWING_API int chewing_interval_hasNext( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->it_no < ctx->output->nDispInterval);
 }
@@ -370,7 +370,7 @@ CHEWING_API void chewing_interval_Get( ChewingContext *ctx, IntervalType *it )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( chewing_interval_hasNext( ctx ) ) {
 		if ( it ) {
@@ -390,7 +390,7 @@ CHEWING_API int chewing_aux_Check( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->data->bShowMsg);
 }
@@ -404,7 +404,7 @@ CHEWING_API int chewing_aux_Length( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return (ctx->data->bShowMsg ? ctx->data->showMsgLen : 0);
 }
@@ -418,7 +418,7 @@ CHEWING_API const char *chewing_aux_String_static( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->data->showMsg;
 }
@@ -432,7 +432,7 @@ CHEWING_API char *chewing_aux_String( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return strdup(chewing_aux_String_static(ctx));
 }
@@ -446,7 +446,7 @@ CHEWING_API int chewing_keystroke_CheckIgnore( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return !!(ctx->output->keystrokeRtn & KEYSTROKE_IGNORE);
 }
@@ -460,7 +460,7 @@ CHEWING_API int chewing_keystroke_CheckAbsorb( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return !!(ctx->output->keystrokeRtn & KEYSTROKE_ABSORB);
 }
@@ -479,7 +479,7 @@ CHEWING_API void chewing_kbtype_Enumerate( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	ctx->kb_no = 0;
 }
@@ -493,7 +493,7 @@ CHEWING_API int chewing_kbtype_hasNext( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return ctx->kb_no < KB_TYPE_NUM;
 }
@@ -509,7 +509,7 @@ CHEWING_API const char *chewing_kbtype_String_static( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	char *s;
 	if ( chewing_kbtype_hasNext( ctx ) ) {
@@ -531,7 +531,7 @@ CHEWING_API char *chewing_kbtype_String( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	return strdup(chewing_kbtype_String_static(ctx));
 }

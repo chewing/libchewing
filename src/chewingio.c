@@ -327,7 +327,7 @@ CHEWING_API int chewing_Reset( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	/* Backup old config and restore it after clearing pgdata structure. */
 	old_config = pgdata->config;
@@ -520,7 +520,7 @@ CHEWING_API void chewing_set_selKey( ChewingContext *ctx, int *selkeys, int len)
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !selkeys ) {
 		return;
@@ -541,7 +541,7 @@ CHEWING_API int* chewing_get_selKey( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	int *selkeys = ALC( int , MAX_SELKEY );
 	if ( selkeys ) {
@@ -857,7 +857,7 @@ CHEWING_API int chewing_handle_Space( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	/*
 	 * Use chewing_handle_Default( ctx, ' ' ) to handle space when:
@@ -901,7 +901,7 @@ CHEWING_API int chewing_handle_Esc( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -936,7 +936,7 @@ CHEWING_API int chewing_handle_Enter( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	nCommitStr = pgdata->chiSymbolBufLen;
 
@@ -996,7 +996,7 @@ CHEWING_API int chewing_handle_Del( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1031,7 +1031,7 @@ CHEWING_API int chewing_handle_Backspace( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	pgdata = ctx->data;
 	pgo = ctx->output;
@@ -1075,7 +1075,7 @@ CHEWING_API int chewing_handle_Up( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1115,7 +1115,7 @@ CHEWING_API int chewing_handle_Down( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1150,7 +1150,7 @@ CHEWING_API int chewing_handle_ShiftLeft( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
@@ -1189,7 +1189,7 @@ CHEWING_API int chewing_handle_Left( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
@@ -1227,7 +1227,7 @@ CHEWING_API int chewing_handle_ShiftRight( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
@@ -1267,7 +1267,7 @@ CHEWING_API int chewing_handle_Right( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! ChewingIsEntering( pgdata ) ) {
 		keystrokeRtn = KEYSTROKE_IGNORE;
@@ -1306,7 +1306,7 @@ CHEWING_API int chewing_handle_Tab( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1350,7 +1350,7 @@ CHEWING_API int chewing_handle_DblTab( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1381,7 +1381,7 @@ CHEWING_API int chewing_handle_Capslock( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	chewing_set_ChiEngMode( ctx, 1 - chewing_get_ChiEngMode(ctx) );
 	MakeOutputWithRtn( pgo, pgdata, KEYSTROKE_ABSORB );
@@ -1400,7 +1400,7 @@ CHEWING_API int chewing_handle_Home( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1426,7 +1426,7 @@ CHEWING_API int chewing_handle_End( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1452,7 +1452,7 @@ CHEWING_API int chewing_handle_PageUp( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1485,7 +1485,7 @@ CHEWING_API int chewing_handle_PageDown( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1762,7 +1762,7 @@ CHEWING_API int chewing_handle_CtrlNum( ChewingContext *ctx, int key )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	CheckAndResetRange( pgdata );
 
@@ -1858,7 +1858,7 @@ CHEWING_API int chewing_handle_ShiftSpace( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! pgdata->bSelect ) {
 		CheckAndResetRange( pgdata );
@@ -1882,7 +1882,7 @@ CHEWING_API int chewing_handle_Numlock( ChewingContext *ctx, int key )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ! pgdata->bSelect ) {
 		/* If we're not selecting words, we should send out numeric
@@ -1937,7 +1937,7 @@ CHEWING_API unsigned short *chewing_get_phoneSeq( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	seq = ALC( uint16_t, ctx->data->nPhoneSeq );
 	if ( seq )
@@ -1970,7 +1970,7 @@ CHEWING_API void chewing_set_logger( ChewingContext *ctx,
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !logger ) {
 		logger = NullLogger;
@@ -1993,7 +1993,7 @@ CHEWING_API int chewing_userphrase_enumerate( ChewingContext *ctx )
 
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 #if WITH_SQLITE3
 	assert( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
@@ -2023,7 +2023,7 @@ CHEWING_API int chewing_userphrase_has_next(
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 #if WITH_SQLITE3
 	ret = sqlite3_step( pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT] );
@@ -2075,7 +2075,7 @@ CHEWING_API int chewing_userphrase_get(
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 #if WITH_SQLITE3
 	phrase = (const char *) sqlite3_column_text(
@@ -2139,7 +2139,7 @@ CHEWING_API int chewing_userphrase_add(
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	phrase_len = ueStrLen( phrase_buf );
 	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
@@ -2181,7 +2181,7 @@ CHEWING_API int chewing_userphrase_remove(
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
 	phone_buf = ALC( uint16_t, phone_len + 1 );
@@ -2213,7 +2213,7 @@ CHEWING_API int chewing_userphrase_lookup(
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	phone_len = UintArrayFromBopomofo( NULL, 0, bopomofo_buf );
 	phone_buf = ALC( uint16_t, phone_len + 1 );
@@ -2289,7 +2289,7 @@ CHEWING_API int chewing_cand_open( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( pgdata->bSelect ) return 0;
 	if ( pgdata->chiSymbolBufLen == 0 ) return -1;
@@ -2311,7 +2311,7 @@ CHEWING_API int chewing_cand_close( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ctx->data->bSelect ) {
 		ChoiceEndChoice( ctx->data );
@@ -2330,7 +2330,7 @@ CHEWING_API int chewing_cand_list_first( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return -1;
 
@@ -2348,7 +2348,7 @@ CHEWING_API int chewing_cand_list_last( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return -1;
 
@@ -2364,7 +2364,7 @@ CHEWING_API int chewing_cand_list_has_next( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return 0;
 
@@ -2380,7 +2380,7 @@ CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return 0;
 
@@ -2396,7 +2396,7 @@ CHEWING_API int chewing_cand_list_next( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return -1;
 
@@ -2412,7 +2412,7 @@ CHEWING_API int chewing_cand_list_prev( ChewingContext *ctx )
 	}
 	pgdata = ctx->data;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( !pgdata->bSelect ) return -1;
 
@@ -2431,7 +2431,7 @@ CHEWING_API int chewing_commit_preedit_buf( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( pgdata->bSelect ) return -1;
 
@@ -2459,7 +2459,7 @@ CHEWING_API int chewing_clean_preedit_buf( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( pgdata->bSelect ) return -1;
 
@@ -2480,7 +2480,7 @@ CHEWING_API int chewing_clean_bopomofo_buf( ChewingContext *ctx )
 	pgdata = ctx->data;
 	pgo = ctx->output;
 
-	LOG_API();
+	LOG_API( "" );
 
 	if ( ZuinIsEntering( &pgdata->zuinData ) ) {
 		ZuinRemoveAll( &pgdata->zuinData );
