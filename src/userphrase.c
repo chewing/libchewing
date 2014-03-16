@@ -25,7 +25,7 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
 	wchar_t *tmp;
 	char *path;
-	int i;
+	int path_len;
 	int len;
 
 	assert(pgdata);
@@ -41,14 +41,17 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 		GetEnvironmentVariableW(L"CHEWING_USER_PATH", tmp, len);
 
 		len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, NULL, 0, NULL, NULL);
-		path = calloc(sizeof(*path), len + 1 + strlen(DB_NAME) + 1);
+		path_len = len + 1 + strlen(DB_NAME) + 1;
+		path = calloc(sizeof(*path), path_len);
 		if (!path) {
 			free(tmp);
 			LOG_ERROR("calloc returns %#p", path);
 			exit(-1);
 		}
 		WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
-		strcat(path + len, "\\" DB_NAME);
+
+		strcat(path, "/" DB_NAME);
+		LOG_INFO("userphrase is at %s", path);
 
 		free(tmp);
 		return path;
