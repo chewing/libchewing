@@ -464,6 +464,173 @@ void test_cand_list_word_rearward()
 	chewing_delete( ctx );
 }
 
+
+void test_cand_list_word_selection_next_no_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "u61o4y7<H>" /* ㄧˊ ㄅㄟˋ ㄗ˙ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 3 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_choose_by_index( ctx, 1 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE4\xB8\x80\xE8\xBC\xA9\xE5\xAD\x90" /* 一輩子 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_word_selection_next_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "u61o4y7" /* ㄧˊ ㄅㄟˋ ㄗ˙ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 3 );
+
+	ret = chewing_cand_list_has_next( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_next() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_next( ctx );
+	ok ( ret == 0, "chewing_cand_list_next() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_choose_by_index( ctx, 0 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE4\xB8\x80\xE8\xBC\xA9\xE5\xAD\x90" /* 一輩子 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_word_selection_prev_no_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	type_keystroke_by_string( ctx, "u61o4y7<H>" /* ㄧˊ ㄅㄟˋ ㄗ˙ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 3 );
+
+	ret  =chewing_cand_list_last( ctx );
+	ok ( ret == 0, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 1 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_choose_by_index( ctx, 1 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE4\xB8\x80\xE8\xBC\xA9\xE5\xAD\x90" /* 一輩子 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_word_selection_prev_rearward()
+{
+	ChewingContext *ctx;
+	int ret;
+
+	clean_userphrase();
+
+	ctx = chewing_new();
+	start_testcase( ctx, fd );
+
+	chewing_set_phraseChoiceRearward( ctx, 1 );
+
+	type_keystroke_by_string( ctx, "u61o4y7" /* ㄧˊ ㄅㄟˋ ㄗ˙ */ );
+
+	ret = chewing_cand_open( ctx );
+	ok( ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 3 );
+
+	ret  =chewing_cand_list_last( ctx );
+	ok ( ret == 0, "chewing_cand_list_last() returns `%d' shall be `%d'", ret, 1 );
+	ok_candidate_len( ctx, 1 );
+
+	ret = chewing_cand_list_has_prev( ctx );
+	ok ( ret == 1, "chewing_cand_list_has_prev() returns `%d' shall be `%d'", ret, 1 );
+	ret = chewing_cand_list_prev( ctx );
+	ok ( ret == 0, "chewing_cand_list_prev() returns `%d' shall be `%d'", ret, 0 );
+
+	ret = chewing_cand_TotalChoice( ctx );
+	ok ( ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0 );
+	ok_candidate_len( ctx, 2 );
+
+	ret = chewing_cand_choose_by_index( ctx, 0 );
+	ok ( ret == 0, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, 0 );
+
+	ok_preedit_buffer( ctx, "\xE4\xB8\x80\xE8\xBC\xA9\xE5\xAD\x90" /* 一輩子 */ );
+
+	chewing_delete( ctx );
+}
+
+void test_cand_list_word()
+{
+	test_cand_list_word_no_rearward();
+	test_cand_list_word_rearward();
+	test_cand_list_word_selection_next_no_rearward();
+	test_cand_list_word_selection_next_rearward();
+	test_cand_list_word_selection_prev_no_rearward();
+	test_cand_list_word_selection_prev_rearward();
+}
+
 void test_cand_list_symbol()
 {
 	ChewingContext *ctx;
@@ -531,8 +698,7 @@ void test_cand_list_no_cand_windows()
 
 void test_cand_list()
 {
-	test_cand_list_word_no_rearward();
-	test_cand_list_word_rearward();
+	test_cand_list_word();
 	test_cand_list_symbol();
 	test_cand_list_no_cand_windows();
 }

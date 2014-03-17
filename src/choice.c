@@ -402,10 +402,18 @@ int ChoiceInitAvail( ChewingData *pgdata )
 
 int ChoiceFirstAvail( ChewingData *pgdata )
 {
+	int avail_willbe;
+
 	assert( pgdata );
 	assert( pgdata->bSelect );
 
 	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		avail_willbe = pgdata->availInfo.nAvail - 1;
+		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
+			pgdata->availInfo.avail[ avail_willbe ].len;
+	}
 
 	pgdata->availInfo.currentAvail = pgdata->availInfo.nAvail - 1;
 	SetChoiceInfo( pgdata );
@@ -415,10 +423,18 @@ int ChoiceFirstAvail( ChewingData *pgdata )
 
 int ChoiceLastAvail( ChewingData *pgdata )
 {
+	int avail_willbe;
+
 	assert( pgdata );
 	assert( pgdata->bSelect );
 
 	if ( pgdata->choiceInfo.isSymbol != WORD_CHOICE ) return 0;
+
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		avail_willbe = 1;
+		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
+			pgdata->availInfo.avail[ avail_willbe ].len;
+	}
 
 	pgdata->availInfo.currentAvail = 0;
 	SetChoiceInfo( pgdata );
@@ -449,30 +465,48 @@ int ChoiceHasPrevAvail( ChewingData *pgdata )
 
 int ChoicePrevAvail( ChewingData *pgdata )
 {
+	int avail_willbe;
+
 	assert( pgdata );
 	assert( pgdata->bSelect );
 
-	if ( ChoiceHasPrevAvail( pgdata ) ) {
-		++pgdata->availInfo.currentAvail;
-		SetChoiceInfo( pgdata );
-		return 0;
+	if ( !ChoiceHasPrevAvail( pgdata ) ) {
+		return -1;
 	}
 
-	return -1;
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		avail_willbe = pgdata->availInfo.currentAvail + 1;
+		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
+			pgdata->availInfo.avail[ avail_willbe ].len;
+	}
+
+	++pgdata->availInfo.currentAvail;
+	SetChoiceInfo( pgdata );
+
+	return 0;
 }
 
 int ChoiceNextAvail( ChewingData *pgdata )
 {
+	int avail_willbe;
+
 	assert( pgdata );
 	assert( pgdata->bSelect );
 
-	if ( ChoiceHasNextAvail( pgdata ) ) {
-		--pgdata->availInfo.currentAvail;
-		SetChoiceInfo( pgdata );
-		return 0;
+	if ( !ChoiceHasNextAvail( pgdata ) ) {
+		return -1;
 	}
 
-	return -1;
+	if ( pgdata->config.bPhraseChoiceRearward ) {
+		avail_willbe = pgdata->availInfo.currentAvail - 1;
+		pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
+			pgdata->availInfo.avail[ avail_willbe ].len;
+	}
+
+	--pgdata->availInfo.currentAvail;
+	SetChoiceInfo( pgdata );
+
+	return 0;
 }
 
 int ChoiceEndChoice( ChewingData *pgdata )

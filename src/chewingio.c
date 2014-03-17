@@ -105,18 +105,6 @@ static void chooseCandidate( ChewingContext *ctx, int toSelect, int key_buf_curs
 		if ( ! pgdata->bSelect ) {
 			ChoiceInitAvail( pgdata );
 		} else {
-			if ( pgdata->config.bPhraseChoiceRearward ) {
-				int avail_willbe = (pgdata->availInfo.currentAvail > 0) ?
-					pgdata->availInfo.currentAvail - 1 :
-					pgdata->availInfo.nAvail - 1;
-				pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor -
-					pgdata->availInfo.avail[ avail_willbe ].len;
-				if ( chewing_buffer_Len( ctx ) >
-						pgdata->choiceInfo.oldChiSymbolCursor ) {
-					pgdata->chiSymbolCursor++;
-				}
-			}
-
 			if ( ChoiceHasNextAvail( pgdata ) )
 				ChoiceNextAvail( pgdata );
 			else /* rollover */
@@ -2385,7 +2373,7 @@ CHEWING_API int chewing_cand_list_has_prev( ChewingContext *ctx )
 
 	if ( !pgdata->bSelect ) return 0;
 
-	return ChoiceHasPrevAvail( pgdata);
+	return ChoiceHasPrevAvail( pgdata );
 }
 
 CHEWING_API int chewing_cand_list_next( ChewingContext *ctx )
