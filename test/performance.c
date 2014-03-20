@@ -14,20 +14,20 @@
 
 int main()
 {
-	ChewingContext *ctx;
-	int ch;
+    ChewingContext *ctx;
+    int ch;
 
-	/* Initialize libchewing */
-	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
-	/* for the sake of testing, we should not change existing hash data */
-	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+    /* Initialize libchewing */
+    putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+    /* for the sake of testing, we should not change existing hash data */
+    putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-	ctx = chewing_new();
+    ctx = chewing_new();
 
-	while ( ( ch = getchar() ) != EOF ) {
-		chewing_handle_Default( ctx, ch );
-	}
+    while ((ch = getchar()) != EOF) {
+        chewing_handle_Default(ctx, ch);
+    }
 
-	chewing_delete( ctx );
-	return 0;
+    chewing_delete(ctx);
+    return 0;
 }

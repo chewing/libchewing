@@ -9,7 +9,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#    include <config.h>
 #endif
 
 #include <assert.h>
@@ -24,35 +24,36 @@ FILE *fd;
 
 void test_set_null_logger()
 {
-	ChewingContext *ctx;
+    ChewingContext *ctx;
 
-	ctx = chewing_new();
-	start_testcase( ctx, fd );
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
 
-	chewing_set_logger( ctx, NULL, 0 );
-	type_keystroke_by_string( ctx, "hk4g4" );
+    chewing_set_logger(ctx, NULL, 0);
+    type_keystroke_by_string(ctx, "hk4g4");
 
-	chewing_delete( ctx );
+    chewing_delete(ctx);
 }
 
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
 {
-	char *logname;
-	int ret;
+    char *logname;
+    int ret;
 
-	putenv( "CHEWING_PATH=" CHEWING_DATA_PREFIX );
-	putenv( "CHEWING_USER_PATH=" TEST_HASH_DIR );
+    putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+    putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-	ret = asprintf( &logname, "%s.log", argv[0] );
-	if ( ret == -1 ) return -1;
-	fd = fopen( logname, "w" );
-	assert( fd );
-	free( logname );
+    ret = asprintf(&logname, "%s.log", argv[0]);
+    if (ret == -1)
+        return -1;
+    fd = fopen(logname, "w");
+    assert(fd);
+    free(logname);
 
 
-	test_set_null_logger();
+    test_set_null_logger();
 
-	fclose( fd );
+    fclose(fd);
 
-	return exit_status();
+    return exit_status();
 }

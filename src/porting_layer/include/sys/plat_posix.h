@@ -9,49 +9,46 @@
  */
 
 #ifndef PLAT_POSIX_H
-#define PLAT_POSIX_H
+#    define PLAT_POSIX_H
 
-#ifdef UNDER_POSIX
+#    ifdef UNDER_POSIX
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <limits.h>
+#        include <unistd.h>
+#        include <sys/types.h>
+#        include <sys/stat.h>
+#        include <fcntl.h>
+#        include <limits.h>
 
-#include <sys/types.h>
+#        include <sys/types.h>
 
-#define PLAT_SEPARATOR "/"
-#define PLAT_TMPDIR "/tmp"
-#define PLAT_MKDIR(dir) \
+#        define PLAT_SEPARATOR "/"
+#        define PLAT_TMPDIR "/tmp"
+#        define PLAT_MKDIR(dir) \
 	mkdir(dir, S_IRWXU)
-#define PLAT_RENAME(oldpath, newpath) \
+#        define PLAT_RENAME(oldpath, newpath) \
 	rename(oldpath, newpath)
-#define PLAT_UNLINK(path) \
+#        define PLAT_UNLINK(path) \
 	unlink(path)
 
 /* GNU Hurd doesn't define PATH_MAX */
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
+#        ifndef PATH_MAX
+#            define PATH_MAX 4096
+#        endif
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
+#        ifdef __cplusplus
+extern "C" {
+#        endif                  /* __cplusplus */
 
 /* plat_mmap.h */
-typedef struct plat_mmap {
-	int fd;
-	void *address;
-	size_t sizet;
-	int fAccessAttr;
-} plat_mmap;
+    typedef struct plat_mmap {
+        int fd;
+        void *address;
+        size_t sizet;
+        int fAccessAttr;
+    } plat_mmap;
 
-#ifdef __cplusplus
+#        ifdef __cplusplus
 }
-#endif /* __cplusplus */
-
-#endif /* UNDER_POSIX */
-#endif /* PLAT_POSIX_H */
-
+#        endif                  /* __cplusplus */
+#    endif                      /* UNDER_POSIX */
+#endif                          /* PLAT_POSIX_H */
