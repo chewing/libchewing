@@ -207,8 +207,8 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
     }
 
     pgdata->static_data.original_lifetime = sqlite3_column_int(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT],
-                                                               SQL_STMT_CONFIG[STMT_CONFIG_SELECT].
-                                                               column[COLUMN_CONFIG_VALUE]);
+                                                               SQL_STMT_CONFIG[STMT_CONFIG_SELECT].column
+                                                               [COLUMN_CONFIG_VALUE]);
     pgdata->static_data.new_lifetime = pgdata->static_data.original_lifetime;
 
     ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);

@@ -1931,12 +1931,12 @@ CHEWING_API int chewing_userphrase_has_next(ChewingContext *ctx, unsigned int *p
     }
 
     *phrase_len = strlen((const char *) sqlite3_column_text(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
-                                                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].
-                                                            column[COLUMN_USERPHRASE_PHRASE])) + 1;
+                                                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
+                                                            [COLUMN_USERPHRASE_PHRASE])) + 1;
 
     *bopomofo_len = GetBopomofoBufLen(sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
-                                                         SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].
-                                                         column[COLUMN_USERPHRASE_LENGTH]));
+                                                         SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
+                                                         [COLUMN_USERPHRASE_LENGTH]));
 
     return 1;
 #else
@@ -1972,8 +1972,8 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 
 #if WITH_SQLITE3
     phrase = (const char *) sqlite3_column_text(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
-                                                SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].
-                                                column[COLUMN_USERPHRASE_PHRASE]);
+                                                SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
+                                                [COLUMN_USERPHRASE_PHRASE]);
     length =
         sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH]);
@@ -1990,8 +1990,8 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 
     for (i = 0; i < length && i < ARRAY_SIZE(phone_array); ++i) {
         phone_array[i] = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
-                                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].
-                                            column[COLUMN_USERPHRASE_PHONE_0 + i]);
+                                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHONE_0
+                                                                                               + i]);
     }
 
     strncpy(phrase_buf, phrase, phrase_len);

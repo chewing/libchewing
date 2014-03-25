@@ -1182,7 +1182,7 @@ void test_longest_phrase()
 
     type_keystroke_by_string(ctx, "rup ji up6ji 1j4bj6y4ru32k7e.3ji "
                              /* ㄐㄧㄣ ㄨㄛ ㄧㄣˊ ㄨㄛ ㄅㄨˋ ㄖㄨˊ ㄗˋ ㄐㄧˇ ㄉㄜ˙ ㄍㄡˇ ㄨㄛ */
-                             );
+        );
     ok_preedit_buffer(ctx,
                       "\xE9\x87\x91\xE7\xAA\xA9\xE9\x8A\x80\xE7\xAA\xA9\xE4\xB8\x8D\xE5\xA6\x82\xE8\x87\xAA\xE5\xB7\xB1\xE7\x9A\x84\xE7\x8B\x97\xE7\xAA\xA9"
                       /* 金窩銀窩不如自己的狗窩 */ );
@@ -1243,8 +1243,7 @@ void test_interval()
 
     type_keystroke_by_string(ctx, "`31hk4g4`31hk4g4`31" /* ，測試，測試， */ );
 
-    ok_preedit_buffer(ctx,
-                      "\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C"
+    ok_preedit_buffer(ctx, "\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C\xE6\xB8\xAC\xE8\xA9\xA6\xEF\xBC\x8C"
                       /* ，測試，測試， */ );
 
     chewing_interval_Enumerate(ctx);

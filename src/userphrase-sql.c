@@ -121,8 +121,8 @@ static int LoadMaxFreq(ChewingData *pgdata, const uint16_t phoneSeq[], int len)
     }
 
     max_userphrase_freq = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_GET_MAX_FREQ],
-                                             SQL_STMT_USERPHRASE[STMT_USERPHRASE_GET_MAX_FREQ].
-                                             column[COLUMN_USERPHRASE_USER_FREQ]);
+                                             SQL_STMT_USERPHRASE[STMT_USERPHRASE_GET_MAX_FREQ].column
+                                             [COLUMN_USERPHRASE_USER_FREQ]);
 
     if (max_userphrase_freq > maxFreq)
         maxFreq = max_userphrase_freq;
@@ -236,18 +236,18 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
         action = USER_UPDATE_MODIFY;
 
         orig_freq = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE],
-                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].
-                                       column[COLUMN_USERPHRASE_ORIG_FREQ]);
+                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].column
+                                       [COLUMN_USERPHRASE_ORIG_FREQ]);
 
         max_freq = LoadMaxFreq(pgdata, phoneSeq, phone_len);
 
         user_freq = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE],
-                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].
-                                       column[COLUMN_USERPHRASE_USER_FREQ]);
+                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].column
+                                       [COLUMN_USERPHRASE_USER_FREQ]);
 
         orig_time = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE],
-                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].
-                                       column[COLUMN_USERPHRASE_TIME]);
+                                       SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE_PHRASE].column
+                                       [COLUMN_USERPHRASE_TIME]);
 
         user_freq = UpdateFreq(user_freq, max_freq, orig_freq, recent_time - orig_time);
     } else {
@@ -418,8 +418,8 @@ UserPhraseData *UserGetPhraseNext(ChewingData *pgdata, const uint16_t phoneSeq[]
     /* FIXME: shall not remove const here. */
     pgdata->userphrase_data.wordSeq =
         (char *) sqlite3_column_text(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT_BY_PHONE],
-                                     SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE].
-                                     column[COLUMN_USERPHRASE_PHRASE]);
+                                     SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT_BY_PHONE].column
+                                     [COLUMN_USERPHRASE_PHRASE]);
     pgdata->userphrase_data.phoneSeq = (uint16_t *) phoneSeq;
 
     pgdata->userphrase_data.recentTime =
