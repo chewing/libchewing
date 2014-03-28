@@ -8,42 +8,46 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_ZUIN_PRIVATE_H
 #define _CHEWING_ZUIN_PRIVATE_H
+/* *INDENT-ON* */
 
 #include "chewing-private.h"
 
 /** Chewing Phonetic Definitions */
-enum{
-	ZUIN_IGNORE,
-	ZUIN_ABSORB,
-	ZUIN_COMMIT,
-	ZUIN_KEY_ERROR,
-	ZUIN_ERROR,
-	ZUIN_NO_WORD,
-	ZUIN_OPEN_SYMBOL_TABLE
+enum {
+    ZUIN_IGNORE,
+    ZUIN_ABSORB,
+    ZUIN_COMMIT,
+    ZUIN_KEY_ERROR,
+    ZUIN_ERROR,
+    ZUIN_NO_WORD,
+    ZUIN_OPEN_SYMBOL_TABLE
 };
 
 /** keyboard layout */
 enum {
-	KB_DEFAULT,
-	KB_HSU,
-	KB_IBM,
-	KB_GIN_YIEH,
-	KB_ET,
-	KB_ET26,
-	KB_DVORAK,
-	KB_DVORAK_HSU,
-	KB_DACHEN_CP26,
-	KB_HANYU_PINYIN,
-	KB_THL_PINYIN,
-	KB_MPS2_PINYIN,
-	KB_TYPE_NUM
+    KB_DEFAULT,
+    KB_HSU,
+    KB_IBM,
+    KB_GIN_YIEH,
+    KB_ET,
+    KB_ET26,
+    KB_DVORAK,
+    KB_DVORAK_HSU,
+    KB_DACHEN_CP26,
+    KB_HANYU_PINYIN,
+    KB_THL_PINYIN,
+    KB_MPS2_PINYIN,
+    KB_TYPE_NUM
 };
 
-int ZuinPhoInput( ChewingData *, int key );  /* assume `key' is "ascii" code. */
-int ZuinRemoveLast( ZuinData * );
-int ZuinRemoveAll( ZuinData * );
-int ZuinIsEntering( ZuinData * );
+int ZuinPhoInput(ChewingData *, int key);       /* assume `key' is "ascii" code. */
+int ZuinRemoveLast(ZuinData *);
+int ZuinRemoveAll(ZuinData *);
+int ZuinIsEntering(ZuinData *);
 
+/* *INDENT-OFF* */
 #endif
+/* *INDENT-ON* */

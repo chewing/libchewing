@@ -8,8 +8,10 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_CORE_
 #define _CHEWING_CORE_
+/* *INDENT-ON* */
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,5 +56,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _CHEWING_CORE_ */
+/* *INDENT-OFF* */
+#endif                          /* _CHEWING_CORE_ */
+/* *INDENT-ON* */
+#

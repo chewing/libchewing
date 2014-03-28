@@ -10,13 +10,17 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_GLOBAL_PRIVATE_H
 #define _CHEWING_GLOBAL_PRIVATE_H
+/* *INDENT-ON* */
 
-#define PHONE_TREE_FILE		"index_tree.dat"
-#define DICT_FILE		"dictionary.dat"
-#define SYMBOL_TABLE_FILE	"symbols.dat"
-#define SOFTKBD_TABLE_FILE	"swkb.dat"
-#define PINYIN_TAB_NAME         "pinyin.tab"
+#define PHONE_TREE_FILE     "index_tree.dat"
+#define DICT_FILE           "dictionary.dat"
+#define SYMBOL_TABLE_FILE   "symbols.dat"
+#define SOFTKBD_TABLE_FILE  "swkb.dat"
+#define PINYIN_TAB_NAME     "pinyin.tab"
 
+/* *INDENT-OFF* */
 #endif
+/* *INDENT-ON* */

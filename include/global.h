@@ -12,8 +12,10 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_GLOBAL_H
 #define _CHEWING_GLOBAL_H
+/* *INDENT-ON* */
 
 /*! \file global.h
  *  \brief Chewing Global Definitions
@@ -27,32 +29,32 @@
 
 /* specified to Chewing API */
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
-#   define CHEWING_DLL_IMPORT __declspec(dllimport)
-#   define CHEWING_DLL_EXPORT __declspec(dllexport)
-#   ifdef CHEWINGDLL_EXPORTS
-#      define CHEWING_API CHEWING_DLL_EXPORT
-#      define CHEWING_PRIVATE
-#   elif CHEWINGDLL_IMPORTS
-#      define CHEWING_API CHEWING_DLL_IMPORT
-#      define CHEWING_PRIVATE
-#   else
-#      define CHEWING_API
-#      define CHEWING_PRIVATE
-#   endif
+#    define CHEWING_DLL_IMPORT __declspec(dllimport)
+#    define CHEWING_DLL_EXPORT __declspec(dllexport)
+#    ifdef CHEWINGDLL_EXPORTS
+#        define CHEWING_API CHEWING_DLL_EXPORT
+#        define CHEWING_PRIVATE
+#    elif CHEWINGDLL_IMPORTS
+#        define CHEWING_API CHEWING_DLL_IMPORT
+#        define CHEWING_PRIVATE
+#    else
+#        define CHEWING_API
+#        define CHEWING_PRIVATE
+#    endif
 #elif (__GNUC__ > 3) && (defined(__ELF__) || defined(__PIC__))
-#   define CHEWING_API __attribute__((__visibility__("default")))
-#   define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
+#    define CHEWING_API __attribute__((__visibility__("default")))
+#    define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
 #else
-#   define CHEWING_API
-#   define CHEWING_PRIVATE
+#    define CHEWING_API
+#    define CHEWING_PRIVATE
 #endif
 
 #ifndef UNUSED
-#if defined(__GNUC__) /* gcc specific */
-#   define UNUSED __attribute__((unused))
-#else
-#   define UNUSED
-#endif
+#    if defined(__GNUC__)       /* gcc specific */
+#        define UNUSED __attribute__((unused))
+#    else
+#        define UNUSED
+#    endif
 #endif
 
 #define MIN_SELKEY 1
@@ -68,23 +70,23 @@
  * @deprecated Use chewing_set_ series of functions to set parameters instead.
  */
 typedef struct ChewingConfigData {
-	int candPerPage;
-	int maxChiSymbolLen;
-	int selKey[ MAX_SELKEY ];
-	int bAddPhraseForward;
-	int bSpaceAsSelection;
-	int bEscCleanAllBuf;
-	int bAutoShiftCur;
-	int bEasySymbolInput;
-	int bPhraseChoiceRearward;
-	int hsuSelKeyType; // Deprecated.
+    int candPerPage;
+    int maxChiSymbolLen;
+    int selKey[MAX_SELKEY];
+    int bAddPhraseForward;
+    int bSpaceAsSelection;
+    int bEscCleanAllBuf;
+    int bAutoShiftCur;
+    int bEasySymbolInput;
+    int bPhraseChoiceRearward;
+    int hsuSelKeyType;          // Deprecated.
 } ChewingConfigData;
 
 typedef struct IntervalType {
-	/*@{*/
-	int from;	/**< starting position of certain interval */
-	int to;		/**< ending position of certain interval */
-	/*@}*/
+    /*@{ */
+    int from;           /**< starting position of certain interval */
+    int to;             /**< ending position of certain interval */
+    /*@} */
 } IntervalType;
 
 /** @brief context handle used for Chewing IM APIs
@@ -99,4 +101,6 @@ typedef struct ChewingContext ChewingContext;
  */
 #define HSU_SELKEY_TYPE2 2
 
+/* *INDENT-OFF* */
 #endif
+/* *INDENT-ON* */
