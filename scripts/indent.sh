@@ -10,6 +10,7 @@ fi
 find \
     ${ROOTDIR}/src \
     ${ROOTDIR}/test \
+    ${ROOTDIR}/include \
     -regex ".*\.[ch]$" \
     -exec indent \
         --blank-lines-after-declarations \
