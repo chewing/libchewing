@@ -19,10 +19,10 @@
  *	Each node represents a single phone.\n
  *	The output file contains a random access array, where each record includes:\n
  *	\code{
- *	       uint32_t key; may be phone data or record of input keys
- *	       int32_t child.begin, child.end; for internal nodes (key != 0)
- *	       uint32_t phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
- *	       int32_t phrase.freq; for leaf nodes (key == 0), frequency of the phrase
+ *	       [16-bit uint] key; may be phone data or record of input keys
+ *	       [24-bit uint] child.begin, child.end; for internal nodes (key != 0)
+ *	       [24-bit uint] phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
+ *	       [24-bit uint] phrase.freq; for leaf nodes (key == 0), frequency of the phrase
  *	}\endcode
  */
 
