@@ -75,7 +75,9 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
             exit(-1);
         }
         WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, tmp, -1, path, len, NULL, NULL);
-        strcat(path + len, "\\" USERPHRASE_DIR "\\" DB_NAME);
+
+        strcpy(path + len - 1, "\\" USERPHRASE_DIR "\\" DB_NAME);
+        LOG_INFO("userphrase is at %s", path);
 
         free(tmp);
         return path;
