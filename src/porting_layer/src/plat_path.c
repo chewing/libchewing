@@ -47,22 +47,48 @@ int get_search_path(char *path, size_t path_len)
 }
 
 #elif defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+#include <Shlobj.h>
+
 #    define SEARCH_PATH_SEP ";"
+
 int get_search_path(char *path, size_t path_len)
 {
     char *chewing_path;
-    char *windir;
+    size_t len;
+    HRESULT result;
 
     chewing_path = getenv("CHEWING_PATH");
     if (chewing_path) {
+        // FIXME: Check for truncated.
         strncpy(path, chewing_path, path_len);
     } else {
-        windir = getenv("WINDIR");
-        if (windir) {
-            snprintf(path, path_len, "%s\\%s", windir, "chewing");
-        } else {
+
+        /*
+         * Try to search dictionary location at the following path
+         *
+         * - %CSIDL_PROGRAM_FILESX86%/ChewingTextService/Dictionary
+         * - %CSIDL_PROGRAM_FILES%/ChewingTextService/Dictionary
+         */
+
+        if (path_len < MAX_PATH) {
             return -1;
         }
+
+        result = SHGetFolderPathA(NULL, CSIDL_PROGRAM_FILESX86, NULL, 0, path);
+        if(result != S_OK) {
+            result = SHGetFolderPathA(NULL, CSIDL_PROGRAM_FILES, NULL, 0, path);
+        }
+
+        if (result != S_OK) {
+            return -1;
+        }
+
+        len = strlen(path);
+        path += len;
+        path_len -= len;
+
+        // FIXME: Check for truncated.
+        snprintf(path, path_len, "\\%s\\%s", "ChewingTextService", "Dictionary");
     }
 
     return 0;
