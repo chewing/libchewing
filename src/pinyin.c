@@ -184,7 +184,7 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
         break;
     }
     if (seq != NULL) {
-        char s[ZUIN_SIZE * 2 + 1];
+        char s[BOPOMOFO_SIZE * 2 + 1];
 
         strcpy(s, seq);
         initial = strtok(s, " ");

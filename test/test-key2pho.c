@@ -23,7 +23,7 @@ FILE *fd;
 void test_uint_and_phone()
 {
     char *u8phone;
-    char rt[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
+    char rt[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     uint16_t phone;
     uint16_t expect;
 
@@ -59,7 +59,7 @@ void test_uint_and_phone()
 void test_uint_and_phone_error()
 {
     char *u8phone;
-    char rt[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
+    char rt[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     uint16_t phone;
     uint16_t expect;
 
@@ -87,7 +87,7 @@ void test_uint_and_phone_error()
 
 void test_key_and_phone()
 {
-    char rt[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
+    char rt[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
 
     start_testcase(NULL, fd);
 

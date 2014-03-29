@@ -146,10 +146,10 @@ static int DefPhoInput(ChewingData *pgdata, int key)
     int i;
 
     if (IsDefPhoEndKey(key, pZuin->kbtype)) {
-        for (i = 0; i < ZUIN_SIZE; ++i)
+        for (i = 0; i < BOPOMOFO_SIZE; ++i)
             if (pZuin->pho_inx[i] != 0)
                 break;
-        if (i < ZUIN_SIZE)
+        if (i < BOPOMOFO_SIZE)
             return EndKeyProcess(pgdata, key, 1);
     } else {
         pZuin->pho_inx[3] = 0;
@@ -664,7 +664,7 @@ int ZuinIsEntering(ZuinData *pZuin)
         if (pZuin->pinYinData.keySeq[0])
             return 1;
     } else {
-        for (i = 0; i < ZUIN_SIZE; i++)
+        for (i = 0; i < BOPOMOFO_SIZE; i++)
             if (pZuin->pho_inx[i])
                 return 1;
     }

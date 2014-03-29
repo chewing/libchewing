@@ -101,14 +101,14 @@ uint16_t UintFromPhone(const char *zhuin)
     while (*iter && *iter != 0x20) {
         len = ueStrNCpy(buf, iter, 1, STRNCPY_CLOSE);
 
-        for (; zhuin_index < ZUIN_SIZE; ++zhuin_index) {
+        for (; zhuin_index < BOPOMOFO_SIZE; ++zhuin_index) {
             pos = strstr(zhuin_tab[zhuin_index], buf);
             if (pos) {
                 break;
             }
         }
 
-        if (zhuin_index >= ZUIN_SIZE) {
+        if (zhuin_index >= BOPOMOFO_SIZE) {
             return 0;
         }
 
@@ -149,9 +149,9 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     int index;
     const char *pos;
     char tmp[MAX_UTF8_SIZE + 1];
-    char buffer[MAX_UTF8_SIZE * ZUIN_SIZE + 1] = { 0 };
+    char buffer[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1] = { 0 };
 
-    for (i = 0; i < ZUIN_SIZE; ++i) {
+    for (i = 0; i < BOPOMOFO_SIZE; ++i) {
         // The first two characters in zhuin_tab are space, so we need
         // to add 1 here.
         index = ((phone_num >> shift[i]) & sb[i]) + 1;
@@ -185,7 +185,7 @@ uint16_t UintFromPhoneInx(const int ph_inx[])
     int i;
     uint16_t result = 0;
 
-    for (i = 0; i < ZUIN_SIZE; i++)
+    for (i = 0; i < BOPOMOFO_SIZE; i++)
         result |= ph_inx[i] << shift[i];
     return result;
 }
@@ -266,5 +266,5 @@ ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const
 
 size_t GetBopomofoBufLen(size_t len)
 {
-    return (MAX_UTF8_SIZE * ZUIN_SIZE + 1) * len;
+    return (MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1) * len;
 }

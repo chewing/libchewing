@@ -40,7 +40,7 @@ typedef SSIZE_T ssize_t;
 
 #define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
-#define ZUIN_SIZE 4
+#define BOPOMOFO_SIZE 4
 #define PINYIN_SIZE 10
 #define MAX_PHRASE_LEN 11
 #define MAX_PHONE_SEQ_LEN 50
@@ -110,8 +110,8 @@ typedef struct PinYinData {
 
 typedef struct ZuinData {
     int kbtype;
-    int pho_inx[ZUIN_SIZE];
-    int pho_inx_alt[ZUIN_SIZE];
+    int pho_inx[BOPOMOFO_SIZE];
+    int pho_inx_alt[BOPOMOFO_SIZE];
     uint16_t phone;
     uint16_t phoneAlt;
     PinYinData pinYinData;
@@ -270,7 +270,7 @@ typedef struct ChewingOutput {
     long chiSymbolCursor;
     long PointStart;
     long PointEnd;
-    char bopomofoBuf[ZUIN_SIZE * MAX_UTF8_SIZE + 1];
+    char bopomofoBuf[BOPOMOFO_SIZE * MAX_UTF8_SIZE + 1];
         /** @brief indicate the method of showing sentence break. */
     IntervalType dispInterval[MAX_INTERVAL];    /* from prefer, considering symbol */
     int nDispInterval;

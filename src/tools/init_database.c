@@ -236,7 +236,7 @@ void store_phrase(const char *line, int line_num)
     char *phrase;
     char *freq;
     char *bopomofo;
-    char bopomofo_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
+    char bopomofo_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     size_t phrase_len;
     WordData word;              /* For check. */
     WordData *found_word = NULL;
@@ -378,8 +378,8 @@ void read_tsi_src(const char *filename)
 
 void store_word(const char *line, const int line_num)
 {
-    char phone_buf[MAX_UTF8_SIZE * ZUIN_SIZE + 1];
-    char key_buf[ZUIN_SIZE + 1];
+    char phone_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
+    char key_buf[BOPOMOFO_SIZE + 1];
     char buf[MAX_LINE_LEN];
 
     strncpy(buf, line, sizeof(buf));
@@ -401,9 +401,9 @@ void store_word(const char *line, const int line_num)
 #define UTF8_FORMAT_STRING(len1, len2) \
 	"%" __stringify(len1) "[^ ]" " " \
 	"%" __stringify(len2) "[^ ]"
-    sscanf(buf, UTF8_FORMAT_STRING(ZUIN_SIZE, MAX_UTF8_SIZE), key_buf, word_data[num_word_data].text->phrase);
+    sscanf(buf, UTF8_FORMAT_STRING(BOPOMOFO_SIZE, MAX_UTF8_SIZE), key_buf, word_data[num_word_data].text->phrase);
 
-    if (strlen(key_buf) > ZUIN_SIZE) {
+    if (strlen(key_buf) > BOPOMOFO_SIZE) {
         fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
         exit(-1);
     }

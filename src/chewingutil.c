@@ -856,7 +856,7 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
     if (pgdata->zuinData.kbtype >= KB_HANYU_PINYIN) {
         strcpy(pgo->bopomofoBuf, pgdata->zuinData.pinYinData.keySeq);
     } else {
-        for (i = 0; i < ZUIN_SIZE; i++) {
+        for (i = 0; i < BOPOMOFO_SIZE; i++) {
             if (pgdata->zuinData.pho_inx[i] != 0) {
                 ueStrNCpy(pgo->bopomofoBuf + strlen(pgo->bopomofoBuf),
                           ueConstStrSeek((zhuin_tab[i] + 2), pgdata->zuinData.pho_inx[i] - 1), 1, STRNCPY_CLOSE);
