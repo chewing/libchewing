@@ -56,7 +56,6 @@ CHEWING_API int chewing_buffer_Len(ChewingContext *ctx);
  *
  * Always returns a C-style string (char pointer), caller must free it.
  */
-// deprecated
 CHEWING_API char *chewing_bopomofo_String(ChewingContext *ctx, int *bopomofo_count);
 
 CHEWING_API const char *chewing_bopomofo_String_static(ChewingContext *ctx);
