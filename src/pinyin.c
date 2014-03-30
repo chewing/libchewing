@@ -17,7 +17,7 @@
 
 #include "global-private.h"
 #include "pinyin-private.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "private.h"
 
 void TerminatePinyin(ChewingData *pgdata)

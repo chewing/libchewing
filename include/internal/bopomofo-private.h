@@ -1,5 +1,5 @@
 /**
- * zuin-private.h
+ * bopomofo-private.h
  *
  * Copyright (c) 2008, 2012
  *	libchewing Core Team. See ChangeLog for details.

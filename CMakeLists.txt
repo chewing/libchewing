@@ -311,7 +311,7 @@ add_library(chewing OBJECT
     ${INC_DIR}/internal/pinyin-private.h
     ${INC_DIR}/internal/tree-private.h
     ${INC_DIR}/internal/userphrase-private.h
-    ${INC_DIR}/internal/zuin-private.h
+    ${INC_DIR}/internal/bopomofo-private.h
 
     ${SRC_DIR}/chewingio.c
     ${SRC_DIR}/chewingutil.c
@@ -331,7 +331,7 @@ add_library(chewing OBJECT
     ${SRC_DIR}/private.h
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
-    ${SRC_DIR}/zuin.c
+    ${SRC_DIR}/bopomofo.c
 )
 set_target_properties(chewing PROPERTIES
     COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${INSTALL_DATA_DIR}\""

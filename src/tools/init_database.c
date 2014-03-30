@@ -38,7 +38,7 @@
 #include "global-private.h"
 #include "key2pho-private.h"
 #include "memory-private.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 
 /* For ALC macro */
 #include "private.h"

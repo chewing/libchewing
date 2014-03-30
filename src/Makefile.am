@@ -20,7 +20,7 @@ libchewing_la_SOURCES = \
 	choice.c \
 	dict.c \
 	tree.c \
-	zuin.c \
+	bopomofo.c \
 	pinyin.c \
 	mod_aux.c \
 	userphrase.c \

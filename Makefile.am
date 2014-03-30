@@ -48,7 +48,7 @@ noinst_HEADERS =\
 	include/internal/pinyin-private.h \
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \
-	include/internal/zuin-private.h \
+	include/internal/bopomofo-private.h \
 	thirdparty/sqlite-amalgamation/sqlite3ext.h \
 	thirdparty/sqlite-amalgamation/sqlite3.h \
 	$(NULL)

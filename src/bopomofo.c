@@ -1,5 +1,5 @@
 /**
- * zuin.c
+ * bopomofo.c
  *
  * Copyright (c) 1999, 2000, 2001
  *      Lu-chuan Kung and Kang-pen Chen.
@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "chewingutil.h"
 #include "dict-private.h"
 #include "key2pho-private.h"

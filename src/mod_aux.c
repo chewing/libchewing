@@ -18,7 +18,7 @@
 
 #include "global.h"
 #include "chewing-private.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "chewingio.h"
 #include "chewing-utf8-util.h"
 #include "private.h"

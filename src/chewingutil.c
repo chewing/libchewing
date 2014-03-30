@@ -27,7 +27,7 @@
 #include "global.h"
 #include "global-private.h"
 #include "chewingutil.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "choice-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"

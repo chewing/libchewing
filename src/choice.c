@@ -27,7 +27,7 @@
 #include "tree-private.h"
 #include "userphrase-private.h"
 #include "choice-private.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "private.h"
 
 static void ChangeSelectIntervalAndBreakpoint(ChewingData *pgdata, int from, int to, const char *str)

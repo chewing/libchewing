@@ -28,7 +28,7 @@
 
 #include "chewing-utf8-util.h"
 #include "global.h"
-#include "zuin-private.h"
+#include "bopomofo-private.h"
 #include "chewingutil.h"
 #include "userphrase-private.h"
 #include "choice-private.h"
