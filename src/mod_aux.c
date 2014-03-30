@@ -159,16 +159,16 @@ CHEWING_API const char *chewing_bopomofo_String_static(ChewingContext *ctx)
 
 /**
  * @param ctx handle to Chewing IM context
- * @param zuin_count pointer to the integer of available Zuin preedit string
+ * @param bopomofo_count pointer to the integer of available Bopomofo preedit string
  *
  * Always returns a char pointer, caller must free it.
  */
-CHEWING_API char *chewing_zuin_String(ChewingContext *ctx, int *zuin_count)
+CHEWING_API char *chewing_bopomofo_String(ChewingContext *ctx, int *bopomofo_count)
 {
     char *s = strdup(chewing_bopomofo_String_static(ctx));
 
-    if (zuin_count)
-        *zuin_count = ueStrLen(s);
+    if (bopomofo_count)
+        *bopomofo_count = ueStrLen(s);
 
     return s;
 }
@@ -185,15 +185,6 @@ CHEWING_API int chewing_bopomofo_Check(ChewingContext *ctx)
     LOG_API("");
 
     return ctx->output->bopomofoBuf[0] != 0;
-}
-
-CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
-{
-    if (!ctx) {
-        return -1;
-    }
-
-    return !chewing_bopomofo_Check(ctx);
 }
 
 CHEWING_API int chewing_cursor_Current(ChewingContext *ctx)

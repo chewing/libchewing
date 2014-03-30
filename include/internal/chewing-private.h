@@ -108,14 +108,14 @@ typedef struct PinYinData {
     char keySeq[PINYIN_SIZE];
 } PinYinData;
 
-typedef struct ZuinData {
+typedef struct BopomofoData {
     int kbtype;
     int pho_inx[BOPOMOFO_SIZE];
     int pho_inx_alt[BOPOMOFO_SIZE];
     uint16_t phone;
     uint16_t phoneAlt;
     PinYinData pinYinData;
-} ZuinData;
+} BopomofoData;
 
 typedef struct AvailInfo {
         /** @brief all kinds of lengths of available phrases. */
@@ -220,7 +220,7 @@ typedef struct ChewingData {
     AvailInfo availInfo;
     ChoiceInfo choiceInfo;
     PhrasingOutput phrOut;
-    ZuinData zuinData;
+    BopomofoData bopomofoData;
     ChewingConfigData config;
         /** @brief current input buffer, content==0 means Chinese code */
     PreeditBuf preeditBuf[MAX_PHONE_SEQ_LEN];

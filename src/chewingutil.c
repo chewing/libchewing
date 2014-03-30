@@ -106,7 +106,7 @@ int ChewingIsEntering(ChewingData *pgdata)
 {
     if (pgdata->choiceInfo.isSymbol != WORD_CHOICE)
         return 1;
-    return (pgdata->chiSymbolBufLen != 0 || ZuinIsEntering(&(pgdata->zuinData)));
+    return (pgdata->chiSymbolBufLen != 0 || BopomofoIsEntering(&(pgdata->bopomofoData)));
 }
 
 int HaninSymbolInput(ChewingData *pgdata)
@@ -118,7 +118,7 @@ int HaninSymbolInput(ChewingData *pgdata)
 
     /* No available symbol table */
     if (!pgdata->static_data.symbol_table)
-        return ZUIN_ABSORB;
+        return BOPOMOFO_ABSORB;
 
     pci->nTotalChoice = 0;
     for (i = 0; i < pgdata->static_data.n_symbol_entry; i++) {
@@ -134,7 +134,7 @@ int HaninSymbolInput(ChewingData *pgdata)
     pci->nPage = CEIL_DIV(pci->nTotalChoice, pci->nChoicePerPage);
     pci->pageNo = 0;
     pci->isSymbol = SYMBOL_CATEGORY_CHOICE;
-    return ZUIN_ABSORB;
+    return BOPOMOFO_ABSORB;
 }
 
 static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symkey, const char *const chibuf)
@@ -162,11 +162,11 @@ static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symke
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         pgdata->chiSymbolCursor++;
         pgdata->chiSymbolBufLen++;
-        /* reset Zuin data */
+        /* reset Bopomofo data */
         /* Don't forget the kbtype */
-        kbtype = pgdata->zuinData.kbtype;
-        memset(&(pgdata->zuinData), 0, sizeof(ZuinData));
-        pgdata->zuinData.kbtype = kbtype;
+        kbtype = pgdata->bopomofoData.kbtype;
+        memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
+        pgdata->bopomofoData.kbtype = kbtype;
         return 1;
     }
     return 0;
@@ -175,11 +175,11 @@ static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symke
 static int InternalSpecialSymbol(int key, ChewingData *pgdata,
                                  int nSpecial, const char keybuf[], const char *const chibuf[])
 {
-    int i, rtn = ZUIN_IGNORE;   /* very strange and difficult to understand */
+    int i, rtn = BOPOMOFO_IGNORE;   /* very strange and difficult to understand */
 
     for (i = 0; i < nSpecial; i++) {
         if (1 == _Inner_InternalSpecialSymbol(key, pgdata, keybuf[i], chibuf[i])) {
-            rtn = ZUIN_ABSORB;
+            rtn = BOPOMOFO_ABSORB;
             break;
         }
     }
@@ -275,9 +275,9 @@ int FullShapeSymbolInput(int key, ChewingData *pgdata)
     STATIC_ASSERT(ARRAY_SIZE(keybuf) == ARRAY_SIZE(chibuf));
 
     rtn = InternalSpecialSymbol(key, pgdata, ARRAY_SIZE(keybuf), keybuf, chibuf);
-    if (rtn == ZUIN_IGNORE)
+    if (rtn == BOPOMOFO_IGNORE)
         rtn = SpecialSymbolInput(key, pgdata);
-    return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
+    return (rtn == BOPOMOFO_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
 }
 
 int EasySymbolInput(int key, ChewingData *pgdata)
@@ -298,9 +298,9 @@ int EasySymbolInput(int key, ChewingData *pgdata)
 
     rtn = InternalSpecialSymbol(key, pgdata, nSpecial,
                                 G_EASY_SYMBOL_KEY, (const char **) pgdata->static_data.g_easy_symbol_value);
-    if (rtn == ZUIN_IGNORE)
+    if (rtn == BOPOMOFO_IGNORE)
         rtn = SpecialSymbolInput(key, pgdata);
-    return (rtn == ZUIN_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
+    return (rtn == BOPOMOFO_IGNORE ? SYMBOL_KEY_ERROR : SYMBOL_KEY_OK);
 }
 
 int SymbolChoice(ChewingData *pgdata, int sel_i)
@@ -311,7 +311,7 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
     int key;
 
     if (!pgdata->static_data.symbol_table && pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_UPDATE)
-        return ZUIN_ABSORB;
+        return BOPOMOFO_ABSORB;
 
     if (pgdata->choiceInfo.isSymbol == SYMBOL_CATEGORY_CHOICE && 0 == pgdata->static_data.symbol_table[sel_i]->nSymbols)
         symbol_type = SYMBOL_CHOICE_INSERT;
@@ -360,9 +360,9 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         ChoiceEndChoice(pgdata);
         /* Don't forget the kbtype */
-        kbtype = pgdata->zuinData.kbtype;
-        memset(&(pgdata->zuinData), 0, sizeof(ZuinData));
-        pgdata->zuinData.kbtype = kbtype;
+        kbtype = pgdata->bopomofoData.kbtype;
+        memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
+        pgdata->bopomofoData.kbtype = kbtype;
 
         if (symbol_type == SYMBOL_CHOICE_INSERT) {
             pgdata->chiSymbolBufLen++;
@@ -371,7 +371,7 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
 
         pgdata->choiceInfo.isSymbol = WORD_CHOICE;
     }
-    return ZUIN_ABSORB;
+    return BOPOMOFO_ABSORB;
 }
 
 int SymbolInput(int key, ChewingData *pgdata)
@@ -852,14 +852,14 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
     pgo->chiSymbolBufLen = pgdata->chiSymbolBufLen;
     pgo->chiSymbolCursor = pgdata->chiSymbolCursor;
 
-    /* fill zuinBuf */
-    if (pgdata->zuinData.kbtype >= KB_HANYU_PINYIN) {
-        strcpy(pgo->bopomofoBuf, pgdata->zuinData.pinYinData.keySeq);
+    /* fill bopomofoBuf */
+    if (pgdata->bopomofoData.kbtype >= KB_HANYU_PINYIN) {
+        strcpy(pgo->bopomofoBuf, pgdata->bopomofoData.pinYinData.keySeq);
     } else {
         for (i = 0; i < BOPOMOFO_SIZE; i++) {
-            if (pgdata->zuinData.pho_inx[i] != 0) {
+            if (pgdata->bopomofoData.pho_inx[i] != 0) {
                 ueStrNCpy(pgo->bopomofoBuf + strlen(pgo->bopomofoBuf),
-                          ueConstStrSeek((zhuin_tab[i] + 2), pgdata->zuinData.pho_inx[i] - 1), 1, STRNCPY_CLOSE);
+                          ueConstStrSeek((zhuin_tab[i] + 2), pgdata->bopomofoData.pho_inx[i] - 1), 1, STRNCPY_CLOSE);
             }
         }
     }

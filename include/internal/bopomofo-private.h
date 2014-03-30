@@ -9,21 +9,21 @@
  */
 
 /* *INDENT-OFF* */
-#ifndef _CHEWING_ZUIN_PRIVATE_H
-#define _CHEWING_ZUIN_PRIVATE_H
+#ifndef _CHEWING_BOPOMOFO_PRIVATE_H
+#define _CHEWING_BOPOMOFO_PRIVATE_H
 /* *INDENT-ON* */
 
 #include "chewing-private.h"
 
 /** Chewing Phonetic Definitions */
 enum {
-    ZUIN_IGNORE,
-    ZUIN_ABSORB,
-    ZUIN_COMMIT,
-    ZUIN_KEY_ERROR,
-    ZUIN_ERROR,
-    ZUIN_NO_WORD,
-    ZUIN_OPEN_SYMBOL_TABLE
+    BOPOMOFO_IGNORE,
+    BOPOMOFO_ABSORB,
+    BOPOMOFO_COMMIT,
+    BOPOMOFO_KEY_ERROR,
+    BOPOMOFO_ERROR,
+    BOPOMOFO_NO_WORD,
+    BOPOMOFO_OPEN_SYMBOL_TABLE
 };
 
 /** keyboard layout */
@@ -43,10 +43,10 @@ enum {
     KB_TYPE_NUM
 };
 
-int ZuinPhoInput(ChewingData *, int key);       /* assume `key' is "ascii" code. */
-int ZuinRemoveLast(ZuinData *);
-int ZuinRemoveAll(ZuinData *);
-int ZuinIsEntering(ZuinData *);
+int BopomofoPhoInput(ChewingData *, int key);       /* assume `key' is "ascii" code. */
+int BopomofoRemoveLast(BopomofoData *);
+int BopomofoRemoveAll(BopomofoData *);
+int BopomofoIsEntering(BopomofoData *);
 
 /* *INDENT-OFF* */
 #endif

@@ -14,7 +14,7 @@
 
 /**
  * @file key2pho.c
- * @brief map zuins to uint16_t type according to different kb_type
+ * @brief map bopomofos to uint16_t type according to different kb_type
  */
 
 /* This file is encoded in UTF-8 */

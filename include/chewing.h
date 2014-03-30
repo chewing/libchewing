@@ -53,6 +53,14 @@ extern "C" {
  */
 #define LIBCHEWING_ENCODING "UTF-8"
 
+/* API compatibility
+ */
+inline CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
+{
+    return !chewing_bopomofo_Check(ctx);
+}
+#define chewing_zuin_String chewing_bopomofo_String
+
 #ifdef __cplusplus
 }
 #endif

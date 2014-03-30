@@ -25,10 +25,10 @@
  */
 typedef struct keymap {
     char pinyin[7];
-    char zuin[4];
+    char bopomofo[4];
 } keymap;
 
-int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq, char *zuinKeySeqAlt);
+int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomofoKeySeq, char *bopomofoKeySeqAlt);
 int InitPinyin(ChewingData *pgdata, const char *);
 void TerminatePinyin(ChewingData *pgdata);
 

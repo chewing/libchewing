@@ -78,5 +78,5 @@ find \
         -T TreeType \
         -T uint16_t \
         -T UserPhraseData \
-        -T ZuinData \
+        -T BopomofoData \
         {} \;

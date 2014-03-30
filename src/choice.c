@@ -221,7 +221,7 @@ static void SetChoiceInfo(ChewingData *pgdata)
             ChoiceInfoAppendChi(pgdata, pci, phoneSeqAlt[cursor]);
         }
 
-        if (pgdata->zuinData.kbtype == KB_HSU || pgdata->zuinData.kbtype == KB_DVORAK_HSU) {
+        if (pgdata->bopomofoData.kbtype == KB_HSU || pgdata->bopomofoData.kbtype == KB_DVORAK_HSU) {
             switch (phoneSeq[cursor]) {
             case 0x2800:       /* 'ㄘ' */
                 ChoiceInfoAppendChi(pgdata, pci, 0x30); /* 'ㄟ' */

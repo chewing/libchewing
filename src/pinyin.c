@@ -48,7 +48,7 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
     pgdata->static_data.hanyuInitialsMap = ALC(keymap, pgdata->static_data.HANYU_INITIALS);
     for (i = 0; i < pgdata->static_data.HANYU_INITIALS - 1; i++) {
         ret = fscanf(fd, "%s %s",
-                     pgdata->static_data.hanyuInitialsMap[i].pinyin, pgdata->static_data.hanyuInitialsMap[i].zuin);
+                     pgdata->static_data.hanyuInitialsMap[i].pinyin, pgdata->static_data.hanyuInitialsMap[i].bopomofo);
         if (ret != 2) {
             return 0;
         }
@@ -62,7 +62,7 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
     pgdata->static_data.hanyuFinalsMap = ALC(keymap, pgdata->static_data.HANYU_FINALS);
     for (i = 0; i < pgdata->static_data.HANYU_FINALS - 1; i++) {
         ret = fscanf(fd, "%s %s",
-                     pgdata->static_data.hanyuFinalsMap[i].pinyin, pgdata->static_data.hanyuFinalsMap[i].zuin);
+                     pgdata->static_data.hanyuFinalsMap[i].pinyin, pgdata->static_data.hanyuFinalsMap[i].bopomofo);
         if (ret != 2) {
             return 0;
         }
@@ -74,14 +74,14 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
 }
 
 /**
- * Map pinyin key-sequence to Zuin key-sequence.
- * Caller should allocate char zuin[4].
+ * Map pinyin key-sequence to Bopomofo key-sequence.
+ * Caller should allocate char bopomofo[4].
  *
  * Non-Zero: Fail to fully convert
  *
  * @retval 0 Success
  */
-int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq, char *zuinKeySeqAlt)
+int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomofoKeySeq, char *bopomofoKeySeqAlt)
 {
     const char *p, *cursor = NULL;
     const char *initial = 0;
@@ -130,7 +130,7 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
     }
 
     /* multiple mapping for each kbtype */
-    switch (pgdata->zuinData.kbtype) {
+    switch (pgdata->bopomofoData.kbtype) {
     case KB_HANYU_PINYIN:
         if (!strcmp(pinyinKeySeq, "chi")) {
             seq = "t fu";       /* ㄔ|ㄑㄧ */
@@ -188,9 +188,9 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
 
         strcpy(s, seq);
         initial = strtok(s, " ");
-        strcpy(zuinKeySeq, initial);
+        strcpy(bopomofoKeySeq, initial);
         initial = strtok(NULL, " ");
-        strcpy(zuinKeySeqAlt, initial);
+        strcpy(bopomofoKeySeqAlt, initial);
         return 0;
     }
 
@@ -198,7 +198,7 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
     for (i = 0; i < pgdata->static_data.HANYU_INITIALS; i++) {
         p = strstr(pinyinKeySeq, pgdata->static_data.hanyuInitialsMap[i].pinyin);
         if (p == pinyinKeySeq) {
-            initial = pgdata->static_data.hanyuInitialsMap[i].zuin;
+            initial = pgdata->static_data.hanyuInitialsMap[i].bopomofo;
             cursor = pinyinKeySeq + strlen(pgdata->static_data.hanyuInitialsMap[i].pinyin);
             break;
         }
@@ -215,7 +215,7 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
     if (cursor) {
         for (i = 0; i < pgdata->static_data.HANYU_FINALS; i++) {
             if (strcmp(cursor, pgdata->static_data.hanyuFinalsMap[i].pinyin) == 0) {
-                final = pgdata->static_data.hanyuFinalsMap[i].zuin;
+                final = pgdata->static_data.hanyuFinalsMap[i].bopomofo;
                 break;
             }
         }
@@ -298,7 +298,7 @@ int PinyinToZuin(ChewingData *pgdata, const char *pinyinKeySeq, char *zuinKeySeq
 
     }
 
-    sprintf(zuinKeySeq, "%s%s", initial, final);
-    strcpy(zuinKeySeqAlt, zuinKeySeq);
+    sprintf(bopomofoKeySeq, "%s%s", initial, final);
+    strcpy(bopomofoKeySeqAlt, bopomofoKeySeq);
     return 0;
 }

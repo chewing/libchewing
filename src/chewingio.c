@@ -319,8 +319,8 @@ CHEWING_API int chewing_Reset(ChewingContext *ctx)
     pgdata->logger = logger;
     pgdata->loggerData = loggerData;
 
-    /* zuinData */
-    memset(&(pgdata->zuinData), 0, sizeof(ZuinData));
+    /* bopomofoData */
+    memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
 
     /* choiceInfo */
     memset(&(pgdata->choiceInfo), 0, sizeof(ChoiceInfo));
@@ -352,10 +352,10 @@ CHEWING_API int chewing_set_KBType(ChewingContext *ctx, int kbtype)
     LOG_API("kbtype = %d", kbtype);
 
     if (kbtype < KB_TYPE_NUM && kbtype >= 0) {
-        ctx->data->zuinData.kbtype = kbtype;
+        ctx->data->bopomofoData.kbtype = kbtype;
         return 0;
     } else {
-        ctx->data->zuinData.kbtype = KB_DEFAULT;
+        ctx->data->bopomofoData.kbtype = KB_DEFAULT;
         return -1;
     }
 }
@@ -369,9 +369,9 @@ CHEWING_API int chewing_get_KBType(ChewingContext *ctx)
     }
     pgdata = ctx->data;
 
-    LOG_API("kbtype = %d", ctx->data->zuinData.kbtype);
+    LOG_API("kbtype = %d", ctx->data->bopomofoData.kbtype);
 
-    return ctx->data->zuinData.kbtype;
+    return ctx->data->bopomofoData.kbtype;
 }
 
 CHEWING_API char *chewing_get_KBString(ChewingContext *ctx)
@@ -383,9 +383,9 @@ CHEWING_API char *chewing_get_KBString(ChewingContext *ctx)
     }
     pgdata = ctx->data;
 
-    LOG_API("KBString = %s", kb_type_str[ctx->data->zuinData.kbtype]);
+    LOG_API("KBString = %s", kb_type_str[ctx->data->bopomofoData.kbtype]);
 
-    return strdup(kb_type_str[ctx->data->zuinData.kbtype]);
+    return strdup(kb_type_str[ctx->data->bopomofoData.kbtype]);
 }
 
 CHEWING_API void chewing_Terminate()
@@ -729,7 +729,7 @@ CHEWING_API void chewing_set_ChiEngMode(ChewingContext *ctx, int mode)
 
     if (mode == CHINESE_MODE || mode == SYMBOL_MODE) {
         // remove all data inside buffer as switching mode.
-        ZuinRemoveAll(&(ctx->data->zuinData));
+        BopomofoRemoveAll(&(ctx->data->bopomofoData));
         MakeOutputWithRtn(ctx->output, ctx->data, KEYSTROKE_ABSORB);
         ctx->data->bChiSym = mode;
     }
@@ -842,7 +842,7 @@ CHEWING_API int chewing_handle_Space(ChewingContext *ctx)
      * - mode is not CHINESE_MODE
      * - has incompleted bopomofo (space is needed to complete it)
      */
-    if (!pgdata->config.bSpaceAsSelection || pgdata->bChiSym != CHINESE_MODE || ZuinIsEntering(&ctx->data->zuinData)) {
+    if (!pgdata->config.bSpaceAsSelection || pgdata->bChiSym != CHINESE_MODE || BopomofoIsEntering(&ctx->data->bopomofoData)) {
         return chewing_handle_Default(ctx, ' ');
     }
 
@@ -883,8 +883,8 @@ CHEWING_API int chewing_handle_Esc(ChewingContext *ctx)
         keystrokeRtn = KEYSTROKE_IGNORE;
     } else if (pgdata->bSelect) {
         ChoiceEndChoice(pgdata);
-    } else if (ZuinIsEntering(&(pgdata->zuinData))) {
-        ZuinRemoveAll(&(pgdata->zuinData));
+    } else if (BopomofoIsEntering(&(pgdata->bopomofoData))) {
+        BopomofoRemoveAll(&(pgdata->bopomofoData));
     } else if (pgdata->config.bEscCleanAllBuf) {
         CleanAllBuf(pgdata);
         pgo->commitBufLen = pgdata->chiSymbolBufLen;
@@ -972,7 +972,7 @@ CHEWING_API int chewing_handle_Del(ChewingContext *ctx)
     }
 
     if (!pgdata->bSelect) {
-        if (!ZuinIsEntering(&(pgdata->zuinData)) && pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen) {
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen) {
             ChewingKillChar(pgdata, pgdata->chiSymbolCursor, NONDECREASE_CURSOR);
         }
         CallPhrasing(pgdata, 0);
@@ -1005,8 +1005,8 @@ CHEWING_API int chewing_handle_Backspace(ChewingContext *ctx)
     }
 
     if (!pgdata->bSelect) {
-        if (ZuinIsEntering(&(pgdata->zuinData))) {
-            ZuinRemoveLast(&(pgdata->zuinData));
+        if (BopomofoIsEntering(&(pgdata->bopomofoData))) {
+            BopomofoRemoveLast(&(pgdata->bopomofoData));
         } else if (pgdata->chiSymbolCursor > 0) {
             ChewingKillChar(pgdata, pgdata->chiSymbolCursor - 1, DECREASE_CURSOR);
         }
@@ -1110,7 +1110,7 @@ CHEWING_API int chewing_handle_ShiftLeft(ChewingContext *ctx)
     }
     if (!pgdata->bSelect) {
         /*  PointEnd locates (-9, +9) */
-        if (!ZuinIsEntering(&(pgdata->zuinData)) && pgdata->chiSymbolCursor > 0 && pgdata->PointEnd > -9) {
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor > 0 && pgdata->PointEnd > -9) {
             if (pgdata->PointStart == -1)
                 pgdata->PointStart = pgdata->chiSymbolCursor;
             pgdata->chiSymbolCursor--;
@@ -1151,7 +1151,7 @@ CHEWING_API int chewing_handle_Left(ChewingContext *ctx)
         else
             pgdata->choiceInfo.pageNo = pgdata->choiceInfo.nPage - 1;
     } else {
-        if (!ZuinIsEntering(&(pgdata->zuinData)) && pgdata->chiSymbolCursor > 0) {
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor > 0) {
             CheckAndResetRange(pgdata);
             pgdata->chiSymbolCursor--;
         }
@@ -1181,7 +1181,7 @@ CHEWING_API int chewing_handle_ShiftRight(ChewingContext *ctx)
 
     if (!pgdata->bSelect) {
         /* PointEnd locates (-9, +9) */
-        if (!ZuinIsEntering(&(pgdata->zuinData)) &&
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) &&
             pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen && pgdata->PointEnd < 9) {
             if (pgdata->PointStart == -1)
                 pgdata->PointStart = pgdata->chiSymbolCursor;
@@ -1222,7 +1222,7 @@ CHEWING_API int chewing_handle_Right(ChewingContext *ctx)
         else
             pgdata->choiceInfo.pageNo = 0;
     } else {
-        if (!ZuinIsEntering(&(pgdata->zuinData)) && pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen) {
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen) {
             CheckAndResetRange(pgdata);
             pgdata->chiSymbolCursor++;
         }
@@ -1505,7 +1505,7 @@ CHEWING_API int chewing_handle_Default(ChewingContext *ctx, int key)
     DEBUG_OUT("   key=%d", key);
 
     /* Dvorak Hsu */
-    if (pgdata->zuinData.kbtype == KB_DVORAK_HSU) {
+    if (pgdata->bopomofoData.kbtype == KB_DVORAK_HSU) {
         key = dvorak_convert(key);
     }
 
@@ -1564,23 +1564,23 @@ CHEWING_API int chewing_handle_Default(ChewingContext *ctx, int key)
                 goto End_keyproc;
             }
 
-            rtn = ZuinPhoInput(pgdata, key);
-            DEBUG_OUT("\t\tChinese mode key, " "ZuinPhoInput return value = %d\n", rtn);
+            rtn = BopomofoPhoInput(pgdata, key);
+            DEBUG_OUT("\t\tChinese mode key, " "BopomofoPhoInput return value = %d\n", rtn);
 
-            if (rtn == ZUIN_KEY_ERROR)
+            if (rtn == BOPOMOFO_KEY_ERROR)
                 rtn = SpecialSymbolInput(key, pgdata);
             switch (rtn) {
-            case ZUIN_ABSORB:
+            case BOPOMOFO_ABSORB:
                 keystrokeRtn = KEYSTROKE_ABSORB;
                 break;
-            case ZUIN_COMMIT:
-                AddChi(pgdata->zuinData.phone, pgdata->zuinData.phoneAlt, pgdata);
+            case BOPOMOFO_COMMIT:
+                AddChi(pgdata->bopomofoData.phone, pgdata->bopomofoData.phoneAlt, pgdata);
                 break;
-            case ZUIN_NO_WORD:
+            case BOPOMOFO_NO_WORD:
                 keystrokeRtn = KEYSTROKE_BELL | KEYSTROKE_ABSORB;
                 break;
-            case ZUIN_KEY_ERROR:
-            case ZUIN_IGNORE:
+            case BOPOMOFO_KEY_ERROR:
+            case BOPOMOFO_IGNORE:
                 DEBUG_OUT("\t\tbefore isupper(key),key=%d\n", key);
                 /* change upper case into lower case */
                 if (isupper(key))
@@ -2382,8 +2382,8 @@ CHEWING_API int chewing_clean_bopomofo_buf(ChewingContext *ctx)
 
     LOG_API("");
 
-    if (ZuinIsEntering(&pgdata->zuinData)) {
-        ZuinRemoveAll(&pgdata->zuinData);
+    if (BopomofoIsEntering(&pgdata->bopomofoData)) {
+        BopomofoRemoveAll(&pgdata->bopomofoData);
     }
 
     MakeOutput(pgo, pgdata);

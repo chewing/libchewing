@@ -413,7 +413,7 @@ void test_Esc_in_select()
     chewing_delete(ctx);
 }
 
-void test_Esc_entering_zuin()
+void test_Esc_entering_bopomofo()
 {
     ChewingContext *ctx;
 
@@ -445,7 +445,7 @@ void test_Esc()
 {
     test_Esc_not_entering_chewing();
     test_Esc_in_select();
-    test_Esc_entering_zuin();
+    test_Esc_entering_bopomofo();
     test_Esc_escCleanAllBuf();
 }
 
@@ -1144,7 +1144,7 @@ void test_get_phoneSeq()
     chewing_delete(ctx);
 }
 
-void test_zuin_buffer()
+void test_bopomofo_buffer()
 {
     ChewingContext *ctx;
 
@@ -1295,7 +1295,7 @@ int main(int argc, char *argv[])
     test_Space();
 
     test_get_phoneSeq();
-    test_zuin_buffer();
+    test_bopomofo_buffer();
 
     test_longest_phrase();
     test_auto_commit();

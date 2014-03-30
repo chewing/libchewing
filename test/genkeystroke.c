@@ -143,29 +143,29 @@ void show_interval_buffer(int x, int y, ChewingContext *ctx)
     addstr(out_buf);
 }
 
-void showZuin(ChewingContext *ctx)
+void showBopomofo(ChewingContext *ctx)
 {
-    int zuin_count;
-    char *zuin_string;
+    int bopomofo_count;
+    char *bopomofo_string;
 
     if (chewing_get_ChiEngMode(ctx))
         addstr("[中]");
     else
         addstr("[英]");
     addstr("        ");
-    zuin_string = chewing_zuin_String(ctx, &zuin_count);
-    addstr(zuin_string);
-    free(zuin_string);
+    bopomofo_string = chewing_bopomofo_String(ctx, &bopomofo_count);
+    addstr(bopomofo_string);
+    free(bopomofo_string);
 }
 
-void show_zuin_buffer(int x, int y, ChewingContext *ctx)
+void show_bopomofo_buffer(int x, int y, ChewingContext *ctx)
 {
     move(x, y);
     addstr(FILL_BLANK);
     move(x, y);
     if (hasColor)
         attron(COLOR_PAIR(1));
-    showZuin(ctx);
+    showBopomofo(ctx);
     if (hasColor)
         attroff(COLOR_PAIR(1));
 }
@@ -448,7 +448,7 @@ int main(int argc, char *argv[])
         drawline(4, 0);
         show_choose_buffer(5, 0, ctx);
         drawline(6, 0);
-        show_zuin_buffer(7, 0, ctx);
+        show_bopomofo_buffer(7, 0, ctx);
         show_full_shape(7, 5, ctx);
         drawline(8, 0);
         mvaddstr(9, 0, "Ctrl + d : leave");

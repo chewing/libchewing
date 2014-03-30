@@ -48,10 +48,10 @@ BufferType PREEDIT_BUFFER = {
 BufferType BOPOMOFO_BUFFER = {
     "bopomofo buffer",
     chewing_bopomofo_Check,
-    chewing_zuin_Check,
     0,
     0,
-    chewing_zuin_String,
+    0,
+    chewing_bopomofo_String,
     chewing_bopomofo_String_static
 };
 
