@@ -31,6 +31,7 @@ chewing_include_HEADERS = \
 	include/chewingio.h \
 	include/mod_aux.h \
 	include/chewing.h \
+	include/chewing-compat.h \
 	include/global.h \
 	$(NULL)
 

@@ -48,18 +48,8 @@ extern "C" {
 #include "global.h"
 #include "mod_aux.h"
 
-/** @brief indicate the internal encoding of data processing.
- *  @since 0.3.0
- */
-#define LIBCHEWING_ENCODING "UTF-8"
-
-/* API compatibility
- */
-inline CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
-{
-    return !chewing_bopomofo_Check(ctx);
-}
-#define chewing_zuin_String chewing_bopomofo_String
+/* backward compatibility */
+#include "chewing-compat.h"
 
 #ifdef __cplusplus
 }

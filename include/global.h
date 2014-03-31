@@ -57,6 +57,14 @@
 #    endif
 #endif
 
+#ifndef DEPRECATED
+#    if defined(__GNUC__)	/* gcc specific */
+#        define DEPRECATED __attribute__((deprecated))
+#    else
+#        define DEPRECATED
+#    endif
+#endif
+
 #define MIN_SELKEY 1
 #define MAX_SELKEY 10
 

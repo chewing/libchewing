@@ -146,6 +146,7 @@ set(ALL_DATA
 
 set(ALL_INC
     ${INC_DIR}/chewing.h
+    ${INC_DIR}/chewing-compat.h
     ${INC_DIR}/chewingio.h
     ${INC_DIR}/global.h
     ${INC_DIR}/mod_aux.h
@@ -313,6 +314,7 @@ add_library(chewing OBJECT
     ${INC_DIR}/internal/userphrase-private.h
     ${INC_DIR}/internal/bopomofo-private.h
 
+    ${SRC_DIR}/compat.c
     ${SRC_DIR}/chewingio.c
     ${SRC_DIR}/chewingutil.c
     ${SRC_DIR}/choice.c
