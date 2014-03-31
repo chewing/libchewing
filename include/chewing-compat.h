@@ -21,4 +21,8 @@ CHEWING_API int chewing_zuin_Check(ChewingContext *ctx) DEPRECATED;
 CHEWING_API char *chewing_zuin_String(ChewingContext *,
                                       int *zuin_count) DEPRECATED;
 
+CHEWING_API int chewing_Init(const char *dataPath, const char *hashPath) DEPRECATED;
+CHEWING_API void chewing_Terminate() DEPRECATED;
+CHEWING_API int chewing_Configure(ChewingContext *ctx, ChewingConfigData * pcd) DEPRECATED;
+
 #endif

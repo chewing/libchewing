@@ -21,8 +21,8 @@ matrix:
       env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite3=no"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check && make release; fi
-  - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror -Wno-deprecated-declarations" && make check && make release; fi
+  - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror -Wno-deprecated-declarations" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
   - sudo pip install cpp-coveralls --use-mirrors

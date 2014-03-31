@@ -201,17 +201,6 @@ CHEWING_API void chewing_free(void *);
 /*! \name Chewing IM Setup
  */
 
-/*@{*/
-/**
- * @brief Initialize directory data used by Chewing IM
- * @see chewing_Terminate()
- *
- * @param dataPath (read-only) system path of Chewing IM data
- * @param hashPath (read-write) the path where user-defined hash data stores
- * @retval 0 if succeed
- */
-CHEWING_API int chewing_Init(const char *dataPath, const char *hashPath);
-
 /**
  * @brief Reset all settings
  *
@@ -219,21 +208,6 @@ CHEWING_API int chewing_Init(const char *dataPath, const char *hashPath);
  * @return If successed than return 0
  */
 CHEWING_API int chewing_Reset(ChewingContext *ctx);
-
-/**
- * @brief Terminate the I/O routines of Chewing IM
- * @see chewing_Init()
- */
-CHEWING_API void chewing_Terminate();
-
-/**
- * @brief Set selectAreaLen, maxChiSymbolLen, selKey in pcd.
- * @deprecated Use chewing_set_ series of functions to set parameters instead.
- *
- * @param ctx Chewing IM context
- * @param pcd pointer to Chewing configuration data structure
- */
-CHEWING_API int chewing_Configure(ChewingContext *ctx, ChewingConfigData * pcd);
 
 /*@}*/
 

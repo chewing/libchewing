@@ -288,11 +288,6 @@ CHEWING_API ChewingContext *chewing_new()
     return chewing_new2(NULL, NULL, NULL, NULL);
 }
 
-CHEWING_API int chewing_Init(const char *dataPath UNUSED, const char *hashPath UNUSED)
-{
-    return 0;
-}
-
 CHEWING_API int chewing_Reset(ChewingContext *ctx)
 {
     ChewingData *pgdata;
@@ -388,10 +383,6 @@ CHEWING_API char *chewing_get_KBString(ChewingContext *ctx)
     return strdup(kb_type_str[ctx->data->bopomofoData.kbtype]);
 }
 
-CHEWING_API void chewing_Terminate()
-{
-}
-
 CHEWING_API void chewing_delete(ChewingContext *ctx)
 {
     if (ctx) {
@@ -415,21 +406,6 @@ CHEWING_API void chewing_delete(ChewingContext *ctx)
 CHEWING_API void chewing_free(void *p)
 {
     free(p);
-}
-
-CHEWING_API int chewing_Configure(ChewingContext *ctx, ChewingConfigData * pcd)
-{
-    chewing_set_candPerPage(ctx, pcd->candPerPage);
-    chewing_set_maxChiSymbolLen(ctx, pcd->maxChiSymbolLen);
-    chewing_set_selKey(ctx, pcd->selKey, MAX_SELKEY);
-    chewing_set_addPhraseDirection(ctx, pcd->bAddPhraseForward);
-    chewing_set_spaceAsSelection(ctx, pcd->bSpaceAsSelection);
-    chewing_set_escCleanAllBuf(ctx, pcd->bEscCleanAllBuf);
-    chewing_set_autoShiftCur(ctx, pcd->bAutoShiftCur);
-    chewing_set_easySymbolInput(ctx, pcd->bEasySymbolInput);
-    chewing_set_phraseChoiceRearward(ctx, pcd->bPhraseChoiceRearward);
-
-    return 0;
 }
 
 CHEWING_API void chewing_set_candPerPage(ChewingContext *ctx, int n)
