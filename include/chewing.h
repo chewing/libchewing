@@ -67,4 +67,3 @@ inline CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_CORE_ */
 /* *INDENT-ON* */
-#
