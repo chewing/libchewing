@@ -593,18 +593,6 @@ CHEWING_API int chewing_get_escCleanAllBuf(ChewingContext *ctx)
     return ctx->data->config.bEscCleanAllBuf;
 }
 
-CHEWING_API void chewing_set_hsuSelKeyType(ChewingContext *ctx, int mode)
-{
-    // XXX: This function is deprecated. No one read hsuSelKeyType.
-    ctx->data->config.hsuSelKeyType = mode;
-}
-
-CHEWING_API int chewing_get_hsuSelKeyType(ChewingContext *ctx)
-{
-    // XXX: This function is deprecated. No one read hsuSelKeyType.
-    return ctx->data->config.hsuSelKeyType;
-}
-
 CHEWING_API void chewing_set_autoShiftCur(ChewingContext *ctx, int mode)
 {
     ChewingData *pgdata;

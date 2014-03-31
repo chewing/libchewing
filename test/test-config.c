@@ -467,7 +467,7 @@ void test_deprecated()
 
     chewing_set_hsuSelKeyType(ctx, HSU_SELKEY_TYPE1);
     type = chewing_get_hsuSelKeyType(ctx);
-    ok(type == HSU_SELKEY_TYPE1, "`%d' shall be `%d'", type, HSU_SELKEY_TYPE1);
+    ok(type == 0, "`%d' shall be `%d'", type, 0);
 
     chewing_Configure(ctx, &configure);
 

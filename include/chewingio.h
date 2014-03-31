@@ -431,28 +431,6 @@ CHEWING_API int chewing_get_escCleanAllBuf(ChewingContext *ctx);
 /*@}*/
 
 
-/*! \name Type of selection keys in Hsu's keyboard mapping
- */
-
-/*@{*/
-/**
- * @brief Set the type of selection keys in Hsu's keyboard mapping
- *
- * @param ctx
- * @param mode
- */
-CHEWING_API void chewing_set_hsuSelKeyType(ChewingContext *ctx, int mode);
-
-/**
- * @brief Get the type of selection keys in Hsu's keyboard mapping
- *
- * @param ctx
- */
-CHEWING_API int chewing_get_hsuSelKeyType(ChewingContext *ctx);
-
-/*@}*/
-
-
 /*! \name Behavior of automatically shifting cursor after selection
  */
 
