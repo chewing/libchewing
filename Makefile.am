@@ -14,7 +14,7 @@ CONTRIB_FILES = \
 	contrib/python/test.py \
 	contrib/python/chewing.py \
 	contrib/simple-select.c \
-	contrib/Makefile-simple-select \
+	contrib/Makefile \
 	$(NULL)
 
 EXTRA_DIST = \
