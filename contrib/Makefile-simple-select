@@ -5,7 +5,9 @@ all: $(TARGET)
 $(TARGET): $(TARGET).c
 	$(CC) -o $(TARGET) $(TARGET).c \
 		-I ../include \
-		-L ../src/.libs -lchewing
+		-D TEST_HASH_DIR="\"$(PWD)\"" \
+		-D TEST_DATA_DIR="\"../data\"" \
+		../src/.libs/libchewing.a -lsqlite3
 
 clean:
-	rm -f $(TARGET) uhash.dat
+	rm -f $(TARGET) test.sqlite3
