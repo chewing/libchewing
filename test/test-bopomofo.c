@@ -377,6 +377,63 @@ void test_select_candidate_4_bytes_utf8()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_in_middle_no_reaward()
+{
+    ChewingContext *ctx;
+    int ret;
+    const char *cand;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4u6<L><L>" /* 測試儀*/);
+
+    ret = chewing_cand_open(ctx);
+    ok(ret == 0, "chewing_cand_open return %d shall be %d", ret, 0);
+
+    cand = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(cand, "\xE9\x81\xA9\xE5\xAE\x9C") == 0, "first candidate `%s' shall be `%s'", cand, "\xE9\x81\xA9\xE5\xAE\x9C" /* 適宜 */);
+
+    ret = chewing_cand_list_next(ctx);
+    ok(ret == 0, "chewing_cand_list_next return %d shall be %d", ret, 0);
+
+    cand = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(cand, "\xE5\xB8\x82") == 0, "first candidate `%s' shall be `%s'", cand, "\xE5\xB8\x82" /* 市 */);
+
+    chewing_delete(ctx);
+}
+
+void test_select_candidate_in_middle_reaward()
+{
+    ChewingContext *ctx;
+    int ret;
+    const char *cand;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "hk4g4u6<L><L>" /* 測試儀*/);
+
+    ret = chewing_cand_open(ctx);
+    ok(ret == 0, "chewing_cand_open return %d shall be %d", ret, 0);
+
+    cand = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(cand, "\xE6\xB8\xAC\xE8\xA9\xA6") == 0, "first candidate `%s' shall be `%s'", cand, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */);
+
+    ret = chewing_cand_list_next(ctx);
+    ok(ret == 0, "chewing_cand_list_next return %d shall be %d", ret, 0);
+
+    cand = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(cand, "\xE5\xB8\x82") == 0, "first candidate `%s' shall be `%s'", cand, "\xE5\xB8\x82" /* 市 */);
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -387,6 +444,8 @@ void test_select_candidate()
     test_select_candidate_rearward_start_with_symbol();
     test_select_candidate_4_bytes_utf8();
     test_del_bopomofo_as_mode_switch();
+    test_select_candidate_in_middle_no_reaward();
+    test_select_candidate_in_middle_reaward();
 }
 
 void test_Esc_not_entering_chewing()
