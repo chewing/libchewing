@@ -75,6 +75,7 @@ logic; and input framework interface for display and preference setting.
   - JMCCE
   - SCIM
   - standalone Microsoft Windows 32/64-bit (windows-chewing)
+  - Text Services Framework for Microsoft Windows
   - UIM
   - ibus
   - UCIMF

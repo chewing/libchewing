@@ -69,8 +69,10 @@ What's New in libchewing GIT
   - Use Backspace to close candidate window #128
   - Use PgUp/PgDn to turn pages of candidates #129
   - Update Windows default search path #78
-  - Use the consistent coding style
   - The word "zuin", "Zhuyin" are obsolete terms for "Bopomofo"
+* Successful stories:
+  - chewing-windows-tsf project provides Text Services Framework
+    support for Microsoft Windows.
 
 
 What's New in libchewing 0.3.5 (Jul 28, 2013)
