@@ -29,11 +29,11 @@ static const int DEFAULT_SELECT_KEY[] = {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 };
 
-static int ALTERNATE_SELECT_KEY[] = {
+static const int ALTERNATE_SELECT_KEY[] = {
     'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'
 };
 
-const TestData DATA = { "`a", "\xE2\x80\xA6" /* … */  };
+static const TestData DATA = { "`a", "\xE2\x80\xA6" /* … */  };
 
 FILE *fd;
 
