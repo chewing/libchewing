@@ -115,12 +115,12 @@ static void chooseCandidate(ChewingContext *ctx, int toSelect, int key_buf_curso
         if (pgdata->choiceInfo.isSymbol == WORD_CHOICE) {
             OpenSymbolChoice(pgdata);
         }
-                /**
-		 * If these's only one candidate list available, ChoiceFirstAvail
-		 * will re-open the list, namely turn back to the firt page.
-		 * However, it doesn't work for symbols, therefore we
-		 * set the page number to 0 directly.
-		 */
+        /**
+         * If these's only one candidate list available, ChoiceFirstAvail
+         * will re-open the list, namely turn back to the firt page.
+         * However, it doesn't work for symbols, therefore we
+         * set the page number to 0 directly.
+         */
         else if (pgdata->bSelect) {
             pgdata->choiceInfo.pageNo = 0;
         }
