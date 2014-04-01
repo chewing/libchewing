@@ -47,25 +47,25 @@
 #endif
 
 #define ok(test, fmt, ...) \
-	internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
+    internal_ok(__FILE__, __LINE__, !!(test), #test, fmt, ##__VA_ARGS__)
 #define ok_commit_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &COMMIT_BUFFER)
+    internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &COMMIT_BUFFER)
 #define ok_preedit_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &PREEDIT_BUFFER)
+    internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &PREEDIT_BUFFER)
 #define ok_bopomofo_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &BOPOMOFO_BUFFER)
+    internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &BOPOMOFO_BUFFER)
 #define ok_aux_buffer(ctx, expected) \
-	internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
+    internal_ok_buffer(__FILE__, __LINE__, ctx, expected, &AUX_BUFFER)
 #define ok_candidate(ctx, cand, cand_len) \
-	internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
+    internal_ok_candidate(__FILE__, __LINE__, ctx, cand, cand_len)
 #define ok_candidate_len(ctx, expected_len) \
-	internal_ok_candidate_len(__FILE__, __LINE__, ctx, expected_len)
+    internal_ok_candidate_len(__FILE__, __LINE__, ctx, expected_len)
 #define ok_keystroke_rtn(ctx, rtn) \
-	internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
+    internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
-	internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
+    internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
 #define start_testcase(ctx, file) \
-	internal_start_testcase(__func__, ctx, file)
+    internal_start_testcase(__func__, ctx, file)
 
 typedef struct TestData {
     char *token;
