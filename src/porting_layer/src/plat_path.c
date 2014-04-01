@@ -1,7 +1,7 @@
 /**
  * plat_path.c
  *
- * Copyright (c) 2012
+ * Copyright (c) 2012-2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution

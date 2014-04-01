@@ -1,7 +1,7 @@
 /*
  * mod_aux.c
  *
- * Copyright (c) 2005, 2006, 2008
+ * Copyright (c) 2005, 2006, 2008, 2009, 2012-2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution

@@ -1,7 +1,7 @@
 /**
  * chewing-sql.c
  *
- * Copyright (c) 2013
+ * Copyright (c) 2013, 2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution

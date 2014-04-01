@@ -1,7 +1,7 @@
 /**
  * pinyin.c
  *
- * Copyright (c) 2005, 2006, 2008, 2012
+ * Copyright (c) 2005, 2006, 2008, 2012-2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
