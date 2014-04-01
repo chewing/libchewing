@@ -47,6 +47,7 @@ endif()
 
 # automake compatibility
 add_definitions(-DHAVE_CONFIG_H=1)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
 option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
@@ -163,6 +164,7 @@ if (MAKEINFO)
             ${INFO_SRC}
     )
     add_custom_target(INFO ALL DEPENDS ${INFO_BIN})
+    add_dependencies(check INFO)
 
     find_program(INSTALL_INFO NAMES ginstall-info install-info)
     if (INSTALL_INFO)
@@ -190,6 +192,7 @@ foreach(target ${ALL_STATIC_TEST})
     add_custom_target(${target} ALL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TEST_SRC_DIR}/${target} ${TEST_BIN_DIR}/${target}
     )
+    add_dependencies(check ${target})
 endforeach()
 
 # tools
@@ -263,7 +266,6 @@ if(USE_VALGRIND)
     endif()
 endif()
 
-add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     add_dependencies(${target} data all_static_data)
@@ -385,6 +387,7 @@ if (NOT MSVC)
         $<TARGET_OBJECTS:common>
     )
     list(APPEND LIBS chewing_shared)
+    add_dependencies(check chewing_shared)
 endif()
 
 add_library(chewing_static STATIC
@@ -392,6 +395,7 @@ add_library(chewing_static STATIC
     $<TARGET_OBJECTS:common>
 )
 list(APPEND LIBS chewing_static)
+add_dependencies(check chewing_static)
 
 foreach(lib ${LIBS})
     target_link_libraries(${lib} userphrase)
