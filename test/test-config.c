@@ -62,10 +62,9 @@ void test_default_value()
 
     ok(chewing_get_escCleanAllBuf(ctx) == 0, "default escCleanAllBuf shall be 0");
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+BEGIN_IGNORE_DEPRECATIONS
     ok(chewing_get_hsuSelKeyType(ctx) == 0, "default hsuSelKeyType shall be 0");
-#pragma GCC diagnostic pop
+END_IGNORE_DEPRECATIONS
 
     ok(chewing_get_autoShiftCur(ctx) == 0, "default autoShiftCur shall be 0");
 
@@ -468,14 +467,13 @@ void test_deprecated()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+BEGIN_IGNORE_DEPRECATIONS
     chewing_set_hsuSelKeyType(ctx, HSU_SELKEY_TYPE1);
     type = chewing_get_hsuSelKeyType(ctx);
     ok(type == 0, "`%d' shall be `%d'", type, 0);
 
     chewing_Configure(ctx, &configure);
-#pragma GCC diagnostic pop
+END_IGNORE_DEPRECATIONS
 
     chewing_delete(ctx);
 }
