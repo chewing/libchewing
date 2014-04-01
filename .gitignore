@@ -129,3 +129,7 @@ doc/libchewing.vrs
 
 # indent backup
 *~
+
+# contrib directory
+contrib/simple-select
+contrib/test.sqlite3
