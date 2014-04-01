@@ -657,7 +657,7 @@ The number of minimum candidates that are selectable via shortcut keys. Its
 value is @code{1}.
 @end deftypevr
 
-@deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, int *@var{selkeys}, int @var{len})
+@deftypefun void chewing_set_selKey (ChewingContext *@var{ctx}, const int *@var{selkeys}, int @var{len})
 This function sets the selection key to @var{selkeys}, an integer array of
 length @code{MAX_SELKEY}. The @var{len} is ignored by this function.
 

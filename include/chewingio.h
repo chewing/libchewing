@@ -353,7 +353,7 @@ CHEWING_API int chewing_get_maxChiSymbolLen(ChewingContext *ctx);
  * @param selkeys
  * @param len
  */
-CHEWING_API void chewing_set_selKey(ChewingContext *ctx, int *selkeys, int len);
+CHEWING_API void chewing_set_selKey(ChewingContext *ctx, const int *selkeys, int len);
 
 /**
  * @brief Get the key sequence for selecting phrases

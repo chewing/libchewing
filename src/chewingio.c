@@ -466,7 +466,7 @@ CHEWING_API int chewing_get_maxChiSymbolLen(ChewingContext *ctx)
     return ctx->data->config.maxChiSymbolLen;
 }
 
-CHEWING_API void chewing_set_selKey(ChewingContext *ctx, int *selkeys, int len)
+CHEWING_API void chewing_set_selKey(ChewingContext *ctx, const int *selkeys, int len)
 {
     ChewingData *pgdata;
 
