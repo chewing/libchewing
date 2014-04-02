@@ -8,8 +8,10 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_COMPAT_
 #define _CHEWING_COMPAT_
+/* *INDENT-ON* */
 
 /** @brief indicate the internal encoding of data processing.
  *  @since 0.3.0
@@ -27,4 +29,6 @@ CHEWING_API int chewing_Configure(ChewingContext *ctx, ChewingConfigData * pcd) 
 CHEWING_API void chewing_set_hsuSelKeyType(ChewingContext *ctx, int mode) DEPRECATED_FOR(chewing_set_selKey);
 CHEWING_API int chewing_get_hsuSelKeyType(ChewingContext *ctx) DEPRECATED_FOR(chewing_get_selKey);
 
+/* *INDENT-OFF* */
 #endif
+/* *INDENT-ON* */
