@@ -69,7 +69,7 @@
 #        endif
 #    else
 #        define DEPRECATED
-#        define DEPRECATED(f)
+#        define DEPRECATED_FOR(f)
 #    endif
 #endif
 
