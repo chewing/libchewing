@@ -80,7 +80,7 @@
  * macro expansion. _Pragma is an operator, much like sizeof or defined, and
  * can be embedded in a macro.
  */
-#if defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
 #    define BEGIN_IGNORE_DEPRECATIONS \
          _Pragma ("GCC diagnostic push")                       \
          _Pragma ("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
