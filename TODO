@@ -5,6 +5,4 @@ For developers, please add new entry for your plans.
   a) support same phrase in different phones.
 * Support platform independent binary data.
   a) Support data versioning.
-  b) Explicit data struct size.
-  c) Remove text data support.
 * Rebuild data after code changes to tools.
