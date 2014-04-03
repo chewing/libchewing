@@ -157,22 +157,6 @@ CHEWING_API const char *chewing_bopomofo_String_static(ChewingContext *ctx)
     return ctx->output->bopomofoBuf;
 }
 
-/**
- * @param ctx handle to Chewing IM context
- * @param bopomofo_count pointer to the integer of available Bopomofo preedit string
- *
- * Always returns a char pointer, caller must free it.
- */
-CHEWING_API char *chewing_bopomofo_String(ChewingContext *ctx, int *bopomofo_count)
-{
-    char *s = strdup(chewing_bopomofo_String_static(ctx));
-
-    if (bopomofo_count)
-        *bopomofo_count = ueStrLen(s);
-
-    return s;
-}
-
 CHEWING_API int chewing_bopomofo_Check(ChewingContext *ctx)
 {
     ChewingData *pgdata;

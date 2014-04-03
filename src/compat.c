@@ -12,6 +12,10 @@
 #    include <config.h>
 #endif
 
+#include <string.h>
+
+#include "chewing-utf8-util.h"
+
 /* for compatibility */
 
 #include "chewing.h"
@@ -21,9 +25,15 @@ CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
     return !chewing_bopomofo_Check(ctx);
 }
 
-CHEWING_API char *chewing_zuin_String(ChewingContext *ctx, int *zuin_count)
+CHEWING_API char *chewing_zuin_String(ChewingContext *ctx, int *bopomofo_count)
 {
-    return chewing_bopomofo_String(ctx, zuin_count);
+    char *s = strdup(chewing_bopomofo_String_static(ctx));
+
+    if (bopomofo_count) {
+        *bopomofo_count = ueStrLen(s);
+    }
+
+    return s;
 }
 
 CHEWING_API int chewing_Init(const char *dataPath UNUSED, const char *hashPath UNUSED)

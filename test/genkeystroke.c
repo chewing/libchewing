@@ -145,17 +145,12 @@ void show_interval_buffer(int x, int y, ChewingContext *ctx)
 
 void showBopomofo(ChewingContext *ctx)
 {
-    int bopomofo_count;
-    char *bopomofo_string;
-
     if (chewing_get_ChiEngMode(ctx))
         addstr("[中]");
     else
         addstr("[英]");
     addstr("        ");
-    bopomofo_string = chewing_bopomofo_String(ctx, &bopomofo_count);
-    addstr(bopomofo_string);
-    free(bopomofo_string);
+    addstr(chewing_bopomofo_String_static(ctx));
 }
 
 void show_bopomofo_buffer(int x, int y, ChewingContext *ctx)

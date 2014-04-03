@@ -45,15 +45,19 @@ BufferType PREEDIT_BUFFER = {
     chewing_buffer_String_static
 };
 
+BEGIN_IGNORE_DEPRECATIONS
+
 BufferType BOPOMOFO_BUFFER = {
     "bopomofo buffer",
     chewing_bopomofo_Check,
+    chewing_zuin_Check,
     0,
     0,
-    0,
-    chewing_bopomofo_String,
+    chewing_zuin_String,
     chewing_bopomofo_String_static
 };
+
+END_IGNORE_DEPRECATIONS
 
 BufferType AUX_BUFFER = {
     "aux buffer",

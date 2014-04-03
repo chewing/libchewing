@@ -247,15 +247,18 @@ void test_null()
     const_buf = chewing_bopomofo_String_static(NULL);
     ok(strcmp(const_buf, "") == 0, "chewing_bopomofo_String_static() returns `%s' shall be `%s'", const_buf, "");
 
-    buf = chewing_bopomofo_String(NULL, NULL);
-    ok(strcmp(buf, "") == 0, "chewing_bopomofo_String() returns `%s' shall be `%s'", buf, "");
+BEGIN_IGNORE_DEPRECATIONS
+    buf = chewing_zuin_String(NULL, NULL);
+END_IGNORE_DEPRECATIONS
+    ok(strcmp(buf, "") == 0, "chewing_zuin_String() returns `%s' shall be `%s'", buf, "");
     chewing_free(buf);
 
     ret = chewing_bopomofo_Check(NULL);
     ok(ret == -1, "chewing_bopomofo_Check() returns `%d' shall be `%d'", ret, -1);
 
-    ret = chewing_bopomofo_Check(NULL);
-    ok(ret == -1, "chewing_bopomofo_Check() returns `%d' shall be `%d'", ret, -1);
+BEGIN_IGNORE_DEPRECATIONS
+    chewing_zuin_Check(NULL); // shall not crash
+END_IGNORE_DEPRECATIONS
 
     ret = chewing_cursor_Current(NULL);
     ok(ret == -1, "chewing_cursor_Current() returns `%d' shall be `%d'", ret, -1);
