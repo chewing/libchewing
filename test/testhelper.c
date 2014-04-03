@@ -289,6 +289,7 @@ void type_keystroke_by_string(ChewingContext *ctx, char *keystroke)
 void internal_ok_buffer(const char *file, int line, ChewingContext *ctx, const char *expected, const BufferType *buffer)
 {
     char *buf;
+    const char *const_buf;
     int actual_ret;
     int expected_ret;
     int expected_len;
@@ -342,10 +343,9 @@ void internal_ok_buffer(const char *file, int line, ChewingContext *ctx, const c
     }
 
     if (buffer->get_string_static) {
-        buf = strdup(buffer->get_string_static(ctx));
-        internal_ok(file, line, !strcmp(buf, expected), "!strcmp( buf, expected )",
-                    "%s string function returned `%s' shall be `%s'", buffer->name, buf, expected);
-        chewing_free(buf);
+        const_buf = buffer->get_string_static(ctx);
+        internal_ok(file, line, !strcmp(const_buf, expected), "!strcmp( const_buf, expected )",
+                    "%s string function returned `%s' shall be `%s'", buffer->name, const_buf, expected);
     }
 }
 
