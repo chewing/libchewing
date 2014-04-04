@@ -355,9 +355,9 @@ CHEWING_API int chewing_set_KBType(ChewingContext *ctx, int kbtype)
     }
 }
 
-CHEWING_API int chewing_get_KBType(ChewingContext *ctx)
+CHEWING_API int chewing_get_KBType(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -369,9 +369,9 @@ CHEWING_API int chewing_get_KBType(ChewingContext *ctx)
     return ctx->data->bopomofoData.kbtype;
 }
 
-CHEWING_API char *chewing_get_KBString(ChewingContext *ctx)
+CHEWING_API char *chewing_get_KBString(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return strdup("");
@@ -423,9 +423,9 @@ CHEWING_API void chewing_set_candPerPage(ChewingContext *ctx, int n)
         ctx->data->config.candPerPage = n;
 }
 
-CHEWING_API int chewing_get_candPerPage(ChewingContext *ctx)
+CHEWING_API int chewing_get_candPerPage(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -452,9 +452,9 @@ CHEWING_API void chewing_set_maxChiSymbolLen(ChewingContext *ctx, int n)
         ctx->data->config.maxChiSymbolLen = n;
 }
 
-CHEWING_API int chewing_get_maxChiSymbolLen(ChewingContext *ctx)
+CHEWING_API int chewing_get_maxChiSymbolLen(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -487,9 +487,9 @@ CHEWING_API void chewing_set_selKey(ChewingContext *ctx, const int *selkeys, int
     }
 }
 
-CHEWING_API int *chewing_get_selKey(ChewingContext *ctx)
+CHEWING_API int *chewing_get_selKey(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
     int *selkeys;
 
     if (!ctx) {
@@ -521,9 +521,9 @@ CHEWING_API void chewing_set_addPhraseDirection(ChewingContext *ctx, int directi
         ctx->data->config.bAddPhraseForward = direction;
 }
 
-CHEWING_API int chewing_get_addPhraseDirection(ChewingContext *ctx)
+CHEWING_API int chewing_get_addPhraseDirection(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -550,9 +550,9 @@ CHEWING_API void chewing_set_spaceAsSelection(ChewingContext *ctx, int mode)
         ctx->data->config.bSpaceAsSelection = mode;
 }
 
-CHEWING_API int chewing_get_spaceAsSelection(ChewingContext *ctx)
+CHEWING_API int chewing_get_spaceAsSelection(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -579,9 +579,9 @@ CHEWING_API void chewing_set_escCleanAllBuf(ChewingContext *ctx, int mode)
         ctx->data->config.bEscCleanAllBuf = mode;
 }
 
-CHEWING_API int chewing_get_escCleanAllBuf(ChewingContext *ctx)
+CHEWING_API int chewing_get_escCleanAllBuf(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -608,9 +608,9 @@ CHEWING_API void chewing_set_autoShiftCur(ChewingContext *ctx, int mode)
         ctx->data->config.bAutoShiftCur = mode;
 }
 
-CHEWING_API int chewing_get_autoShiftCur(ChewingContext *ctx)
+CHEWING_API int chewing_get_autoShiftCur(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -637,9 +637,9 @@ CHEWING_API void chewing_set_easySymbolInput(ChewingContext *ctx, int mode)
         ctx->data->config.bEasySymbolInput = mode;
 }
 
-CHEWING_API int chewing_get_easySymbolInput(ChewingContext *ctx)
+CHEWING_API int chewing_get_easySymbolInput(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -666,9 +666,9 @@ CHEWING_API void chewing_set_phraseChoiceRearward(ChewingContext *ctx, int mode)
         ctx->data->config.bPhraseChoiceRearward = mode;
 }
 
-CHEWING_API int chewing_get_phraseChoiceRearward(ChewingContext *ctx)
+CHEWING_API int chewing_get_phraseChoiceRearward(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -699,9 +699,9 @@ CHEWING_API void chewing_set_ChiEngMode(ChewingContext *ctx, int mode)
     }
 }
 
-CHEWING_API int chewing_get_ChiEngMode(ChewingContext *ctx)
+CHEWING_API int chewing_get_ChiEngMode(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -728,9 +728,9 @@ CHEWING_API void chewing_set_ShapeMode(ChewingContext *ctx, int mode)
         ctx->data->bFullShape = mode;
 }
 
-CHEWING_API int chewing_get_ShapeMode(ChewingContext *ctx)
+CHEWING_API int chewing_get_ShapeMode(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
@@ -1789,9 +1789,9 @@ CHEWING_API int chewing_handle_Numlock(ChewingContext *ctx, int key)
     return 0;
 }
 
-CHEWING_API unsigned short *chewing_get_phoneSeq(ChewingContext *ctx)
+CHEWING_API unsigned short *chewing_get_phoneSeq(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
     uint16_t *seq;
 
     if (!ctx) {
@@ -1807,9 +1807,9 @@ CHEWING_API unsigned short *chewing_get_phoneSeq(ChewingContext *ctx)
     return seq;
 }
 
-CHEWING_API int chewing_get_phoneSeqLen(ChewingContext *ctx)
+CHEWING_API int chewing_get_phoneSeqLen(const ChewingContext *ctx)
 {
-    ChewingData *pgdata;
+    const ChewingData *pgdata;
 
     if (!ctx) {
         return -1;
