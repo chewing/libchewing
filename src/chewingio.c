@@ -1727,6 +1727,9 @@ CHEWING_API int chewing_handle_ShiftSpace(ChewingContext *ctx)
     if (!pgdata->bSelect) {
         CheckAndResetRange(pgdata);
     }
+
+    chewing_set_ShapeMode(ctx, 1 - chewing_get_ShapeMode(ctx));
+
     CallPhrasing(pgdata, 0);
     MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
     return 0;

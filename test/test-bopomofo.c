@@ -1015,7 +1015,27 @@ void test_PageDown()
 
 void test_ShiftSpace()
 {
-    /* FIXME: Implement this. */
+    ChewingContext *ctx;
+    int mode;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, "<SS>");
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == FULLSHAPE_MODE, "mode shall be FULLSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, " ");
+    ok_commit_buffer(ctx, "\xE3\x80\x80"); /* Fullshape Space (U+3000) */
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "a");
+    ok_commit_buffer(ctx, "\xEF\xBD\x81"); /* Fullshape a */
+
+    chewing_delete(ctx);
 }
 
 void test_Numlock_numeric_input()
