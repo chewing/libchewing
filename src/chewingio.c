@@ -85,7 +85,7 @@ const char *const PINYIN_FILES[] = {
     NULL,
 };
 
-CHEWING_API int chewing_KBStr2Num(char str[])
+CHEWING_API int chewing_KBStr2Num(const char str[])
 {
     int i;
 

@@ -245,7 +245,7 @@ CHEWING_API char *chewing_get_KBString(ChewingContext *ctx);
  *
  * @param str[] name of kbtype eg. "KB_HSU"
  */
-CHEWING_API int chewing_KBStr2Num(char str[]);
+CHEWING_API int chewing_KBStr2Num(const char str[]);
 
 /*@}*/
 
