@@ -119,7 +119,6 @@ typedef struct ChewingConfigData {
     int bAutoShiftCur;
     int bEasySymbolInput;
     int bPhraseChoiceRearward;
-    int hsuSelKeyType;          // Deprecated.
 } ChewingConfigData;
 
 typedef struct IntervalType {
