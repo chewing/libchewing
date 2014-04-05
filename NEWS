@@ -70,6 +70,7 @@ What's New in libchewing GIT
   - Use PgUp/PgDn to turn pages of candidates #129
   - Update Windows default search path #78
   - The word "zuin", "Zhuyin" are obsolete terms for "Bopomofo"
+  - Add const whenever possible in several APIs
 * Successful stories:
   - chewing-windows-tsf project provides Text Services Framework
     support for Microsoft Windows.
