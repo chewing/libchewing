@@ -73,7 +73,7 @@ typedef struct TestData {
 } TestData;
 
 typedef struct BufferType {
-    char *name;
+    const char *name;
     int (*check) (ChewingContext *ctx);
     int (*check_alt) (ChewingContext *ctx);
     int (*get_length) (ChewingContext *ctx);
