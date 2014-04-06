@@ -286,7 +286,7 @@ CHEWING_API int chewing_cand_hasNext(ChewingContext *ctx)
 CHEWING_API const char *chewing_cand_String_static(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    char *s;
+    const char *s;
 
     if (!ctx) {
         return "";
@@ -479,7 +479,7 @@ extern const char *const kb_type_str[];
 CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    char *s;
+    const char *s;
 
     if (!ctx) {
         return "";
