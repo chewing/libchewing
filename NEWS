@@ -71,6 +71,7 @@ What's New in libchewing GIT
   - Update Windows default search path #78
   - The word "zuin", "Zhuyin" are obsolete terms for "Bopomofo"
   - Add const whenever possible in several APIs
+  - Toggle shape mode with shift-space #141 #142
 * Successful stories:
   - chewing-windows-tsf project provides Text Services Framework
     support for Microsoft Windows.
