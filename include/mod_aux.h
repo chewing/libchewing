@@ -25,7 +25,7 @@
  * @param ctx handle to Chewing IM context
  * @retval TRUE if its currnet input state is at the "end-of-a-char"
  */
-CHEWING_API int chewing_commit_Check(ChewingContext *ctx);
+CHEWING_API int chewing_commit_Check(const ChewingContext *ctx);
 
 /**
  * @brief Get current commit string regardless of current input state
@@ -33,36 +33,36 @@ CHEWING_API int chewing_commit_Check(ChewingContext *ctx);
  *
  * Alwasy returns a char pointer, caller must free it.
  */
-CHEWING_API char *chewing_commit_String(ChewingContext *ctx);
-CHEWING_API const char *chewing_commit_String_static(ChewingContext *ctx);
+CHEWING_API char *chewing_commit_String(const ChewingContext *ctx);
+CHEWING_API const char *chewing_commit_String_static(const ChewingContext *ctx);
 
 
 /*! \name Preedit string buffer
  */
 
 /*@{*/
-CHEWING_API char *chewing_buffer_String(ChewingContext *ctx);
-CHEWING_API const char *chewing_buffer_String_static(ChewingContext *ctx);
-CHEWING_API int chewing_buffer_Check(ChewingContext *ctx);
-CHEWING_API int chewing_buffer_Len(ChewingContext *ctx);
+CHEWING_API char *chewing_buffer_String(const ChewingContext *ctx);
+CHEWING_API const char *chewing_buffer_String_static(const ChewingContext *ctx);
+CHEWING_API int chewing_buffer_Check(const ChewingContext *ctx);
+CHEWING_API int chewing_buffer_Len(const ChewingContext *ctx);
 
 /*@}*/
 
 
 /*@{*/
-CHEWING_API const char *chewing_bopomofo_String_static(ChewingContext *ctx);
-CHEWING_API int chewing_bopomofo_Check(ChewingContext *ctx);
+CHEWING_API const char *chewing_bopomofo_String_static(const ChewingContext *ctx);
+CHEWING_API int chewing_bopomofo_Check(const ChewingContext *ctx);
 
 /*@}*/
 
-CHEWING_API int chewing_cursor_Current(ChewingContext *ctx);
+CHEWING_API int chewing_cursor_Current(const ChewingContext *ctx);
 
 /*@{*/
-CHEWING_API int chewing_cand_CheckDone(ChewingContext *ctx);
-CHEWING_API int chewing_cand_TotalPage(ChewingContext *ctx);
-CHEWING_API int chewing_cand_ChoicePerPage(ChewingContext *ctx);
-CHEWING_API int chewing_cand_TotalChoice(ChewingContext *ctx);
-CHEWING_API int chewing_cand_CurrentPage(ChewingContext *ctx);
+CHEWING_API int chewing_cand_CheckDone(const ChewingContext *ctx);
+CHEWING_API int chewing_cand_TotalPage(const ChewingContext *ctx);
+CHEWING_API int chewing_cand_ChoicePerPage(const ChewingContext *ctx);
+CHEWING_API int chewing_cand_TotalChoice(const ChewingContext *ctx);
+CHEWING_API int chewing_cand_CurrentPage(const ChewingContext *ctx);
 CHEWING_API void chewing_cand_Enumerate(ChewingContext *ctx);
 CHEWING_API int chewing_cand_hasNext(ChewingContext *ctx);
 CHEWING_API char *chewing_cand_String(ChewingContext *ctx);
@@ -84,23 +84,23 @@ CHEWING_API void chewing_interval_Get(ChewingContext *ctx, IntervalType * it);
 /*@}*/
 
 /*@{*/
-CHEWING_API int chewing_aux_Check(ChewingContext *ctx);
-CHEWING_API int chewing_aux_Length(ChewingContext *ctx);
-CHEWING_API char *chewing_aux_String(ChewingContext *ctx);
-CHEWING_API const char *chewing_aux_String_static(ChewingContext *ctx);
+CHEWING_API int chewing_aux_Check(const ChewingContext *ctx);
+CHEWING_API int chewing_aux_Length(const ChewingContext *ctx);
+CHEWING_API char *chewing_aux_String(const ChewingContext *ctx);
+CHEWING_API const char *chewing_aux_String_static(const ChewingContext *ctx);
 
 /*@}*/
 
 
 /*@{*/
-CHEWING_API int chewing_keystroke_CheckIgnore(ChewingContext *ctx);
-CHEWING_API int chewing_keystroke_CheckAbsorb(ChewingContext *ctx);
+CHEWING_API int chewing_keystroke_CheckIgnore(const ChewingContext *ctx);
+CHEWING_API int chewing_keystroke_CheckAbsorb(const ChewingContext *ctx);
 
 /*@}*/
 
 
 /*@{*/
-CHEWING_API int chewing_kbtype_Total(ChewingContext *ctx);
+CHEWING_API int chewing_kbtype_Total(const ChewingContext *ctx);
 CHEWING_API void chewing_kbtype_Enumerate(ChewingContext *ctx);
 CHEWING_API int chewing_kbtype_hasNext(ChewingContext *ctx);
 CHEWING_API char *chewing_kbtype_String(ChewingContext *ctx);

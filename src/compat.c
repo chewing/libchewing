@@ -20,12 +20,12 @@
 
 #include "chewing.h"
 
-CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
+CHEWING_API int chewing_zuin_Check(const ChewingContext *ctx)
 {
     return !chewing_bopomofo_Check(ctx);
 }
 
-CHEWING_API char *chewing_zuin_String(ChewingContext *ctx, int *bopomofo_count)
+CHEWING_API char *chewing_zuin_String(const ChewingContext *ctx, int *bopomofo_count)
 {
     char *s = strdup(chewing_bopomofo_String_static(ctx));
 

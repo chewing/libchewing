@@ -19,9 +19,9 @@
 #define LIBCHEWING_ENCODING "UTF-8"
 
 /* deprecated function. for API compatibility */
-CHEWING_API int chewing_zuin_Check(ChewingContext *ctx)
+CHEWING_API int chewing_zuin_Check(const ChewingContext *ctx)
     DEPRECATED_FOR(chewing_bopomofo_Check);
-CHEWING_API char *chewing_zuin_String(ChewingContext *, int *zuin_count)
+CHEWING_API char *chewing_zuin_String(const ChewingContext *, int *zuin_count)
     DEPRECATED_FOR(chewing_bopomofo_String_static);
 
 CHEWING_API int chewing_Init(const char *dataPath, const char *hashPath)

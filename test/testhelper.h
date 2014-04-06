@@ -74,12 +74,12 @@ typedef struct TestData {
 
 typedef struct BufferType {
     const char *name;
-    int (*check) (ChewingContext *ctx);
-    int (*check_alt) (ChewingContext *ctx);
-    int (*get_length) (ChewingContext *ctx);
-    char *(*get_string) (ChewingContext *ctx);
-    char *(*get_string_alt) (ChewingContext *ctx, int *len);
-    const char *(*get_string_static) (ChewingContext *ctx);
+    int (*check) (const ChewingContext *ctx);
+    int (*check_alt) (const ChewingContext *ctx);
+    int (*get_length) (const ChewingContext *ctx);
+    char *(*get_string) (const ChewingContext *ctx);
+    char *(*get_string_alt) (const ChewingContext *ctx, int *len);
+    const char *(*get_string_static) (const ChewingContext *ctx);
 } BufferType;
 
 extern BufferType COMMIT_BUFFER;

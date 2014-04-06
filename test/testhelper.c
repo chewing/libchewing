@@ -398,7 +398,7 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
 {
     const struct {
         int rtn;
-        int (*func) (ChewingContext *ctx);
+        int (*func) (const ChewingContext *ctx);
     } TABLE[] = {
         {
         KEYSTROKE_IGNORE, chewing_keystroke_CheckIgnore}, {
