@@ -17,6 +17,7 @@
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"
 #include "chewing-private.h"
+#include "bopomofo-private.h"
 
 FILE *fd;
 
@@ -91,19 +92,19 @@ void test_key_and_phone()
 
     start_testcase(NULL, fd);
 
-    PhoneFromKey(rt, "dj", 0, 1);
+    PhoneFromKey(rt, "dj", KB_DEFAULT, 1);
     ok(!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8" /* ㄎㄨ */ ), "dj");
 
-    PhoneFromKey(rt, "dj6", 0, 1);
+    PhoneFromKey(rt, "dj6", KB_DEFAULT, 1);
     ok(!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8\xCB\x8A" /* ㄎㄨˊ */ ), "dj6");
 
-    PhoneFromKey(rt, "dj3", 0, 1);
+    PhoneFromKey(rt, "dj3", KB_DEFAULT, 1);
     ok(!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8\xCB\x87" /* ㄎㄨˇ */ ), "dj3");
 
-    PhoneFromKey(rt, "dj4", 0, 1);
+    PhoneFromKey(rt, "dj4", KB_DEFAULT, 1);
     ok(!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8\xCB\x8B" /* ㄎㄨˋ */ ), "dj4");
 
-    PhoneFromKey(rt, "dj7", 0, 1);
+    PhoneFromKey(rt, "dj7", KB_DEFAULT, 1);
     ok(!strcmp(rt, "\xE3\x84\x8E\xE3\x84\xA8\xCB\x99" /* ㄎㄨ˙ */ ), "dj7");
 }
 
