@@ -70,6 +70,7 @@ test/test-path
 test/test-reset
 test/test-regression
 test/test-symbol
+test/test-struct-size
 test/test-special-symbol
 test/test-userphrase
 test/test-utf8
