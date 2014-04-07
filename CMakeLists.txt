@@ -234,6 +234,7 @@ set(ALL_TESTCASES
     test-regression
     test-reset
     test-special-symbol
+    test-struct-size
     test-symbol
     test-userphrase
     test-utf8
