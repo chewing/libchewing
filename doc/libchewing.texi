@@ -12,7 +12,7 @@
 This is the ``libchewing Reference Manual'' corresponding to libchewing
 version @value{VERSION}.
 
-Copyright @copyright{} 2012  libchewing Core Team
+Copyright @copyright{} 2012, 2013, 2014  libchewing Core Team
 
 @quotation
 Copying and distribution of this file, with or without modification,
@@ -891,18 +891,6 @@ This function returns @code{NULL} when no memory.
 The return value is a const pointer to a character string. This function returns
 @code{NULL} when no memory. The memory will be freed by the next time be
 used.
-@end deftypefun
-
-@deftypefun char* chewing_bopomofo_String (ChewingContext *@var{ctx}, int *@var{bopomofo_count})
-This function returns the phonetic characters in the pre-edit buffer.
-
-The @var{bopomofo_count} argument is a output argument. It will contain
-the number of phonetic characters in the returned string. This function returns
-@code{NULL} when no memory.
-
-The return value is a pointer to a character string. This function returns
-@code{NULL} when no memory. The memory @emph{must} be freed by the caller using
-function @code{chewing_free}.
 @end deftypefun
 
 @deftypefun int chewing_cursor_Current (ChewingContext *@var{ctx})
