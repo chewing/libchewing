@@ -28,6 +28,7 @@ as full open source efforts.
     (https://drone.io/github.com/chewing/libchewing)
    - Coveralls: [![Status-Icon](https://coveralls.io/repos/chewing/libchewing/badge.png?branch=master)]
     (https://coveralls.io/r/chewing/libchewing)
+    - API changes/compatibility report: <http://upstream-tracker.org/versions/libchewing.html>
 
 
 ## History
