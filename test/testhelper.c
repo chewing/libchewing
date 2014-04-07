@@ -400,12 +400,11 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
         int rtn;
         int (*func) (const ChewingContext *ctx);
     } TABLE[] = {
-        {
-        KEYSTROKE_IGNORE, chewing_keystroke_CheckIgnore}, {
-        KEYSTROKE_COMMIT, chewing_commit_Check},
-            // No function to check KEYSTROKE_BELL
-        {
-    KEYSTROKE_ABSORB, chewing_keystroke_CheckAbsorb},};
+        {KEYSTROKE_IGNORE, chewing_keystroke_CheckIgnore},
+        {KEYSTROKE_COMMIT, chewing_commit_Check},
+        // No function to check KEYSTROKE_BELL
+        {KEYSTROKE_ABSORB, chewing_keystroke_CheckAbsorb},
+    };
     size_t i;
     int actual;
     int expected;
