@@ -286,10 +286,10 @@ CHEWING_API int chewing_cand_hasNext(ChewingContext *ctx)
 CHEWING_API const char *chewing_cand_String_static(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    const char *s;
+    const char *s = "";
 
     if (!ctx) {
-        return "";
+        return s;
     }
     pgdata = ctx->data;
 
@@ -298,9 +298,8 @@ CHEWING_API const char *chewing_cand_String_static(ChewingContext *ctx)
     if (chewing_cand_hasNext(ctx)) {
         s = ctx->output->pci->totalChoiceStr[ctx->cand_no];
         ctx->cand_no++;
-    } else {
-        s = "";
     }
+
     return s;
 }
 
@@ -479,10 +478,10 @@ extern const char *const kb_type_str[];
 CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    const char *s;
+    const char *s = "";
 
     if (!ctx) {
-        return "";
+        return s;
     }
     pgdata = ctx->data;
 
@@ -491,9 +490,8 @@ CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx)
     if (chewing_kbtype_hasNext(ctx)) {
         s = (char *) kb_type_str[ctx->kb_no];
         ctx->kb_no++;
-    } else {
-        s = "";
     }
+
     return s;
 }
 
