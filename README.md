@@ -16,11 +16,11 @@ Windows, namely, Wang-Xin by Eten, Microsoft New Zhuyin, and Nature Zhuyin.
 The Chewing core team extended their work and actively maintains the project
 as full open source efforts.
 
-+ Website: http://chewing.im/
-+ Issue tracker: http://code.google.com/p/chewing/issues/list
++ Website: <http://chewing.im/>
++ Issue tracker: <http://code.google.com/p/chewing/issues/list>
 + Mailing lists:
-   - Development: http://groups.google.com/group/chewing-devel
-   - General: http://groups.google.com/group/chewing
+   - Development: <http://groups.google.com/group/chewing-devel>
+   - General: <http://groups.google.com/group/chewing>
 + Build Status:
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.png)]
     (https://travis-ci.org/chewing/libchewing)
@@ -113,18 +113,18 @@ projects to deploy the innovative.  Here are the examples:
 
   * FreeArray: utilizing libchewing for selecting phrases of Array input
    method.
-   https://github.com/shaform/libfreearray
-   https://github.com/shaform/ibus-freearray
+   <https://github.com/shaform/libfreearray>
+   <https://github.com/shaform/ibus-freearray>
 
   * CitC (Chewing in the Cloud): extending cloud services for real-time
    training and phrase selection based on Chewing IM.
-   https://code.google.com/p/citc/
+   <https://code.google.com/p/citc/>
 
   * KindleChewing: Chewing IM for Kindle DX device
-   https://github.com/tjwei/KindleChewing
+   <https://github.com/tjwei/KindleChewing>
 
   * NTNU-Master Input Method: A Faster Chinese IM based on windows-chewing
-   https://sites.google.com/site/ntnumaster001/
+   <https://sites.google.com/site/ntnumaster001/>
 
 
 ## Minimal Build Tools Requirement
@@ -152,10 +152,10 @@ be built.
 
 libchewing uses the following CI services:
 
-- https://travis-ci.org/chewing/libchewing (testing)
-- https://drone.io/github.com/chewing/libchewing (testing)
-- https://coveralls.io/r/chewing/libchewing (coverage report)
-- https://launchpad.net/~chewing/+archive/chewing (ubuntu PPA)
+- <https://travis-ci.org/chewing/libchewing> (testing)
+- <https://drone.io/github.com/chewing/libchewing> (testing)
+- <https://coveralls.io/r/chewing/libchewing> (coverage report)
+- <https://launchpad.net/~chewing/+archive/chewing> (ubuntu PPA)
 
 
 ## Installation
@@ -185,7 +185,7 @@ Example cross-build instructions:
 To build libchewing on Windows, you need to setup MinGW and MSYS in your
 system. The installer of MinGW and MSYS is in the following link:
 
-http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
+<http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/>
 
 In "Select Components" during installing, please select the following items:
 
@@ -230,7 +230,7 @@ print it to console.
 
 ## Build with CMake
 
-libchewing supports cmake (http://www.cmake.org/) build system. You can use the
+libchewing supports cmake (<http://www.cmake.org/>) build system. You can use the
 following command to build with cmake:
 
 	- cmake .
@@ -250,7 +250,7 @@ platform:
 
 ## Usage
 
-( modified from http://code.google.com/p/ibus/wiki/ChewingUserGuide )
+( modified from <http://code.google.com/p/ibus/wiki/ChewingUserGuide> )
 
 Chewing guides the user to input Chinese by its pronunciation, in the form of
 either [Bopomofo/Zhuyin][1] or [Hanyu pinyin][2], as well as Chinese punctuation
@@ -377,7 +377,7 @@ implemented in file contrib/simple-select.c
 Except the following source code:
 
 * thirdparty/sqlite-amalgamation/ contains sqlite3 source which is in public
-  domain. See http://www.sqlite.org/copyright.html for more information.
+  domain. See <http://www.sqlite.org/copyright.html> for more information.
 
 * cmake/FindCurses.cmake is modified from CMake source, which is licensed under
    BSD 3-Clause.
