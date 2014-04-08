@@ -499,11 +499,10 @@ The returned value is a pointer to a character string. The memory
 
 @deftypefun char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
 This function returns the current enumerated keyboard layout name. The returnd
-string is emtpy string when enumeration is over. This function returns
-@code{NULL} when no memory.
+string is emtpy string when enumeration is over.
 
 The return value is a const pointer to a character string. The memory will
-be freed by the next time be used.
+be invalid after internal state changed.
 @end deftypefun
 
 @node Operating Modes
@@ -619,11 +618,10 @@ function.
 @end deftypefun
 
 @deftypefun char* chewing_cand_String_static (ChewingContext *@var{ctx})
-This function returns the current enumerated candidate string. This function
-returns @code{NULL} when no memory.
+This function returns the current enumerated candidate string.
 
 The return value is a const pointer to a character string. The memory will
-be freed by the next time be used.
+be invalid after internal state changed.
 @end deftypefun
 
 @deftypefun int chewing_cand_CheckDone (const ChewingContext *@var{ctx})
@@ -807,11 +805,10 @@ The return value is a pointer to a character string. The memory
 @end deftypefun
 
 @deftypefun const char* chewing_commit_String_static (const ChewingContext *@var{ctx})
-This function returns the string in the commit buffer This function returns
-@code{NULL} when no memory.
+This function returns the string in the commit buffer.
 
 The return value is a const pointer to a character string. The memory will
-be freed by the next time be used.
+be invalid after internal state changed.
 @end deftypefun
 
 
@@ -885,12 +882,27 @@ because it provides more consistent interface
 @deftypefun const char* chewing_bopomofo_String_static (const ChewingContext *@var{ctx})
 This function returns the phonetic characters in the pre-edit buffer.
 
-It will contain the number of phonetic characters in the returned string.
-This function returns @code{NULL} when no memory.
+The return value is a const pointer to a character string. The memory will be
+invalid after internal state changed.
+@end deftypefun
 
-The return value is a const pointer to a character string. This function returns
-@code{NULL} when no memory. The memory will be freed by the next time be
-used.
+@deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
+This function returns the phonetic characters in the pre-edit buffer.
+Here ``zuin'' means bopomofo, a phonetic system for transcribing Chinese,
+especially Mandarin.
+
+The @var{zuin_count} argument is a output argument. It will contain
+the number of phonetic characters in the returned string. This function returns
+@code{NULL} when no memory.
+
+The return value is a pointer to a character string. This function returns
+@code{NULL} when no memory. The memory @emph{must} be freed by the caller using
+function @code{chewing_free}.
+
+@quotation Deprecated
+This @code{chewing_zuin_String} function is superseded by @code{chewing_bopomofo_String}
+because it provides more consistent interface
+@end quotation
 @end deftypefun
 
 @deftypefun int chewing_cursor_Current (const ChewingContext *@var{ctx})
@@ -944,6 +956,13 @@ This function returns the current auxiliary string.
 
 The return value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
+@end deftypefun
+
+@deftypefun const char* chewing_aux_String_static (const ChewingContext *@var{ctx})
+This function returns the current auxiliary string.
+
+The return value is a const pointer to a character string. The memory will
+be invalid after internal state changed.
 @end deftypefun
 
 @deftypefun {unsigned short*} chewing_get_phoneSeq (const ChewingContext *@var{ctx})
