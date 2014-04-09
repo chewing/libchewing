@@ -886,12 +886,10 @@ The return value is a const pointer to a character string. The memory will be
 invalid after internal state changed.
 @end deftypefun
 
-@deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{zuin_count})
+@deftypefun char* chewing_zuin_String (ChewingContext *@var{ctx}, int *@var{bopomofo_count})
 This function returns the phonetic characters in the pre-edit buffer.
-Here ``zuin'' means bopomofo, a phonetic system for transcribing Chinese,
-especially Mandarin.
 
-The @var{zuin_count} argument is a output argument. It will contain
+The @var{bopomofo_count} argument is a output argument. It will contain
 the number of phonetic characters in the returned string. This function returns
 @code{NULL} when no memory.
 
@@ -900,7 +898,7 @@ The return value is a pointer to a character string. This function returns
 function @code{chewing_free}.
 
 @quotation Deprecated
-This @code{chewing_zuin_String} function is superseded by @code{chewing_bopomofo_String}
+This @code{chewing_zuin_String} function is superseded by @code{chewing_bopomofo_String_static}
 because it provides more consistent interface
 @end quotation
 @end deftypefun
