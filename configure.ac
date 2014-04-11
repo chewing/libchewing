@@ -3,7 +3,7 @@
 AC_PREREQ([2.65])
 
 # Update CMakeLists.txt if version is changed.
-AC_INIT([libchewing],[0.3.5],[chewing-devel@googlegroups.com])
+AC_INIT([libchewing],[0.4.0],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -29,7 +29,7 @@ LIBCHEWING_MAJOR=3
 
 # increment if the inteface has compatible update (additions).
 # Set to 0 if MAJOR is increased.
-LIBCHEWING_MINOR=1
+LIBCHEWING_MINOR=2
 
 # increment any time the source changes
 # Set to 0 if MAJOR or MINOR is increased.
