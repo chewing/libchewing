@@ -21,7 +21,7 @@ matrix:
       env: BUILD=autotools CONFIGURE_OPTION="--with-sqlite3=no"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make CFLAGS="-Wall -Werror" && make check && make release; fi
   - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
@@ -31,4 +31,4 @@ before_install:
   - sudo apt-get install -qq texinfo cmake valgrind libsqlite3-dev
 
 after_success:
-  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern 'CMake[^\.]*\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi
+  - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern '.*CMake[^/]+\.c(?:pp)?' --exclude-pattern '.*/[_A-Z0-9]+\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi

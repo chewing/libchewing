@@ -8,8 +8,10 @@
  * of this file.
  */
 
+/* *INDENT-OFF* */
 #ifndef _CHEWING_CORE_
 #define _CHEWING_CORE_
+/* *INDENT-ON* */
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,13 +48,12 @@ extern "C" {
 #include "global.h"
 #include "mod_aux.h"
 
-/** @brief indicate the internal encoding of data processing.
- *  @since 0.3.0
- */
-#define LIBCHEWING_ENCODING "UTF-8"
+/* backward compatibility */
+#include "chewing-compat.h"
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _CHEWING_CORE_ */
+/* *INDENT-OFF* */
+#endif                          /* _CHEWING_CORE_ */
+/* *INDENT-ON* */

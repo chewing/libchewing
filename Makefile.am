@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/tools data src test doc
 
 CMAKE_FILES = \
-	cmake/chewing.pc.in \
 	cmake/config.h.in \
 	cmake/FindCurses.cmake \
 	cmake/version.texi.in \
@@ -15,7 +14,7 @@ CONTRIB_FILES = \
 	contrib/python/test.py \
 	contrib/python/chewing.py \
 	contrib/simple-select.c \
-	contrib/Makefile-simple-select \
+	contrib/Makefile \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -32,6 +31,7 @@ chewing_include_HEADERS = \
 	include/chewingio.h \
 	include/mod_aux.h \
 	include/chewing.h \
+	include/chewing-compat.h \
 	include/global.h \
 	$(NULL)
 
@@ -43,12 +43,19 @@ noinst_HEADERS =\
 	include/internal/choice-private.h \
 	include/internal/dict-private.h \
 	include/internal/global-private.h \
+	include/internal/hash-private.h \
+	include/internal/key2pho-private.h \
 	include/internal/memory-private.h \
 	include/internal/pinyin-private.h \
-	include/internal/key2pho-private.h \
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \
-	include/internal/zuin-private.h \
+	include/internal/bopomofo-private.h \
+	thirdparty/sqlite-amalgamation/sqlite3ext.h \
+	thirdparty/sqlite-amalgamation/sqlite3.h \
+	$(NULL)
+
+dist_noinst_DATA = \
+	README.md \
 	$(NULL)
 
 # Maintainer's release target

@@ -15,12 +15,13 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libchewing.la
 libchewing_la_SOURCES = \
+	compat.c \
 	chewingio.c \
 	chewingutil.c \
 	choice.c \
 	dict.c \
 	tree.c \
-	zuin.c \
+	bopomofo.c \
 	pinyin.c \
 	mod_aux.c \
 	userphrase.c \
