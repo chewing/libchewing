@@ -469,6 +469,8 @@ The string @var{str} might be one of the following layouts:
 @item @code{KB_DVORAK_HSU}
 @item @code{KB_DVORAK_CP26}
 @item @code{KB_HANYU_PINYIN}
+@item @code{KB_THL_PINYIN}
+@item @code{KB_MPS2_PINYIN}
 @end itemize
 
 See also the @code{chewing_kbtype_*} enumeration functions.
