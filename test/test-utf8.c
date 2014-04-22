@@ -2,7 +2,7 @@
  * test-utf8.c
  *
  * Copyright (c) 2005
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.

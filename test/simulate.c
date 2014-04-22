@@ -2,7 +2,7 @@
  * simulate.c
  *
  * Copyright (c) 2008, 2010
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
