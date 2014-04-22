@@ -32,10 +32,10 @@
 /*
  * process a key input
  * return value:
- *	BOPOMOFO_ABSORB
- *	BOPOMOFO_COMMIT
- *	BOPOMOFO_KEY_ERROR
- *	BOPOMOFO_ERROR
+ *      BOPOMOFO_ABSORB
+ *      BOPOMOFO_COMMIT
+ *      BOPOMOFO_KEY_ERROR
+ *      BOPOMOFO_ERROR
  */
 static int IsHsuPhoEndKey(const int pho_inx[], int key)
 {
