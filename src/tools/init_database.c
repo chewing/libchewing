@@ -13,17 +13,17 @@
  *
  * @brief Initialization of system dictionary and phone phrase tree.\n
  *
- *	This program reads in source of dictionary.\n
- *	Output a database file containing a phone phrase tree, and a dictionary file\n
+ *      This program reads in source of dictionary.\n
+ *      Output a database file containing a phone phrase tree, and a dictionary file\n
  * filled with non-duplicate phrases.\n
- *	Each node represents a single phone.\n
- *	The output file contains a random access array, where each record includes:\n
- *	\code{
- *	       [16-bit uint] key; may be phone data or record of input keys
- *	       [24-bit uint] child.begin, child.end; for internal nodes (key != 0)
- *	       [24-bit uint] phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
- *	       [24-bit uint] phrase.freq; for leaf nodes (key == 0), frequency of the phrase
- *	}\endcode
+ *      Each node represents a single phone.\n
+ *      The output file contains a random access array, where each record includes:\n
+ *      \code{
+ *            [16-bit uint] key; may be phone data or record of input keys
+ *            [24-bit uint] child.begin, child.end; for internal nodes (key != 0)
+ *            [24-bit uint] phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
+ *            [24-bit uint] phrase.freq; for leaf nodes (key == 0), frequency of the phrase
+ *      }\endcode
  */
 
 #include <assert.h>
@@ -43,13 +43,13 @@
 /* For ALC macro */
 #include "private.h"
 
-#define CHARDEF			"%chardef"
-#define BEGIN			"begin"
-#define END			"end"
-#define MAX_LINE_LEN		(1024)
-#define MAX_WORD_DATA		(60000)
-#define MAX_PHRASE_BUF_LEN	(149)
-#define MAX_PHRASE_DATA		(420000)
+#define CHARDEF               "%chardef"
+#define BEGIN                 "begin"
+#define END                   "end"
+#define MAX_LINE_LEN          (1024)
+#define MAX_WORD_DATA         (60000)
+#define MAX_PHRASE_BUF_LEN    (149)
+#define MAX_PHRASE_DATA       (420000)
 
 const char USAGE[] =
     "Usage: %s <phone.cin> <tsi.src>\n"
@@ -399,8 +399,8 @@ void store_word(const char *line, const int line_num)
     word_data[num_word_data].text = &phrase_data[--top_phrase_data];
 
 #define UTF8_FORMAT_STRING(len1, len2) \
-	"%" __stringify(len1) "[^ ]" " " \
-	"%" __stringify(len2) "[^ ]"
+    "%" __stringify(len1) "[^ ]" " " \
+    "%" __stringify(len2) "[^ ]"
     sscanf(buf, UTF8_FORMAT_STRING(BOPOMOFO_SIZE, MAX_UTF8_SIZE), key_buf, word_data[num_word_data].text->phrase);
 
     if (strlen(key_buf) > BOPOMOFO_SIZE) {
