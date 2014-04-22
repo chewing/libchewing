@@ -65,9 +65,9 @@ static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
 static int FindEasySymbolIndex(char ch)
 {
         /**
-	 * '0' => 0, ..., '9' => 9
-	 * 'A' => 10, 'B' => 11, ... 'Z' => 35
-	 */
+         * '0' => 0, ..., '9' => 9
+         * 'A' => 10, 'B' => 11, ... 'Z' => 35
+         */
     if (isdigit(ch)) {
         return ch - '0';
     } else if (isupper(ch)) {
