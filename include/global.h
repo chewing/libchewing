@@ -2,11 +2,11 @@
  * global.h
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2006, 2008, 2011
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
