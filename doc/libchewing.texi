@@ -94,7 +94,7 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 @end deftypevr
 
 @node Glossary
-@chapter Glassary
+@chapter Glossary
 
 @table @dfn
 @item Bopomofo
