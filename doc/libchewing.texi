@@ -449,7 +449,7 @@ The return value is the name of the current layout, see also function
 freed by function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun int chewing_KBStr2Num (char @var{str}[])
+@deftypefun int chewing_KBStr2Num (const char @var{str}[])
 This function converts the keyboard layout name to corresponding
 layout index. If the string does not match any layout, this function returns
 @code{KB_DEFAULT}.
