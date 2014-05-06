@@ -101,10 +101,7 @@ set(DATA_BIN_DIR ${PROJECT_BINARY_DIR}/data)
 set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test)
 set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/test)
 
-set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include/chewing)
-set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share/libchewing)
-set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
+include(GNUInstallDirs)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
@@ -168,8 +165,8 @@ if (MAKEINFO)
 
     find_program(INSTALL_INFO NAMES ginstall-info install-info)
     if (INSTALL_INFO)
-        install(FILES ${INFO_BIN} DESTINATION ${INSTALL_INFO_DIR})
-        install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${INSTALL_INFO_DIR} ${INFO_BIN})")
+        install(FILES ${INFO_BIN} DESTINATION ${CMAKE_INSTALL_INFODIR})
+        install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${CMAKE_INSTALL_INFODIR} ${INFO_BIN})")
     endif()
 endif()
 
@@ -339,7 +336,7 @@ add_library(chewing OBJECT
     ${SRC_DIR}/bopomofo.c
 )
 set_target_properties(chewing PROPERTIES
-    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${INSTALL_DATA_DIR}\""
+    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${CMAKE_INSTALL_DATADIR}/libchewing\""
 )
 
 if (WITH_SQLITE3)
@@ -424,9 +421,9 @@ add_library(common OBJECT
 
 
 # install
-install(FILES ${ALL_DATA} DESTINATION ${INSTALL_DATA_DIR})
-install(FILES ${ALL_STATIC_DATA} DESTINATION ${INSTALL_DATA_DIR})
-install(FILES ${ALL_INC} DESTINATION ${INSTALL_INC_DIR})
+install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
+install(FILES ${ALL_STATIC_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
+install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
-    DESTINATION ${INSTALL_LIB_DIR}/pkgconfig)
-install(TARGETS ${LIBS} DESTINATION ${INSTALL_LIB_DIR})
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(TARGETS ${LIBS} DESTINATION ${CMAKE_INSTALL_LIBDIR})
