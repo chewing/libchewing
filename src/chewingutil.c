@@ -1317,6 +1317,8 @@ int InitSymbolTable(ChewingData *pgdata, const char *prefix)
     }
 
     size = sizeof(*pgdata->static_data.symbol_table) * pgdata->static_data.n_symbol_entry;
+    if (!size)
+        goto end;
     pgdata->static_data.symbol_table = (SymbolEntry **) malloc(size);
     if (!pgdata->static_data.symbol_table)
         goto error;
