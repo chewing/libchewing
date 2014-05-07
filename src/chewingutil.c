@@ -632,8 +632,6 @@ void AutoLearnPhrase(ChewingData *pgdata)
 
     if (pending_pos) {
         UserUpdatePhrase(pgdata, bufPhoneSeq, bufWordSeq);
-        prev_pos = 0;
-        pending_pos = 0;
     }
 
     UserUpdatePhraseEnd(pgdata);
