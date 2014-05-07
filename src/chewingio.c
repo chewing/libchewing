@@ -959,9 +959,6 @@ CHEWING_API int chewing_handle_Backspace(ChewingContext *ctx)
 
     LOG_API("");
 
-    pgdata = ctx->data;
-    pgo = ctx->output;
-
     CheckAndResetRange(pgdata);
 
     if (!ChewingIsEntering(pgdata)) {
