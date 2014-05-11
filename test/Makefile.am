@@ -90,17 +90,4 @@ LDADD = \
 
 AM_LDFLAGS = -static
 
-if WITH_SQLITE3
-if WITH_INTERNAL_SQLITE3
-sqlite3_SOURCES = \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
-	$(NULL)
-
-check_PROGRAMS += \
-	sqlite3 \
-	$(NULL)
-endif
-endif
-
 CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3 test.sqlite3

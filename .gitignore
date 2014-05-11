@@ -53,7 +53,6 @@ test/genkeystroke
 test/performance
 test/randkeystroke
 test/simulate
-test/sqlite3
 test/testchewing
 test/test-bopomofo
 test/test-config
@@ -80,6 +79,7 @@ test/*.log
 test/*.trs
 test/chewing.sqlite3
 test/test.sqlite3
+thirdparty/sqlite-amalgamation/sqlite3
 
 # Generated tools/headers
 src/tools/init_database
