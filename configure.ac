@@ -156,6 +156,17 @@ foo () {};
 ])
 AC_MSG_RESULT($has_visibility)
 
+AC_CACHE_CHECK([whether the linker supports --no-undefined],
+               [ac_cv_no_undefined],
+               [
+  saved_LDFLAGS="${LDFLAGS}"
+  LDFLAGS="${LDFLAGS} -Wl,--no-undefined"
+  AC_TRY_LINK([], [], [ac_cv_no_undefined=yes], [ac_cv_no_undefined=no])
+  LDFLAGS="${saved_LDFLAGS}"
+])
+AS_IF([test x$ac_cv_no_undefined = "xyes"], [NO_UNDEFINED_LDFLAGS="-Wl,--no-undefined"])
+AC_SUBST(NO_UNDEFINED_LDFLAGS)
+
 # Platform-dependent
 dnl What kind of system are we using?
 case $host_os in
