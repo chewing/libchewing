@@ -1340,6 +1340,39 @@ void test_interval()
     chewing_delete(ctx);
 }
 
+void test_jk_selection()
+{
+    ChewingContext *ctx;
+    int ret;
+    int i;
+    const int EXPECT_CAND_LEN[] = { 1, 2, 1, 1, 2, 1, 1 };
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "`31hk4g4`31hk4g4`31" /* ，測試，測試， */ );
+
+    ret = chewing_cand_open(ctx);
+    ok(ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0);
+
+/* FIXME: buggy now.
+    for (i = ARRAY_SIZE(EXPECT_CAND_LEN) - 1; i >= 0; --i) {
+        ret = chewing_cand_TotalChoice(ctx);
+        ok(ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0);
+        ok_candidate_len(ctx, EXPECT_CAND_LEN[i]);
+        type_keystroke_by_string(ctx, "j");
+    }
+
+    for (i = 0; i < ARRAY_SIZE(EXPECT_CAND_LEN); ++i) {
+        ret = chewing_cand_TotalChoice(ctx);
+        ok(ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0);
+        ok_candidate_len(ctx, EXPECT_CAND_LEN[i]);
+        type_keystroke_by_string(ctx, "i");
+    }
+*/
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -1380,6 +1413,8 @@ int main(int argc, char *argv[])
     test_auto_commit();
 
     test_interval();
+
+    test_jk_selection();
 
     fclose(fd);
 
