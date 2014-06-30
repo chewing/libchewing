@@ -248,6 +248,56 @@ platform:
 	- cmake . -G "Visual Studio 11 Win64" (64-bits Windows)
 
 
+## Build on OS X
+
+To build libchewing on OS X, you will need tools listed in the requirement.
+Since OS X does not ship with those tools, building those tools from source
+could be a tricky task.
+
+A simple way to install those tools is by using Homebrew, a package manager
+for OS X. You can learn more about Homebrew or see the installation 
+instruction from
+
+http://brew.sh
+
+Once Homebrew is installed, run the following commands to install the tools
+you need:
+
+        # brew install autoconf automake
+        # brew install libtool
+        # brew install cmake
+        
+        # brew install texinfo
+
+
+### Autotools (autoconf, automake)
+
+If you get the source from the git repository, run:
+
+        # ./autogen.sh
+
+Because OS X uses an older version of `makeinfo`, you have to set MAKEINFO
+manually to where Homebrew installed makeinfo. For example:
+        
+        # ./configure MAKEINFO=/usr/local/Cellar/texinfo/5.2/bin/makeinfo
+
+then
+        
+        # make
+
+
+### cmake
+
+Because OS X uses an older version of `makeinfo`, you have to set MAKEINFO
+manually to where Homebrew installed makeinfo. For example:
+        
+        # cmake -DMAKEINFO=/usr/local/Cellar/texinfo/5.2/bin/makeinfo .
+
+then
+        
+        # make
+        
+
 ## Usage
 
 ( modified from <http://code.google.com/p/ibus/wiki/ChewingUserGuide> )
