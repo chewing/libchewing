@@ -1199,11 +1199,6 @@ int OpenSymbolChoice(ChewingData *pgdata)
     /* see if there is some word in the cursor position */
     if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen)
         pgdata->chiSymbolCursor--;
-    if (pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] == '1') {
-        pgdata->bSelect = 1;
-        HaninSymbolInput(pgdata);
-        return 0;
-    }
     for (i = 0; i < symbol_buf_len; i++) {
         if (symbol_buf[i][0][0] == pgdata->symbolKeyBuf[pgdata->chiSymbolCursor]) {
             pBuf = symbol_buf[i];
