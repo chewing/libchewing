@@ -395,6 +395,28 @@ void test_symbol()
     test_symbol_count();
 }
 
+void test_nocand_symbol()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_candPerPage(ctx, 10);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+
+    type_keystroke_by_string(ctx, "`<R>20");
+    ok_preedit_buffer(ctx, "\xE2\x96\x88"); /* █ */
+
+    type_keystroke_by_string(ctx, "<D>");
+    ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
+
+    type_keystroke_by_string(ctx, "1<E>"); /* select … */
+    ok_commit_buffer(ctx, "\xE2\x80\xA6");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -412,6 +434,7 @@ int main(int argc, char *argv[])
 
     test_type_symbol();
     test_symbol();
+    test_nocand_symbol();
 
     fclose(fd);
 

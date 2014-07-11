@@ -57,6 +57,7 @@ static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
 };
+static const char NO_SYM_KEY = '\t';
 
 /*
  * FindEasySymbolIndex(ch) = char ch's index in G_EASY_SYMBOL_KEY
@@ -346,16 +347,21 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
         if (symbol_type == SYMBOL_CHOICE_INSERT) {
             assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
 
-            memmove(&pgdata->preeditBuf[pgdata->chiSymbolCursor + 1],
-                    &pgdata->preeditBuf[pgdata->chiSymbolCursor],
-                    sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
+            if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen ||
+                    pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] != NO_SYM_KEY) {
+                memmove(&pgdata->preeditBuf[pgdata->chiSymbolCursor + 1],
+                        &pgdata->preeditBuf[pgdata->chiSymbolCursor],
+                        sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
+            } else {
+                symbol_type = SYMBOL_CHOICE_UPDATE;
+            }
         }
         strncpy(buf->char_, pgdata->choiceInfo.totalChoiceStr[sel_i], sizeof(buf->char_));
         buf->category = CHEWING_SYMBOL;
 
         /* This is very strange */
         key = FindSymbolKey(pgdata->choiceInfo.totalChoiceStr[sel_i]);
-        pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] = key ? key : '0';
+        pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] = key ? key : NO_SYM_KEY;
 
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         ChoiceEndChoice(pgdata);
@@ -1199,6 +1205,11 @@ int OpenSymbolChoice(ChewingData *pgdata)
     /* see if there is some word in the cursor position */
     if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen)
         pgdata->chiSymbolCursor--;
+    if (pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] == NO_SYM_KEY) {
+        pgdata->bSelect = 1;
+        HaninSymbolInput(pgdata);
+        return 0;
+    }
     for (i = 0; i < symbol_buf_len; i++) {
         if (symbol_buf[i][0][0] == pgdata->symbolKeyBuf[pgdata->chiSymbolCursor]) {
             pBuf = symbol_buf[i];
