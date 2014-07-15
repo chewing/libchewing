@@ -142,7 +142,12 @@ static int CreateTable(ChewingData *pgdata)
                        "phone_3,"
                        "phone_4,"
                        "phone_5,"
-                       "phone_6," "phone_7," "phone_8," "phone_9," "phone_10," "phrase)" ")", NULL, NULL, NULL);
+                       "phone_6,"
+                       "phone_7,"
+                       "phone_8,"
+                       "phone_9,"
+                       "phone_10,"
+                       "phrase)" ")", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot create table userphrase_v1, error = %d", ret);
         return -1;
@@ -150,7 +155,9 @@ static int CreateTable(ChewingData *pgdata)
 
     ret = sqlite3_exec(pgdata->static_data.db,
                        "CREATE TABLE IF NOT EXISTS config_v1 ("
-                       "id INTEGER," "value INTEGER," "PRIMARY KEY (id)" ")", NULL, NULL, NULL);
+                       "id INTEGER,"
+                       "value INTEGER,"
+                       "PRIMARY KEY (id)" ")", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot create table config_v1, error = %d", ret);
         return -1;
@@ -298,9 +305,9 @@ static int CreateStmt(ChewingData *pgdata)
     assert(pgdata);
 
     STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config));
-    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase))
+    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase));
 
-        for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
+    for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
         ret = sqlite3_prepare_v2(pgdata->static_data.db,
                                  SQL_STMT_CONFIG[i].stmt, -1, &pgdata->static_data.stmt_config[i], NULL);
         if (ret != SQLITE_OK) {
