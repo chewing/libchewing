@@ -22,12 +22,9 @@ as full open source efforts.
    - Development: <http://groups.google.com/group/chewing-devel>
    - General: <http://groups.google.com/group/chewing>
 + Build Status:
-   - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.png)]
-    (https://travis-ci.org/chewing/libchewing)
-   - Drone.io: [![Status-Icon](https://drone.io/github.com/chewing/libchewing/status.png)]
-    (https://drone.io/github.com/chewing/libchewing)
-   - Coveralls: [![Status-Icon](https://coveralls.io/repos/chewing/libchewing/badge.png?branch=master)]
-    (https://coveralls.io/r/chewing/libchewing)
+   - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
+   - Drone.io: [![Status-Icon](https://drone.io/github.com/chewing/libchewing/status.png)](https://drone.io/github.com/chewing/libchewing)
+   - Coveralls: [![Coverage Status](https://img.shields.io/coveralls/chewing/libchewing.svg)](https://coveralls.io/r/chewing/libchewing?branch=master)
     - API changes/compatibility report: <http://upstream-tracker.org/versions/libchewing.html>
 
 
