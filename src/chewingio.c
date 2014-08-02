@@ -909,6 +909,7 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         AutoLearnPhrase(pgdata);
         CleanAllBuf(pgdata);
         pgo->commitBufLen = nCommitStr;
+        AddCommitHistory(pgo, pgdata);
     }
 
     MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);

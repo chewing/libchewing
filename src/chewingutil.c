@@ -31,6 +31,7 @@
 #include "choice-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
+#include "commit-history-private.h"
 #include "private.h"
 
 #ifdef HAVE_ASPRINTF
@@ -1482,4 +1483,22 @@ int toPreeditBufIndex(ChewingData *pgdata, int pos)
     LOG_VERBOSE("translate phoneSeq index %d to preeditBuf index %d", pos, i);
 
     return i;
+}
+
+int AddCommitHistory(ChewingOutput *pgo, ChewingData *pgdata)
+{
+    int len;
+    uint16_t phone_seq[MAX_PHONE_SEQ_LEN + 1];
+    const char *phrase;
+
+    assert(pgo);
+    assert(pgdata);
+
+    len = pgo->chiSymbolBufLen;
+    phrase = pgo->commitBuf;
+    memcpy(phone_seq, pgdata->phoneSeq, sizeof(uint16_t) * len);
+
+    CommitHistoryInsert(pgdata, phone_seq, phrase);
+
+    return 0;
 }

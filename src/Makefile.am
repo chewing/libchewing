@@ -45,6 +45,7 @@ if WITH_SQLITE3
 libchewing_la_SOURCES += \
 	chewing-sql.c \
 	userphrase-sql.c \
+        commit-history-sql.c \
 	$(NULL)
 
 if WITH_INTERNAL_SQLITE3

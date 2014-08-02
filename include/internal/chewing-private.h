@@ -182,6 +182,7 @@ typedef struct ChewingStaticData {
     sqlite3 *db;
     sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
     sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
+    sqlite3_stmt *stmt_commit_history[STMT_COMMIT_HISTORY_COUNT];
 
     unsigned int original_lifetime;
     unsigned int new_lifetime;
