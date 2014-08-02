@@ -79,18 +79,18 @@ AC_ARG_WITH([sqlite3],
             AS_HELP_STRING([--with-sqlite3], [Use sqlite3 to store userphrase @<:@default=yes@:>@]),
             [],
             [with_sqlite3=yes])
-AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
+AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" = x"yes"])
 
 AC_ARG_WITH([internal-sqlite3],
             AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 instead of system-wide @<:@default=no@:>@]),
             [],
             [with_internal_sqlite3=no])
-AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" == x"yes"])
+AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" = x"yes"])
 
 # for sqlite
-AS_IF([test x"$with_sqlite3" == x"yes"], [
+AS_IF([test x"$with_sqlite3" = x"yes"], [
        AC_DEFINE([WITH_SQLITE3], [1], [Use sqlite3 to store userphrase])
-       AS_IF([test x"$with_internal_sqlite3" == x"no"],
+       AS_IF([test x"$with_internal_sqlite3" = x"no"],
              [
               AC_SEARCH_LIBS([sqlite3_open], [sqlite3],
                              [AS_IF([test x$ac_cv_search_sqlite3_open != x"none required"],
@@ -126,7 +126,7 @@ AC_SUBST(CC_FOR_BUILD)
 AM_CFLAGS="$AM_CFLAGS -Wall $CFLAGS"
 
 # Add '_GNU_SOURCE' for asprintf
-AS_IF([test x$ac_cv_func_asprintf == xyes],
+AS_IF([test x$ac_cv_func_asprintf = xyes],
       [DEFAULT_CPPFLAGS="$DEFAULT_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
