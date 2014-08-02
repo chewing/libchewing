@@ -312,21 +312,21 @@ void store_phrase(const char *line, int line_num)
             fprintf(stderr, "Error in phrase `%s'. Word `%s' has no phone %d (%s) in line %d\n",
                     phrase_data[num_phrase_data].phrase, word.text->phrase, word.text->phone[0], bopomofo_buf,
                     line_num);
-            fprintf(stderr, "\tAdd the following struct to EXCEPTION_PHRASE if this is good phrase\n\t{ \"");
+            fprintf(stderr, "\tAdd the following struct to EXCEPTION_PHRASE if this is good phrase\n\t{\"");
             for (j = 0; j < strlen(phrase_data[num_phrase_data].phrase); ++j) {
                 fprintf(stderr, "\\x%02X", (unsigned char) phrase_data[num_phrase_data].phrase[j]);
             }
-            fprintf(stderr, "\" /* %s */ , 0, { %d", phrase_data[num_phrase_data].phrase,
+            fprintf(stderr, "\" /* %s */ , 0, {%d", phrase_data[num_phrase_data].phrase,
                     phrase_data[num_phrase_data].phone[0]);
             for (j = 1; j < phrase_len; ++j) {
                 fprintf(stderr, ", %d", phrase_data[num_phrase_data].phone[j]);
             }
-            fprintf(stderr, " } /* ");
+            fprintf(stderr, "} /* ");
             for (j = 0; j < phrase_len; ++j) {
                 PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), phrase_data[num_phrase_data].phone[j]);
                 fprintf(stderr, "%s ", bopomofo_buf);
             }
-            fprintf(stderr, "*/, 0 },\n");
+            fprintf(stderr, "*/, 0},\n");
             exit(-1);
         }
     }
