@@ -134,3 +134,9 @@ doc/libchewing.vrs
 # contrib directory
 contrib/simple-select
 contrib/test.sqlite3
+
+# vi
+*.swp
+
+# OS X
+.DS_Store
