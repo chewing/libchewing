@@ -15,6 +15,7 @@
 #include "chewing-utf8-util.h"
 #include "private.h"
 #include "key2pho-private.h"
+#include "json.h"
 
 static int CommitHistoryBindPhone(ChewingData *pgdata, int index, const uint16_t phoneSeq[], int len)
 {
@@ -54,6 +55,27 @@ static int CommitHistoryBindPhone(ChewingData *pgdata, int index, const uint16_t
     return SQLITE_OK;
 }
 
+static int WriteCommit(void *commits_obj, int column_num,
+                       char **text, char **column_name)
+{
+    int i;
+    json_object *row_obj;
+
+    row_obj = json_object_new_array();
+
+    json_object_array_add(row_obj, json_object_new_int(atoi(text[COLUMN_COMMIT_HISTORY_LENGTH])));
+
+    json_object_array_add(row_obj, json_object_new_string(text[COLUMN_COMMIT_HISTORY_PHRASE]));
+
+    for (i = COLUMN_COMMIT_HISTORY_PHONE_0; i <= COLUMN_COMMIT_HISTORY_PHONE_10; ++i) {
+        json_object_array_add(row_obj, json_object_new_int(atoi(text[i])));
+    }
+
+    json_object_array_add(commits_obj, row_obj);
+
+    return 0;
+}
+
 int CommitHistoryInsert(ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[])
 {
     int ret;
@@ -77,6 +99,8 @@ int CommitHistoryInsert(ChewingData *pgdata, const uint16_t phoneSeq[], const ch
         LOG_WARN("wordSeq length %d > MAX_PHRASE_LEN (%d)", word_len, MAX_PHRASE_LEN);
         return COMMIT_INSERT_FAIL;
     }
+
+    assert(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_INSERT]);
 
     /* bind phrase */
     ret = sqlite3_bind_text(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_INSERT],
@@ -208,4 +232,58 @@ int CommitHistoryRemove(ChewingData *pgdata, const char wordSeq[])
     }
 
     return affected;
+}
+
+int ExportCommitHistory(ChewingData *pgdata, FILE *fp)
+{
+    int ret;
+    const char *col_name;
+    sqlite3_stmt *stmt;
+    struct json_object *json_obj;
+    struct json_object *headings_obj;
+    struct json_object *commits_obj;
+
+    assert(pgdata);
+    assert(fp);
+
+    json_obj = json_object_new_object();
+    headings_obj = json_object_new_array();
+    commits_obj = json_object_new_array();
+
+    /* add column name to json */
+    ret = sqlite3_prepare_v2(pgdata->static_data.db,
+                             "pragma table_info('commit_history')",
+                             -1, &stmt, NULL);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_exec returns %d, ret");
+        return COMMIT_EXPORT_FAIL;
+    }
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        col_name = (const char*) sqlite3_column_text(stmt, 1);
+        json_object_array_add(headings_obj,
+                              json_object_new_string(col_name));
+    }
+
+    ret = sqlite3_finalize(stmt);
+
+    /* add commit history to json */
+    ret = sqlite3_exec(pgdata->static_data.db,
+                       "SELECT length, phrase, "
+                       "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
+                       "phone_6, phone_7, phone_8, phone_9, phone_10 "
+                       "FROM commit_history",
+                       WriteCommit, commits_obj, NULL);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_exec returns %d, ret");
+        return COMMIT_EXPORT_FAIL;
+    }
+
+    json_object_object_add(json_obj, "headings", headings_obj);
+    json_object_object_add(json_obj, "commits", commits_obj);
+
+    fprintf(fp, "%s\n", json_object_to_json_string_ext(json_obj, JSON_C_TO_STRING_PRETTY));
+    /* free the json_obj */
+    json_object_put(json_obj);
+
+    return COMMIT_EXPORT_SUCCESS;
 }

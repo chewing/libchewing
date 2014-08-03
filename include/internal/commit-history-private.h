@@ -13,6 +13,8 @@
 #define _CHEWING_COMMIT_HISTORY_PRIVATE_H
 /* *INDENT-ON* */
 
+#include <stdio.h>
+
 #ifdef HAVE_CONFIG_H
 #    include <config.h>
 #endif
@@ -25,6 +27,9 @@
 
 #define COMMIT_INSERT_SUCCESS (1)
 #define COMMIT_INSERT_FAIL    (0)
+
+#define COMMIT_EXPORT_SUCCESS (1)
+#define COMMIT_EXPORT_FAIL    (0)
 
 /* Forward declaration */
 struct ChewingData;
@@ -42,6 +47,8 @@ CommitHistoryData *GetCommitHistoryFirst(struct ChewingData *pgdata, const char 
 CommitHistoryData *GetCommitHistoryNext(struct ChewingData *pgdata, const char wordSeq[]);
 
 int CommitHistoryRemove(struct ChewingData *pgdata, const char wordSeq[]);
+
+int ExportCommitHistory(struct ChewingData *pgdata, FILE *fp);
 
 /* *INDENT-OFF* */
 #endif
