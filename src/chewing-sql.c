@@ -89,7 +89,8 @@ const SqlStmtCommitHistory SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_COUNT] = 
      "SELECT length, phrase, "
      "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
      "phone_6, phone_7, phone_8, phone_9, phone_10 "
-     "FROM commit_history",
+     "FROM commit_history "
+     "WHERE phrase = ?2",
      {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
      },
     {
@@ -101,10 +102,7 @@ const SqlStmtCommitHistory SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_COUNT] = 
      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
      },
     {
-     "DELETE FROM commit_history WHERE length = ?1 AND phrase = ?2 AND "
-     "phone_0 = ?10 AND phone_1 = ?11 AND phone_2 = ?12 AND "
-     "phone_3 = ?13 AND phone_4 = ?14 AND phone_5 = ?15 AND "
-     "phone_6 = ?16 AND phone_7 = ?17 AND phone_8 = ?18 AND " "phone_9 = ?19 AND phone_10 = ?20",
+     "DELETE FROM commit_history WHERE phrase = ?2",
      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
      }
 };
@@ -211,20 +209,8 @@ static int CreateCommitTable(ChewingData *pgdata)
                        "phone_8 INTEGER,"
                        "phone_9 INTEGER,"
                        "phone_10 INTEGER,"
-                       "phrase TEXT,"
-                       "PRIMARY KEY ("
-                       "phone_0,"
-                       "phone_1,"
-                       "phone_2,"
-                       "phone_3,"
-                       "phone_4,"
-                       "phone_5,"
-                       "phone_6,"
-                       "phone_7,"
-                       "phone_8,"
-                       "phone_9,"
-                       "phone_10,"
-                       "phrase)" ")", NULL, NULL, NULL);
+                       "phrase TEXT"
+                       ")", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot create table commit_history, error = %d", ret);
         return -1;

@@ -159,6 +159,7 @@ typedef struct SqlStmtCommitHistory_ {
 } SqlStmtCommitHistory;
 
 extern const SqlStmtUserphrase SQL_STMT_USERPHRASE[STMT_USERPHRASE_COUNT];
+extern const SqlStmtCommitHistory SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_COUNT];
 
 struct ChewingData;
 

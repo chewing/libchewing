@@ -36,6 +36,7 @@ typedef SSIZE_T ssize_t;
 #if WITH_SQLITE3
 #    include "sqlite3.h"
 #    include "chewing-sql.h"
+#    include "commit-history-private.h"
 #endif
 
 #define MAX_KBTYPE 13
@@ -253,6 +254,7 @@ typedef struct ChewingData {
 
 #if WITH_SQLITE3
     UserPhraseData userphrase_data;
+    CommitHistoryData commit_history_data;
 #else
     struct HASH_ITEM *prev_userphrase;
 #endif

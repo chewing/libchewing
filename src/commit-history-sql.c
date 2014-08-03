@@ -16,10 +16,6 @@
 #include "private.h"
 #include "key2pho-private.h"
 
-/* TODO:
- *      select & delete
- */
-
 static int CommitHistoryBindPhone(ChewingData *pgdata, int index, const uint16_t phoneSeq[], int len)
 {
     int i;
@@ -115,4 +111,101 @@ int CommitHistoryInsert(ChewingData *pgdata, const uint16_t phoneSeq[], const ch
     }
 
     return action;
+}
+
+CommitHistoryData *GetCommitHistoryFirst(ChewingData *pgdata, const char wordSeq[])
+{
+    int ret;
+
+    assert(pgdata);
+    assert(wordSeq);
+
+    assert(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+
+    ret = sqlite3_reset(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_reset returns %d", ret);
+        return NULL;
+    }
+
+    /* bind phrase */
+    ret = sqlite3_bind_text(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
+                            BIND_COMMIT_HISTORY_PHRASE, wordSeq, -1, SQLITE_STATIC);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_bind_text returns %d", ret);
+        return NULL;
+    }
+
+    return GetCommitHistoryNext(pgdata, wordSeq);
+}
+
+CommitHistoryData *GetCommitHistoryNext(ChewingData *pgdata, const char wordSeq[])
+{
+    int i;
+    int ret;
+    int word_len;
+
+    assert(pgdata);
+    assert(wordSeq);
+
+    ret = sqlite3_step(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    if (ret != SQLITE_ROW)
+        return NULL;
+
+    /* get the length */
+    pgdata->commit_history_data.length =
+        sqlite3_column_int(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
+                           SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT]
+                               .column[COLUMN_COMMIT_HISTORY_LENGTH]);
+
+    /* get the phrase */
+    pgdata->commit_history_data.wordSeq =
+        (char *) sqlite3_column_text(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
+                                     SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT]
+                                         .column[COLUMN_COMMIT_HISTORY_PHRASE]);
+
+    /* get the phones */
+    word_len = ueStrLen(wordSeq);
+    for (i = 0; i < word_len; ++i) {
+        pgdata->commit_history_data.phoneSeq[i] =
+            sqlite3_column_int(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
+                               SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT]
+                                   .column[COLUMN_COMMIT_HISTORY_PHONE_0 + i]);
+    }
+
+    return &pgdata->commit_history_data;
+}
+
+int CommitHistoryRemove(ChewingData *pgdata, const char wordSeq[])
+{
+    int ret;
+    int affected = 0;
+
+    assert(pgdata);
+    assert(wordSeq);
+
+    assert(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_DELETE]);
+
+    ret = sqlite3_bind_text(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_DELETE],
+                            BIND_COMMIT_HISTORY_PHRASE, wordSeq, -1, SQLITE_STATIC);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_bind_text returns %d", ret);
+        goto end;
+    }
+
+    ret = sqlite3_step(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_DELETE]);
+    if (ret != SQLITE_DONE) {
+        LOG_ERROR("sqlite3_step returns %d", ret);
+        goto end;
+    }
+
+    affected = sqlite3_changes(pgdata->static_data.db);
+
+  end:
+    ret = sqlite3_reset(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_DELETE]);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_reset returns %d", ret);
+    }
+
+    return affected;
 }

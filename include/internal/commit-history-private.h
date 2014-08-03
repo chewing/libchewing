@@ -29,7 +29,19 @@
 /* Forward declaration */
 struct ChewingData;
 
+typedef struct CommitHistoryData {
+    int length;
+    uint16_t phoneSeq[11];
+    char *wordSeq;
+} CommitHistoryData;
+
 int CommitHistoryInsert(struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[]);
+
+CommitHistoryData *GetCommitHistoryFirst(struct ChewingData *pgdata, const char wordSeq[]);
+
+CommitHistoryData *GetCommitHistoryNext(struct ChewingData *pgdata, const char wordSeq[]);
+
+int CommitHistoryRemove(struct ChewingData *pgdata, const char wordSeq[]);
 
 /* *INDENT-OFF* */
 #endif
