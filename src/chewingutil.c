@@ -1485,9 +1485,10 @@ int toPreeditBufIndex(ChewingData *pgdata, int pos)
     return i;
 }
 
-int AddCommitHistory(ChewingOutput *pgo, ChewingData *pgdata)
+void AddCommitHistory(ChewingOutput *pgo, ChewingData *pgdata)
 {
     int len;
+    int ret;
     uint16_t phone_seq[MAX_PHONE_SEQ_LEN + 1];
     const char *phrase;
 
@@ -1498,7 +1499,8 @@ int AddCommitHistory(ChewingOutput *pgo, ChewingData *pgdata)
     phrase = pgo->commitBuf;
     memcpy(phone_seq, pgdata->phoneSeq, sizeof(uint16_t) * len);
 
-    CommitHistoryInsert(pgdata, phone_seq, phrase);
-
-    return 0;
+    ret = CommitHistoryInsert(pgdata, phone_seq, phrase);
+    if (ret == COMMIT_INSERT_FAIL) {
+        LOG_WARN("CommitHistoryInsert returns %d", ret);
+    }
 }
