@@ -8,7 +8,7 @@ matrix:
     - compiler: gcc
       env: BUILD=cmake
     - compiler: clang
-      env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS=-fsanitize=address
+      env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS="-fsanitize=address -fsanitize=undefined"
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
     - compiler: clang
