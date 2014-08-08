@@ -198,6 +198,7 @@ static int CreateCommitTable(ChewingData *pgdata)
     ret = sqlite3_exec(pgdata->static_data.db,
                        "CREATE TABLE IF NOT EXISTS commit_history ("
                        "length INTEGER,"
+                       "phrase TEXT,"
                        "phone_0 INTEGER,"
                        "phone_1 INTEGER,"
                        "phone_2 INTEGER,"
@@ -208,8 +209,7 @@ static int CreateCommitTable(ChewingData *pgdata)
                        "phone_7 INTEGER,"
                        "phone_8 INTEGER,"
                        "phone_9 INTEGER,"
-                       "phone_10 INTEGER,"
-                       "phrase TEXT"
+                       "phone_10 INTEGER"
                        ")", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot create table commit_history, error = %d", ret);
