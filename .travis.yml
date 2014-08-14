@@ -3,6 +3,9 @@ language: c
 compiler: gcc
 env: BUILD=autotools
 
+git:
+  depth: 1
+
 matrix:
   include:
     - compiler: gcc
