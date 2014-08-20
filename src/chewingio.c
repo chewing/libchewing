@@ -909,7 +909,7 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         WriteChiSymbolToCommitBuf(pgdata, pgo, nCommitStr);
         AutoLearnPhrase(pgdata);
         pgo->commitBufLen = nCommitStr;
-        AddCommitHistory(pgo, pgdata);
+        AddCommitHistory(pgdata);
         CleanAllBuf(pgdata);
     }
 
