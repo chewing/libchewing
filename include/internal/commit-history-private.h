@@ -14,6 +14,7 @@
 /* *INDENT-ON* */
 
 #include <stdio.h>
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #    include <config.h>
@@ -41,6 +42,10 @@ typedef struct CommitHistoryData {
 } CommitHistoryData;
 
 int CommitHistoryInsert(struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[]);
+
+int CommitHistoryHasNext(struct ChewingData *pgdata);
+
+int CommitHistoryGet(struct ChewingData *pgdata, int *length, char wordSeq[], uint16_t phoneSeq[]);
 
 CommitHistoryData *GetCommitHistoryByPhraseFirst(struct ChewingData *pgdata, const char wordSeq[]);
 

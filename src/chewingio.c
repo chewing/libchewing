@@ -1976,8 +1976,7 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 
         return 0;
     }
-
-    return -1;
+return -1;
 #endif
 }
 
@@ -2379,4 +2378,49 @@ CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *f
     fclose(fp);
 
     return 0;
+}
+
+CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return 0;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+#if WITH_SQLITE3
+    return CommitHistoryHasNext(pgdata);
+#else
+    /* TODO:
+     *   Implement hash version
+     */
+#endif
+}
+
+CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
+                                           char *word_seq, unsigned short *phone_seq)
+{
+    ChewingData *pgdata;
+
+    if (!ctx || !length || !word_seq || !phone_seq) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+#if WITH_SQLITE3
+    if (CommitHistoryGet(pgdata, length, word_seq, phone_seq) != 1) {
+        return -1;
+    }
+
+    return 0;
+#else
+    /* TODO:
+     *   Implement hash version
+     */
+#endif
 }

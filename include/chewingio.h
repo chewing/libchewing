@@ -552,6 +552,8 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
                                          void *loggerdata);
 
 CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *filepath);
+CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx);
+CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length, char *word_seq, unsigned short *phone_seq);
 
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_IO_H */
