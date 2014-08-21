@@ -89,6 +89,13 @@ const SqlStmtCommitHistory SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_COUNT] = 
      "SELECT length, phrase, "
      "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
      "phone_6, phone_7, phone_8, phone_9, phone_10 "
+     "FROM commit_history",
+     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+     },
+    {
+     "SELECT length, phrase, "
+     "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
+     "phone_6, phone_7, phone_8, phone_9, phone_10 "
      "FROM commit_history "
      "WHERE phrase = ?2",
      {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},

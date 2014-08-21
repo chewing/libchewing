@@ -42,9 +42,9 @@ typedef struct CommitHistoryData {
 
 int CommitHistoryInsert(struct ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[]);
 
-CommitHistoryData *GetCommitHistoryFirst(struct ChewingData *pgdata, const char wordSeq[]);
+CommitHistoryData *GetCommitHistoryByPhraseFirst(struct ChewingData *pgdata, const char wordSeq[]);
 
-CommitHistoryData *GetCommitHistoryNext(struct ChewingData *pgdata, const char wordSeq[]);
+CommitHistoryData *GetCommitHistoryByPhraseNext(struct ChewingData *pgdata, const char wordSeq[]);
 
 int CommitHistoryRemove(struct ChewingData *pgdata, const char wordSeq[]);
 
