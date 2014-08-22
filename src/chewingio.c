@@ -2380,6 +2380,37 @@ CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *f
     return 0;
 }
 
+CHEWING_API int chewing_commit_history_enumerate(ChewingContext *ctx)
+{
+    ChewingData *pgdata;
+
+#if WITH_SQLITE3
+    int ret;
+#endif
+
+    if (!ctx) {
+        return -1;
+    }
+
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+#if WITH_SQLITE3
+    assert(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    ret = sqlite3_reset(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_reset returns %d", ret);
+        return -1;
+    }
+#else
+    /* TODO:
+     *   Implement hash version
+     */
+#endif
+    return 0;
+}
+
 CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx)
 {
     ChewingData *pgdata;
