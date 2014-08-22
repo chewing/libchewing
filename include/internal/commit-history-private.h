@@ -45,7 +45,7 @@ int CommitHistoryInsert(struct ChewingData *pgdata, const uint16_t phoneSeq[], c
 
 int CommitHistoryHasNext(struct ChewingData *pgdata);
 
-int CommitHistoryGet(struct ChewingData *pgdata, int *length, char wordSeq[], uint16_t phoneSeq[]);
+int CommitHistoryGet(struct ChewingData *pgdata, int *length, char **word_ptr, uint16_t **phone_ptr);
 
 CommitHistoryData *GetCommitHistoryByPhraseFirst(struct ChewingData *pgdata, const char wordSeq[]);
 

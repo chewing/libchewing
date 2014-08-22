@@ -2432,11 +2432,11 @@ CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx)
 }
 
 CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
-                                           char *word_seq, unsigned short *phone_seq)
+                                           char **word_ptr, unsigned short **phone_ptr)
 {
     ChewingData *pgdata;
 
-    if (!ctx || !length || !word_seq || !phone_seq) {
+    if (!ctx || !length || !word_ptr || !phone_ptr) {
         return -1;
     }
     pgdata = ctx->data;
@@ -2444,7 +2444,7 @@ CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
     LOG_API("");
 
 #if WITH_SQLITE3
-    if (CommitHistoryGet(pgdata, length, word_seq, phone_seq) != 1) {
+    if (CommitHistoryGet(pgdata, length, word_ptr, phone_ptr) != 1) {
         return -1;
     }
 

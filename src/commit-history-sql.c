@@ -155,33 +155,36 @@ int CommitHistoryHasNext(ChewingData *pgdata)
     return 1;
 }
 
-int CommitHistoryGet(ChewingData *pgdata, int *length, char wordSeq[], uint16_t phoneSeq[])
+int CommitHistoryGet(ChewingData *pgdata, int *length, char **word_ptr, uint16_t **phone_ptr)
 {
     int i;
     int word_len;
     int phone_len;
     const char *phrase;
 
-    assert(pgdata && length && wordSeq && phoneSeq);
+    assert(pgdata && length && word_ptr && phone_ptr);
 
     *length = sqlite3_column_int(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
                                  SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT].
                                    column[COLUMN_COMMIT_HISTORY_LENGTH]);
+
     phrase = (const char *) sqlite3_column_text(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
                                                 SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT].
                                                   column[COLUMN_COMMIT_HISTORY_PHRASE]);
+    *word_ptr = strdup(phrase);
+
+    *phone_ptr = malloc(sizeof(**phone_ptr) * (*length + 1));
     for (i = 0; i < *length; ++i) {
-        phoneSeq[i] = sqlite3_column_int(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
+        (*phone_ptr)[i] = sqlite3_column_int(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT],
                                          SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_SELECT].
                                            column[COLUMN_COMMIT_HISTORY_PHONE_0+i]);
     }
+    (*phone_ptr)[*length] = 0;
 
-    strcpy(wordSeq, phrase);
+    word_len = ueStrLen(*word_ptr);
+    phone_len = GetPhoneLen(*phone_ptr);
 
-    word_len = ueStrLen(wordSeq);
-    phone_len = GetPhoneLen(phoneSeq);
-
-    if (word_len != phone_len || word_len != *length || phone_len != *length){
+    if (word_len != phone_len || word_len != *length || phone_len != *length) {
         return 0;
     }
     return 1;
