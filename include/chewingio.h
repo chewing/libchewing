@@ -551,10 +551,40 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
                                          void (*logger) (void *data, int level, const char *fmt, ...),
                                          void *loggerdata);
 
-CHEWING_API int chewing_commit_history_enumerate(ChewingContext *ctx);
+/*! \name Commit history operations
+ */
+
+/*@{*/
+/**
+ * @brief Export commit history to json file
+ * @param ctx Chewing IM context
+ * @param filepath json file path
+ */
 CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *filepath);
+
+/**
+ * @brief Set up to enumerate commit history. Must be called if want to enumerate from start.
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_commit_history_enumerate(ChewingContext *ctx);
+
+/**
+ * @brief Check if there's next commit history
+ * @param ctx Chewing IM context
+ * @return returns 1 if there's next commit history; otherwise, returns 0
+ */
 CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx);
+
+/**
+ * @brief Get the enumerated commit history
+ * @param ctx Chewing IM context
+ * @param length pointer to int to hold the length of the commit history
+ * @param word_seq char pointer to the phrase of the commit history, caller must free it
+ * @param phone_seq pointer to array of phone numbers. the array is terminate with 0. caller must free it
+ */
 CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length, char *word_seq, unsigned short *phone_seq);
+
+/*@}*/
 
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_IO_H */
