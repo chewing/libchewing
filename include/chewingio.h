@@ -584,6 +584,14 @@ CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx);
  */
 CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length, char **word_ptr, unsigned short **phone_ptr);
 
+/**
+ * @brief Get the enumerated commit history
+ * @param ctx Chewing IM context
+ * @param words the commited words that wants to be deleted
+ * @return the number of deleted commits
+ */
+CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *words);
+
 /*@}*/
 
 /* *INDENT-OFF* */

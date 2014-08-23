@@ -2455,3 +2455,28 @@ CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
      */
 #endif
 }
+
+CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, char *words)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+#if WITH_SQLITE3
+    /* none affected */
+    if (CommitHistoryRemove(pgdata, words) == 0) {
+        return -1;
+    }
+
+    return 0;
+#else
+    /* TODO:
+     *   Implement hash version
+     */
+#endif
+}
