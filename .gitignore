@@ -74,6 +74,7 @@ test/test-struct-size
 test/test-special-symbol
 test/test-userphrase
 test/test-utf8
+test/test-commit-history
 test/do-test.xml
 test/test.txt
 test/*.log
