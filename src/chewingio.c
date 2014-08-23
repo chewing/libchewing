@@ -2422,13 +2422,7 @@ CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx)
 
     LOG_API("");
 
-#if WITH_SQLITE3
     return CommitHistoryHasNext(pgdata);
-#else
-    /* TODO:
-     *   Implement hash version
-     */
-#endif
 }
 
 CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
@@ -2443,20 +2437,14 @@ CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
 
     LOG_API("");
 
-#if WITH_SQLITE3
     if (CommitHistoryGet(pgdata, length, word_ptr, phone_ptr) != 1) {
         return -1;
     }
 
     return 0;
-#else
-    /* TODO:
-     *   Implement hash version
-     */
-#endif
 }
 
-CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, char *words)
+CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *words)
 {
     ChewingData *pgdata;
 
@@ -2467,16 +2455,5 @@ CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, char *words)
 
     LOG_API("");
 
-#if WITH_SQLITE3
-    /* none affected */
-    if (CommitHistoryRemove(pgdata, words) == 0) {
-        return -1;
-    }
-
-    return 0;
-#else
-    /* TODO:
-     *   Implement hash version
-     */
-#endif
+    return CommitHistoryRemove(pgdata, words);
 }
