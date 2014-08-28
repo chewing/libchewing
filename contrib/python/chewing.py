@@ -1,21 +1,36 @@
 from ctypes import *
 from functools import partial
 
+
 _libchewing = CDLL('libchewing.so.3')
 _libchewing.chewing_commit_String.restype = c_char_p
 _libchewing.chewing_buffer_String.restype = c_char_p
 _libchewing.chewing_cand_String.restype = c_char_p
 _libchewing.chewing_zuin_String.restype = c_char_p
 _libchewing.chewing_aux_String.restype = c_char_p
+_libchewing.chewing_get_KBString.restype = c_char_p
+
 
 def Init(datadir, userdir):
     return _libchewing.chewing_Init(datadir, userdir)
 
+
 class ChewingContext:
-    def __init__(self):
-        self.ctx = _libchewing.chewing_new()
+    def __init__(self, **kwargs):
+        if not kwargs:
+            self.ctx = _libchewing.chewing_new()
+        else:
+            syspath = kwargs.get("syspath", None)
+            userpath = kwargs.get("userpath", None)
+            self.ctx = _libchewing.chewing_new2(
+                syspath,
+                userpath,
+                None,
+                None)
+
     def __del__(self):
         _libchewing.chewing_free(self.ctx)
+
     def __getattr__(self, name):
         func = 'chewing_' + name
         if func in _libchewing.__dict__:
@@ -27,7 +42,8 @@ class ChewingContext:
             setattr(self, name, wrap)
             return wrap
         else:
-            raise AttributeError, name
+            raise AttributeError(name)
+
     def Configure(self, cpp, maxlen, direction, space, kbtype):
         self.set_candPerPage(cpp)
         self.set_maxChiSymbolLen(maxlen)
