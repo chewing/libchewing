@@ -64,7 +64,7 @@ int ueStrNCpy(char dest[], const char *src, size_t n, int end);
  * @brief Get the pointer to the nth UTF-8 character.
  * @param[in] src the UTF-8 string.
  * @param[in] n   the nth character.
- * @return pointer to the first byte of the character.
+ * @return a pointer to the first byte of the character.
  */
 char *ueStrSeek(char *src, size_t n);
 
@@ -72,7 +72,7 @@ char *ueStrSeek(char *src, size_t n);
  * @brief Const version of ueStrSeek()
  * @param[in] src the UTF-8 string.
  * @param[in] n   the nth character.
- * @return the pointer to the first byte of the character.
+ * @return a pointer to the first byte of the character.
  */
 const char *ueConstStrSeek(const char *src, size_t n);
 
