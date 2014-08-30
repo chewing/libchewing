@@ -1,5 +1,6 @@
 /**
- * key2pho.c
+ * @file key2pho.c
+ * @brief Map bopomofos to uint16_t type according to different keyboard type.
  *
  * Copyright (c) 1999, 2000, 2001
  *	Lu-chuan Kung and Kang-pen Chen.
@@ -12,11 +13,6 @@
  * of this file.
  */
 
-/**
- * @file key2pho.c
- * @brief map bopomofos to uint16_t type according to different kb_type
- */
-
 /* This file is encoded in UTF-8 */
 #include "key2pho-private.h"
 
@@ -24,7 +20,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "chewing-utf8-util.h"
-#include "chewing-private.h"
 
 /* NOTE:
  * The reason why we convert string literal to hex representation is for the
@@ -52,7 +47,7 @@ static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 static const int shift[] = { 9, 7, 3, 0 };
 static const int sb[] = { 31, 3, 15, 7 };
 
-static const char *const ph_str = 
+static const char *const ph_str =
     "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
     /* ㄅㄆㄇㄈ */
     "\xE3\x84\x89\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C"
@@ -104,6 +99,7 @@ uint16_t UintFromPhone(const char *zhuin)
 
     iter = zhuin;
 
+    /* 0x20: space character */
     while (*iter && *iter != 0x20) {
         len = ueStrNCpy(buf, iter, 1, STRNCPY_CLOSE);
 
@@ -125,10 +121,14 @@ uint16_t UintFromPhone(const char *zhuin)
     return result;
 }
 
-int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes)
+int PhoneFromKey(char *pho, const char *inputkey, KBTYPE kbtype, int searchTimes)
 {
-    int len = strlen(inputkey), i, s;
+    int len;
+    int i;
+    int s;
     const char *pTarget;
+
+    len = strlen(inputkey);
 
     pho[0] = '\0';
     for (i = 0; i < len; i++) {
@@ -172,7 +172,7 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     return 0;
 }
 
-int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes)
+int PhoneInxFromKey(int key, int type, KBTYPE kbtype, int searchTimes)
 {
     char keyStr[2], rtStr[10], *p;
 
@@ -191,8 +191,13 @@ uint16_t UintFromPhoneInx(const int ph_inx[])
     int i;
     uint16_t result = 0;
 
-    for (i = 0; i < BOPOMOFO_SIZE; i++)
+    for (i = 0; i < BOPOMOFO_SIZE; i++) {
+        if (ph_inx[i] < 0 || ph_inx[i] >= zhuin_tab_num[i])
+            return 0;
+
         result |= ph_inx[i] << shift[i];
+    }
+
     return result;
 }
 
