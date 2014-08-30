@@ -74,7 +74,7 @@ static const char *const ph_str =
     "\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B";
     /* ˙ˊˇˋ */
 
-static const char *const key_str[MAX_KBTYPE] = {
+static const char *const key_str[KBTYPE_COUNT] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* standard kb */
     "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",        /* hsu */
     "1234567890-qwertyuiopasdfghjkl;zxcvbn/m,.",        /* IBM */

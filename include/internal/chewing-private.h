@@ -38,7 +38,6 @@ typedef SSIZE_T ssize_t;
 #    include "chewing-sql.h"
 #endif
 
-#define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
 #define BOPOMOFO_SIZE 4
 #define PINYIN_SIZE 10
@@ -73,6 +72,22 @@ static inline int min(int a, int b)
     return a < b ? a : b;
 }
 #endif
+
+typedef enum KBTYPE {
+    KBTYPE_STANDARD,
+    KBTYPE_HSU,
+    KBTYPE_IBM,
+    KBTYPE_GIN_YIEH,
+    KBTYPE_ET,
+    KBTYPE_ET26,
+    KBTYPE_DVORAK,
+    KBTYPE_DVORAK_HSU,
+    KBTYPE_DACHEN_CP26,
+    KBTYPE_HANYU_PINYIN,
+    KBTYPE_LUOMA_PINYIN,
+    KBTYPE_MSP2,            /* Mandarin Phonetic Symbols II */
+    KBTYPE_COUNT
+} KBTYPE;
 
 /*
  * This structure may represent both internal nodes and leaf nodes of a phrase
