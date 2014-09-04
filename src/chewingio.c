@@ -42,6 +42,7 @@
 #include "plat_path.h"
 #include "chewing-private.h"
 #include "key2pho-private.h"
+#include "commit-history-private.h"
 
 #if WITH_SQLITE3
 #    include "chewing-sql.h"
@@ -907,8 +908,9 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         keystrokeRtn = KEYSTROKE_COMMIT;
         WriteChiSymbolToCommitBuf(pgdata, pgo, nCommitStr);
         AutoLearnPhrase(pgdata);
-        CleanAllBuf(pgdata);
         pgo->commitBufLen = nCommitStr;
+        AddCommitHistory(pgdata);
+        CleanAllBuf(pgdata);
     }
 
     MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
@@ -1974,8 +1976,7 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 
         return 0;
     }
-
-    return -1;
+return -1;
 #endif
 }
 
@@ -2352,4 +2353,121 @@ CHEWING_API int chewing_clean_bopomofo_buf(ChewingContext *ctx)
 
     MakeOutput(pgo, pgdata);
     return 0;
+}
+
+CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *filepath)
+{
+    ChewingData *pgdata;
+    FILE *fp;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    fp = fopen(filepath, "w");
+    if (!fp) {
+        LOG_ERROR("Can't open file to export");
+        return -1;
+    }
+
+    ExportCommitHistory(pgdata, fp);
+
+    fclose(fp);
+
+    return 0;
+}
+
+CHEWING_API int chewing_commit_history_enumerate(ChewingContext *ctx)
+{
+    ChewingData *pgdata;
+
+#if WITH_SQLITE3
+    int ret;
+#endif
+
+    if (!ctx) {
+        return -1;
+    }
+
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+#if WITH_SQLITE3
+    assert(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    ret = sqlite3_reset(pgdata->static_data.stmt_commit_history[STMT_COMMIT_HISTORY_SELECT]);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_reset returns %d", ret);
+        return -1;
+    }
+#else
+    /* TODO:
+     *   Implement hash version
+     */
+#endif
+    return 0;
+}
+
+CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return 0;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    return CommitHistoryHasNext(pgdata);
+}
+
+CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length,
+                                           char **word_ptr, unsigned short **phone_ptr)
+{
+    ChewingData *pgdata;
+
+    if (!ctx || !length || !word_ptr || !phone_ptr) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    if (CommitHistoryGet(pgdata, length, word_ptr, phone_ptr) != 1) {
+        return -1;
+    }
+
+    return 0;
+}
+
+CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *words)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    return CommitHistoryRemove(pgdata, words);
+}
+
+CHEWING_API int chewing_commit_history_import(ChewingContext *ctx, const char *path)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    return ImportCommitHistory(pgdata, path);
 }

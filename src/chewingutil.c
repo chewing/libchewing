@@ -31,6 +31,7 @@
 #include "choice-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
+#include "commit-history-private.h"
 #include "private.h"
 
 #ifdef HAVE_ASPRINTF
@@ -1482,4 +1483,46 @@ int toPreeditBufIndex(ChewingData *pgdata, int pos)
     LOG_VERBOSE("translate phoneSeq index %d to preeditBuf index %d", pos, i);
 
     return i;
+}
+
+void AddCommitHistory(ChewingData *pgdata)
+{
+    int len;
+    int commit_len;
+    int ret;
+    int i = 0;
+    int pos = 0;
+    int end;
+    uint16_t phone_seq[MAX_PHONE_SEQ_LEN + 1];
+    char word_seq[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1] = { 0 };
+
+    assert(pgdata);
+
+    commit_len = pgdata->chiSymbolBufLen;
+
+    while (i < commit_len) {
+        end = i;
+        while (ChewingIsChiAt(end, pgdata)) {
+            ++end;
+        }
+        len = end - i;
+
+        memcpy(phone_seq, pgdata->phoneSeq + pos, sizeof(uint16_t) * len);
+        phone_seq[len] = (uint16_t) 0;
+
+        copyStringFromPreeditBuf(pgdata, i, len, word_seq, sizeof(word_seq));
+
+        ret = CommitHistoryInsert(pgdata, phone_seq, word_seq);
+        if (ret == COMMIT_INSERT_FAIL) {
+            LOG_WARN("CommitHistoryInsert returns %d", ret);
+        }
+
+        pos += len;
+
+        /* Skip none-Chinese character */
+        i = end;
+        while (i < commit_len && !ChewingIsChiAt(i, pgdata)) {
+            ++i;
+        }
+    }
 }

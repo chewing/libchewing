@@ -50,6 +50,7 @@ noinst_HEADERS =\
 	include/internal/tree-private.h \
 	include/internal/userphrase-private.h \
 	include/internal/bopomofo-private.h \
+        include/internal/commit-history-private.h \
 	thirdparty/sqlite-amalgamation/sqlite3ext.h \
 	thirdparty/sqlite-amalgamation/sqlite3.h \
 	$(NULL)

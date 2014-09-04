@@ -36,6 +36,7 @@ typedef SSIZE_T ssize_t;
 #if WITH_SQLITE3
 #    include "sqlite3.h"
 #    include "chewing-sql.h"
+#    include "commit-history-private.h"
 #endif
 
 #define MAX_UTF8_SIZE 4
@@ -197,6 +198,7 @@ typedef struct ChewingStaticData {
     sqlite3 *db;
     sqlite3_stmt *stmt_config[STMT_CONFIG_COUNT];
     sqlite3_stmt *stmt_userphrase[STMT_USERPHRASE_COUNT];
+    sqlite3_stmt *stmt_commit_history[STMT_COMMIT_HISTORY_COUNT];
 
     unsigned int original_lifetime;
     unsigned int new_lifetime;
@@ -267,6 +269,7 @@ typedef struct ChewingData {
 
 #if WITH_SQLITE3
     UserPhraseData userphrase_data;
+    CommitHistoryData commit_history_data;
 #else
     struct HASH_ITEM *prev_userphrase;
 #endif

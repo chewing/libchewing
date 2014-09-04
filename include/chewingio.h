@@ -551,6 +551,50 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
                                          void (*logger) (void *data, int level, const char *fmt, ...),
                                          void *loggerdata);
 
+/*! \name Commit history operations
+ */
+
+/*@{*/
+/**
+ * @brief Export commit history to json file
+ * @param ctx Chewing IM context
+ * @param filepath json file path
+ */
+CHEWING_API int chewing_commit_history_export(ChewingContext *ctx, const char *filepath);
+
+/**
+ * @brief Set up to enumerate commit history. Must be called if want to enumerate from start.
+ * @param ctx Chewing IM context
+ */
+CHEWING_API int chewing_commit_history_enumerate(ChewingContext *ctx);
+
+/**
+ * @brief Check if there's next commit history
+ * @param ctx Chewing IM context
+ * @return returns 1 if there's next commit history; otherwise, returns 0
+ */
+CHEWING_API int chewing_commit_history_has_next(ChewingContext *ctx);
+
+/**
+ * @brief Get the enumerated commit history
+ * @param ctx Chewing IM context
+ * @param length pointer to int to hold the length of the commit history
+ * @param word_ptr pointer to the string of phrase of the commit history, caller must free the string
+ * @param phone_ptr pointer to array of phone numbers. the array is allocated and terminated with 0. caller must free the array
+ */
+CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length, char **word_ptr, unsigned short **phone_ptr);
+
+/**
+ * @brief Get the enumerated commit history
+ * @param ctx Chewing IM context
+ * @param words the commited words that wants to be deleted
+ * @return the number of deleted commits
+ */
+CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *words);
+
+CHEWING_API int chewing_commit_history_import(ChewingContext *ctx, const char *path);
+/*@}*/
+
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_IO_H */
 /* *INDENT-ON* */

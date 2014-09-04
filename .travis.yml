@@ -32,6 +32,8 @@ before_install:
   - sudo add-apt-repository --yes ppa:chewing/travis-ci
   - sudo apt-get update -qq
   - sudo apt-get install -qq texinfo cmake valgrind libsqlite3-dev
+  - git clone https://github.com/json-c/json-c /tmp/json-c
+  - cd /tmp/json-c; ./autogen.sh && ./configure && make && sudo make install; cd -
 
 after_success:
   - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern '.*CMake[^/]+\.c(?:pp)?' --exclude-pattern '.*/[_A-Z0-9]+\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi

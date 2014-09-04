@@ -84,6 +84,36 @@ const SqlStmtConfig SQL_STMT_CONFIG[STMT_CONFIG_COUNT] = {
      },
 };
 
+const SqlStmtCommitHistory SQL_STMT_COMMIT_HISTORY[STMT_COMMIT_HISTORY_COUNT] = {
+    {
+     "SELECT length, phrase, "
+     "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
+     "phone_6, phone_7, phone_8, phone_9, phone_10 "
+     "FROM commit_history",
+     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+     },
+    {
+     "SELECT length, phrase, "
+     "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
+     "phone_6, phone_7, phone_8, phone_9, phone_10 "
+     "FROM commit_history "
+     "WHERE phrase = ?2",
+     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+     },
+    {
+     "INSERT INTO commit_history ("
+     "length, phrase, "
+     "phone_0, phone_1, phone_2, phone_3, phone_4, phone_5, "
+     "phone_6, phone_7, phone_8, phone_9, phone_10) "
+     "VALUES (?1, ?2, " "?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)",
+     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+     },
+    {
+     "DELETE FROM commit_history WHERE phrase = ?2",
+     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+     }
+};
+
 #define HASH_FIELD_SIZE		(125)
 #define HASH_FIELD_START	(8)
 #define HASH_LENGTH_OFFSET	(16)
@@ -160,6 +190,36 @@ static int CreateTable(ChewingData *pgdata)
                        "PRIMARY KEY (id)" ")", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot create table config_v1, error = %d", ret);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int CreateCommitTable(ChewingData *pgdata)
+{
+    int ret;
+
+    STATIC_ASSERT(MAX_PHRASE_LEN == 11);
+
+    ret = sqlite3_exec(pgdata->static_data.db,
+                       "CREATE TABLE IF NOT EXISTS commit_history ("
+                       "length INTEGER,"
+                       "phrase TEXT,"
+                       "phone_0 INTEGER,"
+                       "phone_1 INTEGER,"
+                       "phone_2 INTEGER,"
+                       "phone_3 INTEGER,"
+                       "phone_4 INTEGER,"
+                       "phone_5 INTEGER,"
+                       "phone_6 INTEGER,"
+                       "phone_7 INTEGER,"
+                       "phone_8 INTEGER,"
+                       "phone_9 INTEGER,"
+                       "phone_10 INTEGER"
+                       ")", NULL, NULL, NULL);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("Cannot create table commit_history, error = %d", ret);
         return -1;
     }
 
@@ -306,6 +366,7 @@ static int CreateStmt(ChewingData *pgdata)
 
     STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config));
     STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase));
+    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_COMMIT_HISTORY) == ARRAY_SIZE(pgdata->static_data.stmt_commit_history));
 
     for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
         ret = sqlite3_prepare_v2(pgdata->static_data.db,
@@ -321,6 +382,16 @@ static int CreateStmt(ChewingData *pgdata)
                                  SQL_STMT_USERPHRASE[i].stmt, -1, &pgdata->static_data.stmt_userphrase[i], NULL);
         if (ret != SQLITE_OK) {
             LOG_ERROR("Cannot create stmt %s", SQL_STMT_USERPHRASE[i].stmt);
+            return -1;
+        }
+    }
+
+    for (i = 0; i < ARRAY_SIZE(SQL_STMT_COMMIT_HISTORY); ++i) {
+        ret = sqlite3_prepare_v2(pgdata->static_data.db,
+                                 SQL_STMT_COMMIT_HISTORY[i].stmt, -1,
+                                 &pgdata->static_data.stmt_commit_history[i], NULL);
+        if (ret != SQLITE_OK) {
+            LOG_ERROR("Cannot create stmt %s", SQL_STMT_COMMIT_HISTORY[i].stmt);
             return -1;
         }
     }
@@ -453,6 +524,12 @@ int InitUserphrase(ChewingData *pgdata, const char *path)
         goto error;
     }
 
+    ret = CreateCommitTable(pgdata);
+    if (ret) {
+        LOG_ERROR("CreateCommitTable returns %d", ret);
+        goto error;
+    }
+
     ret = CreateStmt(pgdata);
     if (ret) {
         LOG_ERROR("CreateStmt returns %d", ret);
@@ -491,6 +568,11 @@ void TerminateUserphrase(ChewingData *pgdata)
     for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_userphrase); ++i) {
         sqlite3_finalize(pgdata->static_data.stmt_userphrase[i]);
         pgdata->static_data.stmt_userphrase[i] = NULL;
+    }
+
+    for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_commit_history); ++i) {
+        sqlite3_finalize(pgdata->static_data.stmt_commit_history[i]);
+        pgdata->static_data.stmt_commit_history[i] = NULL;
     }
 
     ret = sqlite3_close(pgdata->static_data.db);
