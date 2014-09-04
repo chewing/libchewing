@@ -592,6 +592,7 @@ CHEWING_API int chewing_commit_history_get(ChewingContext *ctx, int *length, cha
  */
 CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *words);
 
+CHEWING_API int chewing_commit_history_import(ChewingContext *ctx, const char *path);
 /*@}*/
 
 /* *INDENT-OFF* */

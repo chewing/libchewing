@@ -55,6 +55,8 @@ int CommitHistoryRemove(struct ChewingData *pgdata, const char wordSeq[]);
 
 int ExportCommitHistory(struct ChewingData *pgdata, FILE *fp);
 
+int ImportCommitHistory(struct ChewingData *pgdata, const char *path);
+
 /* *INDENT-OFF* */
 #endif
 /* *INDENT-ON* */

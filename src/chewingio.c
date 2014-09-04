@@ -2457,3 +2457,17 @@ CHEWING_API int chewing_commit_history_remove(ChewingContext *ctx, const char *w
 
     return CommitHistoryRemove(pgdata, words);
 }
+
+CHEWING_API int chewing_commit_history_import(ChewingContext *ctx, const char *path)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    return ImportCommitHistory(pgdata, path);
+}

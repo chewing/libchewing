@@ -9,8 +9,10 @@
  */
 
 #include <assert.h>
+#include <stdint.h>
 
 #include "commit-history-private.h"
+#include "userphrase-private.h"
 #include "chewing-private.h"
 #include "chewing-utf8-util.h"
 #include "private.h"
@@ -339,4 +341,44 @@ int ExportCommitHistory(ChewingData *pgdata, FILE *fp)
     json_object_put(json_obj);
 
     return COMMIT_EXPORT_SUCCESS;
+}
+
+static int Import(void *pgdata, int column_num,
+                  char **text, char **column_name)
+{
+    uint16_t phones[12] = {0};
+    int i;
+
+    for (i = 2; i < 13; i++) {
+        phones[i-2] =  atoi(text[i]);
+    }
+    UserUpdatePhrase(pgdata, phones, text[1]);
+
+    return 0;
+}
+
+int ImportCommitHistory(ChewingData *pgdata, const char *path)
+{
+    int ret;
+    sqlite3 *db = NULL;
+
+    assert(pgdata);
+    assert(path);
+
+    ret = sqlite3_open(path, &db);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_open returns %d", ret);
+        return 1;
+    }
+
+    ret = sqlite3_exec(db, "SELECT * FROM phrase WHERE weight > 5",
+                       Import, pgdata, NULL);
+    if (ret != SQLITE_OK) {
+        LOG_ERROR("sqlite3_exec returns %d, ret");
+        return 1;
+    }
+
+    sqlite3_close(db);
+
+    return 0;
 }
