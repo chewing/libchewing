@@ -45,7 +45,7 @@ const char *const zhuin_tab[] = {               /* number of bits */
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 static const int shift[] = { 9, 7, 3, 0 };
-static const int sb[] = { 31, 3, 15, 7 };
+static const int mask[] = { 0x1F, 0x3, 0xF, 0x7 };
 
 static const char *const ph_str =
     "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
@@ -135,14 +135,16 @@ int PhoneFromKey(char *pho, const char *inputkey, KBTYPE kbtype, int searchTimes
         char *findptr = NULL;
         int _index;
 
-        for (s = 0, pTarget = key_str[kbtype]; s < searchTimes; s++, pTarget = findptr + 1) {
+        pTarget = key_str[kbtype];
+        for (s = 0; s < searchTimes; s++) {
             findptr = strchr(pTarget, inputkey[i]);
             if (!findptr) {
                 return 0;
             }
+            pTarget = findptr + 1;
         }
         _index = findptr - key_str[kbtype];
-        ueStrNCpy(ueStrSeek(pho, i), ueConstStrSeek(ph_str, _index), 1, 0);
+        ueStrNCpy(ueStrSeek(pho, i), ueConstStrSeek(ph_str, _index), 1, STRNCPY_NOT_CLOSE);
     }
     pho = ueStrSeek(pho, len);
     pho[0] = '\0';
@@ -158,12 +160,12 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     char buffer[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1] = { 0 };
 
     for (i = 0; i < BOPOMOFO_SIZE; ++i) {
-        // The first two characters in zhuin_tab are space, so we need
-        // to add 1 here.
-        index = ((phone_num >> shift[i]) & sb[i]) + 1;
+        /* The first two characters in zhuin_tab are space, so we need
+           to add 1 here. */
+        index = ((phone_num >> shift[i]) & mask[i]) + 1;
         if (index >= 2) {
             pos = ueConstStrSeek(zhuin_tab[i], index);
-            ueStrNCpy(tmp, pos, 1, 1);
+            ueStrNCpy(tmp, pos, 1, STRNCPY_CLOSE);
             strcat(buffer, tmp);
         }
     }
@@ -174,15 +176,20 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
 
 int PhoneInxFromKey(int key, int type, KBTYPE kbtype, int searchTimes)
 {
-    char keyStr[2], rtStr[10], *p;
+    char keyStr[2];
+    char rtStr[10];
+    char *p;
 
     keyStr[0] = key;
     keyStr[1] = '\0';
+
     if (!PhoneFromKey(rtStr, keyStr, kbtype, searchTimes))
         return 0;
+
     p = strstr(zhuin_tab[type], rtStr);
     if (!p)
         return 0;
+
     return zhuin_tab_num[type] - ueStrLen(p);
 }
 
