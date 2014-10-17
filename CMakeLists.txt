@@ -59,6 +59,9 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
 option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
+if(MSVC)
+    set(WITH_INTERNAL_SQLITE3 true)
+endif()
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
