@@ -27,19 +27,19 @@
  * Microsoft VC9 to misinterpret the string.
  */
 const char *const zhuin_tab[] = {               /* number of bits */
-    "  \xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88\xE3\x84\x89"
+    "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88\xE3\x84\x89"
     "\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C\xE3\x84\x8D\xE3\x84\x8E"
     "\xE3\x84\x8F\xE3\x84\x90\xE3\x84\x91\xE3\x84\x92\xE3\x84\x93"
     "\xE3\x84\x94\xE3\x84\x95\xE3\x84\x96\xE3\x84\x97\xE3\x84\x98"
     "\xE3\x84\x99",                             /* 5 */
     /* ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ */
-    "  \xE3\x84\xA7\xE3\x84\xA8\xE3\x84\xA9",   /* 2 */
+    "\xE3\x84\xA7\xE3\x84\xA8\xE3\x84\xA9",   /* 2 */
     /* ㄧㄨㄩ */
-    "  \xE3\x84\x9A\xE3\x84\x9B\xE3\x84\x9C\xE3\x84\x9D\xE3\x84\x9E"
+    "\xE3\x84\x9A\xE3\x84\x9B\xE3\x84\x9C\xE3\x84\x9D\xE3\x84\x9E"
     "\xE3\x84\x9F\xE3\x84\xA0\xE3\x84\xA1\xE3\x84\xA2\xE3\x84\xA3"
     "\xE3\x84\xA4\xE3\x84\xA5\xE3\x84\xA6",     /* 4 */
     /* ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ */
-    "  \xCB\x99\xCB\x8A\xCB\x87\xCB\x8B"        /* 3 */
+    "\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B"        /* 3 */
     /* ˙ˊˇˋ */
 };
 
@@ -162,9 +162,9 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     for (i = 0; i < BOPOMOFO_SIZE; ++i) {
         /* The first two characters in zhuin_tab are space, so we need
            to add 1 here. */
-        index = ((phone_num >> shift[i]) & mask[i]) + 1;
-        if (index >= 2) {
-            pos = ueConstStrSeek(zhuin_tab[i], index);
+        index = ((phone_num >> shift[i]) & mask[i]);
+        if (index >= 1) {
+            pos = ueConstStrSeek(zhuin_tab[i], index - 1);
             ueStrNCpy(tmp, pos, 1, STRNCPY_CLOSE);
             strcat(buffer, tmp);
         }
