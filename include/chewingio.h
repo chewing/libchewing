@@ -22,6 +22,7 @@
  *  \author libchewing Core Team
  */
 
+#include <stddef.h>
 #include "global.h"
 
 #define KEYSTROKE_IGNORE 1
@@ -501,6 +502,17 @@ CHEWING_API int chewing_get_phraseChoiceRearward(const ChewingContext *ctx);
  */
 
 /*@{*/
+/**
+ * @brief Get bopomofo in Chewing internal state machine
+ *
+ * @param ctx
+ * @param bopomofo_buf buffer to contain the bopomofo string
+ * @param bopomofo_len the length of the buffer
+ */
+CHEWING_API size_t chewing_get_bopomofo(const ChewingContext *ctx,
+                                        char *bopomofo_buf,
+                                        const size_t bopomofo_len);
+
 /**
  * @brief Get phonetic sequence in Chewing internal state machine
  *
