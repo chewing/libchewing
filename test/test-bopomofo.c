@@ -1189,12 +1189,15 @@ void test_get_phoneSeq()
         unsigned short phone[5];
     } DATA[] = {
         {
-            "hk4g4", {
-        10268, 8708, 0}}, {
-            "hk4g4`31hk4g4", {
-        10268, 8708, 10268, 8708, 0}}, {
-            "`31`31", {
-    0}},};
+            "hk4g4", {10268, 8708, 0}
+        },
+        {
+            "hk4g4`31hk4g4", {10268, 8708, 10268, 8708, 0}
+        },
+        {
+            "`31`31", {0}
+        },
+    };
     ChewingContext *ctx;
     size_t i;
     int expected_len;

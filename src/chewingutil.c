@@ -836,6 +836,7 @@ static void ShiftInterval(ChewingOutput *pgo, ChewingData *pgdata)
 int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
 {
     int i;
+    int inx;
     char *pos;
 
     /* fill zero to chiSymbolBuf first */
@@ -861,9 +862,11 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
         strcpy(pgo->bopomofoBuf, pgdata->bopomofoData.pinYinData.keySeq);
     } else {
         for (i = 0; i < BOPOMOFO_SIZE; i++) {
-            if (pgdata->bopomofoData.pho_inx[i] != 0) {
+            inx = pgdata->bopomofoData.pho_inx[i];
+            if (inx != 0) {
                 ueStrNCpy(pgo->bopomofoBuf + strlen(pgo->bopomofoBuf),
-                          ueConstStrSeek((zhuin_tab[i] + 2), pgdata->bopomofoData.pho_inx[i] - 1), 1, STRNCPY_CLOSE);
+                          ueConstStrSeek(zhuin_tab[i], inx - 1),
+                          1, STRNCPY_CLOSE);
             }
         }
     }
