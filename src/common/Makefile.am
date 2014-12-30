@@ -2,7 +2,6 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	$(DEFAULT_CPPFLAGS) \
 	$(NULL)
 

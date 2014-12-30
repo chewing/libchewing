@@ -14,8 +14,9 @@ noinst_PROGRAMS = init_database dump_database
 
 init_database_SOURCES = \
 	init_database.c \
-	$(top_srcdir)/src/common/chewing-utf8-util.c \
-	$(top_srcdir)/src/common/key2pho.c \
+	$(NULL)
+init_database_LDADD = \
+	$(top_builddir)/src/common/libcommon.la \
 	$(NULL)
 
 dump_database_SOURCES = \

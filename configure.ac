@@ -215,6 +215,7 @@ AC_CONFIG_FILES([
         src/porting_layer/src/Makefile
         src/tools/Makefile
         test/Makefile
+        thirdparty/sqlite-amalgamation/Makefile
 ])
 AC_OUTPUT
 

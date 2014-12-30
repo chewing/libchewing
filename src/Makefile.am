@@ -1,4 +1,4 @@
-SUBDIRS = common porting_layer
+SUBDIRS = porting_layer
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
@@ -48,12 +48,8 @@ libchewing_la_SOURCES += \
 	$(NULL)
 
 if WITH_INTERNAL_SQLITE3
-AM_CPPFLAGS += \
-	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
-	$(NULL)
-
-libchewing_la_SOURCES += \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
+libchewing_la_LIBADD += \
+	$(top_builddir)/thirdparty/sqlite-amalgamation/libsqlite3-internal.la \
 	$(NULL)
 endif
 
