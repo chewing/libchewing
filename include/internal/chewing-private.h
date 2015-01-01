@@ -91,6 +91,7 @@ typedef enum KBTYPE {
 
 /**
  * @struct TreeType
+ * @brief node type of the system index tree
  *
  * This structure may represent both internal nodes and leaf nodes of a phrase
  * tree. Two kinds are distinguished by whether key is 0. For an internal node,
