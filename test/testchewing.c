@@ -121,7 +121,6 @@ int main()
     /* Free Chewing IM handle */
     chewing_delete(ctx);
 
-    /* Termate Chewing services */
 #ifndef USED_IN_SIMULATION
     printf("\n");
 #endif
