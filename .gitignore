@@ -83,6 +83,7 @@ thirdparty/sqlite-amalgamation/sqlite3
 
 # Generated tools/headers
 src/tools/init_database
+src/tools/dump_database
 
 # gcov output
 *.gcda
