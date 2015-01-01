@@ -89,7 +89,9 @@ typedef enum KBTYPE {
     KBTYPE_COUNT
 } KBTYPE;
 
-/*
+/**
+ * @struct TreeType
+ *
  * This structure may represent both internal nodes and leaf nodes of a phrase
  * tree. Two kinds are distinguished by whether key is 0. For an internal node,
  * child.begin and child.end give a list of children in the position
@@ -98,6 +100,7 @@ typedef enum KBTYPE {
  * phrase using a specific input method (may be bopomofo or non-phone). Note
  * that key in root represents the number of total elements(nodes) in the tree.
  */
+
 typedef struct TreeType {
     unsigned char key[2];
     union {
@@ -132,6 +135,11 @@ typedef struct BopomofoData {
     PinYinData pinYinData;
 } BopomofoData;
 
+/**
+ * @struct AvailInfo
+ * @brief information of available phrases or characters choices.
+ */
+
 typedef struct AvailInfo {
         /** @brief all kinds of lengths of available phrases. */
     struct {
@@ -144,11 +152,6 @@ typedef struct AvailInfo {
         /** @brief the current choosing available length. */
     int currentAvail;
 } AvailInfo;
-
-/**
- *	@struct AvailInfo
- *	@brief information of available phrases or characters choices.
- */
 
 typedef struct ChoiceInfo {
         /** @brief total page number. */
@@ -165,7 +168,10 @@ typedef struct ChoiceInfo {
     int isSymbol;
 } ChoiceInfo;
 
-/** @brief entry of symbol table */
+/**
+ * @struct SymbolEntry
+ * @brief entry of symbol table
+ */
 typedef struct SymbolEntry {
         /** @brief  nSymnols is total number of symbols in this category.
 	 * If nSymbols = 0, category is treat as a symbol,
@@ -276,6 +282,11 @@ typedef struct ChewingData {
     void *loggerData;
 } ChewingData;
 
+/**
+ * @struct ChewingOutput
+ * @brief information for Chewing output.
+ */
+
 typedef struct ChewingOutput {
         /** @brief the content of Edit buffer. */
     char preeditBuf[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1];
@@ -306,22 +317,17 @@ typedef struct ChewingOutput {
 } ChewingOutput;
 
 /**
- *   @struct ChewingOutput
- *   @brief  information for Chewing output.
+ * @struct ChewingContext
+ * @brief context of Chewing IM
  */
 
-struct ChewingContext {
+typedef struct ChewingContext {
     ChewingData *data;
     ChewingOutput *output;
     int cand_no;
     int it_no;
     int kb_no;
-};
-
-/**
- * @struct ChewingContext
- * @brief context of Chewing IM
- */
+} ChewingContext;
 
 typedef struct Phrase {
     char phrase[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];
