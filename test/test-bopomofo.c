@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bopomofo-private.h"
 #include "chewing.h"
 #include "plat_types.h"
 #include "testhelper.h"
@@ -1377,6 +1378,52 @@ FIXME: libchewing is broken in this case
 #endif
 }
 
+
+void test_KB_HSU()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_HSU);
+
+    type_keystroke_by_string(ctx, "mxm"); /* convert "ㄇ" to "ㄢ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x87\xE3\x84\xA8\xE3\x84\xA2" /* ㄇㄨㄢ */ );
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "hxh"); /* convert "ㄏ" to "ㄛ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8F\xE3\x84\xA8\xE3\x84\x9B" /* ㄏㄨㄛ */ );
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "gg"); /* convert "ㄍ" to "ㄜ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8D\xE3\x84\x9C" /* ㄍㄜ */ );
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "nen"); /* convert "ㄋ" to "ㄣ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8B\xE3\x84\xA7\xE3\x84\xA3" /* ㄋㄧㄣ */ );
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "kxk"); /* convert "ㄎ" to "ㄤ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8E\xE3\x84\xA8\xE3\x84\xA4" /* ㄎㄨㄤ */ );
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "jy"); /* convert "ㄐ,ㄑ,ㄒ" to "ㄓ,ㄔ,ㄕ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x93\xE3\x84\x9A" /* ㄓㄚ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "lf"); /* convert "ㄌ" to "ㄦ" */
+    ok_bopomofo_buffer(ctx, "");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ge hxaj"); /* convert "ㄍㄧ" to "ㄐㄧ" */
+    ok_preedit_buffer(ctx, "\xE6\xA9\x9F\xE6\x9C\x83" /* 機會 */);
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -1419,6 +1466,8 @@ int main(int argc, char *argv[])
     test_interval();
 
     test_jk_selection();
+
+    test_KB_HSU();
 
     fclose(fd);
 
