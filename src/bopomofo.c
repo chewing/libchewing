@@ -419,7 +419,7 @@ static int DACHENCP26PhoInput(ChewingData *pgdata, int key)
                 return BOPOMOFO_ABSORB;
             }
         }
-        /* converting "ㄙ" to "ㄣ" */
+        /* converting "ㄙ" to "ㄥ" */
         else if (key == 'n') {
             if (pBopomofo->pho_inx[0] != 0 || pBopomofo->pho_inx[1] != 0) {
                 pBopomofo->pho_inx[2] = 12;
