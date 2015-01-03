@@ -322,13 +322,13 @@ typedef struct ChewingOutput {
  * @brief context of Chewing IM
  */
 
-typedef struct ChewingContext {
+struct ChewingContext {
     ChewingData *data;
     ChewingOutput *output;
     int cand_no;
     int it_no;
     int kb_no;
-} ChewingContext;
+};
 
 typedef struct Phrase {
     char phrase[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];
