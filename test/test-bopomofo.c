@@ -1479,10 +1479,81 @@ void test_KB_ET26()
 }
 
 
+void test_KB_DACHEN_CP26()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_DACHEN_CP26);
+
+    type_keystroke_by_string(ctx, "vup djdup tp wkycprqlld");
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+                      /* 新酷音真的很棒 */ );
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "qq"); /* switch between "ㄅ" and "ㄆ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x86" /* ㄆ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ww"); /* switch between "ㄉ" and "ㄊ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8A" /* ㄊ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "tt"); /* switch between "ㄓ" and "ㄔ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x94" /* ㄔ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "xmm"); /* switch between "ㄩ" and "ㄡ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8C\xE3\x84\xA1" /* ㄌㄡ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "xum"); /* convert "ㄧㄩ" and "ㄧㄡ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8C\xE3\x84\xA7\xE3\x84\xA1" /* ㄌㄧㄡ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ii"); /* switch between "ㄛ" and "ㄞ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x9E" /* ㄞ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "oo"); /* switch between "ㄟ" and "ㄢ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\xA2" /* ㄢ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ll"); /* switch between "ㄠ" and "ㄤ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\xA4" /* ㄤ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "pp"); /* switch between "ㄣ" and "ㄦ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\xA6" /* ㄦ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "wu"); /* switch among "ㄧ", "ㄚ" and "ㄧㄚ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x89\xE3\x84\xA7" /* ㄉㄧ */);
+    type_keystroke_by_string(ctx, "u");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x89\xE3\x84\x9A" /* ㄉㄚ */);
+    type_keystroke_by_string(ctx, "u");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x89\xE3\x84\xA7\xE3\x84\x9A" /* ㄉㄧㄚ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "bb"); /* convert "ㄖ" to "ㄝ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x96\xE3\x84\x9D" /* ㄖㄝ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "njn"); /* convert "ㄙ" to "ㄥ" */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x99\xE3\x84\xA8\xE3\x84\xA5" /* ㄙㄨㄥ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
+
 void test_KB()
 {
     test_KB_HSU();
     test_KB_ET26();
+    test_KB_DACHEN_CP26();
 }
 
 
