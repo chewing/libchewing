@@ -175,19 +175,19 @@ typedef struct ChoiceInfo {
  */
 typedef struct SymbolEntry {
         /** @brief  nSymnols is total number of symbols in this category.
-	 * If nSymbols = 0, category is treat as a symbol,
-	 * which is a zero-terminated utf-8 string.
-	 * In that case, symbols[] is unused and isn't allocated at all.
-	 */
+         * If nSymbols = 0, category is treat as a symbol,
+         * which is a zero-terminated utf-8 string.
+         * In that case, symbols[] is unused and isn't allocated at all.
+         */
     int nSymbols;
 
         /** @brief  Category name of these symbols */
     char category[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];
 
         /** @brief  Symbols in this category.
-	 * This is an char[] array of variable length.
-	 * When nSymbols = 0, this array is not allocated.
-	 */
+         * This is an char[] array of variable length.
+         * When nSymbols = 0, this array is not allocated.
+         */
     char symbols[][MAX_UTF8_SIZE + 1];
 } SymbolEntry;
 
