@@ -1,5 +1,12 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Dictionary
+  - Add debug tool: dump_database
+* Misc
+  - Improve code readability and consistency
+* Bug fixed
+  - Fix unexpected candidate disorder for '1'
+  - Fix symbol update bug
 
 
 What's New in libchewing 0.4.0 (Apr 11, 2014)
