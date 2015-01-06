@@ -1379,6 +1379,40 @@ FIXME: libchewing is broken in this case
 }
 
 
+void test_KB_HSU_fuzzy()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_HSU);
+
+    type_keystroke_by_string(ctx, "ge"); /* fuzzy ㄍㄧ to ㄐㄧ */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x90\xE3\x84\xA7" /* ㄐㄧ */);
+    type_keystroke_by_string(ctx, "y");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x90\xE3\x84\xA7\xE3\x84\x9A" /* ㄐㄧㄚ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "gm");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8D\xE3\x84\xA2" /* ㄍㄢ */);
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x90\xE3\x84\xA7\xE3\x84\xA2" /* ㄐㄧㄢ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "gu"); /* fuzzy ㄍㄩ to ㄐㄩ */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x90\xE3\x84\xA9" /* ㄐㄩ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    type_keystroke_by_string(ctx, "gx"); /* ㄍㄨ shall stay unchanged */
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x8D\xE3\x84\xA8" /* ㄍㄨ */);
+    chewing_clean_bopomofo_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
+
+
 void test_KB_HSU()
 {
     ChewingContext *ctx;
@@ -1419,10 +1453,6 @@ void test_KB_HSU()
 
     type_keystroke_by_string(ctx, "lf"); /* convert "ㄌ" to "ㄦ" */
     ok_bopomofo_buffer(ctx, "");
-    chewing_clean_preedit_buf(ctx);
-
-    type_keystroke_by_string(ctx, "ge hxaj"); /* convert "ㄍㄧ" to "ㄐㄧ" */
-    ok_preedit_buffer(ctx, "\xE6\xA9\x9F\xE6\x9C\x83" /* 機會 */);
     chewing_clean_preedit_buf(ctx);
 
     chewing_delete(ctx);
@@ -1552,6 +1582,7 @@ void test_KB_DACHEN_CP26()
 void test_KB()
 {
     test_KB_HSU();
+    test_KB_HSU_fuzzy();
     test_KB_ET26();
     test_KB_DACHEN_CP26();
 }

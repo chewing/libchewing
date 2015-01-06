@@ -216,10 +216,6 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             }
         }
 
-        if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
-            pBopomofo->pho_inx[0] = 12;
-        }
-
         searchTimes = (key == 'j') ? 3 : 2;
 
         return EndKeyProcess(pgdata, key, searchTimes);
@@ -248,8 +244,8 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             pBopomofo->pho_inx[0] += 3;
         }
 
-        /* Fuzzy "g e" to "j e" */
-        if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
+        /* Fuzzy "ㄍㄧ to ㄐㄧ" and "ㄍㄩ to ㄐㄩ" */
+        if (type == 1 && (inx == 1 || inx == 3) && pBopomofo->pho_inx[0] == 9) {
             pBopomofo->pho_inx[0] = 12;
         }
 
