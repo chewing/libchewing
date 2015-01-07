@@ -2191,8 +2191,6 @@ CHEWING_API int chewing_cand_list_first(ChewingContext *ctx)
         return -1;
 
     return ChoiceFirstAvail(pgdata);
-
-    return 0;
 }
 
 CHEWING_API int chewing_cand_list_last(ChewingContext *ctx)

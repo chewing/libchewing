@@ -17,6 +17,8 @@
 #include "chewingio.h"
 #include "chewing-utf8-util.h"
 
+#include "plat_path.h"
+
 #define KEY_DBLTAB	892     // <TT>
 #define KEY_SSPACE	893     // <SS>
 #define KEY_PPAGE	894     // <PU>
