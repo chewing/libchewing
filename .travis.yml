@@ -7,6 +7,7 @@ env:
         # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
         #   via the "travis encrypt" command using the project repo's public key
         - secure: "BPP6SZ50idXkIPERv5Z+Q2OCvGHHEKI27icS60VnduwT3rtwZBmS2TBPAZugVdxk8AlP9txRidyGjKrliQ8j7KquqNj8RXW86Akok0/gRSWidxUsaWccCYQ00ynDQsil8hAQw3vZHiIdRVDrVYHrvSZeIPqBpfwC/i3zCUpsEoA="
+        - BUILD=autotools
 
 
 git:
