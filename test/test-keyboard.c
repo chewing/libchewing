@@ -132,8 +132,7 @@ void test_hsu_po_to_bo()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x86" /* ㄆ */ );
 
     type_keystroke_by_string(ctx, "b");
-    // FIXME: ㄅ shall overwrite ㄆ
-    //ok_bopomofo_buffer(ctx, "\xE3\x84\x85" /* ㄅ */ );
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x85" /* ㄅ */ );
 
     chewing_delete(ctx);
 }

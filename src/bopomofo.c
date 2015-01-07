@@ -230,7 +230,8 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             if (!inx)
                 continue;       /* if inx == 0, next type */
             else if (type == 0) {
-                if (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1]) {
+                if ((inx == 3 || (7 <= inx && inx <= 11) || inx == 20)
+                    && (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1])) {
                     /* if inx !=0 */
                     searchTimes = 2;    /* possible infinite loop here */
                 } else
