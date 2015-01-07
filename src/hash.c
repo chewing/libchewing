@@ -429,6 +429,7 @@ static int migrate_hash_to_bin(ChewingData *pgdata)
     }
     ret = fscanf(txtfile, "%d", &pgdata->static_data.chewing_lifetime);
     if (ret != 1) {
+        free(dump);
         return 0;
     }
 

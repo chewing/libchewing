@@ -380,6 +380,7 @@ void read_tsi_src(const char *filename)
     }
 
     qsort(phrase_data, num_phrase_data, sizeof(phrase_data[0]), compare_phrase);
+    fclose(tsi_src);
 }
 
 void store_word(const char *line, const int line_num)
