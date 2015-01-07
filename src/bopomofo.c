@@ -346,6 +346,11 @@ static int ET26PhoInput(ChewingData *pgdata, int key)
             pBopomofo->pho_inx[0] += 3;
         }
 
+        /* If ㄓㄔㄕ are followed by ㄧㄩ, convert them back to ㄐㄑㄒ */
+        if (type == 1 && (inx == 1 || inx == 3) && 15 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 17) {
+            pBopomofo->pho_inx[0] -= 3;
+        }
+
         if (type == 3) {        /* the key is NOT a phone */
             if (isalpha(key))
                 return BOPOMOFO_NO_WORD;
