@@ -263,7 +263,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
     ++test_run;
     if (test) {
         ++test_ok;
-        printf("ok %d ", test_run);
+        printf("ok %u ", test_run);
 
         va_start(ap, fmt);
         vprintf(fmt, ap);
@@ -271,7 +271,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
 
         printf("\n");
     } else {
-        printf("not ok %d ", test_run);
+        printf("not ok %u ", test_run);
 
         va_start(ap, fmt);
         vprintf(fmt, ap);
