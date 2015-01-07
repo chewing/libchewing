@@ -1,7 +1,14 @@
 language: c
 
 compiler: gcc
-env: BUILD=autotools
+
+env:
+    global:
+       - BUILD=autotools
+       # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+       #   via the "travis encrypt" command using the project repo's public key
+       - secure: "K8DldP5qcGDRSPV/4cVOf+1q45DPnDKaSngRlgrY5Z2O0hJtvpEWwqki4l1n+jbnPk6xkt01G4Vneqgik2ytxF5KxYhw5yI+Rmtq21qHc5v0c3WXgtIvc11qotATMmWKXqJafRTNS2dfRfWZ3EmOu2KnkKTf3r3MXx0qWfHpA4Y="
+
 
 git:
   depth: 1
@@ -35,3 +42,12 @@ before_install:
 
 after_success:
   - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern '.*CMake[^/]+\.c(?:pp)?' --exclude-pattern '.*/[_A-Z0-9]+\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi
+
+addons:
+  coverity_scan:
+    project:
+      name: "libchewing"
+      description: "Build submitted via Travis CI"
+    build_command_prepend: "./configure; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
