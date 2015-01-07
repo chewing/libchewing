@@ -16,6 +16,8 @@
 #include "chewing-sql.h"
 #include "private.h"
 
+#include "plat_path.h"
+
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
 
 #    include <Shlobj.h>
