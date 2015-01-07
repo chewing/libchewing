@@ -42,6 +42,7 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
 
     ret = fscanf(fd, "%d", &pgdata->static_data.HANYU_INITIALS);
     if (ret != 1) {
+        fclose(fd);
         return 0;
     }
     ++pgdata->static_data.HANYU_INITIALS;
