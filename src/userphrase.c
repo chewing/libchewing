@@ -91,7 +91,6 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
 {
     char *tmp;
     char *path;
-    int path_len;
     int ret;
 
     assert(pgdata);
