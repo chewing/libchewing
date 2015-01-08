@@ -151,6 +151,8 @@ static int CheckUserChoose(ChewingData *pgdata,
      * also store the phrase with highest freq
      */
     pUserPhraseData = UserGetPhraseFirst(pgdata, new_phoneSeq);
+    if (pUserPhraseData == NULL)
+      goto end;
     p_phr->freq = -1;
     do {
         for (chno = 0; chno < nSelect; chno++) {
@@ -183,7 +185,7 @@ static int CheckUserChoose(ChewingData *pgdata,
 
     if (p_phr->freq != -1)
         return 1;
-
+  end:
     free(p_phr);
     return 0;
 }
