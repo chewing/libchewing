@@ -79,6 +79,7 @@ void *read_input(const char *dir_name, const char *base_name)
     size_t len;
     void *buf = NULL;
     FILE *fp;
+    long int raw_filesize;
     size_t filesize;
 
     assert(dir_name);
@@ -97,7 +98,12 @@ void *read_input(const char *dir_name, const char *base_name)
     }
 
     fseek(fp, 0, SEEK_END);
-    filesize = ftell(fp);
+    raw_filesize = ftell(fp);
+    if (raw_filesize < 0) {
+        fprintf(stderr, "Error ftell the file %s\n", filename);
+        exit(-1);
+    }
+    filesize = raw_filesize;
     rewind(fp);
 
     buf = ALC(char, filesize);
