@@ -52,6 +52,7 @@ void dump(uint32_t node_pos, uint32_t indent)
     if (key != 0) {
         uint32_t beg = GetUint24(root[node_pos].child.begin);
         uint32_t end = GetUint24(root[node_pos].child.end);
+        assert (beg < end);
 
         if (indent == 0)
             printf("count=%u,", key);
