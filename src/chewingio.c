@@ -1952,7 +1952,7 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
         return -1;
     }
 
-    for (i = 0; i < length && i < ARRAY_SIZE(phone_array); ++i) {
+    for (i = 0; i < length && i < MAX_PHRASE_LEN; ++i) {
         phone_array[i] = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
                                             SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHONE_0
                                                                                                + i]);
