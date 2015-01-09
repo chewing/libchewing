@@ -387,9 +387,9 @@ void store_word(const char *line, const int line_num)
 {
     char phone_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     char key_buf[BOPOMOFO_SIZE + 1];
-    char buf[MAX_LINE_LEN];
+    char buf[MAX_LINE_LEN + 1] = {0};
 
-    strncpy(buf, line, sizeof(buf));
+    strncpy(buf, line, sizeof(buf) - 1);
 
     strip(buf);
     if (strlen(buf) == 0)

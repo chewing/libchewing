@@ -165,7 +165,7 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
     ChewingContext *ctx;
     ChewingData *pgdata;
     int ret;
-    char search_path[PATH_MAX];
+    char search_path[PATH_MAX + 1] = {0};
     char path[PATH_MAX];
     char *userphrase_path = NULL;
 
@@ -192,7 +192,7 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
     chewing_Reset(ctx);
 
     if (syspath) {
-        strncpy(search_path, syspath, sizeof(search_path));
+        strncpy(search_path, syspath, sizeof(search_path) - 1);
     } else {
         ret = get_search_path(search_path, sizeof(search_path));
         if (ret) {
