@@ -265,7 +265,7 @@ void store_phrase(const char *line, int line_num)
         fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
         exit(-1);
     }
-    strncpy(phrase_data[num_phrase_data].phrase, phrase, sizeof(phrase_data[0].phrase));
+    strncpy(phrase_data[num_phrase_data].phrase, phrase, sizeof(phrase_data[0].phrase) - 1);
 
     /* read frequency */
     freq = strtok(NULL, DELIM);
