@@ -52,6 +52,7 @@ void dump(uint32_t node_pos, uint32_t indent)
     if (key != 0) {
         uint32_t beg = GetUint24(root[node_pos].child.begin);
         uint32_t end = GetUint24(root[node_pos].child.end);
+        assert (beg < end);
 
         if (indent == 0)
             printf("count=%u,", key);
@@ -79,6 +80,7 @@ void *read_input(const char *dir_name, const char *base_name)
     size_t len;
     void *buf = NULL;
     FILE *fp;
+    long int raw_filesize;
     size_t filesize;
 
     assert(dir_name);
@@ -97,7 +99,12 @@ void *read_input(const char *dir_name, const char *base_name)
     }
 
     fseek(fp, 0, SEEK_END);
-    filesize = ftell(fp);
+    raw_filesize = ftell(fp);
+    if (raw_filesize < 0) {
+        fprintf(stderr, "Error ftell the file %s\n", filename);
+        exit(-1);
+    }
+    filesize = raw_filesize;
     rewind(fp);
 
     buf = ALC(char, filesize);

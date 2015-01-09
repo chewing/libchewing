@@ -1379,7 +1379,7 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
 
     file = fopen(filename, "r");
     if (!file)
-        goto end;
+        goto fileopenfail;
 
     line = ALC(char, LINE_LEN);
 
@@ -1416,8 +1416,9 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
     }
     ret = 0;
   end:
-    free(line);
     fclose(file);
+  fileopenfail:
+    free(line);
     free(filename);
     return ret;
 }

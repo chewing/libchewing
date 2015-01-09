@@ -138,7 +138,7 @@ AC_ARG_ENABLE([gcov],
               [AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@])],
               [AS_CASE([${enableval}], [yes], [ENABLE_GCOV="true"], [ENABLE_GCOV="false"])],
               [ENABLE_GCOV="false"])
-AS_IF([test x$ENABLE_GCOV = x"true"], [AM_CFLAGS="$AM_CFLAGS --coverage"])
+AS_IF([test x$ENABLE_GCOV = x"true"], [AM_CFLAGS="$AM_CFLAGS --coverage" AM_LDFLAGS="$AM_LDFLAGS --coverage"])
 
 dnl Adds -fvisibility=hidden to CFLAGS if running with gcc 4 or greater.
 AC_MSG_CHECKING([whether the compiler supports GCC Visibility])
