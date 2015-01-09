@@ -1,5 +1,5 @@
 /**
- * test-keyboardless-api.c
+ * test-keyboardless.c
  *
  * Copyright (c) 2013
  *      libchewing Core Team. See ChangeLog for details.
