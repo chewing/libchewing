@@ -278,7 +278,7 @@ void store_phrase(const char *line, int line_num)
 
     phrase_data[num_phrase_data].freq = strtoul(freq, &endptr, 0);
     if ((*freq == '\0' || *endptr != '\0') ||
-        (phrase_data[num_phrase_data].freq == ULONG_MAX && errno == ERANGE)) {
+        (phrase_data[num_phrase_data].freq == UINT32_MAX && errno == ERANGE)) {
         fprintf(stderr, "Error reading frequency `%s' in line %d, `%s'\n", freq, line_num, line);
         exit(-1);
     }
