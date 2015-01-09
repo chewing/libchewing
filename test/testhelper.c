@@ -490,5 +490,6 @@ int exit_status()
 
 void clean_userphrase()
 {
-    remove(TEST_HASH_DIR PLAT_SEPARATOR DB_NAME);
+    if(remove(TEST_HASH_DIR PLAT_SEPARATOR DB_NAME) != 0)
+        fprintf(stderr, "remove fails at %s:%d", __FILE__, __LINE__);
 }
