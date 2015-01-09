@@ -171,7 +171,7 @@ static int are_all_files_readable(const char *path, const char *const *files, ch
 
 int find_path_by_files(const char *search_path, const char *const *files, char *output, size_t output_len)
 {
-    char buffer[PATH_MAX];
+    char buffer[PATH_MAX + 1] = {0};
     char *path;
     char *saveptr;
     int ret;
@@ -182,7 +182,7 @@ int find_path_by_files(const char *search_path, const char *const *files, char *
     assert(output_len);
 
     // strtok_r will modify its first parameter.
-    strncpy(buffer, search_path, sizeof(buffer));
+    strncpy(buffer, search_path, sizeof(buffer) - 1);
 
     for (path = strtok_r(buffer, SEARCH_PATH_SEP, &saveptr); path; path = strtok_r(NULL, SEARCH_PATH_SEP, &saveptr)) {
 
