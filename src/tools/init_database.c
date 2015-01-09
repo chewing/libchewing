@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -241,6 +242,7 @@ void store_phrase(const char *line, int line_num)
     char buf[MAX_LINE_LEN];
     char *phrase;
     char *freq;
+    char *endptr = NULL;
     char *bopomofo;
     char bopomofo_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     size_t phrase_len;
@@ -274,9 +276,9 @@ void store_phrase(const char *line, int line_num)
         exit(-1);
     }
 
-    errno = 0;
-    phrase_data[num_phrase_data].freq = strtoul(freq, 0, 0);
-    if (errno) {
+    phrase_data[num_phrase_data].freq = strtoul(freq, &endptr, 0);
+    if ((*freq == '\0' || *endptr != '\0') ||
+        (phrase_data[num_phrase_data].freq == ULONG_MAX && errno == ERANGE)) {
         fprintf(stderr, "Error reading frequency `%s' in line %d, `%s'\n", freq, line_num, line);
         exit(-1);
     }
