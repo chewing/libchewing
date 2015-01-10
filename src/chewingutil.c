@@ -1375,16 +1375,15 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
 
     ret = asprintf(&filename, "%s" PLAT_SEPARATOR "%s", prefix, SOFTKBD_TABLE_FILE);
     if (ret == -1)
-        goto end;
+        goto filenamefail;
 
     file = fopen(filename, "r");
     if (!file)
         goto fileopenfail;
 
     line = ALC(char, LINE_LEN);
-
     if (!line)
-        goto end;
+        goto linefail;
 
     while (fgets(line, LINE_LEN, file)) {
         if (' ' != line[1])
@@ -1415,11 +1414,17 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
         pgdata->static_data.g_easy_symbol_num[_index] = len;
     }
     ret = 0;
-  end:
-    fclose(file);
-  fileopenfail:
+
+end:
     free(line);
+
+linefail:
+    fclose(file);
+
+fileopenfail:
     free(filename);
+
+filenamefail:
     return ret;
 }
 
