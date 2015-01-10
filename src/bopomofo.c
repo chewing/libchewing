@@ -216,6 +216,7 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             }
         }
 
+        /* fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ */
         if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
             pBopomofo->pho_inx[0] = 12;
         }
@@ -243,18 +244,20 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             } else
                 break;
         }
-        /* processing very special cases "j v c" */
-        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            pBopomofo->pho_inx[0] += 3;
-        }
 
-        /* Fuzzy "g e" to "j e" */
+        /* fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ */
         if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
             pBopomofo->pho_inx[0] = 12;
         }
 
-        /* ㄐㄑㄒ must follow ㄧㄩ */
+        /* ㄐㄑㄒ must be followed by ㄧㄩ, if not, convert them to ㄓㄔㄕ */
+        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+            /* followed by ㄨ */
+            pBopomofo->pho_inx[0] += 3;
+        }
+
         if (type == 2 && pBopomofo->pho_inx[1] == 0 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+            /* followed by other phones */
             pBopomofo->pho_inx[0] += 3;
         }
 
