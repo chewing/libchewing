@@ -216,10 +216,6 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             }
         }
 
-        if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
-            pBopomofo->pho_inx[0] = 12;
-        }
-
         searchTimes = (key == 'j') ? 3 : 2;
 
         return EndKeyProcess(pgdata, key, searchTimes);
@@ -243,19 +239,22 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             } else
                 break;
         }
-        /* processing very special cases "j v c" */
-        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            pBopomofo->pho_inx[0] += 3;
-        }
 
-        /* Fuzzy "g e" to "j e" */
-        if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
+        /* Fuzzy "ㄍㄧ to ㄐㄧ" and "ㄍㄩ to ㄐㄩ" */
+        if (type == 1 && (inx == 1 || inx == 3) && pBopomofo->pho_inx[0] == 9) {
             pBopomofo->pho_inx[0] = 12;
         }
 
-        /* ㄐㄑㄒ must follow ㄧㄩ */
-        if (type == 2 && pBopomofo->pho_inx[1] == 0 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            pBopomofo->pho_inx[0] += 3;
+        /* ㄐㄑㄒ must be followed by ㄧㄩ, if not, convert them to ㄓㄔㄕ */
+        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+            pBopomofo->pho_inx[0] += 3;  /* followed by ㄨ */
+        } else if (type == 2 && pBopomofo->pho_inx[1] == 0 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+            pBopomofo->pho_inx[0] += 3;  /* followed by other phones */
+        }
+
+        /* If ㄓㄔㄕ are followed by ㄧㄩ, convert them back to ㄐㄑㄒ */
+        if (type == 1 && (inx == 1 || inx == 3) && 15 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 17) {
+            pBopomofo->pho_inx[0] -= 3;
         }
 
         if (type == 3) {        /* the key is NOT a phone */
@@ -345,6 +344,11 @@ static int ET26PhoInput(ChewingData *pgdata, int key)
 
         if (type == 2 && pBopomofo->pho_inx[1] == 0 && (pBopomofo->pho_inx[0] == 12 || pBopomofo->pho_inx[0] == 14)) {
             pBopomofo->pho_inx[0] += 3;
+        }
+
+        /* If ㄓㄔㄕ are followed by ㄧㄩ, convert them back to ㄐㄑㄒ */
+        if (type == 1 && (inx == 1 || inx == 3) && 15 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 17) {
+            pBopomofo->pho_inx[0] -= 3;
         }
 
         if (type == 3) {        /* the key is NOT a phone */
