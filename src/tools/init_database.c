@@ -250,7 +250,7 @@ void store_phrase(const char *line, int line_num)
     int i;
     int j;
 
-    strncpy(buf, line, sizeof(buf));
+    snprintf(buf, sizeof(buf), line);
     strip(buf);
     if (strlen(buf) == 0)
         return;
