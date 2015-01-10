@@ -433,13 +433,13 @@ int internal_has_userphrase(const char *file UNUSED, int line UNUSED,
 
     phone = calloc(MAX_PHONE_SEQ_LEN, sizeof(*phone));
     if (!phone) {
-        fprintf(stderr, "calloc fails at %s:%d", __FILE__, __LINE__);
+        fprintf(stderr, "calloc fails at %s:%d\n", __FILE__, __LINE__);
         goto end;
     }
 
     bopomofo_buf = strdup(bopomofo);
     if (!bopomofo_buf) {
-        fprintf(stderr, "strdup fails at %s:%d", __FILE__, __LINE__);
+        fprintf(stderr, "strdup fails at %s:%d\n", __FILE__, __LINE__);
         goto end;
     }
 
@@ -492,5 +492,5 @@ int exit_status()
 void clean_userphrase()
 {
     if(remove(TEST_HASH_DIR PLAT_SEPARATOR DB_NAME) != 0 && errno != ENOENT)
-        fprintf(stderr, "remove fails at %s:%d", __FILE__, __LINE__);
+        fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
 }

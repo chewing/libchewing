@@ -88,7 +88,7 @@ void *read_input(const char *dir_name, const char *base_name)
 
     len = snprintf(filename, sizeof(filename), "%s" PLAT_SEPARATOR "%s", dir_name, base_name);
     if (len + 1 > sizeof(filename)) {
-        fprintf(stderr, "Too long path %s" PLAT_SEPARATOR "%s", dir_name, base_name);
+        fprintf(stderr, "Too long path %s" PLAT_SEPARATOR "%s\n", dir_name, base_name);
         exit(-1);
     }
 
