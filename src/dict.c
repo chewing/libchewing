@@ -64,7 +64,7 @@ int InitDict(ChewingData *pgdata, const char *prefix)
  */
 static void GetVocabFromDict(ChewingData *pgdata, Phrase *phr_ptr)
 {
-    strcpy(phr_ptr->phrase, pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
+    snprintf(phr_ptr->phrase, sizeof(phr_ptr->phrase), pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
     phr_ptr->freq = GetUint24(pgdata->static_data.tree_cur_pos->phrase.freq);
     pgdata->static_data.tree_cur_pos++;
 }
