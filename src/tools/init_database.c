@@ -637,7 +637,7 @@ void write_index_tree()
     int head = 0;
     int tail = 0;
     int tree_size = 1;
-    size_t q_len = num_word_data + num_phrase_data;
+    size_t q_len = num_word_data + num_phrase_data + 1;
 
     FILE *output = fopen(PHONE_TREE_FILE, "wb");
 
@@ -646,7 +646,7 @@ void write_index_tree()
         exit(-1);
     }
 
-    queue = ALC(NODE *, q_len + 1);
+    queue = ALC(NODE *, q_len);
     assert(queue);
 
     queue[head++] = root;
