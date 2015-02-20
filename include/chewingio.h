@@ -234,9 +234,10 @@ CHEWING_API int chewing_get_KBType(const ChewingContext *ctx);
 
 /**
  * @brief Get keyboard mapping type in C-style string format
+ * @see KBStr2Num()
  *
  * @param ctx
- * @return If successed then return kbtype from KBStr2Num
+ * @return The name of the current keyboard layout. The caller must free it.
  */
 CHEWING_API char *chewing_get_KBString(const ChewingContext *ctx);
 
