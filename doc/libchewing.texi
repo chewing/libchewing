@@ -445,7 +445,7 @@ This function returns the the current layout name string of @var{ctx}. This
 function returns @code{NULL} when no memory.
 
 The return value is the name of the current layout, see also function
-@code{chewing_get_KBStr2Num}. The returned pointer @emph{must} be
+@code{chewing_KBStr2Num}. The returned pointer @emph{must} be
 freed by function @code{chewing_free}.
 @end deftypefun
 
