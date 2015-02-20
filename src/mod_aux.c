@@ -45,7 +45,7 @@ CHEWING_API int chewing_commit_Check(const ChewingContext *ctx)
  * @param ctx handle to Chewing IM context
  *
  * retrun current commit string, regardless current input state.
- * Alwasy returns a char pointer, caller must free it.
+ * Always returns a char pointer, caller must free it.
  */
 CHEWING_API char *chewing_commit_String(const ChewingContext *ctx)
 {
@@ -64,7 +64,7 @@ CHEWING_API char *chewing_commit_String(const ChewingContext *ctx)
 /**
  * @param ctx handle to Chewing IM context
  * retrun current commit string, regardless current input state.
- * Alwasy returns a const char pointer, you have to clone them immediately,
+ * Always returns a const char pointer, you have to clone them immediately,
  * if you need.
  */
 CHEWING_API const char *chewing_commit_String_static(const ChewingContext *ctx)
@@ -140,7 +140,7 @@ CHEWING_API const char *chewing_buffer_String_static(const ChewingContext *ctx)
 /**
  * @param ctx handle to Chewing IM context
  *
- * Alwasy returns a const char pointer, you have to clone them immediately,
+ * Always returns a const char pointer, you have to clone them immediately,
  * if you need.
  */
 CHEWING_API const char *chewing_bopomofo_String_static(const ChewingContext *ctx)
