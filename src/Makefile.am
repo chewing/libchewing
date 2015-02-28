@@ -4,7 +4,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
+	-DCHEWING_DATADIR=\"$(datadir)/libchewing\" \
 	$(USERPHRASE_CPPFLAGS) \
 	$(DEFAULT_CPPFLAGS) \
 	$(NULL)
