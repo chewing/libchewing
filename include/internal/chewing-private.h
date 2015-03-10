@@ -148,7 +148,7 @@ typedef struct AvailInfo {
                 /** @brief phone id. */
         const TreeType *id;
     } avail[MAX_PHRASE_LEN];
-        /** @brief total number of availble lengths. */
+        /** @brief total number of available lengths. */
     int nAvail;
         /** @brief the current choosing available length. */
     int currentAvail;

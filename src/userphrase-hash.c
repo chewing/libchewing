@@ -24,7 +24,7 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-/* load the orginal frequency from the static dict */
+/* load the original frequency from the static dict */
 static int LoadOriginalFreq(ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len)
 {
     const TreeType *tree_pos;

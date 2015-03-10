@@ -491,7 +491,7 @@ enumerate.
 @end deftypefun
 
 @deftypefun char* chewing_kbtype_String (ChewingContext *@var{ctx})
-This function returns the current enumerated keyboard layout name. The returnd
+This function returns the current enumerated keyboard layout name. The returned
 string is emtpy string when enumeration is over. This function returns
 @code{NULL} when no memory.
 
@@ -500,7 +500,7 @@ The returned value is a pointer to a character string. The memory
 @end deftypefun
 
 @deftypefun char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
-This function returns the current enumerated keyboard layout name. The returnd
+This function returns the current enumerated keyboard layout name. The returned
 string is emtpy string when enumeration is over.
 
 The return value is a const pointer to a character string. The memory will

@@ -308,7 +308,7 @@ static void internal_release_Phrase(UsedPhraseMode mode, Phrase *pUser, Phrase *
         if (pUser != NULL)
             free(pUser);
         break;
-    default:                   /* In fact, it is alwyas 0 */
+    default:                   /* In fact, it is always 0 */
         if (pDict != NULL)
             free(pDict);
         if (pUser != NULL)
@@ -430,7 +430,7 @@ static int CompRecord(const RecordNode **pa, const RecordNode **pb)
  *
  * Example:
  * 國民大會 has three interval: 國民, 大會, 國民大會. This function removes
- * 國名, 大會 becasue 國民大會 contains 國民 and 大會.
+ * 國名, 大會 because 國民大會 contains 國民 and 大會.
  */
 static void Discard1(TreeDataType *ptd)
 {

@@ -48,7 +48,7 @@ static int PhoneSeqTheSame(const uint16_t p1[], const uint16_t p2[])
 {
     int i;
 
-    if (!p1 || !p2)             /* FIXME: should not happend. */
+    if (!p1 || !p2)             /* FIXME: should not happened. */
         return 0;
 
     for (i = 0; (p1[i] != 0 && p2[i] != 0); i++) {
