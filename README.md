@@ -133,13 +133,13 @@ build libchewing. If any tools you use below this version, libchewing might not
 be built.
 
 + Build tools:
-   - autoconf >= 2.67
+   - autoconf >= 2.65
    - automake >= 1.11.6
    - libtool >= 2.4.2
    - cmake >= 2.8.8 (optional)
 + Toolchain / IDE:
    - clang >= 3.2
-   - gcc >= 4.7.3
+   - gcc >= 4.6.3
    - Visual Studio Express 2012
 + Documentation tools:
    - texinfo >= 4.12
