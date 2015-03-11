@@ -132,4 +132,4 @@ void plat_mmap_unmap(plat_mmap *handle)
     }
 }
 
-#endif                          /* UNDER_POSIX */
+#endif /* UNDER_POSIX */
