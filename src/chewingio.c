@@ -2088,7 +2088,7 @@ CHEWING_API int chewing_userphrase_lookup(ChewingContext *ctx, const char *phras
 CHEWING_API const char *chewing_cand_string_by_index_static(ChewingContext *ctx, int index)
 {
     ChewingData *pgdata;
-    char *s;
+    const char *s;
 
     if (!ctx) {
         return NULL;

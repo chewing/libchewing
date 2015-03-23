@@ -709,7 +709,7 @@ This function closes the candidate windows. It returns @code{0} when success,
 @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
+@deftypefun const char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
 @var{index})
 This function returns the candidate string by its index. The range of
 @var{index} shall be @code{0} @leq{} @var{index} <
