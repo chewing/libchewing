@@ -19,7 +19,7 @@
 #include "chewing.h"
 #include "testhelper.h"
 
-static char *KEYBOARD_STRING[] = {
+static const char *const KEYBOARD_STRING[] = {
     "KB_DEFAULT",
     "KB_HSU",
     "KB_IBM",
