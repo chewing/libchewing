@@ -104,7 +104,7 @@ CHEWING_API int chewing_kbtype_Total(const ChewingContext *ctx);
 CHEWING_API void chewing_kbtype_Enumerate(ChewingContext *ctx);
 CHEWING_API int chewing_kbtype_hasNext(ChewingContext *ctx);
 CHEWING_API char *chewing_kbtype_String(ChewingContext *ctx);
-CHEWING_API char *chewing_kbtype_String_static(ChewingContext *ctx);
+CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx);
 
 /*@}*/
 

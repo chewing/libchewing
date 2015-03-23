@@ -499,7 +499,7 @@ The returned value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
+@deftypefun const char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
 This function returns the current enumerated keyboard layout name. The returned
 string is emtpy string when enumeration is over.
 

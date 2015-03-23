@@ -488,7 +488,7 @@ CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx)
     LOG_API("");
 
     if (chewing_kbtype_hasNext(ctx)) {
-        s = (char *) kb_type_str[ctx->kb_no];
+        s = kb_type_str[ctx->kb_no];
         ctx->kb_no++;
     }
 
