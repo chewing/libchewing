@@ -799,7 +799,7 @@ The return value is @code{1} on success, @code{0} on failure.
 @end deftypefun
 
 @deftypefun char* chewing_commit_String (const ChewingContext *@var{ctx})
-This function returns the string in the commit buffer This function returns
+This function returns the string in the commit buffer. This function returns
 @code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
