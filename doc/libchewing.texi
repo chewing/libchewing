@@ -881,6 +881,14 @@ because it provides more consistent interface
 @end quotation
 @end deftypefun
 
+@deftypefun char* chewing_bopomofo_String (ChewingContext *@var{ctx})
+This function returns the phonetic characters in the pre-edit buffer. This
+function returns @code{NULL} when no memory.
+
+The return value @emph{must} be freed by the @code{chewing_free}
+function.
+@end deftypefun
+
 @deftypefun const char* chewing_bopomofo_String_static (const ChewingContext *@var{ctx})
 This function returns the phonetic characters in the pre-edit buffer.
 
