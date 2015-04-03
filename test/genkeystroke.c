@@ -215,15 +215,14 @@ void show_choose_buffer(int x, int y, ChewingContext *ctx)
     while (chewing_cand_hasNext(ctx)) {
         if (i > chewing_cand_ChoicePerPage(ctx))
             break;
-        sprintf(str, "%d.", i);
+        snprintf(str, sizeof(str), "%d.", i);
         if (hasColor)
             attron(COLOR_PAIR(3));
         addstr(str);
         if (hasColor)
             attroff(COLOR_PAIR(3));
         cand_string = chewing_cand_String_static(ctx);
-        sprintf(str, " %s ", cand_string);
-        addstr(str);
+        addstr(cand_string);
         i++;
     }
     currentPageNo = chewing_cand_CurrentPage(ctx);
