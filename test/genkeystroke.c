@@ -1,7 +1,7 @@
 /**
- * gen_keystroke.c
+ * genkeystroke.c
  *
- * Copyright (c) 2004, 2005
+ * Copyright (c) 2004, 2005, 2015
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
