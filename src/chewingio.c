@@ -227,7 +227,7 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
     }
 
     if (!userphrase_path) {
-        LOG_ERROR("GetUserPhraseStoregePath returns %#p", path);
+        LOG_ERROR("GetUserPhraseStoragePath returns %p", path);
         goto error;
     }
 
