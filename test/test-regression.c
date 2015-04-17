@@ -24,8 +24,7 @@ FILE *fd;
 
 void test_libchewing_googlecode_issue_472()
 {
-    /* FIXME: Add const cause gcc warning */
-    static char *INPUT[] = {
+    static const char *const INPUT[] = {
         "<T>|&Wt<H>mrJY)G<C2>OqJ<H><H>Yl<R>p0<EE>QE[^<C1>k",
         "+F<C9>hQ$UIICMr!X8/9<C3>(N<T>yU2!-LUI<D>`CS<D>jShm9SF}<EN>[`QYu<C8>k",
         "hk4`2<D>jk",
@@ -50,8 +49,7 @@ void test_libchewing_googlecode_issue_472()
 
 void test_libchewing_googlecode_issue_473()
 {
-    /* FIXME: Add const cause gcc warning */
-    static char *INPUT[] = {
+    static const char *const INPUT[] = {
         "t<N->_ M1<N+>H[Ls3<L><N1>PL+Z]4<C1>&(^H*H<TT>Sc<N->P]!|<CB>-<C6>S<H><N1><C0>U<B>d}P!f<EN><N.><C7>V!U!w|4-=S<C1>b<N2>Q",
         "wv<C0><C5><N9>$FIF<D><N4>B *<C2>E4*<C2>q)Kf)<SS><TT>4=<N5>%<R>mN4<EN>H<N9><N.>8s{XTD<N6>jZV(y3G`9<C6>JTy<B>J<C1>SNc<E>hC<SL><N/><R><C6>@an<C3><N7>wzF<C3>P*<N*><B>l<C3><N6>W<N*> $<SR><N.><N1><E><E><N0><N6>Y",
     };

@@ -243,7 +243,7 @@ static void type_keystroke(ChewingContext *ctx, get_char_func get_char, void *pa
 
 static int get_char_by_string(void *param)
 {
-    char **ptr = param;
+    const char **ptr = param;
     char ch;
 
     assert(param);
@@ -282,7 +282,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
     }
 }
 
-void type_keystroke_by_string(ChewingContext *ctx, char *keystroke)
+void type_keystroke_by_string(ChewingContext *ctx, const char *keystroke)
 {
     type_keystroke(ctx, get_char_by_string, &keystroke);
 }
