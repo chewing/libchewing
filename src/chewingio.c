@@ -419,7 +419,7 @@ CHEWING_API void chewing_set_candPerPage(ChewingContext *ctx, int n)
 
     LOG_API("n = %d", n);
 
-    if (MIN_SELKEY <= n && n <= MAX_SELKEY)
+    if (MIN_SELKEY <= n && n <= MAX_SELKEY && ctx->data->config.selKey[n - 1])
         ctx->data->config.candPerPage = n;
 }
 
