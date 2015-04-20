@@ -783,7 +783,7 @@ static int SelectCandidate(ChewingData *pgdata, int num)
 static void DoSelect(ChewingData *pgdata, int num)
 {
     assert(pgdata->choiceInfo.pageNo >= 0);
-    if (num >= 0) {
+    if (num >= 0 && num < pgdata->choiceInfo.nChoicePerPage) {
         num += pgdata->choiceInfo.pageNo * pgdata->choiceInfo.nChoicePerPage;
         SelectCandidate(pgdata, num);
     }
