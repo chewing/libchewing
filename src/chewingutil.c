@@ -909,7 +909,7 @@ int AddSelect(ChewingData *pgdata, int sel_i)
     return 0;
 }
 
-int CountSelKeyNum(int key, ChewingData *pgdata)
+int CountSelKeyNum(int key, const ChewingData *pgdata)
         /* return value starts from 0.  If less than zero : error key */
 {
     int i;

@@ -43,7 +43,7 @@ int MakeOutputWithRtn(ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn)
 int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata);
 void MakeOutputAddMsgAndCleanInterval(ChewingOutput *pgo, ChewingData *pgdata);
 int AddSelect(ChewingData *pgdata, int sel_i);
-int CountSelKeyNum(int key, ChewingData *pgdata);
+int CountSelKeyNum(int key, const ChewingData *pgdata);
 int CountSymbols(ChewingData *pgdata, int to);
 int PhoneSeqCursor(ChewingData *pgdata);
 int ChewingIsChiAt(int cursor, ChewingData *pgdata);
