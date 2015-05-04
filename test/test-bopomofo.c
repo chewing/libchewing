@@ -1302,7 +1302,7 @@ void test_auto_commit_symbol()
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 2);
 
-    type_keystroke_by_string(ctx, "`31hk4g4hk4g4" /* ，測試 */ );
+    type_keystroke_by_string(ctx, "`31hk4g4" /* ，測試 */ );
     ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
     ok_commit_buffer(ctx, "\xEF\xBC\x8C" /* ， */ );
 
@@ -1312,8 +1312,7 @@ void test_auto_commit_symbol()
 void test_auto_commit()
 {
     test_auto_commit_phrase();
-    // FIXME: Auto commit for symbol seem to be incorrect.
-    //test_auto_commit_symbol();
+    test_auto_commit_symbol();
 }
 
 void test_interval()
