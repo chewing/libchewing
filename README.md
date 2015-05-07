@@ -17,7 +17,7 @@ The Chewing core team extended their work and actively maintains the project
 as full open source efforts.
 
 + Website: <http://chewing.im/>
-+ Issue tracker: <http://code.google.com/p/chewing/issues/list>
++ Issue tracker: <https://github.com/chewing/libchewing/issues>
 + Mailing lists:
    - Development: <http://groups.google.com/group/chewing-devel>
    - General: <http://groups.google.com/group/chewing>
