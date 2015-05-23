@@ -59,14 +59,14 @@ uint16_t UintFromPhone(const char *phone);
  * 3. Rhymes: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
  * 4. Tonal marks: ˙ˊˇˋ
  *
- * The index of a phonetic symbols is defined by the order in its corresponding
+ * The index of a phonetic symbol is defined by the order in its corresponding
  * category starting from 1.
  *
  * The argument `ph_inx` should be of size 4. Each element is the index of the
  * four categories respectively. If some categories are not used, the
  * index should be 0.
  *
- * @param[in] ph_inx array of index of phnetic symbols.
+ * @param[in] ph_inx array of index of phonetic symbols.
  * @return an 16-bit unsigned integer or 0 if any index is illegal.
  */
 uint16_t UintFromPhoneInx(const int ph_inx[]);
