@@ -1,7 +1,7 @@
 /**
  * chewing-utf8-util.c
  *
- * Copyright (c) 2005, 2006, 2012-2104
+ * Copyright (c) 2005, 2006, 2012-2014
  *	libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
