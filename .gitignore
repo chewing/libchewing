@@ -44,6 +44,7 @@ include/stamp-h1
 # cmake generated files
 config.h
 /libchewing.*
+/libsqlite3_library.a
 /libtesthelper.a
 /libuserphrase.a
 /Testing
