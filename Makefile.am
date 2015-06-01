@@ -6,7 +6,7 @@ SUBDIRS = thirdparty/sqlite-amalgamation
 else
 SUBDIRS =
 endif
-SUBDIRS += src/common src/tools data src test doc
+SUBDIRS += src/tools data src test doc
 
 CMAKE_FILES = \
 	cmake/config.h.in \
