@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef HAVE_CONFIG_H
+#    include <config.h>
+#endif
+
 #include "chewing-private.h"
 #include "global-private.h"
 #include "key2pho-private.h"
@@ -74,14 +78,14 @@ void dump(uint32_t node_pos, uint32_t indent)
     }
 }
 
-void *read_input(const char *dir_name, const char *base_name)
+void *read_input(const char *dir_name, const char *base_name, plat_mmap *mmap)
 {
     char filename[PATH_MAX];
     size_t len;
+    size_t offset;
+    size_t file_size;
+    size_t csize;
     void *buf = NULL;
-    FILE *fp;
-    long int raw_filesize;
-    size_t filesize;
 
     assert(dir_name);
     assert(base_name);
@@ -92,46 +96,41 @@ void *read_input(const char *dir_name, const char *base_name)
         exit(-1);
     }
 
-    fp = fopen(filename, "rb");
-    if (!fp) {
+    file_size = plat_mmap_create(mmap, filename, FLAG_ATTRIBUTE_READ);
+    if (file_size <= 0) {
         fprintf(stderr, "Error opening the file %s\n", filename);
         exit(-1);
     }
 
-    fseek(fp, 0, SEEK_END);
-    raw_filesize = ftell(fp);
-    if (raw_filesize < 0) {
-        fprintf(stderr, "Error ftell the file %s\n", filename);
-        exit(-1);
-    }
-    filesize = raw_filesize;
-    rewind(fp);
-
-    buf = ALC(char, filesize);
-    assert(buf);
-    if (fread(buf, 1, filesize, fp) != filesize) {
+    offset = 0;
+    csize = file_size;
+    buf = plat_mmap_set_view(mmap, &offset, &csize);
+    if (!buf) {
         fprintf(stderr, "Error reading the file %s\n", filename);
         exit(-1);
     }
-    fclose(fp);
 
     return buf;
 }
 
 int main(int argc, char *argv[])
 {
+    plat_mmap dict_mmap;
+    plat_mmap tree_mmap;
+
     if (argc != 2) {
         printf(USAGE, argv[0]);
         return -1;
     }
 
-    dict = (char *) read_input(argv[1], DICT_FILE);
-    root = (TreeType *) read_input(argv[1], PHONE_TREE_FILE);
+
+    dict = (char *) read_input(argv[1], DICT_FILE, &dict_mmap);
+    root = (TreeType *) read_input(argv[1], PHONE_TREE_FILE, &tree_mmap);
 
     dump(0, 0);
 
-    free(dict);
-    free(root);
+    plat_mmap_close(&dict_mmap);
+    plat_mmap_close(&tree_mmap);
 
     return 0;
 }

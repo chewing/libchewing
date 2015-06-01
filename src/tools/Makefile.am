@@ -23,4 +23,7 @@ dump_database_SOURCES = \
 	dump_database.c \
 	$(top_srcdir)/src/common/chewing-utf8-util.c \
 	$(top_srcdir)/src/common/key2pho.c \
+	$(top_srcdir)/src/porting_layer/src/plat_mmap_posix.c \
+	$(top_srcdir)/src/porting_layer/src/plat_mmap_windows.c \
+	$(top_srcdir)/src/porting_layer/src/rpl_malloc.c \
 	$(NULL)
