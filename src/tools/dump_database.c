@@ -34,8 +34,8 @@
 #include "plat_types.h"
 #include "private.h"
 
-char *dict = NULL;
-TreeType *root = NULL;
+const char *dict = NULL;
+const TreeType *root = NULL;
 const char USAGE[] =
     "Usage: %s <data_directory>\n"
     "This program dumps the entire index structure to stdout.\n";
@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
     }
 
 
-    dict = (char *) read_input(argv[1], DICT_FILE, &dict_mmap);
-    root = (TreeType *) read_input(argv[1], PHONE_TREE_FILE, &tree_mmap);
+    dict = (const char *) read_input(argv[1], DICT_FILE, &dict_mmap);
+    root = (const TreeType *) read_input(argv[1], PHONE_TREE_FILE, &tree_mmap);
 
     dump(0, 0);
 
