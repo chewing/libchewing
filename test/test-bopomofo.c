@@ -743,10 +743,35 @@ void test_Down_not_entering_chewing()
     chewing_delete(ctx);
 }
 
+void test_Down_open_candidate_window_after_deleting_symbol()
+{
+    ChewingContext *ctx;
+    int ret;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "<<>hk4g4<<>" /* ，測試， */);
+    ret = chewing_cand_TotalChoice(ctx);
+    ok(ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0);
+
+    type_keystroke_by_string(ctx, "<H><DC><EN><D>" /* Home Delete End Down */);
+    ret = chewing_cand_TotalChoice(ctx);
+    ok(ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0);
+
+    type_keystroke_by_string(ctx, "2");
+    ret = chewing_cand_TotalChoice(ctx);
+    ok(ret == 0, "chewing_cand_TotalChoice() returns `%d' shall be `%d'", ret, 0);
+    ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE2\x86\x90" /* 測試← */ );
+
+    chewing_delete(ctx);
+}
+
 void test_Down()
 {
     test_Down_open_candidate_window();
     test_Down_not_entering_chewing();
+    test_Down_open_candidate_window_after_deleting_symbol();
 }
 
 void test_Tab_insert_breakpoint_between_word()
