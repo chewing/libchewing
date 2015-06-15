@@ -1004,6 +1004,9 @@ int ChewingKillChar(ChewingData *pgdata, int chiSymbolCursorToKill, int minus)
     }
     pgdata->symbolKeyBuf[chiSymbolCursorToKill] = 0;
     assert(pgdata->chiSymbolBufLen - chiSymbolCursorToKill);
+    memmove(&pgdata->symbolKeyBuf[chiSymbolCursorToKill],
+            &pgdata->symbolKeyBuf[chiSymbolCursorToKill + 1],
+            sizeof(pgdata->symbolKeyBuf[0]) * (pgdata->chiSymbolBufLen - chiSymbolCursorToKill));
     memmove(&pgdata->preeditBuf[chiSymbolCursorToKill],
             &pgdata->preeditBuf[chiSymbolCursorToKill + 1],
             sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - chiSymbolCursorToKill));
