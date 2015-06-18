@@ -132,8 +132,7 @@ void test_hsu_po_to_bo()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x86" /* ㄆ */ );
 
     type_keystroke_by_string(ctx, "b");
-    // FIXME: ㄅ shall overwrite ㄆ
-    //ok_bopomofo_buffer(ctx, "\xE3\x84\x85" /* ㄅ */ );
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x85" /* ㄅ */ );
 
     chewing_delete(ctx);
 }
@@ -141,6 +140,30 @@ void test_hsu_po_to_bo()
 void test_hsu()
 {
     test_hsu_po_to_bo();
+}
+
+void test_et26_po_to_bo()
+{
+    // https://github.com/chewing/libchewing/issues/170
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, chewing_KBStr2Num("KB_ET26"));
+
+    type_keystroke_by_string(ctx, "p");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x86" /* ㄆ */ );
+
+    type_keystroke_by_string(ctx, "b");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x85" /* ㄅ */ );
+
+    chewing_delete(ctx);
+}
+
+void test_et26()
+{
+    test_et26_po_to_bo();
 }
 
 int main(int argc, char *argv[])
@@ -163,6 +186,7 @@ int main(int argc, char *argv[])
     test_enumerate_keyboard_type();
 
     test_hsu();
+    test_et26();
 
     fclose(fd);
 
