@@ -46,6 +46,8 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     set(CMAKE_C_FLAGS "/wd4819 ${CMAKE_C_FLAGS}")
     add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE)
     add_definitions(/Dsnprintf=_snprintf /D__func__=__FUNCTION__)
+
+    option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." false)
 endif()
 
 check_c_compiler_flag(-fvisibility=hidden FVISIBILITY_HIDDEN)
@@ -397,7 +399,10 @@ else()
     )
 endif()
 
-if (NOT MSVC)
+if (BUILD_DLL OR NOT MSVC)
+    if (MSVC)
+        add_definitions(-DCHEWINGDLL_EXPORTS)
+    endif()
     add_library(chewing_shared SHARED
         $<TARGET_OBJECTS:chewing>
         $<TARGET_OBJECTS:common>
@@ -406,12 +411,14 @@ if (NOT MSVC)
     add_dependencies(check chewing_shared)
 endif()
 
-add_library(chewing_static STATIC
-    $<TARGET_OBJECTS:chewing>
-    $<TARGET_OBJECTS:common>
-)
-list(APPEND LIBS chewing_static)
-add_dependencies(check chewing_static)
+if (NOT BUILD_DLL)
+    add_library(chewing_static STATIC
+        $<TARGET_OBJECTS:chewing>
+        $<TARGET_OBJECTS:common>
+    )
+    list(APPEND LIBS chewing_static)
+    add_dependencies(check chewing_static)
+endif()
 
 foreach(lib ${LIBS})
     target_link_libraries(${lib} userphrase)
