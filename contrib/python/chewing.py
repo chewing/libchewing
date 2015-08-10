@@ -43,12 +43,8 @@ class ChewingContext:
 
     def __getattr__(self, name):
         func = 'chewing_' + name
-        if func in _libchewing.__dict__:
-            wrap = partial(_libchewing.__dict__[func], self.ctx)
-            setattr(self, name, wrap)
-            return wrap
-        elif hasattr(_libchewing, func):
-            wrap = partial(_libchewing.__getattr__(func), self.ctx)
+        if hasattr(_libchewing, func):
+            wrap = partial(getattr(_libchewing, func), self.ctx)
             setattr(self, name, wrap)
             return wrap
         else:
