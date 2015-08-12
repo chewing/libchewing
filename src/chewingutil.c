@@ -555,7 +555,7 @@ static int ChewingIsBreakPoint(int cursor, ChewingData *pgdata)
         "\xE5\x9C\xA8",
         /* 在 */
     };
-    int i;
+    size_t i;
 
     if (!ChewingIsChiAt(cursor, pgdata))
         return 1;
@@ -1450,7 +1450,7 @@ void copyStringFromPreeditBuf(ChewingData *pgdata, int pos, int len, char *outpu
     int x;
 
     assert(pgdata);
-    assert(0 <= pos && pos + len < ARRAY_SIZE(pgdata->preeditBuf));
+    assert(0 <= pos && (size_t) (pos + len) < ARRAY_SIZE(pgdata->preeditBuf));
     assert(output);
     assert(output_len);
 

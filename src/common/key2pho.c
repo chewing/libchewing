@@ -259,8 +259,8 @@ size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len
 
 ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const char *bopomofo_buf)
 {
-    ssize_t i;
-    ssize_t len;
+    size_t i;
+    size_t len;
 
     assert(bopomofo_buf);
 

@@ -441,7 +441,7 @@ UserPhraseData *UserGetPhraseNext(ChewingData *pgdata, const uint16_t phoneSeq[]
     return &pgdata->userphrase_data;
 }
 
-void UserGetPhraseEnd(ChewingData *pgdata, const uint16_t phoneSeq[])
+void UserGetPhraseEnd(ChewingData *pgdata UNUSED, const uint16_t phoneSeq[] UNUSED)
 {
     /* FIXME: Remove this */
 }

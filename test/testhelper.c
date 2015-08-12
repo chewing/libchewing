@@ -385,7 +385,7 @@ void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, cons
 void internal_ok_candidate_len(const char *file, int line, ChewingContext *ctx, size_t expected_len)
 {
     const char *buf;
-    int actual_len;
+    size_t actual_len;
 
     assert(ctx);
 
@@ -465,7 +465,7 @@ int internal_has_userphrase(const char *file UNUSED, int line UNUSED,
     return ret;
 }
 
-void logger(void *data, int level, const char *fmt, ...)
+void logger(void *data, int level UNUSED, const char *fmt, ...)
 {
     va_list ap;
     FILE *fd = (FILE *) data;

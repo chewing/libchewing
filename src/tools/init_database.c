@@ -247,8 +247,7 @@ void store_phrase(const char *line, int line_num)
     size_t phrase_len;
     WordData word;              /* For check. */
     WordData *found_word = NULL;
-    int i;
-    int j;
+    size_t i, j;
 
     snprintf(buf, sizeof(buf), "%s", line);
     strip(buf);
@@ -634,9 +633,8 @@ void write_index_tree()
     NODE **queue;
     NODE *p;
     NODE *pNext;
-    int head = 0;
-    int tail = 0;
-    int tree_size = 1;
+    size_t head = 0, tail = 0;
+    size_t tree_size = 1;
     size_t q_len = num_word_data + num_phrase_data + 1;
 
     FILE *output = fopen(PHONE_TREE_FILE, "wb");

@@ -299,7 +299,7 @@ static int ConfigDatabase(ChewingData *pgdata)
 
 static int CreateStmt(ChewingData *pgdata)
 {
-    int i;
+    size_t i;
     int ret;
 
     assert(pgdata);
@@ -478,7 +478,7 @@ int InitUserphrase(ChewingData *pgdata, const char *path)
 
 void TerminateUserphrase(ChewingData *pgdata)
 {
-    int i;
+    size_t i;
     int ret;
 
     UpdateLifeTime(pgdata);
