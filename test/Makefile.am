@@ -57,6 +57,7 @@ check_PROGRAMS = \
 	testchewing \
 	simulate \
 	randkeystroke \
+	stress \
 	$(TEXT_UI_BIN) \
 	$(NATIVE_TESTS) \
 	$(NULL)
