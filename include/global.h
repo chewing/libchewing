@@ -76,7 +76,7 @@
 /* The following macros are modified from GLIB.
  * from GNU cpp Manual:
  * C99 introduces the _Pragma operator. This feature addresses a major problem
- * with ‘#pragma’: being a directive, it cannot be produced as the result of
+ * with `#pragma': being a directive, it cannot be produced as the result of
  * macro expansion. _Pragma is an operator, much like sizeof or defined, and
  * can be embedded in a macro.
  */
