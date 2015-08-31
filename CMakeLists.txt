@@ -45,7 +45,12 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     # /wd4819 can suppress this warning.
     set(CMAKE_C_FLAGS "/wd4819 ${CMAKE_C_FLAGS}")
     add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE)
-    add_definitions(/Dsnprintf=_snprintf /D__func__=__FUNCTION__)
+    add_definitions(/D__func__=__FUNCTION__)
+
+    # MSVC 2015 supports `snprintf`, so no need to redefine it
+    if(MSVC_VERSION LESS 1900)
+        add_definitions(/Dsnprintf=_snprintf)
+    endif()
 
     option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." false)
 endif()
