@@ -35,7 +35,7 @@ script:
   - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make && make check; fi
 
 before_install:
-  - sudo pip install cpp-coveralls --use-mirrors
+  - sudo pip install cpp-coveralls
   - sudo add-apt-repository --yes ppa:chewing/travis-ci
   - sudo apt-get update -qq
   - sudo apt-get install -qq texinfo cmake-data cmake valgrind libsqlite3-dev
