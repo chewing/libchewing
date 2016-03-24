@@ -36,8 +36,8 @@ before_install:
   - P_JOBS="-j$(getconf _NPROCESSORS_ONLN)"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make $P_JOBS CFLAGS="-Wall -Werror" && make $P_JOBS check && make $P_JOBS release; fi
-  - if [ x$BUILD == xcmake ]; then CFLAGS="-Wall -Werror" cmake . $CMAKE_OPTION && make $P_JOBS && make $P_JOBS check; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make $P_JOBS CFLAGS="$CFLAGS -Wall -Werror" && make $P_JOBS check && make $P_JOBS release; fi
+  - if [ x$BUILD == xcmake ]; then CFLAGS="$CFLAGS -Wall -Werror" cmake . $CMAKE_OPTION && make $P_JOBS && make $P_JOBS check; fi
 
 after_success:
   - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern '.*CMake[^/]+\.c(?:pp)?' --exclude-pattern '.*/[_A-Z0-9]+\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi
