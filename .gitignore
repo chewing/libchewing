@@ -54,6 +54,7 @@ test/genkeystroke
 test/performance
 test/randkeystroke
 test/simulate
+test/stress
 test/testchewing
 test/test-bopomofo
 test/test-config
