@@ -215,6 +215,20 @@ static void SetChoiceInfo(ChewingData *pgdata)
 
     /* secondly, read tree phrase */
     if (len == 1) {             /* single character */
+        memcpy(userPhoneSeq, &phoneSeq[cursor], sizeof(uint16_t) * len);
+        userPhoneSeq[len] = 0;
+        pUserPhraseData = UserGetPhraseFirst(pgdata, userPhoneSeq);
+        if (pUserPhraseData) {
+            do {
+                /* check if the phrase is already in the choice list */
+                if (ChoiceTheSame(pci, pUserPhraseData->wordSeq, len * ueBytesFromChar(pUserPhraseData->wordSeq[0])))
+                    continue;
+                /* otherwise store it */
+                ueStrNCpy(pci->totalChoiceStr[pci->nTotalChoice], pUserPhraseData->wordSeq, len, 1);
+                pci->nTotalChoice++;
+            } while ((pUserPhraseData = UserGetPhraseNext(pgdata, userPhoneSeq)) != NULL);
+        }
+        UserGetPhraseEnd(pgdata, userPhoneSeq);
         ChoiceInfoAppendChi(pgdata, pci, phoneSeq[cursor]);
 
         if (phoneSeq[cursor] != phoneSeqAlt[cursor]) {
