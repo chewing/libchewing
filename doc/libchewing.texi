@@ -84,7 +84,7 @@ behavior how an intelligent phonetic IM should works via the common
 interface, and Chewing permits the extra parameters and properties for the
 input method implementations to extend their specific functionality.
 
-@deftypevr Marco char* LIBCHEWING_ENCODING
+@deftypevr Macro char* LIBCHEWING_ENCODING
 @quotation Deprecated
 Not used anywhere. Will be removed soon.
 @end quotation
@@ -515,8 +515,8 @@ mode. The English mode supports input English characters
 directly. These functions set the current input mode.
 
 @c TODO: We should have ENGLISH_MODE, no?
-@deftypevr  Marco int CHINESE_MODE
-@deftypevrx Marco int SYMBOL_MODE
+@deftypevr  Macro int CHINESE_MODE
+@deftypevrx Macro int SYMBOL_MODE
 Indicate whether the input mode is translating keystrokes to Chinese
 character or not.
 @end deftypevr
@@ -532,8 +532,8 @@ The @var{mode} argument is one of the @code{CHINESE_MODE} and
 This function returns the current Chinese/English mode setting.
 @end deftypefun
 
-@deftypevr  Marco int FULLSHAPE_MODE
-@deftypevrx Marco int HALFSHAPE_MODE
+@deftypevr  Macro int FULLSHAPE_MODE
+@deftypevrx Macro int HALFSHAPE_MODE
 Indicate whether the input mode is translating the latin and
 punctuation characters to double-width characters or not.
 @end deftypevr
@@ -649,11 +649,11 @@ not enough, the @var{n} will be ignored. The default candidates per page is
 This function returns the candidates per page.
 @end deftypefun
 
-@deftypevr Marco int MAX_SELKEY
+@deftypevr Macro int MAX_SELKEY
 The number of maximum candidates that are selectable via shortcut keys. Its
 value is @code{10}.
 @end deftypevr
-@deftypevr Marco int MIN_SELKEY
+@deftypevr Macro int MIN_SELKEY
 The number of minimum candidates that are selectable via shortcut keys. Its
 value is @code{1}.
 @end deftypevr
@@ -673,8 +673,8 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
-@deftypevr  Marco int HSU_SELKEY_TYPE1
-@deftypevrx Marco int HSU_SELKEY_TYPE2
+@deftypevr  Macro int HSU_SELKEY_TYPE1
+@deftypevrx Macro int HSU_SELKEY_TYPE2
 Use `asdfjkl789' or `asdfzxcv89' as selection key.
 @end deftypevr
 
@@ -1073,20 +1073,20 @@ then the leading part will be committed automatically. The range of @var{n}
 shall between @code{MIN_CHI_SYMBOL_LEN} and @code{MAX_CHI_SYMBOL_LEN}.
 @end deftypefun
 
-@deftypevr Marco int MIN_CHI_SYMBOL_LEN
+@deftypevr Macro int MIN_CHI_SYMBOL_LEN
 The minimal size of pre-edit buffer. Its value is @code{0}.
 @end deftypevr
 
-@deftypevr Marco int MAX_CHI_SYMBOL_LEN
+@deftypevr Macro int MAX_CHI_SYMBOL_LEN
 The maximum size of pre-edit buffer. Its value is
 @code{MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN}.
 @end deftypevr
 
-@deftypevr Marco int MAX_PHONE_SEQ_LEN
+@deftypevr Macro int MAX_PHONE_SEQ_LEN
 The size of internal buffer for pre-edit buffer. Its value is @code{50}.
 @end deftypevr
 
-@deftypevr Marco int MAX_PHRASE_LEN
+@deftypevr Macro int MAX_PHRASE_LEN
 The maximum phrase size. Its value is @code{11}.
 @end deftypevr
 
