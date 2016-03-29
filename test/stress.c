@@ -15,8 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <unistd.h>
 #include <assert.h>
+
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 
 static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0 }; /* Default */
 
@@ -78,7 +81,7 @@ static int all_key[] = {
 
 static int random256()
 {
-    return random() % 256;
+    return rand() % 256;
 }
 
 void commit_string(ChewingContext *ctx)
@@ -235,8 +238,11 @@ int main(int argc, char *argv[])
 
 	if (i % 10000 == 0)
 	    printf("%zu\n", i);
+
+#ifndef _MSC_VER
 	if (getenv("AFL_PERSISTENT"))
 	    raise(SIGSTOP);
+#endif
     }
 
     return 0;
