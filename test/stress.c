@@ -19,6 +19,8 @@
 
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <io.h>
 #endif
 
 static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0 }; /* Default */
@@ -105,7 +107,7 @@ int get_stdin()
 
 int main(int argc, char *argv[])
 {
-    size_t i;
+    int i;
     int flag_random_init = 0;
     int flag_random_extra = 0;
     int flag_loop = -1;
