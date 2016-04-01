@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 	if (i % 10000 == 0)
 	    printf("%zu\n", i);
 
-#ifndef _MSC_VER
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(_WIN32_WCE)
 	if (getenv("AFL_PERSISTENT"))
 	    raise(SIGSTOP);
 #endif
