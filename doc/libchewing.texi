@@ -471,6 +471,7 @@ The string @var{str} might be one of the following layouts:
 @item @code{KB_HANYU_PINYIN}
 @item @code{KB_THL_PINYIN}
 @item @code{KB_MPS2_PINYIN}
+@item @code{KB_CARPALX}
 @end itemize
 
 See also the @code{chewing_kbtype_*} enumeration functions.

@@ -86,6 +86,7 @@ typedef enum KBTYPE {
     KBTYPE_HANYU_PINYIN,
     KBTYPE_LUOMA_PINYIN,
     KBTYPE_MSP2,            /* Mandarin Phonetic Symbols II */
+    KBTYPE_CARPALX,
     KBTYPE_COUNT
 } KBTYPE;
 

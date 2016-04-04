@@ -61,7 +61,8 @@ const char *const kb_type_str[] = {
     "KB_DACHEN_CP26",
     "KB_HANYU_PINYIN",
     "KB_THL_PINYIN",
-    "KB_MPS2_PINYIN"
+    "KB_MPS2_PINYIN",
+    "KB_CARPALX"
 };
 
 const char *const DICT_FILES[] = {
