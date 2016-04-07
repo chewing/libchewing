@@ -76,9 +76,9 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/porting_layer/include \
 	-I$(top_srcdir)/test/ \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
-	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
+	-DCHEWING_DATA_PREFIX="\"$(abs_top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
-	-DTEST_DATA_DIR="\"$(srcdir)/data\"" \
+	-DTEST_DATA_DIR="\"$(abs_srcdir)/data\"" \
 	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \
 	$(NULL)
