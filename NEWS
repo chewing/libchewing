@@ -22,6 +22,11 @@ What's New in libchewing GIT
   - Fix ChewingKillChar which is disabling OpenSymbolChoice #160 #181.
   - Allow ㄅ to overwrite ㄆ in ET26.
   - Fix symbol update bug
+* Successful stories:
+  - Rime Input Method Engine (RIME) takes partial dictionary from
+    libchewing.
+  - PIME (writing input methods for Windows easily with Python) supports
+    Chewing IM by default.
 
 
 What's New in libchewing 0.4.0 (Apr 11, 2014)
