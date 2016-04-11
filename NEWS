@@ -1,11 +1,24 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* New feature
+  - Add Carpalx keyboard layout support.
 * Dictionary
-  - Add debug tool: dump_database
+  - Add debug tool: dump_database.
+  - Update dictionary.
 * Misc
-  - Improve code readability and consistency
+  - Improve code readability and consistency.
+  - New test cases for different keyboard layout.
+* Windows
+  - Don't use SIGSTOP.
+  - Fix Windows build warnings and errors.
+  - Set WITH_INTERNAL_SQLITE3 to true by default in Windows.
 * Bug fixed
-  - Fix unexpected candidate disorder for '1'
+  - Fix several Coverity errors.
+  - check if ld supports --no-defined #144.
+  - Fix unexpected candidate disorder for '1' #153
+  - Fix ㄅ cannot overwrite ㄆ in HSU #170.
+  - Fix ChewingKillChar which is disabling OpenSymbolChoice #160 #181.
+  - Allow ㄅ to overwrite ㄆ in ET26.
   - Fix symbol update bug
 
 
