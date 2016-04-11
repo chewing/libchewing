@@ -82,6 +82,7 @@ static const char *const key_str[KBTYPE_COUNT] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* Hanyu Pinyin */
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* Luoma Pinyin */
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* secondary Bopomofo Pinyin */
+    "1qdz2gsxmtclnv5wrjyikfap8ue,9bo.0;h/-7634",        /* Carpalx */
 };
 
 /*

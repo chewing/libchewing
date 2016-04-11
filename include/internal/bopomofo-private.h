@@ -40,6 +40,7 @@ enum {
     KB_HANYU_PINYIN,
     KB_THL_PINYIN,
     KB_MPS2_PINYIN,
+    KB_CARPALX,
     KB_TYPE_NUM
 };
 
