@@ -8,10 +8,12 @@ What's New in libchewing GIT
 * Misc
   - Improve code readability and consistency.
   - New test cases for different keyboard layout.
-* Windows
-  - Don't use SIGSTOP.
-  - Fix Windows build warnings and errors.
-  - Set WITH_INTERNAL_SQLITE3 to true by default in Windows.
+* Platform-specific
+  - Don't use SIGSTOP in MS-Windows.
+  - Fix MS-Windows build warnings and errors.
+  - Set WITH_INTERNAL_SQLITE3 to true by default in MS-Windows.
+  - Fix gcov build and eliminate compilation warnings for gcc5.
+  - Implement GetDefaultChewingUserPath() for MS-Windows.
 * Bug fixed
   - Fix several Coverity errors.
   - check if ld supports --no-defined #144.
