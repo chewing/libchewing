@@ -4,7 +4,7 @@ What's New in libchewing GIT
   - Add Carpalx keyboard layout support #217.
 
 * Dictionary
-  - Update dictionary #188 #191 #201.
+  - Update dictionary #151 #155 #188 #191 #201.
   - Add debug tool: dump_database.
   - Sort tsi.src #212.
 
