@@ -1,27 +1,40 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 * New feature
-  - Add Carpalx keyboard layout support.
+  - Add Carpalx keyboard layout support #217.
+
 * Dictionary
+  - Update dictionary #188 #191 #201.
   - Add debug tool: dump_database.
-  - Update dictionary.
+  - Sort tsi.src #212.
+
 * Misc
+  - Tweak several comments.
+  - Fix libchewing document.
+  - Remove old/dead code.
   - Improve code readability and consistency.
-  - New test cases for different keyboard layout.
+  - Update automake syntax #114.
+  - Add test cases #169 #177.
+  - Update Python sample code.
+  - Add debug tool dump_database.
+  - Integrate coverity scan in https://scan.coverity.com/.
+
 * Platform-specific
-  - Don't use SIGSTOP in MS-Windows.
-  - Fix MS-Windows build warnings and errors.
+  - Update README for OS X.
   - Set WITH_INTERNAL_SQLITE3 to true by default in MS-Windows.
-  - Fix gcov build and eliminate compilation warnings for gcc5.
-  - Implement GetDefaultChewingUserPath() for MS-Windows.
+  - Fix Visual Studio compiling warnings/errors #168 #171 #189 #190 #213.
+  - Add a cmake option BUILD_DLL to enable building *.dll with MS VC++ #185.
+  - Make the python binding of libchewing support Windows dll files #186.
+  - Don't use SIGSTOP in MS-Windows.
+
 * Bug fixed
-  - Fix several Coverity errors.
-  - check if ld supports --no-defined #144.
+  - Check if ld supports --no-defined #144.
   - Fix unexpected candidate disorder for '1' #153
-  - Fix ㄅ cannot overwrite ㄆ in HSU #170.
+  - Replace bash-izm '==' operator with '=' for test(1) # 158.
+  - Fix several Coverity errors #172 #173.
   - Fix ChewingKillChar which is disabling OpenSymbolChoice #160 #181.
-  - Allow ㄅ to overwrite ㄆ in ET26.
-  - Fix symbol update bug
+  - ㄅ cannot overwrite ㄆ in HSU and ET26 #170 #183.
+
 * Successful stories:
   - Rime Input Method Engine (RIME) takes partial dictionary from
     libchewing.
