@@ -447,11 +447,78 @@ void test_userphrase_enumerate_rewind()
     chewing_delete(ctx);
 }
 
+void test_userphrase_enumerate_frequency()
+{
+    ChewingContext *ctx;
+    int ret;
+    unsigned int expect_len;
+
+    const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
+    char phrase_buf[50];
+    unsigned int phrase_len;
+
+    const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B";    /* ㄘㄜˋ ㄕˋ */
+    char bopomofo_buf[50];
+    unsigned int bopomofo_len;
+
+    unsigned int orig_freq = 0, orig_freq_b = 0;
+    unsigned int max_freq = 0, max_freq_b = 0;
+    unsigned int user_freq = 0, user_freq_b = 0;
+    unsigned int time = 0, time_b = 0;
+
+    int i;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    ret = chewing_userphrase_add(ctx, phrase, bopomofo);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_lookup(ctx, phrase, bopomofo);
+    ok(ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1);
+
+    ret = chewing_userphrase_enumerate(ctx);
+    ok(ret == 0, "chewing_userphrase_enumerate() return value `%d' shall be `%d'", ret, 0);
+
+    ret = chewing_userphrase_has_next(ctx, &phrase_len, &bopomofo_len);
+    ok(ret == 1, "chewing_userphrase_has_next() return value `%d' shall be `%d'", ret, 1);
+    expect_len = strlen(phrase) + 1;
+    ok(phrase_len >= expect_len, "chewing_userphrase_has_next() shall set phrase_len `%d' >= `%d'", phrase_len,
+       expect_len);
+    expect_len = strlen(bopomofo) + 1;
+    ok(bopomofo_len >= expect_len, "chewing_userphrase_has_next() shall set bopomofo_len `%d' >= `%d'", bopomofo_len,
+       expect_len);
+    ret = chewing_userphrase_get(ctx, phrase_buf, sizeof(phrase_buf), bopomofo_buf, sizeof(bopomofo_buf));
+    ok(ret == 0, "chewing_userphrase_get() return value `%d' shall be `%d'", ret, 0);
+    ok(strcmp(phrase_buf, phrase) == 0, "chewing_userphrase_get() shall set phrase_buf `%s' to `%s'", phrase_buf,
+       phrase);
+    ok(strcmp(bopomofo_buf, bopomofo) == 0, "chewing_userphrase_get() shall set bopomofo_buf `%s' to `%s'",
+       bopomofo_buf, bopomofo);
+
+    ret = chewing_userphrase_get_freq(ctx, phrase_buf, bopomofo_buf, &orig_freq, &max_freq, &user_freq, &time);
+    ok(ret == 0, "chewing_userphrase_get_freq() return value `%d' shall be `%d'", ret, 0);
+    for( i=0 ; i < 32 ; i++ ){  // frequently type 測試 to increase the frequency of it.
+        type_keystroke_by_string(ctx, "hk4g4<SL><SL><E>");
+    }
+    ret = chewing_userphrase_get_freq(ctx, phrase_buf, bopomofo_buf, &orig_freq_b, &max_freq_b, &user_freq_b, &time_b);
+    ok(ret == 0, "chewing_userphrase_get_freq() return value `%d' shall be `%d'", ret, 0);
+    ok(orig_freq_b == orig_freq, "chewing_userphrase_get_freq() orig_freq `%d' shall be `%d'", orig_freq_b, orig_freq);
+    ok(max_freq_b == max_freq, "chewing_userphrase_get_freq() max_freq `%d' shall be `%d'", max_freq_b, max_freq);
+    ok(user_freq_b > user_freq, "chewing_userphrase_get_freq() shall set user_freq `%d' > `%d'", user_freq_b, user_freq);
+    ok(time_b >= time, "chewing_userphrase_get_freq() shall set time `%d' >= `%d'", time_b, time);
+    printf("ret=%d. orig=%d. max=%d. user=%d. time=%d.\n",ret,orig_freq,max_freq,user_freq,time);
+
+    chewing_delete(ctx);
+    
+}
+
 void test_userphrase_enumerate()
 {
     test_userphrase_enumerate_normal();
     test_userphrase_enumerate_empty();
     test_userphrase_enumerate_rewind();
+    test_userphrase_enumerate_frequency();
 }
 
 void test_userphrase_manipulate_normal()
