@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
 # Update configure.ac if LIBCHEWING_VERSION is changed.
-set(LIBCHEWING_VERSION 0.4.0)
+set(LIBCHEWING_VERSION 0.5.0)
 set(PACKAGE_VERSION ${LIBCHEWING_VERSION})
 # Update configure.ac if LIBCHEWING_BINARY_VERSION is changed.
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
@@ -438,7 +438,7 @@ set_target_properties(${LIBS} PROPERTIES
     # Update configure.ac if one of SOVERSION/VERSION is updated.
     # See configure.ac for more information.
     SOVERSION 3
-    VERSION 3.2.0
+    VERSION 3.3.0
 )
 
 add_library(common OBJECT
