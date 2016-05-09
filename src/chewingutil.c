@@ -729,7 +729,7 @@ int CallPhrasing(ChewingData *pgdata, int all_phrasing)
             ch_count++;
         else {
             pgdata->bArrBrkpt[ch_count] = 1;
-            pgdata->bSymbolArrBrkpt[ch_count] = 1;
+            pgdata->bSymbolArrBrkpt[i] = 1;
         }
     }
 
