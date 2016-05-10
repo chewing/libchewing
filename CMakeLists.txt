@@ -362,7 +362,7 @@ add_library(chewing OBJECT
     ${SRC_DIR}/bopomofo.c
 )
 set_target_properties(chewing PROPERTIES
-    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${CMAKE_INSTALL_DATADIR}/libchewing\""
+    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\""
 )
 
 if (WITH_SQLITE3)
