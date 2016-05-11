@@ -1370,8 +1370,6 @@ void test_interval()
 
 void test_jk_selection()
 {
-#if 0
-FIXME: libchewing is broken in this case
     ChewingContext *ctx;
     int ret;
     int i;
@@ -1396,10 +1394,9 @@ FIXME: libchewing is broken in this case
         ret = chewing_cand_TotalChoice(ctx);
         ok(ret > 0, "chewing_cand_TotalChoice() returns `%d' shall be greater than `%d'", ret, 0);
         ok_candidate_len(ctx, EXPECT_CAND_LEN[i]);
-        type_keystroke_by_string(ctx, "i");
+        type_keystroke_by_string(ctx, "k");
     }
     chewing_delete(ctx);
-#endif
 }
 
 
