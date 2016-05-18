@@ -1,4 +1,4 @@
-What's New in libchewing GIT
+What's New in libchewing 0.5.1 (May 18, 2016)
 ---------------------------------------------------------
 * Bug fixed:
   - Fix wrong CHEWING_DATADIR definition in CMake build #222.
