@@ -1,5 +1,8 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
+* Bug fixed:
+  - Fix wrong CHEWING_DATADIR definition in CMake build #222.
+  - Fix j, k selection when symbol in between #149 #221.
 
 
 What's New in libchewing 0.5.0 (May 2, 2016)
