@@ -438,7 +438,7 @@ set_target_properties(${LIBS} PROPERTIES
     # Update configure.ac if one of SOVERSION/VERSION is updated.
     # See configure.ac for more information.
     SOVERSION 3
-    VERSION 3.3.0
+    VERSION 3.3.1
 )
 
 add_library(common OBJECT
