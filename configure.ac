@@ -3,7 +3,7 @@
 AC_PREREQ([2.65])
 
 # Update CMakeLists.txt if version is changed.
-AC_INIT([libchewing],[0.5.0],[chewing-devel@googlegroups.com])
+AC_INIT([libchewing],[0.5.1],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])

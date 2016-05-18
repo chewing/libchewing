@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
 # Update configure.ac if LIBCHEWING_VERSION is changed.
-set(LIBCHEWING_VERSION 0.5.0)
+set(LIBCHEWING_VERSION 0.5.1)
 set(PACKAGE_VERSION ${LIBCHEWING_VERSION})
 # Update configure.ac if LIBCHEWING_BINARY_VERSION is changed.
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
