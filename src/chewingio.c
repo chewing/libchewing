@@ -2058,7 +2058,7 @@ CHEWING_API int chewing_userphrase_lookup(ChewingContext *ctx, const char *phras
     int ret;
     UserPhraseData *user_phrase_data;
 
-    if (!ctx || !phrase_buf || !bopomofo_buf) {
+    if (!ctx || !bopomofo_buf) {
         return 0;
     }
     pgdata = ctx->data;
@@ -2077,7 +2077,7 @@ CHEWING_API int chewing_userphrase_lookup(ChewingContext *ctx, const char *phras
 
     user_phrase_data = UserGetPhraseFirst(pgdata, phone_buf);
     while (user_phrase_data) {
-        if (strcmp(phrase_buf, user_phrase_data->wordSeq) == 0)
+        if (phrase_buf == NULL || strcmp(phrase_buf, user_phrase_data->wordSeq) == 0)
             break;
         user_phrase_data = UserGetPhraseNext(pgdata, phone_buf);
     }
