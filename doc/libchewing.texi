@@ -989,6 +989,15 @@ This function returns the length of the phonetic sequence in the
 Chewing IM internal state machine.
 @end deftypefun
 
+@deftypefun int chewing_phone_to_bopomofo(unsigned short @var{phone}, char *@var{buf}, unsigned short @var{len}) 
+This function converts the phone to bopomofo.
+
+If both of the buf and the len are 0, this function will return buf length for bopomofo so that 
+caller can prepare enough buffer for it.
+
+The return value is '0' on success, '-1' on failure.
+@end deftypefun
+
 @node Userphrase Handling
 @chapter Userphrase Handling
 

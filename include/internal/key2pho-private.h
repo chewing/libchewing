@@ -137,6 +137,14 @@ size_t GetPhoneLen(const uint16_t *phoneSeq);
  */
 size_t GetBopomofoBufLen(size_t len);
 
+
+/**
+ * @brief Get the length of phonetic symbols by its phonetic number. 
+ * @param[in] phone_num phonetic number.
+ * @return the length of phone.
+ */
+size_t GetPhoneLenFromUint(uint16_t phone_num);
+
 /* *INDENT-OFF* */
 #endif
 /* *INDENT-ON* */

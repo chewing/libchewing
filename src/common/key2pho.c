@@ -287,3 +287,20 @@ size_t GetBopomofoBufLen(size_t len)
 {
     return (MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1) * len;
 }
+
+size_t GetPhoneLenFromUint(uint16_t phone_num)
+{
+    int i;
+    size_t len = 0 ;
+
+    for (i = 0; i < BOPOMOFO_SIZE; ++i) {
+        /* The first two characters in zhuin_tab are space, so we need
+           to add 1 here. */
+        int index = ((phone_num >> shift[i]) & mask[i]);
+        if (index >= 1) {
+            const char *pos = ueConstStrSeek(zhuin_tab[i], index - 1);
+            len += ueStrNBytes(pos, 1) + 1;
+        }
+    }
+    return len;
+}
