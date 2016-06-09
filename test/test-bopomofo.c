@@ -1746,6 +1746,9 @@ void test_chewing_phone_to_bopomofo()
     chewing_phone_to_bopomofo(expect, rt, len);
     ok(strcmp(rt, u8phone) == 0, "PhoneFromUint `%d' shall be `%s', got `%s'", expect, u8phone, rt);
     free(rt);
+
+    len = chewing_phone_to_bopomofo(0, NULL, 0);
+    ok(len == 0, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, 0);
 }
 
 int main(int argc, char *argv[])
