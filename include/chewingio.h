@@ -552,6 +552,8 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
                                          void (*logger) (void *data, int level, const char *fmt, ...),
                                          void *loggerdata);
 
+CHEWING_API int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len);
+
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_IO_H */
 /* *INDENT-ON* */

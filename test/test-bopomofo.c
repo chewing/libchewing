@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "key2pho-private.h"
 #include "bopomofo-private.h"
 #include "chewing.h"
 #include "plat_types.h"
@@ -1690,6 +1691,62 @@ void test_KB()
     test_KB_MPS2();
 }
 
+void test_chewing_phone_to_bopomofo()
+{
+    char *u8phone;
+    char *rt;
+    int  len;
+    uint16_t phone;
+    uint16_t expect;
+    /*
+     *  the libchewing divides a completed bopomofo into 4 parts,
+     *      1st part: ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ
+     *      2nd part: ㄧㄨㄩ
+     *      3rd part: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
+     *      4th part:  ˙ˊˇˋ
+     *  
+     *  calculates each part's offset and stores into a 16-bit unsigned by following rule:
+     *  16-bit unsinged = ( 1st part offset )<<9 + ( 2nd part offset )<<7 + ( 3rd part offset )<<3 + (4th part offset),
+     *  
+     *  e.g., ㄆㄣ, 1st part offset = 2, 2nd part offset = 0, 3rd part offset = 10, 4th part offset = 0, 
+     *  so the number for ㄆㄣ is (2<<9)+(0<<7)+(10<<3)+(0) = 1104 
+     */
+
+    start_testcase(NULL, fd);
+
+    u8phone = "\xE3\x84\x86\xE3\x84\xA3" /* ㄆㄣ */ ;
+    phone = UintFromPhone(u8phone);
+    expect = (2 << 9) + (0 << 7) + (10 << 3) + (0);
+    ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
+
+    len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    rt = calloc(sizeof(char), len);
+    chewing_phone_to_bopomofo(expect, rt, len);
+    ok(strcmp(rt, u8phone) == 0, "PhoneFromUint d%d' shall be `%s', got `%s'", expect, u8phone, rt);
+    free(rt);
+
+    u8phone = "\xE3\x84\x8A\xE3\x84\xA7\xE3\x84\xA2" /* ㄊㄧㄢ */ ;
+    phone = UintFromPhone(u8phone);
+    expect = (6 << 9) + (1 << 7) + (9 << 3) + (0);
+    ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
+
+    len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    rt = calloc(sizeof(char), len);
+    chewing_phone_to_bopomofo(expect, rt, len);
+    ok(strcmp(rt, u8phone) == 0, "PhoneFromUint d%d' shall be `%s', got `%s'", expect, u8phone, rt);
+    free(rt);
+
+    u8phone = "\xE3\x84\x92\xE3\x84\xA7\xE3\x84\x9A\xCB\x8B" /* ㄒㄧㄚˋ */ ;
+    phone = UintFromPhone(u8phone);
+    expect = (14 << 9) + (1 << 7) + (1 << 3)+ (4);
+    ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
+
+    len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    rt = calloc(sizeof(char), len);
+    chewing_phone_to_bopomofo(expect, rt, len);
+    ok(strcmp(rt, u8phone) == 0, "PhoneFromUint `%d' shall be `%s', got `%s'", expect, u8phone, rt);
+    free(rt);
+}
 
 int main(int argc, char *argv[])
 {
@@ -1735,6 +1792,8 @@ int main(int argc, char *argv[])
     test_jk_selection();
 
     test_KB();
+
+    test_chewing_phone_to_bopomofo();
 
     fclose(fd);
 

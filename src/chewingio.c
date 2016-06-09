@@ -2352,3 +2352,13 @@ CHEWING_API int chewing_clean_bopomofo_buf(ChewingContext *ctx)
     MakeOutput(pgo, pgdata);
     return 0;
 }
+
+CHEWING_API int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len)
+{
+    if(!buf && !len)
+        return GetPhoneLenFromUint(phone);
+    else if(!buf || !len)
+        return -1;
+
+    return PhoneFromUint(buf, len, phone);
+}
