@@ -1411,7 +1411,7 @@ void test_KB_HSU()
     chewing_set_KBType(ctx, KB_HSU);
 
     type_keystroke_by_string(ctx, "cen kxjen jn dgshnfbkj");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1478,7 +1478,7 @@ void test_KB_ET26()
     chewing_set_KBType(ctx, KB_ET26);
 
     type_keystroke_by_string(ctx, "cen kxken gn drdhnjbtk");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1545,7 +1545,7 @@ void test_KB_DACHEN_CP26()
     chewing_set_KBType(ctx, KB_DACHEN_CP26);
 
     type_keystroke_by_string(ctx, "vup djdup tp wkycprqlld");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1621,12 +1621,12 @@ void test_KB_HANYU()
     chewing_set_KBType(ctx, KB_HANYU_PINYIN);
 
     type_keystroke_by_string(ctx, "xin ku4yin zhen de5hen3bang4");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "huan ying2shi3yong4pin yin mo2shi4");
-    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F" 
+    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F"
                       /* 歡迎使用拼音模式 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1644,12 +1644,12 @@ void test_KB_THL()
     chewing_set_KBType(ctx, KB_THL_PINYIN);
 
     type_keystroke_by_string(ctx, "sin ku4yin jhen de5hen3bang4");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "huan ying2shih3yong4pin yin mo2shih4");
-    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F" 
+    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F"
                       /* 歡迎使用拼音模式 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1667,12 +1667,12 @@ void test_KB_MPS2()
     chewing_set_KBType(ctx, KB_MPS2_PINYIN);
 
     type_keystroke_by_string(ctx, "shin ku4in jen de5hen3bang4");
-    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92" 
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "huan ing2shr3iung4pin in muo2shz4");
-    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F" 
+    ok_preedit_buffer(ctx, "\xE6\xAD\xA1\xE8\xBF\x8E\xE4\xBD\xBF\xE7\x94\xA8\xE6\x8B\xBC\xE9\x9F\xB3\xE6\xA8\xA1\xE5\xBC\x8F"
                       /* 歡迎使用拼音模式 */ );
     chewing_clean_preedit_buf(ctx);
 
@@ -1704,12 +1704,12 @@ void test_chewing_phone_to_bopomofo()
      *      2nd part: ㄧㄨㄩ
      *      3rd part: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
      *      4th part:  ˙ˊˇˋ
-     *  
+     *
      *  calculates each part's offset and stores into a 16-bit unsigned by following rule:
      *  16-bit unsinged = ( 1st part offset )<<9 + ( 2nd part offset )<<7 + ( 3rd part offset )<<3 + (4th part offset),
-     *  
-     *  e.g., ㄆㄣ, 1st part offset = 2, 2nd part offset = 0, 3rd part offset = 10, 4th part offset = 0, 
-     *  so the number for ㄆㄣ is (2<<9)+(0<<7)+(10<<3)+(0) = 1104 
+     *
+     *  e.g., ㄆㄣ, 1st part offset = 2, 2nd part offset = 0, 3rd part offset = 10, 4th part offset = 0,
+     *  so the number for ㄆㄣ is (2<<9)+(0<<7)+(10<<3)+(0) = 1104
      */
 
     start_testcase(NULL, fd);

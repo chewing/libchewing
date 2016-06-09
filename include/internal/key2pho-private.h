@@ -139,7 +139,7 @@ size_t GetBopomofoBufLen(size_t len);
 
 
 /**
- * @brief Get the length of phonetic symbols by its phonetic number. 
+ * @brief Get the length of phonetic symbols by its phonetic number.
  * @param[in] phone_num phonetic number.
  * @return the length of phone.
  */
