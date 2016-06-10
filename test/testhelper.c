@@ -420,51 +420,6 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
     }
 }
 
-int internal_has_userphrase(const char *file UNUSED, int line UNUSED,
-                            ChewingContext *ctx, const char *bopomofo, const char *phrase)
-{
-    uint16_t *phone = NULL;
-    char *bopomofo_buf = NULL;
-    int i;
-    char *p;
-    char *save_ptr = NULL;
-    UserPhraseData *userphrase;
-    int ret = 0;
-
-    phone = calloc(MAX_PHONE_SEQ_LEN, sizeof(*phone));
-    if (!phone) {
-        fprintf(stderr, "calloc fails at %s:%d\n", __FILE__, __LINE__);
-        goto end;
-    }
-
-    bopomofo_buf = strdup(bopomofo);
-    if (!bopomofo_buf) {
-        fprintf(stderr, "strdup fails at %s:%d\n", __FILE__, __LINE__);
-        goto end;
-    }
-
-    for (i = 0, p = strtok_r(bopomofo_buf, " ", &save_ptr);
-         i < MAX_PHONE_SEQ_LEN && p; ++i, p = strtok_r(NULL, " ", &save_ptr)) {
-        phone[i] = UintFromPhone(p);
-    }
-
-    for (userphrase = UserGetPhraseFirst(ctx->data, phone);
-         userphrase != NULL; userphrase = UserGetPhraseNext(ctx->data, phone)) {
-        if (phrase == NULL || strcmp(userphrase->wordSeq, phrase) == 0) {
-            ret = 1;
-            goto end;
-        }
-
-    }
-
-  end:
-    UserGetPhraseEnd(ctx->data, phone);
-    free(bopomofo_buf);
-    free(phone);
-
-    return ret;
-}
-
 void logger(void *data, int level UNUSED, const char *fmt, ...)
 {
     va_list ap;
