@@ -37,7 +37,7 @@ before_install:
 
 script:
   - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make $P_JOBS CFLAGS="$CFLAGS -Wall -Werror" && make $P_JOBS check && make $P_JOBS release && LC_ALL=c sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
-  - if [ x$BUILD == xcmake ]; then CFLAGS="$CFLAGS -Wall -Werror" cmake . $CMAKE_OPTION && make $P_JOBS && make $P_JOBS check && LC_ALL=c sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
+  - if [ x$BUILD == xcmake ]; then CFLAGS="$CFLAGS -Wall -Werror" cmake . $CMAKE_OPTION && make $P_JOBS && make $P_JOBS check && LC_ALL=C sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
 
 after_success:
   - if [ x$COVERALLS == xyes ]; then coveralls --exclude src/tools --exclude contrib --exclude test --exclude thirdparty --exclude-pattern '.*CMake[^/]+\.c(?:pp)?' --exclude-pattern '.*/[_A-Z0-9]+\.c(?:pp)?' --exclude-pattern '[^\.]*\.h'; fi
