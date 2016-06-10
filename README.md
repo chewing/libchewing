@@ -429,6 +429,9 @@ Except the following source code:
 * cmake/FindCurses.cmake is modified from CMake source, which is licensed under
    BSD 3-Clause.
 
+* some phrases in data/tsi.src are imported from McBopomofo(小麥輸入法) project,
+   which are MIT licensed.
+
 All source code are licensed under GNU LGPL v2.1 (Lesser General Public License
 v2.1). See "COPYING" for details.
 
