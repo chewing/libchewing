@@ -170,8 +170,14 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
             strcat(buffer, tmp);
         }
     }
+    if (!buffer[0]) {
+        phone[0] = 0;
+        return -1;
+    }
     strncpy(phone, buffer, phone_len);
     phone[phone_len - 1] = 0;
+    if (phone_len < strlen(buffer) + 1)
+        return -1;
     return 0;
 }
 
@@ -299,8 +305,8 @@ size_t GetPhoneLenFromUint(uint16_t phone_num)
         int index = ((phone_num >> shift[i]) & mask[i]);
         if (index >= 1) {
             const char *pos = ueConstStrSeek(zhuin_tab[i], index - 1);
-            len += ueStrNBytes(pos, 1) + 1;
+            len += ueStrNBytes(pos, 1);
         }
     }
-    return len;
+    return len > 0 ? (len + 1) : -1;
 }

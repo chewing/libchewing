@@ -1695,6 +1695,7 @@ void test_chewing_phone_to_bopomofo()
 {
     char *u8phone;
     char *rt;
+    int  expected_len;
     int  len;
     uint16_t phone;
     uint16_t expect;
@@ -1719,7 +1720,9 @@ void test_chewing_phone_to_bopomofo()
     expect = (2 << 9) + (0 << 7) + (10 << 3) + (0);
     ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
 
+    expected_len = strlen(u8phone) + 1;
     len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    ok(len == expected_len, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, expected_len);
     rt = calloc(sizeof(char), len);
     chewing_phone_to_bopomofo(expect, rt, len);
     ok(strcmp(rt, u8phone) == 0, "PhoneFromUint d%d' shall be `%s', got `%s'", expect, u8phone, rt);
@@ -1730,7 +1733,9 @@ void test_chewing_phone_to_bopomofo()
     expect = (6 << 9) + (1 << 7) + (9 << 3) + (0);
     ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
 
+    expected_len = strlen(u8phone) + 1;
     len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    ok(len == expected_len, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, expected_len);
     rt = calloc(sizeof(char), len);
     chewing_phone_to_bopomofo(expect, rt, len);
     ok(strcmp(rt, u8phone) == 0, "PhoneFromUint d%d' shall be `%s', got `%s'", expect, u8phone, rt);
@@ -1741,14 +1746,16 @@ void test_chewing_phone_to_bopomofo()
     expect = (14 << 9) + (1 << 7) + (1 << 3)+ (4);
     ok(phone == expect, "UintFromPhone `%s' shall be `%d', got `%d'", u8phone, expect, phone);
 
+    expected_len = strlen(u8phone) + 1;
     len = chewing_phone_to_bopomofo(expect, NULL, 0);
+    ok(len == expected_len, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, expected_len);
     rt = calloc(sizeof(char), len);
     chewing_phone_to_bopomofo(expect, rt, len);
     ok(strcmp(rt, u8phone) == 0, "PhoneFromUint `%d' shall be `%s', got `%s'", expect, u8phone, rt);
     free(rt);
 
     len = chewing_phone_to_bopomofo(0, NULL, 0);
-    ok(len == 0, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, 0);
+    ok(len == -1, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, -1);
 }
 
 int main(int argc, char *argv[])

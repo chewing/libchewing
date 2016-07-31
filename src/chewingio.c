@@ -2355,9 +2355,9 @@ CHEWING_API int chewing_clean_bopomofo_buf(ChewingContext *ctx)
 
 CHEWING_API int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len)
 {
-    if(!buf && !len)
+    if (!buf)
         return GetPhoneLenFromUint(phone);
-    else if(!buf || !len)
+    else if (len <= 0)
         return -1;
 
     return PhoneFromUint(buf, len, phone);
