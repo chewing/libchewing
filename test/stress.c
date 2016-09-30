@@ -238,9 +238,6 @@ int main(int argc, char *argv[])
 	}
 	chewing_delete(ctx);
 
-	if (i % 10000 == 0)
-	    printf("%d\n", i);
-
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(_WIN32_WCE)
 	if (getenv("AFL_PERSISTENT"))
 	    raise(SIGSTOP);
