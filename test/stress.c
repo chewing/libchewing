@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 		if (!handled)
 		    break;
 	    } else {
-		if (0 <= v && v < max_key) {
+		if (0 <= v && v < sizeof(all_key) / sizeof(all_key[0])) {
 		    int key = all_key[v];
 		    type_single_keystroke(ctx, key);
 		} else {
