@@ -157,12 +157,16 @@ libchewing uses the following CI services:
 
 ## Installation
 
-
 	# ./configure --prefix=/usr
 	  (If you checkout from GIT, make sure running ./autogen.sh
 	   before this.)
 	# make
 	# make install
+
+For macOS:
+
+	# brew install libchewing  # latest release version
+	# brew install --HEAD libchewing  # development, git master branch
 
 see "INSTALL" for details.
 
