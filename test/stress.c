@@ -134,9 +134,11 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize libchewing */
-    putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+    if (!getenv("CHEWING_PATH"))
+	putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     /* for the sake of testing, we should not change existing hash data */
-    putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
+    if (!getenv("CHEWING_USER_PATH"))
+	putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
     for (i = 0; i != flag_loop; i++) {
 	ChewingContext *ctx = chewing_new();
