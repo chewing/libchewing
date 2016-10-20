@@ -180,6 +180,7 @@ char *GetDefaultUserPhrasePath(ChewingData *pgdata)
         free(tmp);
         return path;
     }
+    free(tmp);
 
     return NULL;
 }
