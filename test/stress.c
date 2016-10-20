@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
 	    raise(SIGSTOP);
 #endif
     }
+    clean_userphrase();
 
     return 0;
 }
