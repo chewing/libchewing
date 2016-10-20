@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     for (i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-init") == 0)
 	    flag_random_init = 1;
-	else if (strcmp(argv[i], "-extra") == 0 && argv[i + 1])
+	else if (strcmp(argv[i], "-extra") == 0)
 	    flag_random_extra = 1;
 	else if (strcmp(argv[i], "-loop") == 0 && argv[i + 1])
 	    flag_loop = atoi(argv[++i]);
