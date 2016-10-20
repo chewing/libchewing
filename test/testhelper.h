@@ -95,6 +95,7 @@ int get_keystroke(get_char_func get_char, void *param);
 void type_keystroke_by_string(ChewingContext *ctx, const char *keystroke);
 void type_single_keystroke(ChewingContext *ctx, int ch);
 int exit_status();
+char *get_test_userphrase_path();
 void clean_userphrase();
 
 // The internal_xxx function shall be used indirectly by macro in order to

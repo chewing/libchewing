@@ -444,8 +444,18 @@ int exit_status()
     return test_run == test_ok ? 0 : -1;
 }
 
+char *get_test_userphrase_path()
+{
+    char *userphrase_path = getenv("TEST_USERPHRASE_PATH");
+    if (userphrase_path)
+        return userphrase_path;
+    else
+        return TEST_HASH_DIR PLAT_SEPARATOR DB_NAME;
+}
+
 void clean_userphrase()
 {
-    if(remove(TEST_HASH_DIR PLAT_SEPARATOR DB_NAME) != 0 && errno != ENOENT)
+    char *userphrase_path = get_test_userphrase_path();
+    if(remove(userphrase_path) != 0 && errno != ENOENT)
         fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
 }

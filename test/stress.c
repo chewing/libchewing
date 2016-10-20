@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
     int flag_random_extra = 0;
     int flag_loop = -1;
     int (*get_input)() = &random256;
+    char *chewing_sys_path;
+    char *userphrase_path;
 
     for (i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-init") == 0)
@@ -134,14 +136,17 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize libchewing */
-    if (!getenv("CHEWING_PATH"))
-	putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+    chewing_sys_path = getenv("CHEWING_PATH");
+    if (!chewing_sys_path)
+	chewing_sys_path = CHEWING_DATA_PREFIX;
+
     /* for the sake of testing, we should not change existing hash data */
-    if (!getenv("CHEWING_USER_PATH"))
-	putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
+    userphrase_path = get_test_userphrase_path();
 
     for (i = 0; i != flag_loop; i++) {
-	ChewingContext *ctx = chewing_new();
+	ChewingContext *ctx;
+	clean_userphrase();
+	ctx = chewing_new2(chewing_sys_path, userphrase_path, NULL, NULL);
 
 	/* typical configuration */
 	chewing_set_KBType(ctx, chewing_KBStr2Num("KB_DEFAULT"));
