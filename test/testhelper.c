@@ -191,7 +191,7 @@ static void type_keystroke(ChewingContext *ctx, get_char_func get_char, void *pa
         type_single_keystroke(ctx, ch);
 }
 
-static int get_char_by_string(void *param)
+int get_char_by_string(void *param)
 {
     const char **ptr = param;
     char ch;

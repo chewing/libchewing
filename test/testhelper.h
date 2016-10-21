@@ -103,6 +103,7 @@ extern TestKeyEntry chewing_test_special_keys[];
 
 typedef int (*get_char_func) (void *param);
 
+int get_char_by_string(void *param);
 int get_keystroke(get_char_func get_char, void *param);
 void type_keystroke_by_string(ChewingContext *ctx, const char *keystroke);
 void type_single_keystroke(ChewingContext *ctx, int ch);
