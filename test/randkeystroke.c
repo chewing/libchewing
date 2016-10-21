@@ -19,7 +19,9 @@
 #include <string.h>
 #include <time.h>
 
-const char *zhuin_tab[] = {
+#include "testhelper.h"
+
+const char *zhuin_keys[] = {
     "1qaz2wsxedcrfv5tgbyhn",    /* ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ */
     "ujm",                      /* ㄧㄨㄩ */
     "8ik,9ol.0p;/-",            /* ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ */
@@ -28,16 +30,8 @@ const char *zhuin_tab[] = {
 
 static char normal_keys[] = "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "`1234567890[]/=-?+_|!@#$%^&*(){} ";
-static char *other_keys[] = {
-    "<L>", "<SL>", "<R>", "<SR>", "<U>", "<D>", "<E>", "<B>", "<EE>", "<DC>", "<H>",
-    "<EN>", "<T>", "<C0>", "<C1>", "<C2>", "<C3>", "<C4>", "<C5>", "<C6>",
-    "<C7>", "<C8>", "<C9>", "<CB>", "<PU>", "<PD>", "<SS>", "<TT>",
-    "<N0>", "<N1>", "<N2>", "<N3>", "<N4>", "<N5>", "<N6>", "<N7>", "<N8>", "<N9>",
-    "<N+>", "<N->", "<N*>", "<N/>", "<N.>"
-};
 
 #define n_nkeys (int)(sizeof(normal_keys) / sizeof(normal_keys[0]))
-#define n_okeys (int)(sizeof(other_keys) / sizeof(other_keys[0]))
 
 void usage()
 {
@@ -51,10 +45,16 @@ int main(int argc, char *argv[])
     int nk = 100;
     int total_random = 0;
     int i, n;
-    int n_tab1 = strlen(zhuin_tab[0]);
-    int n_tab2 = strlen(zhuin_tab[1]);
-    int n_tab3 = strlen(zhuin_tab[2]);
-    int n_tab4 = strlen(zhuin_tab[3]);
+    int n_tab1 = strlen(zhuin_keys[0]);
+    int n_tab2 = strlen(zhuin_keys[1]);
+    int n_tab3 = strlen(zhuin_keys[2]);
+    int n_tab4 = strlen(zhuin_keys[3]);
+	int n_okeys = 0;
+
+    TestKeyEntry *key_entry;
+    for (key_entry = chewing_test_special_keys; key_entry->key; key_entry++) {
+	n_okeys++;
+    }
 
     srand(time(NULL));
 
@@ -76,20 +76,20 @@ int main(int argc, char *argv[])
         for (i = 0; i < nk; i++) {
             n = rand() % (n_nkeys + n_okeys);
             if (n >= n_nkeys)
-                printf("%s", other_keys[n - n_nkeys]);
+                printf("%s", chewing_test_special_keys[n - n_nkeys].str);
             else
                 printf("%c", normal_keys[n]);
         }
     } else {
         for (i = 0; i < nk; i++) {
             if (rand() % 2)
-                printf("%c", zhuin_tab[0][rand() % n_tab1]);
+                printf("%c", zhuin_keys[0][rand() % n_tab1]);
             if (rand() % 2)
-                printf("%c", zhuin_tab[1][rand() % n_tab2]);
+                printf("%c", zhuin_keys[1][rand() % n_tab2]);
             if (rand() % 2)
-                printf("%c", zhuin_tab[2][rand() % n_tab3]);
+                printf("%c", zhuin_keys[2][rand() % n_tab3]);
             if (rand() % 2)
-                printf("%c", zhuin_tab[3][rand() % n_tab4]);
+                printf("%c", zhuin_keys[3][rand() % n_tab4]);
             else
                 printf(" ");
             if (rand() % 2)

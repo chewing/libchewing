@@ -25,51 +25,7 @@
 
 static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0 }; /* Default */
 
-static int all_key[] = {
-    KEY_LEFT,
-    KEY_SLEFT,
-    KEY_RIGHT,
-    KEY_SRIGHT,
-    KEY_UP,
-    KEY_DOWN,
-    KEY_SPACE,
-    KEY_ENTER,
-    KEY_BACKSPACE,
-    KEY_ESC,
-    KEY_DELETE,
-    KEY_HOME,
-    KEY_END,
-    KEY_TAB,
-    KEY_CAPSLOCK,
-    KEY_NPAGE,
-    KEY_PPAGE,
-    KEY_SSPACE,
-    KEY_DBLTAB,
-    KEY_CTRL_BASE + '0',
-    KEY_CTRL_BASE + '1',
-    KEY_CTRL_BASE + '2',
-    KEY_CTRL_BASE + '3',
-    KEY_CTRL_BASE + '4',
-    KEY_CTRL_BASE + '5',
-    KEY_CTRL_BASE + '6',
-    KEY_CTRL_BASE + '7',
-    KEY_CTRL_BASE + '8',
-    KEY_CTRL_BASE + '9',
-    KEY_NUMPAD_BASE + '0',
-    KEY_NUMPAD_BASE + '1',
-    KEY_NUMPAD_BASE + '2',
-    KEY_NUMPAD_BASE + '3',
-    KEY_NUMPAD_BASE + '4',
-    KEY_NUMPAD_BASE + '5',
-    KEY_NUMPAD_BASE + '6',
-    KEY_NUMPAD_BASE + '7',
-    KEY_NUMPAD_BASE + '8',
-    KEY_NUMPAD_BASE + '9',
-    KEY_NUMPAD_BASE + '+',
-    KEY_NUMPAD_BASE + '-',
-    KEY_NUMPAD_BASE + '*',
-    KEY_NUMPAD_BASE + '/',
-    KEY_NUMPAD_BASE + '.',
+static int normal_keys[] = {
     // all isprint()
     '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
     '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
@@ -111,15 +67,21 @@ int main(int argc, char *argv[])
     int flag_random_init = 0;
     int flag_random_extra = 0;
     int flag_loop = -1;
+    int flag_verbose = 0;
     int (*get_input)() = &random256;
     char *chewing_sys_path;
     char *userphrase_path;
+    int num_special_key = 0;
+    int num_normal_key = sizeof(normal_keys) / sizeof(normal_keys[0]);
+    TestKeyEntry *key_entry;
 
     for (i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-init") == 0)
 	    flag_random_init = 1;
 	else if (strcmp(argv[i], "-extra") == 0)
 	    flag_random_extra = 1;
+	else if (strcmp(argv[i], "-verbose") == 0)
+	    flag_verbose = 1;
 	else if (strcmp(argv[i], "-loop") == 0 && argv[i + 1])
 	    flag_loop = atoi(argv[++i]);
 	else if (strcmp(argv[i], "-stdin") == 0)
@@ -131,9 +93,14 @@ int main(int argc, char *argv[])
 	    printf("\t                This is usually unexpected.\n");
 	    printf("\t-stdin          Get random input from stdin\n");
 	    printf("\t-loop N         How many iterations to test (default infinite=-1)\n");
+            printf("\t-verbose        Verbose\n");
 	    exit(1);
 	}
     }
+
+    /* Initialize for testing */
+    for (key_entry = chewing_test_special_keys; key_entry->key; key_entry++)
+	num_special_key++;
 
     /* Initialize libchewing */
     chewing_sys_path = getenv("CHEWING_PATH");
@@ -178,7 +145,7 @@ int main(int argc, char *argv[])
 	    int v = get_input();
 	    if (v == EOF)
 		break;
-	    assert(max_key * sizeof(all_key[0]) >= sizeof(all_key));
+	    assert(max_key >= (num_special_key + num_normal_key));
 	    if (v >= max_key) {
 		const int typical = 2;
 		int handled = 1;
@@ -234,8 +201,15 @@ int main(int argc, char *argv[])
 		if (!handled)
 		    break;
 	    } else {
-		if (0 <= v && v < sizeof(all_key) / sizeof(all_key[0])) {
-		    int key = all_key[v];
+		if (0 <= v && v < num_special_key) {
+		    int key = chewing_test_special_keys[v].key;
+                    if (flag_verbose)
+                        printf("%s", chewing_test_special_keys[v].str);
+		    type_single_keystroke(ctx, key);
+                } else if (num_special_key <= v && v < num_special_key + num_normal_key) {
+		    int key = normal_keys[v - num_special_key];
+                    if (flag_verbose)
+                        printf("%c", key);
 		    type_single_keystroke(ctx, key);
 		} else {
 		    break;
@@ -243,6 +217,8 @@ int main(int argc, char *argv[])
 	    }
 	    commit_string(ctx);
 	}
+        if (flag_verbose)
+            printf("\n");
 	chewing_delete(ctx);
 
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(_WIN32_WCE)

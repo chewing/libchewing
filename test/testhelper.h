@@ -69,6 +69,17 @@
 #define start_testcase(ctx, file) \
     internal_start_testcase(__func__, ctx, file)
 
+typedef struct {
+    /* Key code. This code is only valid in testing framework. */
+    int key;
+
+    /* key serialed as string */
+    const char* str;
+
+    /* chewing handling function. NULL for special functions */
+    int (*handler)(ChewingContext *ctx);
+} TestKeyEntry;
+
 typedef struct TestData {
     char *token;
     char *expected;
@@ -88,6 +99,7 @@ extern BufferType COMMIT_BUFFER;
 extern BufferType PREEDIT_BUFFER;
 extern BufferType BOPOMOFO_BUFFER;
 extern BufferType AUX_BUFFER;
+extern TestKeyEntry chewing_test_special_keys[];
 
 typedef int (*get_char_func) (void *param);
 
