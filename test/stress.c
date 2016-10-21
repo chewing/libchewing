@@ -16,6 +16,7 @@
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
+#include <fcntl.h>
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -37,6 +38,8 @@ static int normal_keys[] = {
     'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',
 };
 
+static int input_fd = -1;
+
 static int random256()
 {
     return rand() % 256;
@@ -52,10 +55,10 @@ void commit_string(ChewingContext *ctx)
     }
 }
 
-int get_stdin()
+int read_from_fd()
 {
     unsigned char c;
-    int len = read(0, &c, 1);
+    int len = read(input_fd, &c, 1);
     if (len <= 0)
 	return EOF;
     return c;
@@ -84,9 +87,18 @@ int main(int argc, char *argv[])
 	    flag_verbose = 1;
 	else if (strcmp(argv[i], "-loop") == 0 && argv[i + 1])
 	    flag_loop = atoi(argv[++i]);
-	else if (strcmp(argv[i], "-stdin") == 0)
-	    get_input = &get_stdin;
-	else {
+	else if (strcmp(argv[i], "-stdin") == 0) {
+            input_fd = 0;
+	    get_input = &read_from_fd;
+        } else if (strcmp(argv[i], "-file") == 0 && argv[i + 1]) {
+            input_fd = open(argv[i + 1], O_RDONLY);
+            if (input_fd < 0) {
+                fprintf(stderr, "failed to open '%s'\n", argv[i + 1]);
+                exit(1);
+            }
+	    get_input = &read_from_fd;
+            i++;
+        } else {
 	    printf("Usage: %s [-init] [-extra] [-loop N] [-stdin]\n", argv[0]);
 	    printf("\t-init           Random initial configuration\n");
 	    printf("\t-extra          Random change all configurations during input.\n");
@@ -231,6 +243,9 @@ int main(int argc, char *argv[])
 #endif
     }
     clean_userphrase();
+
+    if (input_fd > 0)
+        close(input_fd);
 
     return 0;
 }
