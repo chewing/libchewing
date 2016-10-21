@@ -168,6 +168,7 @@ int get_keystroke(get_char_func get_char, void *param)
 void type_single_keystroke(ChewingContext *ctx, int key)
 {
     TestKeyEntry *key_entry;
+
     for (key_entry = chewing_test_special_keys; key_entry->key; key_entry++) {
         if (key_entry->key == key && key_entry->handler) {
             key_entry->handler(ctx);
@@ -204,6 +205,27 @@ int get_char_by_string(void *param)
 
     ch = **ptr;
     ++*ptr;
+    return ch;
+}
+
+int get_char_from_stdin(void *param UNUSED)
+{
+    int ch = getchar();
+
+    if (ch == EOF)
+        return END;
+    return ch;
+}
+
+int get_char_from_fp(void *param)
+{
+    FILE *fp = param;
+
+    assert(fp);
+    int ch = fgetc(fp);
+
+    if (ch == EOF)
+        return END;
     return ch;
 }
 
@@ -397,6 +419,7 @@ int exit_status()
 char *get_test_userphrase_path()
 {
     char *userphrase_path = getenv("TEST_USERPHRASE_PATH");
+
     if (userphrase_path)
         return userphrase_path;
     else
@@ -406,6 +429,7 @@ char *get_test_userphrase_path()
 void clean_userphrase()
 {
     char *userphrase_path = get_test_userphrase_path();
-    if(remove(userphrase_path) != 0 && errno != ENOENT)
+
+    if (remove(userphrase_path) != 0 && errno != ENOENT)
         fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
 }

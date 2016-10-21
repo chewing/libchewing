@@ -203,13 +203,17 @@ int main(int argc, char *argv[])
 	    } else {
 		if (0 <= v && v < num_special_key) {
 		    int key = chewing_test_special_keys[v].key;
-                    if (flag_verbose)
+		    if (flag_verbose) {
                         printf("%s", chewing_test_special_keys[v].str);
+			fflush(stdout);
+		    }
 		    type_single_keystroke(ctx, key);
                 } else if (num_special_key <= v && v < num_special_key + num_normal_key) {
 		    int key = normal_keys[v - num_special_key];
-                    if (flag_verbose)
+		    if (flag_verbose) {
                         printf("%c", key);
+			fflush(stdout);
+		    }
 		    type_single_keystroke(ctx, key);
 		} else {
 		    break;

@@ -17,15 +17,6 @@
 
 static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0 }; /* Default */
 
-static int get_char(void *param UNUSED)
-{
-    int ch = getchar();
-
-    if (ch == EOF)
-        return END;
-    return ch;
-}
-
 void commit_string(ChewingContext *ctx)
 {
     char *s;
@@ -33,19 +24,29 @@ void commit_string(ChewingContext *ctx)
     if (chewing_commit_Check(ctx)) {
         s = chewing_commit_String(ctx);
         printf("%s", s);
+        fflush(stdout);
         free(s);
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     ChewingContext *ctx;
     int i;
+    FILE *fp = stdin;
 
     /* Initialize libchewing */
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     /* for the sake of testing, we should not change existing hash data */
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
+
+    if (argc == 2) {
+        fp = fopen(argv[1], "r");
+        if (!fp) {
+            fprintf(stderr, "failed to open '%s'\n", argv[1]);
+            return 1;
+        }
+    }
 
     /* Request handle to ChewingContext */
     ctx = chewing_new();
@@ -60,7 +61,7 @@ int main()
     chewing_set_spaceAsSelection(ctx, 1);
 
     while (1) {
-        i = get_keystroke(get_char, NULL);
+        i = get_keystroke(get_char_from_fp, fp);
         if (i == END)
             goto end;
         type_single_keystroke(ctx, i);
@@ -69,6 +70,8 @@ int main()
   end:
     /* Free Chewing IM handle */
     chewing_delete(ctx);
+    if (fp)
+        fclose(fp);
 
     return 0;
 }
