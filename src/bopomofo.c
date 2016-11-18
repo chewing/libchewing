@@ -604,9 +604,15 @@ static int PinYinInput(ChewingData *pgdata, int key)
         pBopomofo->pinYinData.keySeq[0] = '\0';
         return EndKeyProcess(pgdata, key, 1);
     }
-    buf[0] = key;
-    buf[1] = '\0';
-    strcat(pBopomofo->pinYinData.keySeq, buf);
+
+    if (strlen(pBopomofo->pinYinData.keySeq) + 1 < sizeof(pBopomofo->pinYinData.keySeq)) {
+        buf[0] = key;
+        buf[1] = '\0';
+        strcat(pBopomofo->pinYinData.keySeq, buf);
+    } else {
+        /* buffer is full, ignore this keystroke */
+        return BOPOMOFO_NO_WORD;
+    }
 
     DEBUG_OUT("PinYin Seq: %s\n", pBopomofo->pinYinData.keySeq);
 
