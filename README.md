@@ -19,8 +19,8 @@ as full open source efforts.
 + Website: <http://chewing.im/>
 + Issue tracker: <https://github.com/chewing/libchewing/issues>
 + Mailing lists:
-   - Development: <http://groups.google.com/group/chewing-devel>
-   - General: <http://groups.google.com/group/chewing>
+   - Development: <https://groups.google.com/group/chewing-devel>
+   - General: <https://groups.google.com/group/chewing>
 + Build Status:
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
@@ -157,12 +157,16 @@ libchewing uses the following CI services:
 
 ## Installation
 
-
 	# ./configure --prefix=/usr
 	  (If you checkout from GIT, make sure running ./autogen.sh
 	   before this.)
 	# make
 	# make install
+
+For macOS:
+
+	# brew install libchewing  # latest release version
+	# brew install --HEAD libchewing  # development, git master branch
 
 see "INSTALL" for details.
 
@@ -182,7 +186,7 @@ Example cross-build instructions:
 To build libchewing on Windows, you need to setup MinGW and MSYS in your
 system. The installer of MinGW and MSYS is in the following link:
 
-<http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/>
+<https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/>
 
 In "Select Components" during installing, please select the following items:
 
@@ -227,7 +231,7 @@ print it to console.
 
 ## Build with CMake
 
-libchewing supports cmake (<http://www.cmake.org/>) build system. You can use the
+libchewing supports cmake (<https://www.cmake.org/>) build system. You can use the
 following command to build with cmake:
 
 	- cmake .
@@ -297,7 +301,7 @@ then
 
 ## Usage
 
-( modified from <http://code.google.com/p/ibus/wiki/ChewingUserGuide> )
+( modified from <https://code.google.com/p/ibus/wiki/ChewingUserGuide> )
 
 Chewing guides the user to input Chinese by its pronunciation, in the form of
 either [Bopomofo/Zhuyin][1] or [Hanyu pinyin][2], as well as Chinese punctuation
@@ -415,8 +419,8 @@ binding (Ctrl-A, Ctrl-S).
 For the brief usage of libchewing APIs, please check the simplified example
 implemented in file contrib/simple-select.c
 
-[1]: http://en.wikipedia.org/wiki/Bopomofo
-[2]: http://en.wikipedia.org/wiki/Pinyin
+[1]: https://en.wikipedia.org/wiki/Bopomofo
+[2]: https://en.wikipedia.org/wiki/Pinyin
 
 
 ## License
@@ -424,7 +428,7 @@ implemented in file contrib/simple-select.c
 Except the following source code:
 
 * thirdparty/sqlite-amalgamation/ contains sqlite3 source which is in public
-  domain. See <http://www.sqlite.org/copyright.html> for more information.
+  domain. See <https://www.sqlite.org/copyright.html> for more information.
 
 * cmake/FindCurses.cmake is modified from CMake source, which is licensed under
    BSD 3-Clause.
