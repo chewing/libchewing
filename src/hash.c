@@ -369,9 +369,22 @@ static FILE *open_file_get_length(const char *filename, const char *otype, int *
         return NULL;
     }
     if (size != NULL) {
-        fseek(tf, 0, SEEK_END);
+        int ok;
+        ok = fseek(tf, 0, SEEK_END);
+        if (ok < 0) {
+            fclose(tf);
+            return NULL;
+        }
         *size = ftell(tf);
-        fseek(tf, 0, SEEK_SET);
+        if (*size < 0) {
+            fclose(tf);
+            return NULL;
+        }
+        ok = fseek(tf, 0, SEEK_SET);
+        if (ok < 0) {
+            fclose(tf);
+            return NULL;
+        }
     }
     return tf;
 }
