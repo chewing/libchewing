@@ -941,6 +941,8 @@ int PhoneSeqCursor(ChewingData *pgdata)
 
 int ChewingIsChiAt(int chiSymbolCursor, ChewingData *pgdata)
 {
+    assert(0 <= chiSymbolCursor);
+    assert(chiSymbolCursor < ARRAY_SIZE(pgdata->preeditBuf));
     return pgdata->preeditBuf[chiSymbolCursor].category == CHEWING_CHINESE;
 }
 
@@ -1209,7 +1211,7 @@ int OpenSymbolChoice(ChewingData *pgdata)
     pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
     /* see if there is some word in the cursor position */
-    if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen)
+    if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen && pgdata->chiSymbolCursor > 0)
         pgdata->chiSymbolCursor--;
     if (pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] == NO_SYM_KEY) {
         pgdata->bSelect = 1;

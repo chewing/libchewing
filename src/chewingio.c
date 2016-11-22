@@ -1221,7 +1221,8 @@ CHEWING_API int chewing_handle_Tab(ChewingContext *ctx)
         if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen) {
             pgdata->phrOut.nNumCut++;
             all_phrasing = 1;
-        } else if (ChewingIsChiAt(pgdata->chiSymbolCursor - 1, pgdata)) {
+        } else if (pgdata->chiSymbolCursor > 0 &&
+                   ChewingIsChiAt(pgdata->chiSymbolCursor - 1, pgdata)) {
             cursor = PhoneSeqCursor(pgdata);
             if (IsPreferIntervalConnted(cursor, pgdata)) {
                 pgdata->bUserArrBrkpt[cursor] = 1;
