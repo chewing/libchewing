@@ -1467,6 +1467,56 @@ void test_KB_HSU()
     chewing_delete(ctx);
 }
 
+void test_KB_HSU_choice_append()
+{
+    const TestData CHOICE_INFO_APPEND[] = {
+        {"e " /* ㄧ */, "\xE3\x84\x9D" /* ㄝ */ },
+        {"g " /* ㄜ */, "\xE3\x84\x8D" /* ㄍ */ },
+        {"h " /* ㄛ */, "\xE3\x84\x8F" /* ㄏ */ },
+        {"k " /* ㄤ */, "\xE3\x84\x8E" /* ㄎ */ },
+        {"c " /* ㄕ */, "\xE3\x84\x92" /* ㄒ */ },
+        {"n " /* ㄣ */, "\xE3\x84\x8B" /* ㄋ */ },
+        {"m " /* ㄢ */, "\xE3\x84\x87" /* ㄇ */ },
+        {"s " /* ㄙ */, "\xCB\x99" /* ˙ */ },
+        {"d " /* ㄉ */, "\xCB\x8A" /* ˊ */ },
+        {"f " /* ㄈ */, "\xCB\x87" /* ˇ */ },
+        {"j " /* ㄓ */, "\xCB\x8B" /* ˋ */ },
+        {"l " /* ㄦ */, "\xE3\x84\xA5" /* ㄥ */ },
+        {"a " /* ㄘ */, "\xE3\x84\x9F" /* ㄟ */ },
+        {"j " /* ㄓ */, "\xE3\x84\x90" /* ㄐ */ },
+        {"l " /* ㄦ */, "\xE3\x84\x8C" /* ㄌ */ },
+    };
+    size_t i;
+    ChewingContext *ctx;
+    int totalChoice;
+    const char *cand;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_KBType(ctx, KB_HSU);
+
+    for (i = 0; i < ARRAY_SIZE(CHOICE_INFO_APPEND); ++i) {
+
+        type_keystroke_by_string(ctx, CHOICE_INFO_APPEND[i].token);
+
+        chewing_cand_open(ctx);
+        totalChoice = chewing_cand_TotalChoice(ctx);
+
+        if (i == 14) {
+            cand = chewing_cand_string_by_index_static(ctx, totalChoice - 3);
+        } else if (i == 13 || i == 12) {
+            cand = chewing_cand_string_by_index_static(ctx, totalChoice - 2);
+        } else {
+            cand = chewing_cand_string_by_index_static(ctx, totalChoice - 1);
+        }
+
+        ok(strcmp(cand, CHOICE_INFO_APPEND[i].expected) == 0, "returned candidate is `%s' shall be `%s'", cand, CHOICE_INFO_APPEND[i].expected);
+
+        chewing_cand_close(ctx);
+        chewing_clean_preedit_buf(ctx);
+    }
+    chewing_delete(ctx);
+}
 
 void test_KB_ET26()
 {
@@ -1534,6 +1584,55 @@ void test_KB_ET26()
     chewing_delete(ctx);
 }
 
+void test_KB_ET26_choice_append()
+{
+    const TestData CHOICE_INFO_APPEND[] = {
+        { "p " /* ㄡ */, "\xE3\x84\x86" /* ㄆ */ },
+        { "t " /* ㄤ */, "\xE3\x84\x8A" /* ㄊ */ },
+        { "w " /* ㄘ */, "\xE3\x84\x9D" /* ㄝ */ },
+        { "g " /* ㄓ */, "\xE3\x84\x90" /* ㄐ */ },
+        { "h " /* ㄦ */, "\xE3\x84\x8F" /* ㄏ */ },
+        { "l " /* ㄥ */, "\xE3\x84\x8C" /* ㄌ */ },
+        { "c " /* ㄕ */, "\xE3\x84\x92" /* ㄒ */ },
+        { "n " /* ㄣ */, "\xE3\x84\x8B" /* ㄋ */ },
+        { "m " /* ㄢ */, "\xE3\x84\x87" /* ㄇ */ },
+        { "d " /* ㄉ */, "\xCB\x99" /* ˙ */ },
+        { "f " /* ㄈ */, "\xCB\x8A" /* ˊ */ },
+        { "j " /* ㄖ */, "\xCB\x87" /* ˇ */ },
+        { "k " /* ㄎ */, "\xCB\x8B" /* ˋ */ },
+        { "q " /* ㄗ */, "\xE3\x84\x9F" /* ㄟ */ },
+        { "v " /* ㄍ */, "\xE3\x84\x91" /* ㄑ */ },
+    };
+
+    size_t i;
+    ChewingContext *ctx;
+    int totalChoice;
+    const char *cand;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_KBType(ctx, KB_ET26);
+
+    for (i = 0; i < ARRAY_SIZE(CHOICE_INFO_APPEND); ++i) {
+
+        type_keystroke_by_string(ctx, CHOICE_INFO_APPEND[i].token);
+
+        chewing_cand_open(ctx);
+        totalChoice = chewing_cand_TotalChoice(ctx);
+
+        if (i == 13 || i == 14) {
+            cand = chewing_cand_string_by_index_static(ctx, totalChoice - 2);
+        } else {
+            cand = chewing_cand_string_by_index_static(ctx, totalChoice - 1);
+        }
+
+        ok(strcmp(cand, CHOICE_INFO_APPEND[i].expected) == 0, "returned candidate is `%s' shall be `%s'", cand, CHOICE_INFO_APPEND[i].expected);
+
+        chewing_cand_close(ctx);
+        chewing_clean_preedit_buf(ctx);
+    }
+    chewing_delete(ctx);
+}
 
 void test_KB_DACHEN_CP26()
 {
@@ -1683,7 +1782,9 @@ void test_KB_MPS2()
 void test_KB()
 {
     test_KB_HSU();
+    test_KB_HSU_choice_append();
     test_KB_ET26();
+    test_KB_ET26_choice_append();
     test_KB_DACHEN_CP26();
 
     test_KB_HANYU();
