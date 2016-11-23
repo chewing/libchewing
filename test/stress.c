@@ -64,6 +64,17 @@ int read_from_fd()
     return c;
 }
 
+static void verbose_logger(void *data, int level, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+    printf("\r");
+    fflush(stdout);
+}
+
 int main(int argc, char *argv[])
 {
     int i;
@@ -72,6 +83,7 @@ int main(int argc, char *argv[])
     int flag_loop = -1;
     int flag_verbose = 0;
     int (*get_input)() = &random256;
+    void (*logger) (void *data, int level, const char *fmt, ...) = NULL;
     char *chewing_sys_path;
     char *userphrase_path;
     int num_special_key = 0;
@@ -83,9 +95,10 @@ int main(int argc, char *argv[])
 	    flag_random_init = 1;
 	else if (strcmp(argv[i], "-extra") == 0)
 	    flag_random_extra = 1;
-	else if (strcmp(argv[i], "-verbose") == 0)
+	else if (strcmp(argv[i], "-verbose") == 0) {
 	    flag_verbose = 1;
-	else if (strcmp(argv[i], "-loop") == 0 && argv[i + 1])
+            logger = verbose_logger;
+        } else if (strcmp(argv[i], "-loop") == 0 && argv[i + 1])
 	    flag_loop = atoi(argv[++i]);
 	else if (strcmp(argv[i], "-stdin") == 0) {
             input_fd = 0;
@@ -125,7 +138,7 @@ int main(int argc, char *argv[])
     for (i = 0; i != flag_loop; i++) {
 	ChewingContext *ctx;
 	clean_userphrase();
-	ctx = chewing_new2(chewing_sys_path, userphrase_path, NULL, NULL);
+	ctx = chewing_new2(chewing_sys_path, userphrase_path, logger, NULL);
 
 	/* typical configuration */
 	chewing_set_KBType(ctx, chewing_KBStr2Num("KB_DEFAULT"));
@@ -216,14 +229,16 @@ int main(int argc, char *argv[])
 		if (0 <= v && v < num_special_key) {
 		    int key = chewing_test_special_keys[v].key;
 		    if (flag_verbose) {
-                        printf("%s", chewing_test_special_keys[v].str);
+                        printf("\r\n------------------------------\r\n");
+                        printf("keystroke: %s\r\n", chewing_test_special_keys[v].str);
 			fflush(stdout);
 		    }
 		    type_single_keystroke(ctx, key);
                 } else if (num_special_key <= v && v < num_special_key + num_normal_key) {
 		    int key = normal_keys[v - num_special_key];
 		    if (flag_verbose) {
-                        printf("%c", key);
+                        printf("\r\n------------------------------\r\n");
+                        printf("keystroke: [%c]\r\n", key);
 			fflush(stdout);
 		    }
 		    type_single_keystroke(ctx, key);
@@ -234,7 +249,7 @@ int main(int argc, char *argv[])
 	    commit_string(ctx);
 	}
         if (flag_verbose)
-            printf("\n");
+            printf("\r\n");
 	chewing_delete(ctx);
 
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(_WIN32_WCE)
