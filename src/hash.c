@@ -396,7 +396,7 @@ static char *_load_hash_file(const char *filename, int *size)
     FILE *tf;
 
     tf = open_file_get_length(filename, "rb", &flen);
-    if (tf == NULL || flen == -1) {
+    if (tf == NULL) {
         goto err_load_file;
     }
     pd = ALC(char, flen);
