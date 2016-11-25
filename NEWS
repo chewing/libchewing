@@ -1,6 +1,20 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 
+* New APIs:
+  - chewing_phone_to_bopomofo [ShengYenPeng]. #166
+
+* Platform-specific
+  - Install instructions for Mac OS [Chocobo1].
+
+* Bug fixed:
+  - Unable to input some Bopomofos with ET26 layout [Hiunn-hué]. #235
+  - prevent memory leak in error case of GetDefaultUserPhrasePath [Kuang-che Wu].
+  - Fix PinYinData keySeq buffer overflow in PinYinInput() [Kuang-che Wu]. #238
+  - Fix trying to allocate buffer of negative size [Kuang-che Wu].
+  - Fix access violation due to negative cursor position [Kuang-che Wu].
+  - Stop when _load_hash_file cannot read file size [ChangZhuo Chen]. #246
+
 
 What's New in libchewing 0.5.1 (May 18, 2016)
 ---------------------------------------------------------
