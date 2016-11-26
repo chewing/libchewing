@@ -164,9 +164,11 @@ static int CheckUserChoose(ChewingData *pgdata,
                  * 'selectStr[chno]' test if not ok then return 0,
                  * if ok then continue to test. */
                 len = c.to - c.from;
-                if (memcmp(ueStrSeek(pUserPhraseData->wordSeq, c.from - from),
-                           selectStr[chno], ueStrNBytes(selectStr[chno], len)))
+                if (strncmp(ueStrSeek(pUserPhraseData->wordSeq, c.from - from),
+                            selectStr[chno],
+                            ueStrNBytes(selectStr[chno], len))) {
                     break;
+                }
             }
 
         }
