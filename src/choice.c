@@ -162,7 +162,7 @@ static int ChoiceTheSame(ChoiceInfo *pci, const char *str, int len)
     int i;
 
     for (i = 0; i < pci->nTotalChoice; i++)
-        if (!memcmp(pci->totalChoiceStr[i], str, len))
+        if (!strncmp(pci->totalChoiceStr[i], str, len))
             return 1;
     return 0;
 }
