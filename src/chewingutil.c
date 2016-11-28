@@ -292,7 +292,7 @@ int EasySymbolInput(int key, ChewingData *pgdata)
     if (-1 != _index) {
         for (loop = 0; loop < pgdata->static_data.g_easy_symbol_num[_index]; ++loop) {
             ueStrNCpy(wordbuf, ueStrSeek(pgdata->static_data.g_easy_symbol_value[_index], loop), 1, 1);
-            rtn = _Inner_InternalSpecialSymbol(key, pgdata, key, wordbuf);
+            (void) _Inner_InternalSpecialSymbol(key, pgdata, key, wordbuf);
         }
         return SYMBOL_KEY_OK;
     }
