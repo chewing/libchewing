@@ -652,8 +652,8 @@ static void SortListByScore(TreeDataType *ptd)
     for (listLen = 0, p = ptd->phList; p; listLen++, p = p->next);
     ptd->nPhListLen = listLen;
 
+    assert(listLen);
     arr = ALC(RecordNode *, listLen);
-
     assert(arr);
 
     for (i = 0, p = ptd->phList; i < listLen; p = p->next, i++) {
@@ -867,6 +867,7 @@ static RecordNode *DuplicateRecordAndInsertInterval(const RecordNode *record, Tr
     if (!ret)
         return NULL;
 
+    assert(record->nInter + 1);
     ret->arrIndex = ALC(int, record->nInter + 1);
     if (!ret->arrIndex) {
         free(ret);
