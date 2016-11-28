@@ -227,6 +227,9 @@ int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomo
         }
     }
 
+    /* catch the above exceptions */
+    if (!final) final = "";
+    if (!initial) initial = "";
 
     /* THL empty rime
      * we use '=' in pinyin.tab as empty rime, restore it to ''
