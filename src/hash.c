@@ -40,8 +40,7 @@ int AlcUserPhraseSeq(UserPhraseData *pData, int phonelen, int wordlen)
     return 1;
 
   error:
-    free(pData->phoneSeq);
-    free(pData->wordSeq);
+    DestroyUserPhraseData(pData);
     return 0;
 }
 
@@ -317,14 +316,7 @@ static int ReadHashItem_bin(const char *srcbuf, HASH_ITEM *pItem, int item_index
     return 1;                   /* continue */
 
   ignore_corrupted_record:
-    if (pItem->data.phoneSeq != NULL) {
-        free(pItem->data.phoneSeq);
-        pItem->data.phoneSeq = NULL;
-    }
-    if (pItem->data.wordSeq != NULL) {
-        free(pItem->data.wordSeq);
-        pItem->data.wordSeq = NULL;
-    }
+    DestroyUserPhraseData(&pItem->data);
     return -1;                  /* ignore */
 }
 
@@ -477,8 +469,7 @@ static int migrate_hash_to_bin(ChewingData *pgdata)
 
         HashItem2Binary(seekdump, &item);
         seekdump += FIELD_SIZE;
-        free(item.data.phoneSeq);
-        free(item.data.wordSeq);
+        DestroyUserPhraseData(&item.data);
     };
     fclose(txtfile);
 
@@ -503,8 +494,7 @@ void FreeHashItem(HASH_ITEM *pItem)
     while (pItem) {
         HASH_ITEM *next = pItem->next;
 
-        free(pItem->data.phoneSeq);
-        free(pItem->data.wordSeq);
+        DestroyUserPhraseData(&pItem->data);
         free(pItem);
         pItem = next;
     }
