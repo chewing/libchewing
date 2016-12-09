@@ -152,6 +152,7 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
         data.userfreq = data.origfreq;
         data.recentTime = pgdata->static_data.chewing_lifetime;
         pItem = HashInsert(pgdata, &data);
+        DestroyUserPhraseData(&data);
         LogUserPhrase(pgdata, phoneSeq, wordSeq, pItem->data.origfreq, pItem->data.maxfreq, pItem->data.userfreq,
                       pItem->data.recentTime);
         HashModify(pgdata, pItem);

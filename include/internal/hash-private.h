@@ -41,6 +41,7 @@ HASH_ITEM *FindNextHash(const struct ChewingData *pgdata, HASH_ITEM *curr);
 void HashModify(struct ChewingData *pgdata, HASH_ITEM *pItem);
 void FreeHashItem(HASH_ITEM *pItem);
 int AlcUserPhraseSeq(UserPhraseData *pData, int phonelen, int wordlen);
+void DestroyUserPhraseData(UserPhraseData* pData);
 int InitUserphrase(struct ChewingData *pgdata, const char *path);
 void TerminateUserphrase(struct ChewingData *pgdata);
 void FreeHashTable(void);

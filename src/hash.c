@@ -27,6 +27,7 @@
 
 int AlcUserPhraseSeq(UserPhraseData *pData, int phonelen, int wordlen)
 {
+    memset(pData, 0, sizeof(*pData));
     pData->phoneSeq = ALC(uint16_t, phonelen + 1);
 
     if (!pData->phoneSeq)
@@ -42,6 +43,14 @@ int AlcUserPhraseSeq(UserPhraseData *pData, int phonelen, int wordlen)
     free(pData->phoneSeq);
     free(pData->wordSeq);
     return 0;
+}
+
+void DestroyUserPhraseData(UserPhraseData* pData)
+{
+    free(pData->phoneSeq);
+    pData->phoneSeq = NULL;
+    free(pData->wordSeq);
+    pData->wordSeq = NULL;
 }
 
 static int PhoneSeqTheSame(const uint16_t p1[], const uint16_t p2[])
@@ -119,7 +128,9 @@ HASH_ITEM *HashInsert(ChewingData *pgdata, UserPhraseData *pData)
     /* set the new element */
     pItem->next = pgdata->static_data.hashtable[hashvalue];
 
-    memcpy(&(pItem->data), pData, sizeof(pItem->data));
+    /* transfer ownership of pointers inside |pData| to |pItem->data| */
+    pItem->data = *pData;
+    memset(pData, 0, sizeof(*pData));
     pItem->item_index = -1;
 
     /* set link to the new element */
