@@ -526,6 +526,8 @@ static void Discard2(TreeDataType *ptd)
     for (i = 0; i < ptd->nInterval; i++)
         if (!failflag[i])
             ptd->interval[nInterval2++] = ptd->interval[i];
+        else if (ptd->interval[i].p_phr != NULL)
+            free(ptd->interval[i].p_phr);
     ptd->nInterval = nInterval2;
 }
 
