@@ -607,8 +607,10 @@ int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem)
     int fsize  = 0;
     int len    = 0;
     int offset = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
+    int found  = 0;
 
-    char *seekhead = _load_hash_file(pgdata->static_data.hashfilename, &fsize);
+    char *fhead    = _load_hash_file(pgdata->static_data.hashfilename, &fsize);
+    char *seekhead = fhead;
     char *wordSeq  = NULL;
 
     const char *pc;
@@ -630,9 +632,10 @@ int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem)
         if ((int)(seekhead[16]) &&
             strlen(wordSeq) == strlen(pItem->data.wordSeq) &&
             !strncmp(wordSeq, pItem->data.wordSeq, strlen(pItem->data.wordSeq))) {
-            free (wordSeq);
+            free(wordSeq);
             wordSeq = NULL;
-            return offset;
+            found = 1;
+            break;
         }
 
         seekhead += FIELD_SIZE;
@@ -642,6 +645,8 @@ int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem)
         wordSeq = NULL;
     }
 
-    return -1;
+    free(fhead);
+    fhead = NULL;
+    return (found ? offset : -1);
 }
 
