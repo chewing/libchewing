@@ -196,6 +196,7 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
             HashModify(pgdata, item);
 
             *prev = item->next;
+            item->next = NULL;
             FreeHashItem(item);
 
             return 1;
