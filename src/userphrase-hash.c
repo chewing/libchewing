@@ -192,7 +192,6 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
         if (strcmp(item->data.wordSeq, wordSeq) == 0) {
             /* Remove this phrase by removing */
             item->data.phoneSeq[0] = 0;
-            item->data.wordSeq[0] = 0;
             HashModify(pgdata, item);
 
             *prev = item->next;

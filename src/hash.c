@@ -212,6 +212,7 @@ void HashModify(ChewingData *pgdata, HASH_ITEM *pItem)
 {
     FILE *outfile;
     char str[FIELD_SIZE + 1];
+    int offset = -1;
 
     outfile = fopen(pgdata->static_data.hashfilename, "r+b");
     if (!outfile)
@@ -228,14 +229,23 @@ void HashModify(ChewingData *pgdata, HASH_ITEM *pItem)
         fseek(outfile, 0, SEEK_END);
         pItem->item_index = (ftell(outfile) - 4 - strlen(BIN_HASH_SIG)) / FIELD_SIZE;
     } else {
-        fseek(outfile, pItem->item_index * FIELD_SIZE + 4 + strlen(BIN_HASH_SIG), SEEK_SET);
+        offset = HashFileOffsetWithUserPhrase(pgdata, pItem);
+        if (offset != -1)
+            fseek(outfile, offset, SEEK_SET);
+        else
+            goto cleanup;
     }
+
+    if (pItem->data.phoneSeq[0] == 0)
+        pItem->data.wordSeq[0] = 0;
 
     HashItem2String(str, pItem);
     DEBUG_OUT("HashModify-2: '%-75s'\n", str);
 
     HashItem2Binary(str, pItem);
     fwrite(str, 1, FIELD_SIZE, outfile);
+
+cleanup:
     fflush(outfile);
     fclose(outfile);
 }
@@ -591,3 +601,47 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
     }
     return 0;
 }
+
+int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem)
+{
+    int fsize  = 0;
+    int len    = 0;
+    int offset = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
+
+    char *seekhead = _load_hash_file(pgdata->static_data.hashfilename, &fsize);
+    char *wordSeq  = NULL;
+
+    const char *pc;
+
+    seekhead += offset;
+    fsize    -= offset;
+
+    while (fsize >= FIELD_SIZE) {
+        len = (int)(seekhead[16]);
+
+        pc = &(seekhead[17]);
+        while (len--)
+            pc += 2;
+
+        wordSeq = ALC(char, (*pc) + 1);
+        strcpy(wordSeq, (char *) (pc + 1));
+        wordSeq[(unsigned int) *pc] = '\0';
+
+        if ((int)(seekhead[16]) &&
+            strlen(wordSeq) == strlen(pItem->data.wordSeq) &&
+            !strncmp(wordSeq, pItem->data.wordSeq, strlen(pItem->data.wordSeq))) {
+            free (wordSeq);
+            wordSeq = NULL;
+            return offset;
+        }
+
+        seekhead += FIELD_SIZE;
+        fsize    -= FIELD_SIZE;
+        offset   += FIELD_SIZE;
+        free(wordSeq);
+        wordSeq = NULL;
+    }
+
+    return -1;
+}
+
