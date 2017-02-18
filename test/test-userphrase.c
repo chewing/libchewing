@@ -787,7 +787,7 @@ void test_userphrase_remove()
 
     ctx = chewing_new();
     ret = chewing_userphrase_lookup(ctx, p2, b1);
-    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
     chewing_delete(ctx);
     ctx = NULL;
 }

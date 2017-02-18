@@ -212,7 +212,6 @@ void HashModify(ChewingData *pgdata, HASH_ITEM *pItem)
 {
     FILE *outfile;
     char str[FIELD_SIZE + 1];
-    int offset = -1;
 
     outfile = fopen(pgdata->static_data.hashfilename, "r+b");
     if (!outfile)
@@ -228,12 +227,8 @@ void HashModify(ChewingData *pgdata, HASH_ITEM *pItem)
     if (pItem->item_index < 0) {
         fseek(outfile, 0, SEEK_END);
         pItem->item_index = (ftell(outfile) - 4 - strlen(BIN_HASH_SIG)) / FIELD_SIZE;
-    } else {
-        offset = HashFileOffsetWithUserPhrase(pgdata, pItem);
-        if (offset != -1)
-            fseek(outfile, offset, SEEK_SET);
-        else
-            goto cleanup;
+    } else if (!HashFileSeekToUserPhrase(pgdata, pItem, outfile)) {
+        goto cleanup;
     }
 
     if (pItem->data.phoneSeq[0] == 0)
@@ -602,51 +597,52 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
     return 0;
 }
 
-int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem)
+int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE *fpHash)
 {
-    int fsize  = 0;
     int len    = 0;
-    int offset = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
-    int found  = 0;
-
-    char *fhead    = _load_hash_file(pgdata->static_data.hashfilename, &fsize);
-    char *seekhead = fhead;
-    char *wordSeq  = NULL;
-
+    int result = 0;
+    char buf[FIELD_SIZE];
     const char *pc;
+    HASH_ITEM *pTmpItem;
 
-    seekhead += offset;
-    fsize    -= offset;
+    pTmpItem = ALC(HASH_ITEM, 1);
+    if (!pTmpItem)
+        return 0;
 
-    while (fsize >= FIELD_SIZE) {
-        len = (int)(seekhead[16]);
+    fseek(fpHash, strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime), SEEK_SET);
 
-        pc = &(seekhead[17]);
+    while (!feof(fpHash)) {
+        memset(buf, 0x00, FIELD_SIZE);
+        if (fread(buf, FIELD_SIZE, 1, fpHash) != 1)
+        {
+            free(pTmpItem);
+            return 0;
+        }
+
+        len = (int)(buf[16]);
+        pTmpItem->data.phoneSeq = ALC(uint16_t, len + 1);
+
+        pc = &(buf[17]);
         while (len--)
             pc += 2;
 
-        wordSeq = ALC(char, (*pc) + 1);
-        strcpy(wordSeq, (char *) (pc + 1));
-        wordSeq[(unsigned int) *pc] = '\0';
+        pTmpItem->data.wordSeq = ALC(char, (*pc) + 1);
+        strcpy(pTmpItem->data.wordSeq, (char *) (pc + 1));
+        pTmpItem->data.wordSeq[(unsigned int) *pc] = '\0';
 
-        if ((int)(seekhead[16]) &&
-            strlen(wordSeq) == strlen(pItem->data.wordSeq) &&
-            !strncmp(wordSeq, pItem->data.wordSeq, strlen(pItem->data.wordSeq))) {
-            free(wordSeq);
-            wordSeq = NULL;
-            found = 1;
+        if ((int)(buf[16]) &&
+            strlen(pTmpItem->data.wordSeq) == strlen(pItem->data.wordSeq) &&
+            !strncmp(pTmpItem->data.wordSeq, pItem->data.wordSeq, strlen(pItem->data.wordSeq))) {
+            fseek(fpHash, ftell(fpHash) - FIELD_SIZE, SEEK_SET);
+            DestroyUserPhraseData(&pTmpItem->data);
+            result = 1;
             break;
         }
 
-        seekhead += FIELD_SIZE;
-        fsize    -= FIELD_SIZE;
-        offset   += FIELD_SIZE;
-        free(wordSeq);
-        wordSeq = NULL;
+        DestroyUserPhraseData(&pTmpItem->data);
     }
 
-    free(fhead);
-    fhead = NULL;
-    return (found ? offset : -1);
+    free(pTmpItem);
+    return result;
 }
 

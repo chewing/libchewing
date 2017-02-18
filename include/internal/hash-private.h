@@ -45,7 +45,7 @@ void DestroyUserPhraseData(UserPhraseData* pData);
 int InitUserphrase(struct ChewingData *pgdata, const char *path);
 void TerminateUserphrase(struct ChewingData *pgdata);
 void FreeHashTable(void);
-int HashFileOffsetWithUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem);
+int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE *fpHash);
 
 /* *INDENT-OFF* */
 #endif
