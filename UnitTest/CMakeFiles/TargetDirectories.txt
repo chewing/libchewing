@@ -1,0 +1,3 @@
+/home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles/rebuild_cache.dir
+/home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles/edit_cache.dir
+/home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles/UintTest.dir

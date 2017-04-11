@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mnpan/1052Testing/project/libchewing/UnitTest/chewing_test/chewing_test.cpp
+stdio.h
+-
+stdlib.h
+-
+chewing.h
+-
+
+/usr/local/include/chewing/chewing-compat.h
+
+/usr/local/include/chewing/chewing.h
+chewingio.h
+/usr/local/include/chewing/chewingio.h
+global.h
+/usr/local/include/chewing/global.h
+mod_aux.h
+/usr/local/include/chewing/mod_aux.h
+chewing-compat.h
+/usr/local/include/chewing/chewing-compat.h
+
+/usr/local/include/chewing/chewingio.h
+global.h
+/usr/local/include/chewing/global.h
+
+/usr/local/include/chewing/global.h
+
+/usr/local/include/chewing/mod_aux.h
+global.h
+/usr/local/include/chewing/global.h
+

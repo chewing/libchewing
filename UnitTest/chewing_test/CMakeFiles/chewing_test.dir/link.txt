@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/chewing_test.dir/chewing_test.cpp.o  -o chewing_test  -L/usr/local/lib -rdynamic -lchewing -Wl,-rpath,/usr/local/lib 
