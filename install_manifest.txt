@@ -1,0 +1,16 @@
+/usr/local/share/info/libchewing.info
+/usr/local/share/libchewing/dictionary.dat
+/usr/local/share/libchewing/index_tree.dat
+/usr/local/share/libchewing/pinyin.tab
+/usr/local/share/libchewing/swkb.dat
+/usr/local/share/libchewing/symbols.dat
+/usr/local/include/chewing/chewing.h
+/usr/local/include/chewing/chewing-compat.h
+/usr/local/include/chewing/chewingio.h
+/usr/local/include/chewing/global.h
+/usr/local/include/chewing/mod_aux.h
+/usr/local/lib/pkgconfig/chewing.pc
+/usr/local/lib/libchewing.so.3.3.1
+/usr/local/lib/libchewing.so.3
+/usr/local/lib/libchewing.so
+/usr/local/lib/libchewing.a

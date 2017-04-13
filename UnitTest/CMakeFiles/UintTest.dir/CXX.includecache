@@ -6,6 +6,12 @@
 
 #IncludeRegexTransform: 
 
+/home/mnpan/1052Testing/project/libchewing/UnitTest/BoundaryValueTest.cpp
+func.h
+/home/mnpan/1052Testing/project/libchewing/UnitTest/func.h
+
+/home/mnpan/1052Testing/project/libchewing/UnitTest/EquivalenceClass.cpp
+
 /home/mnpan/1052Testing/project/libchewing/UnitTest/UnitTest.cpp
 gtest/gtest.h
 -
@@ -13,6 +19,14 @@ chewing.h
 -
 iostream
 -
+BoundaryValueTest.cpp
+/home/mnpan/1052Testing/project/libchewing/UnitTest/BoundaryValueTest.cpp
+EquivalenceClass.cpp
+/home/mnpan/1052Testing/project/libchewing/UnitTest/EquivalenceClass.cpp
+
+/home/mnpan/1052Testing/project/libchewing/UnitTest/func.h
+chewing.h
+/home/mnpan/1052Testing/project/libchewing/UnitTest/chewing.h
 
 /usr/local/include/chewing/chewing-compat.h
 
