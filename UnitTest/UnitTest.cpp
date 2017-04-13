@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <chewing.h>
 #include <iostream>
+#include "func.h"
 #include "BoundaryValueTest.cpp"
 #include "EquivalenceClass.cpp"
 

@@ -7,7 +7,8 @@ ChewingContext* convert2ctx( string str){
 		chewing_handle_Default(ctx, str[idx]);
 		idx++;
 	}
-	chewing_handle_Enter(ctx);
+	//chewing_handle_Enter(ctx);
+	chewing_handle_Down(ctx);
 	return ctx;
 }
 
@@ -15,7 +16,9 @@ ChewingContext* convert2ctx_bychar(char a, char b){
 	ChewingContext* ctx = chewing_new();
 	chewing_handle_Default(ctx, a);
 	chewing_handle_Default(ctx, b);
-	chewing_handle_Default(ctx, ' ');
-	chewing_handle_Enter(ctx);
+	//chewing_handle_Default(ctx, ' ');
+	//chewing_handle_Enter(ctx);
+	chewing_handle_Space(ctx);
+	chewing_handle_Down(ctx);
 	return ctx;
 }

@@ -7,8 +7,6 @@
 #IncludeRegexTransform: 
 
 /home/mnpan/1052Testing/project/libchewing/UnitTest/BoundaryValueTest.cpp
-func.h
-/home/mnpan/1052Testing/project/libchewing/UnitTest/func.h
 
 /home/mnpan/1052Testing/project/libchewing/UnitTest/EquivalenceClass.cpp
 
@@ -19,6 +17,8 @@ chewing.h
 -
 iostream
 -
+func.h
+/home/mnpan/1052Testing/project/libchewing/UnitTest/func.h
 BoundaryValueTest.cpp
 /home/mnpan/1052Testing/project/libchewing/UnitTest/BoundaryValueTest.cpp
 EquivalenceClass.cpp

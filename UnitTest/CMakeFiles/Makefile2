@@ -60,39 +60,39 @@ CMAKE_SOURCE_DIR = /home/mnpan/1052Testing/project/libchewing/UnitTest
 CMAKE_BINARY_DIR = /home/mnpan/1052Testing/project/libchewing/UnitTest
 
 #=============================================================================
-# Target rules for target CMakeFiles/UintTest.dir
+# Target rules for target CMakeFiles/UnitTest.dir
 
 # All Build rule for target.
-CMakeFiles/UintTest.dir/all:
-	$(MAKE) -f CMakeFiles/UintTest.dir/build.make CMakeFiles/UintTest.dir/depend
-	$(MAKE) -f CMakeFiles/UintTest.dir/build.make CMakeFiles/UintTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles --progress-num=1,2 "Built target UintTest"
-.PHONY : CMakeFiles/UintTest.dir/all
+CMakeFiles/UnitTest.dir/all:
+	$(MAKE) -f CMakeFiles/UnitTest.dir/build.make CMakeFiles/UnitTest.dir/depend
+	$(MAKE) -f CMakeFiles/UnitTest.dir/build.make CMakeFiles/UnitTest.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles --progress-num=1,2 "Built target UnitTest"
+.PHONY : CMakeFiles/UnitTest.dir/all
 
 # Include target in all.
-all: CMakeFiles/UintTest.dir/all
+all: CMakeFiles/UnitTest.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/UintTest.dir/rule: cmake_check_build_system
+CMakeFiles/UnitTest.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/UintTest.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/UnitTest.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/mnpan/1052Testing/project/libchewing/UnitTest/CMakeFiles 0
-.PHONY : CMakeFiles/UintTest.dir/rule
+.PHONY : CMakeFiles/UnitTest.dir/rule
 
 # Convenience name for target.
-UintTest: CMakeFiles/UintTest.dir/rule
+UnitTest: CMakeFiles/UnitTest.dir/rule
 
-.PHONY : UintTest
-
-# clean rule for target.
-CMakeFiles/UintTest.dir/clean:
-	$(MAKE) -f CMakeFiles/UintTest.dir/build.make CMakeFiles/UintTest.dir/clean
-.PHONY : CMakeFiles/UintTest.dir/clean
+.PHONY : UnitTest
 
 # clean rule for target.
-clean: CMakeFiles/UintTest.dir/clean
+CMakeFiles/UnitTest.dir/clean:
+	$(MAKE) -f CMakeFiles/UnitTest.dir/build.make CMakeFiles/UnitTest.dir/clean
+.PHONY : CMakeFiles/UnitTest.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/UnitTest.dir/clean
 
 .PHONY : clean
 

@@ -114,7 +114,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=UintTest
+CMAKE_PROJECT_NAME:STATIC=UnitTest
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -188,6 +188,12 @@ UintTest_BINARY_DIR:STATIC=/home/mnpan/1052Testing/project/libchewing/UnitTest
 
 //Value Computed by CMake
 UintTest_SOURCE_DIR:STATIC=/home/mnpan/1052Testing/project/libchewing/UnitTest
+
+//Value Computed by CMake
+UnitTest_BINARY_DIR:STATIC=/home/mnpan/1052Testing/project/libchewing/UnitTest
+
+//Value Computed by CMake
+UnitTest_SOURCE_DIR:STATIC=/home/mnpan/1052Testing/project/libchewing/UnitTest
 
 //Value Computed by CMake
 chewing_test_BINARY_DIR:STATIC=/home/mnpan/1052Testing/project/libchewing/UnitTest
