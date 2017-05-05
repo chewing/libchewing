@@ -523,11 +523,9 @@ int ChoiceEndChoice(ChewingData *pgdata)
     pgdata->choiceInfo.nTotalChoice = 0;
     pgdata->choiceInfo.nPage = 0;
 
-    if (pgdata->choiceInfo.isSymbol != WORD_CHOICE || pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_INSERT) {
-        /* return to the old chiSymbolCursor position */
-        pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
-        assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
-    }
+    pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
+    assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
+
     pgdata->choiceInfo.isSymbol = WORD_CHOICE;
     return 0;
 }
