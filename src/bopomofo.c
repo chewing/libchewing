@@ -242,6 +242,9 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
                     && (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1])) {
                     /* if inx !=0 */
                     searchTimes = 2;    /* possible infinite loop here */
+                } else if (12 <= inx && inx <= 14) {
+                    /* ㄐㄑㄒ always come with ㄧㄩ, so set ㄓㄔㄕ as default. */
+                    pBopomofo->pho_inx[0] = inx + 3;
                 } else
                     break;
             } else if (type == 1 && inx == 1) { /* handle i and e */
@@ -258,15 +261,18 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             pBopomofo->pho_inx[0] = 12;
         }
 
-        /* ㄐㄑㄒ must be followed by ㄧㄩ, if not, convert them to ㄓㄔㄕ */
-        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            /* followed by ㄨ */
-            pBopomofo->pho_inx[0] += 3;
+        /* ㄐㄑㄒ must be followed by ㄧ or ㄩ. If not, convert them to ㄓㄔㄕ. */
+        if (12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+	        if ((type == 1 && inx == 2) || (type == 2 && pBopomofo->pho_inx[1] == 0)) {
+		        pBopomofo->pho_inx[0] += 3;
+	        }
         }
 
-        if (type == 2 && pBopomofo->pho_inx[1] == 0 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            /* followed by other phones */
-            pBopomofo->pho_inx[0] += 3;
+        /* Likeweis, when ㄓㄔㄕ is followed by ㄧ or ㄩ, convert them to ㄐㄑㄒ. */
+        if (15 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 17) {
+	        if ((type == 1) && (inx == 1 || inx == 3)) {
+		        pBopomofo->pho_inx[0] -= 3;
+	        }
         }
 
         if (type == 3) {        /* the key is NOT a phone */

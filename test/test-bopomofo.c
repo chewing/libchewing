@@ -1450,13 +1450,6 @@ void test_KB_HSU()
     ok_preedit_buffer(ctx, "\xE9\xAA\xAF" /* 骯 */);
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "j");
-    ok_bopomofo_buffer(ctx, "\xE3\x84\x90" /* ㄐ */);
-    type_keystroke_by_string(ctx, " "); /* convert "ㄐ,ㄑ,ㄒ" to "ㄓ,ㄔ,ㄕ" */
-    ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE4\xB9\x8B" /* 之 */);
-    chewing_clean_preedit_buf(ctx);
-
     type_keystroke_by_string(ctx, "l");
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8C" /* ㄌ */);
     type_keystroke_by_string(ctx, "f"); /* convert "ㄌ" to "ㄦ" */
@@ -1515,6 +1508,47 @@ void test_KB_HSU_choice_append()
         chewing_cand_close(ctx);
         chewing_clean_preedit_buf(ctx);
     }
+    chewing_delete(ctx);
+}
+
+void test_KB_HSU_JVC()
+{
+    static const struct {
+        char *keystroke;
+        char *bopomofo;
+        char *cand;
+    } DATA[] = {
+        { "j", "\xE3\x84\x93", /* ㄓ */ "\xE4\xB9\x8B", /* 之 */ },
+        { "v", "\xE3\x84\x94", /* ㄔ */ "\xE5\x90\x83", /* 吃 */ },
+        { "c", "\xE3\x84\x95", /* ㄕ */ "\xE5\xA4\xB1", /* 失 */ },
+    };
+
+    ChewingContext *ctx;
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_KBType(ctx, KB_HSU);
+
+    for (int i = 0; i < ARRAY_SIZE(DATA); ++i) {
+        type_keystroke_by_string(ctx, DATA[i].keystroke);
+        ok_bopomofo_buffer(ctx, DATA[i].bopomofo);
+        type_keystroke_by_string(ctx, " ");
+        ok_bopomofo_buffer(ctx, "");
+        ok_preedit_buffer(ctx, DATA[i].cand);
+
+        chewing_cand_close(ctx);
+        chewing_clean_preedit_buf(ctx);
+    }
+
+    type_keystroke_by_string(ctx, "cek");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x92\xE3\x84\xA7\xE3\x84\xA4" /* ㄒㄧㄤ */ );
+    type_keystroke_by_string(ctx, "<EE>");
+
+    type_keystroke_by_string(ctx, "cke");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x92\xE3\x84\xA7\xE3\x84\xA4" /* ㄒㄧㄤ */ );
+    type_keystroke_by_string(ctx, "<B><B>k");
+    ok_bopomofo_buffer(ctx, "\xE3\x84\x95\xE3\x84\xA4" /* ㄕㄤ */ );
+    chewing_clean_preedit_buf(ctx);
+
     chewing_delete(ctx);
 }
 
@@ -1783,6 +1817,7 @@ void test_KB()
 {
     test_KB_HSU();
     test_KB_HSU_choice_append();
+    test_KB_HSU_JVC();
     test_KB_ET26();
     test_KB_ET26_choice_append();
     test_KB_DACHEN_CP26();
