@@ -599,50 +599,55 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
 
 int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE *fpHash)
 {
-    int len    = 0;
-    int result = 0;
-    char buf[FIELD_SIZE];
-    const char *pc;
-    HASH_ITEM *pTmpItem;
+    int fsize           = 0;
+    int iret            = 0;
+    int item_index      = 0;
+    int hdrlen          = 0;
+    int result          = 0;
+    char *seekdump      = NULL;
+    char *buf           = NULL;
+    HASH_ITEM *pItemTmp = NULL;
 
-    pTmpItem = ALC(HASH_ITEM, 1);
-    if (!pTmpItem)
-        return 0;
+    pItemTmp = ALC(HASH_ITEM, 1);
+    if (!pItemTmp)
+        goto error;
 
-    fseek(fpHash, strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime), SEEK_SET);
+    fseek(fpHash, 0, SEEK_END);
+    fsize = ftell(fpHash);
 
-    while (!feof(fpHash)) {
-        memset(buf, 0x00, FIELD_SIZE);
-        if (fread(buf, FIELD_SIZE, 1, fpHash) != 1)
-        {
-            free(pTmpItem);
-            return 0;
+    buf = ALC(char, fsize);
+    if (!buf)
+        goto error;
+
+    fseek(fpHash, 0, SEEK_SET);
+    if (fread(buf, fsize, 1, fpHash) != 1)
+        goto error;
+
+    hdrlen = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
+    seekdump = buf + hdrlen;
+    fsize -= hdrlen;
+
+    while (fsize >= FIELD_SIZE) {
+        iret = ReadHashItem_bin(seekdump, pItemTmp, item_index);
+        if (iret == 1) {
+            if (strlen(pItem->data.wordSeq) == strlen(pItemTmp->data.wordSeq) &&
+                !strncmp(pItem->data.wordSeq, pItemTmp->data.wordSeq, strlen(pItem->data.wordSeq))) {
+                fseek(fpHash, (item_index * FIELD_SIZE) + hdrlen, SEEK_SET);
+                DestroyUserPhraseData(&pItemTmp->data);
+                result = 1;
+                break;
+            }
+            DestroyUserPhraseData(&pItemTmp->data);
         }
 
-        len = (int)(buf[16]);
-        pTmpItem->data.phoneSeq = ALC(uint16_t, len + 1);
-
-        pc = &(buf[17]);
-        while (len--)
-            pc += 2;
-
-        pTmpItem->data.wordSeq = ALC(char, (*pc) + 1);
-        strcpy(pTmpItem->data.wordSeq, (char *) (pc + 1));
-        pTmpItem->data.wordSeq[(unsigned int) *pc] = '\0';
-
-        if ((int)(buf[16]) &&
-            strlen(pTmpItem->data.wordSeq) == strlen(pItem->data.wordSeq) &&
-            !strncmp(pTmpItem->data.wordSeq, pItem->data.wordSeq, strlen(pItem->data.wordSeq))) {
-            fseek(fpHash, ftell(fpHash) - FIELD_SIZE, SEEK_SET);
-            DestroyUserPhraseData(&pTmpItem->data);
-            result = 1;
-            break;
-        }
-
-        DestroyUserPhraseData(&pTmpItem->data);
+        seekdump += FIELD_SIZE;
+        fsize -= FIELD_SIZE;
+        item_index++;
     }
 
-    free(pTmpItem);
+error:
+    free (pItemTmp);
+    free (buf);
     return result;
 }
 
