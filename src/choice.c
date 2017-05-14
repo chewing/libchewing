@@ -530,24 +530,12 @@ int ChoiceEndChoice(ChewingData *pgdata)
     return 0;
 }
 
-static void ChangeUserData(ChewingData *pgdata, int selectNo)
-{
-    uint16_t userPhoneSeq[MAX_PHONE_SEQ_LEN];
-    int len;
-
-    len = ueStrLen(pgdata->choiceInfo.totalChoiceStr[selectNo]);
-    memcpy(userPhoneSeq, &(pgdata->phoneSeq[PhoneSeqCursor(pgdata)]), len * sizeof(uint16_t));
-    userPhoneSeq[len] = 0;
-    UserUpdatePhrase(pgdata, userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[selectNo]);
-}
-
 /** @brief commit the selected phrase. */
 int ChoiceSelect(ChewingData *pgdata, int selectNo)
 {
     ChoiceInfo *pci = &(pgdata->choiceInfo);
     AvailInfo *pai = &(pgdata->availInfo);
 
-    ChangeUserData(pgdata, selectNo);
     ChangeSelectIntervalAndBreakpoint(pgdata,
                                       PhoneSeqCursor(pgdata),
                                       PhoneSeqCursor(pgdata) + pai->avail[pai->currentAvail].len,
