@@ -239,12 +239,12 @@ void test_userphrase_auto_learn()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
-    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
 
     type_keystroke_by_string(ctx, "dk dk dk hk4g4<E>");
 
-    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
 
     chewing_delete(ctx);
@@ -303,11 +303,44 @@ void test_userphrase_auto_learn_hardcode_break()
     chewing_delete(ctx);
 }
 
+void test_userphrase_auto_learn_only_after_commit()
+{
+    /* GitHub #206: It should add the word after user actually finish the character selection. */
+
+    const char bopomofo_1[] = "\xE3\x84\x94\xE3\x84\xA4\xCB\x8A \xE3\x84\x86\xE3\x84\xA2\xCB\x8A"; /* ㄔㄤˊ ㄆㄢˊ */
+    const char bopomofo_2[] = "\xE3\x84\x94\xE3\x84\xA4\xCB\x8A"; /* ㄔㄤˊ */
+
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    /* user just inputs some characters: don't auto learn. */
+    type_keystroke_by_string(ctx, "t;6q06");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    /* user selectes a candidate on the list, but doesn't commit: don't auto learn. */
+    type_keystroke_by_string(ctx, "<L><L><D>7");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    /* user selectes another cadidate and commit: auto learn phrase(s), but not the selected candidate. */
+    type_keystroke_by_string(ctx, "<L><D>2<E>");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    chewing_delete(ctx);
+}
+
 void test_userphrase()
 {
     test_userphrase_auto_learn();
     test_userphrase_auto_learn_with_symbol();
     test_userphrase_auto_learn_hardcode_break();
+    test_userphrase_auto_learn_only_after_commit();
 }
 
 void test_userphrase_enumerate_normal()
