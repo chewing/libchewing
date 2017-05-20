@@ -242,8 +242,15 @@ void test_userphrase_auto_learn()
     ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
 
+    chewing_set_autoLearn(ctx, AUTOLEARN_DISABLED);
+    ok(chewing_get_autoLearn(ctx) == AUTOLEARN_DISABLED, "AutoLearn shall be `%d'", AUTOLEARN_DISABLED);
     type_keystroke_by_string(ctx, "dk dk dk hk4g4<E>");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
 
+    chewing_set_autoLearn(ctx, AUTOLEARN_ENABLED);
+    ok(chewing_get_autoLearn(ctx) == AUTOLEARN_ENABLED, "AutoLearn shall be `%d'", AUTOLEARN_ENABLED);
+    type_keystroke_by_string(ctx, "dk dk dk hk4g4<E>");
     ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
 

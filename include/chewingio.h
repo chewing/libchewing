@@ -498,6 +498,30 @@ CHEWING_API int chewing_get_phraseChoiceRearward(const ChewingContext *ctx);
 /*@}*/
 
 
+/*! \name Behavior of automatic learning after committing
+ */
+
+/*@{*/
+/**
+ * @brief Set the behavior of automatic learning
+ *
+ * @param ctx
+ * @param mode AUTOLEARN_ENABLED or AUTOLEARN_DISABLED
+ */
+CHEWING_API void chewing_set_autoLearn(ChewingContext *ctx, int mode);
+
+
+/**
+ * @brief Get the behavior of automatic learning
+ *
+ * @param ctx
+ * @return AUTOLEARN_ENABLED or AUTOLEARN_DISABLED
+ */
+CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx);
+
+/*@}*/
+
+
 /*! \name Phonetic sequence in Chewing internal state machine
  */
 

@@ -456,6 +456,39 @@ void test_set_ShapeMode()
     chewing_delete(ctx);
 }
 
+void test_set_autoLearn()
+{
+    const int VALUE[] = {
+        AUTOLEARN_ENABLED,
+        AUTOLEARN_DISABLED,
+    };
+
+    const int INVALID_VALUE[] = {
+        -1,
+        2,
+    };
+
+    ChewingContext *ctx;
+    size_t i;
+    size_t j;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    for (i = 0; i < ARRAY_SIZE(VALUE); ++i) {
+        chewing_set_autoLearn(ctx, VALUE[i]);
+        ok(chewing_get_autoLearn(ctx) == VALUE[i], "AutoLearn shall be `%d'", VALUE[i]);
+
+        for (j = 0; j < ARRAY_SIZE(INVALID_VALUE); ++j) {
+            // mode shall not change when set mode has invalid value.
+            chewing_set_autoLearn(ctx, INVALID_VALUE[j]);
+            ok(chewing_get_autoLearn(ctx) == VALUE[i], "AutoLearn shall be `%d'", VALUE[i]);
+        }
+    }
+
+    chewing_delete(ctx);
+}
+
 void test_deprecated()
 {
     ChewingContext *ctx;
@@ -574,6 +607,7 @@ int main(int argc, char *argv[])
     test_set_phraseChoiceRearward();
     test_set_ChiEngMode();
     test_set_ShapeMode();
+    test_set_autoLearn();
 
     test_deprecated();
 
