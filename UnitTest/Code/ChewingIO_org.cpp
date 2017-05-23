@@ -11,7 +11,7 @@ using namespace std;
 
 int selKeys[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 0};
 
-string chewing_io( string line, string select_str){
+string chewing_io( string line){
 	/*** Initailize ***/
 	ChewingContext* ctx;
 	//chewing_Init("/usr/share/chewing", ".");
@@ -31,7 +31,6 @@ string chewing_io( string line, string select_str){
 	int ctr;
 	string result;
 	stringstream sin(line);
-	stringstream sin2( select_str);
 	while( sin.get(ch) ){
 		switch(ch){
 			case ' ':
@@ -55,13 +54,12 @@ string chewing_io( string line, string select_str){
 				}
 				cout << endl << "Choose: ";
 				//cout << "+" << chewing_cand_TotalChoice(ctx) << endl;
-				if( !isdigit(sin2.peek())){
-					sin2.ignore(256, '\n');
+				if( !isdigit(cin.peek())){
+					cin.ignore(256, '\n');
 					return "[Error] select number error.";
 				}
-				sin2 >> select;
-				cout << select << endl;
-				sin2.ignore(256, '\n');
+				cin >> select;
+				cin.ignore(256, '\n');
 				if( select <0 || select > chewing_cand_TotalChoice(ctx)){
 					return "[Error] select number error.";
 				}
@@ -90,7 +88,7 @@ int main(){
 	string line;
 	cout << ">";
 	while( getline(cin, line) ){
-		cout << "[ChewingIO] " << chewing_io( line, "1\n1\n1\n1\n1\n1\n") << endl;
+		cout << "[ChewingIO] " << chewing_io( line) << endl;
 		cout << ">";
 	}
 	cout << "Finish" << endl;
