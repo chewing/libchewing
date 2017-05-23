@@ -6,7 +6,7 @@ find_package(PkgConfig)
 find_package(GTest REQUIRED)
 pkg_check_modules(CHEWING REQUIRED chewing)
 
-include_directories(${CHEWING_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+include_directories(${CHEWING_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ../src/porting_layer/include ../include/ ../include/internal )
 link_directories(${CHEWING_LIBRARY_DIRS})
 
 add_executable(UnitTest UnitTest.cpp)
