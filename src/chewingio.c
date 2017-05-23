@@ -1625,6 +1625,7 @@ CHEWING_API int chewing_handle_Default(ChewingContext *ctx, int key)
   End_KeyDefault:
     CallPhrasing(pgdata, 0);
   End_Paging:
+    ResetOldChiSymbolCursor(pgdata);
     MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
     return 0;
 }

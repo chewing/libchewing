@@ -529,6 +529,12 @@ int ReleaseChiSymbolBuf(ChewingData *pgdata, ChewingOutput *pgo)
     return throwEnd;
 }
 
+/* Sync the oldChiSymbolCursor after choice */
+void ResetOldChiSymbolCursor(ChewingData *pgdata)
+{
+    pgdata->choiceInfo.oldChiSymbolCursor = pgdata->chiSymbolCursor;
+}
+
 static int ChewingIsBreakPoint(int cursor, ChewingData *pgdata)
 {
     static const char *const BREAK_WORD[] = {
