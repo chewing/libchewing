@@ -882,26 +882,22 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         keystrokeRtn = KEYSTROKE_ABSORB | KEYSTROKE_BELL;
     } else if (pgdata->PointStart > -1) {
         int buf = pgdata->chiSymbolCursor;
-        int key;
+        int key = '0';
 
         if (pgdata->PointEnd > 1) {
             if (!pgdata->config.bAddPhraseForward) {
                 pgdata->chiSymbolCursor = pgdata->PointStart;
-                key = '0' + pgdata->PointEnd;
             } else {
                 pgdata->chiSymbolCursor = pgdata->PointStart + pgdata->PointEnd;
-                key = '0' + pgdata->PointEnd;
             }
-
-            chewing_handle_CtrlNum(ctx, key);
-            pgdata->chiSymbolCursor = buf;
+            key = '0' + pgdata->PointEnd;
         } else if (pgdata->PointEnd < 1) {
             if (pgdata->config.bAddPhraseForward)
                 pgdata->chiSymbolCursor = buf - pgdata->PointEnd;
             key = '0' - pgdata->PointEnd;
-            chewing_handle_CtrlNum(ctx, key);
-            pgdata->chiSymbolCursor = buf;
         }
+        chewing_handle_CtrlNum(ctx, key);
+        pgdata->chiSymbolCursor = buf;
         pgdata->PointStart = -1;
         pgdata->PointEnd = 0;
     } else {
