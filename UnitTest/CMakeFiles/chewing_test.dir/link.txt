@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/chewing_test.dir/UnitTest.cpp.o  -o chewing_test  -L/usr/local/lib -rdynamic -lchewing -Wl,-Bstatic -lgtest -Wl,-Bdynamic -lpthread -Wl,-rpath,/usr/local/lib 

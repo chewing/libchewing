@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/UintTest.dir/UnitTest.cpp.o  -o UintTest  -L/usr/local/lib -rdynamic -lchewing -Wl,-Bstatic -lgtest -Wl,-Bdynamic -lpthread -Wl,-rpath,/usr/local/lib 
