@@ -1174,6 +1174,21 @@ before the cursor or after the cursor.
 This function returns the phrase choice rearward setting.
 @end deftypefun
 
+@deftypefun void chewing_set_autoLearn (ChewingContext *@var{ctx}, int @var{mode})
+This function can be used to enable or disable the automatic learning.
+
+The @var{mode} argument is be one of the @code{AUTOLEARN_ENABLED} and @code{AUTOLEARN_DISABLED} macros.
+@end deftypefun
+
+@deftypevr  Macro int AUTOLEARN_ENABLED
+@deftypevrx Macro int AUTOLEARN_DISABLED
+Indicate whether the automatic learning is enabled or not.
+@end deftypevr
+
+@deftypefun int chewing_get_autoLearn (const ChewingContext *@var{ctx})
+This function returns whether the automatic learning is enabled or disabled.
+@end deftypefun
+
 @node Variable Index
 @unnumbered Variable Index
 

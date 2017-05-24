@@ -56,6 +56,7 @@ CHEWING_API int chewing_Configure(ChewingContext *ctx, ChewingConfigData * pcd)
     chewing_set_autoShiftCur(ctx, pcd->bAutoShiftCur);
     chewing_set_easySymbolInput(ctx, pcd->bEasySymbolInput);
     chewing_set_phraseChoiceRearward(ctx, pcd->bPhraseChoiceRearward);
+    chewing_set_autoLearn(ctx, pcd->bAutoLearn);
 
     return 0;
 }

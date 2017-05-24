@@ -26,6 +26,8 @@
 #define SYMBOL_MODE 0
 #define FULLSHAPE_MODE 1
 #define HALFSHAPE_MODE 0
+#define AUTOLEARN_DISABLED 1
+#define AUTOLEARN_ENABLED 0
 
 /* specified to Chewing API */
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
@@ -119,6 +121,7 @@ typedef struct ChewingConfigData {
     int bAutoShiftCur;
     int bEasySymbolInput;
     int bPhraseChoiceRearward;
+    int bAutoLearn;
     int hsuSelKeyType;          // Deprecated.
 } ChewingConfigData;
 

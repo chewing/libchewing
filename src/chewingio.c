@@ -743,6 +743,35 @@ CHEWING_API int chewing_get_ShapeMode(const ChewingContext *ctx)
     return ctx->data->bFullShape;
 }
 
+CHEWING_API void chewing_set_autoLearn(ChewingContext *ctx, int mode)
+{
+    ChewingData *pgdata;
+
+    if (!ctx) {
+        return;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("mode = %d", mode);
+
+    if (mode == AUTOLEARN_ENABLED || mode == AUTOLEARN_DISABLED)
+        ctx->data->config.bAutoLearn = mode;
+}
+
+CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx)
+{
+    const ChewingData *pgdata;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("bAutoLearn = %d", ctx->data->config.bAutoLearn);
+
+    return ctx->data->config.bAutoLearn;
+}
+
 static void CheckAndResetRange(ChewingData *pgdata)
 {
     if (pgdata->PointStart > -1) {
@@ -903,7 +932,9 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
     } else {
         keystrokeRtn = KEYSTROKE_COMMIT;
         WriteChiSymbolToCommitBuf(pgdata, pgo, nCommitStr);
-        AutoLearnPhrase(pgdata);
+        if (!pgdata->config.bAutoLearn) {
+            AutoLearnPhrase(pgdata);
+        }
         CleanAllBuf(pgdata);
         pgo->commitBufLen = nCommitStr;
     }
@@ -2299,7 +2330,9 @@ CHEWING_API int chewing_commit_preedit_buf(ChewingContext *ctx)
         return -1;
 
     WriteChiSymbolToCommitBuf(pgdata, pgo, len);
-    AutoLearnPhrase(pgdata);
+    if (!pgdata->config.bAutoLearn) {
+        AutoLearnPhrase(pgdata);
+    }
     CleanAllBuf(pgdata);
 
     MakeOutputWithRtn(pgo, pgdata, KEYSTROKE_COMMIT);
