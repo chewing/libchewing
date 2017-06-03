@@ -1818,6 +1818,27 @@ CHEWING_API int chewing_handle_Numlock(ChewingContext *ctx, int key)
     return 0;
 }
 
+CHEWING_API size_t chewing_get_bopomofo(const ChewingContext *ctx,
+                                        char *bopomofo_buf,
+                                        const size_t bopomofo_len)
+{
+    const ChewingData *pgdata;
+    size_t size;
+
+    if (!ctx) {
+        return -1;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    size = BopomofoFromUintArray(bopomofo_buf,
+                                 bopomofo_len,
+                                 ctx->data->phoneSeq);
+
+    return size;
+}
+
 CHEWING_API unsigned short *chewing_get_phoneSeq(const ChewingContext *ctx)
 {
     const ChewingData *pgdata;
