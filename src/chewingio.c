@@ -694,8 +694,7 @@ CHEWING_API void chewing_set_ChiEngMode(ChewingContext *ctx, int mode)
 
     if (mode == CHINESE_MODE || mode == SYMBOL_MODE) {
         // remove all data inside buffer as switching mode.
-        BopomofoRemoveAll(&(ctx->data->bopomofoData));
-        MakeOutputWithRtn(ctx->output, ctx->data, KEYSTROKE_ABSORB);
+        chewing_clean_bopomofo_buf(ctx);
         ctx->data->bChiSym = mode;
     }
 }

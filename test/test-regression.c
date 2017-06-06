@@ -107,6 +107,24 @@ void test_libchewing_issue_108()
     chewing_delete(ctx);
 }
 
+void test_libchewing_issue_194()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "test");
+    chewing_set_ChiEngMode(ctx, CHINESE_MODE);
+
+    ok_commit_buffer(ctx, "t");
+
+    chewing_delete(ctx);
+}
+
 void test_libchewing_data_issue_1()
 {
     const TestData DATA = { "e03y.3", "\xE8\xB6\x95\xE8\xB5\xB0" /* 趕走 */  };
@@ -142,6 +160,7 @@ int main(int argc, char *argv[])
     test_libchewing_data_issue_1();
     test_libchewing_issue_30();
     test_libchewing_issue_108();
+    test_libchewing_issue_194();
     test_libchewing_googlecode_issue_472();
     test_libchewing_googlecode_issue_473();
 
