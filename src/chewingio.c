@@ -1667,6 +1667,7 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
     char addWordSeq[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1];
     int phraseState;
     int cursor;
+    int key_buf_cursor;
 
     if (!ctx) {
         return -1;
@@ -1682,7 +1683,6 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
         return 0;
 
     CallPhrasing(pgdata, 0);
-    newPhraseLen = key - '0';
 
     if (key == '0' || key == '1') {
         pgdata->bSelect = 1;
@@ -1694,15 +1694,20 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
         return 0;
     }
 
+    newPhraseLen = key - '0';
     cursor = PhoneSeqCursor(pgdata);
-    if (!pgdata->config.bAddPhraseForward) {
-        if (newPhraseLen >= 1 && cursor + newPhraseLen - 1 <= pgdata->nPhoneSeq) {
-            if (NoSymbolBetween(pgdata, cursor, cursor + newPhraseLen)) {
+    key_buf_cursor = pgdata->chiSymbolCursor;
+
+    if (newPhraseLen >= 2 && newPhraseLen <= 9) {
+        if (!pgdata->config.bAddPhraseForward) {
+            if (cursor + newPhraseLen <= pgdata->nPhoneSeq &&
+                NoSymbolBetween(pgdata, key_buf_cursor, key_buf_cursor + newPhraseLen)) {
+
                 /* Manually add phrase to the user phrase database. */
                 memcpy(addPhoneSeq, &pgdata->phoneSeq[cursor], sizeof(uint16_t) * newPhraseLen);
                 addPhoneSeq[newPhraseLen] = 0;
 
-                copyStringFromPreeditBuf(pgdata, cursor, newPhraseLen, addWordSeq, sizeof(addWordSeq));
+                copyStringFromPreeditBuf(pgdata, key_buf_cursor, newPhraseLen, addWordSeq, sizeof(addWordSeq));
 
                 phraseState = UserUpdatePhrase(pgdata, addPhoneSeq, addWordSeq);
                 SetUpdatePhraseMsg(pgdata, addWordSeq, newPhraseLen, phraseState);
@@ -1711,15 +1716,15 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
                 for (i = 1; i < newPhraseLen; i++)
                     pgdata->bUserArrBrkpt[cursor + i] = 0;
             }
-        }
-    } else {
-        if (newPhraseLen >= 1 && cursor - newPhraseLen >= 0) {
-            if (NoSymbolBetween(pgdata, cursor - newPhraseLen, cursor)) {
+        } else {
+            if (cursor - newPhraseLen >= 0 &&
+                NoSymbolBetween(pgdata, key_buf_cursor - newPhraseLen, key_buf_cursor)) {
+
                 /* Manually add phrase to the user phrase database. */
                 memcpy(addPhoneSeq, &pgdata->phoneSeq[cursor - newPhraseLen], sizeof(uint16_t) * newPhraseLen);
                 addPhoneSeq[newPhraseLen] = 0;
 
-                copyStringFromPreeditBuf(pgdata, cursor - newPhraseLen, newPhraseLen, addWordSeq, sizeof(addWordSeq));
+                copyStringFromPreeditBuf(pgdata, key_buf_cursor - newPhraseLen, newPhraseLen, addWordSeq, sizeof(addWordSeq));
 
                 phraseState = UserUpdatePhrase(pgdata, addPhoneSeq, addWordSeq);
                 SetUpdatePhraseMsg(pgdata, addWordSeq, newPhraseLen, phraseState);
@@ -1730,6 +1735,7 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
             }
         }
     }
+
     CallPhrasing(pgdata, 0);
     MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
     MakeOutputAddMsgAndCleanInterval(pgo, pgdata);

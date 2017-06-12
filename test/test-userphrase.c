@@ -219,12 +219,72 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
     chewing_delete(ctx);
 }
 
+void test_CtrlNum_add_phrase_right_start_with_symbol()
+{
+    static const char bopomofo[] =
+        "\xE3\x84\x89\xE3\x84\xA4\xCB\x87 \xE3\x84\x8A\xE3\x84\xA8\xCB\x87 \xE3\x84\x91\xE3\x84\xA7\xE3\x84\xA4\xCB\x8A" /* ㄉㄤˇ ㄊㄨˇ ㄑㄧㄤˊ */ ;
+    static const char phrase[] = "\xE6\x93\x8B\xE5\x9C\x9F\xE7\x89\x86"; /* 擋土牆 */
+
+    const char *const_buf;
+    ChewingContext *ctx;
+
+    clean_userphrase();
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_addPhraseDirection(ctx, 0);
+
+    ok(has_userphrase(ctx, bopomofo, NULL) == 0, "`%s' shall not be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "`1hk4g42;3wj3fu;6<L><L><L><D>3<C3>");
+    ok(has_userphrase(ctx, bopomofo, NULL) == 1, "`%s' shall be in userphrase", bopomofo);
+
+    chewing_cand_open(ctx);
+    chewing_cand_Enumerate(ctx);
+    const_buf = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(const_buf, phrase) == 0, "first candidate `%s' shall be `%s'", const_buf, phrase);
+
+    chewing_delete(ctx);
+} 
+
+void test_CtrlNum_add_phrase_left_start_with_symbol()
+{
+    static const char bopomofo[] =
+        "\xE3\x84\x89\xE3\x84\xA4\xCB\x87 \xE3\x84\x8A\xE3\x84\xA8\xCB\x87 \xE3\x84\x91\xE3\x84\xA7\xE3\x84\xA4\xCB\x8A" /* ㄉㄤˇ ㄊㄨˇ ㄑㄧㄤˊ */ ;
+    static const char phrase[] = "\xE6\x93\x8B\xE5\x9C\x9F\xE7\x89\x86"; /* 擋土牆 */
+
+    const char *const_buf;
+    ChewingContext *ctx;
+
+    clean_userphrase();
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_addPhraseDirection(ctx, 1);
+
+    ok(has_userphrase(ctx, bopomofo, NULL) == 0, "`%s' shall not be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "`1hk4g42;3wj3fu;6<L><L><L><D>3<EN><C3>");
+    ok(has_userphrase(ctx, bopomofo, NULL) == 1, "`%s' shall be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "<L><L><L>");
+    chewing_cand_open(ctx);
+    chewing_cand_Enumerate(ctx);
+    const_buf = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(const_buf, phrase) == 0, "first candidate `%s' shall be `%s'", const_buf, phrase);
+
+    chewing_delete(ctx);
+}
+
+
 void test_CtrlNum()
 {
     test_CtrlNum_add_phrase_right();
     test_CtrlNum_add_phrase_left();
     test_CtrlNum_add_phrase_right_symbol_in_between();
     test_CtrlNum_add_phrase_left_symbol_in_between();
+    test_CtrlNum_add_phrase_right_start_with_symbol();
+    test_CtrlNum_add_phrase_left_start_with_symbol();
 }
 
 void test_userphrase_auto_learn()
