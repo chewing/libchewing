@@ -114,6 +114,8 @@ void test_CtrlNum_add_phrase_right()
     static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
     static const char msg_already_have[] =
         "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */ ;
+
+    int ret;
     int cursor;
     ChewingContext *ctx;
 
@@ -136,6 +138,14 @@ void test_CtrlNum_add_phrase_right()
     type_keystroke_by_string(ctx, "<C2>");
     ok_aux_buffer(ctx, msg_already_have);
 
+    type_keystroke_by_string(ctx, "<EN><C2>");
+
+    ret = chewing_aux_Check(ctx);
+    ok(ret == 0, "chewing_aux_Check() returns `%d', shall be `0'", ret);
+
+    ret = chewing_aux_Length(ctx);
+    ok(ret == 0, "chewing_aux_Length() returns `%d', shall be `0'", ret);
+
     chewing_delete(ctx);
 }
 
@@ -146,6 +156,8 @@ void test_CtrlNum_add_phrase_left()
     static const char msg_add[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
     static const char msg_already_have[] =
         "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */ ;
+
+    int ret;
     int cursor;
     ChewingContext *ctx;
 
@@ -167,6 +179,14 @@ void test_CtrlNum_add_phrase_left()
 
     type_keystroke_by_string(ctx, "<C2>");
     ok_aux_buffer(ctx, msg_already_have);
+
+    type_keystroke_by_string(ctx, "<H><C2>");
+
+    ret = chewing_aux_Check(ctx);
+    ok(ret == 0, "chewing_aux_Check() returns `%d', shall be `0'", ret);
+
+    ret = chewing_aux_Length(ctx);
+    ok(ret == 0, "chewing_aux_Length() returns `%d', shall be `0'", ret);
 
     chewing_delete(ctx);
 }

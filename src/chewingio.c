@@ -1661,13 +1661,6 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
     ChewingData *pgdata;
     ChewingOutput *pgo;
     int keystrokeRtn = KEYSTROKE_ABSORB;
-    int newPhraseLen;
-    int i;
-    uint16_t addPhoneSeq[MAX_PHONE_SEQ_LEN];
-    char addWordSeq[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1];
-    int phraseState;
-    int cursor;
-    int key_buf_cursor;
 
     if (!ctx) {
         return -1;
@@ -1694,11 +1687,15 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
         return 0;
     }
 
-    newPhraseLen = key - '0';
-    cursor = PhoneSeqCursor(pgdata);
-    key_buf_cursor = pgdata->chiSymbolCursor;
+    if (key >= '2' && key <= '9') {
+        int i;
+        int newPhraseLen = key - '0';
+        int phraseState = 0;
+        int cursor = PhoneSeqCursor(pgdata);
+        int key_buf_cursor = pgdata->chiSymbolCursor;
+        uint16_t addPhoneSeq[MAX_PHONE_SEQ_LEN];
+        char addWordSeq[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1];
 
-    if (newPhraseLen >= 2 && newPhraseLen <= 9) {
         if (!pgdata->config.bAddPhraseForward) {
             if (cursor + newPhraseLen <= pgdata->nPhoneSeq &&
                 NoSymbolBetween(pgdata, key_buf_cursor, key_buf_cursor + newPhraseLen)) {
@@ -1734,11 +1731,18 @@ CHEWING_API int chewing_handle_CtrlNum(ChewingContext *ctx, int key)
                     pgdata->bUserArrBrkpt[cursor - newPhraseLen + i] = 0;
             }
         }
+
+        CallPhrasing(pgdata, 0);
+        MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
+
+        if (!phraseState) {
+            /* No userphrase modification, so clear the old aux message. */
+            pgdata->showMsgLen = 0;
+        } else {
+            MakeOutputAddMsgAndCleanInterval(pgo, pgdata);
+        }
     }
 
-    CallPhrasing(pgdata, 0);
-    MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
-    MakeOutputAddMsgAndCleanInterval(pgo, pgdata);
     return 0;
 }
 
