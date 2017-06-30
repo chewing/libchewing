@@ -48,6 +48,7 @@ libchewing_la_SOURCES += \
 	$(NULL)
 
 if WITH_INTERNAL_SQLITE3
+AM_CPPFLAGS += -I$(top_srcdir)/thirdparty/sqlite-amalgamation
 libchewing_la_LIBADD += \
 	$(top_builddir)/thirdparty/sqlite-amalgamation/libsqlite3-internal.la \
 	$(NULL)
