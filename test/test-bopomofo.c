@@ -1134,6 +1134,23 @@ void test_Numlock()
     test_Numlock_select_candidate();
 }
 
+void test_Space_empty_buffer()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_spaceAsSelection(ctx, 1);
+
+    type_keystroke_by_string(ctx, " ");
+    ok_preedit_buffer(ctx, "");
+    ok_commit_buffer(ctx, " ");
+
+    chewing_delete(ctx);
+}
+
 void test_Space_selection_word()
 {
     ChewingContext *ctx;
@@ -1205,6 +1222,7 @@ void test_Space_selection_symbol()
 
 void test_Space()
 {
+    test_Space_empty_buffer();
     test_Space_selection_word();
     test_Space_selection_symbol();
 }
