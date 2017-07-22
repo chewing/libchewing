@@ -138,6 +138,29 @@ static void chooseCandidate(ChewingContext *ctx, int toSelect, int key_buf_curso
     }
 }
 
+typedef struct {
+    void (*logger) (void *data, int level, const char *msg);
+    void *data;
+} Data4NoVarArgListLogger;
+
+static void Logger4NoVarArgList(void *data, int level, const char *fmt, ...)
+{
+    Data4NoVarArgListLogger *all_data = (Data4NoVarArgListLogger*)data;
+    char *msg;
+    int sz;
+    va_list vl;
+
+    va_start(vl, fmt);
+    sz = vsnprintf(NULL, 0, fmt, vl);
+    if (sz > 0) {
+        msg = ALC(char, sz + 1);
+        vsnprintf(msg, sz + 1, fmt, vl);
+        all_data->logger(all_data->data, level, msg);
+        free(msg);
+    }
+    va_end(vl);
+}
+
 static void NullLogger(void *data UNUSED, int level UNUSED, const char *fmt UNUSED, ...)
 {
 }
@@ -394,6 +417,8 @@ CHEWING_API void chewing_delete(ChewingContext *ctx)
             TerminateUserphrase(ctx->data);
             TerminateTree(ctx->data);
             TerminateDict(ctx->data);
+            if (ctx->data->logger == Logger4NoVarArgList)
+                free(ctx->data->loggerData);
             free(ctx->data);
         }
 
@@ -1876,9 +1901,42 @@ CHEWING_API void chewing_set_logger(ChewingContext *ctx,
 
     LOG_API("");
 
+    if (ctx->data->logger == Logger4NoVarArgList)
+        free(ctx->data->loggerData);
+
     if (!logger) {
         logger = NullLogger;
         data = 0;
+    }
+    ctx->data->logger = logger;
+    ctx->data->loggerData = data;
+}
+
+CHEWING_API void chewing_set_logger2(ChewingContext *ctx,
+                                    void (*logger2) (void *data, int level, const char *msg), void *data2)
+{
+    ChewingData *pgdata;
+    void (*logger) (void *data, int level, const char *fmt, ...) = NullLogger;
+    void *data = 0;
+
+    if (!ctx) {
+        return;
+    }
+    pgdata = ctx->data;
+
+    LOG_API("");
+
+    if (ctx->data->logger == Logger4NoVarArgList)
+        free(ctx->data->loggerData);
+
+    if (logger2) {
+        Data4NoVarArgListLogger *all_data;
+
+        logger = Logger4NoVarArgList;
+        all_data = ALC(Data4NoVarArgListLogger, 1);
+        all_data->logger = logger2;
+        all_data->data = data2;
+        data = all_data;
     }
     ctx->data->logger = logger;
     ctx->data->loggerData = data;

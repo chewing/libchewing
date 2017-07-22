@@ -545,6 +545,9 @@ CHEWING_API int chewing_get_phoneSeqLen(const ChewingContext *ctx);
 CHEWING_API void chewing_set_logger(ChewingContext *ctx,
                                     void (*logger) (void *data, int level, const char *fmt, ...), void *data);
 
+CHEWING_API void chewing_set_logger2(ChewingContext *ctx,
+                                    void (*logger2) (void *data, int level, const char *msg), void *data);
+
 CHEWING_API int chewing_userphrase_enumerate(ChewingContext *ctx);
 
 CHEWING_API int chewing_userphrase_has_next(ChewingContext *ctx, unsigned int *phrase_len, unsigned int *bopomofo_len);
