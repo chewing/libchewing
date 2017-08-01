@@ -39,6 +39,8 @@ void test_ShiftLeft_add_userphrase()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
     static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */ ;
+    static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -55,6 +57,7 @@ void test_ShiftLeft_add_userphrase()
     cursor = chewing_cursor_Current(ctx);
     ok(cursor == 0, "cursor position `%d' shall be 0", cursor);
     ok(has_userphrase(ctx, bopomofo, phrase) == 1, "`%s' shall be in userphrase", phrase);
+    ok_aux_buffer(ctx, msg);
 
     chewing_delete(ctx);
 }
@@ -81,6 +84,8 @@ void test_ShiftRight_add_userphrase()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
     static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */ ;
+    static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -97,6 +102,7 @@ void test_ShiftRight_add_userphrase()
     cursor = chewing_cursor_Current(ctx);
     ok(cursor == 2, "cursor position `%d' shall be 2", cursor);
     ok(has_userphrase(ctx, bopomofo, phrase) == 1, "`%s' shall be in userphrase", phrase);
+    ok_aux_buffer(ctx, msg);
 
     chewing_delete(ctx);
 }
