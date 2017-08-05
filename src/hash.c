@@ -610,18 +610,25 @@ int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE 
 
     pItemTmp = ALC(HASH_ITEM, 1);
     if (!pItemTmp)
-        goto error;
+        return 0;
 
     fseek(fpHash, 0, SEEK_END);
     fsize = ftell(fpHash);
 
     buf = ALC(char, fsize);
     if (!buf)
-        goto error;
+    {
+        free (pItemTmp);
+        return 0;
+    }
 
     fseek(fpHash, 0, SEEK_SET);
     if (fread(buf, fsize, 1, fpHash) != 1)
-        goto error;
+    {
+        free (pItemTmp);
+        free (buf);
+        return 0;
+    }
 
     hdrlen = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
     seekdump = buf + hdrlen;
@@ -645,7 +652,6 @@ int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE 
         item_index++;
     }
 
-error:
     free (pItemTmp);
     free (buf);
     return result;
