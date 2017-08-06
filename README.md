@@ -25,7 +25,6 @@ as full open source efforts.
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
    - Coveralls: [![Coverage Status](https://img.shields.io/coveralls/chewing/libchewing.svg)](https://coveralls.io/r/chewing/libchewing?branch=master)
-    - API changes/compatibility report: <http://upstream-tracker.org/versions/libchewing.html>
 
 
 ## History
