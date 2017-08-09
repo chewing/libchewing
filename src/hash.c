@@ -616,17 +616,15 @@ int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE 
     fsize = ftell(fpHash);
 
     buf = ALC(char, fsize);
-    if (!buf)
-    {
-        free (pItemTmp);
+    if (!buf) {
+        free(pItemTmp);
         return 0;
     }
 
     fseek(fpHash, 0, SEEK_SET);
-    if (fread(buf, fsize, 1, fpHash) != 1)
-    {
-        free (pItemTmp);
-        free (buf);
+    if (fread(buf, fsize, 1, fpHash) != 1) {
+        free(pItemTmp);
+        free(buf);
         return 0;
     }
 
@@ -652,8 +650,8 @@ int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE 
         item_index++;
     }
 
-    free (pItemTmp);
-    free (buf);
+    free(pItemTmp);
+    free(buf);
     return result;
 }
 

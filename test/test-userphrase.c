@@ -792,7 +792,6 @@ void test_userphrase_remove()
     ctx = NULL;
 }
 
-
 int main(int argc, char *argv[])
 {
     char *logname;
