@@ -227,15 +227,20 @@ void HashModify(ChewingData *pgdata, HASH_ITEM *pItem)
     if (pItem->item_index < 0) {
         fseek(outfile, 0, SEEK_END);
         pItem->item_index = (ftell(outfile) - 4 - strlen(BIN_HASH_SIG)) / FIELD_SIZE;
-    } else {
-        fseek(outfile, pItem->item_index * FIELD_SIZE + 4 + strlen(BIN_HASH_SIG), SEEK_SET);
+    } else if (!HashFileSeekToUserPhrase(pgdata, pItem, outfile)) {
+        goto cleanup;
     }
+
+    if (pItem->data.phoneSeq[0] == 0)
+        pItem->data.wordSeq[0] = 0;
 
     HashItem2String(str, pItem);
     DEBUG_OUT("HashModify-2: '%-75s'\n", str);
 
     HashItem2Binary(str, pItem);
     fwrite(str, 1, FIELD_SIZE, outfile);
+
+cleanup:
     fflush(outfile);
     fclose(outfile);
 }
@@ -591,3 +596,62 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
     }
     return 0;
 }
+
+int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE *fpHash)
+{
+    int fsize           = 0;
+    int iret            = 0;
+    int item_index      = 0;
+    int hdrlen          = 0;
+    int result          = 0;
+    char *seekdump      = NULL;
+    char *buf           = NULL;
+    HASH_ITEM *pItemTmp = NULL;
+
+    pItemTmp = ALC(HASH_ITEM, 1);
+    if (!pItemTmp)
+        return 0;
+
+    fseek(fpHash, 0, SEEK_END);
+    fsize = ftell(fpHash);
+
+    buf = ALC(char, fsize);
+    if (!buf) {
+        free(pItemTmp);
+        return 0;
+    }
+
+    fseek(fpHash, 0, SEEK_SET);
+    if (fread(buf, fsize, 1, fpHash) != 1) {
+        free(pItemTmp);
+        free(buf);
+        return 0;
+    }
+
+    hdrlen = strlen(BIN_HASH_SIG) + sizeof(pgdata->static_data.chewing_lifetime);
+    seekdump = buf + hdrlen;
+    fsize -= hdrlen;
+
+    while (fsize >= FIELD_SIZE) {
+        iret = ReadHashItem_bin(seekdump, pItemTmp, item_index);
+        if (iret == 1) {
+            if (strlen(pItem->data.wordSeq) == strlen(pItemTmp->data.wordSeq) &&
+                !strncmp(pItem->data.wordSeq, pItemTmp->data.wordSeq, strlen(pItem->data.wordSeq))) {
+                fseek(fpHash, (item_index * FIELD_SIZE) + hdrlen, SEEK_SET);
+                DestroyUserPhraseData(&pItemTmp->data);
+                result = 1;
+                break;
+            }
+            DestroyUserPhraseData(&pItemTmp->data);
+        }
+
+        seekdump += FIELD_SIZE;
+        fsize -= FIELD_SIZE;
+        item_index++;
+    }
+
+    free(pItemTmp);
+    free(buf);
+    return result;
+}
+

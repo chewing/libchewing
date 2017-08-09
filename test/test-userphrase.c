@@ -797,6 +797,41 @@ void test_userphrase_double_free()
     ctx = NULL;
 }
 
+void test_userphrase_remove()
+{
+    ChewingContext *ctx = NULL;
+    char p1[] = "\xE6\xB8\xAC";
+    char p2[] = "\xE7\xAD\x96";
+    char b1[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B";
+    int ret = 0;
+
+    clean_userphrase();
+
+    start_testcase(ctx, fd);
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_add(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_add(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_remove(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_remove(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_lookup(ctx, p2, b1);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    chewing_delete(ctx);
+    ctx = NULL;
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -820,6 +855,7 @@ int main(int argc, char *argv[])
     test_userphrase_manipulate();
     test_userphrase_lookup();
     test_userphrase_double_free();
+    test_userphrase_remove();
 
     fclose(fd);
 
