@@ -835,12 +835,12 @@ CHEWING_API int chewing_handle_Space(ChewingContext *ctx)
      * - "space as selection" mode is disable
      * - mode is not CHINESE_MODE
      * - has incompleted bopomofo (space is needed to complete it)
+     * - pre-edit buffer is empty
      */
-    if (!pgdata->config.bSpaceAsSelection || pgdata->bChiSym != CHINESE_MODE || BopomofoIsEntering(&ctx->data->bopomofoData)) {
+    if (!pgdata->config.bSpaceAsSelection || pgdata->bChiSym != CHINESE_MODE ||
+        BopomofoIsEntering(&ctx->data->bopomofoData) || pgdata->chiSymbolBufLen == 0) {
         return chewing_handle_Default(ctx, ' ');
     }
-
-    CheckAndResetRange(pgdata);
 
     /*
      * space = right when the follogin conditions are true
@@ -851,10 +851,9 @@ CHEWING_API int chewing_handle_Space(ChewingContext *ctx)
      */
     if (pgdata->bSelect && ctx->output->pci->pageNo < ctx->output->pci->nPage - 1) {
         return chewing_handle_Right(ctx);
-    } else {
-        return chewing_handle_Down(ctx);
     }
-    return 0;
+
+    return chewing_handle_Down(ctx);
 }
 
 CHEWING_API int chewing_handle_Esc(ChewingContext *ctx)
