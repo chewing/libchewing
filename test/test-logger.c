@@ -32,7 +32,7 @@ void test_set_null_logger()
     chewing_set_logger(ctx, NULL, 0);
     type_keystroke_by_string(ctx, "hk4g4");
 
-    chewing_set_logger2(ctx, NULL, 0);
+    chewing_set_logger_without_varglist(ctx, NULL, 0);
     type_keystroke_by_string(ctx, "hk4g4");
 
     chewing_delete(ctx);

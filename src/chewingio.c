@@ -1912,7 +1912,7 @@ CHEWING_API void chewing_set_logger(ChewingContext *ctx,
     ctx->data->loggerData = data;
 }
 
-CHEWING_API void chewing_set_logger2(ChewingContext *ctx,
+CHEWING_API void chewing_set_logger_without_varglist(ChewingContext *ctx,
                                     void (*logger2) (void *data, int level, const char *msg), void *data2)
 {
     ChewingData *pgdata;
