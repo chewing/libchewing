@@ -246,7 +246,7 @@ Chewing IM and returned to the caller.
 There are functions returning pointers of strings or other data
 structures that are allocated on the heap. These memory @emph{must} be
 freed to avoid memory leak. To avoid memory allocator mismatch between
-the Chewing IM and the caller, use this function the free the resource.
+the Chewing IM and the caller, use this function to free the resource.
 
 Do nothing if @var{ptr} is @code{NULL}.
 @end deftypefun
