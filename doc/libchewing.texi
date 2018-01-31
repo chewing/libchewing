@@ -1154,7 +1154,7 @@ This function returns the auto shift cursor setting.
 @deftypefun void chewing_set_easySymbolInput (ChewingContext *@var{ctx}, int @var{mode})
 This function sets the current normal/easy symbol mode. In easy symbol mode,
 the key be will changed to its related easy symbol in @file{swkb.dat}. The
-format of @file{swkb.dat} is key symble pair per line. The valid value of key
+format of @file{swkb.dat} is key symbol pair per line. The valid value of key
 is [0-9A-Z]. The lower case character in key will be changed to upper case when
 loading @file{swkb.dat}. However, in easy symbol mode, only [0-9A-Z] are
 accepted.
