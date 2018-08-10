@@ -246,7 +246,7 @@ Chewing IM and returned to the caller.
 There are functions returning pointers of strings or other data
 structures that are allocated on the heap. These memory @emph{must} be
 freed to avoid memory leak. To avoid memory allocator mismatch between
-the Chewing IM and the caller, use this function the free the resource.
+the Chewing IM and the caller, use this function to free the resource.
 
 Do nothing if @var{ptr} is @code{NULL}.
 @end deftypefun
@@ -1029,6 +1029,7 @@ otherwise.
 @deftypefun int chewing_userphrase_get (ChewingContext *@var{ctx}, char
 *@var{phrase_buf}, unsigned int @var{phrase_len}, char *@var{bopomofo_buf},
 unsigned int @var{bopomofo_len})
+
 This function gets the current enumerated userphrase. The @var{phrase_buf} and
 @var{bopomofo_buf} are userphrase and its bopomofo buffers provided by caller.
 The length of buffer @var{phrase_len} and @var{bopomofo_len} can be get by
@@ -1039,6 +1040,7 @@ The return value is @code{0} on success, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_add (ChewingContext *@var{ctx}, const char
 *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is how many phrases are added, @code{-1} on failure.
@@ -1046,6 +1048,7 @@ The return value is how many phrases are added, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_remove (ChewingContext *@var{ctx}, const
 char *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is how many phrases are removed, @code{-1} on failure.
@@ -1053,6 +1056,7 @@ The return value is how many phrases are removed, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_lookup (ChewingContext *@var{ctx}, const
 char *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function lookups if userphrase @var{phrase_buf}(@var{bopomofo_buf}) is in
 userphrase.
 
@@ -1150,7 +1154,7 @@ This function returns the auto shift cursor setting.
 @deftypefun void chewing_set_easySymbolInput (ChewingContext *@var{ctx}, int @var{mode})
 This function sets the current normal/easy symbol mode. In easy symbol mode,
 the key be will changed to its related easy symbol in @file{swkb.dat}. The
-format of @file{swkb.dat} is key symble pair per line. The valid value of key
+format of @file{swkb.dat} is key symbol pair per line. The valid value of key
 is [0-9A-Z]. The lower case character in key will be changed to upper case when
 loading @file{swkb.dat}. However, in easy symbol mode, only [0-9A-Z] are
 accepted.
