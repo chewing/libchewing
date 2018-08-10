@@ -143,3 +143,6 @@ contrib/test.sqlite3
 
 # OS X
 .DS_Store
+
+# python
+*.pyc
