@@ -22,9 +22,9 @@ matrix:
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
     - compiler: clang
-      env: BUILD=cmake CMAKE_OPTION="-DWITH_STATIC_SQLITE3=yes"
+      env: BUILD=cmake CMAKE_OPTION="-DWITH_INTERNAL_SQLITE3=yes"
     - compiler: gcc
-      env: BUILD=autotools CONFIGURE_OPTION="--with-static_sqlite3=yes"
+      env: BUILD=autotools CONFIGURE_OPTION="--with-internal-sqlite3=yes"
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DWITH_SQLITE3=no"
     - compiler: clang
