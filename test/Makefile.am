@@ -84,9 +84,9 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 LDADD = \
-	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
 	$(top_builddir)/test/libtesthelper.la \
+	$(top_builddir)/src/common/libcommon.la \
 	$(NULL)
 
 AM_LDFLAGS = -static
