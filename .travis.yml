@@ -18,6 +18,8 @@ matrix:
     - compiler: gcc
       env: BUILD=cmake
     - compiler: clang
+      # LSan does not work in containers https://github.com/travis-ci/travis-ci/issues/9033
+      sudo: true
       env: BUILD=cmake CMAKE_OPTION="-DUSE_VALGRIND=no -DNO_UNDEFINED=no" CFLAGS="-fsanitize=address -fsanitize=undefined"
     - compiler: gcc
       env: BUILD=cmake CMAKE_OPTION="-DENABLE_GCOV=yes -DUSE_VALGRIND=no" COVERALLS=yes
