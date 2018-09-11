@@ -522,7 +522,7 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
     int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
     char *dump, *seekdump;
 
-    strncpy(pgdata->static_data.hashfilename, path, sizeof(pgdata->static_data.hashfilename));
+    strncpy(pgdata->static_data.hashfilename, path, sizeof(pgdata->static_data.hashfilename) - 1);
     memset(pgdata->static_data.hashtable, 0, sizeof(pgdata->static_data.hashtable));
 
   open_hash_file:
