@@ -152,7 +152,7 @@ static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symke
                 &pgdata->preeditBuf[pgdata->chiSymbolCursor],
                 sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
 
-        strncpy(buf->char_, chibuf, sizeof(buf->char_) - 1);
+        strncpy(buf->char_, chibuf, ARRAY_SIZE(buf->char_) - 1);
         buf->category = CHEWING_SYMBOL;
 
         /* Save Symbol Key */
@@ -356,7 +356,7 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
                 symbol_type = SYMBOL_CHOICE_UPDATE;
             }
         }
-        strncpy(buf->char_, pgdata->choiceInfo.totalChoiceStr[sel_i], sizeof(buf->char_) - 1);
+        strncpy(buf->char_, pgdata->choiceInfo.totalChoiceStr[sel_i], ARRAY_SIZE(buf->char_) - 1);
         buf->category = CHEWING_SYMBOL;
 
         /* This is very strange */
