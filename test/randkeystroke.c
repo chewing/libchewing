@@ -37,7 +37,9 @@ void usage()
 {
     printf("usage: randkeystroke [-r] [-n num] [-h]\n"
            "\t -r     - total random\n"
-           "\t -n num - generate num keystrokes\n" "\t -s seed - random seed\n" "\t -h     - help\n");
+           "\t -n num - generate num keystrokes\n"
+           "\t -s seed - random seed\n"
+           "\t -h     - help\n");
 }
 
 int main(int argc, char *argv[])
