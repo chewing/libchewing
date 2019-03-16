@@ -38,7 +38,7 @@ before_install:
   - P_JOBS="-j$(getconf _NPROCESSORS_ONLN)"
 
 script:
-  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make $P_JOBS CFLAGS="$CFLAGS -Wall -Werror -Wno-unused-const-variable" && make $P_JOBS check && make $P_JOBS release && LC_ALL=c sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
+  - if [ x$BUILD == xautotools ]; then ./autogen.sh && ./configure $CONFIGURE_OPTION && make $P_JOBS V=1 CFLAGS="$CFLAGS -Wall -Werror -Wno-unused-const-variable" && make $P_JOBS check && make $P_JOBS release && LC_ALL=c sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
   - if [ x$BUILD == xcmake ]; then CFLAGS="$CFLAGS -Wall -Werror -Wno-unused-const-variable" cmake . $CMAKE_OPTION && make $P_JOBS && make $P_JOBS check && LC_ALL=C sort data/tsi.src > data/tsi.src.sort && diff data/tsi.src data/tsi.src.sort; fi
 
 after_success:
