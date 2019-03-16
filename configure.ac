@@ -57,7 +57,7 @@ AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS([include/config.h])
 
 # Init libtool
-LT_INIT([win32-dll])
+LT_INIT([win32-dll pic-only])
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
