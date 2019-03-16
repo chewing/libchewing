@@ -1,5 +1,7 @@
 language: c
 
+dist: xenial
+
 # container-based builds
 sudo: false
 
