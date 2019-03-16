@@ -927,6 +927,9 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         pgdata->chiSymbolCursor = buf;
         pgdata->PointStart = -1;
         pgdata->PointEnd = 0;
+        MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
+        MakeOutputAddMsgAndCleanInterval(pgo, pgdata);
+        return 0;
     } else {
         keystrokeRtn = KEYSTROKE_COMMIT;
         WriteChiSymbolToCommitBuf(pgdata, pgo, nCommitStr);
