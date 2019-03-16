@@ -193,7 +193,7 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
     chewing_Reset(ctx);
 
     if (syspath) {
-        strncpy(search_path, syspath, sizeof(search_path) - 1);
+        strncpy(search_path, syspath, ARRAY_SIZE(search_path) - 1);
     } else {
         ret = get_search_path(search_path, sizeof(search_path));
         if (ret) {
