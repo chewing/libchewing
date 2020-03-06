@@ -55,28 +55,38 @@ size_t plat_mmap_create(plat_mmap *handle, const char *file, int fileAccessAttr)
 #    ifdef _WIN32_WCE
         handle->fd_file = CreateFileForMappingA(file,
                                                 GENERIC_READ,
-                                                FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+                                                FILE_SHARE_READ, NULL,
+                                                OPEN_EXISTING,
+                                                FILE_ATTRIBUTE_NORMAL, NULL);
 #    else                       /* !_WIN32_WCE */
         handle->fd_file = CreateFileA(file,
                                       GENERIC_READ,
                                       FILE_SHARE_READ,
-                                      NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY | FILE_FLAG_RANDOM_ACCESS, 0);
+                                      NULL, OPEN_EXISTING,
+                                      FILE_ATTRIBUTE_READONLY |
+                                      FILE_FLAG_RANDOM_ACCESS, 0);
 #    endif                      /* _WIN32_WCE */
 
         if (INVALID_HANDLE_VALUE == handle->fd_file)
             return 0;
 
-        sizet.LowPart = GetFileSize(handle->fd_file, (LPDWORD) & sizet.HighPart);
-        handle->fd_map = CreateFileMappingA(handle->fd_file, NULL, PAGE_READONLY, sizet.HighPart, sizet.LowPart, 0);
+        sizet.LowPart = GetFileSize(handle->fd_file,
+                                    (LPDWORD) & sizet.HighPart);
+        handle->fd_map = CreateFileMappingA(handle->fd_file, NULL,
+                                            PAGE_READONLY,
+                                            sizet.HighPart, sizet.LowPart, 0);
     } else {
 #    ifdef _WIN32_WCE
         handle->fd_file = CreateFileForMappingA(file,
                                                 GENERIC_WRITE | GENERIC_READ,
-                                                FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                                                FILE_SHARE_WRITE, NULL,
+                                                CREATE_ALWAYS,
+                                                FILE_ATTRIBUTE_NORMAL, NULL);
 #    else                       /* !_WIN32_WCE */
         handle->fd_file = CreateFileA(file,
                                       GENERIC_WRITE | GENERIC_READ,
-                                      FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+                                      FILE_SHARE_WRITE, NULL,
+                                      CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 #    endif                      /* _WIN32_WCE */
 
         if (INVALID_HANDLE_VALUE == handle->fd_file)
@@ -84,14 +94,18 @@ size_t plat_mmap_create(plat_mmap *handle, const char *file, int fileAccessAttr)
 
         sizet.LowPart = 0;
         sizet.HighPart = 1;
-        handle->fd_map = CreateFileMapping(handle->fd_file, NULL, PAGE_READWRITE, 0, sizet.LowPart, 0);
+        handle->fd_map = CreateFileMapping(handle->fd_file, NULL,
+                                           PAGE_READWRITE, 0,
+                                           sizet.LowPart, 0);
         sizet.LowPart = 1024 * 1024 * 1024;
         sizet.HighPart = 0;
 
         while (!handle->fd_map) {
             DWORD error;
 
-            handle->fd_map = CreateFileMapping(handle->fd_file, NULL, PAGE_READWRITE, 0, sizet.LowPart, 0);
+            handle->fd_map = CreateFileMapping(handle->fd_file, NULL,
+                                               PAGE_READWRITE, 0,
+                                               sizet.LowPart, 0);
             error = GetLastError();
 
             if (ERROR_NOT_ENOUGH_MEMORY == error || ERROR_DISK_FULL == error)
@@ -103,7 +117,8 @@ size_t plat_mmap_create(plat_mmap *handle, const char *file, int fileAccessAttr)
 
     handle->fAccessAttr = fileAccessAttr;
 
-    if (FLAG_ATTRIBUTE_READ & fileAccessAttr || 16 * 1024 * 1024 <= sizet.LowPart) {
+    if (FLAG_ATTRIBUTE_READ & fileAccessAttr ||
+        16 * 1024 * 1024 <= sizet.LowPart) {
         if (handle->fd_map)
             return (size_t) sizet.QuadPart;
     }
@@ -139,10 +154,14 @@ void *plat_mmap_set_view(plat_mmap *handle, size_t * offset, size_t * sizet)
 
     if (FLAG_ATTRIBUTE_READ & handle->fAccessAttr) {
         handle->address = MapViewOfFile(handle->fd_map,
-                                        FILE_MAP_READ, t_offset.HighPart, t_offset.LowPart, t_sizet.LowPart);
+                                        FILE_MAP_READ,
+                                        t_offset.HighPart,
+                                        t_offset.LowPart, t_sizet.LowPart);
     } else {
         handle->address = MapViewOfFile(handle->fd_map,
-                                        FILE_MAP_WRITE, t_offset.HighPart, t_offset.LowPart, t_sizet.LowPart);
+                                        FILE_MAP_WRITE,
+                                        t_offset.HighPart,
+                                        t_offset.LowPart, t_sizet.LowPart);
     }
 
     return handle->address;
@@ -200,4 +219,4 @@ void plat_mmap_unmap(plat_mmap *handle)
     }
 }
 
-#endif                          /* defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE) */
+#endif /* defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE) */

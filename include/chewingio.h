@@ -2,11 +2,11 @@
  * chewingio.h
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2008
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -234,9 +234,10 @@ CHEWING_API int chewing_get_KBType(const ChewingContext *ctx);
 
 /**
  * @brief Get keyboard mapping type in C-style string format
+ * @see KBStr2Num()
  *
  * @param ctx
- * @return If successed then return kbtype from KBStr2Num
+ * @return The name of the current keyboard layout. The caller must free it.
  */
 CHEWING_API char *chewing_get_KBString(const ChewingContext *ctx);
 
@@ -497,6 +498,30 @@ CHEWING_API int chewing_get_phraseChoiceRearward(const ChewingContext *ctx);
 /*@}*/
 
 
+/*! \name Behavior of automatic learning after committing
+ */
+
+/*@{*/
+/**
+ * @brief Set the behavior of automatic learning
+ *
+ * @param ctx
+ * @param mode AUTOLEARN_ENABLED or AUTOLEARN_DISABLED
+ */
+CHEWING_API void chewing_set_autoLearn(ChewingContext *ctx, int mode);
+
+
+/**
+ * @brief Get the behavior of automatic learning
+ *
+ * @param ctx
+ * @return AUTOLEARN_ENABLED or AUTOLEARN_DISABLED
+ */
+CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx);
+
+/*@}*/
+
+
 /*! \name Phonetic sequence in Chewing internal state machine
  */
 
@@ -550,6 +575,8 @@ CHEWING_API ChewingContext *chewing_new2(const char *syspath,
                                          const char *userpath,
                                          void (*logger) (void *data, int level, const char *fmt, ...),
                                          void *loggerdata);
+
+CHEWING_API int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len);
 
 /* *INDENT-OFF* */
 #endif                          /* _CHEWING_IO_H */

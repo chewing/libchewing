@@ -44,6 +44,7 @@ include/stamp-h1
 # cmake generated files
 config.h
 /libchewing.*
+/libsqlite3_library.a
 /libtesthelper.a
 /libuserphrase.a
 /Testing
@@ -53,7 +54,7 @@ test/genkeystroke
 test/performance
 test/randkeystroke
 test/simulate
-test/sqlite3
+test/stress
 test/testchewing
 test/test-bopomofo
 test/test-config
@@ -80,9 +81,11 @@ test/*.log
 test/*.trs
 test/chewing.sqlite3
 test/test.sqlite3
+thirdparty/sqlite-amalgamation/sqlite3
 
 # Generated tools/headers
 src/tools/init_database
+src/tools/dump_database
 
 # gcov output
 *.gcda
@@ -134,3 +137,12 @@ doc/libchewing.vrs
 # contrib directory
 contrib/simple-select
 contrib/test.sqlite3
+
+# vi
+*.swp
+
+# OS X
+.DS_Store
+
+# python
+*.pyc

@@ -17,6 +17,8 @@
 #include "chewingio.h"
 #include "chewing-utf8-util.h"
 
+#include "plat_path.h"
+
 #define KEY_DBLTAB	892     // <TT>
 #define KEY_SSPACE	893     // <SS>
 #define KEY_PPAGE	894     // <PU>
@@ -63,9 +65,20 @@
 #define ok_keystroke_rtn(ctx, rtn) \
     internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
-    internal_has_userphrase(__FILE__, __LINE__, ctx, bopomofo, phrase)
+    chewing_userphrase_lookup(ctx, phrase, bopomofo)
 #define start_testcase(ctx, file) \
     internal_start_testcase(__func__, ctx, file)
+
+typedef struct {
+    /* Key code. This code is only valid in testing framework. */
+    int key;
+
+    /* key serialed as string */
+    const char *str;
+
+    /* chewing handling function. NULL for special functions */
+    int (*handler) (ChewingContext *ctx);
+} TestKeyEntry;
 
 typedef struct TestData {
     char *token;
@@ -86,13 +99,18 @@ extern BufferType COMMIT_BUFFER;
 extern BufferType PREEDIT_BUFFER;
 extern BufferType BOPOMOFO_BUFFER;
 extern BufferType AUX_BUFFER;
+extern TestKeyEntry chewing_test_special_keys[];
 
 typedef int (*get_char_func) (void *param);
 
+int get_char_by_string(void *param);
+int get_char_from_stdin(void *param);
+int get_char_from_fp(void *param);
 int get_keystroke(get_char_func get_char, void *param);
-void type_keystroke_by_string(ChewingContext *ctx, char *keystroke);
+void type_keystroke_by_string(ChewingContext *ctx, const char *keystroke);
 void type_single_keystroke(ChewingContext *ctx, int ch);
 int exit_status();
+char *get_test_userphrase_path();
 void clean_userphrase();
 
 // The internal_xxx function shall be used indirectly by macro in order to
@@ -103,6 +121,5 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
 void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, const char *cand[], size_t cand_len);
 void internal_ok_candidate_len(const char *file, int line, ChewingContext *ctx, size_t expected_len);
 void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, int rtn);
-int internal_has_userphrase(const char *file, int line, ChewingContext *ctx, const char *bopomofo, const char *phrase);
 void internal_start_testcase(const char *func, ChewingContext *ctx, FILE * file);
 void logger(void *data, int level, const char *fmt, ...);

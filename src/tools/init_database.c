@@ -13,17 +13,17 @@
  *
  * @brief Initialization of system dictionary and phone phrase tree.\n
  *
- *	This program reads in source of dictionary.\n
- *	Output a database file containing a phone phrase tree, and a dictionary file\n
+ *      This program reads in source of dictionary.\n
+ *      Output a database file containing a phone phrase tree, and a dictionary file\n
  * filled with non-duplicate phrases.\n
- *	Each node represents a single phone.\n
- *	The output file contains a random access array, where each record includes:\n
- *	\code{
- *	       [16-bit uint] key; may be phone data or record of input keys
- *	       [24-bit uint] child.begin, child.end; for internal nodes (key != 0)
- *	       [24-bit uint] phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
- *	       [24-bit uint] phrase.freq; for leaf nodes (key == 0), frequency of the phrase
- *	}\endcode
+ *      Each node represents a single phone.\n
+ *      The output file contains a random access array, where each record includes:\n
+ *      \code{
+ *            [16-bit uint] key; may be phone data or record of input keys
+ *            [24-bit uint] child.begin, child.end; for internal nodes (key != 0)
+ *            [24-bit uint] phrase.pos; for leaf nodes (key == 0), position of phrase in dictionary
+ *            [24-bit uint] phrase.freq; for leaf nodes (key == 0), frequency of the phrase
+ *      }\endcode
  */
 
 #include <assert.h>
@@ -43,13 +43,13 @@
 /* For ALC macro */
 #include "private.h"
 
-#define CHARDEF			"%chardef"
-#define BEGIN			"begin"
-#define END			"end"
-#define MAX_LINE_LEN		(1024)
-#define MAX_WORD_DATA		(60000)
-#define MAX_PHRASE_BUF_LEN	(149)
-#define MAX_PHRASE_DATA		(420000)
+#define CHARDEF               "%chardef"
+#define BEGIN                 "begin"
+#define END                   "end"
+#define MAX_LINE_LEN          (1024)
+#define MAX_WORD_DATA         (60000)
+#define MAX_PHRASE_BUF_LEN    (149)
+#define MAX_PHRASE_DATA       (420000)
 
 const char USAGE[] =
     "Usage: %s <phone.cin> <tsi.src>\n"
@@ -83,6 +83,12 @@ const PhraseData EXCEPTION_PHRASE[] = {
     {"\xE9\x81\x9B\xE9\x81\x94" /* 遛達 */ , 0, {4292, 2569} /* ㄌㄧㄡˋ ㄉㄚ˙ */ , 0},
 
     {"\xE5\xA4\xA7\xE5\xA4\xAB" /* 大夫 */ , 0, {2604, 2305} /* ㄉㄞˋ ㄈㄨ˙ */ , 0},
+
+    {"\xE5\x92\x96\xE5\x96\xB1" /* 咖喱 */ , 0, {4616, 4226} /* ㄍㄚ ㄌㄧˊ */, 0},
+    {"\xE5\x92\x96\xE5\x96\xB1\xE6\xB1\x81" /* 咖喱汁 */ , 0, {4616, 4226, 7680} /* ㄍㄚ ㄌㄧˊ ㄓ */, 0},
+    {"\xE5\x92\x96\xE5\x96\xB1\xE7\xB2\x89" /* 咖喱粉 */ , 0, {4616, 4226, 2131} /* ㄍㄚ ㄌㄧˊ ㄈㄣˇ */, 0},
+    {"\xE5\x92\x96\xE5\x96\xB1\xE9\x9B\x9E" /* 咖喱雞 */ , 0, {4616, 4226, 6272} /* ㄍㄚ ㄌㄧˊ ㄐㄧ */, 0},
+    {"\xE5\x92\x96\xE5\x96\xB1\xE9\xA3\xAF" /* 咖喱飯 */ , 0, {4616, 4226, 2124} /* ㄍㄚ ㄌㄧˊ ㄈㄢˋ */, 0},
 };
 
 /*
@@ -235,15 +241,15 @@ void store_phrase(const char *line, int line_num)
     char buf[MAX_LINE_LEN];
     char *phrase;
     char *freq;
+    char *endptr = NULL;
     char *bopomofo;
     char bopomofo_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     size_t phrase_len;
     WordData word;              /* For check. */
     WordData *found_word = NULL;
-    int i;
-    int j;
+    size_t i, j;
 
-    strncpy(buf, line, sizeof(buf));
+    snprintf(buf, sizeof(buf), "%s", line);
     strip(buf);
     if (strlen(buf) == 0)
         return;
@@ -259,7 +265,7 @@ void store_phrase(const char *line, int line_num)
         fprintf(stderr, "Error reading line %d, `%s'\n", line_num, line);
         exit(-1);
     }
-    strncpy(phrase_data[num_phrase_data].phrase, phrase, sizeof(phrase_data[0].phrase));
+    strncpy(phrase_data[num_phrase_data].phrase, phrase, sizeof(phrase_data[0].phrase) - 1);
 
     /* read frequency */
     freq = strtok(NULL, DELIM);
@@ -268,9 +274,9 @@ void store_phrase(const char *line, int line_num)
         exit(-1);
     }
 
-    errno = 0;
-    phrase_data[num_phrase_data].freq = strtoul(freq, 0, 0);
-    if (errno) {
+    phrase_data[num_phrase_data].freq = strtoul(freq, &endptr, 0);
+    if ((*freq == '\0' || *endptr != '\0') ||
+        (phrase_data[num_phrase_data].freq == UINT32_MAX && errno == ERANGE)) {
         fprintf(stderr, "Error reading frequency `%s' in line %d, `%s'\n", freq, line_num, line);
         exit(-1);
     }
@@ -312,21 +318,21 @@ void store_phrase(const char *line, int line_num)
             fprintf(stderr, "Error in phrase `%s'. Word `%s' has no phone %d (%s) in line %d\n",
                     phrase_data[num_phrase_data].phrase, word.text->phrase, word.text->phone[0], bopomofo_buf,
                     line_num);
-            fprintf(stderr, "\tAdd the following struct to EXCEPTION_PHRASE if this is good phrase\n\t{ \"");
+            fprintf(stderr, "\tAdd the following struct to EXCEPTION_PHRASE if this is good phrase\n\t{\"");
             for (j = 0; j < strlen(phrase_data[num_phrase_data].phrase); ++j) {
                 fprintf(stderr, "\\x%02X", (unsigned char) phrase_data[num_phrase_data].phrase[j]);
             }
-            fprintf(stderr, "\" /* %s */ , 0, { %d", phrase_data[num_phrase_data].phrase,
+            fprintf(stderr, "\" /* %s */ , 0, {%d", phrase_data[num_phrase_data].phrase,
                     phrase_data[num_phrase_data].phone[0]);
             for (j = 1; j < phrase_len; ++j) {
                 fprintf(stderr, ", %d", phrase_data[num_phrase_data].phone[j]);
             }
-            fprintf(stderr, " } /* ");
+            fprintf(stderr, "} /* ");
             for (j = 0; j < phrase_len; ++j) {
                 PhoneFromUint(bopomofo_buf, sizeof(bopomofo_buf), phrase_data[num_phrase_data].phone[j]);
                 fprintf(stderr, "%s ", bopomofo_buf);
             }
-            fprintf(stderr, "*/, 0 },\n");
+            fprintf(stderr, "*/, 0},\n");
             exit(-1);
         }
     }
@@ -374,15 +380,16 @@ void read_tsi_src(const char *filename)
     }
 
     qsort(phrase_data, num_phrase_data, sizeof(phrase_data[0]), compare_phrase);
+    fclose(tsi_src);
 }
 
 void store_word(const char *line, const int line_num)
 {
     char phone_buf[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1];
     char key_buf[BOPOMOFO_SIZE + 1];
-    char buf[MAX_LINE_LEN];
+    char buf[MAX_LINE_LEN + 1] = {0};
 
-    strncpy(buf, line, sizeof(buf));
+    strncpy(buf, line, sizeof(buf) - 1);
 
     strip(buf);
     if (strlen(buf) == 0)
@@ -399,8 +406,8 @@ void store_word(const char *line, const int line_num)
     word_data[num_word_data].text = &phrase_data[--top_phrase_data];
 
 #define UTF8_FORMAT_STRING(len1, len2) \
-	"%" __stringify(len1) "[^ ]" " " \
-	"%" __stringify(len2) "[^ ]"
+    "%" __stringify(len1) "[^ ]" " " \
+    "%" __stringify(len2) "[^ ]"
     sscanf(buf, UTF8_FORMAT_STRING(BOPOMOFO_SIZE, MAX_UTF8_SIZE), key_buf, word_data[num_word_data].text->phrase);
 
     if (strlen(key_buf) > BOPOMOFO_SIZE) {
@@ -626,10 +633,9 @@ void write_index_tree()
     NODE **queue;
     NODE *p;
     NODE *pNext;
-    int head = 0;
-    int tail = 0;
-    int tree_size = 1;
-    size_t q_len = num_word_data + num_phrase_data;
+    size_t head = 0, tail = 0;
+    size_t tree_size = 1;
+    size_t q_len = num_word_data + num_phrase_data + 1;
 
     FILE *output = fopen(PHONE_TREE_FILE, "wb");
 
@@ -638,7 +644,7 @@ void write_index_tree()
         exit(-1);
     }
 
-    queue = ALC(NODE *, q_len + 1);
+    queue = ALC(NODE *, q_len);
     assert(queue);
 
     queue[head++] = root;

@@ -2,7 +2,7 @@
  * pinyin.c
  *
  * Copyright (c) 2005, 2006, 2008, 2012-2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -42,7 +42,7 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
 
     ret = fscanf(fd, "%d", &pgdata->static_data.HANYU_INITIALS);
     if (ret != 1) {
-        return 0;
+        goto fail;
     }
     ++pgdata->static_data.HANYU_INITIALS;
     pgdata->static_data.hanyuInitialsMap = ALC(keymap, pgdata->static_data.HANYU_INITIALS);
@@ -50,13 +50,13 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
         ret = fscanf(fd, "%s %s",
                      pgdata->static_data.hanyuInitialsMap[i].pinyin, pgdata->static_data.hanyuInitialsMap[i].bopomofo);
         if (ret != 2) {
-            return 0;
+            goto fail;
         }
     }
 
     ret = fscanf(fd, "%d", &pgdata->static_data.HANYU_FINALS);
     if (ret != 1) {
-        return 0;
+        goto fail;
     }
     ++pgdata->static_data.HANYU_FINALS;
     pgdata->static_data.hanyuFinalsMap = ALC(keymap, pgdata->static_data.HANYU_FINALS);
@@ -64,13 +64,16 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
         ret = fscanf(fd, "%s %s",
                      pgdata->static_data.hanyuFinalsMap[i].pinyin, pgdata->static_data.hanyuFinalsMap[i].bopomofo);
         if (ret != 2) {
-            return 0;
+            goto fail;
         }
     }
 
     fclose(fd);
-
     return 1;
+
+fail:
+    fclose(fd);
+    return 0;
 }
 
 /**
@@ -224,6 +227,9 @@ int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomo
         }
     }
 
+    /* catch the above exceptions */
+    if (!final) final = "";
+    if (!initial) initial = "";
 
     /* THL empty rime
      * we use '=' in pinyin.tab as empty rime, restore it to ''

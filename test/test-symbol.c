@@ -2,7 +2,7 @@
  * test-symbol.c
  *
  * Copyright (c) 2012
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -29,7 +29,7 @@ static const TestData SYMBOL[] = {
     {"`35<E>", "\xEF\xBC\x9F" /* ？ */ },
     {"`36<E>", "\xEF\xBC\x81" /* ！ */ },
     {"`37<E>", "\xEF\xBC\x9B" /* ； */ },
-    {"`38<E>", "\xEF\xB8\xB0" /* ︰ */ },
+    {"`38<E>", "\xEF\xBC\x9A" /* ： */ },
     {"`39<E>", "\xE2\x80\xA7" /* ‧ */ },
     {"`30<E>", "\xE2\x80\xA5" /* ‥ */ },
     {"`3<R>1<E>", "\xEF\xB9\x90" /* ﹐ */ },
@@ -395,6 +395,28 @@ void test_symbol()
     test_symbol_count();
 }
 
+void test_nocand_symbol()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_candPerPage(ctx, 10);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+
+    type_keystroke_by_string(ctx, "`<R>20");
+    ok_preedit_buffer(ctx, "\xE2\x96\x88"); /* █ */
+
+    type_keystroke_by_string(ctx, "<D>");
+    ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
+
+    type_keystroke_by_string(ctx, "1<E>"); /* select … */
+    ok_commit_buffer(ctx, "\xE2\x80\xA6");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -412,6 +434,7 @@ int main(int argc, char *argv[])
 
     test_type_symbol();
     test_symbol();
+    test_nocand_symbol();
 
     fclose(fd);
 

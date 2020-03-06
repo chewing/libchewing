@@ -1,5 +1,6 @@
 /**
- * key2pho.c
+ * @file key2pho.c
+ * @brief Map bopomofos to uint16_t type according to different keyboard type.
  *
  * Copyright (c) 1999, 2000, 2001
  *	Lu-chuan Kung and Kang-pen Chen.
@@ -12,11 +13,6 @@
  * of this file.
  */
 
-/**
- * @file key2pho.c
- * @brief map bopomofos to uint16_t type according to different kb_type
- */
-
 /* This file is encoded in UTF-8 */
 #include "key2pho-private.h"
 
@@ -24,29 +20,35 @@
 #include <stdio.h>
 #include <string.h>
 #include "chewing-utf8-util.h"
-#include "chewing-private.h"
 
 /* NOTE:
  * The reason why we convert string literal to hex representation is for the
  * sake of portability, that avoid some buggy or faulty environment like
  * Microsoft VC9 to misinterpret the string.
  */
-const char *const zhuin_tab[] = {       /* number of bits */
-    "  \xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88\xE3\x84\x89" "\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C\xE3\x84\x8D\xE3\x84\x8E" "\xE3\x84\x8F\xE3\x84\x90\xE3\x84\x91\xE3\x84\x92\xE3\x84\x93" "\xE3\x84\x94\xE3\x84\x95\xE3\x84\x96\xE3\x84\x97\xE3\x84\x98" "\xE3\x84\x99",       /* 5 */
+const char *const zhuin_tab[] = {               /* number of bits */
+    "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88\xE3\x84\x89"
+    "\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C\xE3\x84\x8D\xE3\x84\x8E"
+    "\xE3\x84\x8F\xE3\x84\x90\xE3\x84\x91\xE3\x84\x92\xE3\x84\x93"
+    "\xE3\x84\x94\xE3\x84\x95\xE3\x84\x96\xE3\x84\x97\xE3\x84\x98"
+    "\xE3\x84\x99",                             /* 5 */
     /* ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ */
-    "  \xE3\x84\xA7\xE3\x84\xA8\xE3\x84\xA9",   /* 2 */
+    "\xE3\x84\xA7\xE3\x84\xA8\xE3\x84\xA9",   /* 2 */
     /* ㄧㄨㄩ */
-    "  \xE3\x84\x9A\xE3\x84\x9B\xE3\x84\x9C\xE3\x84\x9D\xE3\x84\x9E" "\xE3\x84\x9F\xE3\x84\xA0\xE3\x84\xA1\xE3\x84\xA2\xE3\x84\xA3" "\xE3\x84\xA4\xE3\x84\xA5\xE3\x84\xA6",     /* 4 */
+    "\xE3\x84\x9A\xE3\x84\x9B\xE3\x84\x9C\xE3\x84\x9D\xE3\x84\x9E"
+    "\xE3\x84\x9F\xE3\x84\xA0\xE3\x84\xA1\xE3\x84\xA2\xE3\x84\xA3"
+    "\xE3\x84\xA4\xE3\x84\xA5\xE3\x84\xA6",     /* 4 */
     /* ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ */
-    "  \xCB\x99\xCB\x8A\xCB\x87\xCB\x8B"        /* 3 */
-        /* ˙ˊˇˋ */
+    "\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B"        /* 3 */
+    /* ˙ˊˇˋ */
 };
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 static const int shift[] = { 9, 7, 3, 0 };
-static const int sb[] = { 31, 3, 15, 7 };
+static const int mask[] = { 0x1F, 0x3, 0xF, 0x7 };
 
-static const char *const ph_str = "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
+static const char *const ph_str =
+    "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
     /* ㄅㄆㄇㄈ */
     "\xE3\x84\x89\xE3\x84\x8A\xE3\x84\x8B\xE3\x84\x8C"
     /* ㄉㄊㄋㄌ */
@@ -65,9 +67,9 @@ static const char *const ph_str = "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\
     "\xE3\x84\xA2\xE3\x84\xA3\xE3\x84\xA4\xE3\x84\xA5\xE3\x84\xA6"
     /* ㄢㄣㄤㄥㄦ */
     "\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B";
+    /* ˙ˊˇˋ */
 
-                /* ˙ˊˇˋ */
-static const char *const key_str[MAX_KBTYPE] = {
+static const char *const key_str[KBTYPE_COUNT] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* standard kb */
     "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",        /* hsu */
     "1234567890-qwertyuiopasdfghjkl;zxcvbn/m,.",        /* IBM */
@@ -80,7 +82,7 @@ static const char *const key_str[MAX_KBTYPE] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* Hanyu Pinyin */
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* Luoma Pinyin */
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* secondary Bopomofo Pinyin */
-
+    "1qdz2gsxmtclnv5wrjyikfap8ue,9bo.0;h/-7634",        /* Carpalx */
 };
 
 /*
@@ -98,6 +100,7 @@ uint16_t UintFromPhone(const char *zhuin)
 
     iter = zhuin;
 
+    /* 0x20: space character */
     while (*iter && *iter != 0x20) {
         len = ueStrNCpy(buf, iter, 1, STRNCPY_CLOSE);
 
@@ -119,24 +122,30 @@ uint16_t UintFromPhone(const char *zhuin)
     return result;
 }
 
-int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes)
+int PhoneFromKey(char *pho, const char *inputkey, KBTYPE kbtype, int searchTimes)
 {
-    int len = strlen(inputkey), i, s;
+    int len;
+    int i;
+    int s;
     const char *pTarget;
+
+    len = strlen(inputkey);
 
     pho[0] = '\0';
     for (i = 0; i < len; i++) {
         char *findptr = NULL;
         int _index;
 
-        for (s = 0, pTarget = key_str[kbtype]; s < searchTimes; s++, pTarget = findptr + 1) {
+        pTarget = key_str[kbtype];
+        for (s = 0; s < searchTimes; s++) {
             findptr = strchr(pTarget, inputkey[i]);
             if (!findptr) {
                 return 0;
             }
+            pTarget = findptr + 1;
         }
         _index = findptr - key_str[kbtype];
-        ueStrNCpy(ueStrSeek(pho, i), ueConstStrSeek(ph_str, _index), 1, 0);
+        ueStrNCpy(ueStrSeek(pho, i), ueConstStrSeek(ph_str, _index), 1, STRNCPY_NOT_CLOSE);
     }
     pho = ueStrSeek(pho, len);
     pho[0] = '\0';
@@ -152,31 +161,42 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     char buffer[MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1] = { 0 };
 
     for (i = 0; i < BOPOMOFO_SIZE; ++i) {
-        // The first two characters in zhuin_tab are space, so we need
-        // to add 1 here.
-        index = ((phone_num >> shift[i]) & sb[i]) + 1;
-        if (index >= 2) {
-            pos = ueConstStrSeek(zhuin_tab[i], index);
-            ueStrNCpy(tmp, pos, 1, 1);
+        /* The first two characters in zhuin_tab are space, so we need
+           to add 1 here. */
+        index = ((phone_num >> shift[i]) & mask[i]);
+        if (index >= 1) {
+            pos = ueConstStrSeek(zhuin_tab[i], index - 1);
+            ueStrNCpy(tmp, pos, 1, STRNCPY_CLOSE);
             strcat(buffer, tmp);
         }
     }
+    if (!buffer[0]) {
+        phone[0] = 0;
+        return -1;
+    }
     strncpy(phone, buffer, phone_len);
     phone[phone_len - 1] = 0;
+    if (phone_len < strlen(buffer) + 1)
+        return -1;
     return 0;
 }
 
-int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes)
+int PhoneInxFromKey(int key, int type, KBTYPE kbtype, int searchTimes)
 {
-    char keyStr[2], rtStr[10], *p;
+    char keyStr[2];
+    char rtStr[10];
+    char *p;
 
     keyStr[0] = key;
     keyStr[1] = '\0';
+
     if (!PhoneFromKey(rtStr, keyStr, kbtype, searchTimes))
         return 0;
+
     p = strstr(zhuin_tab[type], rtStr);
     if (!p)
         return 0;
+
     return zhuin_tab_num[type] - ueStrLen(p);
 }
 
@@ -185,8 +205,13 @@ uint16_t UintFromPhoneInx(const int ph_inx[])
     int i;
     uint16_t result = 0;
 
-    for (i = 0; i < BOPOMOFO_SIZE; i++)
+    for (i = 0; i < BOPOMOFO_SIZE; i++) {
+        if (ph_inx[i] < 0 || ph_inx[i] >= zhuin_tab_num[i])
+            return 0;
+
         result |= ph_inx[i] << shift[i];
+    }
+
     return result;
 }
 
@@ -241,8 +266,8 @@ size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len
 
 ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const char *bopomofo_buf)
 {
-    ssize_t i;
-    ssize_t len;
+    size_t i;
+    size_t len;
 
     assert(bopomofo_buf);
 
@@ -267,4 +292,21 @@ ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const
 size_t GetBopomofoBufLen(size_t len)
 {
     return (MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1) * len;
+}
+
+size_t GetPhoneLenFromUint(uint16_t phone_num)
+{
+    int i;
+    size_t len = 0 ;
+
+    for (i = 0; i < BOPOMOFO_SIZE; ++i) {
+        /* The first two characters in zhuin_tab are space, so we need
+           to add 1 here. */
+        int index = ((phone_num >> shift[i]) & mask[i]);
+        if (index >= 1) {
+            const char *pos = ueConstStrSeek(zhuin_tab[i], index - 1);
+            len += ueStrNBytes(pos, 1);
+        }
+    }
+    return len > 0 ? (len + 1) : -1;
 }

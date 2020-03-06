@@ -39,6 +39,8 @@ void test_ShiftLeft_add_userphrase()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
     static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */ ;
+    static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -55,6 +57,7 @@ void test_ShiftLeft_add_userphrase()
     cursor = chewing_cursor_Current(ctx);
     ok(cursor == 0, "cursor position `%d' shall be 0", cursor);
     ok(has_userphrase(ctx, bopomofo, phrase) == 1, "`%s' shall be in userphrase", phrase);
+    ok_aux_buffer(ctx, msg);
 
     chewing_delete(ctx);
 }
@@ -81,6 +84,8 @@ void test_ShiftRight_add_userphrase()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
     static const char bopomofo[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B \xE3\x84\x95\xCB\x8B" /* ㄘㄜˋ ㄕˋ */ ;
+    static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -97,6 +102,7 @@ void test_ShiftRight_add_userphrase()
     cursor = chewing_cursor_Current(ctx);
     ok(cursor == 2, "cursor position `%d' shall be 2", cursor);
     ok(has_userphrase(ctx, bopomofo, phrase) == 1, "`%s' shall be in userphrase", phrase);
+    ok_aux_buffer(ctx, msg);
 
     chewing_delete(ctx);
 }
@@ -114,6 +120,11 @@ void test_CtrlNum_add_phrase_right()
     static const char msg[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
     static const char msg_already_have[] =
         "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */ ;
+    static const char msg_error[] =
+        "\xE5\x8A\xA0\xE8\xA9\x9E\xE5\xA4\xB1\xE6\x95\x97\xEF\xBC\x9A\xE5\xAD\x97\xE6\x95\xB8"
+        "\xE4\xB8\x8D\xE7\xAC\xA6\xE6\x88\x96\xE5\xA4\xBE\xE9\x9B\x9C\xE7\xAC\xA6\xE8\x99\x9F"
+        /* 加詞失敗：字數不符或夾雜符號 */;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -136,6 +147,9 @@ void test_CtrlNum_add_phrase_right()
     type_keystroke_by_string(ctx, "<C2>");
     ok_aux_buffer(ctx, msg_already_have);
 
+    type_keystroke_by_string(ctx, "<EN><C2>");
+    ok_aux_buffer(ctx, msg_error);
+
     chewing_delete(ctx);
 }
 
@@ -146,6 +160,11 @@ void test_CtrlNum_add_phrase_left()
     static const char msg_add[] = "\xE5\x8A\xA0\xE5\x85\xA5\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 加入：測試 */ ;
     static const char msg_already_have[] =
         "\xE5\xB7\xB2\xE6\x9C\x89\xEF\xBC\x9A\xE6\xB8\xAC\xE8\xA9\xA6" /* 已有：測試 */ ;
+    static const char msg_error[] =
+        "\xE5\x8A\xA0\xE8\xA9\x9E\xE5\xA4\xB1\xE6\x95\x97\xEF\xBC\x9A\xE5\xAD\x97\xE6\x95\xB8"
+        "\xE4\xB8\x8D\xE7\xAC\xA6\xE6\x88\x96\xE5\xA4\xBE\xE9\x9B\x9C\xE7\xAC\xA6\xE8\x99\x9F"
+        /* 加詞失敗：字數不符或夾雜符號 */;
+
     int cursor;
     ChewingContext *ctx;
 
@@ -167,6 +186,9 @@ void test_CtrlNum_add_phrase_left()
 
     type_keystroke_by_string(ctx, "<C2>");
     ok_aux_buffer(ctx, msg_already_have);
+
+    type_keystroke_by_string(ctx, "<H><C2>");
+    ok_aux_buffer(ctx, msg_error);
 
     chewing_delete(ctx);
 }
@@ -219,12 +241,71 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
     chewing_delete(ctx);
 }
 
+void test_CtrlNum_add_phrase_right_start_with_symbol()
+{
+    static const char bopomofo[] =
+        "\xE3\x84\x89\xE3\x84\xA4\xCB\x87 \xE3\x84\x8A\xE3\x84\xA8\xCB\x87 \xE3\x84\x91\xE3\x84\xA7\xE3\x84\xA4\xCB\x8A" /* ㄉㄤˇ ㄊㄨˇ ㄑㄧㄤˊ */ ;
+    static const char phrase[] = "\xE6\x93\x8B\xE5\x9C\x9F\xE7\x89\x86"; /* 擋土牆 */
+
+    const char *const_buf;
+    ChewingContext *ctx;
+
+    clean_userphrase();
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_addPhraseDirection(ctx, 0);
+
+    ok(has_userphrase(ctx, bopomofo, NULL) == 0, "`%s' shall not be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "`1hk4g42;3wj3fu;6<L><L><L><D>3<C3>");
+    ok(has_userphrase(ctx, bopomofo, NULL) == 1, "`%s' shall be in userphrase", bopomofo);
+
+    chewing_cand_open(ctx);
+    chewing_cand_Enumerate(ctx);
+    const_buf = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(const_buf, phrase) == 0, "first candidate `%s' shall be `%s'", const_buf, phrase);
+
+    chewing_delete(ctx);
+} 
+
+void test_CtrlNum_add_phrase_left_start_with_symbol()
+{
+    static const char bopomofo[] =
+        "\xE3\x84\x89\xE3\x84\xA4\xCB\x87 \xE3\x84\x8A\xE3\x84\xA8\xCB\x87 \xE3\x84\x91\xE3\x84\xA7\xE3\x84\xA4\xCB\x8A" /* ㄉㄤˇ ㄊㄨˇ ㄑㄧㄤˊ */ ;
+    static const char phrase[] = "\xE6\x93\x8B\xE5\x9C\x9F\xE7\x89\x86"; /* 擋土牆 */
+
+    const char *const_buf;
+    ChewingContext *ctx;
+
+    clean_userphrase();
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_addPhraseDirection(ctx, 1);
+
+    ok(has_userphrase(ctx, bopomofo, NULL) == 0, "`%s' shall not be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "`1hk4g42;3wj3fu;6<L><L><L><D>3<EN><C3>");
+    ok(has_userphrase(ctx, bopomofo, NULL) == 1, "`%s' shall be in userphrase", bopomofo);
+
+    type_keystroke_by_string(ctx, "<L><L><L>");
+    chewing_cand_open(ctx);
+    chewing_cand_Enumerate(ctx);
+    const_buf = chewing_cand_string_by_index_static(ctx, 0);
+    ok(strcmp(const_buf, phrase) == 0, "first candidate `%s' shall be `%s'", const_buf, phrase);
+
+    chewing_delete(ctx);
+}
+
 void test_CtrlNum()
 {
     test_CtrlNum_add_phrase_right();
     test_CtrlNum_add_phrase_left();
     test_CtrlNum_add_phrase_right_symbol_in_between();
     test_CtrlNum_add_phrase_left_symbol_in_between();
+    test_CtrlNum_add_phrase_right_start_with_symbol();
+    test_CtrlNum_add_phrase_left_start_with_symbol();
 }
 
 void test_userphrase_auto_learn()
@@ -239,12 +320,19 @@ void test_userphrase_auto_learn()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
-    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
 
+    chewing_set_autoLearn(ctx, AUTOLEARN_DISABLED);
+    ok(chewing_get_autoLearn(ctx) == AUTOLEARN_DISABLED, "AutoLearn shall be `%d'", AUTOLEARN_DISABLED);
     type_keystroke_by_string(ctx, "dk dk dk hk4g4<E>");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
 
-    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
+    chewing_set_autoLearn(ctx, AUTOLEARN_ENABLED);
+    ok(chewing_get_autoLearn(ctx) == AUTOLEARN_ENABLED, "AutoLearn shall be `%d'", AUTOLEARN_ENABLED);
+    type_keystroke_by_string(ctx, "dk dk dk hk4g4<E>");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
 
     chewing_delete(ctx);
@@ -303,11 +391,44 @@ void test_userphrase_auto_learn_hardcode_break()
     chewing_delete(ctx);
 }
 
+void test_userphrase_auto_learn_only_after_commit()
+{
+    /* GitHub #206: It should add the word after user actually finish the character selection. */
+
+    const char bopomofo_1[] = "\xE3\x84\x94\xE3\x84\xA4\xCB\x8A \xE3\x84\x86\xE3\x84\xA2\xCB\x8A"; /* ㄔㄤˊ ㄆㄢˊ */
+    const char bopomofo_2[] = "\xE3\x84\x94\xE3\x84\xA4\xCB\x8A"; /* ㄔㄤˊ */
+
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    /* user just inputs some characters: don't auto learn. */
+    type_keystroke_by_string(ctx, "t;6q06");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    /* user selectes a candidate on the list, but doesn't commit: don't auto learn. */
+    type_keystroke_by_string(ctx, "<L><L><D>7");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    /* user selectes another cadidate and commit: auto learn phrase(s), but not the selected candidate. */
+    type_keystroke_by_string(ctx, "<L><D>2<E>");
+    ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+
+    chewing_delete(ctx);
+}
+
 void test_userphrase()
 {
     test_userphrase_auto_learn();
     test_userphrase_auto_learn_with_symbol();
     test_userphrase_auto_learn_hardcode_break();
+    test_userphrase_auto_learn_only_after_commit();
 }
 
 void test_userphrase_enumerate_normal()
@@ -724,6 +845,74 @@ void test_userphrase_lookup()
     chewing_delete(ctx);
 }
 
+void test_userphrase_double_free()
+{
+    ChewingContext *ctx = NULL;
+    char p1[] = "\xE6\xB8\xAC";
+    char p2[] = "\xE7\xAD\x96";
+    char b1[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B";
+    int ret = 0;
+
+    clean_userphrase();
+
+    start_testcase(ctx, fd);
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_add(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_add(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_remove(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_add(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_add(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    chewing_userphrase_remove(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+}
+
+void test_userphrase_remove()
+{
+    ChewingContext *ctx = NULL;
+    char p1[] = "\xE6\xB8\xAC";
+    char p2[] = "\xE7\xAD\x96";
+    char b1[] = "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B";
+    int ret = 0;
+
+    clean_userphrase();
+
+    start_testcase(ctx, fd);
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_add(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_add(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_remove(ctx, p1, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_remove(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_lookup(ctx, p2, b1);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    chewing_delete(ctx);
+    ctx = NULL;
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -746,6 +935,8 @@ int main(int argc, char *argv[])
     test_userphrase_enumerate();
     test_userphrase_manipulate();
     test_userphrase_lookup();
+    test_userphrase_double_free();
+    test_userphrase_remove();
 
     fclose(fd);
 

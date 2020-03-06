@@ -2,11 +2,11 @@
  * chewingutil.c
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004-2006, 2008, 2010-2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -57,6 +57,7 @@ static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
 };
+static const char NO_SYM_KEY = '\t';
 
 /*
  * FindEasySymbolIndex(ch) = char ch's index in G_EASY_SYMBOL_KEY
@@ -65,9 +66,9 @@ static const char G_EASY_SYMBOL_KEY[EASY_SYMBOL_KEY_TAB_LEN] = {
 static int FindEasySymbolIndex(char ch)
 {
         /**
-	 * '0' => 0, ..., '9' => 9
-	 * 'A' => 10, 'B' => 11, ... 'Z' => 35
-	 */
+         * '0' => 0, ..., '9' => 9
+         * 'A' => 10, 'B' => 11, ... 'Z' => 35
+         */
     if (isdigit(ch)) {
         return ch - '0';
     } else if (isupper(ch)) {
@@ -151,7 +152,7 @@ static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symke
                 &pgdata->preeditBuf[pgdata->chiSymbolCursor],
                 sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
 
-        strncpy(buf->char_, chibuf, sizeof(buf->char_));
+        strncpy(buf->char_, chibuf, ARRAY_SIZE(buf->char_) - 1);
         buf->category = CHEWING_SYMBOL;
 
         /* Save Symbol Key */
@@ -291,7 +292,7 @@ int EasySymbolInput(int key, ChewingData *pgdata)
     if (-1 != _index) {
         for (loop = 0; loop < pgdata->static_data.g_easy_symbol_num[_index]; ++loop) {
             ueStrNCpy(wordbuf, ueStrSeek(pgdata->static_data.g_easy_symbol_value[_index], loop), 1, 1);
-            rtn = _Inner_InternalSpecialSymbol(key, pgdata, key, wordbuf);
+            (void) _Inner_InternalSpecialSymbol(key, pgdata, key, wordbuf);
         }
         return SYMBOL_KEY_OK;
     }
@@ -346,16 +347,21 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
         if (symbol_type == SYMBOL_CHOICE_INSERT) {
             assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
 
-            memmove(&pgdata->preeditBuf[pgdata->chiSymbolCursor + 1],
-                    &pgdata->preeditBuf[pgdata->chiSymbolCursor],
-                    sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
+            if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen ||
+                    pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] != NO_SYM_KEY) {
+                memmove(&pgdata->preeditBuf[pgdata->chiSymbolCursor + 1],
+                        &pgdata->preeditBuf[pgdata->chiSymbolCursor],
+                        sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - pgdata->chiSymbolCursor));
+            } else {
+                symbol_type = SYMBOL_CHOICE_UPDATE;
+            }
         }
-        strncpy(buf->char_, pgdata->choiceInfo.totalChoiceStr[sel_i], sizeof(buf->char_));
+        strncpy(buf->char_, pgdata->choiceInfo.totalChoiceStr[sel_i], ARRAY_SIZE(buf->char_) - 1);
         buf->category = CHEWING_SYMBOL;
 
         /* This is very strange */
         key = FindSymbolKey(pgdata->choiceInfo.totalChoiceStr[sel_i]);
-        pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] = key ? key : '0';
+        pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] = key ? key : NO_SYM_KEY;
 
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         ChoiceEndChoice(pgdata);
@@ -549,7 +555,7 @@ static int ChewingIsBreakPoint(int cursor, ChewingData *pgdata)
         "\xE5\x9C\xA8",
         /* 在 */
     };
-    int i;
+    size_t i;
 
     if (!ChewingIsChiAt(cursor, pgdata))
         return 1;
@@ -632,8 +638,6 @@ void AutoLearnPhrase(ChewingData *pgdata)
 
     if (pending_pos) {
         UserUpdatePhrase(pgdata, bufPhoneSeq, bufWordSeq);
-        prev_pos = 0;
-        pending_pos = 0;
     }
 
     UserUpdatePhraseEnd(pgdata);
@@ -725,7 +729,7 @@ int CallPhrasing(ChewingData *pgdata, int all_phrasing)
             ch_count++;
         else {
             pgdata->bArrBrkpt[ch_count] = 1;
-            pgdata->bSymbolArrBrkpt[ch_count] = 1;
+            pgdata->bSymbolArrBrkpt[i] = 1;
         }
     }
 
@@ -832,6 +836,7 @@ static void ShiftInterval(ChewingOutput *pgo, ChewingData *pgdata)
 int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
 {
     int i;
+    int inx;
     char *pos;
 
     /* fill zero to chiSymbolBuf first */
@@ -857,9 +862,11 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
         strcpy(pgo->bopomofoBuf, pgdata->bopomofoData.pinYinData.keySeq);
     } else {
         for (i = 0; i < BOPOMOFO_SIZE; i++) {
-            if (pgdata->bopomofoData.pho_inx[i] != 0) {
+            inx = pgdata->bopomofoData.pho_inx[i];
+            if (inx != 0) {
                 ueStrNCpy(pgo->bopomofoBuf + strlen(pgo->bopomofoBuf),
-                          ueConstStrSeek((zhuin_tab[i] + 2), pgdata->bopomofoData.pho_inx[i] - 1), 1, STRNCPY_CLOSE);
+                          ueConstStrSeek(zhuin_tab[i], inx - 1),
+                          1, STRNCPY_CLOSE);
             }
         }
     }
@@ -902,7 +909,7 @@ int AddSelect(ChewingData *pgdata, int sel_i)
     return 0;
 }
 
-int CountSelKeyNum(int key, ChewingData *pgdata)
+int CountSelKeyNum(int key, const ChewingData *pgdata)
         /* return value starts from 0.  If less than zero : error key */
 {
     int i;
@@ -934,6 +941,8 @@ int PhoneSeqCursor(ChewingData *pgdata)
 
 int ChewingIsChiAt(int chiSymbolCursor, ChewingData *pgdata)
 {
+    assert(0 <= chiSymbolCursor);
+    assert(chiSymbolCursor < ARRAY_SIZE(pgdata->preeditBuf));
     return pgdata->preeditBuf[chiSymbolCursor].category == CHEWING_CHINESE;
 }
 
@@ -997,6 +1006,9 @@ int ChewingKillChar(ChewingData *pgdata, int chiSymbolCursorToKill, int minus)
     }
     pgdata->symbolKeyBuf[chiSymbolCursorToKill] = 0;
     assert(pgdata->chiSymbolBufLen - chiSymbolCursorToKill);
+    memmove(&pgdata->symbolKeyBuf[chiSymbolCursorToKill],
+            &pgdata->symbolKeyBuf[chiSymbolCursorToKill + 1],
+            sizeof(pgdata->symbolKeyBuf[0]) * (pgdata->chiSymbolBufLen - chiSymbolCursorToKill));
     memmove(&pgdata->preeditBuf[chiSymbolCursorToKill],
             &pgdata->preeditBuf[chiSymbolCursorToKill + 1],
             sizeof(pgdata->preeditBuf[0]) * (pgdata->chiSymbolBufLen - chiSymbolCursorToKill));
@@ -1199,9 +1211,9 @@ int OpenSymbolChoice(ChewingData *pgdata)
     pci->oldChiSymbolCursor = pgdata->chiSymbolCursor;
 
     /* see if there is some word in the cursor position */
-    if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen)
+    if (pgdata->chiSymbolCursor == pgdata->chiSymbolBufLen && pgdata->chiSymbolCursor > 0)
         pgdata->chiSymbolCursor--;
-    if (pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] == '1') {
+    if (pgdata->symbolKeyBuf[pgdata->chiSymbolCursor] == NO_SYM_KEY) {
         pgdata->bSelect = 1;
         HaninSymbolInput(pgdata);
         return 0;
@@ -1319,6 +1331,8 @@ int InitSymbolTable(ChewingData *pgdata, const char *prefix)
     }
 
     size = sizeof(*pgdata->static_data.symbol_table) * pgdata->static_data.n_symbol_entry;
+    if (!size)
+        goto end;
     pgdata->static_data.symbol_table = (SymbolEntry **) malloc(size);
     if (!pgdata->static_data.symbol_table)
         goto error;
@@ -1366,16 +1380,15 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
 
     ret = asprintf(&filename, "%s" PLAT_SEPARATOR "%s", prefix, SOFTKBD_TABLE_FILE);
     if (ret == -1)
-        goto end;
+        goto filenamefail;
 
     file = fopen(filename, "r");
     if (!file)
-        goto end;
+        goto fileopenfail;
 
     line = ALC(char, LINE_LEN);
-
     if (!line)
-        goto end;
+        goto linefail;
 
     while (fgets(line, LINE_LEN, file)) {
         if (' ' != line[1])
@@ -1406,10 +1419,17 @@ int InitEasySymbolInput(ChewingData *pgdata, const char *prefix)
         pgdata->static_data.g_easy_symbol_num[_index] = len;
     }
     ret = 0;
-  end:
+
+end:
     free(line);
+
+linefail:
     fclose(file);
+
+fileopenfail:
     free(filename);
+
+filenamefail:
     return ret;
 }
 
@@ -1432,7 +1452,7 @@ void copyStringFromPreeditBuf(ChewingData *pgdata, int pos, int len, char *outpu
     int x;
 
     assert(pgdata);
-    assert(0 <= pos && pos + len < ARRAY_SIZE(pgdata->preeditBuf));
+    assert(0 <= pos && (size_t) (pos + len) < ARRAY_SIZE(pgdata->preeditBuf));
     assert(output);
     assert(output_len);
 

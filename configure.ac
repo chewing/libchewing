@@ -3,7 +3,7 @@
 AC_PREREQ([2.65])
 
 # Update CMakeLists.txt if version is changed.
-AC_INIT([libchewing],[0.4.0],[chewing-devel@googlegroups.com])
+AC_INIT([libchewing],[0.5.1],[chewing-devel@googlegroups.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/chewingio.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -29,11 +29,11 @@ LIBCHEWING_MAJOR=3
 
 # increment if the inteface has compatible update (additions).
 # Set to 0 if MAJOR is increased.
-LIBCHEWING_MINOR=2
+LIBCHEWING_MINOR=3
 
 # increment any time the source changes
 # Set to 0 if MAJOR or MINOR is increased.
-LIBCHEWING_REVISION=0
+LIBCHEWING_REVISION=1
 
 AC_SUBST(LIBCHEWING_MAJOR)
 AC_SUBST(LIBCHEWING_MINOR)
@@ -57,7 +57,7 @@ AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS([include/config.h])
 
 # Init libtool
-LT_INIT([win32-dll])
+LT_INIT([win32-dll pic-only])
 
 # libtool option to control which symbols are exported
 # right now, symbols starting with _ are not exported
@@ -79,18 +79,18 @@ AC_ARG_WITH([sqlite3],
             AS_HELP_STRING([--with-sqlite3], [Use sqlite3 to store userphrase @<:@default=yes@:>@]),
             [],
             [with_sqlite3=yes])
-AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" == x"yes"])
+AM_CONDITIONAL([WITH_SQLITE3], [test x"$with_sqlite3" = x"yes"])
 
 AC_ARG_WITH([internal-sqlite3],
             AS_HELP_STRING([--with-internal-sqlite3], [Use internal sqlite3 instead of system-wide @<:@default=no@:>@]),
             [],
             [with_internal_sqlite3=no])
-AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" == x"yes"])
+AM_CONDITIONAL([WITH_INTERNAL_SQLITE3], [test x"$with_internal_sqlite3" = x"yes"])
 
 # for sqlite
-AS_IF([test x"$with_sqlite3" == x"yes"], [
+AS_IF([test x"$with_sqlite3" = x"yes"], [
        AC_DEFINE([WITH_SQLITE3], [1], [Use sqlite3 to store userphrase])
-       AS_IF([test x"$with_internal_sqlite3" == x"no"],
+       AS_IF([test x"$with_internal_sqlite3" = x"no"],
              [
               AC_SEARCH_LIBS([sqlite3_open], [sqlite3],
                              [AS_IF([test x$ac_cv_search_sqlite3_open != x"none required"],
@@ -126,7 +126,7 @@ AC_SUBST(CC_FOR_BUILD)
 AM_CFLAGS="$AM_CFLAGS -Wall $CFLAGS"
 
 # Add '_GNU_SOURCE' for asprintf
-AS_IF([test x$ac_cv_func_asprintf == xyes],
+AS_IF([test x$ac_cv_func_asprintf = xyes],
       [DEFAULT_CPPFLAGS="$DEFAULT_CPPFLAGS -D_GNU_SOURCE"])
 
 AX_WITH_CURSES
@@ -138,7 +138,7 @@ AC_ARG_ENABLE([gcov],
               [AS_HELP_STRING([--enable-gcov], [Turn on gcov support @<:@default=no@:>@])],
               [AS_CASE([${enableval}], [yes], [ENABLE_GCOV="true"], [ENABLE_GCOV="false"])],
               [ENABLE_GCOV="false"])
-AS_IF([test x$ENABLE_GCOV = x"true"], [AM_CFLAGS="$AM_CFLAGS --coverage"])
+AS_IF([test x$ENABLE_GCOV = x"true"], [AM_CFLAGS="$AM_CFLAGS --coverage" AM_LDFLAGS="$AM_LDFLAGS --coverage"])
 
 dnl Adds -fvisibility=hidden to CFLAGS if running with gcc 4 or greater.
 AC_MSG_CHECKING([whether the compiler supports GCC Visibility])
@@ -155,6 +155,17 @@ foo () {};
   has_visibility=no
 ])
 AC_MSG_RESULT($has_visibility)
+
+AC_CACHE_CHECK([whether the linker supports --no-undefined],
+               [ac_cv_no_undefined],
+               [
+  saved_LDFLAGS="${LDFLAGS}"
+  LDFLAGS="${LDFLAGS} -Wl,--no-undefined"
+  AC_TRY_LINK([], [], [ac_cv_no_undefined=yes], [ac_cv_no_undefined=no])
+  LDFLAGS="${saved_LDFLAGS}"
+])
+AS_IF([test x$ac_cv_no_undefined = "xyes"], [NO_UNDEFINED_LDFLAGS="-Wl,--no-undefined"])
+AC_SUBST(NO_UNDEFINED_LDFLAGS)
 
 # Platform-dependent
 dnl What kind of system are we using?
@@ -204,6 +215,7 @@ AC_CONFIG_FILES([
         src/porting_layer/src/Makefile
         src/tools/Makefile
         test/Makefile
+        thirdparty/sqlite-amalgamation/Makefile
 ])
 AC_OUTPUT
 

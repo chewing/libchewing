@@ -2,7 +2,7 @@
  * bopomofo-private.h
  *
  * Copyright (c) 2008, 2012
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -40,6 +40,7 @@ enum {
     KB_HANYU_PINYIN,
     KB_THL_PINYIN,
     KB_MPS2_PINYIN,
+    KB_CARPALX,
     KB_TYPE_NUM
 };
 

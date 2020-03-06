@@ -1,11 +1,10 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 AM_CPPFLAGS = \
-	-DCHEWING_DATADIR=\"@datadir@\" \
+	-DCHEWING_DATADIR=\"$(datadir)/libchewing\" \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
 	$(DEFAULT_CPPFLAGS) \
 	$(NULL)
 

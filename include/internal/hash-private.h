@@ -2,7 +2,7 @@
  * hash-private.h
  *
  * Copyright (c) 2008
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -41,9 +41,11 @@ HASH_ITEM *FindNextHash(const struct ChewingData *pgdata, HASH_ITEM *curr);
 void HashModify(struct ChewingData *pgdata, HASH_ITEM *pItem);
 void FreeHashItem(HASH_ITEM *pItem);
 int AlcUserPhraseSeq(UserPhraseData *pData, int phonelen, int wordlen);
+void DestroyUserPhraseData(UserPhraseData* pData);
 int InitUserphrase(struct ChewingData *pgdata, const char *path);
 void TerminateUserphrase(struct ChewingData *pgdata);
 void FreeHashTable(void);
+int HashFileSeekToUserPhrase(struct ChewingData *pgdata, HASH_ITEM *pItem, FILE *fpHash);
 
 /* *INDENT-OFF* */
 #endif

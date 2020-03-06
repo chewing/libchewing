@@ -1,7 +1,12 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src/tools data src test doc
+if WITH_INTERNAL_SQLITE3
+SUBDIRS = thirdparty/sqlite-amalgamation
+else
+SUBDIRS =
+endif
+SUBDIRS += src/tools data src test doc
 
 CMAKE_FILES = \
 	cmake/config.h.in \

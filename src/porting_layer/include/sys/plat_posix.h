@@ -20,13 +20,19 @@
 #        include <limits.h>
 
 #        include <sys/types.h>
+#        include <errno.h>
 
 #        define PLAT_SEPARATOR "/"
 #        define PLAT_TMPDIR "/tmp"
 #        define PLAT_MKDIR(dir) \
 	mkdir(dir, S_IRWXU)
-#        define PLAT_RENAME(oldpath, newpath) \
-	rename(oldpath, newpath)
+#        define PLAT_RENAME(oldpath, newpath) do { \
+             int ret = rename(oldpath, newpath); \
+             if (ret == -1) { \
+                 LOG_ERROR("rename fails. errno = %d", errno); \
+             } \
+         } while (0)
+
 #        define PLAT_UNLINK(path) \
 	unlink(path)
 

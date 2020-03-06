@@ -2,7 +2,7 @@
  * mod_aux.h
  *
  * Copyright (c) 2005, 2008
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -31,7 +31,7 @@ CHEWING_API int chewing_commit_Check(const ChewingContext *ctx);
  * @brief Get current commit string regardless of current input state
  * @param ctx handle to Chewing IM context
  *
- * Alwasy returns a char pointer, caller must free it.
+ * Always returns a char pointer, caller must free it.
  */
 CHEWING_API char *chewing_commit_String(const ChewingContext *ctx);
 CHEWING_API const char *chewing_commit_String_static(const ChewingContext *ctx);
@@ -104,7 +104,7 @@ CHEWING_API int chewing_kbtype_Total(const ChewingContext *ctx);
 CHEWING_API void chewing_kbtype_Enumerate(ChewingContext *ctx);
 CHEWING_API int chewing_kbtype_hasNext(ChewingContext *ctx);
 CHEWING_API char *chewing_kbtype_String(ChewingContext *ctx);
-CHEWING_API char *chewing_kbtype_String_static(ChewingContext *ctx);
+CHEWING_API const char *chewing_kbtype_String_static(ChewingContext *ctx);
 
 /*@}*/
 

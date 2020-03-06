@@ -84,7 +84,7 @@ behavior how an intelligent phonetic IM should works via the common
 interface, and Chewing permits the extra parameters and properties for the
 input method implementations to extend their specific functionality.
 
-@deftypevr Marco char* LIBCHEWING_ENCODING
+@deftypevr Macro char* LIBCHEWING_ENCODING
 @quotation Deprecated
 Not used anywhere. Will be removed soon.
 @end quotation
@@ -94,7 +94,7 @@ Defined since version 0.3.0. Currently it is always @code{"UTF-8"}.
 @end deftypevr
 
 @node Glossary
-@chapter Glassary
+@chapter Glossary
 
 @table @dfn
 @item Bopomofo
@@ -246,7 +246,7 @@ Chewing IM and returned to the caller.
 There are functions returning pointers of strings or other data
 structures that are allocated on the heap. These memory @emph{must} be
 freed to avoid memory leak. To avoid memory allocator mismatch between
-the Chewing IM and the caller, use this function the free the resource.
+the Chewing IM and the caller, use this function to free the resource.
 
 Do nothing if @var{ptr} is @code{NULL}.
 @end deftypefun
@@ -445,11 +445,11 @@ This function returns the the current layout name string of @var{ctx}. This
 function returns @code{NULL} when no memory.
 
 The return value is the name of the current layout, see also function
-@code{chewing_get_KBStr2Num}. The returned pointer @emph{must} be
+@code{chewing_KBStr2Num}. The returned pointer @emph{must} be
 freed by function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun int chewing_KBStr2Num (char @var{str}[])
+@deftypefun int chewing_KBStr2Num (const char @var{str}[])
 This function converts the keyboard layout name to corresponding
 layout index. If the string does not match any layout, this function returns
 @code{KB_DEFAULT}.
@@ -469,6 +469,9 @@ The string @var{str} might be one of the following layouts:
 @item @code{KB_DVORAK_HSU}
 @item @code{KB_DVORAK_CP26}
 @item @code{KB_HANYU_PINYIN}
+@item @code{KB_THL_PINYIN}
+@item @code{KB_MPS2_PINYIN}
+@item @code{KB_CARPALX}
 @end itemize
 
 See also the @code{chewing_kbtype_*} enumeration functions.
@@ -489,7 +492,7 @@ enumerate.
 @end deftypefun
 
 @deftypefun char* chewing_kbtype_String (ChewingContext *@var{ctx})
-This function returns the current enumerated keyboard layout name. The returnd
+This function returns the current enumerated keyboard layout name. The returned
 string is emtpy string when enumeration is over. This function returns
 @code{NULL} when no memory.
 
@@ -497,8 +500,8 @@ The returned value is a pointer to a character string. The memory
 @emph{must} be freed by the caller using function @code{chewing_free}.
 @end deftypefun
 
-@deftypefun char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
-This function returns the current enumerated keyboard layout name. The returnd
+@deftypefun const char* chewing_kbtype_String_static (ChewingContext *@var{ctx})
+This function returns the current enumerated keyboard layout name. The returned
 string is emtpy string when enumeration is over.
 
 The return value is a const pointer to a character string. The memory will
@@ -513,8 +516,8 @@ mode. The English mode supports input English characters
 directly. These functions set the current input mode.
 
 @c TODO: We should have ENGLISH_MODE, no?
-@deftypevr  Marco int CHINESE_MODE
-@deftypevrx Marco int SYMBOL_MODE
+@deftypevr  Macro int CHINESE_MODE
+@deftypevrx Macro int SYMBOL_MODE
 Indicate whether the input mode is translating keystrokes to Chinese
 character or not.
 @end deftypevr
@@ -530,8 +533,8 @@ The @var{mode} argument is one of the @code{CHINESE_MODE} and
 This function returns the current Chinese/English mode setting.
 @end deftypefun
 
-@deftypevr  Marco int FULLSHAPE_MODE
-@deftypevrx Marco int HALFSHAPE_MODE
+@deftypevr  Macro int FULLSHAPE_MODE
+@deftypevrx Macro int HALFSHAPE_MODE
 Indicate whether the input mode is translating the latin and
 punctuation characters to double-width characters or not.
 @end deftypevr
@@ -638,19 +641,20 @@ This function checks if the candidates selection has finished.
 
 @deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
 This function sets the candidates per page to @var{n}. If MIN_SELKEY @leq{}
-@var{n} @leq{} @code{MAX_SELKEY} is not true, the @var{n} will be ignored. The
-default candidates per page is @code{MAX_SELKEY}.
+@var{n} @leq{} @code{MAX_SELKEY} is not true or the number of selection keys is
+not enough, the @var{n} will be ignored. The default candidates per page is
+@code{MAX_SELKEY}.
 @end deftypefun
 
 @deftypefun int chewing_get_candPerPage (const ChewingContext *@var{ctx})
 This function returns the candidates per page.
 @end deftypefun
 
-@deftypevr Marco int MAX_SELKEY
+@deftypevr Macro int MAX_SELKEY
 The number of maximum candidates that are selectable via shortcut keys. Its
 value is @code{10}.
 @end deftypevr
-@deftypevr Marco int MIN_SELKEY
+@deftypevr Macro int MIN_SELKEY
 The number of minimum candidates that are selectable via shortcut keys. Its
 value is @code{1}.
 @end deftypevr
@@ -670,8 +674,8 @@ The return value @emph{must} be freed by the @code{chewing_free}
 function.
 @end deftypefun
 
-@deftypevr  Marco int HSU_SELKEY_TYPE1
-@deftypevrx Marco int HSU_SELKEY_TYPE2
+@deftypevr  Macro int HSU_SELKEY_TYPE1
+@deftypevrx Macro int HSU_SELKEY_TYPE2
 Use `asdfjkl789' or `asdfzxcv89' as selection key.
 @end deftypevr
 
@@ -707,7 +711,7 @@ This function closes the candidate windows. It returns @code{0} when success,
 @code{-1} otherwise.
 @end deftypefun
 
-@deftypefun char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
+@deftypefun const char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
 @var{index})
 This function returns the candidate string by its index. The range of
 @var{index} shall be @code{0} @leq{} @var{index} <
@@ -797,7 +801,7 @@ The return value is @code{1} on success, @code{0} on failure.
 @end deftypefun
 
 @deftypefun char* chewing_commit_String (const ChewingContext *@var{ctx})
-This function returns the string in the commit buffer This function returns
+This function returns the string in the commit buffer. This function returns
 @code{NULL} when no memory.
 
 The return value is a pointer to a character string. The memory
@@ -977,6 +981,15 @@ This function returns the length of the phonetic sequence in the
 Chewing IM internal state machine.
 @end deftypefun
 
+@deftypefun int chewing_phone_to_bopomofo (unsigned short @var{phone}, char *@var{buf}, unsigned short @var{len})
+This function converts the phone to bopomofo.
+
+If both of the buf and the len are 0, this function will return buf length for bopomofo including
+the null character so that caller can prepare enough buffer for it.
+
+The return value is '0' on success, '-1' on failure.
+@end deftypefun
+
 @node Userphrase Handling
 @chapter Userphrase Handling
 
@@ -1016,6 +1029,7 @@ otherwise.
 @deftypefun int chewing_userphrase_get (ChewingContext *@var{ctx}, char
 *@var{phrase_buf}, unsigned int @var{phrase_len}, char *@var{bopomofo_buf},
 unsigned int @var{bopomofo_len})
+
 This function gets the current enumerated userphrase. The @var{phrase_buf} and
 @var{bopomofo_buf} are userphrase and its bopomofo buffers provided by caller.
 The length of buffer @var{phrase_len} and @var{bopomofo_len} can be get by
@@ -1026,6 +1040,7 @@ The return value is @code{0} on success, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_add (ChewingContext *@var{ctx}, const char
 *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function adds new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is how many phrases are added, @code{-1} on failure.
@@ -1033,6 +1048,7 @@ The return value is how many phrases are added, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_remove (ChewingContext *@var{ctx}, const
 char *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function removes new userphrase @var{phrase_buf}(@var{bopomofo_buf}).
 
 The return value is how many phrases are removed, @code{-1} on failure.
@@ -1040,6 +1056,7 @@ The return value is how many phrases are removed, @code{-1} on failure.
 
 @deftypefun int chewing_userphrase_lookup (ChewingContext *@var{ctx}, const
 char *@var{phrase_buf}, const char *@var{bopomofo_buf})
+
 This function lookups if userphrase @var{phrase_buf}(@var{bopomofo_buf}) is in
 userphrase.
 
@@ -1062,20 +1079,20 @@ then the leading part will be committed automatically. The range of @var{n}
 shall between @code{MIN_CHI_SYMBOL_LEN} and @code{MAX_CHI_SYMBOL_LEN}.
 @end deftypefun
 
-@deftypevr Marco int MIN_CHI_SYMBOL_LEN
+@deftypevr Macro int MIN_CHI_SYMBOL_LEN
 The minimal size of pre-edit buffer. Its value is @code{0}.
 @end deftypevr
 
-@deftypevr Marco int MAX_CHI_SYMBOL_LEN
+@deftypevr Macro int MAX_CHI_SYMBOL_LEN
 The maximum size of pre-edit buffer. Its value is
 @code{MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN}.
 @end deftypevr
 
-@deftypevr Marco int MAX_PHONE_SEQ_LEN
+@deftypevr Macro int MAX_PHONE_SEQ_LEN
 The size of internal buffer for pre-edit buffer. Its value is @code{50}.
 @end deftypevr
 
-@deftypevr Marco int MAX_PHRASE_LEN
+@deftypevr Macro int MAX_PHRASE_LEN
 The maximum phrase size. Its value is @code{11}.
 @end deftypevr
 
@@ -1137,7 +1154,7 @@ This function returns the auto shift cursor setting.
 @deftypefun void chewing_set_easySymbolInput (ChewingContext *@var{ctx}, int @var{mode})
 This function sets the current normal/easy symbol mode. In easy symbol mode,
 the key be will changed to its related easy symbol in @file{swkb.dat}. The
-format of @file{swkb.dat} is key symble pair per line. The valid value of key
+format of @file{swkb.dat} is key symbol pair per line. The valid value of key
 is [0-9A-Z]. The lower case character in key will be changed to upper case when
 loading @file{swkb.dat}. However, in easy symbol mode, only [0-9A-Z] are
 accepted.
@@ -1159,6 +1176,21 @@ before the cursor or after the cursor.
 
 @deftypefun int chewing_get_phraseChoiceRearward (const ChewingContext *@var{ctx})
 This function returns the phrase choice rearward setting.
+@end deftypefun
+
+@deftypefun void chewing_set_autoLearn (ChewingContext *@var{ctx}, int @var{mode})
+This function can be used to enable or disable the automatic learning.
+
+The @var{mode} argument is be one of the @code{AUTOLEARN_ENABLED} and @code{AUTOLEARN_DISABLED} macros.
+@end deftypefun
+
+@deftypevr  Macro int AUTOLEARN_ENABLED
+@deftypevrx Macro int AUTOLEARN_DISABLED
+Indicate whether the automatic learning is enabled or not.
+@end deftypevr
+
+@deftypefun int chewing_get_autoLearn (const ChewingContext *@var{ctx})
+This function returns whether the automatic learning is enabled or disabled.
 @end deftypefun
 
 @node Variable Index

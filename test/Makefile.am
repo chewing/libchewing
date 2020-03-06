@@ -57,6 +57,7 @@ check_PROGRAMS = \
 	testchewing \
 	simulate \
 	randkeystroke \
+	stress \
 	$(TEXT_UI_BIN) \
 	$(NATIVE_TESTS) \
 	$(NULL)
@@ -75,32 +76,19 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/porting_layer/include \
 	-I$(top_srcdir)/test/ \
 	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
-	-DCHEWING_DATA_PREFIX="\"$(top_builddir)/data\"" \
+	-DCHEWING_DATA_PREFIX="\"$(abs_top_builddir)/data\"" \
 	-DTEST_HASH_DIR="\"$(PWD)\"" \
-	-DTEST_DATA_DIR="\"$(srcdir)/data\"" \
+	-DTEST_DATA_DIR="\"$(abs_srcdir)/data\"" \
 	$(DEFAULT_CPPFLAGS) \
 	$(CHECK_CFLAGS) \
 	$(NULL)
 
 LDADD = \
-	$(top_builddir)/src/common/libcommon.la \
 	$(top_builddir)/src/porting_layer/src/libporting_layer.la \
 	$(top_builddir)/test/libtesthelper.la \
+	$(top_builddir)/src/common/libcommon.la \
 	$(NULL)
 
 AM_LDFLAGS = -static
-
-if WITH_SQLITE3
-if WITH_INTERNAL_SQLITE3
-sqlite3_SOURCES = \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/shell.c \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
-	$(NULL)
-
-check_PROGRAMS += \
-	sqlite3 \
-	$(NULL)
-endif
-endif
 
 CLEANFILES = uhash.dat materials.txt-random chewing.sqlite3 test.sqlite3

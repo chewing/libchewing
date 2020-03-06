@@ -36,10 +36,11 @@ int get_search_path(char *path, size_t path_len)
     } else {
         home = getenv("HOME");
         if (home) {
-            snprintf(path, path_len, "%s/.chewing" SEARCH_PATH_SEP CHEWING_DATADIR "/libchewing", home);
+            snprintf(path, path_len,
+                     "%s/.chewing" SEARCH_PATH_SEP CHEWING_DATADIR, home);
         } else {
-            // No HOME ?
-            strncpy(path, SEARCH_PATH_SEP CHEWING_DATADIR "/libchewing", path_len);
+            /* No HOME ? */
+            strncpy(path, SEARCH_PATH_SEP CHEWING_DATADIR, path_len);
         }
     }
 
@@ -59,7 +60,7 @@ int get_search_path(char *path, size_t path_len)
 
     chewing_path = getenv("CHEWING_PATH");
     if (chewing_path) {
-        // FIXME: Check for truncated.
+        /* FIXME: Check for truncated. */
         strncpy(path, chewing_path, path_len);
     } else {
 
@@ -69,26 +70,23 @@ int get_search_path(char *path, size_t path_len)
          * - %CSIDL_PROGRAM_FILESX86%/ChewingTextService/Dictionary
          * - %CSIDL_PROGRAM_FILES%/ChewingTextService/Dictionary
          */
-
-        if (path_len < MAX_PATH) {
+        if (path_len < MAX_PATH)
             return -1;
-        }
 
         result = SHGetFolderPathA(NULL, CSIDL_PROGRAM_FILESX86, NULL, 0, path);
-        if(result != S_OK) {
+        if (result != S_OK)
             result = SHGetFolderPathA(NULL, CSIDL_PROGRAM_FILES, NULL, 0, path);
-        }
 
-        if (result != S_OK) {
+        if (result != S_OK)
             return -1;
-        }
 
         len = strlen(path);
         path += len;
         path_len -= len;
 
-        // FIXME: Check for truncated.
-        snprintf(path, path_len, "\\%s\\%s", "ChewingTextService", "Dictionary");
+        /* FIXME: Check for truncated. */
+        snprintf(path, path_len,
+                 "\\%s\\%s", "ChewingTextService", "Dictionary");
     }
 
     return 0;
@@ -115,10 +113,10 @@ char *strtok_r(char *s, const char *delim, char **save_ptr)
     /* Find the end of the token.  */
     token = s;
     s = strpbrk(token, delim);
-    if (s == NULL)
+    if (s == NULL) {
         /* This token finishes the string.  */
         *save_ptr = token + strlen(token);
-    else {
+    } else {
         /* Terminate the token and make *SAVE_PTR point past it.  */
         *s = '\0';
         *save_ptr = s + 1;
@@ -152,7 +150,9 @@ int asprintf(char **strp, const char *fmt, ...)
 }
 #endif
 
-static int are_all_files_readable(const char *path, const char *const *files, char *output, size_t output_len)
+static int are_all_files_readable(const char *path,
+                                  const char *const *files,
+                                  char *output, size_t output_len)
 {
     int i;
 
@@ -160,18 +160,20 @@ static int are_all_files_readable(const char *path, const char *const *files, ch
     assert(files);
 
     for (i = 0; files[i] != NULL; ++i) {
-        snprintf(output, output_len, "%s" PLAT_SEPARATOR "%s", path, files[i]);
-        if (access(output, R_OK) != 0) {
+        snprintf(output, output_len,
+                 "%s" PLAT_SEPARATOR "%s", path, files[i]);
+        if (access(output, R_OK) != 0)
             return 0;
-        }
     }
 
     return 1;
 }
 
-int find_path_by_files(const char *search_path, const char *const *files, char *output, size_t output_len)
+int find_path_by_files(const char *search_path,
+                       const char *const *files,
+                       char *output, size_t output_len)
 {
-    char buffer[PATH_MAX];
+    char buffer[PATH_MAX + 1] = {0};
     char *path;
     char *saveptr;
     int ret;
@@ -181,11 +183,11 @@ int find_path_by_files(const char *search_path, const char *const *files, char *
     assert(output);
     assert(output_len);
 
-    // strtok_r will modify its first parameter.
-    strncpy(buffer, search_path, sizeof(buffer));
+    /* strtok_r will modify its first parameter. */
+    strncpy(buffer, search_path, sizeof(buffer) - 1);
 
-    for (path = strtok_r(buffer, SEARCH_PATH_SEP, &saveptr); path; path = strtok_r(NULL, SEARCH_PATH_SEP, &saveptr)) {
-
+    for (path = strtok_r(buffer, SEARCH_PATH_SEP, &saveptr); path;
+         path = strtok_r(NULL, SEARCH_PATH_SEP, &saveptr)) {
         ret = are_all_files_readable(path, files, output, output_len);
         if (ret) {
             snprintf(output, output_len, "%s", path);

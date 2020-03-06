@@ -2,11 +2,11 @@
  * global.h
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2006, 2008, 2011
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -26,6 +26,8 @@
 #define SYMBOL_MODE 0
 #define FULLSHAPE_MODE 1
 #define HALFSHAPE_MODE 0
+#define AUTOLEARN_DISABLED 1
+#define AUTOLEARN_ENABLED 0
 
 /* specified to Chewing API */
 #if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
@@ -76,7 +78,7 @@
 /* The following macros are modified from GLIB.
  * from GNU cpp Manual:
  * C99 introduces the _Pragma operator. This feature addresses a major problem
- * with ‘#pragma’: being a directive, it cannot be produced as the result of
+ * with `#pragma': being a directive, it cannot be produced as the result of
  * macro expansion. _Pragma is an operator, much like sizeof or defined, and
  * can be embedded in a macro.
  */
@@ -119,6 +121,7 @@ typedef struct ChewingConfigData {
     int bAutoShiftCur;
     int bEasySymbolInput;
     int bPhraseChoiceRearward;
+    int bAutoLearn;
     int hsuSelKeyType;          // Deprecated.
 } ChewingConfigData;
 

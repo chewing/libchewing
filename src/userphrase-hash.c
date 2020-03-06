@@ -2,11 +2,11 @@
  * userphrase-hash.c
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004-2006, 2008, 2012-2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -24,7 +24,7 @@
 #include "userphrase-private.h"
 #include "private.h"
 
-/* load the orginal frequency from the static dict */
+/* load the original frequency from the static dict */
 static int LoadOriginalFreq(ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len)
 {
     const TreeType *tree_pos;
@@ -152,6 +152,7 @@ int UserUpdatePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
         data.userfreq = data.origfreq;
         data.recentTime = pgdata->static_data.chewing_lifetime;
         pItem = HashInsert(pgdata, &data);
+        DestroyUserPhraseData(&data);
         LogUserPhrase(pgdata, phoneSeq, wordSeq, pItem->data.origfreq, pItem->data.maxfreq, pItem->data.userfreq,
                       pItem->data.recentTime);
         HashModify(pgdata, pItem);
@@ -191,10 +192,10 @@ int UserRemovePhrase(ChewingData *pgdata, const uint16_t phoneSeq[], const char 
         if (strcmp(item->data.wordSeq, wordSeq) == 0) {
             /* Remove this phrase by removing */
             item->data.phoneSeq[0] = 0;
-            item->data.wordSeq[0] = 0;
             HashModify(pgdata, item);
 
             *prev = item->next;
+            item->next = NULL;
             FreeHashItem(item);
 
             return 1;

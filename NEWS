@@ -1,6 +1,71 @@
 What's New in libchewing GIT
 ---------------------------------------------------------
 
+* New APIs:
+  - chewing_phone_to_bopomofo [ShengYenPeng]. #166
+
+* Platform-specific
+  - Install instructions for Mac OS [Chocobo1].
+
+* Bug fixed:
+  - Unable to input some Bopomofos with ET26 layout [Hiunn-hué]. #235
+  - prevent memory leak in error case of GetDefaultUserPhrasePath [Kuang-che Wu].
+  - Fix PinYinData keySeq buffer overflow in PinYinInput() [Kuang-che Wu]. #238
+  - Fix trying to allocate buffer of negative size [Kuang-che Wu].
+  - Fix access violation due to negative cursor position [Kuang-che Wu].
+  - Fix several buffer overflow. [ChangZhuo Chen]. #241 #242
+
+
+What's New in libchewing 0.5.1 (May 18, 2016)
+---------------------------------------------------------
+* Bug fixed:
+  - Fix wrong CHEWING_DATADIR definition in CMake build #222.
+  - Fix j, k selection when symbol in between #149 #221.
+
+
+What's New in libchewing 0.5.0 (May 2, 2016)
+---------------------------------------------------------
+* New feature
+  - Add Carpalx keyboard layout support #217.
+
+* Dictionary
+  - Update dictionary #151 #155 #188 #191 #201.
+  - Add debug tool: dump_database.
+  - Sort tsi.src #212.
+
+* Misc
+  - Tweak several comments.
+  - Fix libchewing document.
+  - Remove old/dead code.
+  - Improve code readability and consistency.
+  - Update automake syntax #114.
+  - Add test cases #169 #177.
+  - Update Python sample code.
+  - Add debug tool dump_database.
+  - Integrate coverity scan in https://scan.coverity.com/.
+
+* Platform-specific
+  - Update README for OS X.
+  - Set WITH_INTERNAL_SQLITE3 to true by default in MS-Windows.
+  - Fix Visual Studio compiling warnings/errors #168 #171 #189 #190 #213.
+  - Add a cmake option BUILD_DLL to enable building *.dll with MS VC++ #185.
+  - Make the python binding of libchewing support Windows dll files #186.
+  - Don't use SIGSTOP in MS-Windows.
+
+* Bug fixed
+  - Check if ld supports --no-defined #144.
+  - Fix unexpected candidate disorder for '1' #153
+  - Replace bash-izm '==' operator with '=' for test(1) # 158.
+  - Fix several Coverity errors #172 #173.
+  - Fix ChewingKillChar which is disabling OpenSymbolChoice #160 #181.
+  - ㄅ cannot overwrite ㄆ in HSU and ET26 #170 #183.
+
+* Successful stories:
+  - Rime Input Method Engine (RIME) takes partial dictionary from
+    libchewing.
+  - PIME (writing input methods for Windows easily with Python) supports
+    Chewing IM by default.
+
 
 What's New in libchewing 0.4.0 (Apr 11, 2014)
 ---------------------------------------------------------

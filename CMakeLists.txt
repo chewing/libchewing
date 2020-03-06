@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(libchewing)
 
 # Update configure.ac if LIBCHEWING_VERSION is changed.
-set(LIBCHEWING_VERSION 0.4.0)
+set(LIBCHEWING_VERSION 0.5.1)
 set(PACKAGE_VERSION ${LIBCHEWING_VERSION})
 # Update configure.ac if LIBCHEWING_BINARY_VERSION is changed.
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
@@ -12,6 +12,8 @@ if(UNIX)
     set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
     add_definitions(-DUNDER_POSIX -DPIC)
 endif()
+
+include(CheckCCompilerFlag)
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
     ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -25,7 +27,14 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
     # Use NO_UNDEFINED=no when running with address sanitizer
     option(NO_UNDEFINED "No undefined symbol in object file" true)
     if(NO_UNDEFINED)
-        set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+        set(saved_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+        set(CMAKE_REQUIRED_FLAGS "-Wl,--no-undefined")
+        check_c_compiler_flag("" HAVE_NO_UNDEFINED)
+        set(CMAKE_REQUIRED_FLAGS ${saved_CMAKE_REQUIRED_FLAGS})
+
+        if(HAVE_NO_UNDEFINED)
+            set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+        endif()
     endif()
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     # XXX: Not sure why we need to use MATCHES instead of STREQUAL here.
@@ -36,10 +45,16 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     # /wd4819 can suppress this warning.
     set(CMAKE_C_FLAGS "/wd4819 ${CMAKE_C_FLAGS}")
     add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE)
-    add_definitions(/Dsnprintf=_snprintf /D__func__=__FUNCTION__)
+    add_definitions(/D__func__=__FUNCTION__)
+
+    # MSVC 2015 supports `snprintf`, so no need to redefine it
+    if(MSVC_VERSION LESS 1900)
+        add_definitions(/Dsnprintf=_snprintf)
+    endif()
+
+    option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." false)
 endif()
 
-include(CheckCCompilerFlag)
 check_c_compiler_flag(-fvisibility=hidden FVISIBILITY_HIDDEN)
 if(${FVISIBILITY_HIDDEN})
     set(CMAKE_C_FLAGS "-fvisibility=hidden ${CMAKE_C_FLAGS}")
@@ -51,6 +66,9 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
 option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
+if(MSVC)
+    set(WITH_INTERNAL_SQLITE3 true)
+endif()
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
@@ -101,10 +119,7 @@ set(DATA_BIN_DIR ${PROJECT_BINARY_DIR}/data)
 set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test)
 set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/test)
 
-set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include/chewing)
-set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-set(INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share/libchewing)
-set(INSTALL_INFO_DIR ${CMAKE_INSTALL_PREFIX}/share/info)
+include(GNUInstallDirs)
 
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
@@ -168,8 +183,8 @@ if (MAKEINFO)
 
     find_program(INSTALL_INFO NAMES ginstall-info install-info)
     if (INSTALL_INFO)
-        install(FILES ${INFO_BIN} DESTINATION ${INSTALL_INFO_DIR})
-        install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${INSTALL_INFO_DIR} ${INFO_BIN})")
+        install(FILES ${INFO_BIN} DESTINATION ${CMAKE_INSTALL_INFODIR})
+        install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${CMAKE_INSTALL_INFODIR} ${INFO_BIN})")
     endif()
 endif()
 
@@ -196,8 +211,15 @@ foreach(target ${ALL_STATIC_TEST})
 endforeach()
 
 # tools
-set(ALL_TOOLS init_database)
+set(ALL_TOOLS init_database dump_database)
 add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
+add_executable(dump_database
+    ${TOOLS_SRC_DIR}/dump_database.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
+    $<TARGET_OBJECTS:common>
+)
 set_target_properties(${ALL_TOOLS} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
         RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
@@ -243,6 +265,7 @@ set(ALL_TESTTOOLS
     performance
     randkeystroke
     simulate
+    stress
     testchewing
 )
 
@@ -339,7 +362,7 @@ add_library(chewing OBJECT
     ${SRC_DIR}/bopomofo.c
 )
 set_target_properties(chewing PROPERTIES
-    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${INSTALL_DATA_DIR}\""
+    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\""
 )
 
 if (WITH_SQLITE3)
@@ -363,11 +386,11 @@ if (WITH_SQLITE3)
         )
         target_link_libraries(sqlite3 sqlite3_library)
         set_target_properties(sqlite3 PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
+            RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
         )
         target_link_libraries(userphrase sqlite3_library)
     else()
@@ -382,7 +405,10 @@ else()
     )
 endif()
 
-if (NOT MSVC)
+if (BUILD_DLL OR NOT MSVC)
+    if (MSVC)
+        add_definitions(-DCHEWINGDLL_EXPORTS)
+    endif()
     add_library(chewing_shared SHARED
         $<TARGET_OBJECTS:chewing>
         $<TARGET_OBJECTS:common>
@@ -391,12 +417,14 @@ if (NOT MSVC)
     add_dependencies(check chewing_shared)
 endif()
 
-add_library(chewing_static STATIC
-    $<TARGET_OBJECTS:chewing>
-    $<TARGET_OBJECTS:common>
-)
-list(APPEND LIBS chewing_static)
-add_dependencies(check chewing_static)
+if (NOT BUILD_DLL)
+    add_library(chewing_static STATIC
+        $<TARGET_OBJECTS:chewing>
+        $<TARGET_OBJECTS:common>
+    )
+    list(APPEND LIBS chewing_static)
+    add_dependencies(check chewing_static)
+endif()
 
 foreach(lib ${LIBS})
     target_link_libraries(${lib} userphrase)
@@ -410,7 +438,7 @@ set_target_properties(${LIBS} PROPERTIES
     # Update configure.ac if one of SOVERSION/VERSION is updated.
     # See configure.ac for more information.
     SOVERSION 3
-    VERSION 3.2.0
+    VERSION 3.3.1
 )
 
 add_library(common OBJECT
@@ -424,9 +452,9 @@ add_library(common OBJECT
 
 
 # install
-install(FILES ${ALL_DATA} DESTINATION ${INSTALL_DATA_DIR})
-install(FILES ${ALL_STATIC_DATA} DESTINATION ${INSTALL_DATA_DIR})
-install(FILES ${ALL_INC} DESTINATION ${INSTALL_INC_DIR})
+install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
+install(FILES ${ALL_STATIC_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
+install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
-    DESTINATION ${INSTALL_LIB_DIR}/pkgconfig)
-install(TARGETS ${LIBS} DESTINATION ${INSTALL_LIB_DIR})
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(TARGETS ${LIBS} DESTINATION ${CMAKE_INSTALL_LIBDIR})

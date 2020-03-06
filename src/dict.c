@@ -2,11 +2,11 @@
  * dict.c
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2008, 2012, 2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -64,7 +64,7 @@ int InitDict(ChewingData *pgdata, const char *prefix)
  */
 static void GetVocabFromDict(ChewingData *pgdata, Phrase *phr_ptr)
 {
-    strcpy(phr_ptr->phrase, pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
+    snprintf(phr_ptr->phrase, sizeof(phr_ptr->phrase), "%s", pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
     phr_ptr->freq = GetUint24(pgdata->static_data.tree_cur_pos->phrase.freq);
     pgdata->static_data.tree_cur_pos++;
 }

@@ -2,7 +2,7 @@
  * chewing-private.h
  *
  * Copyright (c) 2008, 2010
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -38,7 +38,6 @@ typedef SSIZE_T ssize_t;
 #    include "chewing-sql.h"
 #endif
 
-#define MAX_KBTYPE 13
 #define MAX_UTF8_SIZE 4
 #define BOPOMOFO_SIZE 4
 #define PINYIN_SIZE 10
@@ -74,7 +73,27 @@ static inline int min(int a, int b)
 }
 #endif
 
-/*
+typedef enum KBTYPE {
+    KBTYPE_STANDARD,
+    KBTYPE_HSU,
+    KBTYPE_IBM,
+    KBTYPE_GIN_YIEH,
+    KBTYPE_ET,
+    KBTYPE_ET26,
+    KBTYPE_DVORAK,
+    KBTYPE_DVORAK_HSU,
+    KBTYPE_DACHEN_CP26,
+    KBTYPE_HANYU_PINYIN,
+    KBTYPE_LUOMA_PINYIN,
+    KBTYPE_MSP2,            /* Mandarin Phonetic Symbols II */
+    KBTYPE_CARPALX,
+    KBTYPE_COUNT
+} KBTYPE;
+
+/**
+ * @struct TreeType
+ * @brief node type of the system index tree
+ *
  * This structure may represent both internal nodes and leaf nodes of a phrase
  * tree. Two kinds are distinguished by whether key is 0. For an internal node,
  * child.begin and child.end give a list of children in the position
@@ -83,6 +102,7 @@ static inline int min(int a, int b)
  * phrase using a specific input method (may be bopomofo or non-phone). Note
  * that key in root represents the number of total elements(nodes) in the tree.
  */
+
 typedef struct TreeType {
     unsigned char key[2];
     union {
@@ -117,6 +137,11 @@ typedef struct BopomofoData {
     PinYinData pinYinData;
 } BopomofoData;
 
+/**
+ * @struct AvailInfo
+ * @brief information of available phrases or characters choices.
+ */
+
 typedef struct AvailInfo {
         /** @brief all kinds of lengths of available phrases. */
     struct {
@@ -124,16 +149,11 @@ typedef struct AvailInfo {
                 /** @brief phone id. */
         const TreeType *id;
     } avail[MAX_PHRASE_LEN];
-        /** @brief total number of availble lengths. */
+        /** @brief total number of available lengths. */
     int nAvail;
         /** @brief the current choosing available length. */
     int currentAvail;
 } AvailInfo;
-
-/**
- *	@struct AvailInfo
- *	@brief information of available phrases or characters choices.
- */
 
 typedef struct ChoiceInfo {
         /** @brief total page number. */
@@ -150,22 +170,25 @@ typedef struct ChoiceInfo {
     int isSymbol;
 } ChoiceInfo;
 
-/** @brief entry of symbol table */
+/**
+ * @struct SymbolEntry
+ * @brief entry of symbol table
+ */
 typedef struct SymbolEntry {
         /** @brief  nSymnols is total number of symbols in this category.
-	 * If nSymbols = 0, category is treat as a symbol,
-	 * which is a zero-terminated utf-8 string.
-	 * In that case, symbols[] is unused and isn't allocated at all.
-	 */
+         * If nSymbols = 0, category is treat as a symbol,
+         * which is a zero-terminated utf-8 string.
+         * In that case, symbols[] is unused and isn't allocated at all.
+         */
     int nSymbols;
 
         /** @brief  Category name of these symbols */
     char category[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];
 
         /** @brief  Symbols in this category.
-	 * This is an char[] array of variable length.
-	 * When nSymbols = 0, this array is not allocated.
-	 */
+         * This is an char[] array of variable length.
+         * When nSymbols = 0, this array is not allocated.
+         */
     char symbols[][MAX_UTF8_SIZE + 1];
 } SymbolEntry;
 
@@ -261,6 +284,11 @@ typedef struct ChewingData {
     void *loggerData;
 } ChewingData;
 
+/**
+ * @struct ChewingOutput
+ * @brief information for Chewing output.
+ */
+
 typedef struct ChewingOutput {
         /** @brief the content of Edit buffer. */
     char preeditBuf[MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE + 1];
@@ -291,8 +319,8 @@ typedef struct ChewingOutput {
 } ChewingOutput;
 
 /**
- *   @struct ChewingOutput
- *   @brief  information for Chewing output.
+ * @struct ChewingContext
+ * @brief context of Chewing IM
  */
 
 struct ChewingContext {
@@ -302,11 +330,6 @@ struct ChewingContext {
     int it_no;
     int kb_no;
 };
-
-/**
- * @struct ChewingContext
- * @brief context of Chewing IM
- */
 
 typedef struct Phrase {
     char phrase[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];

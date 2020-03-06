@@ -4,7 +4,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/include/internal \
 	-I$(top_srcdir)/src/porting_layer/include \
-	-DCHEWING_DATADIR=\"$(datadir)/chewing\" \
+	-DCHEWING_DATADIR=\"$(datadir)/libchewing\" \
 	$(USERPHRASE_CPPFLAGS) \
 	$(DEFAULT_CPPFLAGS) \
 	$(NULL)
@@ -37,7 +37,7 @@ libchewing_la_LDFLAGS = \
 	-version-number $(LIBCHEWING_MAJOR):$(LIBCHEWING_MINOR):$(LIBCHEWING_REVISION) \
 	-rpath $(libdir) \
 	-no-undefined \
-	-Wl,--no-undefined \
+	$(NO_UNDEFINED_LDFLAGS) \
 	-export-symbols-regex "^(chewing)_" \
 	$(NULL)
 
@@ -48,12 +48,9 @@ libchewing_la_SOURCES += \
 	$(NULL)
 
 if WITH_INTERNAL_SQLITE3
-AM_CPPFLAGS += \
-	-I$(top_srcdir)/thirdparty/sqlite-amalgamation \
-	$(NULL)
-
-libchewing_la_SOURCES += \
-	$(top_srcdir)/thirdparty/sqlite-amalgamation/sqlite3.c \
+AM_CPPFLAGS += -I$(top_srcdir)/thirdparty/sqlite-amalgamation
+libchewing_la_LIBADD += \
+	$(top_builddir)/thirdparty/sqlite-amalgamation/libsqlite3-internal.la \
 	$(NULL)
 endif
 

@@ -2,7 +2,7 @@
  * testhelper.c
  *
  * Copyright (c) 2012
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -10,6 +10,7 @@
 #include "testhelper.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,54 @@
 
 static unsigned int test_run;
 static unsigned int test_ok;
+
+TestKeyEntry chewing_test_special_keys[] = {
+  { KEY_LEFT,      "<L>",  chewing_handle_Left },
+  { KEY_SLEFT,     "<SL>", chewing_handle_ShiftLeft },
+  { KEY_RIGHT,     "<R>",  chewing_handle_Right },
+  { KEY_SRIGHT,    "<SR>", chewing_handle_ShiftRight },
+  { KEY_UP,        "<U>",  chewing_handle_Up },
+  { KEY_DOWN,      "<D>",  chewing_handle_Down },
+  { KEY_SPACE,     " ",    chewing_handle_Space },
+  { KEY_ENTER,     "<E>",  chewing_handle_Enter },
+  { KEY_BACKSPACE, "<B>",  chewing_handle_Backspace },
+  { KEY_ESC,       "<EE>", chewing_handle_Esc },
+  { KEY_DELETE,    "<DC>", chewing_handle_Del },
+  { KEY_HOME,      "<H>",  chewing_handle_Home },
+  { KEY_END,       "<EN>", chewing_handle_End },
+  { KEY_TAB,       "<T>",  chewing_handle_Tab },
+  { KEY_CAPSLOCK,  "<CB>", chewing_handle_Capslock },
+  { KEY_NPAGE,     "<PD>", chewing_handle_PageDown },
+  { KEY_PPAGE,     "<PU>", chewing_handle_PageUp },
+  { KEY_SSPACE,    "<SS>", chewing_handle_ShiftSpace },
+  { KEY_DBLTAB,    "<TT>", chewing_handle_DblTab },
+  { KEY_CTRL_BASE + '0', "<C0>", NULL },
+  { KEY_CTRL_BASE + '1', "<C1>", NULL },
+  { KEY_CTRL_BASE + '2', "<C2>", NULL },
+  { KEY_CTRL_BASE + '3', "<C3>", NULL },
+  { KEY_CTRL_BASE + '4', "<C4>", NULL },
+  { KEY_CTRL_BASE + '5', "<C5>", NULL },
+  { KEY_CTRL_BASE + '6', "<C6>", NULL },
+  { KEY_CTRL_BASE + '7', "<C7>", NULL },
+  { KEY_CTRL_BASE + '8', "<C8>", NULL },
+  { KEY_CTRL_BASE + '9', "<C9>", NULL },
+  { KEY_NUMPAD_BASE + '0', "<N0>", NULL },
+  { KEY_NUMPAD_BASE + '1', "<N1>", NULL },
+  { KEY_NUMPAD_BASE + '2', "<N2>", NULL },
+  { KEY_NUMPAD_BASE + '3', "<N3>", NULL },
+  { KEY_NUMPAD_BASE + '4', "<N4>", NULL },
+  { KEY_NUMPAD_BASE + '5', "<N5>", NULL },
+  { KEY_NUMPAD_BASE + '6', "<N6>", NULL },
+  { KEY_NUMPAD_BASE + '7', "<N7>", NULL },
+  { KEY_NUMPAD_BASE + '8', "<N8>", NULL },
+  { KEY_NUMPAD_BASE + '9', "<N9>", NULL },
+  { KEY_NUMPAD_BASE + '+', "<N+>", NULL },
+  { KEY_NUMPAD_BASE + '-', "<N->", NULL },
+  { KEY_NUMPAD_BASE + '*', "<N*>", NULL },
+  { KEY_NUMPAD_BASE + '/', "<N/>", NULL },
+  { KEY_NUMPAD_BASE + '.', "<N.>", NULL },
+  { 0, NULL, NULL },
+};
 
 /* We cannot use designated initializer here due to Visual Studio */
 BufferType COMMIT_BUFFER = {
@@ -71,165 +120,68 @@ BufferType AUX_BUFFER = {
 
 int get_keystroke(get_char_func get_char, void *param)
 {
+    TestKeyEntry *key_entry;
     int ch;
-    int result = END;
-    int flag = 0;
+    char current_key[10];
+    int current_keylen = 0;
+    int partial_match;
 
     assert(get_char);
 
     while ((ch = get_char(param)) != END) {
-        if ((ch != '<') && (flag != 1))
-            return (int) ch;
-        else if (ch == '>') {
-            flag = 0;
-            return result;
-        } else {
-            flag = 1;
-            ch = get_char(param);
-            switch (ch) {
-            case '<':
-            case '>':
-                if (get_char(param) == '>')
-                    return result = ch;
-                break;
-            case 'L':
-                result = KEY_LEFT;
-                break;
-            case 'R':
-                result = KEY_RIGHT;
-                break;
-            case 'U':
-                result = KEY_UP;
-                break;
-            case 'D':
-                if ((ch = get_char(param)) == '>')
-                    return result = KEY_DOWN;
-                else {
-                    get_char(param);
-                    return result = KEY_DELETE;
-                }
-                break;
-            case 'E':
-                if ((ch = get_char(param)) == '>')
-                    return result = KEY_ENTER;
-                else if (ch == 'E')
-                    result = KEY_ESC;
-                else
-                    result = KEY_END;
-                break;
-            case 'C':
-                if ((ch = get_char(param)) != '>') {
-                    if (ch == 'B')
-                        result = (KEY_CAPSLOCK);
-                    else
-                        result = (KEY_CTRL_BASE + ch);
-                }
-                break;
-            case 'B':
-                result = KEY_BACKSPACE;
-                break;
-            case 'H':
-                result = KEY_HOME;
-                break;
-            case 'S':
-                if ((ch = get_char(param)) == 'L')
-                    result = KEY_SLEFT;
-                else if (ch == 'R')
-                    result = KEY_SRIGHT;
-                else
-                    result = KEY_SSPACE;
-                break;
-            case 'T':
-                if ((ch = get_char(param)) == '>')
-                    return result = KEY_TAB;
-                else
-                    result = KEY_DBLTAB;
-                break;
-            case 'P':
-                if ((ch = get_char(param)) == 'D')
-                    result = KEY_NPAGE;
-                else
-                    result = KEY_PPAGE;
-                break;
-            case 'N':
-                ch = get_char(param);
-                result = KEY_NUMPAD_BASE + ch;
-                break;
+        current_key[current_keylen++] = ch;
+        current_key[current_keylen] = '\0';
+
+        partial_match = 0;
+        for (key_entry = chewing_test_special_keys; key_entry->key; key_entry++) {
+            if (strcmp(key_entry->str, current_key) == 0) {
+                current_keylen = 0;
+                return key_entry->key;
             }
+            if (strncmp(key_entry->str, current_key, current_keylen) == 0)
+                partial_match = 1;
         }
+
+        /* special case: partial match but not special key */
+        if (strcmp(current_key, "<<") == 0 || strcmp(current_key, "<>") == 0) {
+            partial_match = 1;
+            continue;
+        }
+        if (strcmp(current_key, "<<>") == 0 || strcmp(current_key, "<>>") == 0) {
+            current_keylen = 0;
+            return current_key[1];
+        }
+
+
+        if (partial_match)
+            continue;
+
+        if (current_keylen > 1) {
+            fprintf(stderr, "unknown key: '%s'\n", current_key);
+        }
+
+        return current_key[0];
     }
-    return result = END;
+    return END;
 }
 
-void type_single_keystroke(ChewingContext *ctx, int ch)
+void type_single_keystroke(ChewingContext *ctx, int key)
 {
-    switch (ch) {
-    case KEY_LEFT:
-        chewing_handle_Left(ctx);
-        break;
-    case KEY_SLEFT:
-        chewing_handle_ShiftLeft(ctx);
-        break;
-    case KEY_RIGHT:
-        chewing_handle_Right(ctx);
-        break;
-    case KEY_SRIGHT:
-        chewing_handle_ShiftRight(ctx);
-        break;
-    case KEY_UP:
-        chewing_handle_Up(ctx);
-        break;
-    case KEY_DOWN:
-        chewing_handle_Down(ctx);
-        break;
-    case KEY_SPACE:
-        chewing_handle_Space(ctx);
-        break;
-    case KEY_ENTER:
-        chewing_handle_Enter(ctx);
-        break;
-    case KEY_BACKSPACE:
-        chewing_handle_Backspace(ctx);
-        break;
-    case KEY_ESC:
-        chewing_handle_Esc(ctx);
-        break;
-    case KEY_DELETE:
-        chewing_handle_Del(ctx);
-        break;
-    case KEY_HOME:
-        chewing_handle_Home(ctx);
-        break;
-    case KEY_END:
-        chewing_handle_End(ctx);
-        break;
-    case KEY_TAB:
-        chewing_handle_Tab(ctx);
-        break;
-    case KEY_CAPSLOCK:
-        chewing_handle_Capslock(ctx);
-        break;
-    case KEY_NPAGE:
-        chewing_handle_PageDown(ctx);
-        break;
-    case KEY_PPAGE:
-        chewing_handle_PageUp(ctx);
-        break;
-    case KEY_SSPACE:
-        chewing_handle_ShiftSpace(ctx);
-        break;
-    case KEY_DBLTAB:
-        chewing_handle_DblTab(ctx);
-        break;
-    default:
-        if (KEY_CTRL_BASE <= ch && ch < KEY_NUMPAD_BASE)
-            chewing_handle_CtrlNum(ctx, ch - KEY_CTRL_BASE);
-        else if (KEY_NUMPAD_BASE <= ch)
-            chewing_handle_Numlock(ctx, ch - KEY_NUMPAD_BASE);
-        else
-            chewing_handle_Default(ctx, (char) ch);
-        break;
+    TestKeyEntry *key_entry;
+
+    for (key_entry = chewing_test_special_keys; key_entry->key; key_entry++) {
+        if (key_entry->key == key && key_entry->handler) {
+            key_entry->handler(ctx);
+            return;
+        }
     }
+
+    if (KEY_CTRL_BASE <= key && key < KEY_NUMPAD_BASE)
+        chewing_handle_CtrlNum(ctx, key - KEY_CTRL_BASE);
+    else if (KEY_NUMPAD_BASE <= key)
+        chewing_handle_Numlock(ctx, key - KEY_NUMPAD_BASE);
+    else
+        chewing_handle_Default(ctx, (char) key);
 }
 
 static void type_keystroke(ChewingContext *ctx, get_char_func get_char, void *param)
@@ -240,9 +192,9 @@ static void type_keystroke(ChewingContext *ctx, get_char_func get_char, void *pa
         type_single_keystroke(ctx, ch);
 }
 
-static int get_char_by_string(void *param)
+int get_char_by_string(void *param)
 {
-    char **ptr = param;
+    const char **ptr = param;
     char ch;
 
     assert(param);
@@ -256,6 +208,27 @@ static int get_char_by_string(void *param)
     return ch;
 }
 
+int get_char_from_stdin(void *param UNUSED)
+{
+    int ch = getchar();
+
+    if (ch == EOF)
+        return END;
+    return ch;
+}
+
+int get_char_from_fp(void *param)
+{
+    FILE *fp = param;
+
+    assert(fp);
+    int ch = fgetc(fp);
+
+    if (ch == EOF)
+        return END;
+    return ch;
+}
+
 void internal_ok(const char *file, int line, int test, const char *test_txt, const char *fmt, ...)
 {
     va_list ap;
@@ -263,7 +236,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
     ++test_run;
     if (test) {
         ++test_ok;
-        printf("ok %d ", test_run);
+        printf("ok %u ", test_run);
 
         va_start(ap, fmt);
         vprintf(fmt, ap);
@@ -271,7 +244,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
 
         printf("\n");
     } else {
-        printf("not ok %d ", test_run);
+        printf("not ok %u ", test_run);
 
         va_start(ap, fmt);
         vprintf(fmt, ap);
@@ -281,7 +254,7 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
     }
 }
 
-void type_keystroke_by_string(ChewingContext *ctx, char *keystroke)
+void type_keystroke_by_string(ChewingContext *ctx, const char *keystroke)
 {
     type_keystroke(ctx, get_char_by_string, &keystroke);
 }
@@ -384,7 +357,7 @@ void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, cons
 void internal_ok_candidate_len(const char *file, int line, ChewingContext *ctx, size_t expected_len)
 {
     const char *buf;
-    int actual_len;
+    size_t actual_len;
 
     assert(ctx);
 
@@ -419,52 +392,7 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
     }
 }
 
-int internal_has_userphrase(const char *file UNUSED, int line UNUSED,
-                            ChewingContext *ctx, const char *bopomofo, const char *phrase)
-{
-    uint16_t *phone = NULL;
-    char *bopomofo_buf = NULL;
-    int i;
-    char *p;
-    char *save_ptr = NULL;
-    UserPhraseData *userphrase;
-    int ret = 0;
-
-    phone = calloc(MAX_PHONE_SEQ_LEN, sizeof(*phone));
-    if (!phone) {
-        fprintf(stderr, "calloc fails at %s:%d", __FILE__, __LINE__);
-        goto end;
-    }
-
-    bopomofo_buf = strdup(bopomofo);
-    if (!bopomofo_buf) {
-        fprintf(stderr, "strdup fails at %s:%d", __FILE__, __LINE__);
-        goto end;
-    }
-
-    for (i = 0, p = strtok_r(bopomofo_buf, " ", &save_ptr);
-         i < MAX_PHONE_SEQ_LEN && p; ++i, p = strtok_r(NULL, " ", &save_ptr)) {
-        phone[i] = UintFromPhone(p);
-    }
-
-    for (userphrase = UserGetPhraseFirst(ctx->data, phone);
-         userphrase != NULL; userphrase = UserGetPhraseNext(ctx->data, phone)) {
-        if (phrase == NULL || strcmp(userphrase->wordSeq, phrase) == 0) {
-            ret = 1;
-            goto end;
-        }
-
-    }
-
-  end:
-    UserGetPhraseEnd(ctx->data, phone);
-    free(bopomofo_buf);
-    free(phone);
-
-    return ret;
-}
-
-void logger(void *data, int level, const char *fmt, ...)
+void logger(void *data, int level UNUSED, const char *fmt, ...)
 {
     va_list ap;
     FILE *fd = (FILE *) data;
@@ -488,7 +416,20 @@ int exit_status()
     return test_run == test_ok ? 0 : -1;
 }
 
+char *get_test_userphrase_path()
+{
+    char *userphrase_path = getenv("TEST_USERPHRASE_PATH");
+
+    if (userphrase_path)
+        return userphrase_path;
+    else
+        return TEST_HASH_DIR PLAT_SEPARATOR DB_NAME;
+}
+
 void clean_userphrase()
 {
-    remove(TEST_HASH_DIR PLAT_SEPARATOR DB_NAME);
+    char *userphrase_path = get_test_userphrase_path();
+
+    if (remove(userphrase_path) != 0 && errno != ENOENT)
+        fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
 }

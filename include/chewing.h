@@ -2,7 +2,7 @@
  * chewing.h
  *
  * Copyright (c) 2004, 2005, 2006, 2008
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.

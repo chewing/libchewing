@@ -1,8 +1,8 @@
 /**
- * gen_keystroke.c
+ * genkeystroke.c
  *
- * Copyright (c) 2004, 2005
- *	libchewing Core Team. See ChangeLog for details.
+ * Copyright (c) 2004, 2005, 2015
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -77,8 +77,8 @@ void drawline(int x, int y)
 void show_edit_buffer(int x, int y, ChewingContext *ctx)
 {
     int i, cursor, count;
-    char *buffer_string;
-    char *p;
+    const char *buffer_string;
+    const char *p;
 
     move(x, y);
     addstr(FILL_BLANK);
@@ -86,7 +86,7 @@ void show_edit_buffer(int x, int y, ChewingContext *ctx)
         move(x, y);
         return;
     }
-    buffer_string = chewing_buffer_String(ctx);
+    buffer_string = chewing_buffer_String_static(ctx);
     mvaddstr(x, y, buffer_string);
     cursor = chewing_cursor_Current(ctx);
     p = buffer_string;
@@ -96,13 +96,12 @@ void show_edit_buffer(int x, int y, ChewingContext *ctx)
         p += ueBytesFromChar(*p);
     }
     move(x, count);
-    free(buffer_string);
 }
 
 void show_interval_buffer(int x, int y, ChewingContext *ctx)
 {
-    char *buf;
-    char *p;
+    const char *buf;
+    const char *p;
     int buf_len;
     char out_buf[100];
     int i, count;
@@ -118,7 +117,7 @@ void show_interval_buffer(int x, int y, ChewingContext *ctx)
         return;
     }
 
-    buf = chewing_buffer_String(ctx);
+    buf = chewing_buffer_String_static(ctx);
     buf_len = chewing_buffer_Len(ctx);
 
     p = buf;
@@ -182,7 +181,7 @@ void show_full_shape(int x, int y, ChewingContext *ctx)
 
 void show_userphrase(int x, int y, ChewingContext *ctx)
 {
-    char *aux_string;
+    const char *aux_string;
 
     if (chewing_aux_Length(ctx) == 0)
         return;
@@ -192,9 +191,8 @@ void show_userphrase(int x, int y, ChewingContext *ctx)
     move(x, y);
     if (hasColor)
         attron(COLOR_PAIR(2));
-    aux_string = chewing_aux_String(ctx);
+    aux_string = chewing_aux_String_static(ctx);
     addstr(aux_string);
-    free(aux_string);
     if (hasColor)
         attroff(COLOR_PAIR(2));
 }
@@ -204,7 +202,7 @@ void show_choose_buffer(int x, int y, ChewingContext *ctx)
     int i = 1;
     int currentPageNo;
     char str[20];
-    char *cand_string;
+    const char *cand_string;
 
     move(x, y);
     addstr(FILL_BLANK);
@@ -217,16 +215,14 @@ void show_choose_buffer(int x, int y, ChewingContext *ctx)
     while (chewing_cand_hasNext(ctx)) {
         if (i > chewing_cand_ChoicePerPage(ctx))
             break;
-        sprintf(str, "%d.", i);
+        snprintf(str, sizeof(str), "%d.", i);
         if (hasColor)
             attron(COLOR_PAIR(3));
         addstr(str);
         if (hasColor)
             attroff(COLOR_PAIR(3));
-        cand_string = chewing_cand_String(ctx);
-        sprintf(str, " %s ", cand_string);
-        addstr(str);
-        free(cand_string);
+        cand_string = chewing_cand_String_static(ctx);
+        addstr(cand_string);
         i++;
     }
     currentPageNo = chewing_cand_CurrentPage(ctx);
@@ -242,7 +238,7 @@ void show_choose_buffer(int x, int y, ChewingContext *ctx)
 
 void show_commit_string(int x, int y, ChewingContext *ctx)
 {
-    char *commit_string;
+    const char *commit_string;
 
 #if 0
     if (pgo->keystrokeRtn & KEYSTROKE_COMMIT) {
@@ -254,10 +250,9 @@ void show_commit_string(int x, int y, ChewingContext *ctx)
     }
 #endif
     if (chewing_commit_Check(ctx)) {
-        commit_string = chewing_commit_String(ctx);
+        commit_string = chewing_commit_String_static(ctx);
         mvaddstr(x, y, FILL_BLANK);
         mvaddstr(x, y, commit_string);
-        free(commit_string);
     }
 }
 

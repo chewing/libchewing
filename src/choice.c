@@ -2,11 +2,11 @@
  * choice.c
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004-2008, 2010-2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -162,7 +162,7 @@ static int ChoiceTheSame(ChoiceInfo *pci, const char *str, int len)
     int i;
 
     for (i = 0; i < pci->nTotalChoice; i++)
-        if (!memcmp(pci->totalChoiceStr[i], str, len))
+        if (!strncmp(pci->totalChoiceStr[i], str, len))
             return 1;
     return 0;
 }
@@ -224,48 +224,100 @@ static void SetChoiceInfo(ChewingData *pgdata)
         if (pgdata->bopomofoData.kbtype == KB_HSU || pgdata->bopomofoData.kbtype == KB_DVORAK_HSU) {
             switch (phoneSeq[cursor]) {
             case 0x2800:       /* 'ㄘ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x30); /* 'ㄟ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x30);     /* 'ㄟ' */
                 break;
             case 0x80:         /* 'ㄧ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x20); /* 'ㄝ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x20);     /* 'ㄝ' */
                 break;
             case 0x2A00:       /* 'ㄙ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1);  /* '˙' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1);      /* '˙' */
                 break;
             case 0xA00:        /* 'ㄉ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x2);  /* 'ˊ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x2);      /* 'ˊ' */
                 break;
             case 0x800:        /* 'ㄈ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x3);  /* 'ˇ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x3);      /* 'ˇ' */
                 break;
             case 0x18:         /* 'ㄜ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1200);       /* 'ㄍ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1200);   /* 'ㄍ' */
                 break;
             case 0x10:         /* 'ㄛ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1600);       /* 'ㄏ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1600);   /* 'ㄏ' */
                 break;
             case 0x1E00:       /* 'ㄓ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1800);       /* 'ㄐ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x4);  /* 'ˋ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1800);   /* 'ㄐ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x4);      /* 'ˋ' */
                 break;
             case 0x58:         /* 'ㄤ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1400);       /* 'ㄎ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1400);   /* 'ㄎ' */
                 break;
             case 0x68:         /* 'ㄦ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1000);       /* 'ㄌ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x60); /* 'ㄥ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1000);   /* 'ㄌ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x60);     /* 'ㄥ' */
                 break;
             case 0x2200:       /* 'ㄕ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1C00);       /* 'ㄒ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1C00);   /* 'ㄒ' */
                 break;
             case 0x2000:       /* 'ㄔ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x1A00);       /* 'ㄑ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1A00);   /* 'ㄑ' */
                 break;
             case 0x50:         /* 'ㄣ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0xE00);        /* 'ㄋ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0xE00);    /* 'ㄋ' */
                 break;
             case 0x48:         /* 'ㄢ' */
-                ChoiceInfoAppendChi(pgdata, pci, 0x600);        /* 'ㄇ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x600);    /* 'ㄇ' */
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (pgdata->bopomofoData.kbtype == KB_ET26) {
+            switch (phoneSeq[cursor]) {
+            case 0x40:      /* 'ㄡ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x400);    /* 'ㄆ' */
+                break;
+            case 0x58:      /* 'ㄤ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0xC00);    /* 'ㄊ' */
+                break;
+            case 0x2800:    /* 'ㄘ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x20);     /* 'ㄝ' */
+                break;
+            case 0x2600:    /* 'ㄗ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x30);     /* 'ㄟ' */
+                break;
+            case 0x1E00:    /* 'ㄓ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1800);   /* 'ㄐ' */
+                break;
+            case 0x68:      /* 'ㄦ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1600);   /* 'ㄏ' */
+                break;
+            case 0x60:      /* 'ㄥ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1000);   /* 'ㄌ' */
+                break;
+            case 0x2200:    /* 'ㄕ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1C00);   /* 'ㄒ' */
+                break;
+            case 0x1200:    /* 'ㄍ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1A00);   /* 'ㄑ' */
+                break;
+            case 0x50:      /* 'ㄣ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0xE00);    /* 'ㄋ' */
+                break;
+            case 0x48:      /* 'ㄢ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x600);    /* 'ㄇ' */
+                break;
+            case 0xA00:     /* 'ㄉ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x1);      /* '˙' */
+                break;
+            case 0x800:     /* 'ㄈ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x2);      /* 'ˊ' */
+                break;
+            case 0x2400:    /* 'ㄖ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x3);      /* 'ˇ' */
+                break;
+            case 0x1400:    /* 'ㄎ' */
+                ChoiceInfoAppendChi(pgdata, pci, 0x4);      /* 'ˋ' */
                 break;
             default:
                 break;
@@ -471,24 +523,11 @@ int ChoiceEndChoice(ChewingData *pgdata)
     pgdata->choiceInfo.nTotalChoice = 0;
     pgdata->choiceInfo.nPage = 0;
 
-    if (pgdata->choiceInfo.isSymbol != WORD_CHOICE || pgdata->choiceInfo.isSymbol != SYMBOL_CHOICE_INSERT) {
-        /* return to the old chiSymbolCursor position */
-        pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
-        assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
-    }
+    pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
+    assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
+
     pgdata->choiceInfo.isSymbol = WORD_CHOICE;
     return 0;
-}
-
-static void ChangeUserData(ChewingData *pgdata, int selectNo)
-{
-    uint16_t userPhoneSeq[MAX_PHONE_SEQ_LEN];
-    int len;
-
-    len = ueStrLen(pgdata->choiceInfo.totalChoiceStr[selectNo]);
-    memcpy(userPhoneSeq, &(pgdata->phoneSeq[PhoneSeqCursor(pgdata)]), len * sizeof(uint16_t));
-    userPhoneSeq[len] = 0;
-    UserUpdatePhrase(pgdata, userPhoneSeq, pgdata->choiceInfo.totalChoiceStr[selectNo]);
 }
 
 /** @brief commit the selected phrase. */
@@ -497,7 +536,6 @@ int ChoiceSelect(ChewingData *pgdata, int selectNo)
     ChoiceInfo *pci = &(pgdata->choiceInfo);
     AvailInfo *pai = &(pgdata->availInfo);
 
-    ChangeUserData(pgdata, selectNo);
     ChangeSelectIntervalAndBreakpoint(pgdata,
                                       PhoneSeqCursor(pgdata),
                                       PhoneSeqCursor(pgdata) + pai->avail[pai->currentAvail].len,

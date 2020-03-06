@@ -2,11 +2,11 @@
  * chewingutil.h
  *
  * Copyright (c) 1999, 2000, 2001
- *	Lu-chuan Kung and Kang-pen Chen.
- *	All rights reserved.
+ *      Lu-chuan Kung and Kang-pen Chen.
+ *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2006, 2010
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -43,7 +43,7 @@ int MakeOutputWithRtn(ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn)
 int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata);
 void MakeOutputAddMsgAndCleanInterval(ChewingOutput *pgo, ChewingData *pgdata);
 int AddSelect(ChewingData *pgdata, int sel_i);
-int CountSelKeyNum(int key, ChewingData *pgdata);
+int CountSelKeyNum(int key, const ChewingData *pgdata);
 int CountSymbols(ChewingData *pgdata, int to);
 int PhoneSeqCursor(ChewingData *pgdata);
 int ChewingIsChiAt(int cursor, ChewingData *pgdata);

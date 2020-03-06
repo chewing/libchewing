@@ -32,10 +32,10 @@
 /*
  * process a key input
  * return value:
- *	BOPOMOFO_ABSORB
- *	BOPOMOFO_COMMIT
- *	BOPOMOFO_KEY_ERROR
- *	BOPOMOFO_ERROR
+ *      BOPOMOFO_ABSORB
+ *      BOPOMOFO_COMMIT
+ *      BOPOMOFO_KEY_ERROR
+ *      BOPOMOFO_ERROR
  */
 static int IsHsuPhoEndKey(const int pho_inx[], int key)
 {
@@ -216,6 +216,7 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             }
         }
 
+        /* fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ */
         if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
             pBopomofo->pho_inx[0] = 12;
         }
@@ -230,9 +231,20 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             if (!inx)
                 continue;       /* if inx == 0, next type */
             else if (type == 0) {
-                if (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1]) {
+                /**
+                 * Hsu maps multiple bopomofo into one single key.
+                 * Therefore, if a consonant or a medial already exists
+                 * in buffer, and the user presses a key with consonant
+                 * and rhyme, libchewing should consider that the user
+                 * wants to input the rhyme.
+                 */
+                if ((inx == 3 || (7 <= inx && inx <= 11) || inx == 20)
+                    && (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1])) {
                     /* if inx !=0 */
                     searchTimes = 2;    /* possible infinite loop here */
+                } else if (12 <= inx && inx <= 14) {
+                    /* ㄐㄑㄒ always come with ㄧㄩ, so set ㄓㄔㄕ as default. */
+                    pBopomofo->pho_inx[0] = inx + 3;
                 } else
                     break;
             } else if (type == 1 && inx == 1) { /* handle i and e */
@@ -243,19 +255,24 @@ static int HsuPhoInput(ChewingData *pgdata, int key)
             } else
                 break;
         }
-        /* processing very special cases "j v c" */
-        if (type == 1 && inx == 2 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            pBopomofo->pho_inx[0] += 3;
-        }
 
-        /* Fuzzy "g e" to "j e" */
+        /* fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ */
         if ((pBopomofo->pho_inx[0] == 9) && ((pBopomofo->pho_inx[1] == 1) || (pBopomofo->pho_inx[1] == 3))) {
             pBopomofo->pho_inx[0] = 12;
         }
 
-        /* ㄐㄑㄒ must follow ㄧㄩ */
-        if (type == 2 && pBopomofo->pho_inx[1] == 0 && 12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
-            pBopomofo->pho_inx[0] += 3;
+        /* ㄐㄑㄒ must be followed by ㄧ or ㄩ. If not, convert them to ㄓㄔㄕ. */
+        if (12 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 14) {
+	        if ((type == 1 && inx == 2) || (type == 2 && pBopomofo->pho_inx[1] == 0)) {
+		        pBopomofo->pho_inx[0] += 3;
+	        }
+        }
+
+        /* Likeweis, when ㄓㄔㄕ is followed by ㄧ or ㄩ, convert them to ㄐㄑㄒ. */
+        if (15 <= pBopomofo->pho_inx[0] && pBopomofo->pho_inx[0] <= 17) {
+	        if ((type == 1) && (inx == 1 || inx == 3)) {
+		        pBopomofo->pho_inx[0] -= 3;
+	        }
         }
 
         if (type == 3) {        /* the key is NOT a phone */
@@ -321,7 +338,14 @@ static int ET26PhoInput(ChewingData *pgdata, int key)
             if (!inx)
                 continue;       /* if inx == 0, next type */
             else if (type == 0) {
-                if (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1]) {
+                 /**
+                  * Same as Hsu: If a consonant or a medial already exists
+                  * in buffer, and the user presses a key with consonant
+                  * and rhyme, libchewing should consider that the user
+                  * wants to input the rhyme.
+                  */
+                if ((inx == 2 || inx == 3 || inx == 11 || inx == 19 || inx == 20 ||
+                    (6 <= inx && inx <= 8)) && (pBopomofo->pho_inx[0] || pBopomofo->pho_inx[1])) {
                     /* if inx !=0 */
                     searchTimes = 2;    /* possible infinite loop here */
                 } else
@@ -419,7 +443,7 @@ static int DACHENCP26PhoInput(ChewingData *pgdata, int key)
                 return BOPOMOFO_ABSORB;
             }
         }
-        /* converting "ㄙ" to "ㄣ" */
+        /* converting "ㄙ" to "ㄥ" */
         else if (key == 'n') {
             if (pBopomofo->pho_inx[0] != 0 || pBopomofo->pho_inx[1] != 0) {
                 pBopomofo->pho_inx[2] = 12;
@@ -586,9 +610,15 @@ static int PinYinInput(ChewingData *pgdata, int key)
         pBopomofo->pinYinData.keySeq[0] = '\0';
         return EndKeyProcess(pgdata, key, 1);
     }
-    buf[0] = key;
-    buf[1] = '\0';
-    strcat(pBopomofo->pinYinData.keySeq, buf);
+
+    if (strlen(pBopomofo->pinYinData.keySeq) + 1 < sizeof(pBopomofo->pinYinData.keySeq)) {
+        buf[0] = key;
+        buf[1] = '\0';
+        strcat(pBopomofo->pinYinData.keySeq, buf);
+    } else {
+        /* buffer is full, ignore this keystroke */
+        return BOPOMOFO_NO_WORD;
+    }
 
     DEBUG_OUT("PinYin Seq: %s\n", pBopomofo->pinYinData.keySeq);
 

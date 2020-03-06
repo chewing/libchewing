@@ -2,7 +2,7 @@
  * userphrase-sql.c
  *
  * Copyright (c) 2014
- *	libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -59,7 +59,7 @@ static int UserBindPhone(ChewingData *pgdata, int index, const uint16_t phoneSeq
 }
 
 
-/* load the orginal frequency from the static dict */
+/* load the original frequency from the static dict */
 static int LoadOriginalFreq(ChewingData *pgdata, const uint16_t phoneSeq[], const char wordSeq[], int len)
 {
     const TreeType *tree_pos;
@@ -441,7 +441,7 @@ UserPhraseData *UserGetPhraseNext(ChewingData *pgdata, const uint16_t phoneSeq[]
     return &pgdata->userphrase_data;
 }
 
-void UserGetPhraseEnd(ChewingData *pgdata, const uint16_t phoneSeq[])
+void UserGetPhraseEnd(ChewingData *pgdata UNUSED, const uint16_t phoneSeq[] UNUSED)
 {
     /* FIXME: Remove this */
 }
