@@ -517,6 +517,10 @@ int ChoiceNextAvail(ChewingData *pgdata)
     return 0;
 }
 
+/* TODO:
+**     Distinguish in what situation the chiSymbolCursor should be
+** reset to the oldChiSymbolCursor
+*/
 int ChoiceEndChoice(ChewingData *pgdata)
 {
     pgdata->bSelect = 0;

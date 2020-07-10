@@ -37,6 +37,7 @@ int SymbolChoice(ChewingData *pgdata, int sel_i);
 int HaninSymbolInput(ChewingData *pgdata);
 void WriteChiSymbolToCommitBuf(ChewingData *pgdata, ChewingOutput *pgo, int len);
 int ReleaseChiSymbolBuf(ChewingData *pgdata, ChewingOutput *);
+void ResetOldChiSymbolCursor(ChewingData *pgdata);
 int AddChi(uint16_t phone, uint16_t phoneAlt, ChewingData *pgdata);
 int CallPhrasing(ChewingData *pgdata, int all_phrasing);
 int MakeOutputWithRtn(ChewingOutput *pgo, ChewingData *pgdata, int keystrokeRtn);
