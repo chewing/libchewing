@@ -285,8 +285,8 @@ endforeach()
 
 set_target_properties(${LIBS} PROPERTIES
     OUTPUT_NAME chewing
-    SOVERSION 3
-    VERSION 3.3.1
+    SOVERSION 4
+    VERSION 4.0.0
 )
 
 # install
