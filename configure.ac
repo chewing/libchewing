@@ -25,15 +25,15 @@ AC_SUBST(PACKAGE_VERSION)
 #   http://www.freebsd.org/doc/en/books/developers-handbook/policies-shlib.html
 
 # increment if the interface has incompatible update (changes, removals).
-LIBCHEWING_MAJOR=3
+LIBCHEWING_MAJOR=4
 
 # increment if the inteface has compatible update (additions).
 # Set to 0 if MAJOR is increased.
-LIBCHEWING_MINOR=3
+LIBCHEWING_MINOR=0
 
 # increment any time the source changes
 # Set to 0 if MAJOR or MINOR is increased.
-LIBCHEWING_REVISION=1
+LIBCHEWING_REVISION=0
 
 AC_SUBST(LIBCHEWING_MAJOR)
 AC_SUBST(LIBCHEWING_MINOR)
