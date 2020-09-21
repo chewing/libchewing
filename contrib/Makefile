@@ -5,7 +5,7 @@ UNAME_S := $(shell uname -s)
 # on macOS
 ifeq ($(UNAME_S),Darwin)
 LIBCHEWING = $(shell dirname $(shell find .. -name libchewing.dylib))
-LIBCHEWING_DYLIB_LD_BUILT_PATH = $(shell otool -L ../src/.libs/libchewing.3.dylib | grep "libchewing.*dylib" | awk -F' ' '{print $$1}' | tail -n 1)
+LIBCHEWING_DYLIB_LD_BUILT_PATH = $(shell otool -L $(LIBCHEWING)/libchewing.3.dylib | grep "libchewing.*dylib" | awk -F' ' '{print $$1}' | tail -n 1)
 CHEWING_LDFLAGS = \
 	-L"$(LIBCHEWING)/" -lchewing \
 	-Wl,-rpath,"$(LIBCHEWING)/"
