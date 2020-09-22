@@ -26,7 +26,7 @@ $(TARGET): $(TARGET).c
 		$(CHEWING_LDFLAGS)
 ifeq ($(UNAME_S),Darwin)
 # relocate to in-tree here dylib if on macOS
-	install_name_tool -change $(LIBCHEWING_DYLIB_LD_BUILT_PATH) ../src/.libs/libchewing.3.dylib simple-select
+	install_name_tool -change $(LIBCHEWING_DYLIB_LD_BUILT_PATH) @executable_path/../src/.libs/libchewing.3.dylib simple-select
 endif
 
 check: $(TARGET)
