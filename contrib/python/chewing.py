@@ -19,6 +19,8 @@ _libchewing.chewing_cand_String.restype = c_char_p
 _libchewing.chewing_zuin_String.restype = c_char_p
 _libchewing.chewing_aux_String.restype = c_char_p
 _libchewing.chewing_get_KBString.restype = c_char_p
+_libchewing.chewing_new.restype = c_void_p
+_libchewing.chewing_new2.restype = c_void_p
 
 
 def Init(datadir, userdir):
@@ -39,12 +41,12 @@ class ChewingContext:
                 None)
 
     def __del__(self):
-        _libchewing.chewing_delete(self.ctx)
+        _libchewing.chewing_delete(c_void_p(self.ctx))
 
     def __getattr__(self, name):
         func = 'chewing_' + name
         if hasattr(_libchewing, func):
-            wrap = partial(getattr(_libchewing, func), self.ctx)
+            wrap = partial(getattr(_libchewing, func), c_void_p(self.ctx))
             setattr(self, name, wrap)
             return wrap
         else:
