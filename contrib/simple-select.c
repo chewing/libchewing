@@ -21,6 +21,11 @@ int main()
     ctx = chewing_new2(TEST_DATA_DIR, TEST_HASH_DIR "/test.sqlite3",
                        NULL, 0);
 
+    if (ctx == NULL) {
+      printf("There is something wrong while initializing libchewing :-(\n");
+      exit(-1);
+    }
+
     /* Chinese mode by default */
     if (chewing_get_ChiEngMode(ctx) == CHINESE_MODE)
         printf("Chinese mode!\n");
