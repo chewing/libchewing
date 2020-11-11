@@ -72,6 +72,8 @@ END_IGNORE_DEPRECATIONS
 
     ok(chewing_get_phraseChoiceRearward(ctx) == 0, "default phraseChoiceRearward shall be 0");
 
+    ok(chewing_get_autoLearn(ctx) == 0, "default autoLearn shall be 0");
+
     ok(chewing_get_ChiEngMode(ctx) == CHINESE_MODE, "default ChiEngMode shall be CHINESE_MODE");
 
     ok(chewing_get_ShapeMode(ctx) == HALFSHAPE_MODE, "default ShapeMode shall be HALFSHAPE_MODE");
