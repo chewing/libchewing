@@ -21,6 +21,9 @@ as full open source efforts.
 + Mailing lists:
    - Development: <https://groups.google.com/group/chewing-devel>
    - General: <https://groups.google.com/group/chewing>
++ Matrix:
+   - Development: <https://matrix.to/#/#libchewing:matrix.org>
+   - General: <https://matrix.to/#/#chewing-users:matrix.org>
 + Build Status:
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
