@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include "chewing-utf8-util.h"
-#include "global.h"
 #include "bopomofo-private.h"
 #include "chewingutil.h"
 #include "userphrase-private.h"

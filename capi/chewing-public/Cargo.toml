@@ -1,0 +1,15 @@
+[package]
+name = "chewing-public"
+description = "Public C API for the Chewing (酷音) intelligent Zhuyin input method."
+license = "LGPL-2.1-or-later"
+version = "0.5.1-alpha.1"
+edition = "2021"
+
+[dependencies]
+chewing = { version = "0.5.1-alpha.1", path = "../.." }
+
+[lib]
+crate-type = ["staticlib"]
+
+[build-dependencies]
+cbindgen = "0.24.3"

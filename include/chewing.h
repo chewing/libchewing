@@ -44,8 +44,12 @@ extern "C" {
  * specific functionality.
  */
 
+#ifdef WITH_RUST
+#   include "chewing_rs.h"
+#else
+#   include "global.h"
+#endif
 #include "chewingio.h"
-#include "global.h"
 #include "mod_aux.h"
 
 /* backward compatibility */

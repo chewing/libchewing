@@ -16,7 +16,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "global.h"
 #include "chewing-private.h"
 #include "bopomofo-private.h"
 #include "chewingio.h"

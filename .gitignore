@@ -145,3 +145,6 @@ contrib/test.sqlite3
 
 # python
 *.pyc
+
+# rust
+/target

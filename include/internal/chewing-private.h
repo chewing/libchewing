@@ -29,7 +29,11 @@
 typedef SSIZE_T ssize_t;
 #endif
 
-#include "global.h"
+#ifdef WITH_RUST
+#   include "chewing_rs.h"
+#else
+#   include "global.h"
+#endif
 #include "plat_mmap.h"
 
 #include "userphrase-private.h"
@@ -72,23 +76,6 @@ static inline int min(int a, int b)
     return a < b ? a : b;
 }
 #endif
-
-typedef enum KBTYPE {
-    KBTYPE_STANDARD,
-    KBTYPE_HSU,
-    KBTYPE_IBM,
-    KBTYPE_GIN_YIEH,
-    KBTYPE_ET,
-    KBTYPE_ET26,
-    KBTYPE_DVORAK,
-    KBTYPE_DVORAK_HSU,
-    KBTYPE_DACHEN_CP26,
-    KBTYPE_HANYU_PINYIN,
-    KBTYPE_LUOMA_PINYIN,
-    KBTYPE_MSP2,            /* Mandarin Phonetic Symbols II */
-    KBTYPE_CARPALX,
-    KBTYPE_COUNT
-} KBTYPE;
 
 /**
  * @struct TreeType

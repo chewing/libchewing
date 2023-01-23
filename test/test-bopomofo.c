@@ -19,7 +19,6 @@
 
 #include "key2pho-private.h"
 #include "bopomofo-private.h"
-#include "chewing.h"
 #include "plat_types.h"
 #include "testhelper.h"
 

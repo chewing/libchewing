@@ -79,7 +79,7 @@ uint16_t UintFromPhoneInx(const int ph_inx[]);
  * @param[in] searchTimes times to search.
  * @return 1 if succeed or 0 if failed.
  */
-int PhoneFromKey(char *pho, const char *inputkey, KBTYPE kbtype, int searchTimes);
+int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes);
 
 /**
  * @brief Get the string of phonetic symbols by its phonetic number.
@@ -97,7 +97,7 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num);
  * @param[in]
  * @return
  */
-int PhoneInxFromKey(int key, int type, KBTYPE kbtype, int searchTimes);
+int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes);
 
 /**
  * @brief

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "chewing-utf8-util.h"
+#include "bopomofo-private.h"
 
 /* NOTE:
  * The reason why we convert string literal to hex representation is for the
@@ -69,7 +70,7 @@ static const char *const ph_str =
     "\xCB\x99\xCB\x8A\xCB\x87\xCB\x8B";
     /* ˙ˊˇˋ */
 
-static const char *const key_str[KBTYPE_COUNT] = {
+static const char *const key_str[KB_TYPE_NUM] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* standard kb */
     "bpmfdtnlgkhjvcjvcrzasexuyhgeiawomnkllsdfj",        /* hsu */
     "1234567890-qwertyuiopasdfghjkl;zxcvbn/m,.",        /* IBM */
@@ -122,7 +123,7 @@ uint16_t UintFromPhone(const char *zhuin)
     return result;
 }
 
-int PhoneFromKey(char *pho, const char *inputkey, KBTYPE kbtype, int searchTimes)
+int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes)
 {
     int len;
     int i;
@@ -181,7 +182,7 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
     return 0;
 }
 
-int PhoneInxFromKey(int key, int type, KBTYPE kbtype, int searchTimes)
+int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes)
 {
     char keyStr[2];
     char rtStr[10];

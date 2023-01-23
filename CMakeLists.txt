@@ -74,6 +74,13 @@ endif()
 
 option(USE_VALGRIND "Use valgrind when testing" true)
 
+option(WITH_RUST "Use rust implemented internals (experimental)" true)
+if (WITH_RUST)
+    add_subdirectory(cmake/corrosion)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml)
+    add_compile_definitions(WITH_RUST)
+endif()
+
 # Feature probe
 include(CheckTypeSize)
 check_type_size(uint16_t UINT16_T)
@@ -160,6 +167,11 @@ set(ALL_INC
     ${INC_DIR}/global.h
     ${INC_DIR}/mod_aux.h
 )
+
+if (WITH_RUST)
+    include_directories(capi/chewing-public/include)
+    list(APPEND ALL_INC capi/chewing-public/include/chewing_rs.h)
+endif()
 
 add_subdirectory(doc)
 add_subdirectory(test)
@@ -280,6 +292,9 @@ foreach(lib ${LIBS})
     target_link_libraries(${lib} userphrase)
     if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
         target_link_libraries(${lib} ${SQLITE3_LIBRARY})
+    endif()
+    if (WITH_RUST)
+        target_link_libraries(${lib} chewing-public)
     endif()
 endforeach()
 
