@@ -19,12 +19,19 @@ add_custom_target(all_static_data
 )
 
 # tools
-set(ALL_TOOLS init_database dump_database)
+set(ALL_TOOLS init_database)
 add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
+if (WITH_RUST)
+target_link_libraries(init_database chewing-internal)
+endif()
+
+if (NOT WITH_RUST)
+list(APPEND ALL_TOOLS dump_database)
 add_executable(dump_database
     ${TOOLS_SRC_DIR}/dump_database.c
     $<TARGET_OBJECTS:common>
 )
+endif()
 set_target_properties(${ALL_TOOLS} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
         RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}

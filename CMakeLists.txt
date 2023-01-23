@@ -169,6 +169,7 @@ set(ALL_INC
 )
 
 if (WITH_RUST)
+    include_directories(capi/chewing-internal/include)
     include_directories(capi/chewing-public/include)
     list(APPEND ALL_INC capi/chewing-public/include/chewing_rs.h)
 endif()
@@ -295,6 +296,7 @@ foreach(lib ${LIBS})
     endif()
     if (WITH_RUST)
         target_link_libraries(${lib} chewing-public)
+        target_link_libraries(${lib} chewing-internal)
     endif()
 endforeach()
 

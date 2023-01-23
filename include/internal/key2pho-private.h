@@ -33,6 +33,7 @@ typedef SSIZE_T ssize_t;
 
 #include "chewing-private.h"
 
+#ifndef WITH_RUST
 /**
  * @brief Get the unsigned 16-bit representation of phonetic symbols.
  *
@@ -70,6 +71,7 @@ uint16_t UintFromPhone(const char *phone);
  * @return an 16-bit unsigned integer or 0 if any index is illegal.
  */
 uint16_t UintFromPhoneInx(const int ph_inx[]);
+#endif
 
 /**
  * @brief Get the phonetic symbols by the given keystroke.
@@ -81,6 +83,7 @@ uint16_t UintFromPhoneInx(const int ph_inx[]);
  */
 int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes);
 
+#ifndef WITH_RUST
 /**
  * @brief Get the string of phonetic symbols by its phonetic number.
  * @param[out] phone destination string.
@@ -89,6 +92,7 @@ int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes);
  * @return 1 if succeed or 0 if failed.
  */
 int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num);
+#endif
 
 /**
  * @brief Get the index of a phonetic symbols in its category.
@@ -108,6 +112,7 @@ int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes);
  */
 size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len, const uint16_t *phoneSeq);
 
+#ifndef WITH_RUST
 /**
  * @brief
  * @param[out]
@@ -116,6 +121,7 @@ size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len
  * @return
  */
 ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const char *bopomofo_buf);
+#endif
 
 /**
  * @brief Get the length of the array of phones.
@@ -137,13 +143,14 @@ size_t GetPhoneLen(const uint16_t *phoneSeq);
  */
 size_t GetBopomofoBufLen(size_t len);
 
-
+#ifndef WITH_RUST
 /**
  * @brief Get the length of phonetic symbols by its phonetic number.
  * @param[in] phone_num phonetic number.
  * @return the length of phone.
  */
 size_t GetPhoneLenFromUint(uint16_t phone_num);
+#endif
 
 /* *INDENT-OFF* */
 #endif
