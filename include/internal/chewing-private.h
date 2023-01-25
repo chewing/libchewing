@@ -34,14 +34,14 @@ typedef SSIZE_T ssize_t;
 #   include "chewing_internal.h"
 #else
 #   include "global.h"
+#   include "plat_mmap.h"
+#   include "userphrase-private.h"
+#   if WITH_SQLITE3
+#       include "sqlite3.h"
+#       include "chewing-sql.h"
+#   endif
 #endif
-#include "plat_mmap.h"
 
-#include "userphrase-private.h"
-#if WITH_SQLITE3
-#    include "sqlite3.h"
-#    include "chewing-sql.h"
-#endif
 
 #define MAX_UTF8_SIZE 4
 #define BOPOMOFO_SIZE 4
@@ -78,6 +78,7 @@ static inline int min(int a, int b)
 }
 #endif
 
+#ifndef WITH_RUST
 /**
  * @struct TreeType
  * @brief node type of the system index tree
@@ -204,11 +205,11 @@ typedef struct ChewingStaticData {
     struct HASH_ITEM *userphrase_enum;  /* FIXME: Shall be in ChewingData? */
 #endif
 
-    unsigned int n_symbol_entry;
-    SymbolEntry **symbol_table;
+    unsigned int nSymbolEntry;
+    SymbolEntry **symbolTable;
 
-    char *g_easy_symbol_value[EASY_SYMBOL_KEY_TAB_LEN];
-    int g_easy_symbol_num[EASY_SYMBOL_KEY_TAB_LEN];
+    char *gEasySymbolValue[EASY_SYMBOL_KEY_TAB_LEN];
+    int gEasySymbolNum[EASY_SYMBOL_KEY_TAB_LEN];
 
     struct keymap *hanyuInitialsMap;
     struct keymap *hanyuFinalsMap;
@@ -237,8 +238,8 @@ typedef struct ChewingData {
     PreeditBuf preeditBuf[MAX_PHONE_SEQ_LEN];
     int chiSymbolCursor;
     int chiSymbolBufLen;
-    int PointStart;
-    int PointEnd;
+    int pointStart;
+    int pointEnd;
 
     int bShowMsg;
     char showMsg[MAX_UTF8_SIZE * (MAX_PHRASE_LEN + AUX_PREFIX_LEN) + 1];
@@ -267,7 +268,7 @@ typedef struct ChewingData {
     struct HASH_ITEM *prev_userphrase;
 #endif
 
-    ChewingStaticData static_data;
+    ChewingStaticData staticData;
     void (*logger) (void *data, int level, const char *fmt, ...);
     void *loggerData;
 } ChewingData;
@@ -284,8 +285,8 @@ typedef struct ChewingOutput {
     int chiSymbolBufLen;
         /** @brief current position of the cursor. */
     long chiSymbolCursor;
-    long PointStart;
-    long PointEnd;
+    long pointStart;
+    long pointEnd;
     char bopomofoBuf[BOPOMOFO_SIZE * MAX_UTF8_SIZE + 1];
         /** @brief indicate the method of showing sentence break. */
     IntervalType dispInterval[MAX_INTERVAL];    /* from prefer, considering symbol */
@@ -323,6 +324,7 @@ typedef struct Phrase {
     char phrase[MAX_PHRASE_LEN * MAX_UTF8_SIZE + 1];
     int freq;
 } Phrase;
+#endif
 
 /* *INDENT-OFF* */
 #endif

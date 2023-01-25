@@ -15,9 +15,17 @@
 
 #include "chewing.h"
 #include "chewingio.h"
-#include "chewing-utf8-util.h"
 
+#ifdef WITH_RUST
+#if WITH_SQLITE3
+#    define DB_NAME	"chewing.sqlite3"
+#else
+#    define DB_NAME	"uhash.dat"
+#endif
+#else
+#include "chewing-utf8-util.h"
 #include "plat_path.h"
+#endif
 
 /* The following macros are modified from GLIB.
  * from GNU cpp Manual:

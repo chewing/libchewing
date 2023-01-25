@@ -6,7 +6,7 @@ use std::{
 use chewing::zhuyin::{Bopomofo, Syllable};
 
 #[no_mangle]
-pub extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {
+pub unsafe extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {
     let cstr = unsafe { CStr::from_ptr(phone) };
     let rstr = match cstr.to_str() {
         Ok(rstr) => rstr,
@@ -20,7 +20,7 @@ pub extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {
 }
 
 #[no_mangle]
-pub extern "C" fn UintFromPhoneInx(ph_inx: *const c_int) -> u16 {
+pub unsafe extern "C" fn UintFromPhoneInx(ph_inx: *const c_int) -> u16 {
     let ph_inx = unsafe { slice::from_raw_parts(ph_inx, 4) };
     let mut builder = Syllable::builder();
     if ph_inx[0] > 0 {
@@ -71,7 +71,11 @@ pub extern "C" fn UintFromPhoneInx(ph_inx: *const c_int) -> u16 {
 }
 
 #[no_mangle]
-pub extern "C" fn PhoneFromUint(phone: *mut c_char, phone_len: usize, phone_num: u16) -> c_int {
+pub unsafe extern "C" fn PhoneFromUint(
+    phone: *mut c_char,
+    phone_len: usize,
+    phone_num: u16,
+) -> c_int {
     let syl = match Syllable::try_from(phone_num) {
         Ok(syl) => syl,
         Err(_) => return 1,
@@ -82,13 +86,13 @@ pub extern "C" fn PhoneFromUint(phone: *mut c_char, phone_len: usize, phone_num:
     }
     unsafe {
         phone.copy_from(str.as_ptr() as *const c_char, str.len());
-        ptr::write(phone.offset(str.len() as isize), 0);
+        ptr::write(phone.add(str.len()), 0);
     }
     0
 }
 
 #[no_mangle]
-pub extern "C" fn UintArrayFromBopomofo(
+pub unsafe extern "C" fn UintArrayFromBopomofo(
     phone_seq: *mut u16,
     phone_len: usize,
     bopomofo_buf: *const c_char,
@@ -110,7 +114,7 @@ pub extern "C" fn UintArrayFromBopomofo(
     }
     for (i, syl) in syllables.into_iter().enumerate() {
         let syl_u16 = syl.unwrap();
-        unsafe { ptr::write(phone_seq.offset(i as isize), syl_u16) };
+        unsafe { ptr::write(phone_seq.add(i), syl_u16) };
     }
     len as isize
 }

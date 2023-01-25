@@ -77,7 +77,7 @@ option(USE_VALGRIND "Use valgrind when testing" true)
 option(WITH_RUST "Use rust implemented internals (experimental)" true)
 if (WITH_RUST)
     add_subdirectory(cmake/corrosion)
-    corrosion_import_crate(MANIFEST_PATH Cargo.toml)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml NO_LINKER_OVERRIDE)
     add_compile_definitions(WITH_RUST)
 endif()
 
@@ -169,8 +169,8 @@ set(ALL_INC
 )
 
 if (WITH_RUST)
-    include_directories(capi/chewing-internal/include)
     include_directories(capi/chewing-public/include)
+    include_directories(capi/chewing-internal/include)
     list(APPEND ALL_INC capi/chewing-public/include/chewing_rs.h)
 endif()
 
@@ -189,12 +189,7 @@ add_library(common OBJECT
     ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
     ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
 
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/plat_path.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
-    ${SRC_DIR}/common/chewing-utf8-util.c
-    ${SRC_DIR}/common/key2pho.c
+    src/chewing.c
 )
 target_compile_definitions(common PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
@@ -205,29 +200,48 @@ add_library(chewing OBJECT
     ${INC_DIR}/internal/chewing-private.h
     ${INC_DIR}/internal/chewingutil.h
     ${INC_DIR}/internal/choice-private.h
-    ${INC_DIR}/internal/dict-private.h
     ${INC_DIR}/internal/global-private.h
-    ${INC_DIR}/internal/pinyin-private.h
-    ${INC_DIR}/internal/tree-private.h
-    ${INC_DIR}/internal/userphrase-private.h
-    ${INC_DIR}/internal/bopomofo-private.h
 
     ${SRC_DIR}/compat.c
     ${SRC_DIR}/chewingio.c
     ${SRC_DIR}/chewingutil.c
     ${SRC_DIR}/choice.c
-    ${SRC_DIR}/dict.c
     ${SRC_DIR}/mod_aux.c
-    ${SRC_DIR}/pinyin.c
     ${SRC_DIR}/private.h
+)
+if (NOT WITH_RUST)
+target_sources(common PRIVATE
+    ${SRC_DIR}/common/chewing-utf8-util.c
+    ${SRC_DIR}/common/key2pho.c
+)
+target_sources(chewing PRIVATE
+    ${INC_DIR}/internal/dict-private.h
+    ${INC_DIR}/internal/pinyin-private.h
+    ${INC_DIR}/internal/tree-private.h
+    ${INC_DIR}/internal/userphrase-private.h
+    ${INC_DIR}/internal/bopomofo-private.h
+
+    ${SRC_DIR}/dict.c
+    ${SRC_DIR}/pinyin.c
+    ${SRC_DIR}/porting_layer/include/plat_mmap.h
+    ${SRC_DIR}/porting_layer/include/plat_path.h
+    ${SRC_DIR}/porting_layer/include/plat_types.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
+    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+    ${SRC_DIR}/porting_layer/src/plat_path.c
+    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
     ${SRC_DIR}/bopomofo.c
 )
+endif()
 target_compile_definitions(chewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
+if (NOT WITH_RUST)
 if (WITH_SQLITE3)
     add_library(userphrase STATIC
         ${INC_DIR}/internal/chewing-sql.h
@@ -267,6 +281,7 @@ else()
         ${SRC_DIR}/userphrase-hash.c
     )
 endif()
+endif()
 
 if (BUILD_DLL OR NOT MSVC)
     if (MSVC)
@@ -290,13 +305,14 @@ if (NOT BUILD_DLL)
 endif()
 
 foreach(lib ${LIBS})
-    target_link_libraries(${lib} userphrase)
     if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
         target_link_libraries(${lib} ${SQLITE3_LIBRARY})
     endif()
     if (WITH_RUST)
         target_link_libraries(${lib} chewing-public)
         target_link_libraries(${lib} chewing-internal)
+    else()
+        target_link_libraries(${lib} userphrase)
     endif()
 endforeach()
 

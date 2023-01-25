@@ -20,16 +20,20 @@
 #include <string.h>
 #include <assert.h>
 
-#include "chewing-utf8-util.h"
-#include "dict-private.h"
 #include "chewingutil.h"
-#include "tree-private.h"
-#include "userphrase-private.h"
 #include "choice-private.h"
-#include "bopomofo-private.h"
 #include "private.h"
 
-static void ChangeSelectIntervalAndBreakpoint(ChewingData *pgdata, int from, int to, const char *str)
+#ifndef WITH_RUST
+#include "global.h"
+#include "bopomofo-private.h"
+#include "chewing-utf8-util.h"
+#include "dict-private.h"
+#include "tree-private.h"
+#include "userphrase-private.h"
+#endif
+
+void ChangeSelectIntervalAndBreakpoint(ChewingData *pgdata, int from, int to, const char *str)
 {
     int i;
     int user_alloc;
@@ -70,7 +74,11 @@ static void SetAvailInfo(ChewingData *pgdata, int begin, int end)
     const int *bSymbolArrBrkpt = pgdata->bSymbolArrBrkpt;
     int symbolArrBrkpt[ARRAY_SIZE(pgdata->bSymbolArrBrkpt)] = { 0 };
 
+#ifdef WITH_RUST
+    const void* tree_pos;
+#else
     const TreeType *tree_pos;
+#endif
     int diff;
     uint16_t userPhoneSeq[MAX_PHONE_SEQ_LEN];
 
@@ -79,6 +87,17 @@ static void SetAvailInfo(ChewingData *pgdata, int begin, int end)
     int pos;
 
     head = tail = 0;
+
+#ifdef WITH_RUST
+    if (pgdata->availInfo.nAvail) {
+        for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
+            if (pgdata->availInfo.avail[i].id) {
+                FreeTreePhrase(pgdata->availInfo.avail[i].id);
+            }
+        }
+    }
+    pgdata->availInfo.nAvail = 0;
+#endif
 
     pai->nAvail = 0;
 
@@ -220,7 +239,7 @@ static void SetChoiceInfo(ChewingData *pgdata)
             ChoiceInfoAppendChi(pgdata, pci, phoneSeqAlt[cursor]);
         }
 
-        if (pgdata->bopomofoData.kbtype == KB_HSU || pgdata->bopomofoData.kbtype == KB_DVORAK_HSU) {
+        if (BopomofoKbType(&pgdata->bopomofoData) == KB_HSU || BopomofoKbType(&pgdata->bopomofoData) == KB_DVORAK_HSU) {
             switch (phoneSeq[cursor]) {
             case 0x2800:       /* 'ㄘ' */
                 ChoiceInfoAppendChi(pgdata, pci, 0x30);     /* 'ㄟ' */
@@ -271,7 +290,7 @@ static void SetChoiceInfo(ChewingData *pgdata)
             }
         }
 
-        if (pgdata->bopomofoData.kbtype == KB_ET26) {
+        if (BopomofoKbType(&pgdata->bopomofoData) == KB_ET26) {
             switch (phoneSeq[cursor]) {
             case 0x40:      /* 'ㄡ' */
                 ChoiceInfoAppendChi(pgdata, pci, 0x400);    /* 'ㄆ' */
@@ -524,6 +543,15 @@ int ChoiceEndChoice(ChewingData *pgdata)
 
     pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
     assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
+
+#ifdef WITH_RUST
+    for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
+        if (pgdata->availInfo.avail[i].id) {
+            FreeTreePhrase(pgdata->availInfo.avail[i].id);
+        }
+    }
+    pgdata->availInfo.nAvail = 0;
+#endif
 
     pgdata->choiceInfo.isSymbol = WORD_CHOICE;
     return 0;

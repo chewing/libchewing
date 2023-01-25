@@ -8,6 +8,42 @@
 /* Platform-dependent declaration */
 #include "plat_types.h"
 
+#ifdef WITH_RUST
+#define LOG_VERBOSE(fmt, ...) \
+    do { \
+    } while (0)
+
+#define LOG_DEBUG(fmt, ...) \
+    do { \
+    } while (0)
+
+#define LOG_INFO(fmt, ...) \
+    do { \
+    } while (0)
+
+#define LOG_WARN(fmt, ...) \
+    do { \
+    } while (0)
+
+#define LOG_ERROR(fmt, ...) \
+    do { \
+    } while (0)
+
+#define DEBUG_OUT( fmt, ... ) \
+    do { \
+    } while (0)
+
+#define DEBUG_CHECKPOINT() \
+    do { \
+    } while (0)
+
+/* Use LOG_API to log all public API call. */
+#define LOG_API(fmt, ...) \
+    do { \
+    } while (0)
+
+#else
+
 #define LOG_VERBOSE(fmt, ...) \
     do { \
         pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, \
@@ -61,6 +97,7 @@
     do { \
         LOG_INFO("API call: " fmt, ##__VA_ARGS__); \
     } while (0)
+#endif
 
 #define ALC(type, size) \
     (type *) calloc(size, sizeof(type))

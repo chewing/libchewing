@@ -7,9 +7,11 @@ edition = "2021"
 
 [dependencies]
 chewing = { version = "0.5.1-alpha.1", path = "../.." }
+chewing-public = { version = "0.5.1-alpha.1", path = "../chewing-public" }
+ffi-opaque = "2.0.0"
 
 [lib]
-crate-type = ["staticlib"]
+crate-type = ["rlib", "staticlib"]
 
 [build-dependencies]
 cbindgen = "0.24.3"

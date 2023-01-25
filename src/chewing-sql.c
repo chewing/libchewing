@@ -116,7 +116,7 @@ static int CreateTable(ChewingData *pgdata)
 
     STATIC_ASSERT(MAX_PHRASE_LEN == 11);
 
-    ret = sqlite3_exec(pgdata->static_data.db,
+    ret = sqlite3_exec(pgdata->staticData.db,
                        "CREATE TABLE IF NOT EXISTS userphrase_v1 ("
                        "time INTEGER,"
                        "user_freq INTEGER,"
@@ -153,7 +153,7 @@ static int CreateTable(ChewingData *pgdata)
         return -1;
     }
 
-    ret = sqlite3_exec(pgdata->static_data.db,
+    ret = sqlite3_exec(pgdata->staticData.db,
                        "CREATE TABLE IF NOT EXISTS config_v1 ("
                        "id INTEGER,"
                        "value INTEGER,"
@@ -170,55 +170,55 @@ static int SetupUserphraseLifeTime(ChewingData *pgdata)
 {
     int ret;
 
-    assert(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+    assert(pgdata->staticData.stmt_config[STMT_CONFIG_INSERT]);
 
-    ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
+    ret = sqlite3_bind_int(pgdata->staticData.stmt_config[STMT_CONFIG_INSERT], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
                   BIND_CONFIG_ID, CONFIG_ID_LIFETIME, SQL_STMT_CONFIG[STMT_CONFIG_INSERT].stmt, ret);
         return -1;
     }
 
-    ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT], BIND_CONFIG_VALUE, 0);
+    ret = sqlite3_bind_int(pgdata->staticData.stmt_config[STMT_CONFIG_INSERT], BIND_CONFIG_VALUE, 0);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
                   BIND_CONFIG_VALUE, 0, SQL_STMT_CONFIG[STMT_CONFIG_INSERT].stmt, ret);
         return -1;
     }
 
-    ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+    ret = sqlite3_step(pgdata->staticData.stmt_config[STMT_CONFIG_INSERT]);
     if (ret != SQLITE_DONE) {
         LOG_ERROR("sqlite3_step returns %d", ret);
         return -1;
     }
 
-    ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INSERT]);
+    ret = sqlite3_reset(pgdata->staticData.stmt_config[STMT_CONFIG_INSERT]);
     if (ret != SQLITE_OK) {
         LOG_ERROR("sqlite3_reset returns %d", ret);
         return -1;
     }
 
-    assert(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+    assert(pgdata->staticData.stmt_config[STMT_CONFIG_SELECT]);
 
-    ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
+    ret = sqlite3_bind_int(pgdata->staticData.stmt_config[STMT_CONFIG_SELECT], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
                   BIND_CONFIG_ID, CONFIG_ID_LIFETIME, SQL_STMT_CONFIG[STMT_CONFIG_SELECT].stmt, ret);
         return -1;
     }
 
-    ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+    ret = sqlite3_step(pgdata->staticData.stmt_config[STMT_CONFIG_SELECT]);
     if (ret != SQLITE_ROW) {
         LOG_ERROR("sqlite3_step returns %d", ret);
         return -1;
     }
 
-    pgdata->static_data.original_lifetime = sqlite3_column_int(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT],
+    pgdata->staticData.original_lifetime = sqlite3_column_int(pgdata->staticData.stmt_config[STMT_CONFIG_SELECT],
                                                                SQL_STMT_CONFIG[STMT_CONFIG_SELECT].column
                                                                [COLUMN_CONFIG_VALUE]);
-    pgdata->static_data.new_lifetime = pgdata->static_data.original_lifetime;
+    pgdata->staticData.new_lifetime = pgdata->staticData.original_lifetime;
 
-    ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_SELECT]);
+    ret = sqlite3_reset(pgdata->staticData.stmt_config[STMT_CONFIG_SELECT]);
     if (ret != SQLITE_OK) {
         LOG_ERROR("sqlite3_reset returns %d", ret);
         return -1;
@@ -232,20 +232,20 @@ static int UpdateLifeTime(ChewingData *pgdata)
     int ret;
     int result = 0;
 
-    if (!pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]) {
-        LOG_ERROR("pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE] is NULL");
+    if (!pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE]) {
+        LOG_ERROR("pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE] is NULL");
         result = -1;
         goto end;
     }
 
-    ret = sqlite3_clear_bindings(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+    ret = sqlite3_clear_bindings(pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE]);
     if (ret != SQLITE_OK) {
         LOG_ERROR("sqlite3_clear_bindings returns %d", ret);
         result = -1;
         goto end;
     }
 
-    ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
+    ret = sqlite3_bind_int(pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE], BIND_CONFIG_ID, CONFIG_ID_LIFETIME);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
                   BIND_CONFIG_ID, CONFIG_ID_LIFETIME, SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].stmt, ret);
@@ -253,18 +253,18 @@ static int UpdateLifeTime(ChewingData *pgdata)
         goto end;
     }
 
-    ret = sqlite3_bind_int(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE],
-                           BIND_CONFIG_VALUE, pgdata->static_data.new_lifetime - pgdata->static_data.original_lifetime);
+    ret = sqlite3_bind_int(pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE],
+                           BIND_CONFIG_VALUE, pgdata->staticData.new_lifetime - pgdata->staticData.original_lifetime);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot bind ?%d to %d in stmt %s, error = %d",
                   BIND_CONFIG_VALUE,
-                  pgdata->static_data.new_lifetime - pgdata->static_data.original_lifetime,
+                  pgdata->staticData.new_lifetime - pgdata->staticData.original_lifetime,
                   SQL_STMT_CONFIG[STMT_CONFIG_INCREASE].stmt, ret);
         result = -1;
         goto end;
     }
 
-    ret = sqlite3_step(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+    ret = sqlite3_step(pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE]);
     if (ret != SQLITE_DONE) {
         LOG_ERROR("sqlite3_step returns %d", ret);
         result = -1;
@@ -272,7 +272,7 @@ static int UpdateLifeTime(ChewingData *pgdata)
     }
 
   end:
-    ret = sqlite3_reset(pgdata->static_data.stmt_config[STMT_CONFIG_INCREASE]);
+    ret = sqlite3_reset(pgdata->staticData.stmt_config[STMT_CONFIG_INCREASE]);
     if (ret != SQLITE_OK) {
         LOG_ERROR("sqlite3_reset returns %d", ret);
         result = -1;
@@ -286,9 +286,9 @@ static int ConfigDatabase(ChewingData *pgdata)
     int ret;
 
     assert(pgdata);
-    assert(pgdata->static_data.db);
+    assert(pgdata->staticData.db);
 
-    ret = sqlite3_exec(pgdata->static_data.db, "PRAGMA synchronous=OFF", NULL, NULL, NULL);
+    ret = sqlite3_exec(pgdata->staticData.db, "PRAGMA synchronous=OFF", NULL, NULL, NULL);
     if (ret != SQLITE_OK) {
         LOG_ERROR("Cannot set synchronous=OFF, error = %d", ret);
         return -1;
@@ -304,12 +304,12 @@ static int CreateStmt(ChewingData *pgdata)
 
     assert(pgdata);
 
-    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->static_data.stmt_config));
-    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->static_data.stmt_userphrase));
+    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_CONFIG) == ARRAY_SIZE(pgdata->staticData.stmt_config));
+    STATIC_ASSERT(ARRAY_SIZE(SQL_STMT_USERPHRASE) == ARRAY_SIZE(pgdata->staticData.stmt_userphrase));
 
     for (i = 0; i < ARRAY_SIZE(SQL_STMT_CONFIG); ++i) {
-        ret = sqlite3_prepare_v2(pgdata->static_data.db,
-                                 SQL_STMT_CONFIG[i].stmt, -1, &pgdata->static_data.stmt_config[i], NULL);
+        ret = sqlite3_prepare_v2(pgdata->staticData.db,
+                                 SQL_STMT_CONFIG[i].stmt, -1, &pgdata->staticData.stmt_config[i], NULL);
         if (ret != SQLITE_OK) {
             LOG_ERROR("Cannot create stmt %s", SQL_STMT_CONFIG[i].stmt);
             return -1;
@@ -317,8 +317,8 @@ static int CreateStmt(ChewingData *pgdata)
     }
 
     for (i = 0; i < ARRAY_SIZE(SQL_STMT_USERPHRASE); ++i) {
-        ret = sqlite3_prepare_v2(pgdata->static_data.db,
-                                 SQL_STMT_USERPHRASE[i].stmt, -1, &pgdata->static_data.stmt_userphrase[i], NULL);
+        ret = sqlite3_prepare_v2(pgdata->staticData.db,
+                                 SQL_STMT_USERPHRASE[i].stmt, -1, &pgdata->staticData.stmt_userphrase[i], NULL);
         if (ret != SQLITE_OK) {
             LOG_ERROR("Cannot create stmt %s", SQL_STMT_USERPHRASE[i].stmt);
             return -1;
@@ -432,11 +432,11 @@ int InitUserphrase(ChewingData *pgdata, const char *path)
 {
     int ret;
 
-    assert(!pgdata->static_data.db);
+    assert(!pgdata->staticData.db);
     assert(path);
 
-    pgdata->static_data.db = GetSQLiteInstance(pgdata, path);
-    if (!pgdata->static_data.db) {
+    pgdata->staticData.db = GetSQLiteInstance(pgdata, path);
+    if (!pgdata->staticData.db) {
         LOG_ERROR("GetSQLiteInstance fails");
         goto error;
     }
@@ -483,17 +483,17 @@ void TerminateUserphrase(ChewingData *pgdata)
 
     UpdateLifeTime(pgdata);
 
-    for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_config); ++i) {
-        sqlite3_finalize(pgdata->static_data.stmt_config[i]);
-        pgdata->static_data.stmt_config[i] = NULL;
+    for (i = 0; i < ARRAY_SIZE(pgdata->staticData.stmt_config); ++i) {
+        sqlite3_finalize(pgdata->staticData.stmt_config[i]);
+        pgdata->staticData.stmt_config[i] = NULL;
     }
 
-    for (i = 0; i < ARRAY_SIZE(pgdata->static_data.stmt_userphrase); ++i) {
-        sqlite3_finalize(pgdata->static_data.stmt_userphrase[i]);
-        pgdata->static_data.stmt_userphrase[i] = NULL;
+    for (i = 0; i < ARRAY_SIZE(pgdata->staticData.stmt_userphrase); ++i) {
+        sqlite3_finalize(pgdata->staticData.stmt_userphrase[i]);
+        pgdata->staticData.stmt_userphrase[i] = NULL;
     }
 
-    ret = sqlite3_close(pgdata->static_data.db);
+    ret = sqlite3_close(pgdata->staticData.db);
     assert(SQLITE_OK == ret);
-    pgdata->static_data.db = NULL;
+    pgdata->staticData.db = NULL;
 }

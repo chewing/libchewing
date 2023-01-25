@@ -700,3 +700,24 @@ int BopomofoIsEntering(BopomofoData *pBopomofo)
     }
     return 0;
 }
+
+int BopomofoKeyseq(BopomofoData *pBopomofo, char key_seq[10])
+{
+    strcpy(key_seq, pBopomofo->pinYinData.keySeq);
+    return 1;
+}
+
+int BopomofoSyllableIndex(BopomofoData *pBopomofo)
+{
+    return pBopomofo->phone;
+}
+
+int BopomofoSyllableIndexAlt(BopomofoData *pBopomofo)
+{
+    return pBopomofo->phoneAlt;
+}
+
+int BopomofoKbType(BopomofoData *pBopomofo)
+{
+    return pBopomofo->kbtype;
+}
