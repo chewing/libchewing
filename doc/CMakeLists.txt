@@ -1,8 +1,10 @@
 set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
 
+option(BUILD_INFO "Build info doc from texi source")
+
 find_program(MAKEINFO makeinfo)
-if (MAKEINFO)
+if (BUILD_INFO AND MAKEINFO)
     add_custom_command(
         OUTPUT
             ${INFO_BIN}
