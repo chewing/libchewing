@@ -50,6 +50,8 @@ impl SqliteUserFreqEstimate {
     }
 
     fn initialize_tables(conn: &Connection) -> Result<(), EstimateError> {
+        conn.pragma_update(None, "journal_mode", "WAL")?;
+        conn.pragma_update(None, "synchronous", "NORMAL")?;
         conn.execute(
             "CREATE TABLE IF NOT EXISTS config_v1 (
                 id INTEGER PRIMARY KEY,
