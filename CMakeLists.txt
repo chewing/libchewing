@@ -234,37 +234,36 @@ target_compile_definitions(chewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
-if (NOT WITH_RUST)
-if (WITH_SQLITE3)
-    add_library(userphrase STATIC
-        ${INC_DIR}/internal/chewing-sql.h
-
-        ${SRC_DIR}/chewing-sql.c
-        ${SRC_DIR}/userphrase-sql.c
+if (WITH_INTERNAL_SQLITE3)
+    find_package (Threads)
+    add_library(sqlite3_library STATIC
+        ${SQLITE3_SRC_DIR}/sqlite3.c
+        ${SQLITE3_SRC_DIR}/sqlite3.h
     )
+    target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 
-    if (WITH_INTERNAL_SQLITE3)
-        find_package (Threads)
-        add_library(sqlite3_library STATIC
-            ${SQLITE3_SRC_DIR}/sqlite3.c
-            ${SQLITE3_SRC_DIR}/sqlite3.h
-        )
-        target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+    add_executable(sqlite3
+        ${SQLITE3_SRC_DIR}/shell.c
+    )
+    target_link_libraries(sqlite3 sqlite3_library)
+    set_target_properties(sqlite3 PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
+    )
+    set(SQLite3_LIBRARIES sqlite3_library)
+endif()
 
-        add_executable(sqlite3
-            ${SQLITE3_SRC_DIR}/shell.c
+if (WITH_SQLITE3)
+    if (NOT WITH_RUST)
+        add_library(userphrase STATIC
+            ${INC_DIR}/internal/chewing-sql.h
+
+            ${SRC_DIR}/chewing-sql.c
+            ${SRC_DIR}/userphrase-sql.c
         )
-        target_link_libraries(sqlite3 sqlite3_library)
-        set_target_properties(sqlite3 PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
-        )
-        target_link_libraries(userphrase sqlite3_library)
-    else()
-        target_link_libraries(testhelper ${SQLITE3_LIBRARY})
     endif()
 else()
     add_library(userphrase STATIC
@@ -273,7 +272,6 @@ else()
         ${SRC_DIR}/hash.c
         ${SRC_DIR}/userphrase-hash.c
     )
-endif()
 endif()
 
 if (BUILD_DLL OR NOT MSVC)
@@ -301,12 +299,12 @@ foreach(lib ${LIBS})
     if (WITH_RUST)
         target_link_libraries(${lib} chewing-public)
         target_link_libraries(${lib} chewing-internal)
-        if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
+        if (WITH_SQLITE3)
             target_link_libraries(chewing-internal INTERFACE ${SQLite3_LIBRARIES})
         endif()
     else()
         target_link_libraries(${lib} userphrase)
-        if (WITH_SQLITE3 AND NOT WITH_INTERNAL_SQLITE3)
+        if (WITH_SQLITE3)
             target_link_libraries(userphrase ${SQLite3_LIBRARIES})
         endif()
     endif()
