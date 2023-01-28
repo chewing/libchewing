@@ -24,16 +24,13 @@ jobs:
         submodules: 'true'
 
     - name: Configure CMake
-      run: |
-        cmake -B ${{github.workspace}}/build \
-              -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-              -DWITH_RUST=${{matrix.with_rust}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DWITH_RUST=${{matrix.with_rust}}
 
     - name: Show config
       run: cmake -B ${{github.workspace}}/build -LA
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build -v --config ${{env.BUILD_TYPE}}
 
     - name: Test
       working-directory: ${{github.workspace}}/build
