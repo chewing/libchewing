@@ -72,7 +72,7 @@ void test_plat_path_found()
                              CHEWING_DATA_PREFIX, FILES, output, sizeof(output));
 
     ok(ret == 0, "find_path_by_files shall return 0");
-    ok(strcmp(output, CHEWING_DATA_PREFIX) == 0, "output shall be " CHEWING_DATA_PREFIX);
+    ok(strcmp(output, CHEWING_DATA_PREFIX) == 0, "output %s shall be " CHEWING_DATA_PREFIX, output);
 }
 
 void test_plat_path_cannot_find()
