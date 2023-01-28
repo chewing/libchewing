@@ -366,7 +366,10 @@ impl From<BuildSyllableError> for ParseSyllableError {
     }
 }
 
-/// Build a syllable from bopomofos
+/// Builds a syllable from bopomofos.
+///
+/// `syl!` can be used in const context. It is meant for
+/// embedding const syllables or writing tests.
 ///
 /// # Examples
 ///
@@ -379,6 +382,12 @@ impl From<BuildSyllableError> for ParseSyllableError {
 ///
 /// assert_eq!("ㄎㄨˋ", syl.to_string());
 /// ```
+///
+/// # Panics
+///
+/// `syl!` can panic if the bopomofos are not well formed.
+/// For example, multiple initials or incorrect orders both cause
+/// the macro to panic.
 #[macro_export]
 macro_rules! syl {
     () => { $crate::zhuyin::Syllable::new() };
