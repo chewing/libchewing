@@ -6,6 +6,12 @@ use std::{
     path::Path,
 };
 
+#[cfg(target_family = "windows")]
+const SEARCH_PATH_SEP: char = ';';
+
+#[cfg(target_family = "unix")]
+const SEARCH_PATH_SEP: char = ':';
+
 #[no_mangle]
 pub extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
     let chewing_path = env::var("CHEWING_PATH");
@@ -43,7 +49,7 @@ pub unsafe extern "C" fn find_path_by_files(
     let search_path = search_path.to_str();
     let files = files_ptr_to_slice(files);
     if let Ok(search_path) = search_path {
-        for path in search_path.split(':') {
+        for path in search_path.split(SEARCH_PATH_SEP) {
             let prefix = Path::new(path).to_path_buf();
             if files
                 .iter()
