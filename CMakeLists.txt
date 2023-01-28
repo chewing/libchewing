@@ -38,9 +38,7 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
             set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
         endif()
     endif()
-elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
-    # XXX: Not sure why we need to use MATCHES instead of STREQUAL here.
-
+elseif(MSVC)
     # /wd4819
     # Without BOM, Visual Studio does not treat source file as UTF-8
     # encoding, thus it will complain about invalid character. Use
