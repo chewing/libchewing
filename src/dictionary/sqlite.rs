@@ -1,4 +1,4 @@
-use std::{os::unix::prelude::OsStrExt, path::Path, str};
+use std::{path::Path, str};
 
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
 use thiserror::Error;
@@ -506,7 +506,9 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        let path = str::from_utf8(path.as_os_str().as_bytes())?;
+        let path = path.to_str().ok_or(BuildDictionaryError {
+            source: "cannot convert file path to utf8".into(),
+        })?;
         self.dict.conn.execute("VACUUM INTO ?", [path])?;
         Ok(())
     }
