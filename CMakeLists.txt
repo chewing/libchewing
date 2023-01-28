@@ -15,6 +15,8 @@ endif()
 
 include(CheckCCompilerFlag)
 
+option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." true)
+
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
     ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
@@ -52,7 +54,7 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
         add_compile_definitions(snprintf=_snprintf)
     endif()
 
-    option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." false)
+    set(BUILD_DLL false)
 endif()
 
 check_c_compiler_flag(-fvisibility=hidden FVISIBILITY_HIDDEN)
@@ -168,9 +170,21 @@ add_library(common OBJECT
     ${INC_DIR}/internal/chewing-utf8-util.h
     ${INC_DIR}/internal/key2pho-private.h
     ${INC_DIR}/internal/memory-private.h
+    ${SRC_DIR}/porting_layer/include/plat_mmap.h
+    ${SRC_DIR}/porting_layer/include/plat_path.h
+    ${SRC_DIR}/porting_layer/include/plat_types.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
 
+    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+    ${SRC_DIR}/porting_layer/src/plat_path.c
+    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/common/chewing-utf8-util.c
     ${SRC_DIR}/common/key2pho.c
+)
+target_compile_definitions(common PRIVATE
+    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
 add_library(chewing OBJECT
@@ -192,15 +206,6 @@ add_library(chewing OBJECT
     ${SRC_DIR}/dict.c
     ${SRC_DIR}/mod_aux.c
     ${SRC_DIR}/pinyin.c
-    ${SRC_DIR}/porting_layer/include/plat_mmap.h
-    ${SRC_DIR}/porting_layer/include/plat_path.h
-    ${SRC_DIR}/porting_layer/include/plat_types.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/plat_path.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/private.h
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c

@@ -23,9 +23,6 @@ set(ALL_TOOLS init_database dump_database)
 add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
 add_executable(dump_database
     ${TOOLS_SRC_DIR}/dump_database.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     $<TARGET_OBJECTS:common>
 )
 set_target_properties(${ALL_TOOLS} PROPERTIES
