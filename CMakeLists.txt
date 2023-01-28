@@ -171,15 +171,9 @@ add_subdirectory(data)
 
 # library
 add_library(common OBJECT
-    ${INC_DIR}/internal/chewing-utf8-util.h
-    ${INC_DIR}/internal/key2pho-private.h
-    ${INC_DIR}/internal/memory-private.h
-    ${SRC_DIR}/porting_layer/include/plat_mmap.h
-    ${SRC_DIR}/porting_layer/include/plat_path.h
-    ${SRC_DIR}/porting_layer/include/plat_types.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
+    src/porting_layer/src/asprintf.h
 
+    src/porting_layer/src/asprintf.c
     src/chewing.c
 )
 target_compile_definitions(common PRIVATE
