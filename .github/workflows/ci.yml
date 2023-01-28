@@ -15,13 +15,17 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        with_rust: ['ON', 'OFF']
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: |
+        cmake -B ${{github.workspace}}/build \
+              -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+              -DWITH_RUST=${{matrix.with_rust}}
 
     - name: Show config
       run: cmake -B ${{github.workspace}}/build -LA
