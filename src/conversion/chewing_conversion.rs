@@ -240,10 +240,10 @@ struct PossibleInterval<'a> {
 }
 
 impl PossibleInterval<'_> {
-    pub fn contains(&self, other: &PossibleInterval) -> bool {
+    fn contains(&self, other: &PossibleInterval) -> bool {
         self.start <= other.start && self.end >= other.end
     }
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.end - self.start
     }
 }
