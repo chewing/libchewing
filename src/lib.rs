@@ -10,7 +10,7 @@
 #![warn(unused_import_braces)]
 #![deny(unused_lifetimes)]
 #![warn(unused_macro_rules)]
-// #![warn(unused_qualifications)]
+#![warn(unused_qualifications)]
 #![warn(unused_tuple_struct_fields)]
 #![warn(variant_size_differences)]
 
