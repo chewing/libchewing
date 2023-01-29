@@ -26,7 +26,7 @@ pub extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
     } else {
         let user_datadir = chewing::path::data_dir();
         if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
-            let path_cstring = CString::new(format!("{}:/usr/share/libchewing", datadir)).unwrap();
+            let path_cstring = CString::new(format!("{datadir}:/usr/share/libchewing")).unwrap();
             let bytes = path_cstring.as_bytes_with_nul();
             if bytes.len() > path_len {
                 return 1;
