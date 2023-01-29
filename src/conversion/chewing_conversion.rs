@@ -62,7 +62,7 @@ impl ChewingConversionEngine {
         syllables: &[Syllable],
         selections: &[Interval],
         breaks: &[Break],
-    ) -> Option<Rc<Phrase>> {
+    ) -> Option<Rc<Phrase<'_>>> {
         let end = start + syllables.len();
 
         for br in breaks.iter() {
@@ -165,13 +165,13 @@ impl ChewingConversionEngine {
             .collect()
     }
 
-    fn find_all_paths<'g, 's: 'g, 'b: 'g>(
-        &'s self,
+    fn find_all_paths<'g>(
+        &'g self,
         graph: &mut Graph<'g>,
         sequence: &ChineseSequence,
         start: usize,
         target: usize,
-        prefix: Option<PossiblePath<'b>>,
+        prefix: Option<PossiblePath<'g>>,
     ) -> Vec<PossiblePath<'g>> {
         if start == target {
             return vec![prefix.expect("should have prefix")];

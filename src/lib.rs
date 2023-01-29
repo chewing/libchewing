@@ -4,7 +4,7 @@
 #![warn(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![warn(noop_method_call)]
-// #![deny(single_use_lifetimes)]
+#![deny(single_use_lifetimes)]
 #![deny(unreachable_pub)]
 #![deny(unsafe_code)]
 #![warn(unused_import_braces)]
