@@ -44,3 +44,6 @@ add_custom_command(
         ${DATA_SRC_DIR}/phone.cin
         ${DATA_SRC_DIR}/tsi.src
 )
+
+install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
+install(FILES ${ALL_STATIC_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
