@@ -16,13 +16,15 @@ pub struct Syllable {
 }
 
 impl Syllable {
+    /// TODO: docs
     pub const fn new() -> Syllable {
         Syllable { value: 0 }
     }
-
+    /// TODO: docs
     pub const fn builder() -> SyllableBuilder {
         SyllableBuilder::new()
     }
+    /// TODO: docs
     pub const fn initial(&self) -> Option<Bopomofo> {
         let index = self.value >> 9;
         if index == 0 {
@@ -34,6 +36,7 @@ impl Syllable {
             }
         }
     }
+    /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn medial(&self) -> Option<Bopomofo> {
         let index = (self.value & 0b0000000_11_0000_000) >> 7;
@@ -46,6 +49,7 @@ impl Syllable {
             }
         }
     }
+    /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn rime(&self) -> Option<Bopomofo> {
         let index = (self.value & 0b0000000_00_1111_000) >> 3;
@@ -58,6 +62,7 @@ impl Syllable {
             }
         }
     }
+    /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn tone(&self) -> Option<Bopomofo> {
         let index = self.value & 0b0000000_00_0000_111;
@@ -70,38 +75,47 @@ impl Syllable {
             }
         }
     }
+    /// TODO: docs
     pub fn remove_initial(&mut self) -> Option<Bopomofo> {
         let ret = self.initial();
         self.value &= 0b0000_0001_1111_1111;
         ret
     }
+    /// TODO: docs
     pub fn remove_medial(&mut self) -> Option<Bopomofo> {
         let ret = self.medial();
         self.value &= 0b1111_1110_0111_1111;
         ret
     }
+    /// TODO: docs
     pub fn remove_rime(&mut self) -> Option<Bopomofo> {
         let ret = self.rime();
         self.value &= 0b1111_1111_1000_0111;
         ret
     }
+    /// TODO: docs
     pub fn remove_tone(&mut self) -> Option<Bopomofo> {
         let ret = self.tone();
         self.value &= 0b1111_1111_1111_1000;
         ret
     }
+    /// TODO: docs
     pub fn is_empty(&self) -> bool {
         self.value == 0
     }
+    /// TODO: docs
     pub fn has_initial(&self) -> bool {
         self.initial().is_some()
     }
+    /// TODO: docs
     pub fn has_medial(&self) -> bool {
         self.medial().is_some()
     }
+    /// TODO: docs
     pub fn has_rime(&self) -> bool {
         self.rime().is_some()
     }
+    /// TODO: docs
     pub fn has_tone(&self) -> bool {
         self.tone().is_some()
     }
@@ -137,6 +151,7 @@ impl Syllable {
     pub fn to_le_bytes(&self) -> [u8; 2] {
         self.to_u16().to_le_bytes()
     }
+    /// TODO: docs
     pub fn update(&mut self, bopomofo: Bopomofo) {
         match bopomofo.kind() {
             BopomofoKind::Initial => {
@@ -157,6 +172,7 @@ impl Syllable {
             }
         };
     }
+    /// TODO: docs
     pub fn pop(&mut self) -> Option<Bopomofo> {
         if self.tone().is_some() {
             return self.remove_tone();
@@ -172,6 +188,7 @@ impl Syllable {
         }
         None
     }
+    /// TODO: docs
     pub fn clear(&mut self) {
         *self = Syllable::new()
     }
@@ -218,7 +235,9 @@ impl FromStr for Syllable {
     }
 }
 
+/// TODO: docs
 pub trait IntoSyllablesBytes {
+    /// TODO: docs
     fn into_syllables_bytes(self) -> Vec<u8>;
 }
 
@@ -246,6 +265,7 @@ impl Display for Syllable {
     }
 }
 
+/// TODO: docs
 #[derive(Debug)]
 pub struct SyllableBuilder {
     value: u16,
@@ -259,9 +279,11 @@ impl Default for SyllableBuilder {
 }
 
 impl SyllableBuilder {
+    /// TODO: docs
     pub const fn new() -> SyllableBuilder {
         SyllableBuilder { value: 0, step: 0 }
     }
+    /// TODO: docs
     pub const fn insert(
         mut self,
         bopomofo: Bopomofo,
@@ -326,11 +348,13 @@ impl SyllableBuilder {
         };
         Ok(self)
     }
+    /// TODO: docs
     pub const fn build(self) -> Syllable {
         Syllable { value: self.value }
     }
 }
 
+/// TODO: docs
 #[derive(Error, Debug)]
 #[error("syllable decode error: {msg}")]
 pub struct DecodeSyllableError {

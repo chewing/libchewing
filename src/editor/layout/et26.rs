@@ -7,12 +7,14 @@ use crate::{
 
 use super::{KeyBehavior, SyllableEditor};
 
+/// TODO: docs
 #[derive(Debug)]
 pub struct Et26 {
     syllable: Syllable,
 }
 
 impl Et26 {
+    /// TODO: docs
     pub fn new() -> Et26 {
         Et26 {
             syllable: Default::default(),

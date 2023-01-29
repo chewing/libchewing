@@ -10,18 +10,24 @@ use super::{
     DictionaryMut, DictionaryUpdateError, Phrase, Phrases,
 };
 
+/// TODO: doc
 #[derive(Debug, Error)]
 #[error("sqlite error")]
 pub enum SqliteDictionaryError {
+    /// TODO: doc
     SqliteError {
+        /// TODO: doc
         #[from]
         source: RusqliteError,
     },
+    /// TODO: doc
     MissingTable {
+        /// TODO: doc
         table: String,
     },
 }
 
+/// TODO: doc
 #[derive(Debug)]
 pub struct SqliteDictionary {
     conn: Connection,
@@ -30,6 +36,7 @@ pub struct SqliteDictionary {
 }
 
 impl SqliteDictionary {
+    /// TODO: doc
     pub fn open<P: AsRef<Path>>(path: P) -> Result<SqliteDictionary, SqliteDictionaryError> {
         let mut conn = Connection::open(path)?;
         Self::initialize_tables(&conn)?;
@@ -44,6 +51,7 @@ impl SqliteDictionary {
         })
     }
 
+    /// TODO: doc
     pub fn open_read_only<P: AsRef<Path>>(
         path: P,
     ) -> Result<SqliteDictionary, SqliteDictionaryError> {
@@ -58,6 +66,7 @@ impl SqliteDictionary {
         })
     }
 
+    /// TODO: doc
     pub fn open_in_memory() -> Result<SqliteDictionary, SqliteDictionaryError> {
         let conn = Connection::open_in_memory()?;
         Self::initialize_tables(&conn)?;
@@ -416,12 +425,14 @@ impl DictionaryMut for SqliteDictionary {
     }
 }
 
+/// TODO: doc
 pub struct SqliteDictionaryBuilder {
     dict: SqliteDictionary,
     sort_id: u64,
 }
 
 impl SqliteDictionaryBuilder {
+    /// TODO: doc
     pub fn new() -> SqliteDictionaryBuilder {
         let dict = SqliteDictionary::open_in_memory().unwrap();
         SqliteDictionaryBuilder { dict, sort_id: 0 }

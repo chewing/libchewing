@@ -13,13 +13,19 @@ use thiserror::Error;
 /// 4. Tonal marks: ˙ˊˇˋ
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BopomofoKind {
+    /// TODO: docs
     Initial = 0,
+    /// TODO: docs
     Medial,
+    /// TODO: docs
     Rime,
+    /// TODO: docs
     Tone,
 }
 
 /// Zhuyin Fuhao, often shortened as zhuyin and commonly called bopomofo
+///
+/// TODO: refactor this to not use enum?
 ///
 /// <https://simple.m.wikipedia.org/wiki/Zhuyin>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -120,6 +126,7 @@ const RIME_MAP: [Bopomofo; 13] = [A, O, E, EH, AI, EI, AU, OU, AN, EN, ANG, ENG,
 const TONE_MAP: [Bopomofo; 4] = [TONE5, TONE2, TONE3, TONE4];
 
 impl Bopomofo {
+    /// TODO: docs
     pub const fn kind(&self) -> BopomofoKind {
         match self {
             B | P | M | F | D | T | N | L | G | K | H | J | Q | X | ZH | CH | SH | R | Z | C
@@ -129,6 +136,7 @@ impl Bopomofo {
             TONE1 | TONE2 | TONE3 | TONE4 | TONE5 => BopomofoKind::Tone,
         }
     }
+    /// TODO: docs
     pub const fn from_initial(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
         if index < 1 || (index - 1) as usize >= INITIAL_MAP.len() {
             return Err(ParseBopomofoError {
@@ -137,6 +145,7 @@ impl Bopomofo {
         }
         Ok(INITIAL_MAP[(index - 1) as usize])
     }
+    /// TODO: docs
     pub const fn from_medial(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
         if index < 1 || (index - 1) as usize >= MEDIAL_MAP.len() {
             return Err(ParseBopomofoError {
@@ -145,6 +154,7 @@ impl Bopomofo {
         }
         Ok(MEDIAL_MAP[(index - 1) as usize])
     }
+    /// TODO: docs
     pub const fn from_rime(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
         if index < 1 || (index - 1) as usize >= RIME_MAP.len() {
             return Err(ParseBopomofoError {
@@ -153,6 +163,7 @@ impl Bopomofo {
         }
         Ok(RIME_MAP[(index - 1) as usize])
     }
+    /// TODO: docs
     pub const fn from_tone(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
         if index < 1 || (index - 1) as usize >= TONE_MAP.len() {
             return Err(ParseBopomofoError {
@@ -161,30 +172,39 @@ impl Bopomofo {
         }
         Ok(TONE_MAP[(index - 1) as usize])
     }
-
+    /// TODO: docs
     pub fn initial_index(&self) -> u16 {
         (INITIAL_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
     }
+    /// TODO: docs
     pub fn medial_index(&self) -> u16 {
         (MEDIAL_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
     }
+    /// TODO: docs
     pub fn rime_index(&self) -> u16 {
         (RIME_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
     }
+    /// TODO: docs
     pub fn tone_index(&self) -> u16 {
         (TONE_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
     }
 }
 
+/// TODO: docs
+/// TODO: refactor to enum?
 #[derive(Error, Debug)]
 #[error("parse bopomofo error: {:?}", kind)]
 pub struct ParseBopomofoError {
+    /// TODO: docs
     pub kind: ParseBopomofoErrorKind,
 }
 
+/// TODO: docs
 #[derive(Debug)]
 pub enum ParseBopomofoErrorKind {
+    /// TODO: docs
     UnknownSymbol,
+    /// TODO: docs
     IndexOutOfRange,
 }
 

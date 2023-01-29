@@ -7,12 +7,14 @@ use crate::{
 
 use super::{KeyBehavior, KeyEvent, SyllableEditor};
 
+/// TODO: docs
 #[derive(Debug)]
 pub struct Hsu {
     syllable: Syllable,
 }
 
 impl Hsu {
+    /// TODO: docs
     pub fn new() -> Hsu {
         Hsu {
             syllable: Default::default(),

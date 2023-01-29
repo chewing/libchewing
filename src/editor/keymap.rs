@@ -6,6 +6,9 @@
 //! used to drive the phonetic conversion engines.
 
 /// Layout independent key index
+///
+/// TODO: refactor this to not use enum?
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[rustfmt::skip]
 pub enum KeyIndex {
@@ -21,6 +24,9 @@ pub enum KeyIndex {
 }
 
 /// USB HID KeyCodes
+///
+/// TODO: refactor this to not use enum?
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[rustfmt::skip]
 pub enum KeyCode {
@@ -34,26 +40,33 @@ pub enum KeyCode {
 /// Key processed by a keymap
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct KeyEvent {
+    /// TODO: doc
     pub index: KeyIndex,
+    /// TODO: doc
     pub code: KeyCode,
 }
 
+/// TODO: doc
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Layout {
     name: &'static str,
     map: [KeyCode; 48],
 }
 
+/// TODO: doc
 pub trait Keymap {
+    /// TODO: doc
     fn map_key(&self, input: KeyCode) -> KeyEvent;
 }
 
+/// TODO: doc
 #[derive(Debug)]
 pub struct IdentityKeymap {
     inner: RemappingKeymap,
 }
 
 impl IdentityKeymap {
+    /// TODO: doc
     pub fn new(source: Layout) -> IdentityKeymap {
         IdentityKeymap {
             inner: RemappingKeymap::new(source, source),
@@ -67,6 +80,7 @@ impl Keymap for IdentityKeymap {
     }
 }
 
+/// TODO: doc
 #[derive(Debug)]
 pub struct RemappingKeymap {
     source: Layout,
@@ -74,6 +88,7 @@ pub struct RemappingKeymap {
 }
 
 impl RemappingKeymap {
+    /// TODO: doc
     pub fn new(source: Layout, target: Layout) -> RemappingKeymap {
         RemappingKeymap { source, target }
     }
@@ -101,7 +116,9 @@ const QWERTY_INDEX: [u8; 48] = [
       b'z', b'x', b'c', b'v', b'b', b'n', b'm', b',', b'.', b'/', b' '
 ];
 
+/// TODO: doc
 pub trait KeyCodeFromQwerty {
+    /// TODO: doc
     fn as_key_code(&self) -> Option<KeyCode>;
 }
 
@@ -125,6 +142,7 @@ const BLANK: [KeyIndex; 48] = [
           K38, K39, K40, K41, K42, K43, K44, K45, K46, K47, K48
 ];
 
+/// TODO: doc
 #[rustfmt::skip]
 pub const QWERTY: Layout = Layout {
     name: "QWERTY",
@@ -136,6 +154,7 @@ pub const QWERTY: Layout = Layout {
     ],
 };
 
+/// TODO: doc
 #[rustfmt::skip]
 pub const DVORAK: Layout = Layout {
     name: "DVORAK",
@@ -147,6 +166,7 @@ pub const DVORAK: Layout = Layout {
     ],
 };
 
+/// TODO: doc
 #[rustfmt::skip]
 pub const CARPALX: Layout = Layout {
     name: "CARPALX (QGMLWY)",

@@ -41,36 +41,60 @@ mod ibm;
 mod pinyin;
 mod standard;
 
+/// TODO: docs
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(C)]
 pub enum KeyboardLayoutCompat {
+    /// TODO: docs
     Default = 0,
+    /// TODO: docs
     Hsu,
+    /// TODO: docs
     Ibm,
+    /// TODO: docs
     GinYieh,
+    /// TODO: docs
     Et,
+    /// TODO: docs
     Et26,
+    /// TODO: docs
     Dvorak,
+    /// TODO: docs
     DvorakHsu,
+    /// TODO: docs
     DachenCp26,
+    /// TODO: docs
     HanyuPinyin,
+    /// TODO: docs
     ThlPinyin,
+    /// TODO: docs
     Mps2Pinyin,
+    /// TODO: docs
     Carpalx,
 }
 
+/// TODO: docs
+/// TODO: move this to the editor module
 #[derive(Debug, PartialEq)]
 #[repr(C)]
 pub enum KeyBehavior {
+    /// TODO: docs
     Ignore = 0,
+    /// TODO: docs
     Absorb,
+    /// TODO: docs
     Commit,
+    /// TODO: docs
     KeyError,
+    /// TODO: docs
     Error,
+    /// TODO: docs
     NoWord,
+    /// TODO: docs
     OpenSymbolTable,
 }
 
+/// TODO: docs
 pub trait SyllableEditor {
     /// Handles a key press event and returns the behavior of the layout.
     fn key_press(&mut self, key: KeyEvent) -> KeyBehavior;

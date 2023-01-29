@@ -14,6 +14,7 @@ use crate::{
 
 use super::{Break, ChineseSequence, ConversionEngine, Interval};
 
+/// TODO: doc
 #[derive(Debug)]
 pub struct ChewingConversionEngine {
     dict: Rc<dyn Dictionary>,
@@ -50,6 +51,7 @@ impl ConversionEngine for ChewingConversionEngine {
 }
 
 impl ChewingConversionEngine {
+    /// TODO: doc
     pub fn new(dict: Rc<dyn Dictionary>) -> ChewingConversionEngine {
         ChewingConversionEngine { dict }
     }

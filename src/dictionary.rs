@@ -24,6 +24,8 @@ mod trie;
 #[derive(Error, Debug)]
 #[error("update dictionary failed")]
 pub struct DictionaryUpdateError {
+    /// TODO: doc
+    /// TODO: change this to anyhow::Error?
     #[from]
     pub source: Box<dyn std::error::Error + Send + Sync>,
 }
@@ -247,6 +249,7 @@ impl Display for Phrase<'_> {
 /// ```
 pub type Phrases<'a, 'p> = Box<dyn Iterator<Item = Phrase<'p>> + 'a>;
 
+/// TODO: doc
 pub type DictEntries<'a, 'p> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase<'p>)> + 'a>;
 
 /// An interface for looking up dictionaries.
@@ -321,12 +324,14 @@ pub trait Dictionary: Debug {
 /// # }
 /// ```
 pub trait DictionaryMut {
+    /// TODO: doc
     fn insert(
         &mut self,
         syllables: &[Syllable],
         phrase: Phrase<'static>,
     ) -> Result<(), DictionaryUpdateError>;
 
+    /// TODO: doc
     fn update(
         &mut self,
         syllables: &[Syllable],
@@ -335,6 +340,7 @@ pub trait DictionaryMut {
         time: u64,
     ) -> Result<(), DictionaryUpdateError>;
 
+    /// TODO: doc
     fn remove(
         &mut self,
         syllables: &[Syllable],
@@ -342,6 +348,7 @@ pub trait DictionaryMut {
     ) -> Result<(), DictionaryUpdateError>;
 }
 
+/// TODO: doc
 #[derive(Error, Debug)]
 #[error("build dictionary error")]
 pub struct BuildDictionaryError {
@@ -357,13 +364,17 @@ impl From<std::io::Error> for BuildDictionaryError {
     }
 }
 
+/// TODO: doc
 pub trait DictionaryBuilder {
+    /// TODO: doc
     fn set_info(&mut self, info: DictionaryInfo) -> Result<(), BuildDictionaryError>;
+    /// TODO: doc
     fn insert(
         &mut self,
         syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), BuildDictionaryError>;
+    /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
 }
 

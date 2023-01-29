@@ -9,10 +9,14 @@ use super::{KeyBehavior, SyllableEditor};
 
 const MAX_PINYIN_LEN: usize = 10;
 
+/// TODO: docs
 #[derive(Debug)]
 pub enum PinyinVariant {
+    /// TODO: docs
     HanyuPinyin,
+    /// TODO: docs
     ThlPinyin,
+    /// TODO: docs
     Mps2Pinyin,
 }
 
@@ -22,6 +26,7 @@ impl Default for PinyinVariant {
     }
 }
 
+/// TODO: docs
 #[derive(Default, Debug)]
 pub struct Pinyin {
     key_seq: String,
@@ -31,30 +36,39 @@ pub struct Pinyin {
 }
 
 impl Pinyin {
+    /// TODO: docs
     pub fn new() -> Pinyin {
         Default::default()
     }
+    /// TODO: docs
+    /// TODO: refactor this to const variable
     pub fn hanyu() -> Pinyin {
         Pinyin {
             variant: PinyinVariant::HanyuPinyin,
             ..Default::default()
         }
     }
+    /// TODO: docs
+    /// TODO: refactor this to const variable
     pub fn thl() -> Pinyin {
         Pinyin {
             variant: PinyinVariant::ThlPinyin,
             ..Default::default()
         }
     }
+    /// TODO: docs
+    /// TODO: refactor this to const variable
     pub fn mps2() -> Pinyin {
         Pinyin {
             variant: PinyinVariant::Mps2Pinyin,
             ..Default::default()
         }
     }
+    /// TODO: docs
     pub fn alt(&self) -> Syllable {
         self.syllable_alt
     }
+    /// TODO: docs
     pub fn key_seq(&self) -> &String {
         &self.key_seq
     }

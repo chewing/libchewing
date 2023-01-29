@@ -5,18 +5,25 @@ use thiserror::Error;
 
 use crate::dictionary::Phrase;
 
+/// TODO: doc
+/// TODO: change to enum?
 #[derive(Error, Debug)]
 #[error("update estimate error")]
 pub struct EstimateError {
     source: Box<dyn std::error::Error>,
 }
 
+/// TODO: doc
 pub trait UserFreqEstimate {
+    /// TODO: doc
     fn tick(&mut self) -> Result<(), EstimateError>;
+    /// TODO: doc
     fn now(&self) -> Result<u64, EstimateError>;
+    /// TODO: doc
     fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32;
 }
 
+/// TODO: doc
 pub struct SqliteUserFreqEstimate {
     conn: Connection,
     lifetime: u64,
@@ -31,6 +38,7 @@ impl From<rusqlite::Error> for EstimateError {
 }
 
 impl SqliteUserFreqEstimate {
+    /// TODO: doc
     pub fn open<P: AsRef<Path>>(path: P) -> Result<SqliteUserFreqEstimate, EstimateError> {
         let conn = Connection::open(path)?;
         Self::initialize_tables(&conn)?;
@@ -40,6 +48,7 @@ impl SqliteUserFreqEstimate {
         Ok(SqliteUserFreqEstimate { conn, lifetime })
     }
 
+    /// TODO: doc
     pub fn open_in_memory() -> Result<SqliteUserFreqEstimate, EstimateError> {
         let conn = Connection::open_in_memory()?;
         Self::initialize_tables(&conn)?;

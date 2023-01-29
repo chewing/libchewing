@@ -101,29 +101,96 @@ typedef enum KB {
   KB_TYPE_NUM,
 } KB;
 
+/**
+ * TODO: docs
+ * TODO: move this to the editor module
+ */
 typedef enum KeyBehavior {
+  /**
+   * TODO: docs
+   */
   IGNORE = 0,
+  /**
+   * TODO: docs
+   */
   ABSORB,
+  /**
+   * TODO: docs
+   */
   COMMIT,
+  /**
+   * TODO: docs
+   */
   KEY_ERROR,
+  /**
+   * TODO: docs
+   */
   ERROR,
+  /**
+   * TODO: docs
+   */
   NO_WORD,
+  /**
+   * TODO: docs
+   */
   OPEN_SYMBOL_TABLE,
 } KeyBehavior;
 
+/**
+ * TODO: docs
+ */
 typedef enum KeyboardLayoutCompat {
+  /**
+   * TODO: docs
+   */
   DEFAULT = 0,
+  /**
+   * TODO: docs
+   */
   HSU,
+  /**
+   * TODO: docs
+   */
   IBM,
+  /**
+   * TODO: docs
+   */
   GIN_YIEH,
+  /**
+   * TODO: docs
+   */
   ET,
+  /**
+   * TODO: docs
+   */
   ET26,
+  /**
+   * TODO: docs
+   */
   DVORAK,
+  /**
+   * TODO: docs
+   */
   DVORAK_HSU,
+  /**
+   * TODO: docs
+   */
   DACHEN_CP26,
+  /**
+   * TODO: docs
+   */
   HANYU_PINYIN,
+  /**
+   * TODO: docs
+   */
   THL_PINYIN,
+  /**
+   * TODO: docs
+   */
   MPS2_PINYIN,
+  /**
+   * TODO: docs
+   */
   CARPALX,
 } KeyboardLayoutCompat;
 
@@ -140,6 +207,9 @@ enum UserUpdate
 typedef uint8_t UserUpdate;
 #endif // __cplusplus
 
+/**
+ * TODO: doc
+ */
 typedef struct ChewingConversionEngine ChewingConversionEngine;
 
 /**

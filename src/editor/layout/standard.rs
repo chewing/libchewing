@@ -10,12 +10,14 @@ use crate::{
 
 use super::{KeyBehavior, SyllableEditor};
 
+/// TODO: docs
 #[derive(Debug)]
 pub struct Standard {
     syllable: Syllable,
 }
 
 impl Standard {
+    /// TODO: docs
     pub fn new() -> Standard {
         Standard {
             syllable: Syllable::new(),
