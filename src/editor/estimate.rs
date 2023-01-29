@@ -24,6 +24,7 @@ pub trait UserFreqEstimate {
 }
 
 /// TODO: doc
+#[derive(Debug)]
 pub struct SqliteUserFreqEstimate {
     conn: Connection,
     lifetime: u64,

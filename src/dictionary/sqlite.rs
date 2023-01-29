@@ -426,6 +426,7 @@ impl DictionaryMut for SqliteDictionary {
 }
 
 /// TODO: doc
+#[derive(Debug)]
 pub struct SqliteDictionaryBuilder {
     dict: SqliteDictionary,
     sort_id: u64,

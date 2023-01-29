@@ -491,6 +491,7 @@ impl Dictionary for TrieDictionary {
 /// [WebP]: https://developers.google.com/speed/webp/docs/riff_container
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
 /// [RIFF]: https://en.m.wikipedia.org/wiki/Resource_Interchange_File_Format
+#[derive(Debug)]
 pub struct TrieDictionaryBuilder {
     // The builder uses an arena to allocate nodes and reference each node with
     // node index.
