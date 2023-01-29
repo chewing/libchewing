@@ -192,13 +192,13 @@ impl AsRef<str> for Phrase<'_> {
 }
 
 impl From<Phrase<'_>> for String {
-    fn from(phrase: Phrase) -> Self {
+    fn from(phrase: Phrase<'_>) -> Self {
         phrase.phrase.into_owned()
     }
 }
 
 impl From<Phrase<'_>> for (String, u32) {
-    fn from(phrase: Phrase) -> Self {
+    fn from(phrase: Phrase<'_>) -> Self {
         (phrase.phrase.into_owned(), phrase.freq)
     }
 }
@@ -286,14 +286,14 @@ pub trait Dictionary: Debug {
     /// Returns an iterator to all single syllable words matched by the
     /// syllable, if any. The result should use a stable order each time for the
     /// same input.
-    fn lookup_word(&self, syllable: Syllable) -> Phrases {
+    fn lookup_word(&self, syllable: Syllable) -> Phrases<'_, '_> {
         self.lookup_phrase(&[syllable])
     }
     /// Returns an iterator to all phrases matched by the syllables, if any. The
     /// result should use a stable order each time for the same input.
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases;
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_>;
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries;
+    fn entries(&self) -> DictEntries<'_, '_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
     /// Returns a mutable reference to the dictionary if the underlying
@@ -335,7 +335,7 @@ pub trait DictionaryMut {
     fn update(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase,
+        phrase: Phrase<'_>,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError>;
@@ -372,21 +372,21 @@ pub trait DictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase,
+        phrase: Phrase<'_>,
     ) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
 }
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases {
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
         self.get(syllables)
             .cloned()
-            .map(|v| Box::new(v.into_iter()) as Phrases)
+            .map(|v| Box::new(v.into_iter()) as Phrases<'_, '_>)
             .unwrap_or_else(|| Box::new(std::iter::empty()))
     }
 
-    fn entries(&self) -> DictEntries {
+    fn entries(&self) -> DictEntries<'_, '_> {
         Box::new(
             self.iter()
                 .flat_map(|(k, v)| v.iter().map(|phrase| (k.clone(), phrase.clone()))),
@@ -421,7 +421,7 @@ impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
     fn update(
         &mut self,
         _syllables: &[Syllable],
-        _phrase: Phrase,
+        _phrase: Phrase<'_>,
         _user_freq: u32,
         _time: u64,
     ) -> Result<(), DictionaryUpdateError> {

@@ -102,7 +102,7 @@ impl ChewingConversionEngine {
 
         best_phrase
     }
-    fn find_intervals(&self, seq: &ChineseSequence) -> Vec<PossibleInterval> {
+    fn find_intervals(&self, seq: &ChineseSequence) -> Vec<PossibleInterval<'_>> {
         let mut intervals = vec![];
         for begin in 0..seq.syllables.len() {
             for end in begin..=seq.syllables.len() {
@@ -138,7 +138,7 @@ impl ChewingConversionEngine {
     /// highest_score[1] = P(0,1)
     /// ...
     /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(&self, len: usize, mut intervals: Vec<PossibleInterval>) -> Vec<Interval> {
+    fn find_best_path(&self, len: usize, mut intervals: Vec<PossibleInterval<'_>>) -> Vec<Interval> {
         let mut highest_score = vec![PossiblePath::default(); len + 1];
 
         // The interval shall be sorted by the increase order of end.
@@ -203,7 +203,7 @@ impl ChewingConversionEngine {
     ///
     /// Ported from original C implementation, but the original algorithm seems wrong.
     fn trim_paths<'a>(&self, paths: Vec<PossiblePath<'a>>) -> Vec<PossiblePath<'a>> {
-        let mut trimmed_paths: Vec<PossiblePath> = vec![];
+        let mut trimmed_paths: Vec<PossiblePath<'_>> = vec![];
         for candidate in paths.into_iter() {
             trace!("Trim check {}", candidate);
             let mut drop_candidate = false;
@@ -240,7 +240,7 @@ struct PossibleInterval<'a> {
 }
 
 impl PossibleInterval<'_> {
-    fn contains(&self, other: &PossibleInterval) -> bool {
+    fn contains(&self, other: &PossibleInterval<'_>) -> bool {
         self.start <= other.start && self.end >= other.end
     }
     fn len(&self) -> usize {
@@ -249,7 +249,7 @@ impl PossibleInterval<'_> {
 }
 
 impl From<PossibleInterval<'_>> for Interval {
-    fn from(value: PossibleInterval) -> Self {
+    fn from(value: PossibleInterval<'_>) -> Self {
         Interval {
             start: value.start,
             end: value.end,

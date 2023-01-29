@@ -212,7 +212,7 @@ impl TrieDictionary {
     }
 }
 
-fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases {
+fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases<'_, '_> {
     Box::new(
         dict.dict[begin..end]
             .chunks(trie_leaf::SIZE.unwrap())
@@ -232,7 +232,7 @@ fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases {
 }
 
 impl Dictionary for TrieDictionary {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases {
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
         let chunk_size = trie_node::SIZE.unwrap();
         let root = trie_node::View::new(self.dict.as_slice());
         let mut node = root;
@@ -256,7 +256,7 @@ impl Dictionary for TrieDictionary {
         )
     }
 
-    fn entries(&self) -> super::DictEntries {
+    fn entries(&self) -> super::DictEntries<'_, '_> {
         todo!();
     }
 
@@ -892,7 +892,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase,
+        phrase: Phrase<'_>,
     ) -> Result<(), BuildDictionaryError> {
         let leaf_id = self.alloc_leaf(phrase.as_str(), phrase.freq());
         let parent_id = self.find_or_insert_internal(syllables);
@@ -1078,7 +1078,7 @@ mod tests {
             .collect::<Vec<_>>()
         );
         assert_eq!(
-            Vec::<Phrase>::new(),
+            Vec::<Phrase<'_>>::new(),
             dict.lookup_phrase(&[
                 syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
                 syl![Bopomofo::U, Bopomofo::TONE4]
@@ -1134,7 +1134,7 @@ mod tests {
                 Phrase::new("側", 0),
             ],
             dict.lookup_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
-                .collect::<Vec<Phrase>>()
+                .collect::<Vec<Phrase<'_>>>()
         );
         Ok(())
     }
@@ -1193,7 +1193,7 @@ mod tests {
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<Phrase>>()
+            .collect::<Vec<Phrase<'_>>>()
         );
         Ok(())
     }

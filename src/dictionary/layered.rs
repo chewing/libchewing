@@ -90,7 +90,7 @@ impl Dictionary for LayeredDictionary {
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases {
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
         let (base, layers) = match self.inner.split_first() {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
@@ -112,7 +112,7 @@ impl Dictionary for LayeredDictionary {
         )
     }
 
-    fn entries(&self) -> DictEntries {
+    fn entries(&self) -> DictEntries<'_, '_> {
         todo!("entries from all layers")
         // Box::new(std::iter::empty())
     }
@@ -146,7 +146,7 @@ impl DictionaryMut for LayeredDictionary {
     fn update(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase,
+        phrase: Phrase<'_>,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {

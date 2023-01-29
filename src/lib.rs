@@ -1,4 +1,4 @@
-// #![deny(elided_lifetimes_in_paths)]
+#![deny(elided_lifetimes_in_paths)]
 #![deny(macro_use_extern_crate)]
 #![deny(missing_abi)]
 #![warn(missing_debug_implementations)]
