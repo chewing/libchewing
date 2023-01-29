@@ -285,8 +285,6 @@ endforeach()
 
 set_target_properties(${LIBS} PROPERTIES
     OUTPUT_NAME chewing
-    # Update configure.ac if one of SOVERSION/VERSION is updated.
-    # See configure.ac for more information.
     SOVERSION 3
     VERSION 3.3.1
 )
