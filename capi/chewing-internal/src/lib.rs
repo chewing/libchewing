@@ -1,3 +1,5 @@
+#![deny(unsafe_op_in_unsafe_fn)]
+
 pub mod binding;
 pub mod bopomofo;
 pub mod compat;

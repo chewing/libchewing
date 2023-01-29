@@ -54,7 +54,7 @@ pub unsafe extern "C" fn ueStrNCpy(
     n: usize,
     end: c_int,
 ) -> c_int {
-    let bytes = ueStrNBytes(src, n as c_int) as usize;
+    let bytes = unsafe { ueStrNBytes(src, n as c_int) } as usize;
     unsafe { src.copy_to(dest, bytes) };
     if end == StrNCpyClose::StrncpyClose as i32 {
         unsafe { ptr::write(dest.add(bytes), 0) };
@@ -64,13 +64,13 @@ pub unsafe extern "C" fn ueStrNCpy(
 
 #[no_mangle]
 pub unsafe extern "C" fn ueStrSeek(src: *mut c_char, n: usize) -> *mut c_char {
-    let bytes = ueStrNBytes(src, n as c_int);
+    let bytes = unsafe { ueStrNBytes(src, n as c_int) };
     unsafe { src.offset(bytes as isize) }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ueConstStrSeek(src: *const c_char, n: usize) -> *const c_char {
-    let bytes = ueStrNBytes(src, n as c_int);
+    let bytes = unsafe { ueStrNBytes(src, n as c_int) };
     unsafe { src.offset(bytes as isize) }
 }
 
