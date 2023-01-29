@@ -1,24 +1,26 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.19.0)
 project(libchewing)
 
-# Update configure.ac if LIBCHEWING_VERSION is changed.
 set(LIBCHEWING_VERSION 0.5.1)
 set(PACKAGE_VERSION ${LIBCHEWING_VERSION})
-# Update configure.ac if LIBCHEWING_BINARY_VERSION is changed.
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+enable_testing()
+
 if(UNIX)
     set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
-    add_definitions(-DUNDER_POSIX -DPIC)
+    add_compile_definitions(UNDER_POSIX PIC)
 endif()
 
 include(CheckCCompilerFlag)
 
+option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." true)
+
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
     ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
-    add_definitions(-D_GNU_SOURCE)
+    add_compile_definitions(_GNU_SOURCE)
     option(ENABLE_GCOV "Coverage support" false)
     if(ENABLE_GCOV)
         set(CMAKE_C_FLAGS "-coverage ${CMAKE_C_FLAGS}")
@@ -44,15 +46,15 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     # encoding, thus it will complain about invalid character. Use
     # /wd4819 can suppress this warning.
     set(CMAKE_C_FLAGS "/wd4819 ${CMAKE_C_FLAGS}")
-    add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE)
-    add_definitions(/D__func__=__FUNCTION__)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+    add_compile_definitions(__func__=__FUNCTION__)
 
     # MSVC 2015 supports `snprintf`, so no need to redefine it
     if(MSVC_VERSION LESS 1900)
-        add_definitions(/Dsnprintf=_snprintf)
+        add_compile_definitions(snprintf=_snprintf)
     endif()
 
-    option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." false)
+    set(BUILD_DLL false)
 endif()
 
 check_c_compiler_flag(-fvisibility=hidden FVISIBILITY_HIDDEN)
@@ -61,7 +63,7 @@ if(${FVISIBILITY_HIDDEN})
 endif()
 
 # automake compatibility
-add_definitions(-DHAVE_CONFIG_H=1)
+add_compile_definitions(HAVE_CONFIG_H=1)
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
@@ -70,7 +72,6 @@ if(MSVC)
     set(WITH_INTERNAL_SQLITE3 true)
 endif()
 
-# Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
 # Feature probe
@@ -121,9 +122,6 @@ set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/test)
 
 include(GNUInstallDirs)
 
-set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
-set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
-
 configure_file(
     ${PROJECT_SOURCE_DIR}/cmake/config.h.in
     ${PROJECT_BINARY_DIR}/include/config.h
@@ -155,11 +153,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/porting_layer/include
 )
 
-set(ALL_DATA
-    ${DATA_BIN_DIR}/dictionary.dat
-    ${DATA_BIN_DIR}/index_tree.dat
-)
-
 set(ALL_INC
     ${INC_DIR}/chewing.h
     ${INC_DIR}/chewing-compat.h
@@ -168,166 +161,32 @@ set(ALL_INC
     ${INC_DIR}/mod_aux.h
 )
 
-# info page
-find_program(MAKEINFO makeinfo)
-if (MAKEINFO)
-    add_custom_command(
-        OUTPUT
-            ${INFO_BIN}
-        COMMAND ${MAKEINFO} ${INFO_SRC} -o ${INFO_BIN} -I ${PROJECT_BINARY_DIR}/doc
-        DEPENDS
-            ${INFO_SRC}
-    )
-    add_custom_target(INFO ALL DEPENDS ${INFO_BIN})
-    add_dependencies(check INFO)
-
-    find_program(INSTALL_INFO NAMES ginstall-info install-info)
-    if (INSTALL_INFO)
-        install(FILES ${INFO_BIN} DESTINATION ${CMAKE_INSTALL_INFODIR})
-        install(CODE "execute_process(COMMAND ${INSTALL_INFO} --info-dir=${CMAKE_INSTALL_INFODIR} ${INFO_BIN})")
-    endif()
-endif()
-
-
-# We need to copy static data to binary tree when using out of tree build.
-set(ALL_STATIC_DATA
-    ${DATA_BIN_DIR}/pinyin.tab
-    ${DATA_BIN_DIR}/swkb.dat
-    ${DATA_BIN_DIR}/symbols.dat
-)
-
-add_custom_target(all_static_data
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/pinyin.tab ${DATA_BIN_DIR}/pinyin.tab
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/swkb.dat ${DATA_BIN_DIR}/swkb.dat
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/symbols.dat ${DATA_BIN_DIR}/symbols.dat
-)
-
-set(ALL_STATIC_TEST stresstest.py)
-foreach(target ${ALL_STATIC_TEST})
-    add_custom_target(${target} ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TEST_SRC_DIR}/${target} ${TEST_BIN_DIR}/${target}
-    )
-    add_dependencies(check ${target})
-endforeach()
-
-# tools
-set(ALL_TOOLS init_database dump_database)
-add_executable(init_database ${TOOLS_SRC_DIR}/init_database.c $<TARGET_OBJECTS:common>)
-add_executable(dump_database
-    ${TOOLS_SRC_DIR}/dump_database.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
-    $<TARGET_OBJECTS:common>
-)
-set_target_properties(${ALL_TOOLS} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TOOLS_BIN_DIR}
-)
-
-# tools command
-add_custom_command(
-    OUTPUT
-        ${ALL_DATA}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-    COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/init_database ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
-    DEPENDS
-        ${ALL_TOOLS}
-        ${DATA_SRC_DIR}/phone.cin
-        ${DATA_SRC_DIR}/tsi.src
-)
-
-# test
-set(ALL_TESTCASES
-    test-bopomofo
-    test-config
-    test-easy-symbol
-    test-error-handling
-    test-fullshape
-    test-key2pho
-    test-keyboard
-    test-keyboardless
-    test-logger
-    test-mmap
-    test-path
-    test-regression
-    test-reset
-    test-special-symbol
-    test-struct-size
-    test-symbol
-    test-userphrase
-    test-utf8
-)
-set(ALL_TESTTOOLS
-    performance
-    randkeystroke
-    simulate
-    stress
-    testchewing
-)
-
-if(${CURSES_FOUND})
-    set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
-endif()
-
-enable_testing()
-
-set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
-
-foreach(target ${ALL_TESTCASES})
-    add_test(${target} ${TEST_BIN_DIR}/${target})
-endforeach()
-
-if(USE_VALGRIND)
-    find_program(VALGRIND valgrind)
-    if(VALGRIND)
-        foreach(target ${ALL_TESTCASES})
-            add_test("valgrind-${target}" ${VALGRIND} --error-exitcode=255 --leak-check=full ${TEST_BIN_DIR}/${target})
-        endforeach()
-    endif()
-endif()
-
-foreach(target ${ALL_TESTS})
-    add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
-    add_dependencies(${target} data all_static_data)
-    add_dependencies(check ${target})
-endforeach()
-
-add_library(testhelper STATIC
-    ${TEST_SRC_DIR}/testhelper.c
-    $<TARGET_OBJECTS:chewing>
-    $<TARGET_OBJECTS:common>
-)
-target_link_libraries(testhelper userphrase)
-set_target_properties(testhelper PROPERTIES
-    COMPILE_DEFINITIONS
-        "CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\";TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\""
-)
-
-set_target_properties(${ALL_TESTS} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${TEST_BIN_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_BIN_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
-    COMPILE_DEFINITIONS
-        "CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\";TEST_HASH_DIR=\"${TEST_BIN_DIR}\";TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\""
-)
-foreach(target ${ALL_TESTS})
-    target_link_libraries(${target} testhelper)
-endforeach()
-
-if (${CURSES_FOUND})
-    target_link_libraries(genkeystroke ${CURSES_LIBRARIES})
-endif()
-
-# data
-add_custom_target(data ALL DEPENDS ${ALL_DATA})
+add_subdirectory(doc)
+add_subdirectory(test)
+add_subdirectory(data)
 
 # library
+add_library(common OBJECT
+    ${INC_DIR}/internal/chewing-utf8-util.h
+    ${INC_DIR}/internal/key2pho-private.h
+    ${INC_DIR}/internal/memory-private.h
+    ${SRC_DIR}/porting_layer/include/plat_mmap.h
+    ${SRC_DIR}/porting_layer/include/plat_path.h
+    ${SRC_DIR}/porting_layer/include/plat_types.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
+
+    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+    ${SRC_DIR}/porting_layer/src/plat_path.c
+    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
+    ${SRC_DIR}/common/chewing-utf8-util.c
+    ${SRC_DIR}/common/key2pho.c
+)
+target_compile_definitions(common PRIVATE
+    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
+)
+
 add_library(chewing OBJECT
     ${ALL_INC}
     ${INC_DIR}/internal/chewing-private.h
@@ -347,22 +206,13 @@ add_library(chewing OBJECT
     ${SRC_DIR}/dict.c
     ${SRC_DIR}/mod_aux.c
     ${SRC_DIR}/pinyin.c
-    ${SRC_DIR}/porting_layer/include/plat_mmap.h
-    ${SRC_DIR}/porting_layer/include/plat_path.h
-    ${SRC_DIR}/porting_layer/include/plat_types.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/plat_path.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/private.h
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
     ${SRC_DIR}/bopomofo.c
 )
-set_target_properties(chewing PROPERTIES
-    COMPILE_DEFINITIONS "CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\""
+target_compile_definitions(chewing PRIVATE
+    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
 if (WITH_SQLITE3)
@@ -407,7 +257,7 @@ endif()
 
 if (BUILD_DLL OR NOT MSVC)
     if (MSVC)
-        add_definitions(-DCHEWINGDLL_EXPORTS)
+        add_compile_definitions(CHEWINGDLL_EXPORTS)
     endif()
     add_library(chewing_shared SHARED
         $<TARGET_OBJECTS:chewing>
@@ -440,16 +290,6 @@ set_target_properties(${LIBS} PROPERTIES
     SOVERSION 3
     VERSION 3.3.1
 )
-
-add_library(common OBJECT
-    ${INC_DIR}/internal/chewing-utf8-util.h
-    ${INC_DIR}/internal/key2pho-private.h
-    ${INC_DIR}/internal/memory-private.h
-
-    ${SRC_DIR}/common/chewing-utf8-util.c
-    ${SRC_DIR}/common/key2pho.c
-)
-
 
 # install
 install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
