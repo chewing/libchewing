@@ -34,15 +34,16 @@ set_target_properties(${ALL_TOOLS} PROPERTIES
 )
 
 # tools command
+file(MAKE_DIRECTORY ${DATA_BIN_DIR})
 add_custom_command(
     OUTPUT
         ${ALL_DATA}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${DATA_BIN_DIR}
-    COMMAND ${CMAKE_COMMAND} -E chdir ${DATA_BIN_DIR} ${TOOLS_BIN_DIR}/init_database ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
+    COMMAND init_database ${DATA_SRC_DIR}/phone.cin ${DATA_SRC_DIR}/tsi.src
     DEPENDS
         ${ALL_TOOLS}
         ${DATA_SRC_DIR}/phone.cin
         ${DATA_SRC_DIR}/tsi.src
+    WORKING_DIRECTORY ${DATA_BIN_DIR}
 )
 
 install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
