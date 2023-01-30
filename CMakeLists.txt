@@ -196,6 +196,16 @@ add_library(chewing OBJECT
 )
 if (NOT WITH_RUST)
 target_sources(common PRIVATE
+    ${SRC_DIR}/porting_layer/include/plat_mmap.h
+    ${SRC_DIR}/porting_layer/include/plat_path.h
+    ${SRC_DIR}/porting_layer/include/plat_types.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
+
+    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+    ${SRC_DIR}/porting_layer/src/plat_path.c
+    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/common/chewing-utf8-util.c
     ${SRC_DIR}/common/key2pho.c
 )
@@ -208,15 +218,6 @@ target_sources(chewing PRIVATE
 
     ${SRC_DIR}/dict.c
     ${SRC_DIR}/pinyin.c
-    ${SRC_DIR}/porting_layer/include/plat_mmap.h
-    ${SRC_DIR}/porting_layer/include/plat_path.h
-    ${SRC_DIR}/porting_layer/include/plat_types.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/plat_path.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
     ${SRC_DIR}/bopomofo.c
