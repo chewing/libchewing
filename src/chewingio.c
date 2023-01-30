@@ -811,7 +811,7 @@ CHEWING_API void chewing_set_autoLearn(ChewingContext *ctx, int mode)
     LOG_API("mode = %d", mode);
 
     if (mode == AUTOLEARN_ENABLED || mode == AUTOLEARN_DISABLED)
-        ctx->data->config.bAutoLearn = mode;
+        ctx->data->bAutoLearn = mode;
 }
 
 CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx)
@@ -823,9 +823,9 @@ CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx)
     }
     pgdata = ctx->data;
 
-    LOG_API("bAutoLearn = %d", ctx->data->config.bAutoLearn);
+    LOG_API("bAutoLearn = %d", ctx->data->bAutoLearn);
 
-    return ctx->data->config.bAutoLearn;
+    return ctx->data->bAutoLearn;
 }
 
 static void CheckAndResetRange(ChewingData *pgdata)
@@ -990,7 +990,7 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
     } else {
         keystrokeRtn = KEYSTROKE_COMMIT;
         WriteChiSymbolToCommitBuf(pgdata, pgo, nCommitStr);
-        if (!pgdata->config.bAutoLearn) {
+        if (!pgdata->bAutoLearn) {
             AutoLearnPhrase(pgdata);
         }
         CleanAllBuf(pgdata);
@@ -2419,7 +2419,7 @@ CHEWING_API int chewing_commit_preedit_buf(ChewingContext *ctx)
         return -1;
 
     WriteChiSymbolToCommitBuf(pgdata, pgo, len);
-    if (!pgdata->config.bAutoLearn) {
+    if (!pgdata->bAutoLearn) {
         AutoLearnPhrase(pgdata);
     }
     CleanAllBuf(pgdata);

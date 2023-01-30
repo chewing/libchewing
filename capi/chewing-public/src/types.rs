@@ -34,7 +34,6 @@ pub struct ChewingConfigData {
     pub b_auto_shift_cur: c_int,
     pub b_easy_symbol_input: c_int,
     pub b_phrase_choice_rearward: c_int,
-    pub b_auto_learn: c_int,
     pub hsu_sel_key_type: c_int,
 }
 

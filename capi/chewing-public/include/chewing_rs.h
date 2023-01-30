@@ -116,7 +116,6 @@ typedef struct ChewingConfigData {
   int bAutoShiftCur;
   int bEasySymbolInput;
   int bPhraseChoiceRearward;
-  int bAutoLearn;
   int hsuSelKeyType;
 } ChewingConfigData;
 

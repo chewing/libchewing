@@ -363,6 +363,7 @@ typedef struct ChewingData {
   struct PhrasingOutput phrOut;
   struct BopomofoData bopomofoData;
   ChewingConfigData config;
+  int bAutoLearn;
   /**
    * Current input buffer, content == 0 means Chinese code
    */
