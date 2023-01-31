@@ -72,7 +72,7 @@ endif()
 
 option(USE_VALGRIND "Use valgrind when testing" true)
 
-option(WITH_RUST "Use rust implemented internals (experimental)" true)
+option(WITH_RUST "Use rust implemented internals (experimental)" false)
 if (WITH_RUST)
     add_subdirectory(cmake/corrosion)
     corrosion_import_crate(MANIFEST_PATH Cargo.toml NO_LINKER_OVERRIDE)
