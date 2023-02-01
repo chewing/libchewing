@@ -1,8 +1,4 @@
-use std::{
-    ffi::{c_int, CString},
-    os::raw::c_char,
-    slice,
-};
+use std::{ffi::CString, slice};
 
 use chewing::editor::{
     keymap::{
@@ -15,6 +11,7 @@ use chewing::editor::{
     },
     SyllableEditor,
 };
+use libc::{c_char, c_int};
 
 use super::{
     binding::HaninSymbolInput,

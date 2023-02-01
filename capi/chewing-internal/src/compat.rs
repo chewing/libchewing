@@ -1,4 +1,4 @@
-use std::ffi::c_char;
+use libc::c_char;
 
 use crate::types::ChewingData;
 

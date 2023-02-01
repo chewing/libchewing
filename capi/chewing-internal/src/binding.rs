@@ -1,4 +1,4 @@
-use std::ffi::c_int;
+use libc::c_int;
 
 use ffi_opaque::opaque;
 

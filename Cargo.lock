@@ -73,9 +73,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.78"
+version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a20104e2335ce8a659d6dd92a51a767a0c062599c73b343fd152cb401e828c3d"
+checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
 
 [[package]]
 name = "cfg-if"
@@ -105,6 +105,7 @@ dependencies = [
  "chewing",
  "chewing-public",
  "ffi-opaque",
+ "libc",
 ]
 
 [[package]]
@@ -113,6 +114,7 @@ version = "0.5.1-alpha.1"
 dependencies = [
  "cbindgen",
  "chewing",
+ "libc",
 ]
 
 [[package]]
@@ -121,7 +123,8 @@ version = "0.5.1-alpha.1"
 dependencies = [
  "anyhow",
  "chewing",
- "clap 4.1.4",
+ "clap 4.0.32",
+ "clap_lex 0.3.0",
  "rusqlite",
  "thiserror",
 ]
@@ -143,12 +146,12 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.1.4"
+version = "4.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f13b9c79b5d1dd500d20ef541215a6423c75829ef43117e1b4d17fd8af0b5d76"
+checksum = "a7db700bc935f9e43e88d00b0850dae18a63773cfbec6d8e070fccf7fef89a39"
 dependencies = [
  "bitflags",
- "clap_lex 0.3.1",
+ "clap_lex 0.3.0",
  "is-terminal",
  "strsim",
  "termcolor",
@@ -165,9 +168,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.3.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "783fe232adfca04f90f56201b26d79682d4cd2625e0bc7290b95123afe558ade"
+checksum = "0d4198f73e42b4936b35b5bb248d81d2b595ecb170da0bac7655c54eedfa8da8"
 dependencies = [
  "os_str_bytes",
 ]

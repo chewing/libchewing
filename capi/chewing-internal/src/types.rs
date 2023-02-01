@@ -1,7 +1,6 @@
-use std::ffi::{c_char, c_int, c_long, c_uint, c_void};
-
 use chewing::{conversion::ChewingConversionEngine, dictionary::LayeredDictionary};
 use chewing_public::types::{ChewingConfigData, IntervalType, MAX_SELKEY};
+use libc::{c_char, c_int, c_long, c_uint, c_void};
 
 use crate::userphrase::UserphraseDbAndEstimate;
 

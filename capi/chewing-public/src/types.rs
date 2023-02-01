@@ -1,4 +1,4 @@
-use std::ffi::c_int;
+use libc::c_int;
 
 pub const CHINESE_MODE: usize = 1;
 pub const SYMBOL_MODE: usize = 0;

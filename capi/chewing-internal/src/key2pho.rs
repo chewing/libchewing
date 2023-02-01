@@ -1,9 +1,7 @@
-use std::{
-    ffi::{c_char, c_int, CStr},
-    ptr, slice,
-};
+use std::{ffi::CStr, ptr, slice};
 
 use chewing::zhuyin::{Bopomofo, Syllable};
+use libc::{c_char, c_int};
 
 #[no_mangle]
 pub unsafe extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {

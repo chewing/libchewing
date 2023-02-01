@@ -30,4 +30,4 @@ tempfile = "3"
 members = ["capi/chewing-internal", "capi/chewing-public", "tools"]
 
 [profile.release]
-lto = "thin"
+lto = true

@@ -9,7 +9,8 @@ edition = "2021"
 chewing = { version = "0.5.1-alpha.1", path = ".." }
 thiserror = "1.0.0"
 anyhow = "1.0.0"
-clap = "4.1.0"
+clap = "~4.0.0"
+clap_lex = "=0.3.0"
 
 [target.'cfg(windows)'.dependencies]
 rusqlite = { version = "0.28.0", features = ["bundled"]}

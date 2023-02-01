@@ -1,8 +1,10 @@
 use std::{
-    ffi::{c_char, c_int, c_uchar, CStr},
+    ffi::CStr,
     ptr::{self, null},
     str,
 };
+
+use libc::{c_char, c_int, c_uchar};
 
 #[no_mangle]
 pub unsafe extern "C" fn ueStrLen(str: *const c_char) -> c_int {

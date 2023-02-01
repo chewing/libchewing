@@ -2,9 +2,11 @@ use core::slice;
 use std::{
     borrow::Cow,
     env,
-    ffi::{c_char, c_int, CStr, CString},
+    ffi::{CStr, CString},
     path::Path,
 };
+
+use libc::{c_char, c_int};
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';

@@ -1,12 +1,10 @@
-use std::{
-    ffi::{c_char, c_int, CStr},
-    rc::Rc,
-};
+use std::{ffi::CStr, rc::Rc};
 
 use chewing::conversion::{
     Break, ChewingConversionEngine, ChineseSequence, ConversionEngine, Interval,
 };
 use chewing_public::types::IntervalType;
+use libc::{c_char, c_int};
 
 use super::{binding::toPreeditBufIndex, types::ChewingData};
 
