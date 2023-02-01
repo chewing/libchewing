@@ -9,7 +9,9 @@ edition = "2021"
 chewing = { version = "0.5.1-alpha.1", path = ".." }
 thiserror = "1.0.0"
 anyhow = "1.0.0"
+# MSRV(1.61): clap 4.1.x requires rust 1.64
 clap = "~4.0.0"
+# MSRV(1.61): clap_lex ^0.3.1 requires rust 1.64
 clap_lex = "=0.3.0"
 
 [target.'cfg(windows)'.dependencies]
