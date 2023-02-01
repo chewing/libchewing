@@ -27,6 +27,16 @@ FILE *fd;
 
 int find_path_by_files(const char *search_path, const char *const *files, char *output, size_t output_len);
 
+#ifdef WITH_RUST
+static const char *FILES[] = {
+    "tsi.dat",
+    "word.dat",
+    SYMBOL_TABLE_FILE,
+    SOFTKBD_TABLE_FILE,
+    PINYIN_TAB_NAME,
+    NULL,
+};
+#else
 static const char *FILES[] = {
     DICT_FILE,
     PHONE_TREE_FILE,
@@ -35,6 +45,7 @@ static const char *FILES[] = {
     PINYIN_TAB_NAME,
     NULL,
 };
+#endif
 
 void test_plat_get_search_path()
 {
@@ -61,7 +72,7 @@ void test_plat_path_found()
                              CHEWING_DATA_PREFIX, FILES, output, sizeof(output));
 
     ok(ret == 0, "find_path_by_files shall return 0");
-    ok(strcmp(output, CHEWING_DATA_PREFIX) == 0, "output shall be " CHEWING_DATA_PREFIX);
+    ok(strcmp(output, CHEWING_DATA_PREFIX) == 0, "output %s shall be " CHEWING_DATA_PREFIX, output);
 }
 
 void test_plat_path_cannot_find()

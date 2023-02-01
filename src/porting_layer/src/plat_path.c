@@ -13,9 +13,6 @@
 #endif
 #include "plat_path.h"
 
-#ifndef HAVE_ASPRINTF
-#    include <stdarg.h>
-#endif
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,31 +119,6 @@ char *strtok_r(char *s, const char *delim, char **save_ptr)
         *save_ptr = s + 1;
     }
     return token;
-}
-#endif
-
-#ifndef HAVE_ASPRINTF
-int asprintf(char **strp, const char *fmt, ...)
-{
-    char *buf;
-    size_t len;
-    va_list ap;
-
-    va_start(ap, fmt);
-    len = vsnprintf(NULL, 0, fmt, ap);
-    va_end(ap);
-
-    buf = (char *) malloc(len + 1);
-    if (!buf)
-        return -1;
-
-    va_start(ap, fmt);
-    len = vsnprintf(buf, len + 1, fmt, ap);
-    va_end(ap);
-
-    *strp = buf;
-
-    return len;
 }
 #endif
 

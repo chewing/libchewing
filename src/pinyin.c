@@ -22,8 +22,8 @@
 
 void TerminatePinyin(ChewingData *pgdata)
 {
-    free(pgdata->static_data.hanyuInitialsMap);
-    free(pgdata->static_data.hanyuFinalsMap);
+    free(pgdata->staticData.hanyuInitialsMap);
+    free(pgdata->staticData.hanyuFinalsMap);
 }
 
 int InitPinyin(ChewingData *pgdata, const char *prefix)
@@ -40,29 +40,29 @@ int InitPinyin(ChewingData *pgdata, const char *prefix)
     if (!fd)
         return 0;
 
-    ret = fscanf(fd, "%d", &pgdata->static_data.HANYU_INITIALS);
+    ret = fscanf(fd, "%d", &pgdata->staticData.HANYU_INITIALS);
     if (ret != 1) {
         goto fail;
     }
-    ++pgdata->static_data.HANYU_INITIALS;
-    pgdata->static_data.hanyuInitialsMap = ALC(keymap, pgdata->static_data.HANYU_INITIALS);
-    for (i = 0; i < pgdata->static_data.HANYU_INITIALS - 1; i++) {
+    ++pgdata->staticData.HANYU_INITIALS;
+    pgdata->staticData.hanyuInitialsMap = ALC(keymap, pgdata->staticData.HANYU_INITIALS);
+    for (i = 0; i < pgdata->staticData.HANYU_INITIALS - 1; i++) {
         ret = fscanf(fd, "%s %s",
-                     pgdata->static_data.hanyuInitialsMap[i].pinyin, pgdata->static_data.hanyuInitialsMap[i].bopomofo);
+                     pgdata->staticData.hanyuInitialsMap[i].pinyin, pgdata->staticData.hanyuInitialsMap[i].bopomofo);
         if (ret != 2) {
             goto fail;
         }
     }
 
-    ret = fscanf(fd, "%d", &pgdata->static_data.HANYU_FINALS);
+    ret = fscanf(fd, "%d", &pgdata->staticData.HANYU_FINALS);
     if (ret != 1) {
         goto fail;
     }
-    ++pgdata->static_data.HANYU_FINALS;
-    pgdata->static_data.hanyuFinalsMap = ALC(keymap, pgdata->static_data.HANYU_FINALS);
-    for (i = 0; i < pgdata->static_data.HANYU_FINALS - 1; i++) {
+    ++pgdata->staticData.HANYU_FINALS;
+    pgdata->staticData.hanyuFinalsMap = ALC(keymap, pgdata->staticData.HANYU_FINALS);
+    for (i = 0; i < pgdata->staticData.HANYU_FINALS - 1; i++) {
         ret = fscanf(fd, "%s %s",
-                     pgdata->static_data.hanyuFinalsMap[i].pinyin, pgdata->static_data.hanyuFinalsMap[i].bopomofo);
+                     pgdata->staticData.hanyuFinalsMap[i].pinyin, pgdata->staticData.hanyuFinalsMap[i].bopomofo);
         if (ret != 2) {
             goto fail;
         }
@@ -198,15 +198,15 @@ int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomo
     }
 
 
-    for (i = 0; i < pgdata->static_data.HANYU_INITIALS; i++) {
-        p = strstr(pinyinKeySeq, pgdata->static_data.hanyuInitialsMap[i].pinyin);
+    for (i = 0; i < pgdata->staticData.HANYU_INITIALS; i++) {
+        p = strstr(pinyinKeySeq, pgdata->staticData.hanyuInitialsMap[i].pinyin);
         if (p == pinyinKeySeq) {
-            initial = pgdata->static_data.hanyuInitialsMap[i].bopomofo;
-            cursor = pinyinKeySeq + strlen(pgdata->static_data.hanyuInitialsMap[i].pinyin);
+            initial = pgdata->staticData.hanyuInitialsMap[i].bopomofo;
+            cursor = pinyinKeySeq + strlen(pgdata->staticData.hanyuInitialsMap[i].pinyin);
             break;
         }
     }
-    if (i == pgdata->static_data.HANYU_INITIALS) {
+    if (i == pgdata->staticData.HANYU_INITIALS) {
         /* No initials. might be ㄧㄨㄩ */
         /* XXX: I NEED Implementation
            if(finalsKeySeq[0] != ) {
@@ -216,13 +216,13 @@ int PinyinToBopomofo(ChewingData *pgdata, const char *pinyinKeySeq, char *bopomo
     }
 
     if (cursor) {
-        for (i = 0; i < pgdata->static_data.HANYU_FINALS; i++) {
-            if (strcmp(cursor, pgdata->static_data.hanyuFinalsMap[i].pinyin) == 0) {
-                final = pgdata->static_data.hanyuFinalsMap[i].bopomofo;
+        for (i = 0; i < pgdata->staticData.HANYU_FINALS; i++) {
+            if (strcmp(cursor, pgdata->staticData.hanyuFinalsMap[i].pinyin) == 0) {
+                final = pgdata->staticData.hanyuFinalsMap[i].bopomofo;
                 break;
             }
         }
-        if (i == pgdata->static_data.HANYU_FINALS) {
+        if (i == pgdata->staticData.HANYU_FINALS) {
             return 2;
         }
     }

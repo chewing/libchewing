@@ -17,10 +17,16 @@
 #include <string.h>
 
 #include "chewing-private.h"
+
+#ifdef WITH_RUST
+#include "plat_types.h"
+#else
 #include "chewing-utf8-util.h"
 #include "key2pho-private.h"
-#include "plat_path.h"
 #include "userphrase-private.h"
+#include "plat_path.h"
+#endif
+
 
 static unsigned int test_run;
 static unsigned int test_ok;

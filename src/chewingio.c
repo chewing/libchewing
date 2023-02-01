@@ -26,27 +26,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "chewing-utf8-util.h"
-#include "global.h"
-#include "bopomofo-private.h"
 #include "chewingutil.h"
-#include "userphrase-private.h"
 #include "choice-private.h"
-#include "dict-private.h"
-#include "tree-private.h"
-#include "pinyin-private.h"
 #include "private.h"
 #include "chewingio.h"
 #include "mod_aux.h"
 #include "global-private.h"
-#include "plat_path.h"
-#include "chewing-private.h"
-#include "key2pho-private.h"
 
+#ifdef WITH_RUST
+#   include "chewing_rs.h"
+#   include "chewing_internal.h"
+#else
+#include "global.h"
+#include "bopomofo-private.h"
+#include "chewing-utf8-util.h"
+#include "dict-private.h"
+#include "key2pho-private.h"
+#include "pinyin-private.h"
+#include "plat_path.h"
+#include "tree-private.h"
+#include "userphrase-private.h"
+#include "chewing-private.h"
 #if WITH_SQLITE3
 #    include "chewing-sql.h"
 #else
 #    include "hash-private.h"
+#endif
 #endif
 
 const char *const kb_type_str[] = {
@@ -65,11 +70,19 @@ const char *const kb_type_str[] = {
     "KB_CARPALX"
 };
 
+#ifdef WITH_RUST
+const char *const DICT_FILES[] = {
+    "tsi.dat",
+    "word.dat",
+    NULL,
+};
+#else
 const char *const DICT_FILES[] = {
     DICT_FILE,
     PHONE_TREE_FILE,
     NULL,
 };
+#endif
 
 const char *const SYMBOL_TABLE_FILES[] = {
     SYMBOL_TABLE_FILE,
@@ -292,10 +305,15 @@ CHEWING_API ChewingContext *chewing_new()
 CHEWING_API int chewing_Reset(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    ChewingStaticData static_data;
+    ChewingStaticData staticData;
     ChewingConfigData old_config;
     void (*logger) (void *data, int level, const char *fmt, ...);
     void *loggerData;
+#ifdef WITH_RUST
+    const void *dict;
+    void *ce;
+    void *ue;
+#endif
 
     if (!ctx) {
         return -1;
@@ -306,17 +324,32 @@ CHEWING_API int chewing_Reset(ChewingContext *ctx)
 
     /* Backup old config and restore it after clearing pgdata structure. */
     old_config = pgdata->config;
-    static_data = pgdata->static_data;
+    staticData = pgdata->staticData;
     logger = pgdata->logger;
     loggerData = pgdata->loggerData;
+#ifdef WITH_RUST
+    dict = pgdata->dict;
+    ce = pgdata->ce;
+    ue = pgdata->ue;
+    if (pgdata->bopomofoData.editorWithKeymap != 0) {
+        FreePhoneticEditor(pgdata->bopomofoData.editorWithKeymap);
+    }
+#endif
     memset(pgdata, 0, sizeof(ChewingData));
     pgdata->config = old_config;
-    pgdata->static_data = static_data;
+    pgdata->staticData = staticData;
     pgdata->logger = logger;
     pgdata->loggerData = loggerData;
 
+#ifdef WITH_RUST
+    pgdata->dict = dict;
+    pgdata->ce = ce;
+    pgdata->ue = ue;
+    chewing_set_KBType(ctx, KB_DEFAULT);
+#else
     /* bopomofoData */
     memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
+#endif
 
     /* choiceInfo */
     memset(&(pgdata->choiceInfo), 0, sizeof(ChoiceInfo));
@@ -330,8 +363,8 @@ CHEWING_API int chewing_Reset(ChewingContext *ctx)
     pgdata->bFullShape = HALFSHAPE_MODE;
     pgdata->bSelect = 0;
     pgdata->nSelect = 0;
-    pgdata->PointStart = -1;
-    pgdata->PointEnd = 0;
+    pgdata->pointStart = -1;
+    pgdata->pointEnd = 0;
     pgdata->phrOut.nNumCut = 0;
     return 0;
 }
@@ -347,6 +380,18 @@ CHEWING_API int chewing_set_KBType(ChewingContext *ctx, int kbtype)
 
     LOG_API("kbtype = %d", kbtype);
 
+#ifdef WITH_RUST
+    if (pgdata->bopomofoData.editorWithKeymap != 0) {
+        FreePhoneticEditor(pgdata->bopomofoData.editorWithKeymap);
+    }
+    if (kbtype < KB_TYPE_NUM && kbtype >= 0) {
+        pgdata->bopomofoData.editorWithKeymap = NewPhoneticEditor(kbtype);
+        return 0;
+    } else {
+        pgdata->bopomofoData.editorWithKeymap = NewPhoneticEditor(KB_DEFAULT);
+        return -1;
+    }
+#else
     if (kbtype < KB_TYPE_NUM && kbtype >= 0) {
         ctx->data->bopomofoData.kbtype = kbtype;
         return 0;
@@ -354,6 +399,7 @@ CHEWING_API int chewing_set_KBType(ChewingContext *ctx, int kbtype)
         ctx->data->bopomofoData.kbtype = KB_DEFAULT;
         return -1;
     }
+#endif
 }
 
 CHEWING_API int chewing_get_KBType(const ChewingContext *ctx)
@@ -365,9 +411,11 @@ CHEWING_API int chewing_get_KBType(const ChewingContext *ctx)
     }
     pgdata = ctx->data;
 
-    LOG_API("kbtype = %d", ctx->data->bopomofoData.kbtype);
+    int kbtype = BopomofoKbType(&ctx->data->bopomofoData);
 
-    return ctx->data->bopomofoData.kbtype;
+    LOG_API("kbtype = %d", kbtype);
+
+    return kbtype;
 }
 
 CHEWING_API char *chewing_get_KBString(const ChewingContext *ctx)
@@ -379,18 +427,27 @@ CHEWING_API char *chewing_get_KBString(const ChewingContext *ctx)
     }
     pgdata = ctx->data;
 
-    LOG_API("KBString = %s", kb_type_str[ctx->data->bopomofoData.kbtype]);
+    int kbtype = BopomofoKbType(&ctx->data->bopomofoData);
 
-    return strdup(kb_type_str[ctx->data->bopomofoData.kbtype]);
+    LOG_API("KBString = %s", kb_type_str[kbtype]);
+
+    return strdup(kb_type_str[kbtype]);
 }
 
 CHEWING_API void chewing_delete(ChewingContext *ctx)
 {
     if (ctx) {
         if (ctx->data) {
+            if (ctx->data->bSelect) {
+                chewing_cand_close(ctx);
+            }
             TerminatePinyin(ctx->data);
             TerminateEasySymbolTable(ctx->data);
             TerminateSymbolTable(ctx->data);
+#ifdef WITH_RUST
+            FreePhoneticEditor(ctx->data->bopomofoData.editorWithKeymap);
+            UserGetPhraseEnd(ctx->data, NULL);
+#endif
             TerminateUserphrase(ctx->data);
             TerminateTree(ctx->data);
             TerminateDict(ctx->data);
@@ -773,9 +830,9 @@ CHEWING_API int chewing_get_autoLearn(const ChewingContext *ctx)
 
 static void CheckAndResetRange(ChewingData *pgdata)
 {
-    if (pgdata->PointStart > -1) {
-        pgdata->PointStart = -1;
-        pgdata->PointEnd = 0;
+    if (pgdata->pointStart > -1) {
+        pgdata->pointStart = -1;
+        pgdata->pointEnd = 0;
     }
 }
 
@@ -907,26 +964,26 @@ CHEWING_API int chewing_handle_Enter(ChewingContext *ctx)
         keystrokeRtn = KEYSTROKE_IGNORE;
     } else if (pgdata->bSelect) {
         keystrokeRtn = KEYSTROKE_ABSORB | KEYSTROKE_BELL;
-    } else if (pgdata->PointStart > -1) {
+    } else if (pgdata->pointStart > -1) {
         int buf = pgdata->chiSymbolCursor;
         int key = '0';
 
-        if (pgdata->PointEnd > 1) {
+        if (pgdata->pointEnd > 1) {
             if (!pgdata->config.bAddPhraseForward) {
-                pgdata->chiSymbolCursor = pgdata->PointStart;
+                pgdata->chiSymbolCursor = pgdata->pointStart;
             } else {
-                pgdata->chiSymbolCursor = pgdata->PointStart + pgdata->PointEnd;
+                pgdata->chiSymbolCursor = pgdata->pointStart + pgdata->pointEnd;
             }
-            key = '0' + pgdata->PointEnd;
-        } else if (pgdata->PointEnd < 1) {
+            key = '0' + pgdata->pointEnd;
+        } else if (pgdata->pointEnd < 1) {
             if (pgdata->config.bAddPhraseForward)
-                pgdata->chiSymbolCursor = buf - pgdata->PointEnd;
-            key = '0' - pgdata->PointEnd;
+                pgdata->chiSymbolCursor = buf - pgdata->pointEnd;
+            key = '0' - pgdata->pointEnd;
         }
         chewing_handle_CtrlNum(ctx, key);
         pgdata->chiSymbolCursor = buf;
-        pgdata->PointStart = -1;
-        pgdata->PointEnd = 0;
+        pgdata->pointStart = -1;
+        pgdata->pointEnd = 0;
         MakeOutputWithRtn(pgo, pgdata, keystrokeRtn);
         MakeOutputAddMsgAndCleanInterval(pgo, pgdata);
         return 0;
@@ -1099,16 +1156,16 @@ CHEWING_API int chewing_handle_ShiftLeft(ChewingContext *ctx)
         keystrokeRtn = KEYSTROKE_IGNORE;
     }
     if (!pgdata->bSelect) {
-        /*  PointEnd locates (-9, +9) */
-        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor > 0 && pgdata->PointEnd > -9) {
-            if (pgdata->PointStart == -1)
-                pgdata->PointStart = pgdata->chiSymbolCursor;
+        /*  pointEnd locates (-9, +9) */
+        if (!BopomofoIsEntering(&(pgdata->bopomofoData)) && pgdata->chiSymbolCursor > 0 && pgdata->pointEnd > -9) {
+            if (pgdata->pointStart == -1)
+                pgdata->pointStart = pgdata->chiSymbolCursor;
             pgdata->chiSymbolCursor--;
             if (ChewingIsChiAt(pgdata->chiSymbolCursor, pgdata)) {
-                pgdata->PointEnd--;
+                pgdata->pointEnd--;
             }
-            if (pgdata->PointEnd == 0)
-                pgdata->PointStart = -1;
+            if (pgdata->pointEnd == 0)
+                pgdata->pointStart = -1;
         }
     }
 
@@ -1170,17 +1227,17 @@ CHEWING_API int chewing_handle_ShiftRight(ChewingContext *ctx)
     }
 
     if (!pgdata->bSelect) {
-        /* PointEnd locates (-9, +9) */
+        /* pointEnd locates (-9, +9) */
         if (!BopomofoIsEntering(&(pgdata->bopomofoData)) &&
-            pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen && pgdata->PointEnd < 9) {
-            if (pgdata->PointStart == -1)
-                pgdata->PointStart = pgdata->chiSymbolCursor;
+            pgdata->chiSymbolCursor < pgdata->chiSymbolBufLen && pgdata->pointEnd < 9) {
+            if (pgdata->pointStart == -1)
+                pgdata->pointStart = pgdata->chiSymbolCursor;
             if (ChewingIsChiAt(pgdata->chiSymbolCursor, pgdata)) {
-                pgdata->PointEnd++;
+                pgdata->pointEnd++;
             }
             pgdata->chiSymbolCursor++;
-            if (pgdata->PointEnd == 0)
-                pgdata->PointStart = -1;
+            if (pgdata->pointEnd == 0)
+                pgdata->pointStart = -1;
         }
     }
 
@@ -1496,7 +1553,7 @@ CHEWING_API int chewing_handle_Default(ChewingContext *ctx, int key)
     DEBUG_OUT("   key=%d", key);
 
     /* Dvorak Hsu */
-    if (pgdata->bopomofoData.kbtype == KB_DVORAK_HSU) {
+    if (BopomofoKbType(&pgdata->bopomofoData) == KB_DVORAK_HSU) {
         key = dvorak_convert(key);
     }
 
@@ -1565,7 +1622,8 @@ CHEWING_API int chewing_handle_Default(ChewingContext *ctx, int key)
                 keystrokeRtn = KEYSTROKE_ABSORB;
                 break;
             case BOPOMOFO_COMMIT:
-                AddChi(pgdata->bopomofoData.phone, pgdata->bopomofoData.phoneAlt, pgdata);
+                AddChi(BopomofoSyllableIndex(&pgdata->bopomofoData), BopomofoSyllableIndexAlt(&pgdata->bopomofoData), pgdata);
+                BopomofoRemoveAll(&pgdata->bopomofoData);
                 break;
             case BOPOMOFO_NO_WORD:
                 keystrokeRtn = KEYSTROKE_BELL | KEYSTROKE_ABSORB;
@@ -1888,27 +1946,32 @@ CHEWING_API int chewing_userphrase_enumerate(ChewingContext *ctx)
 {
     ChewingData *pgdata;
 
-#if WITH_SQLITE3
-    int ret;
-#endif
-
     if (!ctx) {
         return -1;
     }
+
+#ifdef WITH_RUST
+    UserGetPhraseEnd(ctx->data, NULL);
+    ctx->data->phraseIter = UserEnumeratePhrase(ctx->data->ue);
+#else
+#if WITH_SQLITE3
+    int ret;
+#endif
 
     pgdata = ctx->data;
 
     LOG_API("");
 
 #if WITH_SQLITE3
-    assert(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT]);
-    ret = sqlite3_reset(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT]);
+    assert(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT]);
+    ret = sqlite3_reset(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT]);
     if (ret != SQLITE_OK) {
         LOG_ERROR("sqlite3_reset returns %d", ret);
         return -1;
     }
 #else
-    pgdata->static_data.userphrase_enum = FindNextHash(pgdata, NULL);
+    pgdata->staticData.userphrase_enum = FindNextHash(pgdata, NULL);
+#endif
 #endif
     return 0;
 }
@@ -1917,19 +1980,23 @@ CHEWING_API int chewing_userphrase_has_next(ChewingContext *ctx, unsigned int *p
 {
     ChewingData *pgdata;
 
+    if (!ctx || !phrase_len || !bopomofo_len) {
+        return 0;
+    }
+
+#ifdef WITH_RUST
+    return UserEnumerateHasNext(ctx->data->phraseIter, phrase_len, bopomofo_len);
+#else
 #if WITH_SQLITE3
     int ret;
 #endif
 
-    if (!ctx || !phrase_len || !bopomofo_len) {
-        return 0;
-    }
     pgdata = ctx->data;
 
     LOG_API("");
 
 #if WITH_SQLITE3
-    ret = sqlite3_step(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT]);
+    ret = sqlite3_step(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT]);
     if (ret != SQLITE_ROW) {
         if (ret != SQLITE_DONE) {
             LOG_ERROR("sqlite3_step returns %d", ret);
@@ -1937,24 +2004,26 @@ CHEWING_API int chewing_userphrase_has_next(ChewingContext *ctx, unsigned int *p
         return 0;
     }
 
-    *phrase_len = strlen((const char *) sqlite3_column_text(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+    *phrase_len = strlen((const char *) sqlite3_column_text(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT],
                                                             SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
                                                             [COLUMN_USERPHRASE_PHRASE])) + 1;
 
-    *bopomofo_len = GetBopomofoBufLen(sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+    *bopomofo_len = GetBopomofoBufLen(sqlite3_column_int(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT],
                                                          SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
                                                          [COLUMN_USERPHRASE_LENGTH]));
 
     return 1;
 #else
-    if (pgdata->static_data.userphrase_enum) {
-        *phrase_len = strlen(pgdata->static_data.userphrase_enum->data.wordSeq) + 1;
-        *bopomofo_len = BopomofoFromUintArray(NULL, 0, pgdata->static_data.userphrase_enum->data.phoneSeq);
+    if (pgdata->staticData.userphrase_enum) {
+        *phrase_len = strlen(pgdata->staticData.userphrase_enum->data.wordSeq) + 1;
+        *bopomofo_len = BopomofoFromUintArray(NULL, 0, pgdata->staticData.userphrase_enum->data.phoneSeq);
         return 1;
 
     }
     return 0;
 #endif
+#endif
+    return 0;
 }
 
 CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
@@ -1963,6 +2032,13 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 {
     ChewingData *pgdata;
 
+    if (!ctx || !phrase_buf || !phrase_len || !bopomofo_buf || !bopomofo_len) {
+        return -1;
+    }
+
+#ifdef WITH_RUST
+    return UserEnumerateGet(ctx->data->phraseIter, phrase_buf, phrase_len, bopomofo_buf, bopomofo_len);
+#else
 #if WITH_SQLITE3
     const char *phrase;
     int length;
@@ -1970,19 +2046,16 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
     uint16_t phone_array[MAX_PHRASE_LEN + 1] = { 0 };
 #endif
 
-    if (!ctx || !phrase_buf || !phrase_len || !bopomofo_buf || !bopomofo_len) {
-        return -1;
-    }
     pgdata = ctx->data;
 
     LOG_API("");
 
 #if WITH_SQLITE3
-    phrase = (const char *) sqlite3_column_text(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+    phrase = (const char *) sqlite3_column_text(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT],
                                                 SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column
                                                 [COLUMN_USERPHRASE_PHRASE]);
     length =
-        sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+        sqlite3_column_int(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT],
                            SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_LENGTH]);
 
     if (phrase_len < strlen(phrase) + 1) {
@@ -1996,7 +2069,7 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
     }
 
     for (i = 0; i < length && i < MAX_PHRASE_LEN; ++i) {
-        phone_array[i] = sqlite3_column_int(pgdata->static_data.stmt_userphrase[STMT_USERPHRASE_SELECT],
+        phone_array[i] = sqlite3_column_int(pgdata->staticData.stmt_userphrase[STMT_USERPHRASE_SELECT],
                                             SQL_STMT_USERPHRASE[STMT_USERPHRASE_SELECT].column[COLUMN_USERPHRASE_PHONE_0
                                                                                                + i]);
     }
@@ -2006,20 +2079,22 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
 
     return 0;
 #else
-    if (pgdata->static_data.userphrase_enum) {
-        strncpy(phrase_buf, pgdata->static_data.userphrase_enum->data.wordSeq, phrase_len);
+    if (pgdata->staticData.userphrase_enum) {
+        strncpy(phrase_buf, pgdata->staticData.userphrase_enum->data.wordSeq, phrase_len);
         phrase_buf[phrase_len - 1] = 0;
 
-        BopomofoFromUintArray(bopomofo_buf, bopomofo_len, pgdata->static_data.userphrase_enum->data.phoneSeq);
+        BopomofoFromUintArray(bopomofo_buf, bopomofo_len, pgdata->staticData.userphrase_enum->data.phoneSeq);
         bopomofo_buf[bopomofo_len - 1] = 0;
 
-        pgdata->static_data.userphrase_enum = FindNextHash(pgdata, pgdata->static_data.userphrase_enum);
+        pgdata->staticData.userphrase_enum = FindNextHash(pgdata, pgdata->staticData.userphrase_enum);
 
         return 0;
     }
 
     return -1;
 #endif
+#endif
+    return -1;
 }
 
 CHEWING_API int chewing_userphrase_add(ChewingContext *ctx, const char *phrase_buf, const char *bopomofo_buf)
@@ -2098,7 +2173,7 @@ CHEWING_API int chewing_userphrase_lookup(ChewingContext *ctx, const char *phras
     ssize_t phone_len;
     uint16_t *phone_buf = 0;
     int ret;
-    UserPhraseData *user_phrase_data;
+    UserPhraseData *user_phrase_data = NULL;
 
     if (!ctx || !bopomofo_buf) {
         return 0;

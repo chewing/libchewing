@@ -16,12 +16,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "global.h"
 #include "chewing-private.h"
-#include "bopomofo-private.h"
 #include "chewingio.h"
-#include "chewing-utf8-util.h"
 #include "private.h"
+
+#ifndef WITH_RUST
+#include "global.h"
+#include "bopomofo-private.h"
+#include "chewing-utf8-util.h"
+#endif
 
 /**
  * @param ctx handle to Chewing IM context

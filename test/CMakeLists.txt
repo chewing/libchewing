@@ -4,11 +4,9 @@ set(ALL_TESTCASES
     test-easy-symbol
     test-error-handling
     test-fullshape
-    test-key2pho
     test-keyboard
     test-keyboardless
     test-logger
-    test-mmap
     test-path
     test-regression
     test-reset
@@ -18,6 +16,12 @@ set(ALL_TESTCASES
     test-userphrase
     test-utf8
 )
+if (NOT WITH_RUST)
+    list(APPEND ALL_TESTCASES
+        test-key2pho
+        test-mmap
+    )
+endif()
 set(ALL_TESTTOOLS
     performance
     randkeystroke
@@ -48,6 +52,10 @@ endif()
 
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
+    if (WITH_RUST)
+        target_link_libraries(${target} chewing-internal)
+        target_link_libraries(${target} ${SQLITE3_LIBRARY})
+    endif()
     add_dependencies(${target} data all_static_data)
     add_dependencies(check ${target})
 endforeach()
@@ -56,6 +64,9 @@ add_library(testhelper STATIC
     ${TEST_SRC_DIR}/testhelper.c
     $<TARGET_OBJECTS:common>
 )
+if (NOT WITH_RUST)
+    target_link_libraries(testhelper userphrase)
+endif()
 target_compile_definitions(testhelper PRIVATE
     CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
     TEST_HASH_DIR=\"${TEST_BIN_DIR}\"

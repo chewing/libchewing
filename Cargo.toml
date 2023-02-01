@@ -1,0 +1,33 @@
+[package]
+name = "chewing"
+description = "The Chewing (酷音) intelligent Zhuyin input method."
+license = "LGPL-2.1-or-later"
+documentation = "https://docs.rs/chewing"
+version = "0.5.1-alpha.2"
+edition = "2021"
+
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "AUTHORS",
+    "COPYING",
+    "NEWS"
+]
+
+[dependencies]
+binary-layout = "3.0.0"
+dirs-next = "2.0.0"
+indexmap = "1.9.2"
+riff = "1.0.0"
+rusqlite = "0.28.0"
+thiserror = "1.0.0"
+tracing = "0.1.37"
+
+[dev-dependencies]
+tempfile = "3"
+
+[workspace]
+members = ["capi/chewing-internal", "capi/chewing-public", "tools"]
+
+[profile.release]
+lto = true
