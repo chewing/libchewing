@@ -52,10 +52,18 @@ endif()
 
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
-    if (WITH_RUST)
-        target_link_libraries(${target} chewing-internal)
-        target_link_libraries(${target} ${SQLITE3_LIBRARY})
+    target_link_libraries(${target} testhelper)
+    if (BUILD_DLL)
+        target_link_libraries(${target} chewing_shared)
+    else()
+        target_link_libraries(${target} chewing_static)
     endif()
+    target_compile_definitions(${target} PRIVATE
+        CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
+        TEST_HASH_DIR=\"${TEST_BIN_DIR}\"
+        TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\"
+        TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\"
+    )
     add_dependencies(${target} data all_static_data)
     add_dependencies(check ${target})
 endforeach()
@@ -81,20 +89,6 @@ set_target_properties(${ALL_TESTS} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_BIN_DIR}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 )
-foreach(target ${ALL_TESTS})
-    target_link_libraries(${target} testhelper)
-    if (BUILD_DLL)
-        target_link_libraries(${target} chewing_shared)
-    else()
-        target_link_libraries(${target} chewing_static)
-    endif()
-    target_compile_definitions(${target} PRIVATE
-        CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
-        TEST_HASH_DIR=\"${TEST_BIN_DIR}\"
-        TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\"
-        TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\"
-    )
-endforeach()
 
 if (${CURSES_FOUND})
     target_link_libraries(genkeystroke ${CURSES_LIBRARIES})
