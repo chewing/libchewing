@@ -19,7 +19,6 @@ typedef struct OrigianlChewingConfigData {
     int bAutoShiftCur;
     int bEasySymbolInput;
     int bPhraseChoiceRearward;
-    int bAutoLearn;
     int hsuSelKeyType;
 } OrigianlChewingConfigData;
 

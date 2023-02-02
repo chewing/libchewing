@@ -234,6 +234,7 @@ typedef struct ChewingData {
     PhrasingOutput phrOut;
     BopomofoData bopomofoData;
     ChewingConfigData config;
+    int bAutoLearn;
         /** @brief current input buffer, content==0 means Chinese code */
     PreeditBuf preeditBuf[MAX_PHONE_SEQ_LEN];
     int chiSymbolCursor;

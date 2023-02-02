@@ -178,6 +178,7 @@ pub struct ChewingData {
     pub phr_out: PhrasingOutput,
     pub bopomofo_data: BopomofoData,
     pub config: ChewingConfigData,
+    pub b_auto_learn: c_int,
     /// Current input buffer, content == 0 means Chinese code
     pub preedit_buf: [PreeditBuf; MAX_PHONE_SEQ_LEN],
     pub chi_symbol_cursor: c_int,
