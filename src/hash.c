@@ -458,7 +458,7 @@ static int migrate_hash_to_bin(ChewingData *pgdata)
     seekdump = dump;
     memcpy(seekdump, BIN_HASH_SIG, strlen(BIN_HASH_SIG));
     memcpy(seekdump + strlen(BIN_HASH_SIG),
-           &pgdata->staticData.chewing_lifetime, sizeof(pgdata->static_data.chewing_lifetime));
+           &pgdata->staticData.chewing_lifetime, sizeof(pgdata->staticData.chewing_lifetime));
     seekdump += strlen(BIN_HASH_SIG) + sizeof(pgdata->staticData.chewing_lifetime);
 
     /* migrate */
@@ -522,8 +522,8 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
     int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
     char *dump, *seekdump;
 
-    strncpy(pgdata->staticData.hashfilename, path, ARRAY_SIZE(pgdata->static_data.hashfilename) - 1);
-    memset(pgdata->staticData.hashtable, 0, sizeof(pgdata->static_data.hashtable));
+    strncpy(pgdata->staticData.hashfilename, path, ARRAY_SIZE(pgdata->staticData.hashfilename) - 1);
+    memset(pgdata->staticData.hashtable, 0, sizeof(pgdata->staticData.hashtable));
 
   open_hash_file:
     dump = _load_hash_file(pgdata->staticData.hashfilename, &fsize);
@@ -541,7 +541,7 @@ int InitUserphrase(struct ChewingData *pgdata, const char *path)
         }
         pgdata->staticData.chewing_lifetime = 0;
         fwrite(BIN_HASH_SIG, 1, strlen(BIN_HASH_SIG), outfile);
-        fwrite(&pgdata->staticData.chewing_lifetime, 1, sizeof(pgdata->static_data.chewing_lifetime), outfile);
+        fwrite(&pgdata->staticData.chewing_lifetime, 1, sizeof(pgdata->staticData.chewing_lifetime), outfile);
         fclose(outfile);
     } else {
         if (memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0) {
