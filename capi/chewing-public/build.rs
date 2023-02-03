@@ -1,4 +1,3 @@
-use core::panic;
 use std::{
     env,
     fs::File,
@@ -27,6 +26,7 @@ fn main() {
     }
 }
 
+#[cfg(target_os = "linux")]
 fn write_version_script(f: &mut impl Write) -> Result<()> {
     for (version, symbol_list) in SYMBOLS {
         writeln!(f, "{version} {{")?;
@@ -40,6 +40,7 @@ fn write_version_script(f: &mut impl Write) -> Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "windows")]
 fn write_def(f: &mut impl Write) -> Result<()> {
     writeln!(f, "EXPORTS")?;
     for (version, symbol_list) in SYMBOLS {
@@ -50,6 +51,7 @@ fn write_def(f: &mut impl Write) -> Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
 fn write_exported_symbols(f: &mut impl Write) -> Result<()> {
     for (version, symbol_list) in SYMBOLS {
         for sym in symbol_list.iter() {
