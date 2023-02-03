@@ -84,6 +84,7 @@ impl SqliteDictionary {
     fn initialize_tables(conn: &Connection) -> Result<(), SqliteDictionaryError> {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
+        conn.pragma_update(None, "wal_autocheckpoint", 0)?;
         conn.execute(
             "CREATE TABLE IF NOT EXISTS dictionary_v1 (
                 syllables BLOB NOT NULL,
