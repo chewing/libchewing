@@ -138,7 +138,11 @@ impl ChewingConversionEngine {
     /// highest_score[1] = P(0,1)
     /// ...
     /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(&self, len: usize, mut intervals: Vec<PossibleInterval<'_>>) -> Vec<Interval> {
+    fn find_best_path(
+        &self,
+        len: usize,
+        mut intervals: Vec<PossibleInterval<'_>>,
+    ) -> Vec<Interval> {
         let mut highest_score = vec![PossiblePath::default(); len + 1];
 
         // The interval shall be sorted by the increase order of end.

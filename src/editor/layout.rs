@@ -95,7 +95,7 @@ pub enum KeyBehavior {
 }
 
 /// TODO: docs
-pub trait SyllableEditor {
+pub trait SyllableEditor: Debug {
     /// Handles a key press event and returns the behavior of the layout.
     fn key_press(&mut self, key: KeyEvent) -> KeyBehavior;
     /// Removes the last input from the buffer.
