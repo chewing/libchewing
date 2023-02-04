@@ -1,3 +1,8 @@
 status = [
-    "build%"
+    "build (ubuntu-latest, WITH_RUST=ON)",
+    "build (ubuntu-latest, WITH_RUST=OFF)",
+    "build (windows-latest, WITH_RUST=ON)",
+    "build (windows-latest, WITH_RUST=OFF)",
+    "build (macos-latest, WITH_RUST=ON)",
+    "build (macos-latest, WITH_RUST=OFF)",
 ]
