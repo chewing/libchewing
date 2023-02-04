@@ -8,7 +8,6 @@ use std::{
     path::Path,
 };
 
-use binary_layout::define_layout;
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
 use crate::zhuyin::Syllable;
@@ -29,17 +28,59 @@ const ILIC: ChunkId = ChunkId { value: *b"ILIC" };
 const IREV: ChunkId = ChunkId { value: *b"IREV" };
 const ISFT: ChunkId = ChunkId { value: *b"ISFT" };
 
-define_layout!(trie_node, LittleEndian, {
-    syllable: u16,
-    child_begin: u32,
-    child_end: u32,
-});
+const TRIE_NODE_SIZE: usize = 10;
+const TRIE_LEAF_SIZE: usize = 10;
 
-define_layout!(trie_leaf, LittleEndian, {
-    zero: u16,
-    data_position: u32,
-    frequency: u32,
-});
+struct TrieNode<T>(T);
+struct TrieLeaf<T>(T);
+
+impl TrieNode<&[u8]> {
+    fn syllable(&self) -> u16 {
+        u16::from_le_bytes(self.0[..2].try_into().unwrap())
+    }
+    fn child_begin(&self) -> usize {
+        u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
+    }
+    fn child_end(&self) -> usize {
+        u32::from_le_bytes(self.0[6..10].try_into().unwrap()) as usize
+    }
+}
+
+impl TrieNode<&mut [u8]> {
+    fn write_syllable(&mut self, syl: u16) {
+        self.0[..2].copy_from_slice(syl.to_le_bytes().as_slice())
+    }
+    fn write_child_begin(&mut self, child_begin: usize) {
+        self.0[2..6].copy_from_slice((child_begin as u32).to_le_bytes().as_slice())
+    }
+    fn write_child_end(&mut self, child_end: usize) {
+        self.0[6..10].copy_from_slice((child_end as u32).to_le_bytes().as_slice())
+    }
+}
+
+impl TrieLeaf<&[u8]> {
+    fn reserved_zero(&self) -> u16 {
+        u16::from_le_bytes(self.0[..2].try_into().unwrap())
+    }
+    fn data_position(&self) -> usize {
+        u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
+    }
+    fn frequency(&self) -> u32 {
+        u32::from_le_bytes(self.0[6..10].try_into().unwrap())
+    }
+}
+
+impl TrieLeaf<&mut [u8]> {
+    fn write_reserved_zero(&mut self) {
+        self.0[..2].copy_from_slice(0u16.to_le_bytes().as_slice())
+    }
+    fn write_data_position(&mut self, position: usize) {
+        self.0[2..6].copy_from_slice((position as u32).to_le_bytes().as_slice())
+    }
+    fn write_frequency(&mut self, frequency: u32) {
+        self.0[6..10].copy_from_slice(frequency.to_le_bytes().as_slice())
+    }
+}
 
 /// A read-only dictionary using a pre-built [Trie][] index that is both space
 /// efficient and fast to lookup.
@@ -215,17 +256,17 @@ impl TrieDictionary {
 fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases<'_, '_> {
     Box::new(
         dict.dict[begin..end]
-            .chunks(trie_leaf::SIZE.unwrap())
-            .map(trie_leaf::View::new)
-            .filter(|view| view.zero().read() == 0)
+            .chunks_exact(TRIE_LEAF_SIZE)
+            .map(TrieLeaf)
+            .filter(|view| view.reserved_zero() == 0)
             .map(|leaf| {
-                let pos = leaf.data_position().read() as usize;
+                let pos = leaf.data_position();
                 let len = dict.data[pos] as usize;
                 let start = pos + 1;
                 let end = start + len;
                 Phrase::new(
                     std::str::from_utf8(&dict.data[start..end]).expect("invalid data"),
-                    leaf.frequency().read(),
+                    leaf.frequency(),
                 )
             }),
     )
@@ -233,16 +274,15 @@ fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases<'_
 
 impl Dictionary for TrieDictionary {
     fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
-        let chunk_size = trie_node::SIZE.unwrap();
-        let root = trie_node::View::new(self.dict.as_slice());
+        let root = TrieNode(self.dict.as_slice());
         let mut node = root;
         'next: for syl in syllables {
             debug_assert!(syl.to_u16() != 0);
-            let child_begin = node.child_begin().read() as usize * chunk_size;
-            let child_end = node.child_end().read() as usize * chunk_size;
-            for storage in self.dict[child_begin..child_end].chunks(chunk_size) {
-                let child = trie_node::View::new(storage);
-                if child.syllable().read() == syl.to_u16() {
+            let child_begin = node.child_begin() * TRIE_NODE_SIZE;
+            let child_end = node.child_end() * TRIE_NODE_SIZE;
+            for storage in self.dict[child_begin..child_end].chunks_exact(TRIE_NODE_SIZE) {
+                let child = TrieNode(storage);
+                if child.syllable() == syl.to_u16() {
                     node = child;
                     continue 'next;
                 }
@@ -251,8 +291,8 @@ impl Dictionary for TrieDictionary {
         }
         trie_leaf_iter(
             self,
-            node.child_begin().read() as usize * chunk_size,
-            node.child_end().read() as usize * chunk_size,
+            node.child_begin() * TRIE_NODE_SIZE,
+            node.child_end() * TRIE_NODE_SIZE,
         )
     }
 
@@ -649,23 +689,21 @@ impl TrieDictionaryBuilder {
                 // An internal node has an associated syllable. The root node is
                 // a special case with no syllable.
                 if node.syllable.is_some() || id == ROOT_ID {
-                    debug_assert_eq!(Some(10), trie_node::SIZE);
-                    let mut record = [0; 10];
-                    let mut view = trie_node::View::new(&mut record);
+                    let mut record = [0; TRIE_NODE_SIZE];
+                    let mut view = TrieNode(record.as_mut_slice());
                     let syllable_u16 = node.syllable.map_or(0, |v| v.to_u16());
-                    let child_end = child_begin + node.children.len() as u32;
-                    view.syllable_mut().write(syllable_u16);
-                    view.child_begin_mut().write(child_begin);
-                    view.child_end_mut().write(child_end);
-                    dict_buf.write_all(view.into_storage())?;
+                    let child_end = child_begin + node.children.len();
+                    view.write_syllable(syllable_u16);
+                    view.write_child_begin(child_begin);
+                    view.write_child_end(child_end);
+                    dict_buf.write_all(&record)?;
                 } else {
-                    debug_assert_eq!(Some(10), trie_leaf::SIZE);
-                    let mut record = [0; 10];
-                    let mut view = trie_leaf::View::new(&mut record);
-                    view.zero_mut().write(0);
-                    view.data_position_mut().write(data_buf.len() as u32);
-                    view.frequency_mut().write(node.frequency);
-                    dict_buf.write_all(view.into_storage())?;
+                    let mut record = [0; TRIE_LEAF_SIZE];
+                    let mut view = TrieLeaf(record.as_mut_slice());
+                    view.write_reserved_zero();
+                    view.write_data_position(data_buf.len());
+                    view.write_frequency(node.frequency);
+                    dict_buf.write_all(&record)?;
 
                     let phrase = &node.phrase;
                     debug_assert!(phrase.len() <= u8::MAX as usize);
@@ -673,7 +711,7 @@ impl TrieDictionaryBuilder {
                     data_buf.write_all(phrase.as_bytes())?;
                 }
 
-                child_begin += node.children.len() as u32;
+                child_begin += node.children.len();
 
                 // Sort the children nodes by their syllables
                 //
