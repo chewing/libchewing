@@ -15,7 +15,6 @@ include = [
 ]
 
 [dependencies]
-binary-layout = "3.0.0"
 dirs-next = "2.0.0"
 indexmap = "1.9.2"
 riff = "1.0.0"
