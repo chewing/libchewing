@@ -1,5 +1,6 @@
 use std::hash::{Hash, Hasher};
 
+use fnv::FnvBuildHasher;
 use indexmap::IndexSet;
 
 use crate::zhuyin::Syllable;
@@ -8,6 +9,8 @@ use super::{
     BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryMut, DictionaryUpdateError,
     Phrase, Phrases,
 };
+
+type FnvIndexSet<T> = IndexSet<T, FnvBuildHasher>;
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -98,7 +101,7 @@ impl Dictionary for LayeredDictionary {
         let mut phrases = base
             .lookup_phrase(syllables)
             .map(LookupPhrase)
-            .collect::<IndexSet<_>>();
+            .collect::<FnvIndexSet<_>>();
         for d in layers {
             for phrase in d.lookup_phrase(syllables) {
                 phrases.replace(LookupPhrase(phrase));
