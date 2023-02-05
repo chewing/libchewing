@@ -10,8 +10,6 @@ use super::{
     Phrase, Phrases,
 };
 
-type FnvIndexSet<T> = IndexSet<T, FnvBuildHasher>;
-
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
 ///
@@ -98,10 +96,8 @@ impl Dictionary for LayeredDictionary {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
         };
-        let mut phrases = base
-            .lookup_phrase(syllables)
-            .map(LookupPhrase)
-            .collect::<FnvIndexSet<_>>();
+        let mut phrases = IndexSet::with_capacity_and_hasher(128, FnvBuildHasher::default());
+        phrases.extend(base.lookup_phrase(syllables).map(LookupPhrase));
         for d in layers {
             for phrase in d.lookup_phrase(syllables) {
                 phrases.replace(LookupPhrase(phrase));

@@ -163,6 +163,27 @@ impl<'a> Phrase<'a> {
     pub fn as_str(&self) -> &str {
         self.phrase.borrow()
     }
+
+    /// Turns the phrase into owned data.
+    ///
+    /// Clones the data if it is not already owned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chewing::dictionary::Phrase;
+    ///
+    /// let phrase = Phrase::new("詞", 100);
+    ///
+    /// assert_eq!("詞", phrase.into_owned().as_str());
+    /// ```
+    pub fn into_owned(self) -> Phrase<'static> {
+        Phrase {
+            phrase: Cow::Owned(self.phrase.into_owned()),
+            freq: self.freq,
+            last_used: self.last_used,
+        }
+    }
 }
 
 /// Phrases are compared by their frequency first, followed by their phrase
