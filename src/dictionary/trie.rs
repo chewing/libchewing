@@ -5,6 +5,7 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
+    num::NonZeroUsize,
     path::Path,
 };
 
@@ -17,9 +18,12 @@ use super::{
     DuplicatePhraseError, Phrase, Phrases,
 };
 
+const DICT_FORMAT: u32 = 0;
+
 const CHEW: ChunkId = ChunkId { value: *b"CHEW" };
-const DICT: ChunkId = ChunkId { value: *b"DICT" };
-const DATA: ChunkId = ChunkId { value: *b"DATA" };
+const FMT: ChunkId = ChunkId { value: *b"fmt " };
+const DICT: ChunkId = ChunkId { value: *b"dict" };
+const DATA: ChunkId = ChunkId { value: *b"data" };
 const LIST: ChunkId = ChunkId { value: *b"LIST" };
 const INFO: ChunkId = ChunkId { value: *b"INFO" };
 const INAM: ChunkId = ChunkId { value: *b"INAM" };
@@ -33,10 +37,11 @@ const TRIE_LEAF_SIZE: usize = 10;
 
 struct TrieNode<T>(T);
 struct TrieLeaf<T>(T);
+struct PhraseData<T>(T);
 
 impl TrieNode<&[u8]> {
-    fn syllable(&self) -> u16 {
-        u16::from_le_bytes(self.0[..2].try_into().unwrap())
+    fn syllable_eq(&self, syl: &Syllable) -> bool {
+        self.0[..2] == syl.to_le_bytes()
     }
     fn child_begin(&self) -> usize {
         u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
@@ -62,11 +67,11 @@ impl TrieLeaf<&[u8]> {
     fn reserved_zero(&self) -> u16 {
         u16::from_le_bytes(self.0[..2].try_into().unwrap())
     }
-    fn data_position(&self) -> usize {
+    fn data_begin(&self) -> usize {
         u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
     }
-    fn frequency(&self) -> u32 {
-        u32::from_le_bytes(self.0[6..10].try_into().unwrap())
+    fn data_end(&self) -> usize {
+        u32::from_le_bytes(self.0[6..10].try_into().unwrap()) as usize
     }
 }
 
@@ -74,11 +79,24 @@ impl TrieLeaf<&mut [u8]> {
     fn write_reserved_zero(&mut self) {
         self.0[..2].copy_from_slice(0u16.to_le_bytes().as_slice())
     }
-    fn write_data_position(&mut self, position: usize) {
+    fn write_data_begin(&mut self, position: usize) {
         self.0[2..6].copy_from_slice((position as u32).to_le_bytes().as_slice())
     }
-    fn write_frequency(&mut self, frequency: u32) {
-        self.0[6..10].copy_from_slice(frequency.to_le_bytes().as_slice())
+    fn write_data_end(&mut self, position: usize) {
+        self.0[6..10].copy_from_slice((position as u32).to_le_bytes().as_slice())
+    }
+}
+
+impl<'a> PhraseData<&'a [u8]> {
+    fn frequency(&self) -> u32 {
+        u32::from_le_bytes(self.0[..4].try_into().unwrap())
+    }
+    fn phrase_str(&self) -> &'a str {
+        let len = self.0[4] as usize;
+        std::str::from_utf8(&self.0[5..5 + len]).expect("should be utf8 encoded string")
+    }
+    fn len(&self) -> usize {
+        4 + 1 + self.0[4] as usize
     }
 }
 
@@ -187,28 +205,50 @@ impl TrieDictionary {
         if file_type != CHEW {
             return Err(io::Error::from(io::ErrorKind::InvalidData));
         }
+        let mut fmt_chunk = None;
         let mut dict_chunk = None;
         let mut data_chunk = None;
         let mut info_chunk = None;
         for chunk in root.iter(&mut stream) {
             match chunk.id() {
+                FMT => fmt_chunk = Some(chunk),
                 LIST => info_chunk = Some(chunk),
                 DICT => dict_chunk = Some(chunk),
                 DATA => data_chunk = Some(chunk),
                 _ => (),
             }
         }
+        let fmt_version = Self::read_fmt_version(
+            fmt_chunk.ok_or_else(|| {
+                io::Error::new(io::ErrorKind::UnexpectedEof, "expecting fmt chunk")
+            })?,
+            &mut stream,
+        )?;
+        if fmt_version != DICT_FORMAT {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "unsupported file version",
+            ));
+        }
         let mut info = DictionaryInfo::default();
         if let Some(chunk) = info_chunk {
             info = Self::read_dictionary_info(chunk, &mut stream)?;
         }
         let dict = dict_chunk
-            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting DICT chunk"))?
+            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting dict chunk"))?
             .read_contents(&mut stream)?;
         let data = data_chunk
-            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting DATA chunk"))?
+            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting data chunk"))?
             .read_contents(&mut stream)?;
         Ok(TrieDictionary { info, dict, data })
+    }
+
+    fn read_fmt_version<T>(fmt_chunk: Chunk, mut stream: T) -> io::Result<u32>
+    where
+        T: Read + Seek,
+    {
+        let bytes = fmt_chunk.read_contents(&mut stream)?;
+        Ok(u32::from_le_bytes(bytes.try_into().unwrap()))
     }
 
     fn read_dictionary_info<T>(list_chunk: Chunk, mut stream: T) -> io::Result<DictionaryInfo>
@@ -253,23 +293,26 @@ impl TrieDictionary {
     }
 }
 
-fn trie_leaf_iter(dict: &TrieDictionary, begin: usize, end: usize) -> Phrases<'_, '_> {
-    Box::new(
-        dict.dict[begin..end]
-            .chunks_exact(TRIE_LEAF_SIZE)
-            .map(TrieLeaf)
-            .filter(|view| view.reserved_zero() == 0)
-            .map(|leaf| {
-                let pos = leaf.data_position();
-                let len = dict.data[pos] as usize;
-                let start = pos + 1;
-                let end = start + len;
-                Phrase::new(
-                    std::str::from_utf8(&dict.data[start..end]).expect("invalid data"),
-                    leaf.frequency(),
-                )
-            }),
-    )
+struct PhrasesIter<'a> {
+    bytes: &'a [u8],
+    start: usize,
+    end: usize,
+}
+
+impl<'a> Iterator for PhrasesIter<'a> {
+    type Item = Phrase<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.start == self.end {
+            return None;
+        }
+        let phrase_data = PhraseData(&self.bytes[self.start..]);
+        self.start += phrase_data.len();
+        Some(Phrase::new(
+            phrase_data.phrase_str(),
+            phrase_data.frequency(),
+        ))
+    }
 }
 
 impl Dictionary for TrieDictionary {
@@ -282,18 +325,23 @@ impl Dictionary for TrieDictionary {
             let child_end = node.child_end() * TRIE_NODE_SIZE;
             for storage in self.dict[child_begin..child_end].chunks_exact(TRIE_NODE_SIZE) {
                 let child = TrieNode(storage);
-                if child.syllable() == syl.to_u16() {
+                if child.syllable_eq(&syl) {
                     node = child;
                     continue 'next;
                 }
             }
             return Box::new(std::iter::empty());
         }
-        trie_leaf_iter(
-            self,
-            node.child_begin() * TRIE_NODE_SIZE,
-            node.child_end() * TRIE_NODE_SIZE,
-        )
+        let begin = node.child_begin() * TRIE_NODE_SIZE;
+        let leaf = TrieLeaf(&self.dict[begin..begin + TRIE_LEAF_SIZE]);
+        if leaf.reserved_zero() != 0 {
+            return Box::new(std::iter::empty());
+        }
+        Box::new(PhrasesIter {
+            bytes: &self.data[leaf.data_begin()..leaf.data_end()],
+            start: 0,
+            end: leaf.data_end() - leaf.data_begin(),
+        })
     }
 
     fn entries(&self) -> super::DictEntries<'_, '_> {
@@ -368,6 +416,8 @@ impl Dictionary for TrieDictionary {
 ///       individual chunks, where 'ABCD' is the FourCC for the chunk. This
 ///       element's size is 8 bytes.
 ///
+/// All integers are little endian.
+///
 /// ## File Header
 ///
 /// ```text
@@ -406,6 +456,8 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |              Dictionary file header (12 bytes)                |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |            Dictionary format chunk                            |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                         Info chunk                            |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                        Index chunk                            |
@@ -413,6 +465,24 @@ impl Dictionary for TrieDictionary {
 /// |                      Phrases chunk                            |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
+///
+/// ### Dictionary format chunk:
+///
+/// ```text
+///  0                   1                   2                   3
+///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                      ChunkHeader('fmt ')                      |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                    Dictionary format version                  |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// ```
+///
+/// The dictionary format chunk contains the format version number of the
+/// index chunk and the phrases chunk, encoded in an unsigned 32 bits
+/// integer (u32).
+///
+/// The currently supported versions are: 0
 ///
 /// ### Info chunk:
 ///
@@ -462,9 +532,9 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                          Child End                            |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |            Zero               |            Data Position    ...
+/// |            Zero               |            Data Begin       ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                             |         Phrase Frequency    ...
+/// ...                             |              Data End       ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ...                             | ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -495,16 +565,16 @@ impl Dictionary for TrieDictionary {
 ///
 /// ```text
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |     Zero    |      Data Position    |       Frequency       |
+/// |     Zero    |      Data Begin       |       Data End        |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
 /// - **Zero: 16 bits (u16)**
 ///     - Must be all zeros, indicating a leaf node.
-/// - **Data Position: 32 bits (u32)**
+/// - **Data Begin: 32 bits (u32)**
 ///     - The offset into the Phrases chunk for the phrase data.
-/// - **Frequency: 32 bits (u32)**
-///     - The frequency of the phrase.
+/// - **Data End: 32 bits (u32)**
+///     - The offset into the end of the phrase data, exclusive.
 ///
 /// ### Phrases chunk:
 ///
@@ -514,15 +584,21 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                      ChunkHeader('DATA')                      |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                           Frequency                           |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |      Length     |                 Phrase                      |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                           Frequency                           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |      Length     |                                           ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// The phrases chunk contains all the phrases strings. Each phrase is written
-/// as length prefixed strings.
+/// The phrases chunk contains all the phrases strings and their frequency.
+/// Each phrase is written as length prefixed strings.
 ///
+/// - **Frequency: 32 bits (u32)**
+///     - The frequency of the phrase.
 /// - **Length: 8 bits (u8)**
 ///     - Each phrase encoded in UTF-8 must not exceed 255 bytes long.
 /// - **Phrase: variable bits**
@@ -539,13 +615,13 @@ pub struct TrieDictionaryBuilder {
     info: DictionaryInfo,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 struct TrieBuilderNode {
     id: usize,
     syllable: Option<Syllable>,
     children: Vec<usize>,
-    frequency: u32,
-    phrase: String,
+    leaf_id: Option<NonZeroUsize>,
+    phrases: Vec<Phrase<'static>>,
 }
 
 /// A container for trie dictionary statistics.
@@ -553,10 +629,10 @@ struct TrieBuilderNode {
 pub struct TrieDictionaryStatistics {
     /// The number of nodes in the dictionary.
     pub node_count: usize,
-    /// The number of internal nodes at the edge (phrases with same syllables).
-    pub internal_leaf_count: usize,
-    /// The number of leaf nodes (total number of phrases).
-    pub leaf_node_count: usize,
+    /// The number of leaf nodes (phrases with same syllables).
+    pub leaf_count: usize,
+    /// The number of phrases.
+    pub phrase_count: usize,
     /// The max height (longest phrase) of the trie.
     pub max_height: usize,
     /// The average height (average phrase length) of the trie.
@@ -583,13 +659,7 @@ impl TrieDictionaryBuilder {
     /// let mut builder = TrieDictionaryBuilder::new();
     /// ```
     pub fn new() -> TrieDictionaryBuilder {
-        let root = TrieBuilderNode {
-            id: 0,
-            syllable: None,
-            children: vec![],
-            frequency: 0,
-            phrase: String::new(),
-        };
+        let root = TrieBuilderNode::default();
         TrieDictionaryBuilder {
             arena: vec![root],
             info: Default::default(),
@@ -597,14 +667,11 @@ impl TrieDictionaryBuilder {
     }
 
     /// Allocates a new leaf node and returns the new node id.
-    fn alloc_leaf(&mut self, phrase: &str, frequency: u32) -> usize {
+    fn alloc_leaf(&mut self) -> usize {
         let next_id = self.arena.len();
         let leaf = TrieBuilderNode {
             id: next_id,
-            syllable: None,
-            children: vec![],
-            frequency,
-            phrase: phrase.to_owned(),
+            ..Default::default()
         };
         self.arena.push(leaf);
         next_id
@@ -616,9 +683,7 @@ impl TrieDictionaryBuilder {
         let internal = TrieBuilderNode {
             id: next_id,
             syllable: Some(syl),
-            children: vec![],
-            frequency: 0,
-            phrase: String::new(),
+            ..Default::default()
         };
         self.arena.push(internal);
         next_id
@@ -626,7 +691,7 @@ impl TrieDictionaryBuilder {
 
     /// Iterates through the syllables and insert all missing internal nodes.
     ///
-    /// Returns the id to the last internal node so we can add leaf nodes to it.
+    /// Returns the id to the leaf node so that we can append the phrase to it.
     fn find_or_insert_internal(&mut self, syllables: &[Syllable]) -> usize {
         let mut node_id = 0;
         'next: for &syl in syllables {
@@ -640,6 +705,13 @@ impl TrieDictionaryBuilder {
             let next_id = self.alloc_internal(syl);
             self.arena[node_id].children.push(next_id);
             node_id = next_id;
+        }
+        if let Some(leaf_id) = self.arena[node_id].leaf_id {
+            node_id = leaf_id.get();
+        } else {
+            let leaf_id = self.alloc_leaf();
+            self.arena[node_id].leaf_id = NonZeroUsize::new(leaf_id);
+            node_id = leaf_id;
         }
         node_id
     }
@@ -692,7 +764,9 @@ impl TrieDictionaryBuilder {
                     let mut record = [0; TRIE_NODE_SIZE];
                     let mut view = TrieNode(record.as_mut_slice());
                     let syllable_u16 = node.syllable.map_or(0, |v| v.to_u16());
-                    let child_end = child_begin + node.children.len();
+                    let child_end = child_begin
+                        + node.children.len()
+                        + if node.leaf_id.is_some() { 1 } else { 0 };
                     view.write_syllable(syllable_u16);
                     view.write_child_begin(child_begin);
                     view.write_child_end(child_end);
@@ -701,46 +775,50 @@ impl TrieDictionaryBuilder {
                     let mut record = [0; TRIE_LEAF_SIZE];
                     let mut view = TrieLeaf(record.as_mut_slice());
                     view.write_reserved_zero();
-                    view.write_data_position(data_buf.len());
-                    view.write_frequency(node.frequency);
-                    dict_buf.write_all(&record)?;
+                    view.write_data_begin(data_buf.len());
 
-                    let phrase = &node.phrase;
-                    debug_assert!(phrase.len() <= u8::MAX as usize);
-                    data_buf.write_all(&[phrase.len() as u8])?;
-                    data_buf.write_all(phrase.as_bytes())?;
-                }
-
-                child_begin += node.children.len();
-
-                // Sort the children nodes by their syllables
-                //
-                // NB: this must use a stable sorting algorithm so that lookup
-                // results are stable according to the input file.
-                let mut children = node.children.clone();
-                children.sort_by(|&a, &b| {
-                    let a = &self.arena[a];
-                    let b = &self.arena[b];
-                    let syllable_u16_a = a.syllable.map_or(0, |syl| syl.to_u16());
-                    let syllable_u16_b = b.syllable.map_or(0, |syl| syl.to_u16());
-                    match (syllable_u16_a, syllable_u16_b) {
+                    let mut phrases = node.phrases.clone();
+                    phrases.sort_by(|a, b| {
                         // Don't sort single word leaves.
                         // But sort phrases first by the frequency, then by the UTF-8 order.
-                        (0, 0) => match (a.phrase.chars().count(), b.phrase.chars().count()) {
+                        //
+                        // NB: this must use a stable sorting algorithm so that lookup
+                        // results are stable according to the input file.
+                        match (a.as_str().chars().count(), b.as_str().chars().count()) {
                             (1, 1) => Ordering::Equal,
-                            (1, _) | (_, 1) => a.phrase.len().cmp(&b.phrase.len()),
+                            (1, _) | (_, 1) => a.as_str().len().cmp(&b.as_str().len()),
                             _ => {
-                                if a.frequency == b.frequency {
-                                    b.phrase.cmp(&a.phrase)
+                                if a.freq() == b.freq() {
+                                    b.as_str().cmp(&a.as_str())
                                 } else {
-                                    b.frequency.cmp(&a.frequency)
+                                    b.freq().cmp(&a.freq())
                                 }
                             }
-                        },
-                        _ => syllable_u16_b.cmp(&syllable_u16_a),
+                        }
+                    });
+                    for phrase in phrases {
+                        debug_assert!(phrase.as_str().len() <= u8::MAX as usize);
+                        data_buf.write_all(&phrase.freq().to_le_bytes())?;
+                        data_buf.write_all(&[phrase.as_str().len() as u8])?;
+                        data_buf.write_all(phrase.as_str().as_bytes())?;
                     }
+
+                    view.write_data_end(data_buf.len());
+                    dict_buf.write_all(&record)?;
+                }
+
+                // Sort the children nodes by their syllables. Not really required,
+                // but it makes using binary search possible in the future.
+                let mut children = node.children.clone();
+                children.sort_by(|&a, &b| {
+                    self.arena[a].syllable.cmp(&self.arena[b].syllable)
                 });
+                if let Some(leaf_id) = node.leaf_id {
+                    child_begin += 1;
+                    queue.push_back(leaf_id.get());
+                }
                 for child_id in children {
+                    child_begin += 1;
                     queue.push_back(child_id);
                 }
             }
@@ -751,6 +829,7 @@ impl TrieDictionaryBuilder {
             RIFF_ID.clone(),
             CHEW,
             vec![
+                ChunkContents::Data(FMT, DICT_FORMAT.to_le_bytes().into()),
                 ChunkContents::Children(LIST, INFO, self.info_chunks()?),
                 ChunkContents::Data(DICT, dict_buf),
                 ChunkContents::Data(DATA, data_buf),
@@ -828,18 +907,18 @@ impl TrieDictionaryBuilder {
     /// ], ("國民大會", 0).into());
     /// let stats = builder.statistics();
     /// assert_eq!(14, stats.node_count);
-    /// assert_eq!(6, stats.internal_leaf_count);
-    /// assert_eq!(6, stats.leaf_node_count);
+    /// assert_eq!(6, stats.leaf_count);
+    /// assert_eq!(6, stats.phrase_count);
     /// assert_eq!(6, stats.max_height);
     /// assert_eq!(2, stats.avg_height);
     /// assert_eq!(4, stats.root_branch_count);
-    /// assert_eq!(2, stats.max_branch_count);
+    /// assert_eq!(1, stats.max_branch_count);
     /// assert_eq!(0, stats.avg_branch_count);
     /// ```
     pub fn statistics(&self) -> TrieDictionaryStatistics {
         let mut node_count = 0;
-        let mut internal_leaf_count = 0;
-        let mut leaf_node_count = 0;
+        let mut leaf_count = 0;
+        let mut phrase_count = 0;
         let mut max_height = 0;
         let mut branch_heights = vec![];
         let mut root_branch_count = 0;
@@ -861,12 +940,8 @@ impl TrieDictionaryBuilder {
                 node_count += 1;
 
                 if node.syllable.is_some() || id == ROOT_ID {
-                    if node
-                        .children
-                        .iter()
-                        .any(|&child_id| self.arena[child_id].syllable.is_none())
-                    {
-                        internal_leaf_count += 1;
+                    if node.leaf_id.is_some() {
+                        leaf_count += 1;
                         branch_heights.push(max_height);
                     }
                     let branch_count = node
@@ -882,7 +957,10 @@ impl TrieDictionaryBuilder {
                         root_branch_count = node.children.len();
                     }
                 } else {
-                    leaf_node_count += 1;
+                    phrase_count += node.phrases.len();
+                }
+                if let Some(leaf_id) = node.leaf_id {
+                    queue.push_back(leaf_id.get());
                 }
                 for &child_id in &node.children {
                     queue.push_back(child_id);
@@ -892,8 +970,8 @@ impl TrieDictionaryBuilder {
 
         TrieDictionaryStatistics {
             node_count,
-            internal_leaf_count,
-            leaf_node_count,
+            leaf_count,
+            phrase_count,
             max_height,
             avg_height: branch_heights.iter().sum::<usize>() / branch_counts.len(),
             root_branch_count,
@@ -932,19 +1010,17 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
         syllables: &[Syllable],
         phrase: Phrase<'_>,
     ) -> Result<(), BuildDictionaryError> {
-        let leaf_id = self.alloc_leaf(phrase.as_str(), phrase.freq());
-        let parent_id = self.find_or_insert_internal(syllables);
-        if self.arena[parent_id]
-            .children
+        let leaf_id = self.find_or_insert_internal(syllables);
+        if self.arena[leaf_id]
+            .phrases
             .iter()
-            .map(|&child_id| &self.arena[child_id])
-            .any(|child| child.phrase == phrase.as_str())
+            .any(|it| it.as_str() == phrase.as_str())
         {
             return Err(BuildDictionaryError {
                 source: Box::new(DuplicatePhraseError),
             });
         }
-        self.arena[parent_id].children.push(leaf_id);
+        self.arena[leaf_id].phrases.push(phrase.into_owned());
         Ok(())
     }
 
@@ -964,7 +1040,7 @@ impl Default for TrieDictionaryBuilder {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
+    use std::{io::Cursor, num::NonZeroUsize};
 
     use crate::{
         dictionary::{
@@ -998,45 +1074,45 @@ mod tests {
                 TrieBuilderNode {
                     id: 0,
                     syllable: None,
-                    children: vec![2],
-                    frequency: 0,
-                    phrase: String::new(),
+                    children: vec![1],
+                    leaf_id: None,
+                    phrases: vec![]
                 },
                 TrieBuilderNode {
                     id: 1,
-                    syllable: None,
-                    children: vec![],
-                    frequency: 100,
-                    phrase: String::from("測試"),
+                    syllable: Some(syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]),
+                    children: vec![2, 4],
+                    leaf_id: None,
+                    phrases: vec![]
                 },
                 TrieBuilderNode {
                     id: 2,
-                    syllable: Some(syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]),
-                    children: vec![3, 5],
-                    frequency: 0,
-                    phrase: String::new(),
+                    syllable: Some(syl![Bopomofo::SH, Bopomofo::TONE4]),
+                    children: vec![],
+                    leaf_id: NonZeroUsize::new(3),
+                    phrases: vec![]
                 },
                 TrieBuilderNode {
                     id: 3,
-                    syllable: Some(syl![Bopomofo::SH, Bopomofo::TONE4]),
-                    children: vec![1],
-                    frequency: 0,
-                    phrase: String::new(),
+                    syllable: None,
+                    children: vec![],
+                    leaf_id: None,
+                    phrases: vec![("測試", 100).into()]
                 },
                 TrieBuilderNode {
                     id: 4,
-                    syllable: None,
+                    syllable: Some(syl![Bopomofo::S, Bopomofo::U, Bopomofo::O, Bopomofo::TONE3]),
                     children: vec![],
-                    frequency: 100,
-                    phrase: String::from("廁所"),
+                    leaf_id: NonZeroUsize::new(5),
+                    phrases: vec![]
                 },
                 TrieBuilderNode {
                     id: 5,
-                    syllable: Some(syl![Bopomofo::S, Bopomofo::U, Bopomofo::O, Bopomofo::TONE3]),
-                    children: vec![4],
-                    frequency: 0,
-                    phrase: String::new(),
-                },
+                    syllable: None,
+                    children: vec![],
+                    leaf_id: None,
+                    phrases: vec![("廁所", 100).into()]
+                }
             ],
             builder.arena
         );
