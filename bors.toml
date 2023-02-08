@@ -5,4 +5,8 @@ status = [
     "build (windows-latest, WITH_RUST=OFF)",
     "build (macos-latest, WITH_RUST=ON)",
     "build (macos-latest, WITH_RUST=OFF)",
+    "cargo_test (ubuntu-latest)",
+    "cargo_test (windows-latest)",
+    "cargo_test (macos-latest)",
+    "build_with_hash",
 ]
