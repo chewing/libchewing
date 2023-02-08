@@ -10,7 +10,7 @@ use super::{Bopomofo, BopomofoKind, ParseBopomofoError};
 /// The consonants and vowels that are taken together to make a single sound.
 ///
 /// <https://en.m.wikipedia.org/wiki/Syllable#Chinese_model>
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Syllable {
     value: u16,
 }

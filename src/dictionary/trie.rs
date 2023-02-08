@@ -781,6 +781,9 @@ impl TrieDictionaryBuilder {
                     phrases.sort_by(|a, b| {
                         // Don't sort single word leaves.
                         // But sort phrases first by the frequency, then by the UTF-8 order.
+                        //
+                        // NB: this must use a stable sorting algorithm so that lookup
+                        // results are stable according to the input file.
                         match (a.as_str().chars().count(), b.as_str().chars().count()) {
                             (1, 1) => Ordering::Equal,
                             (1, _) | (_, 1) => a.as_str().len().cmp(&b.as_str().len()),
@@ -804,27 +807,18 @@ impl TrieDictionaryBuilder {
                     dict_buf.write_all(&record)?;
                 }
 
-                if node.leaf_id.is_some() {
-                    child_begin += 1;
-                }
-                child_begin += node.children.len();
-
-                // Sort the children nodes by their syllables
-                //
-                // NB: this must use a stable sorting algorithm so that lookup
-                // results are stable according to the input file.
+                // Sort the children nodes by their syllables. Not really required,
+                // but it makes using binary search possible in the future.
                 let mut children = node.children.clone();
                 children.sort_by(|&a, &b| {
-                    let syllable_u16_a =
-                        self.arena[a].syllable.as_ref().map_or(0, Syllable::to_u16);
-                    let syllable_u16_b =
-                        self.arena[b].syllable.as_ref().map_or(0, Syllable::to_u16);
-                    syllable_u16_a.cmp(&syllable_u16_b)
+                    self.arena[a].syllable.cmp(&self.arena[b].syllable)
                 });
                 if let Some(leaf_id) = node.leaf_id {
+                    child_begin += 1;
                     queue.push_back(leaf_id.get());
                 }
                 for child_id in children {
+                    child_begin += 1;
                     queue.push_back(child_id);
                 }
             }
