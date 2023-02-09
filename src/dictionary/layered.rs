@@ -1,6 +1,5 @@
 use std::hash::{Hash, Hasher};
 
-use fnv::FnvBuildHasher;
 use indexmap::IndexSet;
 
 use crate::zhuyin::Syllable;
@@ -96,7 +95,7 @@ impl Dictionary for LayeredDictionary {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
         };
-        let mut phrases = IndexSet::with_capacity_and_hasher(128, FnvBuildHasher::default());
+        let mut phrases = IndexSet::with_capacity(128);
         phrases.extend(base.lookup_phrase(syllables).map(LookupPhrase));
         for d in layers {
             for phrase in d.lookup_phrase(syllables) {

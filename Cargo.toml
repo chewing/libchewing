@@ -15,8 +15,8 @@ include = [
 ]
 
 [dependencies]
+bytemuck = { version = "1.13.0", features = ["derive"] }
 dirs-next = "2.0.0"
-fnv = "1.0.0"
 indexmap = "1.9.2"
 riff = "1.0.0"
 rusqlite = "0.28.0"
@@ -34,3 +34,4 @@ members = ["capi/chewing-internal", "capi/chewing-public", "tools"]
 
 [profile.release]
 lto = true
+debug = true

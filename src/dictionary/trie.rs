@@ -5,10 +5,13 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
+    mem,
     num::NonZeroUsize,
     path::Path,
+    str,
 };
 
+use bytemuck::{bytes_of, cast_slice, from_bytes, pod_read_unaligned, Pod, Zeroable};
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
 use crate::zhuyin::Syllable;
@@ -32,71 +35,62 @@ const ILIC: ChunkId = ChunkId { value: *b"ILIC" };
 const IREV: ChunkId = ChunkId { value: *b"IREV" };
 const ISFT: ChunkId = ChunkId { value: *b"ISFT" };
 
-const TRIE_NODE_SIZE: usize = 10;
-const TRIE_LEAF_SIZE: usize = 10;
+#[derive(Pod, Zeroable, Copy, Clone)]
+#[repr(C)]
+struct TrieNodePod {
+    child_begin_raw: u32,
+    child_len_raw: u16,
+    syllable_raw: u16,
+}
 
-struct TrieNode<T>(T);
-struct TrieLeaf<T>(T);
-struct PhraseData<T>(T);
-
-impl TrieNode<&[u8]> {
-    fn syllable_eq(&self, syl: &Syllable) -> bool {
-        self.0[..2] == syl.to_le_bytes()
+impl TrieNodePod {
+    const SIZE: usize = mem::size_of::<Self>();
+    fn syllable(&self) -> u16 {
+        u16::from_le(self.syllable_raw)
     }
     fn child_begin(&self) -> usize {
-        u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
+        u32::from_le(self.child_begin_raw) as usize * Self::SIZE
     }
     fn child_end(&self) -> usize {
-        u32::from_le_bytes(self.0[6..10].try_into().unwrap()) as usize
+        (u32::from_le(self.child_begin_raw) + u16::from_le(self.child_len_raw) as u32) as usize
+            * Self::SIZE
     }
 }
 
-impl TrieNode<&mut [u8]> {
-    fn write_syllable(&mut self, syl: u16) {
-        self.0[..2].copy_from_slice(syl.to_le_bytes().as_slice())
-    }
-    fn write_child_begin(&mut self, child_begin: usize) {
-        self.0[2..6].copy_from_slice((child_begin as u32).to_le_bytes().as_slice())
-    }
-    fn write_child_end(&mut self, child_end: usize) {
-        self.0[6..10].copy_from_slice((child_end as u32).to_le_bytes().as_slice())
-    }
+#[derive(Pod, Zeroable, Copy, Clone)]
+#[repr(C)]
+struct TrieLeafPod {
+    data_begin_raw: u32,
+    data_len_raw: u16,
+    reserved_zero: u16,
 }
 
-impl TrieLeaf<&[u8]> {
+impl TrieLeafPod {
+    const SIZE: usize = mem::size_of::<Self>();
     fn reserved_zero(&self) -> u16 {
-        u16::from_le_bytes(self.0[..2].try_into().unwrap())
+        self.reserved_zero
     }
     fn data_begin(&self) -> usize {
-        u32::from_le_bytes(self.0[2..6].try_into().unwrap()) as usize
+        u32::from_le(self.data_begin_raw) as usize
     }
     fn data_end(&self) -> usize {
-        u32::from_le_bytes(self.0[6..10].try_into().unwrap()) as usize
+        (u32::from_le(self.data_begin_raw) + u16::from_le(self.data_len_raw) as u32) as usize
     }
 }
 
-impl TrieLeaf<&mut [u8]> {
-    fn write_reserved_zero(&mut self) {
-        self.0[..2].copy_from_slice(0u16.to_le_bytes().as_slice())
-    }
-    fn write_data_begin(&mut self, position: usize) {
-        self.0[2..6].copy_from_slice((position as u32).to_le_bytes().as_slice())
-    }
-    fn write_data_end(&mut self, position: usize) {
-        self.0[6..10].copy_from_slice((position as u32).to_le_bytes().as_slice())
-    }
-}
+struct PhraseData<T>(T);
 
 impl<'a> PhraseData<&'a [u8]> {
     fn frequency(&self) -> u32 {
-        u32::from_le_bytes(self.0[..4].try_into().unwrap())
+        pod_read_unaligned(&self.0[..4])
     }
     fn phrase_str(&self) -> &'a str {
         let len = self.0[4] as usize;
-        std::str::from_utf8(&self.0[5..5 + len]).expect("should be utf8 encoded string")
+        let data = &self.0[5..];
+        str::from_utf8(&data[..len]).expect("should be utf8 encoded string")
     }
     fn len(&self) -> usize {
-        4 + 1 + self.0[4] as usize
+        5 + self.0[4] as usize
     }
 }
 
@@ -295,19 +289,17 @@ impl TrieDictionary {
 
 struct PhrasesIter<'a> {
     bytes: &'a [u8],
-    start: usize,
-    end: usize,
 }
 
 impl<'a> Iterator for PhrasesIter<'a> {
     type Item = Phrase<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.start == self.end {
+        if self.bytes.is_empty() {
             return None;
         }
-        let phrase_data = PhraseData(&self.bytes[self.start..]);
-        self.start += phrase_data.len();
+        let phrase_data = PhraseData(self.bytes);
+        self.bytes = &self.bytes[phrase_data.len()..];
         Some(Phrase::new(
             phrase_data.phrase_str(),
             phrase_data.frequency(),
@@ -317,30 +309,27 @@ impl<'a> Iterator for PhrasesIter<'a> {
 
 impl Dictionary for TrieDictionary {
     fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
-        let root = TrieNode(self.dict.as_slice());
+        let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
         let mut node = root;
         'next: for syl in syllables {
             debug_assert!(syl.to_u16() != 0);
-            let child_begin = node.child_begin() * TRIE_NODE_SIZE;
-            let child_end = node.child_end() * TRIE_NODE_SIZE;
-            for storage in self.dict[child_begin..child_end].chunks_exact(TRIE_NODE_SIZE) {
-                let child = TrieNode(storage);
-                if child.syllable_eq(&syl) {
-                    node = child;
-                    continue 'next;
-                }
+            let child_nodes: &[TrieNodePod] =
+                cast_slice(&self.dict[node.child_begin()..node.child_end()]);
+            if let Ok(child) =
+                child_nodes.binary_search_by_key(&syl.to_u16(), TrieNodePod::syllable)
+            {
+                node = &child_nodes[child];
+                continue 'next;
             }
             return Box::new(std::iter::empty());
         }
-        let begin = node.child_begin() * TRIE_NODE_SIZE;
-        let leaf = TrieLeaf(&self.dict[begin..begin + TRIE_LEAF_SIZE]);
+        let leaf_data = &self.dict[node.child_begin()..];
+        let leaf: &TrieLeafPod = from_bytes(&leaf_data[..TrieLeafPod::SIZE]);
         if leaf.reserved_zero() != 0 {
             return Box::new(std::iter::empty());
         }
         Box::new(PhrasesIter {
             bytes: &self.data[leaf.data_begin()..leaf.data_end()],
-            start: 0,
-            end: leaf.data_end() - leaf.data_begin(),
         })
     }
 
@@ -522,22 +511,26 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                      ChunkHeader('DICT')                      |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |           Reserved            |            Child Begin      ...
+/// |                          Child Begin                          |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                             |              Child End      ...
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                             |            SyllableU16        |
+/// |           Child Len           |            Reserved           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                          Child Begin                          |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                          Child End                            |
+/// |           Child Len           |         SyllableU16           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |            Zero               |            Data Begin       ...
+/// ...                                                           ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                             |              Data End       ...
+/// |                           Data Begin                          |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                             | ...
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |            Data Len           |            Reserved           |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                           Data Begin                          |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |            Data Len           |            Reserved           |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// ...                                                           ...
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
 /// The index chunk contains the trie node records serialized in BFS order. The
@@ -550,31 +543,31 @@ impl Dictionary for TrieDictionary {
 ///
 /// ```text
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// | SyllableU16 |      Child Begin      |       Child End       |
+/// |         Child Begin             | Child Len    |SyllableU16 |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// - **SyllableU16: 16 bits (u16)**
-///     - The [`Syllable`] encoded as an u16 integer.
 /// - **Child Begin: 32 bits (u32)**
 ///     - The record index of the first child node.
-/// - **Child End: 32 bits (u32)**
-///     - The record index of the end of the child nodes, exclusive.
+/// - **Child Len: 16 bits (u16)**
+///     - The number of the child nodes.
+/// - **SyllableU16: 16 bits (u16)**
+///     - The [`Syllable`] encoded as an u16 integer.
 ///
 /// Leaf node:
 ///
 /// ```text
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |     Zero    |      Data Begin       |       Data End        |
+/// |          Data Begin             |  Data Len    | Reserved   |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// - **Zero: 16 bits (u16)**
-///     - Must be all zeros, indicating a leaf node.
 /// - **Data Begin: 32 bits (u32)**
 ///     - The offset into the Phrases chunk for the phrase data.
-/// - **Data End: 32 bits (u32)**
-///     - The offset into the end of the phrase data, exclusive.
+/// - **Data Len: 16 bits (u16)**
+///     - The length to the end of the phrase data, exclusive.
+/// - **Reserved: 16 bits (u16)**
+///     - Must be all zeros, indicating a leaf node.
 ///
 /// ### Phrases chunk:
 ///
@@ -598,7 +591,7 @@ impl Dictionary for TrieDictionary {
 /// Each phrase is written as length prefixed strings.
 ///
 /// - **Frequency: 32 bits (u32)**
-///     - The frequency of the phrase.
+///     - The frequency of the phrase. Might be unaligned.
 /// - **Length: 8 bits (u8)**
 ///     - Each phrase encoded in UTF-8 must not exceed 255 bytes long.
 /// - **Phrase: variable bits**
@@ -761,21 +754,17 @@ impl TrieDictionaryBuilder {
                 // An internal node has an associated syllable. The root node is
                 // a special case with no syllable.
                 if node.syllable.is_some() || id == ROOT_ID {
-                    let mut record = [0; TRIE_NODE_SIZE];
-                    let mut view = TrieNode(record.as_mut_slice());
                     let syllable_u16 = node.syllable.map_or(0, |v| v.to_u16());
-                    let child_end = child_begin
-                        + node.children.len()
-                        + if node.leaf_id.is_some() { 1 } else { 0 };
-                    view.write_syllable(syllable_u16);
-                    view.write_child_begin(child_begin);
-                    view.write_child_end(child_end);
-                    dict_buf.write_all(&record)?;
+                    let child_len =
+                        node.children.len() + if node.leaf_id.is_some() { 1 } else { 0 };
+                    let trie_node = TrieNodePod {
+                        syllable_raw: syllable_u16.to_le(),
+                        child_begin_raw: (child_begin as u32).to_le(),
+                        child_len_raw: (child_len as u16).to_le(),
+                    };
+                    dict_buf.write_all(bytes_of(&trie_node))?;
                 } else {
-                    let mut record = [0; TRIE_LEAF_SIZE];
-                    let mut view = TrieLeaf(record.as_mut_slice());
-                    view.write_reserved_zero();
-                    view.write_data_begin(data_buf.len());
+                    let data_begin = data_buf.len();
 
                     let mut phrases = node.phrases.clone();
                     phrases.sort_by(|a, b| {
@@ -803,16 +792,19 @@ impl TrieDictionaryBuilder {
                         data_buf.write_all(phrase.as_str().as_bytes())?;
                     }
 
-                    view.write_data_end(data_buf.len());
-                    dict_buf.write_all(&record)?;
+                    let data_len = data_buf.len() - data_begin;
+                    let trie_leaf = TrieLeafPod {
+                        reserved_zero: 0,
+                        data_begin_raw: (data_begin as u32).to_le(),
+                        data_len_raw: (data_len as u16).to_le(),
+                    };
+                    dict_buf.write_all(bytes_of(&trie_leaf))?;
                 }
 
                 // Sort the children nodes by their syllables. Not really required,
                 // but it makes using binary search possible in the future.
                 let mut children = node.children.clone();
-                children.sort_by(|&a, &b| {
-                    self.arena[a].syllable.cmp(&self.arena[b].syllable)
-                });
+                children.sort_by(|&a, &b| self.arena[a].syllable.cmp(&self.arena[b].syllable));
                 if let Some(leaf_id) = node.leaf_id {
                     child_begin += 1;
                     queue.push_back(leaf_id.get());
