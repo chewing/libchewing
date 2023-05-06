@@ -1,0 +1,41 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "libchewing-devcontainer",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"build": {
+		"dockerfile": "./Dockerfile"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer",
+				"tamasfe.even-better-toml", // for Cargo.toml
+				"eamodio.gitlens", // IDE Git information
+				"shardulm94.trailing-spaces", // Show trailing spaces
+				"christian-kohler.path-intellisense",
+				"ms-azuretools.vscode-docker",
+				"genieai.chatgpt-vscode",
+				"ms-vscode.cmake-tools", // Cmake
+				// "mohsen1.prettify-json", // Prettify JSON data
+				// "spikespaz.vscode-smoothtype", // smooth cursor animation
+			],
+			"settings": {
+				"files.eol": "\n",
+				"[rust]": {
+					"editor.defaultFormatter": "rust-lang.rust-analyzer"
+				}
+			}
+		}
+	}
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "uname -a",
+	// Configure tool-specific properties.
+	// "customizations": {},
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
