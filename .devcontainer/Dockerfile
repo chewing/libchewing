@@ -35,7 +35,7 @@ ENV RUSTUP_HOME=/home/${USER}/.rustup \
     PATH=/home/${USER}/.cargo/bin:$PATH \
     RUST_VERSION=${RUST_VERSION}
 
-# Use sparse protocol once MSVC reaches 1.68.0
+# Use sparse protocol once MSRV reaches 1.68.0
 # Ref: Sparse index protocol: https://blog.rust-lang.org/inside-rust/2023/01/30/cargo-sparse-protocol.html
 #
 # ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
