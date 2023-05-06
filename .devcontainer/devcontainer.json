@@ -9,22 +9,22 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"rust-lang.rust-analyzer",
-				"tamasfe.even-better-toml", // for Cargo.toml
 				"eamodio.gitlens", // IDE Git information
 				"shardulm94.trailing-spaces", // Show trailing spaces
 				"christian-kohler.path-intellisense",
 				"ms-azuretools.vscode-docker",
-				"genieai.chatgpt-vscode",
 				"ms-vscode.cmake-tools", // Cmake
-				// "mohsen1.prettify-json", // Prettify JSON data
-				// "spikespaz.vscode-smoothtype", // smooth cursor animation
+				// Rust language support
+				"rust-lang.rust", // Use "rust-lang.rust-analyzer" once MSRV reaches 1.64
+				// Ref:
+				// + https://github.com/chewing/libchewing/pull/347#issuecomment-1412022376
+				// + https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1640-2022-09-22
+				"tamasfe.even-better-toml", // for Cargo.toml
+				// Other
+				"genieai.chatgpt-vscode"
 			],
 			"settings": {
-				"files.eol": "\n",
-				"[rust]": {
-					"editor.defaultFormatter": "rust-lang.rust-analyzer"
-				}
+				"files.eol": "\n"
 			}
 		}
 	}
