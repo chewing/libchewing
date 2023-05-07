@@ -45,13 +45,6 @@ COPY --chown=${USER} --from=rust-env /usr/local/rustup /home/${USER}/.rustup
 
 RUN set -eux; \
     rustup component add \
-    \
-    # Use rust-analyzer once MSRC reaches 1.64.0
-    # Ref:
-    # + https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1640-2022-09-22
-    # + https://github.com/chewing/libchewing/pull/347#issuecomment-1412022376
-    rls rust-analysis rust-src \
-    #
     clippy \
     rustfmt \
     ;
