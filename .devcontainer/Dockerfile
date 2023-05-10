@@ -6,8 +6,8 @@ ARG RUST_VERSION=1.61.0
 FROM rust:${RUST_VERSION} AS rust-env
 
 # Final stage
-# https://github.com/devcontainers/images/tree/main/src/base-debian
-FROM mcr.microsoft.com/devcontainers/base:debian
+# https://github.com/devcontainers/images/tree/main/src/base-ubuntu
+FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 ARG RUST_VERSION
 ARG USER=vscode
