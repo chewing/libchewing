@@ -10,9 +10,18 @@ use super::{Bopomofo, BopomofoKind, ParseBopomofoError};
 /// The consonants and vowels that are taken together to make a single sound.
 ///
 /// <https://en.m.wikipedia.org/wiki/Syllable#Chinese_model>
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Syllable {
     value: u16,
+}
+
+impl core::fmt::Debug for Syllable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Syllable")
+            .field("value", &self.value)
+            .field("to_string()", &self.to_string())
+            .finish()
+    }
 }
 
 impl Syllable {
