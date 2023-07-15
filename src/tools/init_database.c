@@ -531,7 +531,7 @@ void insert_leaf(NODE * parent, long phr_pos, uint32_t freq)
     NODE *pnew;
 
     for (p = parent->pFirstChild; p && GetUint16(p->data.key) == 0; prev = p, p = p->pNextSibling)
-        if (GetUint16(p->data.phrase.freq) <= freq)
+        if (GetUint24(p->data.phrase.freq) <= freq)
             break;
 
     pnew = new_node(0);
