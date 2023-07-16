@@ -9,4 +9,4 @@ edition = "2021"
 
 anyhow = "1.0.0"
 argh = "0.1.10"
-xshell = "0.2.3"
+xshell = "0.2.5"

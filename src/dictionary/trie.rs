@@ -204,6 +204,7 @@ impl TrieDictionary {
         let mut data_chunk = None;
         let mut info_chunk = None;
         for chunk in root.iter(&mut stream) {
+            let chunk = chunk?;
             match chunk.id() {
                 FMT => fmt_chunk = Some(chunk),
                 LIST => info_chunk = Some(chunk),
@@ -258,6 +259,7 @@ impl TrieDictionary {
         let mut chunks = vec![];
 
         for chunk in list_chunk.iter(&mut stream) {
+            let chunk = chunk?;
             match chunk.id() {
                 INAM | ICOP | ILIC | IREV | ISFT => chunks.push((chunk.id(), chunk)),
                 _ => (),
