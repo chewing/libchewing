@@ -447,6 +447,8 @@ CHEWING_API void chewing_delete(ChewingContext *ctx)
 #ifdef WITH_RUST
             FreePhoneticEditor(ctx->data->bopomofoData.editorWithKeymap);
             UserGetPhraseEnd(ctx->data, NULL);
+            UserEnumeratePhraseEnd(ctx->data->phraseEnumIter);
+            ctx->data->phraseEnumIter = NULL;
 #endif
             TerminateUserphrase(ctx->data);
             TerminateTree(ctx->data);
@@ -1951,8 +1953,8 @@ CHEWING_API int chewing_userphrase_enumerate(ChewingContext *ctx)
     }
 
 #ifdef WITH_RUST
-    UserGetPhraseEnd(ctx->data, NULL);
-    ctx->data->phraseIter = UserEnumeratePhrase(ctx->data->ue);
+    UserEnumeratePhraseEnd(ctx->data->phraseEnumIter);
+    ctx->data->phraseEnumIter = UserEnumeratePhrase(ctx->data->ue);
 #else
 #if WITH_SQLITE3
     int ret;
@@ -1985,7 +1987,7 @@ CHEWING_API int chewing_userphrase_has_next(ChewingContext *ctx, unsigned int *p
     }
 
 #ifdef WITH_RUST
-    return UserEnumerateHasNext(ctx->data->phraseIter, phrase_len, bopomofo_len);
+    return UserEnumerateHasNext(ctx->data->phraseEnumIter, phrase_len, bopomofo_len);
 #else
 #if WITH_SQLITE3
     int ret;
@@ -2037,7 +2039,7 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
     }
 
 #ifdef WITH_RUST
-    return UserEnumerateGet(ctx->data->phraseIter, phrase_buf, phrase_len, bopomofo_buf, bopomofo_len);
+    return UserEnumerateGet(ctx->data->phraseEnumIter, phrase_buf, phrase_len, bopomofo_buf, bopomofo_len);
 #else
 #if WITH_SQLITE3
     const char *phrase;

@@ -400,6 +400,7 @@ typedef struct ChewingData {
   struct ChewingConversionEngine *ce;
   struct UserphraseDbAndEstimate *ue;
   void *phraseIter;
+  void *phraseEnumIter;
 } ChewingData;
 
 typedef struct Phrase {
@@ -553,6 +554,8 @@ void UserUpdatePhraseBegin(struct ChewingData *_pgdata);
 void UserUpdatePhraseEnd(struct ChewingData *_pgdata);
 
 void *UserEnumeratePhrase(const struct UserphraseDbAndEstimate *ue);
+
+void UserEnumeratePhraseEnd(void *iter_ptr);
 
 bool UserEnumerateHasNext(void *iter_ptr, unsigned int *phrase_len_ptr, unsigned int *bopomofo_len);
 

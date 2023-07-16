@@ -227,6 +227,14 @@ pub extern "C" fn UserEnumeratePhrase(ue: &UserphraseDbAndEstimate) -> *mut c_vo
 }
 
 #[no_mangle]
+pub extern "C" fn UserEnumeratePhraseEnd(iter_ptr: *mut c_void) {
+    if !iter_ptr.is_null() {
+        let iter_ptr: *mut Peekable<DictEntries> = iter_ptr.cast();
+        let _ = unsafe { Box::from_raw(iter_ptr) };
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn UserEnumerateHasNext(
     iter_ptr: *mut c_void,
     phrase_len_ptr: *mut c_uint,

@@ -215,6 +215,7 @@ pub struct ChewingData {
     pub ce: Option<Box<ChewingConversionEngine>>,
     pub ue: Option<Box<UserphraseDbAndEstimate>>,
     pub phrase_iter: *mut c_void,
+    pub phrase_enum_iter: *mut c_void,
 }
 
 #[repr(C)]
