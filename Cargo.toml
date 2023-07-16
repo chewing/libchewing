@@ -31,7 +31,7 @@ rusqlite = { version = "0.28.0", features = ["bundled"]}
 tempfile = "3"
 
 [workspace]
-members = ["capi/chewing-internal", "capi/chewing-public", "tools"]
+members = ["capi/chewing-internal", "capi/chewing-public", "tools", "xtask"]
 
 [profile.release]
 lto = true
