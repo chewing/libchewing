@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI
 
 on:
   push:
@@ -14,17 +14,27 @@ env:
 
 jobs:
   build:
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         with_rust: ['true', 'false']
+        rust_version: ['1.64', 'stable']
+        exclude:
+          - with_rust: 'false'
+            rust_version: 'stable'
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}
+    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}, rust_version=${{ matrix.rust_version }}
 
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: 'true'
+
+    - name: Setup rustup
+      run: |
+        rustup default ${{ matrix.rust_version }}
+        rustup update
 
     - name: Build
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --verbose true

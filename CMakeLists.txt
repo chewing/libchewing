@@ -285,6 +285,7 @@ if (BUILD_DLL OR NOT MSVC)
             target_link_options(chewing_shared PRIVATE "-Wl,-dead_strip")
         elseif (MSVC)
             target_link_options(chewing_shared PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
+            set_target_properties(chewing_shared PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
 
