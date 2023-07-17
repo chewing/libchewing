@@ -14,14 +14,14 @@ use tracing::{instrument, warn};
 use crate::{
     conversion::{ChewingConversionEngine, ChineseSequence, ConversionEngine},
     dictionary::{self, Dictionary},
-    editor::keymap::KeyCode,
+    editor::{keymap::KeyCode, preedit_buffer::Char},
     zhuyin::Syllable,
 };
 
 use self::{
     keymap::KeyEvent,
     layout::{KeyBehavior, Standard},
-    preedit_buffer::PreeditBuffer,
+    preedit_buffer::{PreeditBuffer, Segment},
 };
 
 /// Indicates the state change of the editor.
@@ -48,6 +48,8 @@ struct Editor<C: 'static, D: 'static> {
     syllable_editor: Box<dyn SyllableEditor>,
     conversion_engine: C,
     dictionary: D,
+
+    language_mode: LanguageMode,
 }
 
 struct EditLineBuffer;
@@ -112,6 +114,7 @@ pub enum EditorKeyEvent {
     NumLock,
 }
 
+#[derive(Debug)]
 enum LanguageMode {
     Chinese,
     English,
@@ -202,9 +205,15 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 todo!("Handle clean all buf");
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            Default(evt) => match editor.syllable_editor.key_press(evt) {
-                KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
-                _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
+            Default(evt) => match editor.language_mode {
+                LanguageMode::Chinese => match editor.syllable_editor.key_press(evt) {
+                    KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
+                    _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
+                },
+                LanguageMode::English => {
+                    editor.preedit_buffer.push(Char::Other('X'));
+                    (EditorKeyBehavior::Commit, &Entering)
+                }
             },
             _ => (EditorKeyBehavior::Ignore, &Entering),
         }
@@ -244,7 +253,9 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
             Default(evt) => match editor.syllable_editor.key_press(evt) {
                 KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
                 KeyBehavior::Commit => {
-                    editor.preedit_buffer.insert(editor.syllable_buffer());
+                    editor
+                        .preedit_buffer
+                        .push(Char::Chinese(editor.syllable_buffer()));
                     editor.syllable_editor.clear();
                     (EditorKeyBehavior::Absorb, &Entering)
                 }
@@ -323,17 +334,26 @@ impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
             syllable_editor: Box::new(Standard::new()),
             dictionary,
             conversion_engine,
+            language_mode: LanguageMode::Chinese,
         }
     }
     fn preedit_buffer(&self) -> String {
-        self.conversion_engine
-            .convert(&ChineseSequence {
-                syllables: dbg!(self.preedit_buffer.syllables()),
-                selections: vec![],
-                breaks: vec![],
-            })
+        self.preedit_buffer
+            .segments()
             .into_iter()
-            .map(|interval| interval.phrase)
+            .map(|segment| match segment {
+                Segment::Chinese(syllables) => self
+                    .conversion_engine
+                    .convert(&ChineseSequence {
+                        syllables,
+                        selections: vec![],
+                        breaks: vec![],
+                    })
+                    .into_iter()
+                    .map(|interval| interval.phrase)
+                    .collect::<String>(),
+                Segment::Other(chars) => chars.into_iter().collect(),
+            })
             .collect()
     }
 }
@@ -368,7 +388,10 @@ impl<C, D> Editor<C, D> {
         todo!()
     }
     fn switch_language_mode(&mut self) {
-        todo!()
+        self.language_mode = match self.language_mode {
+            LanguageMode::English => LanguageMode::Chinese,
+            LanguageMode::Chinese => LanguageMode::English,
+        }
     }
     fn start_hanin_symbol_input(&mut self) {
         todo!()
@@ -453,10 +476,98 @@ mod tests {
     }
 
     #[test]
-    fn editing_mode_input_chinese_to_english_mode() {}
+    fn editing_mode_input_chinese_to_english_mode() {
+        let dict: Rc<dyn Dictionary> = Rc::new(HashMap::from([(
+            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("冊", 100).into()],
+        )]));
+
+        let conversion_engine = ChewingConversionEngine::new(dict.clone());
+        let mut editor = Editor::new(conversion_engine, dict);
+
+        let keys = [
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K32,
+                code: KeyCode::H,
+            }),
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K34,
+                code: KeyCode::K,
+            }),
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K4,
+                code: KeyCode::N4,
+            }),
+            EditorKeyEvent::CapsLock,
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K39,
+                code: KeyCode::X,
+            }),
+        ];
+
+        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+
+        assert_eq!(
+            vec![
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Commit
+            ],
+            key_behaviors
+        );
+        assert!(editor.syllable_buffer().is_empty());
+        assert_eq!("冊X", editor.preedit_buffer());
+    }
 
     #[test]
-    fn editing_mode_input_english_to_chinese_mode() {}
+    fn editing_mode_input_english_to_chinese_mode() {
+        let dict: Rc<dyn Dictionary> = Rc::new(HashMap::from([(
+            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("冊", 100).into()],
+        )]));
+
+        let conversion_engine = ChewingConversionEngine::new(dict.clone());
+        let mut editor = Editor::new(conversion_engine, dict);
+
+        let keys = [
+            EditorKeyEvent::CapsLock,
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K39,
+                code: KeyCode::X,
+            }),
+            EditorKeyEvent::CapsLock,
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K32,
+                code: KeyCode::H,
+            }),
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K34,
+                code: KeyCode::K,
+            }),
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K4,
+                code: KeyCode::N4,
+            }),
+        ];
+
+        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+
+        assert_eq!(
+            vec![
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Commit,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+            ],
+            key_behaviors
+        );
+        assert!(editor.syllable_buffer().is_empty());
+        assert_eq!("X冊", editor.preedit_buffer());
+    }
 
     #[test]
     fn editing_mode_input_special_symbol() {}

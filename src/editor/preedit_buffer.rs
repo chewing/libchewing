@@ -12,9 +12,14 @@ pub struct PreeditBuffer {
 }
 
 #[derive(Debug, Copy, Clone)]
-enum Char {
+pub(crate) enum Char {
     Chinese(Syllable),
     Other(char),
+}
+
+pub(crate) enum Segment {
+    Chinese(Vec<Syllable>),
+    Other(Vec<char>),
 }
 
 impl PreeditBuffer {
@@ -36,16 +41,38 @@ impl PreeditBuffer {
     pub(crate) fn move_cursor_to_beginning(&mut self) {
         todo!()
     }
-    pub(crate) fn insert(&mut self, syl: Syllable) {
-        self.buffer.insert(self.cursor, Char::Chinese(syl));
+    pub(crate) fn push(&mut self, char_: Char) {
+        self.buffer.push(char_);
+        self.cursor += 1;
     }
-    pub(crate) fn syllables(&self) -> Vec<Syllable> {
-        self.buffer
-            .iter()
-            .filter_map(|ch| match ch {
-                Char::Chinese(syl) => Some(*syl),
-                Char::Other(_) => None,
-            })
-            .collect()
+    pub(crate) fn segments(&self) -> Vec<Segment> {
+        let mut chinese_segment = vec![];
+        let mut other_segment = vec![];
+        let mut segments = vec![];
+        for char_ in self.buffer.iter() {
+            match char_ {
+                Char::Chinese(syllable) => {
+                    if !other_segment.is_empty() {
+                        segments.push(Segment::Other(other_segment));
+                        other_segment = vec![];
+                    }
+                    chinese_segment.push(*syllable);
+                }
+                Char::Other(char_) => {
+                    if !chinese_segment.is_empty() {
+                        segments.push(Segment::Chinese(chinese_segment));
+                        chinese_segment = vec![];
+                    }
+                    other_segment.push(*char_);
+                }
+            }
+        }
+        if !other_segment.is_empty() {
+            segments.push(Segment::Other(other_segment));
+        }
+        if !chinese_segment.is_empty() {
+            segments.push(Segment::Chinese(chinese_segment));
+        }
+        segments
     }
 }
