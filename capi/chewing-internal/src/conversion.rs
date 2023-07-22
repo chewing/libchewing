@@ -1,7 +1,7 @@
 use std::{ffi::CStr, rc::Rc};
 
 use chewing::conversion::{
-    Break, ChewingConversionEngine, ChineseSequence, ConversionEngine, Interval,
+    Break, ChewingConversionEngine, Composition, ConversionEngine, Interval, Symbol,
 };
 use chewing_public::types::IntervalType;
 use libc::{c_char, c_int};
@@ -42,7 +42,7 @@ pub extern "C" fn Phrasing(pgdata: &mut ChewingData, _all_phrasing: bool) {
         .collect();
     let syllables = syllables_u16
         .iter()
-        .map(|&syl_u16| syl_u16.try_into().expect("convert u16 to syllable"))
+        .map(|&syl_u16| Symbol::Syllable(syl_u16.try_into().expect("convert u16 to syllable")))
         .collect();
 
     let selections = select_intervals
@@ -54,14 +54,14 @@ pub extern "C" fn Phrasing(pgdata: &mut ChewingData, _all_phrasing: bool) {
         })
         .collect();
 
-    let sequence = ChineseSequence {
-        syllables,
+    let composition = Composition {
+        buffer: syllables,
         selections,
         breaks,
     };
     let intervals = match pgdata.phr_out.n_num_cut {
-        0 => ce.convert(&sequence),
-        _ => ce.convert_next(&sequence, pgdata.phr_out.n_num_cut as usize),
+        0 => ce.convert(&composition),
+        _ => ce.convert_next(&composition, pgdata.phr_out.n_num_cut as usize),
     };
 
     pgdata.phr_out.n_disp_interval = intervals.len() as c_int;

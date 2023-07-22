@@ -37,6 +37,63 @@ pub enum KeyCode {
         Z, X, C, V, B, N, M, Comma, Dot, Slash, Space
 }
 
+impl KeyCode {
+    /// Return the unicode char corresponding the key code
+    pub fn to_char(&self) -> char {
+        match self {
+            Unknown => '�',
+            N1 => '1',
+            N2 => '2',
+            N3 => '3',
+            N4 => '4',
+            N5 => '5',
+            N6 => '6',
+            N7 => '7',
+            N8 => '8',
+            N9 => '9',
+            N0 => '0',
+            Minus => '-',
+            Equal => '=',
+            BSlash => '/',
+            Grave => '`',
+            Q => 'q',
+            W => 'w',
+            E => 'e',
+            R => 'r',
+            T => 't',
+            Y => 'y',
+            U => 'u',
+            I => 'i',
+            O => 'o',
+            P => 'p',
+            LBracket => '[',
+            RBracket => ']',
+            A => 'a',
+            S => 's',
+            D => 'd',
+            F => 'f',
+            G => 'g',
+            H => 'h',
+            J => 'j',
+            K => 'k',
+            L => 'l',
+            SColon => ':',
+            Quote => '\'',
+            Z => 'z',
+            X => 'x',
+            C => 'c',
+            V => 'v',
+            B => 'b',
+            N => 'n',
+            M => 'm',
+            Comma => ',',
+            Dot => '.',
+            Slash => '\\',
+            Space => ' ',
+        }
+    }
+}
+
 /// Key processed by a keymap
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct KeyEvent {

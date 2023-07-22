@@ -1,6 +1,11 @@
 //! TODO: docs
 
+mod chewing;
+mod symbol;
+
 use crate::zhuyin::Syllable;
+
+pub use self::chewing::ChewingConversionEngine;
 
 /// TODO: doc
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -32,11 +37,35 @@ impl Interval {
 #[derive(Debug)]
 pub struct Break(pub usize);
 
+/// A smallest unit of input in the pre-edit buffer.
+#[derive(Debug, Clone, Copy)]
+pub enum Symbol {
+    /// Chinese syllable
+    Syllable(Syllable),
+    /// Any direct character
+    Char(char),
+}
+
+impl Symbol {
+    pub(crate) fn is_syllable(&self) -> bool {
+        match self {
+            Symbol::Syllable(_) => true,
+            Symbol::Char(_) => false,
+        }
+    }
+    pub(crate) fn as_syllable(&self) -> Syllable {
+        match self {
+            Symbol::Syllable(syllable) => *syllable,
+            Symbol::Char(_) => panic!(),
+        }
+    }
+}
+
 /// TODO: doc
-#[derive(Debug)]
-pub struct ChineseSequence {
+#[derive(Debug, Default)]
+pub struct Composition {
     /// TODO: doc
-    pub syllables: Vec<Syllable>,
+    pub buffer: Vec<Symbol>,
     /// TODO: doc
     pub selections: Vec<Interval>,
     /// TODO: doc
@@ -46,10 +75,7 @@ pub struct ChineseSequence {
 /// TODO: doc
 pub trait ConversionEngine {
     /// TODO: doc
-    fn convert(&self, segment: &ChineseSequence) -> Vec<Interval>;
+    fn convert(&self, composition: &Composition) -> Vec<Interval>;
     /// TODO: doc
-    fn convert_next(&self, segment: &ChineseSequence, next: usize) -> Vec<Interval>;
+    fn convert_next(&self, composition: &Composition, next: usize) -> Vec<Interval>;
 }
-
-mod chewing_conversion;
-pub use chewing_conversion::ChewingConversionEngine;

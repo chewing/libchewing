@@ -7,12 +7,9 @@ use std::{
 
 use tracing::trace;
 
-use crate::{
-    dictionary::{Dictionary, Phrase},
-    zhuyin::Syllable,
-};
+use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Break, ChineseSequence, ConversionEngine, Interval};
+use super::{Break, Composition, ConversionEngine, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug)]
@@ -21,20 +18,20 @@ pub struct ChewingConversionEngine {
 }
 
 impl ConversionEngine for ChewingConversionEngine {
-    fn convert(&self, segment: &ChineseSequence) -> Vec<Interval> {
-        if segment.syllables.is_empty() {
+    fn convert(&self, composition: &Composition) -> Vec<Interval> {
+        if composition.buffer.is_empty() {
             return vec![];
         }
-        let intervals = self.find_intervals(segment);
-        self.find_best_path(segment.syllables.len(), intervals)
+        let intervals = self.find_intervals(composition);
+        self.find_best_path(composition.buffer.len(), intervals)
     }
 
-    fn convert_next(&self, segment: &ChineseSequence, next: usize) -> Vec<Interval> {
-        if segment.syllables.is_empty() {
+    fn convert_next(&self, composition: &Composition, next: usize) -> Vec<Interval> {
+        if composition.buffer.is_empty() {
             return vec![];
         }
         let mut graph = Graph::default();
-        let paths = self.find_all_paths(&mut graph, segment, 0, segment.syllables.len(), None);
+        let paths = self.find_all_paths(&mut graph, composition, 0, composition.buffer.len(), None);
         let mut trimmed_paths = self.trim_paths(paths);
         trimmed_paths.sort();
         trimmed_paths
@@ -59,11 +56,11 @@ impl ChewingConversionEngine {
     fn find_best_phrase(
         &self,
         start: usize,
-        syllables: &[Syllable],
+        symbols: &[Symbol],
         selections: &[Interval],
         breaks: &[Break],
     ) -> Option<Rc<Phrase<'_>>> {
-        let end = start + syllables.len();
+        let end = start + symbols.len();
 
         for br in breaks.iter() {
             if br.0 > start && br.0 < end {
@@ -73,9 +70,24 @@ impl ChewingConversionEngine {
             }
         }
 
+        if symbols.len() == 1 {
+            if let Some(Symbol::Char(ch)) = symbols.first() {
+                return Some(Rc::new(Phrase::new(ch.to_string(), 0)));
+            }
+        }
+
+        let syllables = symbols
+            .iter()
+            .take_while(|symbol| symbol.is_syllable())
+            .map(|symbol| symbol.as_syllable())
+            .collect::<Vec<_>>();
+        if syllables.len() != symbols.len() {
+            return None;
+        }
+
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in self.dict.lookup_phrase(syllables) {
+        'next_phrase: for phrase in self.dict.lookup_phrase(&syllables) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
@@ -102,15 +114,15 @@ impl ChewingConversionEngine {
 
         best_phrase
     }
-    fn find_intervals(&self, seq: &ChineseSequence) -> Vec<PossibleInterval<'_>> {
+    fn find_intervals(&self, comp: &Composition) -> Vec<PossibleInterval<'_>> {
         let mut intervals = vec![];
-        for begin in 0..seq.syllables.len() {
-            for end in begin..=seq.syllables.len() {
+        for begin in 0..comp.buffer.len() {
+            for end in begin..=comp.buffer.len() {
                 if let Some(phrase) = self.find_best_phrase(
                     begin,
-                    &seq.syllables[begin..end],
-                    &seq.selections,
-                    &seq.breaks,
+                    &comp.buffer[begin..end],
+                    &comp.selections,
+                    &comp.breaks,
                 ) {
                     intervals.push(PossibleInterval {
                         start: begin,
@@ -172,7 +184,7 @@ impl ChewingConversionEngine {
     fn find_all_paths<'g>(
         &'g self,
         graph: &mut Graph<'g>,
-        sequence: &ChineseSequence,
+        composition: &Composition,
         start: usize,
         target: usize,
         prefix: Option<PossiblePath<'g>>,
@@ -186,9 +198,9 @@ impl ChewingConversionEngine {
             if let Some(phrase) = entry.or_insert_with(|| {
                 self.find_best_phrase(
                     start,
-                    &sequence.syllables[start..end],
-                    &sequence.selections,
-                    &sequence.breaks,
+                    &composition.buffer[start..end],
+                    &composition.selections,
+                    &composition.breaks,
                 )
             }) {
                 let mut prefix = prefix.clone().unwrap_or_default();
@@ -197,7 +209,13 @@ impl ChewingConversionEngine {
                     end,
                     phrase: phrase.clone(),
                 });
-                result.append(&mut self.find_all_paths(graph, sequence, end, target, Some(prefix)));
+                result.append(&mut self.find_all_paths(
+                    graph,
+                    composition,
+                    end,
+                    target,
+                    Some(prefix),
+                ));
             }
         }
         result
@@ -387,7 +405,7 @@ mod tests {
     use std::{collections::HashMap, rc::Rc};
 
     use crate::{
-        conversion::{Break, ChineseSequence, ConversionEngine, Interval},
+        conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
         dictionary::{Dictionary, Phrase},
         syl,
         zhuyin::Bopomofo::*,
@@ -441,29 +459,29 @@ mod tests {
     }
 
     #[test]
-    fn convert_empty_sequence() {
+    fn convert_empty_composition() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![],
+        let composition = Composition {
+            buffer: vec![],
             selections: vec![],
             breaks: vec![],
         };
-        assert_eq!(Vec::<Interval>::new(), engine.convert(&sequence));
+        assert_eq!(Vec::<Interval>::new(), engine.convert(&composition));
     }
 
     #[test]
-    fn convert_simple_chinese_sequence() {
+    fn convert_simple_chinese_composition() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![
-                syl![G, U, O, TONE2],
-                syl![M, I, EN, TONE2],
-                syl![D, A, TONE4],
-                syl![H, U, EI, TONE4],
-                syl![D, AI, TONE4],
-                syl![B, I, AU, TONE3],
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![G, U, O, TONE2]),
+                Symbol::Syllable(syl![M, I, EN, TONE2]),
+                Symbol::Syllable(syl![D, A, TONE4]),
+                Symbol::Syllable(syl![H, U, EI, TONE4]),
+                Symbol::Syllable(syl![D, AI, TONE4]),
+                Symbol::Syllable(syl![B, I, AU, TONE3]),
             ],
             selections: vec![],
             breaks: vec![],
@@ -486,22 +504,22 @@ mod tests {
                     phrase: "代表".to_string()
                 },
             ],
-            engine.convert(&sequence)
+            engine.convert(&composition)
         );
     }
 
     #[test]
-    fn convert_chinese_sequence_with_breaks() {
+    fn convert_chinese_composition_with_breaks() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![
-                syl![G, U, O, TONE2],
-                syl![M, I, EN, TONE2],
-                syl![D, A, TONE4],
-                syl![H, U, EI, TONE4],
-                syl![D, AI, TONE4],
-                syl![B, I, AU, TONE3],
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![G, U, O, TONE2]),
+                Symbol::Syllable(syl![M, I, EN, TONE2]),
+                Symbol::Syllable(syl![D, A, TONE4]),
+                Symbol::Syllable(syl![H, U, EI, TONE4]),
+                Symbol::Syllable(syl![D, AI, TONE4]),
+                Symbol::Syllable(syl![B, I, AU, TONE3]),
             ],
             selections: vec![],
             breaks: vec![Break(1), Break(5)],
@@ -534,22 +552,22 @@ mod tests {
                     phrase: "表".to_string()
                 },
             ],
-            engine.convert(&sequence)
+            engine.convert(&composition)
         );
     }
 
     #[test]
-    fn convert_chinese_sequence_with_good_selection() {
+    fn convert_chinese_composition_with_good_selection() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![
-                syl![G, U, O, TONE2],
-                syl![M, I, EN, TONE2],
-                syl![D, A, TONE4],
-                syl![H, U, EI, TONE4],
-                syl![D, AI, TONE4],
-                syl![B, I, AU, TONE3],
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![G, U, O, TONE2]),
+                Symbol::Syllable(syl![M, I, EN, TONE2]),
+                Symbol::Syllable(syl![D, A, TONE4]),
+                Symbol::Syllable(syl![H, U, EI, TONE4]),
+                Symbol::Syllable(syl![D, AI, TONE4]),
+                Symbol::Syllable(syl![B, I, AU, TONE3]),
             ],
             selections: vec![Interval {
                 start: 4,
@@ -576,16 +594,20 @@ mod tests {
                     phrase: "戴錶".to_string()
                 },
             ],
-            engine.convert(&sequence)
+            engine.convert(&composition)
         );
     }
 
     #[test]
-    fn convert_chinese_sequence_with_substring_selection() {
+    fn convert_chinese_composition_with_substring_selection() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![syl![X, I, EN], syl![K, U, TONE4], syl![I, EN]],
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![X, I, EN]),
+                Symbol::Syllable(syl![K, U, TONE4]),
+                Symbol::Syllable(syl![I, EN]),
+            ],
             selections: vec![Interval {
                 start: 1,
                 end: 3,
@@ -599,7 +621,7 @@ mod tests {
                 end: 3,
                 phrase: "新酷音".to_string()
             },],
-            engine.convert(&sequence)
+            engine.convert(&composition)
         );
     }
 
@@ -607,12 +629,12 @@ mod tests {
     fn convert_cycle_alternatives() {
         let dict = test_dictionary();
         let engine = ChewingConversionEngine::new(dict);
-        let sequence = ChineseSequence {
-            syllables: vec![
-                syl![C, E, TONE4],
-                syl![SH, TONE4],
-                syl![I, TONE2],
-                syl![X, I, A, TONE4],
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![C, E, TONE4]),
+                Symbol::Syllable(syl![SH, TONE4]),
+                Symbol::Syllable(syl![I, TONE2]),
+                Symbol::Syllable(syl![X, I, A, TONE4]),
             ],
             selections: vec![],
             breaks: vec![],
@@ -630,7 +652,7 @@ mod tests {
                     phrase: "一下".to_string()
                 }
             ],
-            engine.convert_next(&sequence, 0)
+            engine.convert_next(&composition, 0)
         );
         assert_eq!(
             vec![
@@ -645,7 +667,7 @@ mod tests {
                     phrase: "下".to_string()
                 }
             ],
-            engine.convert_next(&sequence, 1)
+            engine.convert_next(&composition, 1)
         );
         assert_eq!(
             vec![
@@ -660,7 +682,7 @@ mod tests {
                     phrase: "一下".to_string()
                 }
             ],
-            engine.convert_next(&sequence, 2)
+            engine.convert_next(&composition, 2)
         );
     }
 

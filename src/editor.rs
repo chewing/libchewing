@@ -1,27 +1,26 @@
 //! TODO: doc
 
+pub mod composition_editor;
 mod estimate;
 pub mod keymap;
 pub mod layout;
-pub mod preedit_buffer;
 
-use std::{collections::HashMap, fmt::Debug, marker::PhantomData, rc::Rc};
+use std::{fmt::Debug, rc::Rc};
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
 pub use layout::SyllableEditor;
-use tracing::{instrument, warn};
+use tracing::warn;
 
 use crate::{
-    conversion::{ChewingConversionEngine, ChineseSequence, ConversionEngine},
-    dictionary::{self, Dictionary},
-    editor::{keymap::KeyCode, preedit_buffer::Char},
+    conversion::{ChewingConversionEngine, ConversionEngine, Symbol},
+    dictionary::Dictionary,
     zhuyin::Syllable,
 };
 
 use self::{
+    composition_editor::CompositionEditor,
     keymap::KeyEvent,
     layout::{KeyBehavior, Standard},
-    preedit_buffer::{PreeditBuffer, Segment},
 };
 
 /// Indicates the state change of the editor.
@@ -41,7 +40,7 @@ pub enum EditorKeyBehavior {
 #[derive(Debug)]
 struct Editor<C: 'static, D: 'static> {
     state: &'static dyn ChewingEditorState<C, D>,
-    preedit_buffer: PreeditBuffer,
+    composition: CompositionEditor,
     commit_buffer: String,
     feedback_buffer: String,
     candidate_selector: CandidateSelector,
@@ -52,8 +51,6 @@ struct Editor<C: 'static, D: 'static> {
     language_mode: LanguageMode,
 }
 
-struct EditLineBuffer;
-struct CommitBuffer;
 #[derive(Debug)]
 struct CandidateSelector;
 
@@ -158,7 +155,7 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
 
         match key_event {
             Backspace => {
-                editor.preedit_buffer.remove_before_cursor();
+                editor.composition.remove_before_cursor();
 
                 (EditorKeyBehavior::Absorb, &Entering)
             }
@@ -185,7 +182,7 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 (EditorKeyBehavior::Absorb, &Entering)
             }
             Del => {
-                editor.preedit_buffer.remove_after_cursor();
+                editor.composition.remove_after_cursor();
 
                 (EditorKeyBehavior::Absorb, &Entering)
             }
@@ -194,7 +191,7 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 (EditorKeyBehavior::Absorb, &Selecting)
             }
             End => {
-                editor.preedit_buffer.move_cursor_to_end();
+                editor.composition.move_cursor_to_end();
                 (EditorKeyBehavior::Absorb, &Entering)
             }
             Enter => {
@@ -211,7 +208,8 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                     _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
                 },
                 LanguageMode::English => {
-                    editor.preedit_buffer.push(Char::Other('X'));
+                    let char_ = evt.code.to_char();
+                    editor.composition.push(Symbol::Char(char_));
                     (EditorKeyBehavior::Commit, &Entering)
                 }
             },
@@ -254,8 +252,8 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
                 KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
                 KeyBehavior::Commit => {
                     editor
-                        .preedit_buffer
-                        .push(Char::Chinese(editor.syllable_buffer()));
+                        .composition
+                        .push(Symbol::Syllable(editor.syllable_buffer()));
                     editor.syllable_editor.clear();
                     (EditorKeyBehavior::Absorb, &Entering)
                 }
@@ -327,7 +325,7 @@ impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
     ) -> Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
         Editor {
             state: &Entering,
-            preedit_buffer: PreeditBuffer::default(),
+            composition: CompositionEditor::default(),
             commit_buffer: String::new(),
             feedback_buffer: String::new(),
             candidate_selector: CandidateSelector,
@@ -337,24 +335,12 @@ impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
             language_mode: LanguageMode::Chinese,
         }
     }
-    fn preedit_buffer(&self) -> String {
-        self.preedit_buffer
-            .segments()
+    fn display(&self) -> String {
+        self.conversion_engine
+            .convert(self.composition.as_ref())
             .into_iter()
-            .map(|segment| match segment {
-                Segment::Chinese(syllables) => self
-                    .conversion_engine
-                    .convert(&ChineseSequence {
-                        syllables,
-                        selections: vec![],
-                        breaks: vec![],
-                    })
-                    .into_iter()
-                    .map(|interval| interval.phrase)
-                    .collect::<String>(),
-                Segment::Other(chars) => chars.into_iter().collect(),
-            })
-            .collect()
+            .map(|interval| interval.phrase)
+            .collect::<String>()
     }
 }
 
@@ -409,7 +395,6 @@ mod tests {
 
     use super::{
         keymap::{KeyCode, KeyEvent, KeyIndex},
-        layout::Standard,
         BasicEditor, Editor, EditorKeyEvent,
     };
 
@@ -472,7 +457,7 @@ mod tests {
             key_behaviors
         );
         assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("冊", editor.preedit_buffer());
+        assert_eq!("冊", editor.display());
     }
 
     #[test]
@@ -501,7 +486,7 @@ mod tests {
             EditorKeyEvent::CapsLock,
             EditorKeyEvent::Default(KeyEvent {
                 index: KeyIndex::K39,
-                code: KeyCode::X,
+                code: KeyCode::Z,
             }),
         ];
 
@@ -518,7 +503,7 @@ mod tests {
             key_behaviors
         );
         assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("冊X", editor.preedit_buffer());
+        assert_eq!("冊z", editor.display());
     }
 
     #[test]
@@ -566,7 +551,7 @@ mod tests {
             key_behaviors
         );
         assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("X冊", editor.preedit_buffer());
+        assert_eq!("x冊", editor.display());
     }
 
     #[test]
