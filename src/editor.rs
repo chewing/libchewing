@@ -12,7 +12,7 @@ pub use layout::SyllableEditor;
 use tracing::warn;
 
 use crate::{
-    conversion::{ChewingConversionEngine, ConversionEngine, Symbol},
+    conversion::{full_width_symbol_input, ChewingConversionEngine, ConversionEngine, Symbol},
     dictionary::Dictionary,
     zhuyin::Syllable,
 };
@@ -49,6 +49,7 @@ struct Editor<C: 'static, D: 'static> {
     dictionary: D,
 
     language_mode: LanguageMode,
+    character_form: CharacterForm,
 }
 
 #[derive(Debug)]
@@ -117,6 +118,7 @@ enum LanguageMode {
     English,
 }
 
+#[derive(Debug)]
 enum CharacterForm {
     Halfwidth,
     Fullwidth,
@@ -209,7 +211,13 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 },
                 LanguageMode::English => {
                     let char_ = evt.code.to_char();
-                    editor.composition.push(Symbol::Char(char_));
+                    match editor.character_form {
+                        CharacterForm::Halfwidth => editor.composition.push(Symbol::Char(char_)),
+                        CharacterForm::Fullwidth => {
+                            let char_ = full_width_symbol_input(char_).unwrap();
+                            editor.composition.push(Symbol::Char(char_));
+                        }
+                    }
                     (EditorKeyBehavior::Commit, &Entering)
                 }
             },
@@ -333,6 +341,7 @@ impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
             dictionary,
             conversion_engine,
             language_mode: LanguageMode::Chinese,
+            character_form: CharacterForm::Halfwidth,
         }
     }
     fn display(&self) -> String {
@@ -377,6 +386,12 @@ impl<C, D> Editor<C, D> {
         self.language_mode = match self.language_mode {
             LanguageMode::English => LanguageMode::Chinese,
             LanguageMode::Chinese => LanguageMode::English,
+        }
+    }
+    fn switch_character_form(&mut self) {
+        self.character_form = match self.character_form {
+            CharacterForm::Fullwidth => CharacterForm::Halfwidth,
+            CharacterForm::Halfwidth => CharacterForm::Fullwidth,
         }
     }
     fn start_hanin_symbol_input(&mut self) {
@@ -558,7 +573,36 @@ mod tests {
     fn editing_mode_input_special_symbol() {}
 
     #[test]
-    fn editing_mode_input_full_shape_symbol() {}
+    fn editing_mode_input_full_shape_symbol() {
+        let dictionary = Rc::new(HashMap::new());
+        let conversion_engine = ChewingConversionEngine::new(dictionary.clone());
+        let mut editor = Editor::new(conversion_engine, dictionary);
+        editor.switch_character_form();
+        let keys = [
+            EditorKeyEvent::CapsLock,
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K10,
+                code: KeyCode::N0,
+            }),
+            EditorKeyEvent::Default(KeyEvent {
+                index: KeyIndex::K11,
+                code: KeyCode::Minus,
+            }),
+        ];
+
+        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+
+        assert_eq!(
+            vec![
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Commit,
+                EditorKeyBehavior::Commit,
+            ],
+            key_behaviors
+        );
+        assert!(editor.syllable_buffer().is_empty());
+        assert_eq!("０－", editor.display());
+    }
 
     #[test]
     fn editing_mode_input_symbol() {}

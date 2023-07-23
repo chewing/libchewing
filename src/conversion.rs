@@ -6,6 +6,7 @@ mod symbol;
 use crate::zhuyin::Syllable;
 
 pub use self::chewing::ChewingConversionEngine;
+pub(crate) use self::symbol::full_width_symbol_input;
 
 /// TODO: doc
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
