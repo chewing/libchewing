@@ -1,11 +1,8 @@
 use std::{ffi::CString, slice};
 
 use chewing::editor::{
-    keymap::{
-        IdentityKeymap, KeyCode, KeyCodeFromQwerty, Keymap, RemappingKeymap, CARPALX, DVORAK,
-        QWERTY,
-    },
-    layout::{
+    keyboard::{Dvorak, KeyCode, KeyboardLayout, Modifiers, Qgmlwy, Qwerty},
+    syllable::{
         DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyBehavior, KeyboardLayoutCompat, Pinyin,
         Standard,
     },
@@ -21,7 +18,7 @@ use super::{
 #[repr(C)]
 pub struct SyllableEditorWithKeymap {
     kb_type: KeyboardLayoutCompat,
-    keymap: Box<dyn Keymap>,
+    keyboard: Box<dyn KeyboardLayout>,
     editor: Box<dyn SyllableEditor>,
 }
 
@@ -33,67 +30,67 @@ pub extern "C" fn NewPhoneticEditor(
     match kb_type {
         KB::Default => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Standard::new()),
         }),
         KB::Hsu => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Hsu::new()),
         }),
         KB::Ibm => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Ibm::new()),
         }),
         KB::GinYieh => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(GinYieh::new()),
         }),
         KB::Et => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Et::new()),
         }),
         KB::Et26 => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Et26::new()),
         }),
         KB::Dvorak => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(RemappingKeymap::new(DVORAK, QWERTY)),
+            keyboard: Box::new(Dvorak),
             editor: Box::new(Standard::new()),
         }),
         KB::DvorakHsu => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(RemappingKeymap::new(DVORAK, QWERTY)),
+            keyboard: Box::new(Dvorak),
             editor: Box::new(Hsu::new()),
         }),
         KB::DachenCp26 => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(DaiChien26::new()),
         }),
         KB::HanyuPinyin => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Pinyin::hanyu()),
         }),
         KB::ThlPinyin => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Pinyin::thl()),
         }),
         KB::Mps2Pinyin => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(IdentityKeymap::new(QWERTY)),
+            keyboard: Box::new(Qwerty),
             editor: Box::new(Pinyin::mps2()),
         }),
         KB::Carpalx => Box::new(SyllableEditorWithKeymap {
             kb_type,
-            keymap: Box::new(RemappingKeymap::new(CARPALX, QWERTY)),
+            keyboard: Box::new(Qgmlwy),
             editor: Box::new(Standard::new()),
         }),
     }
@@ -114,17 +111,15 @@ pub extern "C" fn BopomofoPhoInput(pgdata: &mut ChewingData, key: i32) -> KeyBeh
     }
 
     let editor_keymap = pgdata.bopomofo_data.editor_with_keymap.as_mut();
-    let key_code = match (key as u8).as_key_code() {
-        Some(key_code) => key_code,
-        None => return KeyBehavior::KeyError,
-    };
-    let key_event = editor_keymap.keymap.map_key(key_code);
+    let key_event = editor_keymap
+        .keyboard
+        .map_ascii(key as u8, Modifiers::default());
     let result = editor_keymap.editor.key_press(key_event);
     let key_buf = editor_keymap.editor.read();
 
     if result == KeyBehavior::Commit {
         if key_buf.is_empty() {
-            return if key_code == KeyCode::Space {
+            return if key_event.code == KeyCode::Space {
                 KeyBehavior::KeyError
             } else {
                 KeyBehavior::NoWord

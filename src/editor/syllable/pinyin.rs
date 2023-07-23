@@ -1,7 +1,7 @@
 //! Pinyin
 
 use crate::{
-    editor::keymap::{KeyCode, KeyEvent},
+    editor::keyboard::{KeyCode, KeyEvent},
     zhuyin::{Bopomofo, Syllable},
 };
 

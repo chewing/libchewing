@@ -1,7 +1,7 @@
 //! Dai Chien CP26
 
 use crate::{
-    editor::keymap::{KeyEvent, KeyIndex},
+    editor::keyboard::{KeyEvent, KeyIndex},
     zhuyin::{Bopomofo, Syllable},
 };
 

@@ -1,7 +1,7 @@
 //! Hsu keyboard layout
 
 use crate::{
-    editor::keymap::KeyCode,
+    editor::keyboard::KeyCode,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
@@ -249,8 +249,8 @@ mod test {
 
     use crate::{
         editor::{
-            keymap::{IdentityKeymap, KeyCode, Keymap, QWERTY},
-            layout::SyllableEditor,
+            keyboard::{KeyCode, KeyboardLayout, Modifiers, Qwerty},
+            syllable::SyllableEditor,
         },
         zhuyin::Bopomofo,
     };
@@ -260,11 +260,11 @@ mod test {
     #[test]
     fn cen() {
         let mut hsu = Hsu::new();
-        let keymap = IdentityKeymap::new(QWERTY);
-        hsu.key_press(keymap.map_key(KeyCode::C));
-        hsu.key_press(keymap.map_key(KeyCode::E));
-        hsu.key_press(keymap.map_key(KeyCode::N));
-        hsu.key_press(keymap.map_key(KeyCode::Space));
+        let keyboard = Qwerty;
+        hsu.key_press(keyboard.map_keycode(KeyCode::C, Modifiers::default()));
+        hsu.key_press(keyboard.map_keycode(KeyCode::E, Modifiers::default()));
+        hsu.key_press(keyboard.map_keycode(KeyCode::N, Modifiers::default()));
+        hsu.key_press(keyboard.map_keycode(KeyCode::Space, Modifiers::default()));
         let result = hsu.read();
         assert_eq!(result.initial(), Some(Bopomofo::X));
         assert_eq!(result.medial(), Some(Bopomofo::I));
@@ -274,9 +274,9 @@ mod test {
     #[test]
     fn convert_n_to_en() {
         let mut hsu = Hsu::new();
-        let keymap = IdentityKeymap::new(QWERTY);
-        hsu.key_press(keymap.map_key(KeyCode::N));
-        hsu.key_press(keymap.map_key(KeyCode::F));
+        let keyboard = Qwerty;
+        hsu.key_press(keyboard.map_keycode(KeyCode::N, Modifiers::default()));
+        hsu.key_press(keyboard.map_keycode(KeyCode::F, Modifiers::default()));
         let result = hsu.read();
         assert_eq!(result.rime(), Some(Bopomofo::EN));
     }

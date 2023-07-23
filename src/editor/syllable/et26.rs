@@ -1,7 +1,7 @@
 //! ET26 (倚天26鍵)
 
 use crate::{
-    editor::keymap::{KeyCode, KeyEvent},
+    editor::keyboard::{KeyCode, KeyEvent},
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 

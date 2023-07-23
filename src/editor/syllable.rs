@@ -30,7 +30,7 @@ pub use self::{
     standard::Standard,
 };
 
-use super::keymap::KeyEvent;
+use super::keyboard::KeyEvent;
 
 mod dc26;
 mod et;

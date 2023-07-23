@@ -3,7 +3,7 @@
 //! Another commonly used keyboard layout on older IBM PC.
 
 use crate::{
-    editor::keymap::{KeyEvent, KeyIndex},
+    editor::keyboard::{KeyEvent, KeyIndex},
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
@@ -121,8 +121,8 @@ impl SyllableEditor for Et {
 #[cfg(test)]
 mod test {
     use crate::editor::{
-        keymap::{IdentityKeymap, KeyCode, Keymap, QWERTY},
-        layout::{KeyBehavior, SyllableEditor},
+        keyboard::{KeyCode, KeyboardLayout, Modifiers, Qwerty},
+        syllable::{KeyBehavior, SyllableEditor},
     };
 
     use super::Et;
@@ -130,8 +130,8 @@ mod test {
     #[test]
     fn space() {
         let mut editor = Et::new();
-        let keymap = IdentityKeymap::new(QWERTY);
-        let behavior = editor.key_press(keymap.map_key(KeyCode::Space));
+        let keyboard = Qwerty;
+        let behavior = editor.key_press(keyboard.map_keycode(KeyCode::Space, Modifiers::default()));
         assert_eq!(KeyBehavior::KeyError, behavior);
     }
 }

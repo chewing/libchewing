@@ -2,13 +2,13 @@
 
 pub mod composition_editor;
 mod estimate;
-pub mod keymap;
-pub mod layout;
+pub mod keyboard;
+pub mod syllable;
 
 use std::{fmt::Debug, rc::Rc};
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
-pub use layout::SyllableEditor;
+pub use syllable::SyllableEditor;
 use tracing::warn;
 
 use crate::{
@@ -19,8 +19,8 @@ use crate::{
 
 use self::{
     composition_editor::CompositionEditor,
-    keymap::KeyEvent,
-    layout::{KeyBehavior, Standard},
+    keyboard::KeyEvent,
+    syllable::{KeyBehavior, Standard},
 };
 
 /// Indicates the state change of the editor.
@@ -210,11 +210,12 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                     _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
                 },
                 LanguageMode::English => {
-                    let char_ = evt.code.to_char();
                     match editor.character_form {
-                        CharacterForm::Halfwidth => editor.composition.push(Symbol::Char(char_)),
+                        CharacterForm::Halfwidth => {
+                            editor.composition.push(Symbol::Char(evt.unicode))
+                        }
                         CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(char_).unwrap();
+                            let char_ = full_width_symbol_input(evt.unicode).unwrap();
                             editor.composition.push(Symbol::Char(char_));
                         }
                     }
@@ -404,33 +405,33 @@ mod tests {
     use std::{collections::HashMap, rc::Rc};
 
     use crate::{
-        conversion::ChewingConversionEngine, dictionary::Dictionary, editor::EditorKeyBehavior,
-        syl, zhuyin::Bopomofo,
+        conversion::ChewingConversionEngine,
+        dictionary::Dictionary,
+        editor::{keyboard::Modifiers, EditorKeyBehavior},
+        syl,
+        zhuyin::Bopomofo,
     };
 
     use super::{
-        keymap::{KeyCode, KeyEvent, KeyIndex},
+        keyboard::{KeyCode, KeyboardLayout, Qwerty},
         BasicEditor, Editor, EditorKeyEvent,
     };
 
     #[test]
     fn editing_mode_input_bopomofo() {
+        let keyboard = Qwerty;
         let dict: Rc<dyn Dictionary> = Rc::new(HashMap::new());
         let conversion_engine = ChewingConversionEngine::new(dict.clone());
         let mut editor = Editor::new(conversion_engine, dict);
 
-        let key_behavior = editor.key_press(EditorKeyEvent::Default(KeyEvent {
-            index: KeyIndex::K32,
-            code: KeyCode::H,
-        }));
+        let ev = keyboard.map_keycode(KeyCode::H, Modifiers::default());
+        let key_behavior = editor.key_press(EditorKeyEvent::Default(ev));
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
-        let key_behavior = editor.key_press(EditorKeyEvent::Default(KeyEvent {
-            index: KeyIndex::K34,
-            code: KeyCode::K,
-        }));
+        let ev = keyboard.map_keycode(KeyCode::K, Modifiers::default());
+        let key_behavior = editor.key_press(EditorKeyEvent::Default(ev));
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C, Bopomofo::E], editor.syllable_buffer());
@@ -438,6 +439,7 @@ mod tests {
 
     #[test]
     fn editing_mode_input_bopomofo_commit() {
+        let keyboard = Qwerty;
         let dict: Rc<dyn Dictionary> = Rc::new(HashMap::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
@@ -446,22 +448,13 @@ mod tests {
         let conversion_engine = ChewingConversionEngine::new(dict.clone());
         let mut editor = Editor::new(conversion_engine, dict);
 
-        let keys = [
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K32,
-                code: KeyCode::H,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K34,
-                code: KeyCode::K,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K4,
-                code: KeyCode::N4,
-            }),
-        ];
-
-        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+        let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
+        let key_behaviors: Vec<_> = keys
+            .into_iter()
+            .map(|key| keyboard.map_keycode(key, Modifiers::default()))
+            .map(|ev| EditorKeyEvent::Default(ev))
+            .map(|key| editor.key_press(key))
+            .collect();
 
         assert_eq!(
             vec![
@@ -477,6 +470,7 @@ mod tests {
 
     #[test]
     fn editing_mode_input_chinese_to_english_mode() {
+        let keyboard = Qwerty;
         let dict: Rc<dyn Dictionary> = Rc::new(HashMap::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
@@ -486,23 +480,11 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K32,
-                code: KeyCode::H,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K34,
-                code: KeyCode::K,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K4,
-                code: KeyCode::N4,
-            }),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::H, Default::default())),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::K, Default::default())),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N4, Default::default())),
             EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K39,
-                code: KeyCode::Z,
-            }),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::Z, Default::default())),
         ];
 
         let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
@@ -523,6 +505,7 @@ mod tests {
 
     #[test]
     fn editing_mode_input_english_to_chinese_mode() {
+        let keyboard = Qwerty;
         let dict: Rc<dyn Dictionary> = Rc::new(HashMap::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
@@ -533,23 +516,11 @@ mod tests {
 
         let keys = [
             EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K39,
-                code: KeyCode::X,
-            }),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::X, Default::default())),
             EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K32,
-                code: KeyCode::H,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K34,
-                code: KeyCode::K,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K4,
-                code: KeyCode::N4,
-            }),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::H, Default::default())),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::K, Default::default())),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N4, Default::default())),
         ];
 
         let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
@@ -574,20 +545,16 @@ mod tests {
 
     #[test]
     fn editing_mode_input_full_shape_symbol() {
+        let keyboard = Qwerty;
         let dictionary = Rc::new(HashMap::new());
         let conversion_engine = ChewingConversionEngine::new(dictionary.clone());
         let mut editor = Editor::new(conversion_engine, dictionary);
         editor.switch_character_form();
+
         let keys = [
             EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K10,
-                code: KeyCode::N0,
-            }),
-            EditorKeyEvent::Default(KeyEvent {
-                index: KeyIndex::K11,
-                code: KeyCode::Minus,
-            }),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N0, Default::default())),
+            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::Minus, Default::default())),
         ];
 
         let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
