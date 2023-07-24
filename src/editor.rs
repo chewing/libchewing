@@ -14,6 +14,7 @@ use tracing::warn;
 use crate::{
     conversion::{full_width_symbol_input, ChewingConversionEngine, ConversionEngine, Symbol},
     dictionary::Dictionary,
+    editor::keyboard::KeyCode,
     zhuyin::Syllable,
 };
 
@@ -60,14 +61,14 @@ pub trait BasicEditor {
     /// The type representing the observable state of the editor.
     type State;
     /// Handles a KeyEvent
-    fn key_press(&mut self, key_event: EditorKeyEvent) -> EditorKeyBehavior;
+    fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior;
 }
 
 trait ChewingEditorState<C, D>: Debug {
-    fn process_event(
+    fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
-        key_event: EditorKeyEvent,
+        key_event: KeyEvent,
     ) -> (EditorKeyBehavior, &'static dyn ChewingEditorState<C, D>);
 }
 
@@ -82,35 +83,6 @@ struct Selecting;
 
 #[derive(Debug)]
 struct Highlighting;
-
-/// List of possible key events that can be handled by an editor.
-#[allow(missing_docs)]
-#[non_exhaustive]
-#[derive(Debug, Clone, Copy)]
-pub enum EditorKeyEvent {
-    Space,
-    Esc,
-    Enter,
-    Del,
-    Backspace,
-    Tab,
-    ShiftLeft,
-    Left,
-    ShiftRight,
-    Right,
-    Up,
-    Home,
-    End,
-    PageUp,
-    PageDown,
-    Down,
-    CapsLock,
-    Default(KeyEvent),
-    CtrlNum(u8),
-    ShiftSpace,
-    DoubleTab,
-    NumLock,
-}
 
 #[derive(Debug)]
 enum LanguageMode {
@@ -140,49 +112,46 @@ struct EditorOptions {
 impl<C, D> BasicEditor for Editor<C, D> {
     type State = ();
 
-    fn key_press(&mut self, key_event: EditorKeyEvent) -> EditorKeyBehavior {
-        let (key_behavior, new_state) = self.state.process_event(self, key_event);
+    fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
+        let (key_behavior, new_state) = self.state.process_keyevent(self, key_event);
         self.state = new_state;
         key_behavior
     }
 }
 
 impl<C, D> ChewingEditorState<C, D> for Entering {
-    fn process_event(
+    fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
-        key_event: EditorKeyEvent,
+        key_event: KeyEvent,
     ) -> (EditorKeyBehavior, &'static dyn ChewingEditorState<C, D>) {
-        use EditorKeyEvent::*;
+        use KeyCode::*;
 
-        match key_event {
+        match key_event.code {
             Backspace => {
                 editor.composition.remove_before_cursor();
 
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            CapsLock => {
+            Unknown if key_event.modifiers.capslock => {
                 editor.switch_language_mode();
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            CtrlNum(num) => {
-                if num == 0 || num == 1 {
+            code @ (N0 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9)
+                if key_event.modifiers.ctrl =>
+            {
+                if code == N0 || code == N1 {
                     editor.start_hanin_symbol_input();
                     return (EditorKeyBehavior::Absorb, &Selecting);
                 }
 
-                if (2..=9).contains(&num) {
-                    todo!("handle add new phrases with ctrl-num")
-                } else {
-                    warn!(num = num, "CtrlNum used with number out of range: {}", num);
-                    return (EditorKeyBehavior::Bell, &Entering);
-                }
+                todo!("handle add new phrases with ctrl-num");
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            DoubleTab => {
-                // editor.reset_user_break_and_connect_at_cursor();
-                (EditorKeyBehavior::Absorb, &Entering)
-            }
+            // DoubleTab => {
+            //     // editor.reset_user_break_and_connect_at_cursor();
+            //     (EditorKeyBehavior::Absorb, &Entering)
+            // }
             Del => {
                 editor.composition.remove_after_cursor();
 
@@ -204,18 +173,18 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 todo!("Handle clean all buf");
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            Default(evt) => match editor.language_mode {
-                LanguageMode::Chinese => match editor.syllable_editor.key_press(evt) {
+            _ => match editor.language_mode {
+                LanguageMode::Chinese => match editor.syllable_editor.key_press(key_event) {
                     KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
                     _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
                 },
                 LanguageMode::English => {
                     match editor.character_form {
                         CharacterForm::Halfwidth => {
-                            editor.composition.push(Symbol::Char(evt.unicode))
+                            editor.composition.push(Symbol::Char(key_event.unicode))
                         }
                         CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(evt.unicode).unwrap();
+                            let char_ = full_width_symbol_input(key_event.unicode).unwrap();
                             editor.composition.push(Symbol::Char(char_));
                         }
                     }
@@ -228,14 +197,14 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
 }
 
 impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
-    fn process_event(
+    fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
-        key_event: EditorKeyEvent,
+        key_event: KeyEvent,
     ) -> (EditorKeyBehavior, &'static dyn ChewingEditorState<C, D>) {
-        use EditorKeyEvent::*;
+        use KeyCode::*;
 
-        match key_event {
+        match key_event.code {
             Backspace => {
                 editor.syllable_editor.remove_last();
 
@@ -248,7 +217,7 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
                     },
                 )
             }
-            CapsLock => {
+            Unknown if key_event.modifiers.capslock => {
                 editor.syllable_editor.clear();
                 editor.switch_language_mode();
                 (EditorKeyBehavior::Absorb, &Entering)
@@ -257,7 +226,7 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
                 editor.syllable_editor.clear();
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            Default(evt) => match editor.syllable_editor.key_press(evt) {
+            _ => match editor.syllable_editor.key_press(key_event) {
                 KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
                 KeyBehavior::Commit => {
                     editor
@@ -274,25 +243,25 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
 }
 
 impl<C, D> ChewingEditorState<C, D> for Selecting {
-    fn process_event(
+    fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
-        key_event: EditorKeyEvent,
+        key_event: KeyEvent,
     ) -> (EditorKeyBehavior, &'static dyn ChewingEditorState<C, D>) {
-        use EditorKeyEvent::*;
+        use KeyCode::*;
 
-        match key_event {
+        match key_event.code {
             Backspace => {
                 editor.cancel_selecting();
 
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            CapsLock => {
+            Unknown if key_event.modifiers.capslock => {
                 editor.switch_language_mode();
                 (EditorKeyBehavior::Absorb, &Entering)
             }
             Down => (EditorKeyBehavior::Absorb, &Selecting),
-            Default(ev) => {
+            _ => {
                 todo!("Handle selecting num");
                 (EditorKeyBehavior::Absorb, &Entering)
             }
@@ -302,15 +271,15 @@ impl<C, D> ChewingEditorState<C, D> for Selecting {
 }
 
 impl<C, D> ChewingEditorState<C, D> for Highlighting {
-    fn process_event(
+    fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
-        key_event: EditorKeyEvent,
+        key_event: KeyEvent,
     ) -> (EditorKeyBehavior, &'static dyn ChewingEditorState<C, D>) {
-        use EditorKeyEvent::*;
+        use KeyCode::*;
 
-        match key_event {
-            CapsLock => {
+        match key_event.code {
+            Unknown if key_event.modifiers.capslock => {
                 editor.switch_language_mode();
                 (EditorKeyBehavior::Absorb, &Entering)
             }
@@ -318,7 +287,7 @@ impl<C, D> ChewingEditorState<C, D> for Highlighting {
                 todo!("Handle learn");
                 (EditorKeyBehavior::Absorb, &Entering)
             }
-            Default(_) => {
+            _ => {
                 todo!();
                 (EditorKeyBehavior::Absorb, &EnteringSyllable)
             }
@@ -414,7 +383,7 @@ mod tests {
 
     use super::{
         keyboard::{KeyCode, KeyboardLayout, Qwerty},
-        BasicEditor, Editor, EditorKeyEvent,
+        BasicEditor, Editor,
     };
 
     #[test]
@@ -425,13 +394,13 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let ev = keyboard.map_keycode(KeyCode::H, Modifiers::default());
-        let key_behavior = editor.key_press(EditorKeyEvent::Default(ev));
+        let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
         let ev = keyboard.map_keycode(KeyCode::K, Modifiers::default());
-        let key_behavior = editor.key_press(EditorKeyEvent::Default(ev));
+        let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C, Bopomofo::E], editor.syllable_buffer());
@@ -452,8 +421,7 @@ mod tests {
         let key_behaviors: Vec<_> = keys
             .into_iter()
             .map(|key| keyboard.map_keycode(key, Modifiers::default()))
-            .map(|ev| EditorKeyEvent::Default(ev))
-            .map(|key| editor.key_press(key))
+            .map(|ev| editor.process_keyevent(ev))
             .collect();
 
         assert_eq!(
@@ -480,14 +448,24 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::H, Default::default())),
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::K, Default::default())),
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N4, Default::default())),
-            EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::Z, Default::default())),
+            keyboard.map_keycode(KeyCode::H, Default::default()),
+            keyboard.map_keycode(KeyCode::K, Default::default()),
+            keyboard.map_keycode(KeyCode::N4, Default::default()),
+            keyboard.map_keycode(
+                KeyCode::Unknown,
+                Modifiers {
+                    shift: false,
+                    ctrl: false,
+                    capslock: true,
+                },
+            ),
+            keyboard.map_keycode(KeyCode::Z, Default::default()),
         ];
 
-        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+        let key_behaviors: Vec<_> = keys
+            .iter()
+            .map(|&key| editor.process_keyevent(key))
+            .collect();
 
         assert_eq!(
             vec![
@@ -515,15 +493,32 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::X, Default::default())),
-            EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::H, Default::default())),
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::K, Default::default())),
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N4, Default::default())),
+            keyboard.map_keycode(
+                KeyCode::Unknown,
+                Modifiers {
+                    shift: false,
+                    ctrl: false,
+                    capslock: true,
+                },
+            ),
+            keyboard.map_keycode(KeyCode::X, Default::default()),
+            keyboard.map_keycode(
+                KeyCode::Unknown,
+                Modifiers {
+                    shift: false,
+                    ctrl: false,
+                    capslock: true,
+                },
+            ),
+            keyboard.map_keycode(KeyCode::H, Default::default()),
+            keyboard.map_keycode(KeyCode::K, Default::default()),
+            keyboard.map_keycode(KeyCode::N4, Default::default()),
         ];
 
-        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+        let key_behaviors: Vec<_> = keys
+            .iter()
+            .map(|&key| editor.process_keyevent(key))
+            .collect();
 
         assert_eq!(
             vec![
@@ -552,12 +547,22 @@ mod tests {
         editor.switch_character_form();
 
         let keys = [
-            EditorKeyEvent::CapsLock,
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::N0, Default::default())),
-            EditorKeyEvent::Default(keyboard.map_keycode(KeyCode::Minus, Default::default())),
+            keyboard.map_keycode(
+                KeyCode::Unknown,
+                Modifiers {
+                    shift: false,
+                    ctrl: false,
+                    capslock: true,
+                },
+            ),
+            keyboard.map_keycode(KeyCode::N0, Default::default()),
+            keyboard.map_keycode(KeyCode::Minus, Default::default()),
         ];
 
-        let key_behaviors: Vec<_> = keys.iter().map(|&key| editor.key_press(key)).collect();
+        let key_behaviors: Vec<_> = keys
+            .iter()
+            .map(|&key| editor.process_keyevent(key))
+            .collect();
 
         assert_eq!(
             vec![
