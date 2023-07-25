@@ -12,7 +12,10 @@ pub use syllable::SyllableEditor;
 use tracing::warn;
 
 use crate::{
-    conversion::{full_width_symbol_input, ChewingConversionEngine, ConversionEngine, Symbol},
+    conversion::{
+        full_width_symbol_input, special_symbol_input, ChewingConversionEngine, ConversionEngine,
+        Symbol,
+    },
     dictionary::Dictionary,
     editor::keyboard::KeyCode,
     zhuyin::Syllable,
@@ -174,6 +177,15 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 (EditorKeyBehavior::Absorb, &Entering)
             }
             _ => match editor.language_mode {
+                LanguageMode::Chinese if key_event.modifiers.shift => {
+                    match special_symbol_input(key_event.unicode) {
+                        Some(symbol) => {
+                            editor.composition.push(Symbol::Char(symbol));
+                            (EditorKeyBehavior::Absorb, &Entering)
+                        }
+                        None => (EditorKeyBehavior::Ignore, &Entering),
+                    }
+                }
                 LanguageMode::Chinese => match editor.syllable_editor.key_press(key_event) {
                     KeyBehavior::Absorb => (EditorKeyBehavior::Absorb, &EnteringSyllable),
                     _ => (EditorKeyBehavior::Bell, &EnteringSyllable),
@@ -375,14 +387,14 @@ mod tests {
 
     use crate::{
         conversion::ChewingConversionEngine,
-        dictionary::Dictionary,
+        dictionary::{self, Dictionary},
         editor::{keyboard::Modifiers, EditorKeyBehavior},
         syl,
         zhuyin::Bopomofo,
     };
 
     use super::{
-        keyboard::{KeyCode, KeyboardLayout, Qwerty},
+        keyboard::{self, KeyCode, KeyboardLayout, Qwerty},
         BasicEditor, Editor,
     };
 
@@ -536,7 +548,41 @@ mod tests {
     }
 
     #[test]
-    fn editing_mode_input_special_symbol() {}
+    fn editing_chinese_mode_input_special_symbol() {
+        let keyboard = Qwerty;
+        let dictionary = Rc::new(HashMap::from([(
+            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("冊", 100).into()],
+        )]));
+        let conversion_engine = ChewingConversionEngine::new(dictionary.clone());
+        let mut editor = Editor::new(conversion_engine, dictionary);
+
+        let keys = [
+            keyboard.map_keycode(KeyCode::N1, Modifiers::shift()),
+            keyboard.map_keycode(KeyCode::H, Modifiers::default()),
+            keyboard.map_keycode(KeyCode::K, Modifiers::default()),
+            keyboard.map_keycode(KeyCode::N4, Modifiers::default()),
+            keyboard.map_keycode(KeyCode::Comma, Modifiers::shift()),
+        ];
+
+        let key_behaviors: Vec<_> = keys
+            .iter()
+            .map(|&key| editor.process_keyevent(key))
+            .collect();
+
+        assert_eq!(
+            vec![
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+                EditorKeyBehavior::Absorb,
+            ],
+            key_behaviors
+        );
+        assert!(editor.syllable_buffer().is_empty());
+        assert_eq!("！冊，", editor.display());
+    }
 
     #[test]
     fn editing_mode_input_full_shape_symbol() {

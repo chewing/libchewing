@@ -25,6 +25,18 @@ pub struct Modifiers {
     /// The caps lock toggle is on
     pub capslock: bool,
 }
+impl Modifiers {
+    pub(crate) fn shift() -> Modifiers {
+        Modifiers {
+            shift: true,
+            ctrl: false,
+            capslock: false,
+        }
+    }
+    pub(crate) fn is_none(&self) -> bool {
+        !self.shift && !self.ctrl && !self.capslock
+    }
+}
 
 fn generic_map_keycode(
     keycode_index: &[KeyCode; MATRIX_SIZE],
