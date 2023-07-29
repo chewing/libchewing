@@ -182,19 +182,12 @@ target_compile_definitions(common PRIVATE
 
 add_library(chewing OBJECT
     ${ALL_INC}
-    ${INC_DIR}/internal/chewing-private.h
-    ${INC_DIR}/internal/chewingutil.h
-    ${INC_DIR}/internal/choice-private.h
-    ${INC_DIR}/internal/global-private.h
-
-    ${SRC_DIR}/compat.c
-    ${SRC_DIR}/chewingio.c
-    ${SRC_DIR}/chewingutil.c
-    ${SRC_DIR}/choice.c
-    ${SRC_DIR}/mod_aux.c
-    ${SRC_DIR}/private.h
 )
-if (NOT WITH_RUST)
+if (WITH_RUST)
+target_sources(chewing PRIVATE
+    src/rust_wrapper.c
+)
+else()
 target_sources(common PRIVATE
     ${SRC_DIR}/porting_layer/include/plat_mmap.h
     ${SRC_DIR}/porting_layer/include/plat_path.h
@@ -210,17 +203,27 @@ target_sources(common PRIVATE
     ${SRC_DIR}/common/key2pho.c
 )
 target_sources(chewing PRIVATE
+    ${INC_DIR}/internal/bopomofo-private.h
+    ${INC_DIR}/internal/chewing-private.h
+    ${INC_DIR}/internal/chewingutil.h
+    ${INC_DIR}/internal/choice-private.h
     ${INC_DIR}/internal/dict-private.h
+    ${INC_DIR}/internal/global-private.h
     ${INC_DIR}/internal/pinyin-private.h
     ${INC_DIR}/internal/tree-private.h
     ${INC_DIR}/internal/userphrase-private.h
-    ${INC_DIR}/internal/bopomofo-private.h
 
+    ${SRC_DIR}/bopomofo.c
+    ${SRC_DIR}/chewingio.c
+    ${SRC_DIR}/chewingutil.c
+    ${SRC_DIR}/choice.c
+    ${SRC_DIR}/compat.c
     ${SRC_DIR}/dict.c
+    ${SRC_DIR}/mod_aux.c
     ${SRC_DIR}/pinyin.c
+    ${SRC_DIR}/private.h
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
-    ${SRC_DIR}/bopomofo.c
 )
 endif()
 target_compile_definitions(chewing PRIVATE

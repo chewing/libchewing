@@ -506,6 +506,256 @@ void FreeTreePhrase(struct TreeType *tree_type);
 
 bool GetVocabNext(struct ChewingData *pgdata, struct Phrase *phrase);
 
+void rust_link_io(void);
+
+struct ChewingContext *chewing_new(void);
+
+void chewing_delete(struct ChewingContext *ctx);
+
+void chewing_free(void *ptr);
+
+int chewing_Reset(struct ChewingContext *ctx);
+
+int chewing_set_KBType(struct ChewingContext *ctx, int kbtype);
+
+int chewing_get_KBType(const struct ChewingContext *ctx);
+
+char *chewing_get_KBString(const struct ChewingContext *ctx);
+
+int chewing_KBStr2Num(const char *str);
+
+void chewing_set_ChiEngMode(struct ChewingContext *ctx, int mode);
+
+int chewing_get_ChiEngMode(const struct ChewingContext *ctx);
+
+void chewing_set_ShapeMode(struct ChewingContext *ctx, int mode);
+
+int chewing_get_ShapeMode(const struct ChewingContext *ctx);
+
+void chewing_set_candPerPage(struct ChewingContext *ctx, int n);
+
+int chewing_get_candPerPage(const struct ChewingContext *ctx);
+
+void chewing_set_maxChiSymbolLen(struct ChewingContext *ctx, int n);
+
+int chewing_get_maxChiSymbolLen(const struct ChewingContext *ctx);
+
+void chewing_set_selKey(struct ChewingContext *ctx, const int *sel_keys, int len);
+
+int *chewing_get_selKey(const struct ChewingContext *ctx);
+
+void chewing_set_addPhraseDirection(struct ChewingContext *ctx, int direction);
+
+int chewing_get_addPhraseDirection(const struct ChewingContext *ctx);
+
+void chewing_set_spaceAsSelection(struct ChewingContext *ctx, int mode);
+
+int chewing_get_spaceAsSelection(const struct ChewingContext *ctx);
+
+void chewing_set_escCleanAllBuf(struct ChewingContext *ctx, int mode);
+
+int chewing_get_escCleanAllBuf(const struct ChewingContext *ctx);
+
+void chewing_set_autoShiftCur(struct ChewingContext *ctx, int mode);
+
+int chewing_get_autoShiftCur(const struct ChewingContext *ctx);
+
+void chewing_set_easySymbolInput(struct ChewingContext *ctx, int mode);
+
+int chewing_get_easySymbolInput(const struct ChewingContext *ctx);
+
+void chewing_set_phraseChoiceRearward(struct ChewingContext *ctx, int mode);
+
+int chewing_get_phraseChoiceRearward(const struct ChewingContext *ctx);
+
+void chewing_set_autoLearn(struct ChewingContext *ctx, int mode);
+
+int chewing_get_autoLearn(const struct ChewingContext *ctx);
+
+unsigned short *chewing_get_phoneSeq(const struct ChewingContext *ctx);
+
+int chewing_get_phoneSeqLen(const struct ChewingContext *ctx);
+
+int chewing_userphrase_enumerate(struct ChewingContext *ctx);
+
+int chewing_userphrase_has_next(struct ChewingContext *ctx,
+                                unsigned int *phrase_len,
+                                unsigned int *bopomofo_len);
+
+int chewing_userphrase_get(struct ChewingContext *ctx,
+                           char *phrase_buf,
+                           unsigned int phrase_len,
+                           char *bopomofo_buf,
+                           unsigned int bopomofo_len);
+
+int chewing_userphrase_add(struct ChewingContext *ctx,
+                           const char *phrase_buf,
+                           const char *bopomofo_buf);
+
+int chewing_userphrase_remove(struct ChewingContext *ctx,
+                              const char *phrase_buf,
+                              const char *bopomofo_buf);
+
+int chewing_userphrase_lookup(struct ChewingContext *ctx,
+                              const char *phrase_buf,
+                              const char *bopomofo_buf);
+
+int chewing_cand_list_first(struct ChewingContext *ctx);
+
+int chewing_cand_list_last(struct ChewingContext *ctx);
+
+int chewing_cand_list_has_next(struct ChewingContext *ctx);
+
+int chewing_cand_list_has_prev(struct ChewingContext *ctx);
+
+int chewing_cand_list_next(struct ChewingContext *ctx);
+
+int chewing_cand_list_prev(struct ChewingContext *ctx);
+
+int chewing_commit_preedit_buf(struct ChewingContext *ctx);
+
+int chewing_clean_preedit_buf(struct ChewingContext *ctx);
+
+int chewing_clean_bopomofo_buf(struct ChewingContext *ctx);
+
+int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len);
+
+int chewing_handle_Space(struct ChewingContext *ctx);
+
+int chewing_handle_Esc(struct ChewingContext *ctx);
+
+int chewing_handle_Enter(struct ChewingContext *ctx);
+
+int chewing_handle_Del(struct ChewingContext *ctx);
+
+int chewing_handle_Backspace(struct ChewingContext *ctx);
+
+int chewing_handle_Tab(struct ChewingContext *ctx);
+
+int chewing_handle_ShiftLeft(struct ChewingContext *ctx);
+
+int chewing_handle_Left(struct ChewingContext *ctx);
+
+int chewing_handle_ShiftRight(struct ChewingContext *ctx);
+
+int chewing_handle_Right(struct ChewingContext *ctx);
+
+int chewing_handle_Up(struct ChewingContext *ctx);
+
+int chewing_handle_Home(struct ChewingContext *ctx);
+
+int chewing_handle_End(struct ChewingContext *ctx);
+
+int chewing_handle_PageUp(struct ChewingContext *ctx);
+
+int chewing_handle_PageDown(struct ChewingContext *ctx);
+
+int chewing_handle_Down(struct ChewingContext *ctx);
+
+int chewing_handle_Capslock(struct ChewingContext *ctx);
+
+int chewing_handle_Default(struct ChewingContext *ctx, int key);
+
+int chewing_handle_CtrlNum(struct ChewingContext *ctx, int key);
+
+int chewing_handle_ShiftSpace(struct ChewingContext *ctx);
+
+int chewing_handle_DblTab(struct ChewingContext *ctx);
+
+int chewing_handle_Numlock(struct ChewingContext *ctx, int key);
+
+int chewing_commit_Check(const struct ChewingContext *ctx);
+
+char *chewing_commit_String(const struct ChewingContext *ctx);
+
+const char *chewing_commit_String_static(const struct ChewingContext *ctx);
+
+char *chewing_buffer_String(const struct ChewingContext *ctx);
+
+const char *chewing_buffer_String_static(const struct ChewingContext *ctx);
+
+int chewing_buffer_Check(const struct ChewingContext *ctx);
+
+int chewing_buffer_Len(const struct ChewingContext *ctx);
+
+const char *chewing_bopomofo_String_static(const struct ChewingContext *ctx);
+
+int chewing_bopomofo_Check(const struct ChewingContext *ctx);
+
+int chewing_cursor_Current(const struct ChewingContext *ctx);
+
+int chewing_cand_CheckDone(const struct ChewingContext *ctx);
+
+int chewing_cand_TotalPage(const struct ChewingContext *ctx);
+
+int chewing_cand_ChoicePerPage(const struct ChewingContext *ctx);
+
+int chewing_cand_TotalChoice(const struct ChewingContext *ctx);
+
+int chewing_cand_CurrentPage(const struct ChewingContext *ctx);
+
+void chewing_cand_Enumerate(struct ChewingContext *ctx);
+
+int chewing_cand_hasNext(struct ChewingContext *ctx);
+
+char *chewing_cand_String(struct ChewingContext *ctx);
+
+const char *chewing_cand_String_static(struct ChewingContext *ctx);
+
+char *chewing_cand_string_by_index(struct ChewingContext *ctx, int index);
+
+const char *chewing_cand_string_by_index_static(struct ChewingContext *ctx, int index);
+
+int chewing_cand_choose_by_index(struct ChewingContext *ctx, int index);
+
+int chewing_cand_open(struct ChewingContext *ctx);
+
+int chewing_cand_close(struct ChewingContext *ctx);
+
+void chewing_interval_Enumerate(struct ChewingContext *ctx);
+
+int chewing_interval_hasNext(struct ChewingContext *ctx);
+
+void chewing_interval_Get(struct ChewingContext *ctx, IntervalType *it);
+
+int chewing_aux_Check(const struct ChewingContext *ctx);
+
+int chewing_aux_Length(const struct ChewingContext *ctx);
+
+char *chewing_aux_String(const struct ChewingContext *ctx);
+
+const char *chewing_aux_String_static(const struct ChewingContext *ctx);
+
+int chewing_keystroke_CheckIgnore(const struct ChewingContext *ctx);
+
+int chewing_keystroke_CheckAbsorb(const struct ChewingContext *ctx);
+
+int chewing_kbtype_Total(const struct ChewingContext *ctx);
+
+void chewing_kbtype_Enumerate(struct ChewingContext *ctx);
+
+int chewing_kbtype_hasNext(struct ChewingContext *ctx);
+
+char *chewing_kbtype_String(struct ChewingContext *ctx);
+
+const char *chewing_kbtype_String_static(struct ChewingContext *ctx);
+
+int chewing_zuin_Check(const struct ChewingContext *ctx);
+
+char *chewing_zuin_String(const struct ChewingContext *ctx, int *zuin_count);
+
+int chewing_Init(const char *data_path, const char *hash_path);
+
+void chewing_Terminate(void);
+
+int chewing_Configure(struct ChewingContext *ctx, ChewingConfigData *pcd);
+
+void chewing_set_hsuSelKeyType(struct ChewingContext *ctx, int mode);
+
+int chewing_get_hsuSelKeyType(struct ChewingContext *ctx);
+
+void rust_link_key2pho(void);
+
 uint16_t UintFromPhone(const char *phone);
 
 uint16_t UintFromPhoneInx(const int *ph_inx);
