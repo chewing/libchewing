@@ -9,7 +9,6 @@ use std::{fmt::Debug, rc::Rc};
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
 pub use syllable::SyllableEditor;
-use tracing::warn;
 
 use crate::{
     conversion::{
@@ -387,14 +386,14 @@ mod tests {
 
     use crate::{
         conversion::ChewingConversionEngine,
-        dictionary::{self, Dictionary},
+        dictionary::Dictionary,
         editor::{keyboard::Modifiers, EditorKeyBehavior},
         syl,
         zhuyin::Bopomofo,
     };
 
     use super::{
-        keyboard::{self, KeyCode, KeyboardLayout, Qwerty},
+        keyboard::{KeyCode, KeyboardLayout, Qwerty},
         BasicEditor, Editor,
     };
 
