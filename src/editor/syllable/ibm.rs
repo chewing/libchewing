@@ -131,7 +131,8 @@ mod test {
     fn space() {
         let mut editor = Ibm::new();
         let keyboard = Qwerty;
-        let behavior = editor.key_press(keyboard.map_keycode(KeyCode::Space, Modifiers::default()));
+        let behavior =
+            editor.key_press(keyboard.map_with_mod(KeyCode::Space, Modifiers::default()));
         assert_eq!(KeyBehavior::KeyError, behavior);
     }
 }

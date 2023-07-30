@@ -1,8 +1,51 @@
 //! Types and functions related to file system path operations.
 
-use std::{env, path::PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use dirs_next::{data_dir as user_data_dir, home_dir};
+
+const UNIX_SYS_PATH: &str = "/usr/share/libchewing";
+
+#[cfg(target_family = "windows")]
+const SEARCH_PATH_SEP: char = ';';
+
+#[cfg(target_family = "unix")]
+const SEARCH_PATH_SEP: char = ':';
+
+pub(crate) fn sys_path_from_env_var() -> String {
+    let chewing_path = env::var("CHEWING_PATH");
+    if let Ok(chewing_path) = chewing_path {
+        chewing_path
+    } else {
+        let user_datadir = data_dir();
+        if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
+            format!("{datadir}:{UNIX_SYS_PATH}")
+        } else {
+            UNIX_SYS_PATH.into()
+        }
+    }
+}
+
+pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<PathBuf> {
+    for path in search_path.split(SEARCH_PATH_SEP) {
+        let prefix = Path::new(path).to_path_buf();
+        if files
+            .iter()
+            .map(|it| {
+                let mut path = prefix.clone();
+                path.push(it);
+                path
+            })
+            .all(|it| it.exists())
+        {
+            return Some(prefix);
+        }
+    }
+    None
+}
 
 /// Returns the path to the user's default chewing data directory.
 ///

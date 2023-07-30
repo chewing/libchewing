@@ -2,11 +2,12 @@ use core::slice;
 use std::{
     borrow::Cow,
     env,
-    ffi::{CStr, CString},
+    ffi::{c_char, c_int, CStr, CString},
     path::Path,
 };
 
-use libc::{c_char, c_int};
+#[no_mangle]
+pub extern "C" fn rust_link_path() {}
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';

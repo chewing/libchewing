@@ -1,9 +1,9 @@
 use libc::c_int;
 
-pub const CHINESE_MODE: usize = 1;
-pub const SYMBOL_MODE: usize = 0;
-pub const FULLSHAPE_MODE: usize = 1;
-pub const HALFSHAPE_MODE: usize = 0;
+pub const CHINESE_MODE: c_int = 1;
+pub const SYMBOL_MODE: c_int = 0;
+pub const FULLSHAPE_MODE: c_int = 1;
+pub const HALFSHAPE_MODE: c_int = 0;
 pub const AUTOLEARN_DISABLED: usize = 1;
 pub const AUTOLEARN_ENABLED: usize = 0;
 

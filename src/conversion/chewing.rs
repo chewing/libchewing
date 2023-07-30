@@ -13,11 +13,17 @@ use super::{Break, Composition, ConversionEngine, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug)]
-pub struct ChewingConversionEngine {
-    dict: Rc<dyn Dictionary>,
+pub struct ChewingConversionEngine<T>
+where
+    T: Dictionary,
+{
+    dict: T,
 }
 
-impl ConversionEngine for ChewingConversionEngine {
+impl<T> ConversionEngine for ChewingConversionEngine<T>
+where
+    T: Dictionary,
+{
     fn convert(&self, composition: &Composition) -> Vec<Interval> {
         if composition.buffer.is_empty() {
             return vec![];
@@ -47,9 +53,12 @@ impl ConversionEngine for ChewingConversionEngine {
     }
 }
 
-impl ChewingConversionEngine {
+impl<T> ChewingConversionEngine<T>
+where
+    T: Dictionary,
+{
     /// TODO: doc
-    pub fn new(dict: Rc<dyn Dictionary>) -> ChewingConversionEngine {
+    pub fn new(dict: T) -> ChewingConversionEngine<T> {
         ChewingConversionEngine { dict }
     }
 
@@ -402,7 +411,7 @@ type Graph<'a> = HashMap<(usize, usize), Option<Rc<Phrase<'a>>>>;
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, rc::Rc};
+    use std::collections::HashMap;
 
     use crate::{
         conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
@@ -413,8 +422,8 @@ mod tests {
 
     use super::{ChewingConversionEngine, PossibleInterval, PossiblePath};
 
-    fn test_dictionary() -> Rc<dyn Dictionary> {
-        Rc::new(HashMap::from([
+    fn test_dictionary() -> impl Dictionary {
+        HashMap::from([
             (vec![syl![G, U, O, TONE2]], vec![("國", 1).into()]),
             (vec![syl![M, I, EN, TONE2]], vec![("民", 1).into()]),
             (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),
@@ -455,7 +464,7 @@ mod tests {
                 vec![("一下", 10576).into()],
             ),
             (vec![syl![X, I, A, TONE4]], vec![("下", 10576).into()]),
-        ]))
+        ])
     }
 
     #[test]

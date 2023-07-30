@@ -42,7 +42,7 @@ static SHIFT_MAP: [char; MATRIX_SIZE] = [
 ];
 
 impl KeyboardLayout for Dvorak {
-    fn map_keycode(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
         generic_map_keycode(&KEYCODE_INDEX, &UNICODE_MAP, &SHIFT_MAP, keycode, modifiers)
     }
 }

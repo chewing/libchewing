@@ -2,7 +2,7 @@
 #![deny(macro_use_extern_crate)]
 #![deny(missing_abi)]
 #![warn(missing_debug_implementations)]
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 #![warn(noop_method_call)]
 #![warn(single_use_lifetimes)]
 #![deny(unreachable_pub)]

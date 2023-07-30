@@ -6,6 +6,8 @@ use std::{
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
     path::Path,
+    rc::Rc,
+    sync::Arc,
 };
 
 use thiserror::Error;
@@ -13,10 +15,12 @@ use thiserror::Error;
 use crate::zhuyin::Syllable;
 
 pub use layered::LayeredDictionary;
+pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 
 mod layered;
+mod loader;
 mod sqlite;
 mod trie;
 
@@ -369,6 +373,69 @@ pub trait DictionaryMut {
     ) -> Result<(), DictionaryUpdateError>;
 }
 
+impl<T> Dictionary for Box<T>
+where
+    T: Dictionary + ?Sized,
+{
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+        self.as_ref().lookup_phrase(syllables)
+    }
+
+    fn entries(&self) -> DictEntries<'_, '_> {
+        self.as_ref().entries()
+    }
+
+    fn about(&self) -> DictionaryInfo {
+        self.as_ref().about()
+    }
+
+    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
+        self.as_mut().as_mut_dict()
+    }
+}
+
+impl<T> Dictionary for Rc<T>
+where
+    T: Dictionary + ?Sized,
+{
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+        self.as_ref().lookup_phrase(syllables)
+    }
+
+    fn entries(&self) -> DictEntries<'_, '_> {
+        self.as_ref().entries()
+    }
+
+    fn about(&self) -> DictionaryInfo {
+        self.as_ref().about()
+    }
+
+    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Rc::get_mut(self).and_then(|this| this.as_mut_dict())
+    }
+}
+
+impl<T> Dictionary for Arc<T>
+where
+    T: Dictionary + ?Sized,
+{
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+        self.as_ref().lookup_phrase(syllables)
+    }
+
+    fn entries(&self) -> DictEntries<'_, '_> {
+        self.as_ref().entries()
+    }
+
+    fn about(&self) -> DictionaryInfo {
+        self.as_ref().about()
+    }
+
+    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Arc::get_mut(self).and_then(|this| this.as_mut_dict())
+    }
+}
+
 /// TODO: doc
 #[derive(Error, Debug)]
 #[error("build dictionary error")]
@@ -473,5 +540,59 @@ pub trait BlockList: Debug {
 impl BlockList for HashSet<String> {
     fn is_blocked(&self, phrase: &str) -> bool {
         self.contains(phrase)
+    }
+}
+
+impl BlockList for () {
+    fn is_blocked(&self, _phrase: &str) -> bool {
+        false
+    }
+}
+
+#[derive(Debug)]
+pub enum AnyDictionary {
+    SqliteDictionary(SqliteDictionary),
+    TrieDictionary(TrieDictionary),
+}
+
+impl Dictionary for AnyDictionary {
+    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.lookup_phrase(syllables),
+            AnyDictionary::TrieDictionary(dict) => dict.lookup_phrase(syllables),
+        }
+    }
+
+    fn entries(&self) -> DictEntries<'_, '_> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.entries(),
+            AnyDictionary::TrieDictionary(dict) => dict.entries(),
+        }
+    }
+
+    fn about(&self) -> DictionaryInfo {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.about(),
+            AnyDictionary::TrieDictionary(dict) => dict.about(),
+        }
+    }
+
+    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.as_mut_dict(),
+            AnyDictionary::TrieDictionary(dict) => dict.as_mut_dict(),
+        }
+    }
+}
+
+impl From<SqliteDictionary> for AnyDictionary {
+    fn from(value: SqliteDictionary) -> Self {
+        Self::SqliteDictionary(value)
+    }
+}
+
+impl From<TrieDictionary> for AnyDictionary {
+    fn from(value: TrieDictionary) -> Self {
+        Self::TrieDictionary(value)
     }
 }

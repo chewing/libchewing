@@ -26,7 +26,14 @@ pub struct Modifiers {
     pub capslock: bool,
 }
 impl Modifiers {
-    pub(crate) fn shift() -> Modifiers {
+    pub(crate) const fn new() -> Modifiers {
+        Modifiers {
+            shift: false,
+            ctrl: false,
+            capslock: false,
+        }
+    }
+    pub(crate) const fn shift() -> Modifiers {
         Modifiers {
             shift: true,
             ctrl: false,
@@ -65,14 +72,34 @@ fn generic_map_keycode(
 /// Describe a Keyboard Layout
 pub trait KeyboardLayout {
     /// Map the keycode to a key event according to the keyboard layout
-    fn map_keycode(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent;
+    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent;
+    fn map(&self, keycode: KeyCode) -> KeyEvent {
+        self.map_with_mod(keycode, Modifiers::default())
+    }
     /// Map the ascii to keycode then to a key event
-    fn map_ascii(&self, ascii: u8, modifiers: Modifiers) -> KeyEvent {
-        let keycode = KEYCODE_MAP
+    fn map_ascii(&self, ascii: u8) -> KeyEvent {
+        let item = KEYCODE_MAP
             .iter()
             .find(|item| item.0 == ascii)
-            .map_or(Unknown, |item| item.1);
-        self.map_keycode(keycode, modifiers)
+            .map_or((Unknown, Modifiers::default()), |item| item.1);
+        self.map_with_mod(item.0, item.1)
+    }
+}
+
+#[derive(Debug)]
+pub enum AnyKeyboardLayout {
+    Qwerty(Qwerty),
+    Dvorak(Dvorak),
+    Qgmlwy(Qgmlwy),
+}
+
+impl KeyboardLayout for AnyKeyboardLayout {
+    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+        match self {
+            AnyKeyboardLayout::Qwerty(kb) => kb.map_with_mod(keycode, modifiers),
+            AnyKeyboardLayout::Dvorak(kb) => kb.map_with_mod(keycode, modifiers),
+            AnyKeyboardLayout::Qgmlwy(kb) => kb.map_with_mod(keycode, modifiers),
+        }
     }
 }
 
@@ -147,14 +174,86 @@ macro_rules! keycode_map {
 }
 
 #[rustfmt::skip]
-static KEYCODE_MAP: [(u8, KeyCode); 48] = keycode_map! {
-  b'1' => N1, b'2' => N2, b'3' => N3, b'4' => N4, b'5' => N5,
-  b'6' => N6, b'7' => N7, b'8' => N8, b'9' => N9, b'0' => N0,
-  b'-' => Minus, b'=' => Equal, b'\\' => BSlash, b'`' => Grave,
-  b'q' => Q, b'w' => W, b'e' => E, b'r' => R, b't' => T, b'y' => Y,
-  b'u' => U, b'i' => I, b'o' => O, b'p' => P, b'[' => LBracket, b']' => RBracket,
-  b'a' => A, b's' => S, b'd' => D, b'f' => F, b'g' => G, b'h' => H,
-  b'j' => J, b'k' => K, b'l' => L, b';' => SColon, b'\'' => Quote,
-  b'z' => Z, b'x' => X, b'c' => C, b'v' => V, b'b' => B, b'n' => N,
-  b'm' => M, b',' => Comma, b'.' => Dot, b'/' => Slash, b' ' => Space
+static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 80] = keycode_map! {
+  b'1' => (N1, Modifiers::new()),
+  b'2' => (N2, Modifiers::new()),
+  b'3' => (N3, Modifiers::new()),
+  b'4' => (N4, Modifiers::new()),
+  b'5' => (N5, Modifiers::new()),
+  b'6' => (N6, Modifiers::new()),
+  b'7' => (N7, Modifiers::new()),
+  b'8' => (N8, Modifiers::new()),
+  b'9' => (N9, Modifiers::new()),
+  b'0' => (N0, Modifiers::new()),
+  b'-' => (Minus, Modifiers::new()),
+  b'=' => (Equal, Modifiers::new()),
+  b'\\' => (BSlash, Modifiers::new()),
+  b'`' => (Grave, Modifiers::new()),
+  b'q' => (Q, Modifiers::new()),
+  b'w' => (W, Modifiers::new()),
+  b'e' => (E, Modifiers::new()),
+  b'r' => (R, Modifiers::new()),
+  b't' => (T, Modifiers::new()),
+  b'y' => (Y, Modifiers::new()),
+  b'u' => (U, Modifiers::new()),
+  b'i' => (I, Modifiers::new()),
+  b'o' => (O, Modifiers::new()),
+  b'p' => (P, Modifiers::new()),
+  b'[' => (LBracket, Modifiers::new()),
+  b']' => (RBracket, Modifiers::new()),
+  b'a' => (A, Modifiers::new()),
+  b's' => (S, Modifiers::new()),
+  b'd' => (D, Modifiers::new()),
+  b'f' => (F, Modifiers::new()),
+  b'g' => (G, Modifiers::new()),
+  b'h' => (H, Modifiers::new()),
+  b'j' => (J, Modifiers::new()),
+  b'k' => (K, Modifiers::new()),
+  b'l' => (L, Modifiers::new()),
+  b';' => (SColon, Modifiers::new()),
+  b'\'' => (Quote, Modifiers::new()),
+  b'z' => (Z, Modifiers::new()),
+  b'x' => (X, Modifiers::new()),
+  b'c' => (C, Modifiers::new()),
+  b'v' => (V, Modifiers::new()),
+  b'b' => (B, Modifiers::new()),
+  b'n' => (N, Modifiers::new()),
+  b'm' => (M, Modifiers::new()),
+  b',' => (Comma, Modifiers::new()),
+  b'.' => (Dot, Modifiers::new()),
+  b'/' => (Slash, Modifiers::new()),
+  b' ' => (Space, Modifiers::new()),
+
+  b'A' => (A, Modifiers::shift()),
+  b'B' => (B, Modifiers::shift()),
+  b'C' => (C, Modifiers::shift()),
+  b'D' => (D, Modifiers::shift()),
+  b'E' => (E, Modifiers::shift()),
+  b'F' => (F, Modifiers::shift()),
+  b'G' => (G, Modifiers::shift()),
+  b'H' => (H, Modifiers::shift()),
+  b'I' => (I, Modifiers::shift()),
+  b'J' => (J, Modifiers::shift()),
+  b'K' => (K, Modifiers::shift()),
+  b'L' => (L, Modifiers::shift()),
+  b'M' => (M, Modifiers::shift()),
+  b'N' => (N, Modifiers::shift()),
+  b'O' => (O, Modifiers::shift()),
+  b'P' => (P, Modifiers::shift()),
+  b'Q' => (Q, Modifiers::shift()),
+  b'R' => (R, Modifiers::shift()),
+  b'S' => (S, Modifiers::shift()),
+  b'T' => (T, Modifiers::shift()),
+  b'U' => (U, Modifiers::shift()),
+  b'V' => (V, Modifiers::shift()),
+  b'W' => (W, Modifiers::shift()),
+  b'X' => (X, Modifiers::shift()),
+  b'Y' => (Y, Modifiers::shift()),
+  b'Z' => (Z, Modifiers::shift()),
+  b'"' => (Quote, Modifiers::shift()),
+  b'<' => (Comma, Modifiers::shift()),
+  b'>' => (Dot, Modifiers::shift()),
+  b'{' => (LBracket, Modifiers::shift()),
+  b'}' => (RBracket, Modifiers::shift()),
+  b'+' => (Equal, Modifiers::shift()),
 };

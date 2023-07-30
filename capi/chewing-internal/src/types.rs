@@ -1,10 +1,16 @@
-use chewing::{conversion::ChewingConversionEngine, dictionary::LayeredDictionary};
+use std::rc::Rc;
+
+use chewing::{
+    conversion::ChewingConversionEngine,
+    dictionary::{AnyDictionary, LayeredDictionary},
+    editor::{keyboard::AnyKeyboardLayout, Editor},
+};
 use chewing_public::types::{ChewingConfigData, IntervalType, MAX_SELKEY};
 use libc::{c_char, c_int, c_long, c_uint, c_void};
 
-use crate::userphrase::UserphraseDbAndEstimate;
+// use crate::userphrase::UserphraseDbAndEstimate;
 
-use super::bopomofo::SyllableEditorWithKeymap;
+// use super::bopomofo::SyllableEditorWithKeymap;
 
 pub const MAX_UTF8_SIZE: usize = 4;
 pub const MAX_UTF8_BUF: usize = MAX_UTF8_SIZE + 1;
@@ -80,10 +86,10 @@ pub struct PhrasingOutput {
     pub n_num_cut: c_int,
 }
 
-#[repr(C)]
-pub struct BopomofoData {
-    pub editor_with_keymap: Box<SyllableEditorWithKeymap>,
-}
+// #[repr(C)]
+// pub struct BopomofoData {
+//     pub editor_with_keymap: Box<SyllableEditorWithKeymap>,
+// }
 
 #[repr(C)]
 pub struct PinYinData {
@@ -171,83 +177,84 @@ pub struct UserPhraseData {
     pub maxfreq: c_int,
 }
 
-#[repr(C)]
-pub struct ChewingData {
-    pub avail_info: AvailInfo,
-    pub choice_info: ChoiceInfo,
-    pub phr_out: PhrasingOutput,
-    pub bopomofo_data: BopomofoData,
-    pub config: ChewingConfigData,
-    pub b_auto_learn: c_int,
-    /// Current input buffer, content == 0 means Chinese code
-    pub preedit_buf: [PreeditBuf; MAX_PHONE_SEQ_LEN],
-    pub chi_symbol_cursor: c_int,
-    pub chi_symbol_buf_len: c_int,
-    pub point_start: c_int,
-    pub point_end: c_int,
-    pub b_show_msg: c_int,
-    pub show_msg: [c_char; MAX_SHOW_MSG_BUF],
-    pub show_msg_len: c_int,
-    pub phone_seq: [u16; MAX_PHONE_SEQ_LEN],
-    pub phone_seq_alt: [u16; MAX_PHONE_SEQ_LEN],
-    pub n_phone_seq: c_int,
-    pub select_str: [[c_char; MAX_PHRASE_UTF8_BUF]; MAX_PHONE_SEQ_LEN],
-    pub select_interval: [IntervalType; MAX_PHONE_SEQ_LEN],
-    pub n_select: c_int,
-    pub prefer_interval: [IntervalType; MAX_INTERVAL],
-    pub n_prefer: c_int,
-    pub b_user_arr_cnnct: [c_int; MAX_PHONE_SEQ_BUF],
-    pub b_user_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
-    pub b_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
-    pub b_symbol_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
-    pub b_chi_sym: c_int,
-    pub b_select: c_int,
-    pub b_first_key: c_int,
-    pub b_full_shape: c_int,
-    pub symbol_key_buf: [c_char; MAX_PHONE_SEQ_LEN],
-    pub userphrase_data: UserPhraseData,
-    pub static_data: ChewingStaticData,
+pub struct ChewingData;
 
-    pub logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, ...),
-    pub logger_data: *mut c_void,
+// #[repr(C)]
+// pub struct ChewingData {
+//     pub avail_info: AvailInfo,
+//     pub choice_info: ChoiceInfo,
+//     pub phr_out: PhrasingOutput,
+//     pub bopomofo_data: BopomofoData,
+//     pub config: ChewingConfigData,
+//     pub b_auto_learn: c_int,
+//     /// Current input buffer, content == 0 means Chinese code
+//     pub preedit_buf: [PreeditBuf; MAX_PHONE_SEQ_LEN],
+//     pub chi_symbol_cursor: c_int,
+//     pub chi_symbol_buf_len: c_int,
+//     pub point_start: c_int,
+//     pub point_end: c_int,
+//     pub b_show_msg: c_int,
+//     pub show_msg: [c_char; MAX_SHOW_MSG_BUF],
+//     pub show_msg_len: c_int,
+//     pub phone_seq: [u16; MAX_PHONE_SEQ_LEN],
+//     pub phone_seq_alt: [u16; MAX_PHONE_SEQ_LEN],
+//     pub n_phone_seq: c_int,
+//     pub select_str: [[c_char; MAX_PHRASE_UTF8_BUF]; MAX_PHONE_SEQ_LEN],
+//     pub select_interval: [IntervalType; MAX_PHONE_SEQ_LEN],
+//     pub n_select: c_int,
+//     pub prefer_interval: [IntervalType; MAX_INTERVAL],
+//     pub n_prefer: c_int,
+//     pub b_user_arr_cnnct: [c_int; MAX_PHONE_SEQ_BUF],
+//     pub b_user_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
+//     pub b_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
+//     pub b_symbol_arr_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
+//     pub b_chi_sym: c_int,
+//     pub b_select: c_int,
+//     pub b_first_key: c_int,
+//     pub b_full_shape: c_int,
+//     pub symbol_key_buf: [c_char; MAX_PHONE_SEQ_LEN],
+//     pub userphrase_data: UserPhraseData,
+//     pub static_data: ChewingStaticData,
 
-    pub dict: *const LayeredDictionary,
-    pub ce: Option<Box<ChewingConversionEngine>>,
-    pub ue: Option<Box<UserphraseDbAndEstimate>>,
-    pub phrase_iter: *mut c_void,
-    pub phrase_enum_iter: *mut c_void,
-}
+//     pub logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, ...),
+//     pub logger_data: *mut c_void,
 
-#[repr(C)]
-pub struct ChewingOutput {
-    /// The content of edit buffer
-    pub preedit_buf: [c_char; MAX_PHONE_SEQ_UTF8_BUF],
-    /// The length of edit buffer
-    pub chi_symbol_buf_len: c_int,
-    /// The current position of the cursor
-    pub chi_symbol_cursor: c_long,
-    pub point_start: c_long,
-    pub point_end: c_long,
-    pub bopomofo_buf: [c_char; MAX_BOPOMOFO_UTF8_BUF],
-    pub disp_interval: [IntervalType; MAX_INTERVAL],
-    pub n_disp_interval: c_int,
-    pub disp_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
-    pub commit_buf: [c_char; MAX_PHONE_SEQ_UTF8_BUF],
-    pub commit_buf_len: c_int,
-    pub pci: *mut ChoiceInfo,
-    pub b_chi_sym: c_int,
-    pub sel_key: [c_int; MAX_SELKEY],
-    pub keystroke_rtn: c_int,
-}
+//     pub dict: *const LayeredDictionary,
+//     pub ce: Option<Box<ChewingConversionEngine>>,
+//     pub ue: Option<Box<UserphraseDbAndEstimate>>,
+//     pub phrase_iter: *mut c_void,
+//     pub phrase_enum_iter: *mut c_void,
+// }
+
+// #[repr(C)]
+// pub struct ChewingOutput {
+//     /// The content of edit buffer
+//     pub preedit_buf: [c_char; MAX_PHONE_SEQ_UTF8_BUF],
+//     /// The length of edit buffer
+//     pub chi_symbol_buf_len: c_int,
+//     /// The current position of the cursor
+//     pub chi_symbol_cursor: c_long,
+//     pub point_start: c_long,
+//     pub point_end: c_long,
+//     pub bopomofo_buf: [c_char; MAX_BOPOMOFO_UTF8_BUF],
+//     pub disp_interval: [IntervalType; MAX_INTERVAL],
+//     pub n_disp_interval: c_int,
+//     pub disp_brkpt: [c_int; MAX_PHONE_SEQ_BUF],
+//     pub commit_buf: [c_char; MAX_PHONE_SEQ_UTF8_BUF],
+//     pub commit_buf_len: c_int,
+//     pub pci: *mut ChoiceInfo,
+//     pub b_chi_sym: c_int,
+//     pub sel_key: [c_int; MAX_SELKEY],
+//     pub keystroke_rtn: c_int,
+// }
 
 /// cbindgen:rename-all=None
-#[repr(C)]
 pub struct ChewingContext {
-    pub data: *mut ChewingData,
-    pub output: *mut ChewingOutput,
-    pub cand_no: c_int,
-    pub it_no: c_int,
-    pub kb_no: c_int,
+    pub(crate) keyboard: AnyKeyboardLayout,
+    pub(crate) editor: Editor<
+        ChewingConversionEngine<Rc<LayeredDictionary<AnyDictionary, ()>>>,
+        Rc<LayeredDictionary<AnyDictionary, ()>>,
+    >,
 }
 
 #[repr(C)]

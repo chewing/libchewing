@@ -18,8 +18,8 @@ use super::{
 ///
 /// use chewing::{dictionary::{LayeredDictionary, Dictionary}, syl, zhuyin::Bopomofo};
 ///
-/// let mut sys_dict = Box::new(HashMap::new());
-/// let mut user_dict = Box::new(HashMap::new());
+/// let mut sys_dict = HashMap::new();
+/// let mut user_dict = HashMap::new();
 /// sys_dict.insert(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
@@ -29,7 +29,7 @@ use super::{
 ///     vec![("策", 100).into(), ("冊", 100).into()]
 /// );
 ///
-/// let user_block_list = Box::new(HashSet::from(["側".to_string()]));
+/// let user_block_list = HashSet::from(["側".to_string()]);
 ///
 /// let dict = LayeredDictionary::new(vec![sys_dict, user_dict], vec![user_block_list]);
 /// assert_eq!(
@@ -49,18 +49,23 @@ use super::{
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct LayeredDictionary {
-    inner: Vec<Box<dyn Dictionary>>,
-    blocked: Vec<Box<dyn BlockList>>,
+pub struct LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
+    inner: Vec<T>,
+    blocked: Vec<B>,
 }
 
-impl LayeredDictionary {
+impl<T, B> LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
     /// Creates a new `LayeredDictionary` with the list of dictionaries and
     /// block lists.
-    pub fn new(
-        dictionaries: Vec<Box<dyn Dictionary>>,
-        block_lists: Vec<Box<dyn BlockList>>,
-    ) -> LayeredDictionary {
+    pub fn new(dictionaries: Vec<T>, block_lists: Vec<B>) -> LayeredDictionary<T, B> {
         LayeredDictionary {
             inner: dictionaries,
             blocked: block_lists,
@@ -71,7 +76,11 @@ impl LayeredDictionary {
     }
 }
 
-impl Dictionary for LayeredDictionary {
+impl<T, B> Dictionary for LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
     /// Lookup phrases from all underlying dictionaries.
     ///
     /// Phrases are ordered by their first apperance in the underlying dictionaries.
@@ -127,7 +136,11 @@ impl Dictionary for LayeredDictionary {
     }
 }
 
-impl DictionaryMut for LayeredDictionary {
+impl<T, B> DictionaryMut for LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
     fn insert(
         &mut self,
         syllables: &[Syllable],

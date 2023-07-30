@@ -261,10 +261,10 @@ mod test {
     fn cen() {
         let mut hsu = Hsu::new();
         let keyboard = Qwerty;
-        hsu.key_press(keyboard.map_keycode(KeyCode::C, Modifiers::default()));
-        hsu.key_press(keyboard.map_keycode(KeyCode::E, Modifiers::default()));
-        hsu.key_press(keyboard.map_keycode(KeyCode::N, Modifiers::default()));
-        hsu.key_press(keyboard.map_keycode(KeyCode::Space, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::C, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::E, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::N, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::Space, Modifiers::default()));
         let result = hsu.read();
         assert_eq!(result.initial(), Some(Bopomofo::X));
         assert_eq!(result.medial(), Some(Bopomofo::I));
@@ -275,8 +275,8 @@ mod test {
     fn convert_n_to_en() {
         let mut hsu = Hsu::new();
         let keyboard = Qwerty;
-        hsu.key_press(keyboard.map_keycode(KeyCode::N, Modifiers::default()));
-        hsu.key_press(keyboard.map_keycode(KeyCode::F, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::N, Modifiers::default()));
+        hsu.key_press(keyboard.map_with_mod(KeyCode::F, Modifiers::default()));
         let result = hsu.read();
         assert_eq!(result.rime(), Some(Bopomofo::EN));
     }

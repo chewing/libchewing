@@ -5,16 +5,13 @@ mod estimate;
 pub mod keyboard;
 pub mod syllable;
 
-use std::{fmt::Debug, rc::Rc};
+use std::fmt::Debug;
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
 pub use syllable::SyllableEditor;
 
 use crate::{
-    conversion::{
-        full_width_symbol_input, special_symbol_input, ChewingConversionEngine, ConversionEngine,
-        Symbol,
-    },
+    conversion::{full_width_symbol_input, special_symbol_input, ConversionEngine, Symbol},
     dictionary::Dictionary,
     editor::keyboard::KeyCode,
     zhuyin::Syllable,
@@ -41,7 +38,11 @@ pub enum EditorKeyBehavior {
 
 /// TODO doc.
 #[derive(Debug)]
-struct Editor<C: 'static, D: 'static> {
+pub struct Editor<C, D>
+where
+    C: ConversionEngine + 'static,
+    D: Dictionary + 'static,
+{
     state: &'static dyn ChewingEditorState<C, D>,
     composition: CompositionEditor,
     commit_buffer: String,
@@ -51,8 +52,9 @@ struct Editor<C: 'static, D: 'static> {
     conversion_engine: C,
     dictionary: D,
 
-    language_mode: LanguageMode,
-    character_form: CharacterForm,
+    pub language_mode: LanguageMode,
+    pub character_form: CharacterForm,
+    pub options: EditorOptions,
 }
 
 #[derive(Debug)]
@@ -66,7 +68,11 @@ pub trait BasicEditor {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior;
 }
 
-trait ChewingEditorState<C, D>: Debug {
+trait ChewingEditorState<C, D>: Debug
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
@@ -87,13 +93,13 @@ struct Selecting;
 struct Highlighting;
 
 #[derive(Debug)]
-enum LanguageMode {
+pub enum LanguageMode {
     Chinese,
     English,
 }
 
 #[derive(Debug)]
-enum CharacterForm {
+pub enum CharacterForm {
     Halfwidth,
     Fullwidth,
 }
@@ -103,15 +109,34 @@ enum UserPhraseAddDirection {
     Backward,
 }
 
-struct EditorOptions {
-    esc_clear_all_buffer: bool,
-    space_is_select_key: bool,
-    auto_shift_cursor: bool,
-    phrase_choice_rearward: bool,
-    auto_learn_phrase: bool,
+#[derive(Debug)]
+pub struct EditorOptions {
+    pub esc_clear_all_buffer: bool,
+    pub space_is_select_key: bool,
+    pub auto_shift_cursor: bool,
+    pub phrase_choice_rearward: bool,
+    pub auto_learn_phrase: bool,
+    pub auto_commit_threshold: usize,
 }
 
-impl<C, D> BasicEditor for Editor<C, D> {
+impl Default for EditorOptions {
+    fn default() -> Self {
+        Self {
+            esc_clear_all_buffer: true,
+            space_is_select_key: true,
+            auto_shift_cursor: true,
+            phrase_choice_rearward: true,
+            auto_learn_phrase: true,
+            auto_commit_threshold: 16,
+        }
+    }
+}
+
+impl<C, D> BasicEditor for Editor<C, D>
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     type State = ();
 
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
@@ -121,7 +146,11 @@ impl<C, D> BasicEditor for Editor<C, D> {
     }
 }
 
-impl<C, D> ChewingEditorState<C, D> for Entering {
+impl<C, D> ChewingEditorState<C, D> for Entering
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
@@ -192,11 +221,21 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
                 LanguageMode::English => {
                     match editor.character_form {
                         CharacterForm::Halfwidth => {
-                            editor.composition.push(Symbol::Char(key_event.unicode))
+                            if editor.composition.is_empty() {
+                                editor.commit_buffer.clear();
+                                editor.commit_buffer.push(key_event.unicode);
+                            } else {
+                                editor.composition.push(Symbol::Char(key_event.unicode));
+                            }
                         }
                         CharacterForm::Fullwidth => {
                             let char_ = full_width_symbol_input(key_event.unicode).unwrap();
-                            editor.composition.push(Symbol::Char(char_));
+                            if editor.composition.is_empty() {
+                                editor.commit_buffer.clear();
+                                editor.commit_buffer.push(char_);
+                            } else {
+                                editor.composition.push(Symbol::Char(char_));
+                            }
                         }
                     }
                     (EditorKeyBehavior::Commit, &Entering)
@@ -207,7 +246,11 @@ impl<C, D> ChewingEditorState<C, D> for Entering {
     }
 }
 
-impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
+impl<C, D> ChewingEditorState<C, D> for EnteringSyllable
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
@@ -253,7 +296,11 @@ impl<C, D> ChewingEditorState<C, D> for EnteringSyllable {
     }
 }
 
-impl<C, D> ChewingEditorState<C, D> for Selecting {
+impl<C, D> ChewingEditorState<C, D> for Selecting
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
@@ -281,7 +328,11 @@ impl<C, D> ChewingEditorState<C, D> for Selecting {
     }
 }
 
-impl<C, D> ChewingEditorState<C, D> for Highlighting {
+impl<C, D> ChewingEditorState<C, D> for Highlighting
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
     fn process_keyevent(
         &self,
         editor: &mut Editor<C, D>,
@@ -307,11 +358,13 @@ impl<C, D> ChewingEditorState<C, D> for Highlighting {
     }
 }
 
-impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
-    fn new(
-        conversion_engine: ChewingConversionEngine,
-        dictionary: Rc<dyn Dictionary>,
-    ) -> Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
+impl<C, D> Editor<C, D>
+where
+    C: ConversionEngine,
+    D: Dictionary,
+{
+    /// TODO: doc
+    pub fn new(conversion_engine: C, dictionary: D) -> Editor<C, D> {
         Editor {
             state: &Entering,
             composition: CompositionEditor::default(),
@@ -323,18 +376,22 @@ impl Editor<ChewingConversionEngine, Rc<dyn Dictionary>> {
             conversion_engine,
             language_mode: LanguageMode::Chinese,
             character_form: CharacterForm::Halfwidth,
+            options: Default::default(),
         }
     }
-    fn display(&self) -> String {
+    /// TODO: doc
+    pub fn display(&self) -> String {
         self.conversion_engine
             .convert(self.composition.as_ref())
             .into_iter()
             .map(|interval| interval.phrase)
             .collect::<String>()
     }
-}
 
-impl<C, D> Editor<C, D> {
+    pub fn display_commit(&self) -> &str {
+        &self.commit_buffer
+    }
+
     // fn with_syllable_editor(syllable_editor: Box<dyn SyllableEditor>) -> Editor<C, D> {
     //     Editor {
     //         state: &Entering,
@@ -404,13 +461,13 @@ mod tests {
         let conversion_engine = ChewingConversionEngine::new(dict.clone());
         let mut editor = Editor::new(conversion_engine, dict);
 
-        let ev = keyboard.map_keycode(KeyCode::H, Modifiers::default());
+        let ev = keyboard.map_with_mod(KeyCode::H, Modifiers::default());
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
-        let ev = keyboard.map_keycode(KeyCode::K, Modifiers::default());
+        let ev = keyboard.map_with_mod(KeyCode::K, Modifiers::default());
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
@@ -431,7 +488,7 @@ mod tests {
         let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
         let key_behaviors: Vec<_> = keys
             .into_iter()
-            .map(|key| keyboard.map_keycode(key, Modifiers::default()))
+            .map(|key| keyboard.map_with_mod(key, Modifiers::default()))
             .map(|ev| editor.process_keyevent(ev))
             .collect();
 
@@ -459,10 +516,10 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            keyboard.map_keycode(KeyCode::H, Default::default()),
-            keyboard.map_keycode(KeyCode::K, Default::default()),
-            keyboard.map_keycode(KeyCode::N4, Default::default()),
-            keyboard.map_keycode(
+            keyboard.map_with_mod(KeyCode::H, Default::default()),
+            keyboard.map_with_mod(KeyCode::K, Default::default()),
+            keyboard.map_with_mod(KeyCode::N4, Default::default()),
+            keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
                     shift: false,
@@ -470,7 +527,7 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_keycode(KeyCode::Z, Default::default()),
+            keyboard.map_with_mod(KeyCode::Z, Default::default()),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -504,7 +561,7 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            keyboard.map_keycode(
+            keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
                     shift: false,
@@ -512,8 +569,8 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_keycode(KeyCode::X, Default::default()),
-            keyboard.map_keycode(
+            keyboard.map_with_mod(KeyCode::X, Default::default()),
+            keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
                     shift: false,
@@ -521,9 +578,9 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_keycode(KeyCode::H, Default::default()),
-            keyboard.map_keycode(KeyCode::K, Default::default()),
-            keyboard.map_keycode(KeyCode::N4, Default::default()),
+            keyboard.map_with_mod(KeyCode::H, Default::default()),
+            keyboard.map_with_mod(KeyCode::K, Default::default()),
+            keyboard.map_with_mod(KeyCode::N4, Default::default()),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -557,11 +614,11 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dictionary);
 
         let keys = [
-            keyboard.map_keycode(KeyCode::N1, Modifiers::shift()),
-            keyboard.map_keycode(KeyCode::H, Modifiers::default()),
-            keyboard.map_keycode(KeyCode::K, Modifiers::default()),
-            keyboard.map_keycode(KeyCode::N4, Modifiers::default()),
-            keyboard.map_keycode(KeyCode::Comma, Modifiers::shift()),
+            keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
+            keyboard.map_with_mod(KeyCode::H, Modifiers::default()),
+            keyboard.map_with_mod(KeyCode::K, Modifiers::default()),
+            keyboard.map_with_mod(KeyCode::N4, Modifiers::default()),
+            keyboard.map_with_mod(KeyCode::Comma, Modifiers::shift()),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -592,7 +649,7 @@ mod tests {
         editor.switch_character_form();
 
         let keys = [
-            keyboard.map_keycode(
+            keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
                     shift: false,
@@ -600,8 +657,8 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_keycode(KeyCode::N0, Default::default()),
-            keyboard.map_keycode(KeyCode::Minus, Default::default()),
+            keyboard.map_with_mod(KeyCode::N0, Default::default()),
+            keyboard.map_with_mod(KeyCode::Minus, Default::default()),
         ];
 
         let key_behaviors: Vec<_> = keys
