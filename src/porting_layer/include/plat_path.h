@@ -30,8 +30,4 @@
 int get_search_path(char *path, size_t path_len);
 int find_path_by_files(const char *search_path, const char *const *files, char *output, size_t output_len);
 
-#    ifndef HAVE_ASPRINTF
-int asprintf(char **strp, const char *fmt, ...);
-#    endif
-
 #endif                          // PATH_PRIVATE_H

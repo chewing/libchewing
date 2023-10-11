@@ -22,7 +22,11 @@
  *  \author libchewing Core Team
  */
 
-#include "global.h"
+#ifdef WITH_RUST
+#   include "chewing_rs.h"
+#else
+#   include "global.h"
+#endif
 
 #define KEYSTROKE_IGNORE 1
 #define KEYSTROKE_COMMIT 2

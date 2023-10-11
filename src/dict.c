@@ -29,7 +29,7 @@
 
 void TerminateDict(ChewingData *pgdata)
 {
-    plat_mmap_close(&pgdata->static_data.dict_mmap);
+    plat_mmap_close(&pgdata->staticData.dict_mmap);
 }
 
 int InitDict(ChewingData *pgdata, const char *prefix)
@@ -44,15 +44,15 @@ int InitDict(ChewingData *pgdata, const char *prefix)
     if (len + 1 > sizeof(filename))
         return -1;
 
-    plat_mmap_set_invalid(&pgdata->static_data.dict_mmap);
-    file_size = plat_mmap_create(&pgdata->static_data.dict_mmap, filename, FLAG_ATTRIBUTE_READ);
+    plat_mmap_set_invalid(&pgdata->staticData.dict_mmap);
+    file_size = plat_mmap_create(&pgdata->staticData.dict_mmap, filename, FLAG_ATTRIBUTE_READ);
     if (file_size <= 0)
         return -1;
 
     offset = 0;
     csize = file_size;
-    pgdata->static_data.dict = (const char *) plat_mmap_set_view(&pgdata->static_data.dict_mmap, &offset, &csize);
-    if (!pgdata->static_data.dict)
+    pgdata->staticData.dict = (const char *) plat_mmap_set_view(&pgdata->staticData.dict_mmap, &offset, &csize);
+    if (!pgdata->staticData.dict)
         return -1;
 
     return 0;
@@ -64,9 +64,9 @@ int InitDict(ChewingData *pgdata, const char *prefix)
  */
 static void GetVocabFromDict(ChewingData *pgdata, Phrase *phr_ptr)
 {
-    snprintf(phr_ptr->phrase, sizeof(phr_ptr->phrase), "%s", pgdata->static_data.dict + GetUint24(pgdata->static_data.tree_cur_pos->phrase.pos));
-    phr_ptr->freq = GetUint24(pgdata->static_data.tree_cur_pos->phrase.freq);
-    pgdata->static_data.tree_cur_pos++;
+    snprintf(phr_ptr->phrase, sizeof(phr_ptr->phrase), "%s", pgdata->staticData.dict + GetUint24(pgdata->staticData.tree_cur_pos->phrase.pos));
+    phr_ptr->freq = GetUint24(pgdata->staticData.tree_cur_pos->phrase.freq);
+    pgdata->staticData.tree_cur_pos++;
 }
 
 int GetCharFirst(ChewingData *pgdata, Phrase *wrd_ptr, uint16_t key)
@@ -97,8 +97,8 @@ int GetPhraseFirst(ChewingData *pgdata, Phrase *phr_ptr, const TreeType *phrase_
 
 int GetVocabNext(ChewingData *pgdata, Phrase *phr_ptr)
 {
-    if (pgdata->static_data.tree_cur_pos >= pgdata->static_data.tree_end_pos
-        || GetUint16(pgdata->static_data.tree_cur_pos->key) != 0)
+    if (pgdata->staticData.tree_cur_pos >= pgdata->staticData.tree_end_pos
+        || GetUint16(pgdata->staticData.tree_cur_pos->key) != 0)
         return 0;
     GetVocabFromDict(pgdata, phr_ptr);
     return 1;

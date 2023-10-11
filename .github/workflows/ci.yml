@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master", "staging", "trying" ]
+  pull_request:
+    branches: [ "master" ]
+  merge_group:
+    types: [checks_requested]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        with_rust: ['true', 'false']
+        rust_version: ['1.64', 'stable']
+        exclude:
+          - with_rust: 'false'
+            rust_version: 'stable'
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}, rust_version=${{ matrix.rust_version }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Setup rustup
+      run: |
+        rustup default ${{ matrix.rust_version }}
+        rustup update
+
+    - name: Build
+      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --verbose true
+
+    - name: Test
+      run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
+
+
+  build_with_hash:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Build
+      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust false --with-hash true --verbose true
+
+    - name: Test
+      run: cargo xtask test --build-type ${{env.BUILD_TYPE}} --with-rust false

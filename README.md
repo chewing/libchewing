@@ -21,6 +21,9 @@ as full open source efforts.
 + Mailing lists:
    - Development: <https://groups.google.com/group/chewing-devel>
    - General: <https://groups.google.com/group/chewing>
++ Matrix:
+   - Development: <https://matrix.to/#/#libchewing:matrix.org>
+   - General: <https://matrix.to/#/#chewing-users:matrix.org>
 + Build Status:
    - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
@@ -112,15 +115,12 @@ projects to deploy the innovative.  Here are the examples:
    <https://github.com/shaform/libfreearray>
    <https://github.com/shaform/ibus-freearray>
 
-  * CitC (Chewing in the Cloud): extending cloud services for real-time
+  * [CitC](https://code.google.com/p/citc/) (Chewing in the Cloud): extending cloud services for real-time
    training and phrase selection based on Chewing IM.
-   <https://code.google.com/p/citc/>
 
-  * KindleChewing: Chewing IM for Kindle DX device
-   <https://github.com/tjwei/KindleChewing>
+  * [KindleChewing: Chewing IM for Kindle DX device](https://github.com/tjwei/KindleChewing)
 
-  * NTNU-Master Input Method: A Faster Chinese IM based on windows-chewing
-   <https://sites.google.com/site/ntnumaster001/>
+  * [NTNU-Master Input Method](http://rportal.lib.ntnu.edu.tw/items/42d5cd11-5fab-4d27-9f26-d01b80588a82): A Faster Chinese IM based on windows-chewing
 
 
 ## Minimal Build Tools Requirement

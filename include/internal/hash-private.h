@@ -13,7 +13,6 @@
 #define _CHEWING_HASH_PRIVATE_H
 /* *INDENT-ON* */
 
-#include "global.h"
 #include "userphrase-private.h"
 
 #ifdef __MacOSX__

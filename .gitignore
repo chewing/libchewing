@@ -42,12 +42,17 @@ include/config.h.in
 include/stamp-h1
 
 # cmake generated files
+/build
 config.h
 /libchewing.*
 /libsqlite3_library.a
 /libtesthelper.a
 /libuserphrase.a
 /Testing
+/CTestTestfile.cmake
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
 
 # test suite
 test/genkeystroke
@@ -116,12 +121,6 @@ doc/libchewing.tps
 doc/libchewing.vr
 doc/libchewing.vrs
 
-# cmake
-/CTestTestfile.cmake
-/CMakeCache.txt
-/CMakeFiles/
-/cmake_install.cmake
-
 # Visual Studio
 *.pdb
 *.vcxproj*
@@ -146,3 +145,6 @@ contrib/test.sqlite3
 
 # python
 *.pyc
+
+# rust
+/target

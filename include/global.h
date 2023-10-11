@@ -75,30 +75,6 @@
 #    endif
 #endif
 
-/* The following macros are modified from GLIB.
- * from GNU cpp Manual:
- * C99 introduces the _Pragma operator. This feature addresses a major problem
- * with `#pragma': being a directive, it cannot be produced as the result of
- * macro expansion. _Pragma is an operator, much like sizeof or defined, and
- * can be embedded in a macro.
- */
-#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
-#    define BEGIN_IGNORE_DEPRECATIONS \
-         _Pragma ("GCC diagnostic push")                       \
-         _Pragma ("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#    define END_IGNORE_DEPRECATIONS                  \
-         _Pragma ("GCC diagnostic pop")
-#elif defined (_MSC_VER) && (_MSC_VER >= 1500)
-#    define BEGIN_IGNORE_DEPRECATIONS \
-         __pragma (warning (push))  \
-         __pragma (warning (disable : 4996))
-#    define END_IGNORE_DEPRECATIONS \
-         __pragma (warning (pop))
-#else
-#    define BEGIN_IGNORE_DEPRECATIONS
-#    define END_IGNORE_DEPRECATIONS
-#endif
-
 #define MIN_SELKEY 1
 #define MAX_SELKEY 10
 
@@ -121,7 +97,6 @@ typedef struct ChewingConfigData {
     int bAutoShiftCur;
     int bEasySymbolInput;
     int bPhraseChoiceRearward;
-    int bAutoLearn;
     int hsuSelKeyType;          // Deprecated.
 } ChewingConfigData;
 
