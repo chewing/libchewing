@@ -13,7 +13,7 @@ pub struct CompositionEditor {
 
 impl CompositionEditor {
     pub(crate) fn is_empty(&self) -> bool {
-        self.inner.breaks.is_empty()
+        self.inner.buffer.is_empty()
     }
     pub(crate) fn remove_last(&mut self) {
         todo!()

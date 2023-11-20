@@ -379,7 +379,7 @@ where
             options: Default::default(),
         }
     }
-    /// TODO: doc
+    /// TODO: doc, rename this to `render`?
     pub fn display(&self) -> String {
         self.conversion_engine
             .convert(self.composition.as_ref())
@@ -388,6 +388,7 @@ where
             .collect::<String>()
     }
 
+    // TODO: decide the return type
     pub fn display_commit(&self) -> &str {
         &self.commit_buffer
     }
@@ -516,9 +517,11 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
-            keyboard.map_with_mod(KeyCode::H, Default::default()),
-            keyboard.map_with_mod(KeyCode::K, Default::default()),
-            keyboard.map_with_mod(KeyCode::N4, Default::default()),
+            keyboard.map(KeyCode::H),
+            keyboard.map(KeyCode::K),
+            keyboard.map(KeyCode::N4),
+            // TODO: capslock probably shouldn't be a modifier
+            // Toggle english mode
             keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
@@ -527,7 +530,7 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_with_mod(KeyCode::Z, Default::default()),
+            keyboard.map(KeyCode::Z),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -561,6 +564,7 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
+            // Switch to english mode
             keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
@@ -569,7 +573,8 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_with_mod(KeyCode::X, Default::default()),
+            keyboard.map(KeyCode::X),
+            // Switch to chinese mode
             keyboard.map_with_mod(
                 KeyCode::Unknown,
                 Modifiers {
@@ -578,9 +583,9 @@ mod tests {
                     capslock: true,
                 },
             ),
-            keyboard.map_with_mod(KeyCode::H, Default::default()),
-            keyboard.map_with_mod(KeyCode::K, Default::default()),
-            keyboard.map_with_mod(KeyCode::N4, Default::default()),
+            keyboard.map(KeyCode::H),
+            keyboard.map(KeyCode::K),
+            keyboard.map(KeyCode::N4),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -600,7 +605,8 @@ mod tests {
             key_behaviors
         );
         assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("x冊", editor.display());
+        assert_eq!("x", editor.display_commit());
+        assert_eq!("冊", editor.display());
     }
 
     #[test]
@@ -648,34 +654,45 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dictionary);
         editor.switch_character_form();
 
-        let keys = [
-            keyboard.map_with_mod(
+        let steps = [
+            (
                 KeyCode::Unknown,
                 Modifiers {
                     shift: false,
                     ctrl: false,
                     capslock: true,
                 },
+                EditorKeyBehavior::Absorb,
+                "",
+                "",
+                "",
             ),
-            keyboard.map_with_mod(KeyCode::N0, Default::default()),
-            keyboard.map_with_mod(KeyCode::Minus, Default::default()),
+            (
+                KeyCode::N0,
+                Modifiers::default(),
+                EditorKeyBehavior::Commit,
+                "",
+                "",
+                "０",
+            ),
+            (
+                KeyCode::Minus,
+                Modifiers::default(),
+                EditorKeyBehavior::Commit,
+                "",
+                "",
+                "－",
+            ),
         ];
 
-        let key_behaviors: Vec<_> = keys
-            .iter()
-            .map(|&key| editor.process_keyevent(key))
-            .collect();
-
-        assert_eq!(
-            vec![
-                EditorKeyBehavior::Absorb,
-                EditorKeyBehavior::Commit,
-                EditorKeyBehavior::Commit,
-            ],
-            key_behaviors
-        );
-        assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("０－", editor.display());
+        for s in steps {
+            let key = keyboard.map_with_mod(s.0, s.1);
+            let kb = editor.process_keyevent(key);
+            assert_eq!(s.2, kb);
+            assert_eq!(s.3, editor.syllable_buffer().to_string());
+            assert_eq!(s.4, editor.display());
+            assert_eq!(s.5, editor.display_commit());
+        }
     }
 
     #[test]

@@ -14,6 +14,7 @@ use chewing::{
     dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
+        syllable::KeyboardLayoutCompat,
         BasicEditor, CharacterForm, Editor, LanguageMode,
     },
 };
@@ -131,7 +132,8 @@ pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) -> c_int {
-    todo!()
+    // todo!()
+    1
 }
 
 #[no_mangle]
@@ -146,7 +148,10 @@ pub extern "C" fn chewing_get_KBString(ctx: &ChewingContext) -> *mut c_char {
 
 #[no_mangle]
 pub extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
-    todo!()
+    let cstr = unsafe { CStr::from_ptr(str) };
+    let utf8str = cstr.to_string_lossy();
+    let layout: KeyboardLayoutCompat = utf8str.parse().unwrap_or(KeyboardLayoutCompat::Default);
+    layout as c_int
 }
 
 #[no_mangle]
@@ -185,7 +190,7 @@ pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_candPerPage(ctx: &mut ChewingContext, n: c_int) {
-    todo!()
+    // todo!()
 }
 
 #[no_mangle]
@@ -205,7 +210,7 @@ pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: &ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_selKey(ctx: &mut ChewingContext, sel_keys: *const c_int, len: c_int) {
-    todo!()
+    // todo!()
 }
 
 #[no_mangle]
@@ -215,7 +220,7 @@ pub extern "C" fn chewing_get_selKey(ctx: &ChewingContext) -> *mut c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_addPhraseDirection(ctx: &mut ChewingContext, direction: c_int) {
-    todo!()
+    // todo!()
 }
 
 #[no_mangle]
@@ -225,7 +230,7 @@ pub extern "C" fn chewing_get_addPhraseDirection(ctx: &ChewingContext) -> c_int 
 
 #[no_mangle]
 pub extern "C" fn chewing_set_spaceAsSelection(ctx: &mut ChewingContext, mode: c_int) {
-    todo!()
+    // todo!()
 }
 
 #[no_mangle]
@@ -421,7 +426,9 @@ pub extern "C" fn chewing_handle_Esc(ctx: &mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_handle_Enter(ctx: &mut ChewingContext) -> c_int {
-    todo!()
+    // todo!()
+    dbg!(ctx.editor.display());
+    1
 }
 
 #[no_mangle]

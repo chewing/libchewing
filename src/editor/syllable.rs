@@ -15,7 +15,7 @@
 //! Chewing currently supports the default layout, Hsu's layout, ET26 layout,
 //! DaChen CP26 layout, and the Pinyin layout.
 
-use std::fmt::Debug;
+use std::{fmt::Debug, str::FromStr};
 
 use crate::zhuyin::Syllable;
 
@@ -71,6 +71,30 @@ pub enum KeyboardLayoutCompat {
     Mps2Pinyin,
     /// TODO: docs
     Carpalx,
+}
+
+impl FromStr for KeyboardLayoutCompat {
+    type Err = ();
+
+    fn from_str(kb_str: &str) -> Result<Self, Self::Err> {
+        let layout = match kb_str {
+            "KB_DEFAULT" => Self::Default,
+            "KB_HSU" => Self::Hsu,
+            "KB_IBM" => Self::Ibm,
+            "KB_GIN_YIEH" => Self::GinYieh,
+            "KB_ET" => Self::Et,
+            "KB_ET26" => Self::Et26,
+            "KB_DVORAK" => Self::Dvorak,
+            "KB_DVORAK_HSU" => Self::DvorakHsu,
+            "KB_DACHEN_CP26" => Self::DachenCp26,
+            "KB_HANYU_PINYIN" => Self::HanyuPinyin,
+            "KB_THL_PINYIN" => Self::ThlPinyin,
+            "KB_MPS2_PINYIN" => Self::Mps2Pinyin,
+            "KB_CARPALX" => Self::Carpalx,
+            _ => todo!("handle error"),
+        };
+        Ok(layout)
+    }
 }
 
 /// TODO: docs
