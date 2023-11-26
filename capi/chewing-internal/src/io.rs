@@ -157,15 +157,15 @@ pub extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
 #[no_mangle]
 pub extern "C" fn chewing_set_ChiEngMode(ctx: &mut ChewingContext, mode: c_int) {
     match mode {
-        CHINESE_MODE => ctx.editor.language_mode = LanguageMode::Chinese,
-        SYMBOL_MODE => ctx.editor.language_mode = LanguageMode::English,
+        CHINESE_MODE => ctx.editor.set_language_mode(LanguageMode::Chinese),
+        SYMBOL_MODE => ctx.editor.set_language_mode(LanguageMode::English),
         _ => warn!("invalid language mode {}", mode),
     }
 }
 
 #[no_mangle]
 pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
-    match ctx.editor.language_mode {
+    match ctx.editor.language_mode() {
         LanguageMode::Chinese => CHINESE_MODE,
         LanguageMode::English => SYMBOL_MODE,
     }
@@ -174,15 +174,15 @@ pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
 #[no_mangle]
 pub extern "C" fn chewing_set_ShapeMode(ctx: &mut ChewingContext, mode: c_int) {
     match mode {
-        HALFSHAPE_MODE => ctx.editor.character_form = CharacterForm::Halfwidth,
-        FULLSHAPE_MODE => ctx.editor.character_form = CharacterForm::Fullwidth,
+        HALFSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Halfwidth),
+        FULLSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Fullwidth),
         _ => warn!("invalid shape mode {}", mode),
     }
 }
 
 #[no_mangle]
 pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
-    match ctx.editor.character_form {
+    match ctx.editor.character_form() {
         CharacterForm::Halfwidth => HALFSHAPE_MODE,
         CharacterForm::Fullwidth => FULLSHAPE_MODE,
     }
@@ -200,12 +200,13 @@ pub extern "C" fn chewing_get_candPerPage(ctx: &ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: &mut ChewingContext, n: c_int) {
-    ctx.editor.options.auto_commit_threshold = n as usize
+    // ctx.editor.options.auto_commit_threshold = n as usize
 }
 
 #[no_mangle]
 pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: &ChewingContext) -> c_int {
-    ctx.editor.options.auto_commit_threshold as c_int
+    // ctx.editor.options.auto_commit_threshold as c_int
+    -1
 }
 
 #[no_mangle]
@@ -497,10 +498,7 @@ pub extern "C" fn chewing_handle_PageDown(ctx: &mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_handle_Down(ctx: &mut ChewingContext) -> c_int {
-    let key_event = ctx
-        .keyboard
-        .map_with_mod(KeyCode::Down, Modifiers::default());
-    ctx.editor.process_keyevent(key_event);
+    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Down));
     0
 }
 
@@ -511,8 +509,8 @@ pub extern "C" fn chewing_handle_Capslock(ctx: &mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_handle_Default(ctx: &mut ChewingContext, key: c_int) -> c_int {
-    let key_event = ctx.keyboard.map_ascii(key as u8);
-    ctx.editor.process_keyevent(key_event);
+    ctx.editor
+        .process_keyevent(ctx.keyboard.map_ascii(key as u8));
     0
 }
 
@@ -633,7 +631,7 @@ pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
-    todo!()
+    // let candidates = ctx.
 }
 
 #[no_mangle]

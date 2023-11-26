@@ -70,6 +70,7 @@ pub struct Composition {
     /// TODO: doc
     pub selections: Vec<Interval>,
     /// TODO: doc
+    /// TODO: merge with symbol?
     pub breaks: Vec<Break>,
 }
 
