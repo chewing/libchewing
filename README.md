@@ -80,6 +80,8 @@ preference settings.
   - HanYu PinYin
   - Taiwan Huayu Luomapinyin
   - MPS2 Pinyin
+  - Colemak-DH ANSI
+  - Colemak-DH Ortholinear
 
 
 ### 3. External and unmerged projects
