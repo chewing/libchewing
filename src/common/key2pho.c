@@ -86,6 +86,7 @@ static const char *const key_str[KB_TYPE_NUM] = {
     "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-7634",        /* secondary Bopomofo Pinyin */
     "1qdz2gsxmtclnv5wrjyikfap8ue,9bo.0;h/-7634",        /* Carpalx */
     "1qax2wrcfsdptv5bgzjmklnh8ue,9yi.0;o/-7634",        /* Colemak-DH ANSI */
+    "1qaz2wrxfscptd5bgvjmklnh8ue,9yi.0;o/-7634",        /* Colemak-DH Orth */
 };
 
 /*
