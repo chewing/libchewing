@@ -67,7 +67,8 @@ const char *const kb_type_str[] = {
     "KB_HANYU_PINYIN",
     "KB_THL_PINYIN",
     "KB_MPS2_PINYIN",
-    "KB_CARPALX"
+    "KB_CARPALX",
+    "KB_COLEMAK_DH_ANSI",
 };
 
 #ifdef WITH_RUST

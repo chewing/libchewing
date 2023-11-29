@@ -41,6 +41,7 @@ enum {
     KB_THL_PINYIN,
     KB_MPS2_PINYIN,
     KB_CARPALX,
+    KB_COLEMAK_DH_ANSI,
     KB_TYPE_NUM
 };
 
