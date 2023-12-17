@@ -1,8 +1,8 @@
-use std::rc::Rc;
+use std::{fmt::Debug, iter::Peekable, rc::Rc};
 
 use chewing::{
     conversion::ChewingConversionEngine,
-    dictionary::{AnyDictionary, LayeredDictionary},
+    dictionary::{AnyDictionary, LayeredDictionary, Phrases},
     editor::{keyboard::AnyKeyboardLayout, Editor},
 };
 use chewing_public::types::{ChewingConfigData, IntervalType, MAX_SELKEY};
@@ -255,6 +255,7 @@ pub struct ChewingContext {
         ChewingConversionEngine<Rc<LayeredDictionary<AnyDictionary, ()>>>,
         Rc<LayeredDictionary<AnyDictionary, ()>>,
     >,
+    pub(crate) cand_iter: Option<Peekable<Phrases<'static>>>,
 }
 
 #[repr(C)]

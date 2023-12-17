@@ -259,7 +259,7 @@ impl SqliteDictionary {
 }
 
 impl Dictionary for SqliteDictionary {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'static> {
         let syllables_bytes = syllables.into_syllables_bytes();
         let mut stmt = self
             .conn
@@ -289,7 +289,7 @@ impl Dictionary for SqliteDictionary {
         )
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -348,7 +348,7 @@ impl DictionaryMut for SqliteDictionary {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         let syllables_bytes = syllables.into_syllables_bytes();
         let mut stmt = self.conn.prepare_cached(
@@ -365,7 +365,7 @@ impl DictionaryMut for SqliteDictionary {
     fn update(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
@@ -491,7 +491,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
         let sort_id = if syllables.len() == 1 {
             self.sort_id += 1;

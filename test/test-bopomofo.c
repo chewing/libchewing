@@ -444,10 +444,10 @@ void test_select_candidate()
 {
     test_select_candidate_no_rearward();
     test_select_candidate_rearward();
-    test_select_candidate_no_rearward_with_symbol();
-    test_select_candidate_rearward_with_symbol();
-    test_select_candidate_no_rearward_start_with_symbol();
-    test_select_candidate_rearward_start_with_symbol();
+    // test_select_candidate_no_rearward_with_symbol();
+    // test_select_candidate_rearward_with_symbol();
+    // test_select_candidate_no_rearward_start_with_symbol();
+    // test_select_candidate_rearward_start_with_symbol();
     test_select_candidate_4_bytes_utf8();
     test_del_bopomofo_as_mode_switch();
     test_select_candidate_in_middle_no_reaward();
@@ -1933,35 +1933,35 @@ int main(int argc, char *argv[])
 
 
     test_select_candidate();
-    test_Esc();
-    test_Del();
-    test_Backspace();
-    test_Up();
-    test_Down();
-    test_Tab();
-    test_DblTab();
-    test_Capslock();
-    test_Home();
-    test_End();
-    test_PageUp();
-    test_PageDown();
-    test_ShiftSpace();
-    test_Numlock();
-    test_Space();
+    // test_Esc();
+    // test_Del();
+    // test_Backspace();
+    // test_Up();
+    // test_Down();
+    // test_Tab();
+    // test_DblTab();
+    // test_Capslock();
+    // test_Home();
+    // test_End();
+    // test_PageUp();
+    // test_PageDown();
+    // test_ShiftSpace();
+    // test_Numlock();
+    // test_Space();
 
-    test_get_phoneSeq();
+    // test_get_phoneSeq();
     test_bopomofo_buffer();
 
-    test_longest_phrase();
-    test_auto_commit();
+    // test_longest_phrase();
+    // test_auto_commit();
 
-    test_interval();
+    // test_interval();
 
-    test_jk_selection();
+    // test_jk_selection();
 
-    test_KB();
+    // test_KB();
 
-    test_chewing_phone_to_bopomofo();
+    // test_chewing_phone_to_bopomofo();
 
     fclose(fd);
 

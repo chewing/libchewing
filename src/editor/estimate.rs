@@ -20,7 +20,7 @@ pub trait UserFreqEstimate {
     /// TODO: doc
     fn now(&self) -> Result<u64, EstimateError>;
     /// TODO: doc
-    fn estimate(&self, phrase: &Phrase<'_>, orig_freq: u32, max_freq: u32) -> u32;
+    fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32;
 }
 
 /// TODO: doc
@@ -99,7 +99,7 @@ impl UserFreqEstimate for SqliteUserFreqEstimate {
         Ok(self.lifetime)
     }
 
-    fn estimate(&self, phrase: &Phrase<'_>, orig_freq: u32, max_freq: u32) -> u32 {
+    fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32 {
         let delta_time = self.lifetime - phrase.last_used().unwrap_or(self.lifetime);
 
         if delta_time < 4000 {

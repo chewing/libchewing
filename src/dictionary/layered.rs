@@ -99,7 +99,7 @@ where
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         let (base, layers) = match self.inner.split_first() {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
@@ -119,7 +119,7 @@ where
         )
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         todo!("entries from all layers")
         // Box::new(std::iter::empty())
     }
@@ -144,7 +144,7 @@ where
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'static>,
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
             if let Some(dict_mut) = dict.as_mut_dict() {
@@ -157,7 +157,7 @@ where
     fn update(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
@@ -184,15 +184,15 @@ where
 }
 
 #[derive(Debug, Eq)]
-struct LookupPhrase<'a>(Phrase<'a>);
+struct LookupPhrase(Phrase);
 
-impl Hash for LookupPhrase<'_> {
+impl Hash for LookupPhrase {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.phrase.hash(state);
     }
 }
 
-impl PartialEq for LookupPhrase<'_> {
+impl PartialEq for LookupPhrase {
     fn eq(&self, other: &Self) -> bool {
         self.0.phrase == other.0.phrase
     }

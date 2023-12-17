@@ -5,6 +5,7 @@ use std::{
     cmp::Ordering,
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
+    iter::Peekable,
     path::Path,
     rc::Rc,
     sync::Arc,
@@ -102,13 +103,13 @@ pub struct DictionaryInfo {
 /// assert!(Phrase::new("測", 100) > Phrase::new("冊", 1));
 /// ```
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Phrase<'a> {
-    phrase: Cow<'a, str>,
+pub struct Phrase {
+    phrase: String,
     freq: u32,
     last_used: Option<u64>,
 }
 
-impl<'a> Phrase<'a> {
+impl Phrase {
     /// Creates a new `Phrase`.
     ///
     /// # Examples
@@ -118,9 +119,9 @@ impl<'a> Phrase<'a> {
     ///
     /// let phrase = Phrase::new("新", 1);
     /// ```
-    pub fn new<S>(phrase: S, freq: u32) -> Phrase<'a>
+    pub fn new<S>(phrase: S, freq: u32) -> Phrase
     where
-        S: Into<Cow<'a, str>>,
+        S: Into<String>,
     {
         Phrase {
             phrase: phrase.into(),
@@ -129,7 +130,7 @@ impl<'a> Phrase<'a> {
         }
     }
     /// Sets the last used time of the phrase.
-    pub fn with_time(mut self, last_used: u64) -> Phrase<'a> {
+    pub fn with_time(mut self, last_used: u64) -> Phrase {
         self.last_used = Some(last_used);
         self
     }
@@ -167,32 +168,11 @@ impl<'a> Phrase<'a> {
     pub fn as_str(&self) -> &str {
         self.phrase.borrow()
     }
-
-    /// Turns the phrase into owned data.
-    ///
-    /// Clones the data if it is not already owned.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use chewing::dictionary::Phrase;
-    ///
-    /// let phrase = Phrase::new("詞", 100);
-    ///
-    /// assert_eq!("詞", phrase.into_owned().as_str());
-    /// ```
-    pub fn into_owned(self) -> Phrase<'static> {
-        Phrase {
-            phrase: Cow::Owned(self.phrase.into_owned()),
-            freq: self.freq,
-            last_used: self.last_used,
-        }
-    }
 }
 
 /// Phrases are compared by their frequency first, followed by their phrase
 /// string.
-impl PartialOrd for Phrase<'_> {
+impl PartialOrd for Phrase {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.freq.partial_cmp(&other.freq) {
             Some(Ordering::Equal) => {}
@@ -204,49 +184,49 @@ impl PartialOrd for Phrase<'_> {
 
 /// Phrases are compared by their frequency first, followed by their phrase
 /// string.
-impl Ord for Phrase<'_> {
+impl Ord for Phrase {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
-impl AsRef<str> for Phrase<'_> {
+impl AsRef<str> for Phrase {
     fn as_ref(&self) -> &str {
         self.as_str()
     }
 }
 
-impl From<Phrase<'_>> for String {
-    fn from(phrase: Phrase<'_>) -> Self {
-        phrase.phrase.into_owned()
+impl From<Phrase> for String {
+    fn from(phrase: Phrase) -> Self {
+        phrase.phrase
     }
 }
 
-impl From<Phrase<'_>> for (String, u32) {
-    fn from(phrase: Phrase<'_>) -> Self {
-        (phrase.phrase.into_owned(), phrase.freq)
+impl From<Phrase> for (String, u32) {
+    fn from(phrase: Phrase) -> Self {
+        (phrase.phrase, phrase.freq)
     }
 }
 
-impl<'a, S> From<(S, u32)> for Phrase<'a>
+impl<S> From<(S, u32)> for Phrase
 where
-    S: Into<Cow<'a, str>>,
+    S: Into<String>,
 {
     fn from(tuple: (S, u32)) -> Self {
         Phrase::new(tuple.0, tuple.1)
     }
 }
 
-impl<'a, S> From<(S, u32, u64)> for Phrase<'a>
+impl<S> From<(S, u32, u64)> for Phrase
 where
-    S: Into<Cow<'a, str>>,
+    S: Into<String>,
 {
     fn from(tuple: (S, u32, u64)) -> Self {
         Phrase::new(tuple.0, tuple.1).with_time(tuple.2)
     }
 }
 
-impl Display for Phrase<'_> {
+impl Display for Phrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.as_str())
     }
@@ -272,10 +252,10 @@ impl Display for Phrase<'_> {
 ///     assert_eq!(100, phrase.freq());
 /// }
 /// ```
-pub type Phrases<'a, 'p> = Box<dyn Iterator<Item = Phrase<'p>> + 'a>;
+pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
 /// TODO: doc
-pub type DictEntries<'a, 'p> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase<'p>)> + 'a>;
+pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
 /// An interface for looking up dictionaries.
 ///
@@ -311,14 +291,14 @@ pub trait Dictionary: Debug {
     /// Returns an iterator to all single syllable words matched by the
     /// syllable, if any. The result should use a stable order each time for the
     /// same input.
-    fn lookup_word(&self, syllable: Syllable) -> Phrases<'_, '_> {
+    fn lookup_word(&self, syllable: Syllable) -> Phrases<'_> {
         self.lookup_phrase(&[syllable])
     }
     /// Returns an iterator to all phrases matched by the syllables, if any. The
     /// result should use a stable order each time for the same input.
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_>;
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_>;
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries<'_, '_>;
+    fn entries(&self) -> DictEntries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
     /// Returns a mutable reference to the dictionary if the underlying
@@ -353,14 +333,14 @@ pub trait DictionaryMut {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'static>,
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError>;
 
     /// TODO: doc
     fn update(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError>;
@@ -377,11 +357,11 @@ impl<T> Dictionary for Box<T>
 where
     T: Dictionary + ?Sized,
 {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         self.as_ref().lookup_phrase(syllables)
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         self.as_ref().entries()
     }
 
@@ -398,11 +378,11 @@ impl<T> Dictionary for Rc<T>
 where
     T: Dictionary + ?Sized,
 {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         self.as_ref().lookup_phrase(syllables)
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         self.as_ref().entries()
     }
 
@@ -419,11 +399,11 @@ impl<T> Dictionary for Arc<T>
 where
     T: Dictionary + ?Sized,
 {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         self.as_ref().lookup_phrase(syllables)
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         self.as_ref().entries()
     }
 
@@ -460,21 +440,25 @@ pub trait DictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
     ) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
 }
 
-impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
-        self.get(syllables)
+impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
+        let syllables = syllables
+            .into_iter()
+            .map(|s| s.as_ref().clone())
+            .collect::<Vec<_>>();
+        self.get(&syllables)
             .cloned()
-            .map(|v| Box::new(v.into_iter()) as Phrases<'_, '_>)
+            .map(|v| Box::new(v.into_iter()) as Phrases<'_>)
             .unwrap_or_else(|| Box::new(std::iter::empty()))
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         Box::new(
             self.iter()
                 .flat_map(|(k, v)| v.iter().map(|phrase| (k.clone(), phrase.clone()))),
@@ -490,11 +474,11 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
     }
 }
 
-impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
+impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase>> {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'static>,
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         let vec = self.entry(syllables.to_vec()).or_default();
         if vec.iter().any(|it| it.as_str() == phrase.as_str()) {
@@ -509,7 +493,7 @@ impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase<'static>>> {
     fn update(
         &mut self,
         _syllables: &[Syllable],
-        _phrase: Phrase<'_>,
+        _phrase: Phrase,
         _user_freq: u32,
         _time: u64,
     ) -> Result<(), DictionaryUpdateError> {
@@ -556,14 +540,14 @@ pub enum AnyDictionary {
 }
 
 impl Dictionary for AnyDictionary {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.lookup_phrase(syllables),
             AnyDictionary::TrieDictionary(dict) => dict.lookup_phrase(syllables),
         }
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries<'_> {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.entries(),
             AnyDictionary::TrieDictionary(dict) => dict.entries(),

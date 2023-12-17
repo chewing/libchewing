@@ -9,6 +9,8 @@ mod dvorak;
 mod qgmlwy;
 mod qwerty;
 
+use core::fmt;
+
 pub use dvorak::Dvorak;
 pub use qgmlwy::Qgmlwy;
 pub use qwerty::Qwerty;
@@ -33,11 +35,18 @@ impl Modifiers {
             capslock: false,
         }
     }
-    pub(crate) const fn shift() -> Modifiers {
+    pub const fn shift() -> Modifiers {
         Modifiers {
             shift: true,
             ctrl: false,
             capslock: false,
+        }
+    }
+    pub const fn capslock() -> Modifiers {
+        Modifiers {
+            shift: false,
+            ctrl: false,
+            capslock: true,
         }
     }
     pub(crate) fn is_none(&self) -> bool {
@@ -151,6 +160,16 @@ pub enum KeyCode {
     PageUp, PageDown, NumLock,
 }
 
+impl KeyCode {
+    pub const fn to_digit(self) -> Option<u8> {
+        match self {
+            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) => Some(code as u8),
+            N0 => Some(0),
+            _ => None,
+        }
+    }
+}
+
 use KeyCode::*;
 use KeyIndex::*;
 
@@ -165,6 +184,22 @@ pub struct KeyEvent {
     pub unicode: char,
     /// TODO: doc
     pub modifiers: Modifiers,
+}
+
+impl fmt::Display for KeyEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "key-{:?}-{:?}-{}-", self.index, self.code, self.unicode)?;
+        if self.modifiers.capslock {
+            write!(f, "C")?;
+        }
+        if self.modifiers.ctrl {
+            write!(f, "c")?;
+        }
+        if self.modifiers.shift {
+            write!(f, "S")?;
+        }
+        Ok(())
+    }
 }
 
 macro_rules! keycode_map {

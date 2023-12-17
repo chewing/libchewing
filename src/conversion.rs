@@ -35,7 +35,7 @@ impl Interval {
 }
 
 /// TODO: doc
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Break(pub usize);
 
 /// A smallest unit of input in the pre-edit buffer.
@@ -62,8 +62,17 @@ impl Symbol {
     }
 }
 
+impl AsRef<Syllable> for Symbol {
+    fn as_ref(&self) -> &Syllable {
+        match self {
+            Symbol::Syllable(s) => s,
+            Symbol::Char(_) => panic!(),
+        }
+    }
+}
+
 /// TODO: doc
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Composition {
     /// TODO: doc
     pub buffer: Vec<Symbol>,

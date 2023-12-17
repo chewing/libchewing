@@ -68,7 +68,7 @@ where
         symbols: &[Symbol],
         selections: &[Interval],
         breaks: &[Break],
-    ) -> Option<Rc<Phrase<'_>>> {
+    ) -> Option<Rc<Phrase>> {
         let end = start + symbols.len();
 
         for br in breaks.iter() {
@@ -123,7 +123,7 @@ where
 
         best_phrase
     }
-    fn find_intervals(&self, comp: &Composition) -> Vec<PossibleInterval<'_>> {
+    fn find_intervals(&self, comp: &Composition) -> Vec<PossibleInterval> {
         let mut intervals = vec![];
         for begin in 0..comp.buffer.len() {
             for end in begin..=comp.buffer.len() {
@@ -159,11 +159,7 @@ where
     /// highest_score[1] = P(0,1)
     /// ...
     /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(
-        &self,
-        len: usize,
-        mut intervals: Vec<PossibleInterval<'_>>,
-    ) -> Vec<Interval> {
+    fn find_best_path(&self, len: usize, mut intervals: Vec<PossibleInterval>) -> Vec<Interval> {
         let mut highest_score = vec![PossiblePath::default(); len + 1];
 
         // The interval shall be sorted by the increase order of end.
@@ -196,8 +192,8 @@ where
         composition: &Composition,
         start: usize,
         target: usize,
-        prefix: Option<PossiblePath<'g>>,
-    ) -> Vec<PossiblePath<'g>> {
+        prefix: Option<PossiblePath>,
+    ) -> Vec<PossiblePath> {
         if start == target {
             return vec![prefix.expect("should have prefix")];
         }
@@ -233,8 +229,8 @@ where
     /// Trim some paths that were part of other paths
     ///
     /// Ported from original C implementation, but the original algorithm seems wrong.
-    fn trim_paths<'a>(&self, paths: Vec<PossiblePath<'a>>) -> Vec<PossiblePath<'a>> {
-        let mut trimmed_paths: Vec<PossiblePath<'_>> = vec![];
+    fn trim_paths(&self, paths: Vec<PossiblePath>) -> Vec<PossiblePath> {
+        let mut trimmed_paths: Vec<PossiblePath> = vec![];
         for candidate in paths.into_iter() {
             trace!("Trim check {}", candidate);
             let mut drop_candidate = false;
@@ -264,14 +260,14 @@ where
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct PossibleInterval<'a> {
+struct PossibleInterval {
     start: usize,
     end: usize,
-    phrase: Rc<Phrase<'a>>,
+    phrase: Rc<Phrase>,
 }
 
-impl PossibleInterval<'_> {
-    fn contains(&self, other: &PossibleInterval<'_>) -> bool {
+impl PossibleInterval {
+    fn contains(&self, other: &PossibleInterval) -> bool {
         self.start <= other.start && self.end >= other.end
     }
     fn len(&self) -> usize {
@@ -279,8 +275,8 @@ impl PossibleInterval<'_> {
     }
 }
 
-impl From<PossibleInterval<'_>> for Interval {
-    fn from(value: PossibleInterval<'_>) -> Self {
+impl From<PossibleInterval> for Interval {
+    fn from(value: PossibleInterval) -> Self {
         Interval {
             start: value.start,
             end: value.end,
@@ -290,11 +286,11 @@ impl From<PossibleInterval<'_>> for Interval {
 }
 
 #[derive(Default, Clone, Eq)]
-struct PossiblePath<'a> {
-    intervals: Vec<PossibleInterval<'a>>,
+struct PossiblePath {
+    intervals: Vec<PossibleInterval>,
 }
 
-impl Debug for PossiblePath<'_> {
+impl Debug for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PossiblePath")
             .field("score()", &self.score())
@@ -303,7 +299,7 @@ impl Debug for PossiblePath<'_> {
     }
 }
 
-impl PossiblePath<'_> {
+impl PossiblePath {
     fn score(&self) -> i32 {
         let mut score = 0;
         score += 1000 * self.rule_largest_sum();
@@ -374,25 +370,25 @@ impl PossiblePath<'_> {
     }
 }
 
-impl PartialEq for PossiblePath<'_> {
+impl PartialEq for PossiblePath {
     fn eq(&self, other: &Self) -> bool {
         self.score() == other.score()
     }
 }
 
-impl PartialOrd for PossiblePath<'_> {
+impl PartialOrd for PossiblePath {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.score().partial_cmp(&other.score())
     }
 }
 
-impl Ord for PossiblePath<'_> {
+impl Ord for PossiblePath {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.score().cmp(&other.score())
     }
 }
 
-impl Display for PossiblePath<'_> {
+impl Display for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "#PossiblePath({}", self.score())?;
         for interval in &self.intervals {
@@ -407,7 +403,7 @@ impl Display for PossiblePath<'_> {
     }
 }
 
-type Graph<'a> = HashMap<(usize, usize), Option<Rc<Phrase<'a>>>>;
+type Graph<'a> = HashMap<(usize, usize), Option<Rc<Phrase>>>;
 
 #[cfg(test)]
 mod tests {

@@ -7,7 +7,7 @@ pub trait CopyToCString {
     fn copy_to(&self, buf: &mut [c_char]);
 }
 
-impl CopyToCString for Phrase<'_> {
+impl CopyToCString for Phrase {
     fn copy_to(&self, buf: &mut [c_char]) {
         let phrase_str = CString::new(self.as_str()).expect("Unable to convert to CString");
         let phrase_bytes = phrase_str.as_bytes_with_nul();
