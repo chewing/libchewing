@@ -166,7 +166,7 @@ mod tests {
         let reader = io::Cursor::new("…\n※\n常用符號=，、。\n");
         let mut sel = SymbolSelector::new(reader).expect("should parse");
 
-        assert_eq!(vec!["…※常用符號"], sel.menu());
+        assert_eq!(vec!["…", "※", "常用符號"], sel.menu());
         assert_eq!(Symbol::Char('…'), sel.select(0).unwrap());
     }
 
@@ -175,9 +175,9 @@ mod tests {
         let reader = io::Cursor::new("…\n※\n常用符號=，、。\n");
         let mut sel = SymbolSelector::new(reader).expect("should parse");
 
-        assert_eq!(vec!["…※常用符號"], sel.menu());
+        assert_eq!(vec!["…", "※", "常用符號"], sel.menu());
         assert_eq!(None, sel.select(2));
-        assert_eq!(vec!["，、。"], sel.menu());
+        assert_eq!(vec!["，", "、", "。"], sel.menu());
         assert_eq!(Symbol::Char('，'), sel.select(0).unwrap());
     }
 }
