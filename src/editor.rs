@@ -317,9 +317,13 @@ impl Entering {
 
         match ev.code {
             Backspace => {
-                editor.com.remove_before_cursor();
+                if editor.com.is_empty() {
+                    Transition::Entering(EditorKeyBehavior::Ignore, self)
+                } else {
+                    editor.com.remove_before_cursor();
 
-                Transition::Entering(EditorKeyBehavior::Absorb, self)
+                    Transition::Entering(EditorKeyBehavior::Absorb, self)
+                }
             }
             Unknown if ev.modifiers.capslock => {
                 editor.switch_language_mode();
