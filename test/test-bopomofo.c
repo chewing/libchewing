@@ -1936,7 +1936,7 @@ int main(int argc, char *argv[])
     test_Esc();
     test_Del();
     test_Backspace();
-    // test_Up();
+    test_Up();
     // test_Down();
     // test_Tab();
     // test_DblTab();

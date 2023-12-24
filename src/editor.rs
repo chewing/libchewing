@@ -365,6 +365,7 @@ impl Entering {
                 editor.com.move_cursor_right();
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
+            Up => Transition::Entering(EditorKeyBehavior::Ignore, self),
             Down => {
                 debug!("buffer {:?}", editor.com);
                 match editor.com.symbol_for_select() {
@@ -549,7 +550,10 @@ impl Selecting {
                 editor.switch_language_mode();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
-            Up => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+            Up => {
+                editor.cancel_selecting();
+                Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+            }
             Down => {
                 match self {
                     Selecting::Phrase(ref mut sel) => {

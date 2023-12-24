@@ -209,7 +209,7 @@ macro_rules! keycode_map {
 }
 
 #[rustfmt::skip]
-static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 80] = keycode_map! {
+static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 81] = keycode_map! {
   b'1' => (N1, Modifiers::new()),
   b'2' => (N2, Modifiers::new()),
   b'3' => (N3, Modifiers::new()),
@@ -291,4 +291,5 @@ static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 80] = keycode_map! {
   b'{' => (LBracket, Modifiers::shift()),
   b'}' => (RBracket, Modifiers::shift()),
   b'+' => (Equal, Modifiers::shift()),
+  b'_' => (Minus, Modifiers::shift()),
 };
