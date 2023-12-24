@@ -342,9 +342,12 @@ impl Entering {
             //     (EditorKeyBehavior::Absorb, &Entering)
             // }
             Del => {
-                editor.com.remove_after_cursor();
-
-                Transition::Entering(EditorKeyBehavior::Absorb, self)
+                if editor.com.is_end_of_buffer() {
+                    Transition::Entering(EditorKeyBehavior::Ignore, self)
+                } else {
+                    editor.com.remove_after_cursor();
+                    Transition::Entering(EditorKeyBehavior::Absorb, self)
+                }
             }
             Home => {
                 editor.com.move_cursor_to_beginning();
@@ -593,6 +596,10 @@ impl Selecting {
             Esc => {
                 editor.cancel_selecting();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+            }
+            Del => {
+                // NB: should be Ignore but return Absorb for backward compat
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             _ => {
                 unreachable!("invalid state")

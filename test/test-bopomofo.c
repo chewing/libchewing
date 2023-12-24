@@ -1934,7 +1934,7 @@ int main(int argc, char *argv[])
 
     test_select_candidate();
     test_Esc();
-    // test_Del();
+    test_Del();
     // test_Backspace();
     // test_Up();
     // test_Down();
