@@ -14,7 +14,6 @@ pub(crate) struct SymbolSelector {
 }
 
 impl SymbolSelector {
-    const MAX: usize = 10;
     pub(crate) fn load<P: AsRef<Path>>(path: P) -> Result<SymbolSelector> {
         let file = File::open(path)?;
         let reader = BufReader::new(file);
@@ -23,14 +22,14 @@ impl SymbolSelector {
     pub(crate) fn new<R: BufRead>(reader: R) -> Result<SymbolSelector> {
         let mut category = Vec::new();
         let mut table = Vec::new();
-        for line in reader.lines().take(Self::MAX) {
+        for line in reader.lines() {
             let line = line?;
             if line.contains('=') {
                 let (cat, tab) = line.split_once('=').expect("at last one separator");
                 category.push((cat.to_owned(), table.len()));
                 table.push(tab.to_owned());
             } else {
-                category.push((line, Self::MAX));
+                category.push((line, usize::MAX));
             }
         }
 
@@ -50,13 +49,10 @@ impl SymbolSelector {
         }
     }
     pub(crate) fn select(&mut self, n: usize) -> Option<Symbol> {
-        if n >= Self::MAX {
-            return None;
-        }
         match self.cursor {
             None => {
                 let cat = &self.category[n];
-                if cat.1 == Self::MAX {
+                if cat.1 == usize::MAX {
                     self.cursor = None;
                     Some(Symbol::Char(cat.0.chars().next().unwrap()))
                 } else {

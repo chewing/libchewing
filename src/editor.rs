@@ -67,7 +67,7 @@ impl Default for EditorOptions {
     fn default() -> Self {
         Self {
             esc_clear_all_buffer: false,
-            space_is_select_key: true,
+            space_is_select_key: false,
             auto_shift_cursor: true,
             phrase_choice_rearward: false,
             auto_learn_phrase: true,
@@ -180,7 +180,12 @@ where
     pub fn list_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);
         match &self.state {
-            Transition::Selecting(_, sub_state) => Ok(sub_state.candidates(&self.dict)),
+            Transition::Selecting(_, sub_state) => Ok(sub_state
+                .candidates(&self.dict)
+                .into_iter()
+                .skip(sub_state.page_no * self.options.candidates_per_page)
+                .take(self.options.candidates_per_page)
+                .collect()),
             _ => Err(()),
         }
     }
@@ -188,6 +193,12 @@ where
         debug!("state {:?}", self.state);
         match &self.state {
             Transition::Selecting(_, sub_state) => Ok(sub_state.page_no),
+            _ => Err(()),
+        }
+    }
+    pub fn total_page(&self) -> Result<usize, ()> {
+        match &self.state {
+            Transition::Selecting(_, sub_state) => Ok(sub_state.total_page(self, &self.dict)),
             _ => Err(()),
         }
     }
@@ -362,6 +373,29 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             Up => Transition::Entering(EditorKeyBehavior::Ignore, self),
+            Space if editor.options.space_is_select_key => {
+                debug!("buffer {:?}", editor.com);
+                match editor.com.symbol_for_select() {
+                    Some(symbol) => match symbol {
+                        Symbol::Syllable(_) => Transition::Selecting(
+                            EditorKeyBehavior::Absorb,
+                            Selecting::new_phrase(editor, self),
+                        ),
+                        Symbol::Char(_) => Transition::Selecting(
+                            EditorKeyBehavior::Absorb,
+                            Selecting::new_special_symbol(symbol, self),
+                        ),
+                    },
+                    None if editor.com.is_empty() => {
+                        match editor.options.character_form {
+                            CharacterForm::Halfwidth => editor.commit_buffer.push(' '),
+                            CharacterForm::Fullwidth => editor.commit_buffer.push('　'),
+                        }
+                        Transition::Entering(EditorKeyBehavior::Absorb, self)
+                    }
+                    None => Transition::Entering(EditorKeyBehavior::Ignore, self),
+                }
+            }
             Down => {
                 debug!("buffer {:?}", editor.com);
                 match editor.com.symbol_for_select() {
@@ -536,7 +570,7 @@ impl Selecting {
         D: Dictionary,
     {
         // FIXME load from data
-        let reader = io::Cursor::new("…\n※\n常用符號=，、。\n");
+        let reader = io::Cursor::new(include_str!("../data/symbols.dat"));
         let sel = SymbolSelector::new(reader).expect("parse symbols table");
         Selecting {
             page_no: 0,
@@ -589,13 +623,28 @@ impl Selecting {
                 editor.cancel_selecting();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
+            Space if editor.options.space_is_select_key => {
+                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                    self.page_no += 1;
+                } else {
+                    self.page_no = 0;
+                    match &mut self.sel {
+                        Selector::Phrase(sel) => {
+                            sel.next(&editor.dict);
+                        }
+                        Selector::Symbol(_sel) => (),
+                        Selector::SpecialSymmbol(_sel) => (),
+                    }
+                }
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
+            }
             Down => {
-                match self.sel {
-                    Selector::Phrase(ref mut sel) => {
+                match &mut self.sel {
+                    Selector::Phrase(sel) => {
                         sel.next(&editor.dict);
                     }
-                    Selector::Symbol(sel) => todo!("next page"),
-                    Selector::SpecialSymmbol(sel) => todo!("next page"),
+                    Selector::Symbol(_sel) => (),
+                    Selector::SpecialSymmbol(_sel) => (),
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
@@ -618,6 +667,7 @@ impl Selecting {
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
+                let offset = self.page_no * editor.options.candidates_per_page + n;
                 match self.sel {
                     Selector::Phrase(ref sel) => {
                         let candidates = sel.candidates(&editor.dict);
@@ -633,14 +683,14 @@ impl Selecting {
                             None => Transition::Selecting(EditorKeyBehavior::Bell, self),
                         }
                     }
-                    Selector::Symbol(ref mut sel) => match sel.select(n) {
+                    Selector::Symbol(ref mut sel) => match sel.select(offset) {
                         Some(s) => {
                             editor.com.insert(s);
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
                         None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
                     },
-                    Selector::SpecialSymmbol(ref sel) => match sel.select(n) {
+                    Selector::SpecialSymmbol(ref sel) => match sel.select(offset) {
                         Some(s) => {
                             editor.com.insert(s);
                             editor.com.remove_before_cursor();

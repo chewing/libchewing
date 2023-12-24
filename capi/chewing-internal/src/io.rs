@@ -27,7 +27,6 @@ use tracing::{debug, level_filters::LevelFilter, warn};
 
 use crate::types::ChewingContext;
 
-#[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn rust_link_io() {}
 
@@ -79,13 +78,13 @@ unsafe fn global_empty_cstr() -> *mut c_char {
     unsafe { EMPTY_STRING_BUFFER.as_mut_ptr().cast() }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_new() -> *mut ChewingContext {
     chewing_new2(null(), null(), None, null_mut())
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_new2(
     syspath: *const c_char,
@@ -140,7 +139,7 @@ pub extern "C" fn chewing_new2(
     Box::into_raw(context)
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
     if !ctx.is_null() {
@@ -154,32 +153,32 @@ pub extern "C" fn chewing_free(ptr: *mut c_void) {
     drop_owned(ptr);
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) -> c_int {
     // todo!()
     1
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_KBType(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_KBString(ctx: &ChewingContext) -> *mut c_char {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
     let cstr = unsafe { CStr::from_ptr(str) };
@@ -188,7 +187,7 @@ pub extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
     layout as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_ChiEngMode(ctx: &mut ChewingContext, mode: c_int) {
     match mode {
@@ -198,7 +197,7 @@ pub extern "C" fn chewing_set_ChiEngMode(ctx: &mut ChewingContext, mode: c_int) 
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
     match ctx.editor.language_mode() {
@@ -207,7 +206,7 @@ pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_ShapeMode(ctx: &mut ChewingContext, mode: c_int) {
     match mode {
@@ -217,7 +216,7 @@ pub extern "C" fn chewing_set_ShapeMode(ctx: &mut ChewingContext, mode: c_int) {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
     match ctx.editor.character_form() {
@@ -235,62 +234,71 @@ pub extern "C" fn chewing_set_candPerPage(ctx: &mut ChewingContext, n: c_int) {
     });
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_candPerPage(ctx: &ChewingContext) -> c_int {
     ctx.editor.editor_options().candidates_per_page as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: &mut ChewingContext, n: c_int) {
     // ctx.editor.options.auto_commit_threshold = n as usize
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: &ChewingContext) -> c_int {
     // ctx.editor.options.auto_commit_threshold as c_int
     -1
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_selKey(ctx: &mut ChewingContext, sel_keys: *const c_int, len: c_int) {
     // todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_selKey(ctx: &ChewingContext) -> *mut c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_addPhraseDirection(ctx: &mut ChewingContext, direction: c_int) {
     // todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_addPhraseDirection(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_spaceAsSelection(ctx: &mut ChewingContext, mode: c_int) {
-    // todo!()
+    ctx.editor.set_editor_options(EditorOptions {
+        space_is_select_key: match mode {
+            0 => false,
+            _ => true,
+        },
+        ..ctx.editor.editor_options()
+    });
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_spaceAsSelection(ctx: &ChewingContext) -> c_int {
-    todo!()
+    match ctx.editor.editor_options().space_is_select_key {
+        true => 1,
+        false => 0,
+    }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_escCleanAllBuf(ctx: &mut ChewingContext, mode: c_int) {
     ctx.editor.set_editor_options(EditorOptions {
@@ -302,7 +310,7 @@ pub extern "C" fn chewing_set_escCleanAllBuf(ctx: &mut ChewingContext, mode: c_i
     });
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_escCleanAllBuf(ctx: &ChewingContext) -> c_int {
     match ctx.editor.editor_options().esc_clear_all_buffer {
@@ -323,19 +331,19 @@ pub extern "C" fn chewing_set_autoShiftCur(ctx: &mut ChewingContext, mode: c_int
     });
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_autoShiftCur(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_easySymbolInput(ctx: &mut ChewingContext, mode: c_int) {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_easySymbolInput(ctx: &ChewingContext) -> c_int {
     todo!()
@@ -353,25 +361,25 @@ pub extern "C" fn chewing_set_phraseChoiceRearward(ctx: &mut ChewingContext, mod
     });
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_phraseChoiceRearward(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_autoLearn(ctx: &mut ChewingContext, mode: c_int) {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_autoLearn(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_phoneSeq(ctx: &ChewingContext) -> *mut c_ushort {
     // let syllable = Box::new(ctx.editor.syllable_buffer().to_u16());
@@ -386,13 +394,13 @@ pub extern "C" fn chewing_get_phoneSeq(ctx: &ChewingContext) -> *mut c_ushort {
     owned_into_raw(Owned::CUShort, ptr)
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_phoneSeqLen(ctx: &ChewingContext) -> c_int {
     ctx.editor.syllable_buffer().to_string().len() as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_logger(
     ctx: &mut ChewingContext,
@@ -402,13 +410,13 @@ pub extern "C" fn chewing_set_logger(
     let _ = tracing_subscriber::fmt::try_init();
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_enumerate(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_has_next(
     ctx: &mut ChewingContext,
@@ -418,7 +426,7 @@ pub extern "C" fn chewing_userphrase_has_next(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_get(
     ctx: &mut ChewingContext,
@@ -430,7 +438,7 @@ pub extern "C" fn chewing_userphrase_get(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_add(
     ctx: &mut ChewingContext,
@@ -440,7 +448,7 @@ pub extern "C" fn chewing_userphrase_add(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_remove(
     ctx: &mut ChewingContext,
@@ -450,7 +458,7 @@ pub extern "C" fn chewing_userphrase_remove(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_lookup(
     ctx: &mut ChewingContext,
@@ -460,62 +468,62 @@ pub extern "C" fn chewing_userphrase_lookup(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_first(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_last(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_has_next(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_has_prev(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_next(ctx: &mut ChewingContext) -> c_int {
     // FIXME selecting next mode
     chewing_handle_Down(ctx)
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_list_prev(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_commit_preedit_buf(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_clean_preedit_buf(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_clean_bopomofo_buf(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_phone_to_bopomofo(
     phone: c_ushort,
@@ -525,7 +533,7 @@ pub extern "C" fn chewing_phone_to_bopomofo(
     1
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Space(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -533,14 +541,14 @@ pub extern "C" fn chewing_handle_Space(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Esc(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Esc));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Enter(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -548,14 +556,14 @@ pub extern "C" fn chewing_handle_Enter(ctx: &mut ChewingContext) -> c_int {
     1
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Del(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Del));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Backspace(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -563,20 +571,20 @@ pub extern "C" fn chewing_handle_Backspace(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Tab(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Tab));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_ShiftLeft(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Left(ctx: &mut ChewingContext) -> c_int {
     let key_event = ctx.keyboard.map(KeyCode::Left);
@@ -584,13 +592,13 @@ pub extern "C" fn chewing_handle_Left(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_ShiftRight(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Right(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -598,28 +606,28 @@ pub extern "C" fn chewing_handle_Right(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Up(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Up));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Home(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Home));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_End(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::End));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_PageUp(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -627,7 +635,7 @@ pub extern "C" fn chewing_handle_PageUp(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_PageDown(ctx: &mut ChewingContext) -> c_int {
     ctx.editor
@@ -635,14 +643,14 @@ pub extern "C" fn chewing_handle_PageDown(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Down(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Down));
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Capslock(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(
@@ -652,7 +660,7 @@ pub extern "C" fn chewing_handle_Capslock(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Default(ctx: &mut ChewingContext, key: c_int) -> c_int {
     ctx.editor
@@ -660,13 +668,13 @@ pub extern "C" fn chewing_handle_Default(ctx: &mut ChewingContext, key: c_int) -
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_CtrlNum(ctx: &mut ChewingContext, key: c_int) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_ShiftSpace(ctx: &mut ChewingContext) -> c_int {
     ctx.editor.process_keyevent(
@@ -676,7 +684,7 @@ pub extern "C" fn chewing_handle_ShiftSpace(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_DblTab(ctx: &mut ChewingContext) -> c_int {
     todo!()
@@ -690,7 +698,7 @@ pub extern "C" fn chewing_handle_Numlock(ctx: &mut ChewingContext, key: c_int) -
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_commit_Check(ctx: &ChewingContext) -> c_int {
     if ctx.editor.display_commit().is_empty() {
@@ -700,7 +708,7 @@ pub extern "C" fn chewing_commit_Check(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_commit_String(ctx: &ChewingContext) -> *mut c_char {
     let buffer = ctx.editor.display_commit();
@@ -711,14 +719,14 @@ pub extern "C" fn chewing_commit_String(ctx: &ChewingContext) -> *mut c_char {
     owned_into_raw(Owned::CString, cstr.into_raw())
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_commit_String_static(ctx: &ChewingContext) -> *const c_char {
     let buffer = ctx.editor.display_commit();
     unsafe { global_cstr(&buffer) }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_buffer_String(ctx: &ChewingContext) -> *mut c_char {
     let buffer = ctx.editor.display();
@@ -729,14 +737,14 @@ pub extern "C" fn chewing_buffer_String(ctx: &ChewingContext) -> *mut c_char {
     owned_into_raw(Owned::CString, cstr.into_raw())
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_buffer_String_static(ctx: &ChewingContext) -> *const c_char {
     let buffer = ctx.editor.display();
     unsafe { global_cstr(&buffer) }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_buffer_Check(ctx: &ChewingContext) -> c_int {
     if ctx.editor.display().len() > 0 {
@@ -746,20 +754,20 @@ pub extern "C" fn chewing_buffer_Check(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_buffer_Len(ctx: &ChewingContext) -> c_int {
     ctx.editor.display().chars().count() as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_bopomofo_String_static(ctx: &ChewingContext) -> *const c_char {
     let syllable = ctx.editor.syllable_buffer().to_string();
     unsafe { global_cstr(&syllable) }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_bopomofo_Check(ctx: &ChewingContext) -> c_int {
     if ctx.editor.entering_syllable() {
@@ -769,34 +777,31 @@ pub extern "C" fn chewing_bopomofo_Check(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cursor_Current(ctx: &ChewingContext) -> c_int {
     ctx.editor.cursor() as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CheckDone(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalPage(ctx: &ChewingContext) -> c_int {
-    let page_size = ctx.editor.editor_options().candidates_per_page;
-    ctx.editor.list_candidates().map_or(0, |candidates| {
-        candidates.len().div_ceil(page_size) as c_int
-    })
+    ctx.editor.total_page().unwrap_or_default() as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_ChoicePerPage(ctx: &ChewingContext) -> c_int {
     ctx.editor.editor_options().candidates_per_page as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
     match ctx.editor.list_candidates() {
@@ -805,26 +810,26 @@ pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
     ctx.editor.current_page_no().unwrap_or_default() as c_int
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
     match ctx.editor.list_candidates() {
         Ok(candidates) => {
             debug!("candidates: {candidates:?}");
-            let phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
+            let mut phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
             ctx.cand_iter = Some(phrases.peekable());
         }
         Err(_) => (),
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_hasNext(ctx: &mut ChewingContext) -> c_int {
     ctx.cand_iter
@@ -833,7 +838,7 @@ pub extern "C" fn chewing_cand_hasNext(ctx: &mut ChewingContext) -> c_int {
         .map_or(0, |_| 1)
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_String(ctx: &mut ChewingContext) -> *mut c_char {
     match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
@@ -848,7 +853,7 @@ pub extern "C" fn chewing_cand_String(ctx: &mut ChewingContext) -> *mut c_char {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_String_static(ctx: &mut ChewingContext) -> *const c_char {
     match ctx.cand_iter.as_mut().unwrap().next() {
@@ -857,7 +862,7 @@ pub extern "C" fn chewing_cand_String_static(ctx: &mut ChewingContext) -> *const
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_string_by_index(
     ctx: &mut ChewingContext,
@@ -880,68 +885,68 @@ pub extern "C" fn chewing_cand_string_by_index_static(
     unsafe { global_empty_cstr() }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_choose_by_index(ctx: &mut ChewingContext, index: c_int) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_open(ctx: &mut ChewingContext) -> c_int {
     // FIXME enter selecting mode
     chewing_handle_Down(ctx)
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_close(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_Enumerate(ctx: &mut ChewingContext) {
     ctx.editor.intervals();
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_hasNext(ctx: &mut ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_Get(ctx: &mut ChewingContext, it: *mut IntervalType) {
     ()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_aux_Check(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_aux_Length(ctx: &ChewingContext) -> c_int {
     0
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_aux_String(ctx: &ChewingContext) -> *mut c_char {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_aux_String_static(ctx: &ChewingContext) -> *const c_char {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: &ChewingContext) -> c_int {
     match ctx.editor.last_key_behavior() {
@@ -950,7 +955,7 @@ pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
     match ctx.editor.last_key_behavior() {
@@ -959,44 +964,44 @@ pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_Total(ctx: &ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_Enumerate(ctx: &mut ChewingContext) {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_hasNext(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_String(ctx: &mut ChewingContext) -> *mut c_char {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_String_static(ctx: &mut ChewingContext) -> *const c_char {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_zuin_Check(ctx: &ChewingContext) -> c_int {
     chewing_bopomofo_Check(ctx) ^ 1
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_zuin_String(ctx: &ChewingContext, zuin_count: *mut c_int) -> *mut c_char {
@@ -1011,21 +1016,21 @@ pub extern "C" fn chewing_zuin_String(ctx: &ChewingContext, zuin_count: *mut c_i
     owned_into_raw(Owned::CString, cstr.into_raw())
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Init(data_path: *const c_char, hash_path: *const c_char) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Terminate() {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Configure(
@@ -1035,14 +1040,14 @@ pub extern "C" fn chewing_Configure(
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_set_hsuSelKeyType(ctx: &mut ChewingContext, mode: c_int) {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_get_hsuSelKeyType(ctx: &mut ChewingContext) -> c_int {

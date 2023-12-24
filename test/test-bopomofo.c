@@ -1947,7 +1947,7 @@ int main(int argc, char *argv[])
     test_PageDown();
     // test_ShiftSpace();
     test_Numlock();
-    // test_Space();
+    test_Space();
 
     // test_get_phoneSeq();
     test_bopomofo_buffer();
