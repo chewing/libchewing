@@ -1943,8 +1943,8 @@ int main(int argc, char *argv[])
     test_Capslock();
     test_Home();
     test_End();
-    // test_PageUp();
-    // test_PageDown();
+    test_PageUp();
+    test_PageDown();
     // test_ShiftSpace();
     test_Numlock();
     // test_Space();

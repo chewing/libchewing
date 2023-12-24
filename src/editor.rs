@@ -16,7 +16,7 @@ use crate::{
     conversion::{
         full_width_symbol_input, special_symbol_input, ConversionEngine, Interval, Symbol,
     },
-    dictionary::{Dictionary, Phrases},
+    dictionary::Dictionary,
     editor::keyboard::KeyCode,
     zhuyin::Syllable,
 };
@@ -57,6 +57,7 @@ pub struct EditorOptions {
     pub phrase_choice_rearward: bool,
     pub auto_learn_phrase: bool,
     pub auto_commit_threshold: usize,
+    pub candidates_per_page: usize,
     pub language_mode: LanguageMode,
     pub character_form: CharacterForm,
     pub user_phrase_add_dir: UserPhraseAddDirection,
@@ -71,6 +72,7 @@ impl Default for EditorOptions {
             phrase_choice_rearward: false,
             auto_learn_phrase: true,
             auto_commit_threshold: 16,
+            candidates_per_page: 10,
             language_mode: LanguageMode::Chinese,
             character_form: CharacterForm::Halfwidth,
             user_phrase_add_dir: UserPhraseAddDirection::Backward,
@@ -101,7 +103,7 @@ pub enum EditorKeyBehavior {
 pub struct Editor<C, D>
 where
     C: ConversionEngine,
-    D: Dictionary + Clone,
+    D: Dictionary,
 {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
@@ -116,7 +118,7 @@ where
 impl<C, D> Editor<C, D>
 where
     C: ConversionEngine,
-    D: Dictionary + Clone,
+    D: Dictionary,
 {
     pub fn new(conv: C, dict: D) -> Editor<C, D> {
         Editor {
@@ -178,11 +180,14 @@ where
     pub fn list_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);
         match &self.state {
-            Transition::Selecting(_, sub_state) => match sub_state {
-                Selecting::Phrase(sel) => Ok(sel.candidates(&self.dict)),
-                Selecting::Symbol(sel) => Ok(sel.menu()),
-                Selecting::SpecialSymmbol(sel) => Ok(sel.menu()),
-            },
+            Transition::Selecting(_, sub_state) => Ok(sub_state.candidates(&self.dict)),
+            _ => Err(()),
+        }
+    }
+    pub fn current_page_no(&self) -> Result<usize, ()> {
+        debug!("state {:?}", self.state);
+        match &self.state {
+            Transition::Selecting(_, sub_state) => Ok(sub_state.page_no),
             _ => Err(()),
         }
     }
@@ -233,7 +238,7 @@ where
 impl<C, D> BasicEditor for Editor<C, D>
 where
     C: ConversionEngine,
-    D: Dictionary + Clone,
+    D: Dictionary,
 {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
         trace!("process_keyevent: {}", &key_event);
@@ -265,15 +270,16 @@ struct Entering;
 struct EnteringSyllable;
 
 #[derive(Debug)]
-enum Selecting {
-    Phrase(PhraseSelector),
-    Symbol(SymbolSelector),
-    SpecialSymmbol(SpecialSymbolSelector),
+struct Selecting {
+    page_no: usize,
+    sel: Selector,
 }
 
 #[derive(Debug)]
-struct SelectingSymbols {
-    sel: SymbolSelector,
+enum Selector {
+    Phrase(PhraseSelector),
+    Symbol(SymbolSelector),
+    SpecialSymmbol(SpecialSymbolSelector),
 }
 
 #[derive(Debug)]
@@ -291,12 +297,6 @@ impl From<Selecting> for Entering {
     }
 }
 
-impl From<SelectingSymbols> for Entering {
-    fn from(_: SelectingSymbols) -> Self {
-        Entering
-    }
-}
-
 impl From<Highlighting> for Entering {
     fn from(_: Highlighting) -> Self {
         Entering
@@ -307,7 +307,7 @@ impl Entering {
     fn next<C, D>(self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         use KeyCode::*;
 
@@ -378,7 +378,7 @@ impl Entering {
                     None => Transition::Entering(EditorKeyBehavior::Ignore, self),
                 }
             }
-            End => {
+            End | PageUp | PageDown => {
                 editor.com.move_cursor_to_end();
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
@@ -468,7 +468,7 @@ impl EnteringSyllable {
     fn next<C, D>(self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         use KeyCode::*;
 
@@ -513,7 +513,7 @@ impl Selecting {
     fn new_phrase<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         // TODO maintain cursor stack in composition
         // let saved_cursor = editor.com.cursor();
@@ -525,26 +525,54 @@ impl Selecting {
         );
         sel.init(editor.cursor(), &editor.dict);
 
-        Selecting::Phrase(sel)
+        Selecting {
+            page_no: 0,
+            sel: Selector::Phrase(sel),
+        }
     }
     fn new_symbol<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         // FIXME load from data
         let reader = io::Cursor::new("…\n※\n常用符號=，、。\n");
         let sel = SymbolSelector::new(reader).expect("parse symbols table");
-        Selecting::Symbol(sel)
+        Selecting {
+            page_no: 0,
+            sel: Selector::Symbol(sel),
+        }
     }
     fn new_special_symbol(symbol: Symbol, _state: Entering) -> Self {
         let sel = SpecialSymbolSelector::new(symbol);
-        Selecting::SpecialSymmbol(sel)
+        Selecting {
+            page_no: 0,
+            sel: Selector::SpecialSymmbol(sel),
+        }
+    }
+    fn candidates<D>(&self, dict: &D) -> Vec<String>
+    where
+        D: Dictionary,
+    {
+        match &self.sel {
+            Selector::Phrase(sel) => sel.candidates(dict),
+            Selector::Symbol(sel) => sel.menu(),
+            Selector::SpecialSymmbol(sel) => sel.menu(),
+        }
+    }
+    fn total_page<C, D>(&self, editor: &Editor<C, D>, dict: &D) -> usize
+    where
+        C: ConversionEngine,
+        D: Dictionary,
+    {
+        self.candidates(dict)
+            .len()
+            .div_ceil(editor.options.candidates_per_page)
     }
     fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         use KeyCode::*;
 
@@ -562,22 +590,36 @@ impl Selecting {
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Down => {
-                match self {
-                    Selecting::Phrase(ref mut sel) => {
+                match self.sel {
+                    Selector::Phrase(ref mut sel) => {
                         sel.next(&editor.dict);
                     }
-                    Selecting::Symbol(sel) => todo!("next page"),
-                    Selecting::SpecialSymmbol(sel) => todo!("next page"),
+                    Selector::Symbol(sel) => todo!("next page"),
+                    Selector::SpecialSymmbol(sel) => todo!("next page"),
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
-            PageUp => Transition::Selecting(EditorKeyBehavior::Absorb, self),
-            PageDown => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+            PageUp => {
+                if self.page_no > 0 {
+                    self.page_no -= 1;
+                } else {
+                    self.page_no = self.total_page(editor, &editor.dict) - 1;
+                }
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
+            }
+            PageDown => {
+                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                    self.page_no += 1;
+                } else {
+                    self.page_no = 0;
+                }
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
+            }
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
-                match self {
-                    Selecting::Phrase(ref sel) => {
+                match self.sel {
+                    Selector::Phrase(ref sel) => {
                         let candidates = sel.candidates(&editor.dict);
                         match candidates.get(n) {
                             Some(phrase) => {
@@ -591,14 +633,14 @@ impl Selecting {
                             None => Transition::Selecting(EditorKeyBehavior::Bell, self),
                         }
                     }
-                    Selecting::Symbol(ref mut sel) => match sel.select(n) {
+                    Selector::Symbol(ref mut sel) => match sel.select(n) {
                         Some(s) => {
                             editor.com.insert(s);
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
                         None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
                     },
-                    Selecting::SpecialSymmbol(ref sel) => match sel.select(n) {
+                    Selector::SpecialSymmbol(ref sel) => match sel.select(n) {
                         Some(s) => {
                             editor.com.insert(s);
                             editor.com.remove_before_cursor();
@@ -627,7 +669,7 @@ impl Highlighting {
     fn next<C, D>(self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
-        D: Dictionary + Clone,
+        D: Dictionary,
     {
         use KeyCode::*;
 

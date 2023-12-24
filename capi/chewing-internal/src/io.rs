@@ -226,16 +226,19 @@ pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
     }
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_candPerPage(ctx: &mut ChewingContext, n: c_int) {
-    // todo!()
+    ctx.editor.set_editor_options(EditorOptions {
+        candidates_per_page: n as usize,
+        ..ctx.editor.editor_options()
+    });
 }
 
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_candPerPage(ctx: &ChewingContext) -> c_int {
-    todo!()
+    ctx.editor.editor_options().candidates_per_page as c_int
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -781,15 +784,16 @@ pub extern "C" fn chewing_cand_CheckDone(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalPage(ctx: &ChewingContext) -> c_int {
-    ctx.editor
-        .list_candidates()
-        .map_or(0, |candidates| (candidates.len() / 10) as c_int)
+    let page_size = ctx.editor.editor_options().candidates_per_page;
+    ctx.editor.list_candidates().map_or(0, |candidates| {
+        candidates.len().div_ceil(page_size) as c_int
+    })
 }
 
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_ChoicePerPage(ctx: &ChewingContext) -> c_int {
-    todo!()
+    ctx.editor.editor_options().candidates_per_page as c_int
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -804,7 +808,7 @@ pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
-    0
+    ctx.editor.current_page_no().unwrap_or_default() as c_int
 }
 
 #[tracing::instrument(skip_all, ret)]
