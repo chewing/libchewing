@@ -373,6 +373,13 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             Up => Transition::Entering(EditorKeyBehavior::Ignore, self),
+            Space if ev.modifiers.shift => {
+                editor.options.character_form = match editor.options.character_form {
+                    CharacterForm::Halfwidth => CharacterForm::Fullwidth,
+                    CharacterForm::Fullwidth => CharacterForm::Halfwidth,
+                };
+                Transition::Entering(EditorKeyBehavior::Absorb, self)
+            }
             Space if editor.options.space_is_select_key => {
                 debug!("buffer {:?}", editor.com);
                 match editor.com.symbol_for_select() {
@@ -459,6 +466,28 @@ impl Entering {
                     EditorKeyBehavior::Absorb,
                     Selecting::new_symbol(editor, Entering),
                 ),
+                LanguageMode::Chinese if ev.code == Space => {
+                    match editor.options.character_form {
+                        CharacterForm::Halfwidth => {
+                            if editor.com.is_empty() {
+                                editor.commit_buffer.clear();
+                                editor.commit_buffer.push(ev.unicode);
+                            } else {
+                                editor.com.push(Symbol::Char(ev.unicode));
+                            }
+                        }
+                        CharacterForm::Fullwidth => {
+                            let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                            if editor.com.is_empty() {
+                                editor.commit_buffer.clear();
+                                editor.commit_buffer.push(char_);
+                            } else {
+                                editor.com.push(Symbol::Char(char_));
+                            }
+                        }
+                    }
+                    Transition::Entering(EditorKeyBehavior::Commit, self)
+                }
                 LanguageMode::Chinese => match editor.syl.key_press(ev) {
                     KeyBehavior::Absorb => {
                         Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self.into())

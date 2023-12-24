@@ -1945,7 +1945,7 @@ int main(int argc, char *argv[])
     test_End();
     test_PageUp();
     test_PageDown();
-    // test_ShiftSpace();
+    test_ShiftSpace();
     test_Numlock();
     test_Space();
 
