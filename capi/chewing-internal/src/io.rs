@@ -573,9 +573,7 @@ pub extern "C" fn chewing_handle_ShiftLeft(ctx: &mut ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Left(ctx: &mut ChewingContext) -> c_int {
-    let key_event = ctx
-        .keyboard
-        .map_with_mod(KeyCode::Left, Modifiers::default());
+    let key_event = ctx.keyboard.map(KeyCode::Left);
     ctx.editor.process_keyevent(key_event);
     0
 }
@@ -779,7 +777,9 @@ pub extern "C" fn chewing_cand_CheckDone(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalPage(ctx: &ChewingContext) -> c_int {
-    (ctx.editor.list_candidates().unwrap().len() / 10) as c_int
+    ctx.editor
+        .list_candidates()
+        .map_or(0, |candidates| (candidates.len() / 10) as c_int)
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -918,7 +918,7 @@ pub extern "C" fn chewing_aux_Check(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_aux_Length(ctx: &ChewingContext) -> c_int {
-    todo!()
+    0
 }
 
 #[tracing::instrument(skip_all, ret)]
