@@ -6,21 +6,17 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub(crate) struct PhraseSelector<D> {
+pub(crate) struct PhraseSelector {
     begin: usize,
     end: usize,
     forward_select: bool,
     buffer: Vec<Symbol>,
     selections: Vec<Interval>,
     breaks: Vec<Break>,
-    dict: D,
 }
 
-impl<D> PhraseSelector<D>
-where
-    D: Dictionary,
-{
-    pub(crate) fn new(forward_select: bool, com: Composition, dict: D) -> PhraseSelector<D> {
+impl PhraseSelector {
+    pub(crate) fn new(forward_select: bool, com: Composition) -> PhraseSelector {
         PhraseSelector {
             begin: 0,
             end: com.buffer.len(),
@@ -28,11 +24,10 @@ where
             buffer: com.buffer,
             selections: com.selections,
             breaks: com.breaks,
-            dict,
         }
     }
 
-    pub(crate) fn init(&mut self, cursor: usize) {
+    pub(crate) fn init<D: Dictionary>(&mut self, cursor: usize, dict: &D) {
         if self.forward_select {
             self.begin = cursor;
             self.end = self.next_break_point(cursor);
@@ -42,7 +37,7 @@ where
         }
         loop {
             let syllables = &self.buffer[self.begin..self.end];
-            if self.dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(syllables).next().is_some() {
                 break;
             }
             if self.forward_select {
@@ -53,7 +48,7 @@ where
         }
     }
 
-    pub(crate) fn next(&mut self) {
+    pub(crate) fn next<D: Dictionary>(&mut self, dict: &D) {
         loop {
             if self.forward_select {
                 self.end -= 1;
@@ -67,7 +62,7 @@ where
                 }
             }
             let syllables = &self.buffer[self.begin..self.end];
-            if self.dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(syllables).next().is_some() {
                 break;
             }
         }
@@ -78,9 +73,10 @@ where
             if self.buffer.len() == cursor {
                 break;
             }
-            if self.buffer[cursor].is_syllable() {
-                cursor += 1;
+            if !self.buffer[cursor].is_syllable() {
+                break;
             }
+            cursor += 1;
         }
         cursor
     }
@@ -100,15 +96,19 @@ where
             if self.breaks.binary_search(&Break(cursor)).is_ok() {
                 break;
             }
-            if self.buffer[cursor].is_syllable() {
-                cursor -= 1;
+            cursor -= 1;
+            if !self.buffer[cursor].is_syllable() {
+                cursor += 1;
+                break;
             }
         }
         cursor
     }
 
-    pub(crate) fn candidates(&self) -> Phrases<'_> {
-        self.dict.lookup_phrase(&self.buffer[self.begin..self.end])
+    pub(crate) fn candidates<D: Dictionary>(&self, dict: &D) -> Vec<String> {
+        dict.lookup_phrase(&self.buffer[self.begin..self.end])
+            .map(|phrase| phrase.into())
+            .collect()
     }
 
     pub(crate) fn interval(&self, phrase: String) -> Interval {

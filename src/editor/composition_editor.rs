@@ -73,16 +73,20 @@ impl CompositionEditor {
         self.inner.buffer.push(symbol);
         self.cursor += 1;
     }
-    pub(crate) fn is_cursor_on_syllable(&self) -> bool {
+    pub(crate) fn insert(&mut self, s: Symbol) {
+        self.inner.buffer.insert(self.cursor, s);
+        // FIXME shift selections and breaks
+    }
+    pub(crate) fn symbol_for_select(&self) -> Option<Symbol> {
         let cursor = if self.cursor == self.inner.buffer.len() {
             self.cursor.saturating_sub(1)
         } else {
             self.cursor
         };
         if cursor == self.inner.buffer.len() {
-            false
+            None
         } else {
-            self.inner.buffer[cursor].is_syllable()
+            Some(self.inner.buffer[cursor])
         }
     }
     pub(crate) fn select(&mut self, interval: Interval) {

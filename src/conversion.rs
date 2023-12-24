@@ -39,7 +39,7 @@ impl Interval {
 pub struct Break(pub usize);
 
 /// A smallest unit of input in the pre-edit buffer.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Symbol {
     /// Chinese syllable
     Syllable(Syllable),
@@ -58,6 +58,18 @@ impl Symbol {
         match self {
             Symbol::Syllable(syllable) => *syllable,
             Symbol::Char(_) => panic!(),
+        }
+    }
+    pub(crate) fn is_char(&self) -> bool {
+        match self {
+            Symbol::Syllable(_) => false,
+            Symbol::Char(_) => true,
+        }
+    }
+    pub(crate) fn as_char(&self) -> char {
+        match self {
+            Symbol::Syllable(_) => panic!(),
+            Symbol::Char(c) => *c,
         }
     }
 }

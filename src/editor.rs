@@ -6,7 +6,7 @@ pub mod keyboard;
 mod selection;
 pub mod syllable;
 
-use std::{cmp::min, mem};
+use std::{io, mem};
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
 pub use syllable::SyllableEditor;
@@ -24,7 +24,10 @@ use crate::{
 use self::{
     composition_editor::CompositionEditor,
     keyboard::KeyEvent,
-    selection::phrase::PhraseSelector,
+    selection::{
+        phrase::PhraseSelector,
+        symbol::{SpecialSymbolSelector, SymbolSelector},
+    },
     syllable::{KeyBehavior, Standard},
 };
 
@@ -104,7 +107,6 @@ where
     syl: Box<dyn SyllableEditor>,
     conv: C,
     dict: D,
-    sel: Option<PhraseSelector<D>>,
     options: EditorOptions,
     state: Transition,
 
@@ -122,7 +124,6 @@ where
             syl: Box::new(Standard::new()),
             conv,
             dict,
-            sel: None,
             options: EditorOptions::default(),
             state: Transition::Entering(EditorKeyBehavior::Ignore, Entering),
             commit_buffer: String::new(),
@@ -178,11 +179,15 @@ where
     pub fn syllable_buffer(&self) -> Syllable {
         self.syl.read()
     }
-    pub fn list_candidates(&self) -> Result<Phrases<'_>, ()> {
+    pub fn list_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);
-        match &self.sel {
-            Some(sel) => Ok(sel.candidates()),
-            None => Err(()),
+        match &self.state {
+            Transition::Selecting(_, sub_state) => match sub_state {
+                Selecting::Phrase(sel) => Ok(sel.candidates(&self.dict)),
+                Selecting::Symbol(sel) => Ok(sel.menu()),
+                Selecting::SpecialSymmbol(sel) => Ok(sel.menu()),
+            },
+            _ => Err(()),
         }
     }
     pub fn switch_character_form(&mut self) {
@@ -261,7 +266,16 @@ struct Entering;
 struct EnteringSyllable;
 
 #[derive(Debug)]
-struct Selecting;
+enum Selecting {
+    Phrase(PhraseSelector),
+    Symbol(SymbolSelector),
+    SpecialSymmbol(SpecialSymbolSelector),
+}
+
+#[derive(Debug)]
+struct SelectingSymbols {
+    sel: SymbolSelector,
+}
 
 #[derive(Debug)]
 struct Highlighting;
@@ -274,6 +288,12 @@ impl From<EnteringSyllable> for Entering {
 
 impl From<Selecting> for Entering {
     fn from(_: Selecting) -> Self {
+        Entering
+    }
+}
+
+impl From<SelectingSymbols> for Entering {
+    fn from(_: SelectingSymbols) -> Self {
         Entering
     }
 }
@@ -307,7 +327,7 @@ impl Entering {
                     editor.start_hanin_symbol_input();
                     return Transition::Selecting(
                         EditorKeyBehavior::Absorb,
-                        Selecting::from(editor, self),
+                        Selecting::new_phrase(editor, self),
                     );
                 }
 
@@ -331,11 +351,25 @@ impl Entering {
                 editor.com.move_cursor_left();
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
+            Right => {
+                editor.com.move_cursor_right();
+                Transition::Entering(EditorKeyBehavior::Absorb, self)
+            }
             Down => {
-                if !editor.com.is_cursor_on_syllable() {
-                    return Transition::Entering(EditorKeyBehavior::Ignore, self);
+                debug!("buffer {:?}", editor.com);
+                match editor.com.symbol_for_select() {
+                    Some(symbol) => match symbol {
+                        Symbol::Syllable(_) => Transition::Selecting(
+                            EditorKeyBehavior::Absorb,
+                            Selecting::new_phrase(editor, self),
+                        ),
+                        Symbol::Char(_) => Transition::Selecting(
+                            EditorKeyBehavior::Absorb,
+                            Selecting::new_special_symbol(symbol, self),
+                        ),
+                    },
+                    None => Transition::Entering(EditorKeyBehavior::Ignore, self),
                 }
-                Transition::Selecting(EditorKeyBehavior::Absorb, Selecting::from(editor, self))
             }
             End => {
                 editor.com.move_cursor_to_end();
@@ -362,6 +396,10 @@ impl Entering {
                         None => Transition::Entering(EditorKeyBehavior::Ignore, self),
                     }
                 }
+                LanguageMode::Chinese if ev.code == Grave => Transition::Selecting(
+                    EditorKeyBehavior::Absorb,
+                    Selecting::new_symbol(editor, Entering),
+                ),
                 LanguageMode::Chinese => match editor.syl.key_press(ev) {
                     KeyBehavior::Absorb => {
                         Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self.into())
@@ -444,7 +482,7 @@ impl EnteringSyllable {
 }
 
 impl Selecting {
-    fn from<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
+    fn new_phrase<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
     where
         C: ConversionEngine,
         D: Dictionary + Clone,
@@ -456,12 +494,24 @@ impl Selecting {
         let mut sel = PhraseSelector::new(
             !editor.options.phrase_choice_rearward,
             editor.com.inner.clone(),
-            editor.dict.clone(),
         );
-        sel.init(editor.cursor());
-        editor.sel = Some(sel);
+        sel.init(editor.cursor(), &editor.dict);
 
-        Selecting
+        Selecting::Phrase(sel)
+    }
+    fn new_symbol<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
+    where
+        C: ConversionEngine,
+        D: Dictionary + Clone,
+    {
+        // FIXME load from data
+        let reader = io::Cursor::new("…\n※\n常用符號=，、。\n");
+        let sel = SymbolSelector::new(reader).expect("parse symbols table");
+        Selecting::Symbol(sel)
+    }
+    fn new_special_symbol(symbol: Symbol, _state: Entering) -> Self {
+        let sel = SpecialSymbolSelector::new(symbol);
+        Selecting::SpecialSymmbol(sel)
     }
     fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
@@ -481,7 +531,13 @@ impl Selecting {
             }
             Up => Transition::Selecting(EditorKeyBehavior::Absorb, self),
             Down => {
-                editor.sel.as_mut().expect("should have selector").next();
+                match self {
+                    Selecting::Phrase(ref mut sel) => {
+                        sel.next(&editor.dict);
+                    }
+                    Selecting::Symbol(sel) => todo!("next page"),
+                    Selecting::SpecialSymmbol(sel) => todo!("next page"),
+                }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             PageUp => Transition::Selecting(EditorKeyBehavior::Absorb, self),
@@ -489,18 +545,36 @@ impl Selecting {
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
-                let sel = editor.sel.as_ref().expect("should have selector");
-                let mut phrases = sel.candidates();
-                match phrases.nth(n) {
-                    Some(phrase) => {
-                        editor.com.select(sel.interval(phrase.into()));
-                        debug!("Auto Shift {}", editor.options.auto_shift_cursor);
-                        if editor.options.auto_shift_cursor {
-                            editor.com.move_cursor_right();
+                match self {
+                    Selecting::Phrase(ref sel) => {
+                        let candidates = sel.candidates(&editor.dict);
+                        match candidates.get(n) {
+                            Some(phrase) => {
+                                editor.com.select(sel.interval(phrase.into()));
+                                debug!("Auto Shift {}", editor.options.auto_shift_cursor);
+                                if editor.options.auto_shift_cursor {
+                                    editor.com.move_cursor_right();
+                                }
+                                Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                            }
+                            None => Transition::Selecting(EditorKeyBehavior::Bell, self),
                         }
-                        Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                     }
-                    None => Transition::Selecting(EditorKeyBehavior::Bell, self),
+                    Selecting::Symbol(ref mut sel) => match sel.select(n) {
+                        Some(s) => {
+                            editor.com.insert(s);
+                            Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                        }
+                        None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+                    },
+                    Selecting::SpecialSymmbol(ref sel) => match sel.select(n) {
+                        Some(s) => {
+                            editor.com.insert(s);
+                            editor.com.remove_before_cursor();
+                            Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                        }
+                        None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+                    },
                 }
             }
             Esc => {

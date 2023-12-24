@@ -779,7 +779,7 @@ pub extern "C" fn chewing_cand_CheckDone(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalPage(ctx: &ChewingContext) -> c_int {
-    (ctx.editor.list_candidates().unwrap().count() / 10) as c_int
+    (ctx.editor.list_candidates().unwrap().len() / 10) as c_int
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -791,7 +791,10 @@ pub extern "C" fn chewing_cand_ChoicePerPage(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
-    ctx.editor.list_candidates().unwrap().count() as c_int
+    match ctx.editor.list_candidates() {
+        Ok(candidates) => candidates.len() as c_int,
+        Err(_) => 0,
+    }
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -803,10 +806,14 @@ pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
-    let candidates: Vec<Phrase> = ctx.editor.list_candidates().unwrap().collect();
-    debug!("candidates: {candidates:?}");
-    let phrases: Phrases<'static> = Box::new(candidates.into_iter());
-    ctx.cand_iter = Some(phrases.peekable());
+    match ctx.editor.list_candidates() {
+        Ok(candidates) => {
+            debug!("candidates: {candidates:?}");
+            let phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
+            ctx.cand_iter = Some(phrases.peekable());
+        }
+        Err(_) => (),
+    }
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -857,8 +864,8 @@ pub extern "C" fn chewing_cand_string_by_index_static(
     ctx: &mut ChewingContext,
     index: c_int,
 ) -> *const c_char {
-    if let Ok(mut phrases) = ctx.editor.list_candidates() {
-        if let Some(phrase) = phrases.nth(index as usize) {
+    if let Ok(phrases) = ctx.editor.list_candidates() {
+        if let Some(phrase) = phrases.get(index as usize) {
             return unsafe { global_cstr(&String::from(phrase)) };
         }
     }

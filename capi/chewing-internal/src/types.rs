@@ -2,11 +2,11 @@ use std::{fmt::Debug, iter::Peekable, rc::Rc};
 
 use chewing::{
     conversion::ChewingConversionEngine,
-    dictionary::{AnyDictionary, LayeredDictionary, Phrases},
+    dictionary::{AnyDictionary, LayeredDictionary},
     editor::{keyboard::AnyKeyboardLayout, Editor},
 };
-use chewing_public::types::{ChewingConfigData, IntervalType, MAX_SELKEY};
-use libc::{c_char, c_int, c_long, c_uint, c_void};
+use chewing_public::types::IntervalType;
+use libc::{c_char, c_int, c_uint, c_void};
 
 // use crate::userphrase::UserphraseDbAndEstimate;
 
@@ -255,7 +255,7 @@ pub struct ChewingContext {
         ChewingConversionEngine<Rc<LayeredDictionary<AnyDictionary, ()>>>,
         Rc<LayeredDictionary<AnyDictionary, ()>>,
     >,
-    pub(crate) cand_iter: Option<Peekable<Phrases<'static>>>,
+    pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
 }
 
 #[repr(C)]

@@ -444,10 +444,10 @@ void test_select_candidate()
 {
     test_select_candidate_no_rearward();
     test_select_candidate_rearward();
-    // test_select_candidate_no_rearward_with_symbol();
-    // test_select_candidate_rearward_with_symbol();
-    // test_select_candidate_no_rearward_start_with_symbol();
-    // test_select_candidate_rearward_start_with_symbol();
+    test_select_candidate_no_rearward_with_symbol();
+    test_select_candidate_rearward_with_symbol();
+    test_select_candidate_no_rearward_start_with_symbol();
+    test_select_candidate_rearward_start_with_symbol();
     test_select_candidate_4_bytes_utf8();
     test_del_bopomofo_as_mode_switch();
     test_select_candidate_in_middle_no_reaward();
