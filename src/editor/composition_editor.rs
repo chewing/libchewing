@@ -45,6 +45,12 @@ impl CompositionEditor {
     pub(crate) fn is_empty(&self) -> bool {
         self.inner.buffer.is_empty()
     }
+    pub(crate) fn clear(&mut self) {
+        self.inner.buffer.clear();
+        self.inner.selections.clear();
+        self.inner.breaks.clear();
+        self.cursor = 0;
+    }
     pub(crate) fn remove_after_cursor(&mut self) {
         if self.cursor == self.inner.buffer.len() {
             return;

@@ -49,7 +49,7 @@ pub enum UserPhraseAddDirection {
     Backward,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct EditorOptions {
     pub esc_clear_all_buffer: bool,
     pub space_is_select_key: bool,
@@ -65,7 +65,7 @@ pub struct EditorOptions {
 impl Default for EditorOptions {
     fn default() -> Self {
         Self {
-            esc_clear_all_buffer: true,
+            esc_clear_all_buffer: false,
             space_is_select_key: true,
             auto_shift_cursor: true,
             phrase_choice_rearward: false,
@@ -142,7 +142,7 @@ where
     pub fn set_character_form(&mut self, charactor_form: CharacterForm) {
         self.options.character_form = charactor_form;
     }
-    fn last_key_behavior(&self) -> EditorKeyBehavior {
+    pub fn last_key_behavior(&self) -> EditorKeyBehavior {
         match self.state {
             Transition::Entering(ekb, _) => ekb,
             Transition::EnteringSyllable(ekb, _) => ekb,
@@ -207,6 +207,9 @@ where
             },
             ..self.options
         };
+    }
+    pub fn editor_options(&self) -> EditorOptions {
+        self.options
     }
     pub fn set_editor_options(&mut self, options: EditorOptions) {
         self.options = options;
@@ -385,7 +388,14 @@ impl Entering {
                 editor.commit_buffer.push_str(&output);
                 Transition::Entering(EditorKeyBehavior::Commit, self)
             }
-            Esc => Transition::Entering(EditorKeyBehavior::Absorb, self),
+            Esc => {
+                if editor.options.esc_clear_all_buffer && !editor.com.is_empty() {
+                    editor.com.clear();
+                    Transition::Entering(EditorKeyBehavior::Absorb, self)
+                } else {
+                    Transition::Entering(EditorKeyBehavior::Ignore, self)
+                }
+            }
             _ => match editor.options.language_mode {
                 LanguageMode::Chinese if ev.modifiers.shift => {
                     match special_symbol_input(ev.unicode) {
@@ -464,6 +474,9 @@ impl EnteringSyllable {
             }
             Esc => {
                 editor.syl.clear();
+                if editor.options.esc_clear_all_buffer {
+                    editor.com.clear();
+                }
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             _ => match editor.syl.key_press(ev) {

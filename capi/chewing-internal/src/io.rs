@@ -15,8 +15,8 @@ use chewing::{
     },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::KeyboardLayoutCompat,
-        BasicEditor, CharacterForm, Editor, EditorOptions, LanguageMode,
+        syllable::{KeyBehavior, KeyboardLayoutCompat},
+        BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
     },
     zhuyin::Syllable,
 };
@@ -295,26 +295,29 @@ pub extern "C" fn chewing_set_escCleanAllBuf(ctx: &mut ChewingContext, mode: c_i
             0 => false,
             _ => true,
         },
-        ..Default::default()
+        ..ctx.editor.editor_options()
     });
 }
 
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_escCleanAllBuf(ctx: &ChewingContext) -> c_int {
-    todo!()
+    match ctx.editor.editor_options().esc_clear_all_buffer {
+        true => 1,
+        false => 0,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_autoShiftCur(ctx: &mut ChewingContext, mode: c_int) {
-    // ctx.editor.set_editor_options(EditorOptions {
-    //     auto_shift_cursor: match mode {
-    //         0 => false,
-    //         _ => true,
-    //     },
-    //     ..Default::default()
-    // });
+    ctx.editor.set_editor_options(EditorOptions {
+        auto_shift_cursor: match mode {
+            0 => false,
+            _ => true,
+        },
+        ..ctx.editor.editor_options()
+    });
 }
 
 #[tracing::instrument(skip_all, ret)]
@@ -819,16 +822,16 @@ pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_hasNext(ctx: &mut ChewingContext) -> c_int {
-    match ctx.cand_iter.as_mut().unwrap().peek() {
-        Some(_) => 1,
-        None => 0,
-    }
+    ctx.cand_iter
+        .as_mut()
+        .and_then(|it| it.peek())
+        .map_or(0, |_| 1)
 }
 
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_String(ctx: &mut ChewingContext) -> *mut c_char {
-    match ctx.cand_iter.as_mut().unwrap().next() {
+    match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
         Some(phrase) => {
             let cstr = match CString::new(String::from(phrase)) {
                 Ok(cstr) => cstr,
@@ -936,13 +939,19 @@ pub extern "C" fn chewing_aux_String_static(ctx: &ChewingContext) -> *const c_ch
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: &ChewingContext) -> c_int {
-    0
+    match ctx.editor.last_key_behavior() {
+        EditorKeyBehavior::Ignore => 1,
+        _ => 0,
+    }
 }
 
 #[tracing::instrument(skip_all, ret)]
 #[no_mangle]
 pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
-    0
+    match ctx.editor.last_key_behavior() {
+        EditorKeyBehavior::Absorb => 1,
+        _ => 0,
+    }
 }
 
 #[tracing::instrument(skip_all, ret)]
