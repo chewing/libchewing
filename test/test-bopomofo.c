@@ -1940,9 +1940,9 @@ int main(int argc, char *argv[])
     test_Down();
     // test_Tab();
     // test_DblTab();
-    // test_Capslock();
+    test_Capslock();
     test_Home();
-    // test_End();
+    test_End();
     // test_PageUp();
     // test_PageDown();
     // test_ShiftSpace();
