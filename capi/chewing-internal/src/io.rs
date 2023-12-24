@@ -679,10 +679,11 @@ pub extern "C" fn chewing_handle_DblTab(ctx: &mut ChewingContext) -> c_int {
     todo!()
 }
 
-#[tracing::instrument(skip_all, ret)]
+#[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_Numlock(ctx: &mut ChewingContext, key: c_int) -> c_int {
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::N0));
+    ctx.editor
+        .process_keyevent(ctx.keyboard.map_ascii_numlock(key as u8));
     0
 }
 

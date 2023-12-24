@@ -168,10 +168,6 @@ where
             .map(|interval| interval.phrase)
             .collect::<String>()
     }
-    // pub fn commit(&mut self) {
-    //     let output = self.display();
-    //     self.core_mut().commit_buffer.push_str(&output);
-    // }
     // TODO: decide the return type
     pub fn display_commit(&self) -> &str {
         &self.commit_buffer
@@ -387,6 +383,7 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             Enter => {
+                editor.commit_buffer.clear();
                 let output = editor
                     .conv
                     .convert(editor.com.as_ref())
@@ -394,6 +391,7 @@ impl Entering {
                     .map(|interval| interval.phrase)
                     .collect::<String>();
                 editor.commit_buffer.push_str(&output);
+                editor.com.clear();
                 Transition::Entering(EditorKeyBehavior::Commit, self)
             }
             Esc => {
@@ -403,6 +401,15 @@ impl Entering {
                 } else {
                     Transition::Entering(EditorKeyBehavior::Ignore, self)
                 }
+            }
+            _ if ev.modifiers.numlock => {
+                if editor.com.is_empty() {
+                    editor.commit_buffer.clear();
+                    editor.commit_buffer.push(ev.unicode);
+                } else {
+                    editor.com.push(Symbol::Char(ev.unicode));
+                }
+                Transition::Entering(EditorKeyBehavior::Commit, self)
             }
             _ => match editor.options.language_mode {
                 LanguageMode::Chinese if ev.modifiers.shift => {
@@ -566,7 +573,7 @@ impl Selecting {
             }
             PageUp => Transition::Selecting(EditorKeyBehavior::Absorb, self),
             PageDown => Transition::Selecting(EditorKeyBehavior::Absorb, self),
-            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) => {
+            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
                 match self {
@@ -725,14 +732,7 @@ mod tests {
             keyboard.map(KeyCode::N4),
             // TODO: capslock probably shouldn't be a modifier
             // Toggle english mode
-            keyboard.map_with_mod(
-                KeyCode::Unknown,
-                Modifiers {
-                    shift: false,
-                    ctrl: false,
-                    capslock: true,
-                },
-            ),
+            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
             keyboard.map(KeyCode::Z),
         ];
 
@@ -768,24 +768,10 @@ mod tests {
 
         let keys = [
             // Switch to english mode
-            keyboard.map_with_mod(
-                KeyCode::Unknown,
-                Modifiers {
-                    shift: false,
-                    ctrl: false,
-                    capslock: true,
-                },
-            ),
+            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
             keyboard.map(KeyCode::X),
             // Switch to chinese mode
-            keyboard.map_with_mod(
-                KeyCode::Unknown,
-                Modifiers {
-                    shift: false,
-                    ctrl: false,
-                    capslock: true,
-                },
-            ),
+            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
             keyboard.map(KeyCode::H),
             keyboard.map(KeyCode::K),
             keyboard.map(KeyCode::N4),
@@ -860,11 +846,7 @@ mod tests {
         let steps = [
             (
                 KeyCode::Unknown,
-                Modifiers {
-                    shift: false,
-                    ctrl: false,
-                    capslock: true,
-                },
+                Modifiers::capslock(),
                 EditorKeyBehavior::Absorb,
                 "",
                 "",

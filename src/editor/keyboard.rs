@@ -26,6 +26,8 @@ pub struct Modifiers {
     pub ctrl: bool,
     /// The caps lock toggle is on
     pub capslock: bool,
+    /// The num lock toggle is on
+    pub numlock: bool,
 }
 impl Modifiers {
     pub(crate) const fn new() -> Modifiers {
@@ -33,6 +35,7 @@ impl Modifiers {
             shift: false,
             ctrl: false,
             capslock: false,
+            numlock: false,
         }
     }
     pub const fn shift() -> Modifiers {
@@ -40,6 +43,7 @@ impl Modifiers {
             shift: true,
             ctrl: false,
             capslock: false,
+            numlock: false,
         }
     }
     pub const fn capslock() -> Modifiers {
@@ -47,6 +51,15 @@ impl Modifiers {
             shift: false,
             ctrl: false,
             capslock: true,
+            numlock: false,
+        }
+    }
+    pub const fn numlock() -> Modifiers {
+        Modifiers {
+            shift: false,
+            ctrl: false,
+            capslock: false,
+            numlock: true,
         }
     }
     pub(crate) fn is_none(&self) -> bool {
@@ -88,6 +101,14 @@ pub trait KeyboardLayout {
     /// Map the ascii to keycode then to a key event
     fn map_ascii(&self, ascii: u8) -> KeyEvent {
         let item = KEYCODE_MAP
+            .iter()
+            .find(|item| item.0 == ascii)
+            .map_or((Unknown, Modifiers::default()), |item| item.1);
+        self.map_with_mod(item.0, item.1)
+    }
+    /// Map the ascii to keycode then to a key event with numlock on
+    fn map_ascii_numlock(&self, ascii: u8) -> KeyEvent {
+        let item = NUMLOCK_MAP
             .iter()
             .find(|item| item.0 == ascii)
             .map_or((Unknown, Modifiers::default()), |item| item.1);
@@ -163,8 +184,7 @@ pub enum KeyCode {
 impl KeyCode {
     pub const fn to_digit(self) -> Option<u8> {
         match self {
-            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) => Some(code as u8),
-            N0 => Some(0),
+            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => Some(code as u8),
             _ => None,
         }
     }
@@ -292,4 +312,24 @@ static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 81] = keycode_map! {
   b'}' => (RBracket, Modifiers::shift()),
   b'+' => (Equal, Modifiers::shift()),
   b'_' => (Minus, Modifiers::shift()),
+};
+
+// FIXME should we map to real numlock keycode?
+#[rustfmt::skip]
+static NUMLOCK_MAP: [(u8, (KeyCode, Modifiers)); 15] = keycode_map! {
+  b'1' => (N1, Modifiers::numlock()),
+  b'2' => (N2, Modifiers::numlock()),
+  b'3' => (N3, Modifiers::numlock()),
+  b'4' => (N4, Modifiers::numlock()),
+  b'5' => (N5, Modifiers::numlock()),
+  b'6' => (N6, Modifiers::numlock()),
+  b'7' => (N7, Modifiers::numlock()),
+  b'8' => (N8, Modifiers::numlock()),
+  b'9' => (N9, Modifiers::numlock()),
+  b'0' => (N0, Modifiers::numlock()),
+  b'+' => (Equal, Modifiers { shift: true, ctrl: false, capslock: false, numlock: true }),
+  b'-' => (Minus, Modifiers::numlock()),
+  b'*' => (N8, Modifiers { shift: true, ctrl: false, capslock: false, numlock: true }),
+  b'/' => (Slash, Modifiers::numlock()),
+  b'.' => (Dot, Modifiers::numlock()),
 };

@@ -1946,7 +1946,7 @@ int main(int argc, char *argv[])
     // test_PageUp();
     // test_PageDown();
     // test_ShiftSpace();
-    // test_Numlock();
+    test_Numlock();
     // test_Space();
 
     // test_get_phoneSeq();
