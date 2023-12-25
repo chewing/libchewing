@@ -697,6 +697,53 @@ impl Selecting {
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
+            J => {
+                let begin = match &self.sel {
+                    Selector::Phrase(sel) => sel.begin(),
+                    Selector::Symbol(_) => editor.com.cursor(),
+                    Selector::SpecialSymmbol(_) => editor.com.cursor(),
+                };
+                editor.com.move_cursor(begin.saturating_sub(1));
+                match editor.com.symbol().expect("should have symbol") {
+                    Symbol::Syllable(_) => {
+                        let mut sel = PhraseSelector::new(
+                            !editor.options.phrase_choice_rearward,
+                            editor.com.inner.clone(),
+                        );
+                        sel.init(editor.cursor(), &editor.dict);
+                        self.sel = Selector::Phrase(sel);
+                    }
+                    sym @ Symbol::Char(_) => {
+                        let sel = SpecialSymbolSelector::new(*sym);
+                        self.sel = Selector::SpecialSymmbol(sel);
+                    }
+                }
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
+            }
+            K => {
+                let begin = match &self.sel {
+                    Selector::Phrase(sel) => sel.begin(),
+                    Selector::Symbol(_) => editor.com.cursor(),
+                    Selector::SpecialSymmbol(_) => editor.com.cursor(),
+                };
+                editor.com.move_cursor(begin.saturating_add(1));
+                editor.com.clamp_cursor();
+                match editor.com.symbol().expect("should have symbol") {
+                    Symbol::Syllable(_) => {
+                        let mut sel = PhraseSelector::new(
+                            !editor.options.phrase_choice_rearward,
+                            editor.com.inner.clone(),
+                        );
+                        sel.init(editor.cursor(), &editor.dict);
+                        self.sel = Selector::Phrase(sel);
+                    }
+                    sym @ Symbol::Char(_) => {
+                        let sel = SpecialSymbolSelector::new(*sym);
+                        self.sel = Selector::SpecialSymmbol(sel);
+                    }
+                }
+                Transition::Selecting(EditorKeyBehavior::Absorb, self)
+            }
             PageUp => {
                 if self.page_no > 0 {
                     self.page_no -= 1;

@@ -31,6 +31,9 @@ impl CompositionEditor {
             self.cursor = self.cursor.saturating_sub(1);
         }
     }
+    pub(crate) fn move_cursor(&mut self, cursor: usize) {
+        self.cursor = min(cursor, self.inner.buffer.len());
+    }
     /// Get the current symbol under the cursor
     ///
     /// The cursor always indicates the gap between symbols.

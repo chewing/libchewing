@@ -56,6 +56,10 @@ impl PhraseSelector {
         }
     }
 
+    pub(crate) fn begin(&self) -> usize {
+        self.begin
+    }
+
     pub(crate) fn next<D: Dictionary>(&mut self, dict: &D) {
         loop {
             if self.forward_select {

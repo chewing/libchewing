@@ -1957,7 +1957,7 @@ int main(int argc, char *argv[])
 
     test_interval();
 
-    // test_jk_selection();
+    test_jk_selection();
 
     // test_KB();
 
