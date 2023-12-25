@@ -9,7 +9,7 @@ use std::{
 };
 
 use chewing::{
-    conversion::ChewingConversionEngine,
+    conversion::{ChewingConversionEngine, Symbol},
     dictionary::{
         LayeredDictionary, Phrase, Phrases, SystemDictionaryLoader, UserDictionaryLoader,
     },
@@ -32,7 +32,7 @@ pub extern "C" fn rust_link_io() {}
 
 enum Owned {
     CString,
-    CUShort,
+    CUShortSlice(usize),
 }
 
 static mut OWNED: OnceLock<BTreeMap<*mut c_void, Owned>> = OnceLock::new();
@@ -54,7 +54,9 @@ fn drop_owned(ptr: *mut c_void) {
             if let Some(owned) = map.get(&ptr) {
                 match owned {
                     Owned::CString => drop(unsafe { CString::from_raw(ptr.cast()) }),
-                    Owned::CUShort => drop(unsafe { Box::from_raw(ptr.cast::<c_ushort>()) }),
+                    Owned::CUShortSlice(len) => {
+                        drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) })
+                    }
                 }
             }
         }
@@ -156,6 +158,7 @@ pub extern "C" fn chewing_free(ptr: *mut c_void) {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
+    ctx.editor.clear();
     0
 }
 
@@ -383,21 +386,28 @@ pub extern "C" fn chewing_get_autoLearn(ctx: &ChewingContext) -> c_int {
 #[no_mangle]
 pub extern "C" fn chewing_get_phoneSeq(ctx: &ChewingContext) -> *mut c_ushort {
     // let syllable = Box::new(ctx.editor.syllable_buffer().to_u16());
-    let syllable = Box::new(
-        Syllable::builder()
-            .insert(chewing::zhuyin::Bopomofo::A)
-            .unwrap()
-            .build()
-            .to_u16(),
-    );
-    let ptr = Box::into_raw(syllable);
-    owned_into_raw(Owned::CUShort, ptr)
+    let syllables: Vec<_> = ctx
+        .editor
+        .symbols()
+        .into_iter()
+        .cloned()
+        .filter(Symbol::is_syllable)
+        .map(|sym| sym.as_syllable().to_u16())
+        .collect();
+    let len = syllables.len();
+    let ptr = Box::into_raw(syllables.into_boxed_slice());
+    owned_into_raw(Owned::CUShortSlice(len), ptr.cast())
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_phoneSeqLen(ctx: &ChewingContext) -> c_int {
-    ctx.editor.syllable_buffer().to_string().len() as c_int
+    ctx.editor
+        .symbols()
+        .into_iter()
+        .cloned()
+        .filter(Symbol::is_syllable)
+        .count() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]

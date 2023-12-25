@@ -1949,7 +1949,7 @@ int main(int argc, char *argv[])
     test_Numlock();
     test_Space();
 
-    // test_get_phoneSeq();
+    test_get_phoneSeq();
     test_bopomofo_buffer();
 
     // test_longest_phrase();

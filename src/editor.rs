@@ -131,6 +131,11 @@ where
             commit_buffer: String::new(),
         }
     }
+    pub fn clear(&mut self) {
+        self.com.clear();
+        self.syl.clear();
+        self.commit_buffer.clear();
+    }
     pub fn language_mode(&self) -> LanguageMode {
         self.options.language_mode
     }
@@ -176,6 +181,12 @@ where
     }
     pub fn syllable_buffer(&self) -> Syllable {
         self.syl.read()
+    }
+    pub fn symbols(&self) -> &[Symbol] {
+        &self.com.inner.buffer
+    }
+    pub fn len(&self) -> usize {
+        self.com.inner.buffer.len()
     }
     pub fn list_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);

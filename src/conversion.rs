@@ -48,25 +48,25 @@ pub enum Symbol {
 }
 
 impl Symbol {
-    pub(crate) fn is_syllable(&self) -> bool {
+    pub fn is_syllable(&self) -> bool {
         match self {
             Symbol::Syllable(_) => true,
             Symbol::Char(_) => false,
         }
     }
-    pub(crate) fn as_syllable(&self) -> Syllable {
+    pub fn as_syllable(&self) -> Syllable {
         match self {
             Symbol::Syllable(syllable) => *syllable,
             Symbol::Char(_) => panic!(),
         }
     }
-    pub(crate) fn is_char(&self) -> bool {
+    pub fn is_char(&self) -> bool {
         match self {
             Symbol::Syllable(_) => false,
             Symbol::Char(_) => true,
         }
     }
-    pub(crate) fn as_char(&self) -> char {
+    pub fn as_char(&self) -> char {
         match self {
             Symbol::Syllable(_) => panic!(),
             Symbol::Char(c) => *c,
