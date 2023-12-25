@@ -9,7 +9,7 @@ use std::{
 };
 
 use chewing::{
-    conversion::{ChewingConversionEngine, Symbol},
+    conversion::{ChewingConversionEngine, Interval, Symbol},
     dictionary::{
         LayeredDictionary, Phrase, Phrases, SystemDictionaryLoader, UserDictionaryLoader,
     },
@@ -137,6 +137,7 @@ pub extern "C" fn chewing_new2(
         keyboard,
         editor,
         cand_iter: None,
+        interval_iter: None,
     });
     Box::into_raw(context)
 }
@@ -917,19 +918,34 @@ pub extern "C" fn chewing_cand_close(ctx: &mut ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_Enumerate(ctx: &mut ChewingContext) {
-    ctx.editor.intervals();
+    ctx.interval_iter =
+        Some((Box::new(ctx.editor.intervals()) as Box<dyn Iterator<Item = Interval>>).peekable());
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_hasNext(ctx: &mut ChewingContext) -> c_int {
-    0
+    ctx.interval_iter.as_mut().map_or(0, |it| match it.peek() {
+        Some(_) => 1,
+        None => 0,
+    })
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_Get(ctx: &mut ChewingContext, it: *mut IntervalType) {
-    ()
+    let it = unsafe {
+        match it.as_mut() {
+            Some(it) => it,
+            None => return,
+        }
+    };
+    if let Some(iter) = &mut ctx.interval_iter {
+        if let Some(interval) = iter.next() {
+            it.from = interval.start as i32;
+            it.to = interval.end as i32;
+        }
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]

@@ -1,7 +1,7 @@
 use std::{fmt::Debug, iter::Peekable, rc::Rc};
 
 use chewing::{
-    conversion::ChewingConversionEngine,
+    conversion::{ChewingConversionEngine, Interval},
     dictionary::{AnyDictionary, LayeredDictionary},
     editor::{keyboard::AnyKeyboardLayout, Editor},
 };
@@ -256,6 +256,7 @@ pub struct ChewingContext {
         Rc<LayeredDictionary<AnyDictionary, ()>>,
     >,
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
+    pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
 }
 
 #[repr(C)]
