@@ -255,6 +255,26 @@ where
     fn start_hanin_symbol_input(&mut self) {
         todo!()
     }
+    fn try_auto_commit(&mut self) {
+        let intervals: Vec<_> = self.intervals().collect();
+        let len: usize = intervals.iter().map(|it| it.len()).sum();
+        if len <= self.options.auto_commit_threshold {
+            return;
+        }
+
+        let mut remove = 0;
+        self.commit_buffer.clear();
+        for it in intervals {
+            self.commit_buffer.push_str(&it.phrase);
+            remove += it.len();
+            if len - remove <= self.options.auto_commit_threshold {
+                break;
+            }
+        }
+        self.com.inner.buffer.splice(0..remove, []);
+        self.state = Transition::Entering(EditorKeyBehavior::Commit, Entering);
+        // FIXME fix selections and breaks
+    }
 }
 
 impl<C, D> BasicEditor for Editor<C, D>
@@ -272,6 +292,9 @@ where
             Transition::Highlighting(_, s) => s.next(self, key_event),
             Transition::Invalid => Transition::Invalid,
         };
+        if self.last_key_behavior() == EditorKeyBehavior::Absorb {
+            self.try_auto_commit();
+        }
         self.last_key_behavior()
     }
 }

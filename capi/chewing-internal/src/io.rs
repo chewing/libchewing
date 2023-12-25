@@ -247,14 +247,16 @@ pub extern "C" fn chewing_get_candPerPage(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: &mut ChewingContext, n: c_int) {
-    // ctx.editor.options.auto_commit_threshold = n as usize
+    ctx.editor.set_editor_options(EditorOptions {
+        auto_commit_threshold: n as usize,
+        ..ctx.editor.editor_options()
+    });
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: &ChewingContext) -> c_int {
-    // ctx.editor.options.auto_commit_threshold as c_int
-    -1
+    ctx.editor.editor_options().auto_commit_threshold as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]

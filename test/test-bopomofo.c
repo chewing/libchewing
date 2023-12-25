@@ -1953,7 +1953,7 @@ int main(int argc, char *argv[])
     test_bopomofo_buffer();
 
     test_longest_phrase();
-    // test_auto_commit();
+    test_auto_commit();
 
     test_interval();
 
