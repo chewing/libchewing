@@ -9,6 +9,7 @@ use crate::conversion::{Composition, Interval, Symbol};
 pub struct CompositionEditor {
     /// TODO
     cursor: usize,
+    cursor_stack: Vec<usize>,
     /// TODO
     pub(crate) inner: Composition,
 }
@@ -16,6 +17,19 @@ pub struct CompositionEditor {
 impl CompositionEditor {
     pub(crate) fn cursor(&self) -> usize {
         self.cursor
+    }
+    pub(crate) fn push_cursor(&mut self) {
+        self.cursor_stack.push(self.cursor)
+    }
+    pub(crate) fn pop_cursor(&mut self) {
+        if let Some(cursor) = self.cursor_stack.pop() {
+            self.cursor = cursor;
+        }
+    }
+    pub(crate) fn clamp_cursor(&mut self) {
+        if self.cursor == self.inner.buffer.len() {
+            self.cursor = self.cursor.saturating_sub(1);
+        }
     }
     /// Get the current symbol under the cursor
     ///
@@ -84,6 +98,11 @@ impl CompositionEditor {
     }
     pub(crate) fn insert(&mut self, s: Symbol) {
         self.inner.buffer.insert(self.cursor, s);
+        self.cursor += 1;
+        // FIXME shift selections and breaks
+    }
+    pub(crate) fn replace(&mut self, s: Symbol) {
+        self.inner.buffer[self.cursor] = s;
         // FIXME shift selections and breaks
     }
     pub(crate) fn symbol_for_select(&self) -> Option<Symbol> {

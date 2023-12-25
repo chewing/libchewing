@@ -68,7 +68,7 @@ where
         symbols: &[Symbol],
         selections: &[Interval],
         breaks: &[Break],
-    ) -> Option<Rc<Phrase>> {
+    ) -> Option<PossiblePhrase> {
         let end = start + symbols.len();
 
         for br in breaks.iter() {
@@ -79,10 +79,8 @@ where
             }
         }
 
-        if symbols.len() == 1 {
-            if let Some(Symbol::Char(ch)) = symbols.first() {
-                return Some(Rc::new(Phrase::new(ch.to_string(), 0)));
-            }
+        if symbols.len() == 1 && symbols[0].is_char() {
+            return Some(symbols[0].into());
         }
 
         let syllables = symbols
@@ -117,7 +115,8 @@ where
             // then pick the one with highest frequency.
             if best_phrase.is_none() || phrase.freq() > max_freq {
                 max_freq = phrase.freq();
-                best_phrase = Some(Rc::new(phrase));
+                // TODO can we allocate less?
+                best_phrase = Some(phrase.into());
             }
         }
 
@@ -259,11 +258,50 @@ where
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum PossiblePhrase {
+    Symbol(Symbol),
+    Phrase(Rc<Phrase>),
+}
+
+impl PossiblePhrase {
+    fn to_string(&self) -> String {
+        match self {
+            PossiblePhrase::Symbol(sym) => sym.as_char().to_string(),
+            PossiblePhrase::Phrase(phrase) => phrase.to_string(),
+        }
+    }
+    fn freq(&self) -> u32 {
+        match self {
+            PossiblePhrase::Symbol(_) => 0,
+            PossiblePhrase::Phrase(phrase) => phrase.freq(),
+        }
+    }
+}
+
+impl Display for PossiblePhrase {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.to_string())
+    }
+}
+
+impl From<Phrase> for PossiblePhrase {
+    fn from(value: Phrase) -> Self {
+        PossiblePhrase::Phrase(value.into())
+    }
+}
+
+impl From<Symbol> for PossiblePhrase {
+    fn from(value: Symbol) -> Self {
+        PossiblePhrase::Symbol(value)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct PossibleInterval {
     start: usize,
     end: usize,
-    phrase: Rc<Phrase>,
+    phrase: PossiblePhrase,
 }
 
 impl PossibleInterval {
@@ -280,6 +318,10 @@ impl From<PossibleInterval> for Interval {
         Interval {
             start: value.start,
             end: value.end,
+            is_phrase: match value.phrase {
+                PossiblePhrase::Symbol(_) => false,
+                PossiblePhrase::Phrase(_) => true,
+            },
             phrase: value.phrase.to_string(),
         }
     }
@@ -403,7 +445,7 @@ impl Display for PossiblePath {
     }
 }
 
-type Graph<'a> = HashMap<(usize, usize), Option<Rc<Phrase>>>;
+type Graph<'a> = HashMap<(usize, usize), Option<PossiblePhrase>>;
 
 #[cfg(test)]
 mod tests {
@@ -496,16 +538,19 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 2,
+                    is_phrase: true,
                     phrase: "國民".to_string()
                 },
                 Interval {
                     start: 2,
                     end: 4,
+                    is_phrase: true,
                     phrase: "大會".to_string()
                 },
                 Interval {
                     start: 4,
                     end: 6,
+                    is_phrase: true,
                     phrase: "代表".to_string()
                 },
             ],
@@ -534,26 +579,31 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 1,
+                    is_phrase: true,
                     phrase: "國".to_string()
                 },
                 Interval {
                     start: 1,
                     end: 2,
+                    is_phrase: true,
                     phrase: "民".to_string()
                 },
                 Interval {
                     start: 2,
                     end: 4,
+                    is_phrase: true,
                     phrase: "大會".to_string()
                 },
                 Interval {
                     start: 4,
                     end: 5,
+                    is_phrase: true,
                     phrase: "代".to_string()
                 },
                 Interval {
                     start: 5,
                     end: 6,
+                    is_phrase: true,
                     phrase: "表".to_string()
                 },
             ],
@@ -577,6 +627,7 @@ mod tests {
             selections: vec![Interval {
                 start: 4,
                 end: 6,
+                is_phrase: true,
                 phrase: "戴錶".to_string(),
             }],
             breaks: vec![],
@@ -586,16 +637,19 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 2,
+                    is_phrase: true,
                     phrase: "國民".to_string()
                 },
                 Interval {
                     start: 2,
                     end: 4,
+                    is_phrase: true,
                     phrase: "大會".to_string()
                 },
                 Interval {
                     start: 4,
                     end: 6,
+                    is_phrase: true,
                     phrase: "戴錶".to_string()
                 },
             ],
@@ -616,6 +670,7 @@ mod tests {
             selections: vec![Interval {
                 start: 1,
                 end: 3,
+                is_phrase: true,
                 phrase: "酷音".to_string(),
             }],
             breaks: vec![],
@@ -624,6 +679,7 @@ mod tests {
             vec![Interval {
                 start: 0,
                 end: 3,
+                is_phrase: true,
                 phrase: "新酷音".to_string()
             },],
             engine.convert(&composition)
@@ -649,11 +705,13 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 2,
+                    is_phrase: true,
                     phrase: "測試".to_string()
                 },
                 Interval {
                     start: 2,
                     end: 4,
+                    is_phrase: true,
                     phrase: "一下".to_string()
                 }
             ],
@@ -664,11 +722,13 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 3,
+                    is_phrase: true,
                     phrase: "測試儀".to_string()
                 },
                 Interval {
                     start: 3,
                     end: 4,
+                    is_phrase: true,
                     phrase: "下".to_string()
                 }
             ],
@@ -679,11 +739,13 @@ mod tests {
                 Interval {
                     start: 0,
                     end: 2,
+                    is_phrase: true,
                     phrase: "測試".to_string()
                 },
                 Interval {
                     start: 2,
                     end: 4,
+                    is_phrase: true,
                     phrase: "一下".to_string()
                 }
             ],

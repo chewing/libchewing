@@ -15,6 +15,8 @@ pub struct Interval {
     pub start: usize,
     /// TODO: doc
     pub end: usize,
+    // TODO doc, fix alignment
+    pub is_phrase: bool,
     /// TODO: doc
     pub phrase: String,
 }

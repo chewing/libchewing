@@ -119,6 +119,7 @@ impl PhraseSelector {
         Interval {
             start: self.begin,
             end: self.end,
+            is_phrase: true,
             phrase,
         }
     }
@@ -248,6 +249,7 @@ mod tests {
             selections: vec![Interval {
                 start: 0,
                 end: 1,
+                is_phrase: true,
                 phrase: "冊".to_string(),
             }],
             breaks: vec![],

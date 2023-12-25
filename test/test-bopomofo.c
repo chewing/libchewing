@@ -1955,7 +1955,7 @@ int main(int argc, char *argv[])
     test_longest_phrase();
     // test_auto_commit();
 
-    // test_interval();
+    test_interval();
 
     // test_jk_selection();
 

@@ -401,7 +401,7 @@ impl Entering {
                         ),
                         Symbol::Char(_) => Transition::Selecting(
                             EditorKeyBehavior::Absorb,
-                            Selecting::new_special_symbol(symbol, self),
+                            Selecting::new_special_symbol(editor, symbol, self),
                         ),
                     },
                     None if editor.com.is_empty() => {
@@ -424,7 +424,7 @@ impl Entering {
                         ),
                         Symbol::Char(_) => Transition::Selecting(
                             EditorKeyBehavior::Absorb,
-                            Selecting::new_special_symbol(symbol, self),
+                            Selecting::new_special_symbol(editor, symbol, self),
                         ),
                     },
                     None => Transition::Entering(EditorKeyBehavior::Ignore, self),
@@ -589,9 +589,8 @@ impl Selecting {
         C: ConversionEngine,
         D: Dictionary,
     {
-        // TODO maintain cursor stack in composition
-        // let saved_cursor = editor.com.cursor();
-        // debug!("saved_cursor {}", saved_cursor);
+        editor.com.push_cursor();
+        editor.com.clamp_cursor();
 
         let mut sel = PhraseSelector::new(
             !editor.options.phrase_choice_rearward,
@@ -617,7 +616,14 @@ impl Selecting {
             sel: Selector::Symbol(sel),
         }
     }
-    fn new_special_symbol(symbol: Symbol, _state: Entering) -> Self {
+    fn new_special_symbol<C, D>(editor: &mut Editor<C, D>, symbol: Symbol, _state: Entering) -> Self
+    where
+        C: ConversionEngine,
+        D: Dictionary,
+    {
+        editor.com.push_cursor();
+        editor.com.clamp_cursor();
+
         let sel = SpecialSymbolSelector::new(symbol);
         Selecting {
             page_no: 0,
@@ -653,14 +659,17 @@ impl Selecting {
         match ev.code {
             Backspace => {
                 editor.cancel_selecting();
+                editor.com.pop_cursor();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Unknown if ev.modifiers.capslock => {
                 editor.switch_language_mode();
+                editor.com.pop_cursor();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Up => {
                 editor.cancel_selecting();
+                editor.com.pop_cursor();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Space if editor.options.space_is_select_key => {
@@ -715,6 +724,7 @@ impl Selecting {
                             Some(phrase) => {
                                 editor.com.select(sel.interval(phrase.into()));
                                 debug!("Auto Shift {}", editor.options.auto_shift_cursor);
+                                editor.com.pop_cursor();
                                 if editor.options.auto_shift_cursor {
                                     editor.com.move_cursor_right();
                                 }
@@ -726,14 +736,15 @@ impl Selecting {
                     Selector::Symbol(ref mut sel) => match sel.select(offset) {
                         Some(s) => {
                             editor.com.insert(s);
+                            editor.com.pop_cursor();
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
                         None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
                     },
                     Selector::SpecialSymmbol(ref sel) => match sel.select(offset) {
                         Some(s) => {
-                            editor.com.insert(s);
-                            editor.com.remove_before_cursor();
+                            editor.com.replace(s);
+                            editor.com.pop_cursor();
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
                         None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
@@ -742,6 +753,7 @@ impl Selecting {
             }
             Esc => {
                 editor.cancel_selecting();
+                editor.com.pop_cursor();
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Del => {

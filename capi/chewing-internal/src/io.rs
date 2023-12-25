@@ -918,8 +918,11 @@ pub extern "C" fn chewing_cand_close(ctx: &mut ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_interval_Enumerate(ctx: &mut ChewingContext) {
-    ctx.interval_iter =
-        Some((Box::new(ctx.editor.intervals()) as Box<dyn Iterator<Item = Interval>>).peekable());
+    ctx.interval_iter = Some(
+        (Box::new(ctx.editor.intervals().filter(|it| it.is_phrase))
+            as Box<dyn Iterator<Item = Interval>>)
+            .peekable(),
+    );
 }
 
 #[tracing::instrument(skip(ctx), ret)]
