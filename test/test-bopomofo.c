@@ -1961,7 +1961,7 @@ int main(int argc, char *argv[])
 
     // test_KB();
 
-    // test_chewing_phone_to_bopomofo();
+    test_chewing_phone_to_bopomofo();
 
     fclose(fd);
 

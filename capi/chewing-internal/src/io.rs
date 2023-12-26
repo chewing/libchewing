@@ -4,6 +4,7 @@ use std::{
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
     ptr::{null, null_mut},
     rc::Rc,
+    slice,
     sync::OnceLock,
     u8,
 };
@@ -543,7 +544,16 @@ pub extern "C" fn chewing_phone_to_bopomofo(
     buf: *mut c_char,
     len: c_ushort,
 ) -> c_int {
-    1
+    let syl_str = match Syllable::try_from(phone) {
+        Ok(s) => s.to_string(),
+        Err(_) => return -1,
+    };
+    if !buf.is_null() && len as usize >= (syl_str.len() + 1) {
+        let buf = unsafe { slice::from_raw_parts_mut(buf.cast(), len as usize) };
+        buf[0..syl_str.len()].copy_from_slice(syl_str.as_bytes());
+        buf[syl_str.len()] = 0;
+    }
+    (syl_str.len() + 1) as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
