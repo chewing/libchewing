@@ -112,6 +112,7 @@ where
     options: EditorOptions,
     state: Transition,
 
+    nth_conversion: usize,
     commit_buffer: String,
 }
 
@@ -128,6 +129,7 @@ where
             dict,
             options: EditorOptions::default(),
             state: Transition::Entering(EditorKeyBehavior::Ignore, Entering),
+            nth_conversion: 0,
             commit_buffer: String::new(),
         }
     }
@@ -170,13 +172,20 @@ where
     pub fn cursor(&self) -> usize {
         self.com.cursor()
     }
+    fn conversion(&self) -> Vec<Interval> {
+        if self.nth_conversion == 0 {
+            self.conv.convert(self.com.as_ref())
+        } else {
+            self.conv
+                .convert_next(self.com.as_ref(), self.nth_conversion)
+        }
+    }
     pub fn intervals(&self) -> impl Iterator<Item = Interval> {
-        self.conv.convert(self.com.as_ref()).into_iter()
+        self.conversion().into_iter()
     }
     /// TODO: doc, rename this to `render`?
     pub fn display(&self) -> String {
-        self.conv
-            .convert(self.com.as_ref())
+        self.conversion()
             .into_iter()
             .map(|interval| interval.phrase)
             .collect::<String>()
@@ -362,7 +371,7 @@ impl From<Highlighting> for Entering {
 }
 
 impl Entering {
-    fn next<C, D>(self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
+    fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
         D: Dictionary,
@@ -393,6 +402,10 @@ impl Entering {
                 }
 
                 todo!("handle add new phrases with ctrl-num");
+                Transition::Entering(EditorKeyBehavior::Absorb, self)
+            }
+            Tab if editor.com.is_end_of_buffer() => {
+                editor.nth_conversion += 1;
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             // DoubleTab => {
@@ -473,13 +486,13 @@ impl Entering {
             Enter => {
                 editor.commit_buffer.clear();
                 let output = editor
-                    .conv
-                    .convert(editor.com.as_ref())
+                    .conversion()
                     .into_iter()
                     .map(|interval| interval.phrase)
                     .collect::<String>();
                 editor.commit_buffer.push_str(&output);
                 editor.com.clear();
+                editor.nth_conversion = 0;
                 Transition::Entering(EditorKeyBehavior::Commit, self)
             }
             Esc => {

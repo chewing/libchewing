@@ -870,8 +870,8 @@ void test_Tab_at_the_end()
 
 void test_Tab()
 {
-    test_Tab_insert_breakpoint_between_word();
-    test_Tab_connect_word();
+    // test_Tab_insert_breakpoint_between_word();
+    // test_Tab_connect_word();
     test_Tab_at_the_end();
 }
 
@@ -1938,7 +1938,7 @@ int main(int argc, char *argv[])
     test_Backspace();
     test_Up();
     test_Down();
-    // test_Tab();
+    test_Tab();
     test_DblTab();
     test_Capslock();
     test_Home();
