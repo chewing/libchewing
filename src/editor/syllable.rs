@@ -97,6 +97,29 @@ impl FromStr for KeyboardLayoutCompat {
     }
 }
 
+impl TryFrom<u8> for KeyboardLayoutCompat {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Ok(match value {
+            0 => Self::Default,
+            1 => Self::Hsu,
+            2 => Self::Ibm,
+            3 => Self::GinYieh,
+            4 => Self::Et,
+            5 => Self::Et26,
+            6 => Self::Dvorak,
+            7 => Self::DvorakHsu,
+            8 => Self::DachenCp26,
+            9 => Self::HanyuPinyin,
+            10 => Self::ThlPinyin,
+            11 => Self::Mps2Pinyin,
+            12 => Self::Carpalx,
+            _ => todo!("handle error"),
+        })
+    }
+}
+
 /// TODO: docs
 /// TODO: move this to the editor module
 #[derive(Debug, PartialEq)]
@@ -131,5 +154,11 @@ pub trait SyllableEditor: Debug {
     /// Returns the current syllable without changing the editor buffer.
     fn read(&self) -> Syllable;
     /// Returns the current key seq buffer as printable string, if supported by the layout.
-    fn key_seq(&self) -> Option<String>;
+    fn key_seq(&self) -> Option<String> {
+        None
+    }
+    /// Returns the alternative syllable, if supported by the layout.
+    fn alt_syllables(&self, syl: Syllable) -> &[Syllable] {
+        &[]
+    }
 }

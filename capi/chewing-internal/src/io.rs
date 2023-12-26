@@ -16,8 +16,12 @@ use chewing::{
     },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::{KeyBehavior, KeyboardLayoutCompat},
+        syllable::{
+            DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyBehavior, KeyboardLayoutCompat, Pinyin,
+            Standard,
+        },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
+        SyllableEditor,
     },
     zhuyin::Syllable,
 };
@@ -167,8 +171,29 @@ pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) -> c_int {
-    // todo!()
-    1
+    use KeyboardLayoutCompat as KB;
+    let kbtype = match KB::try_from(kbtype as u8) {
+        Ok(kb) => kb,
+        Err(()) => return -1,
+    };
+    let (keyboard, syl): (AnyKeyboardLayout, Box<dyn SyllableEditor>) = match kbtype {
+        KB::Default => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+        KB::Hsu => (AnyKeyboardLayout::qwerty(), Box::new(Hsu::new())),
+        KB::Ibm => (AnyKeyboardLayout::qwerty(), Box::new(Ibm::new())),
+        KB::GinYieh => (AnyKeyboardLayout::qwerty(), Box::new(GinYieh::new())),
+        KB::Et => (AnyKeyboardLayout::qwerty(), Box::new(Et::new())),
+        KB::Et26 => (AnyKeyboardLayout::qwerty(), Box::new(Et26::new())),
+        KB::Dvorak => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+        KB::DvorakHsu => (AnyKeyboardLayout::qwerty(), Box::new(Hsu::new())),
+        KB::DachenCp26 => (AnyKeyboardLayout::qwerty(), Box::new(DaiChien26::new())),
+        KB::HanyuPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::hanyu())),
+        KB::ThlPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::thl())),
+        KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
+        KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+    };
+    ctx.keyboard = keyboard;
+    ctx.editor.set_syllable_editor(syl);
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -528,12 +553,14 @@ pub extern "C" fn chewing_commit_preedit_buf(ctx: &mut ChewingContext) -> c_int 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_clean_preedit_buf(ctx: &mut ChewingContext) -> c_int {
+    ctx.editor.clear();
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_clean_bopomofo_buf(ctx: &mut ChewingContext) -> c_int {
+    ctx.editor.clear_syllable_editor();
     0
 }
 
@@ -827,7 +854,7 @@ pub extern "C" fn chewing_cand_ChoicePerPage(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
-    match ctx.editor.list_candidates() {
+    match ctx.editor.all_candidates() {
         Ok(candidates) => candidates.len() as c_int,
         Err(_) => 0,
     }
@@ -842,7 +869,7 @@ pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
-    match ctx.editor.list_candidates() {
+    match ctx.editor.paginated_candidates() {
         Ok(candidates) => {
             debug!("candidates: {candidates:?}");
             let mut phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
@@ -900,7 +927,7 @@ pub extern "C" fn chewing_cand_string_by_index_static(
     ctx: &mut ChewingContext,
     index: c_int,
 ) -> *const c_char {
-    if let Ok(phrases) = ctx.editor.list_candidates() {
+    if let Ok(phrases) = ctx.editor.all_candidates() {
         if let Some(phrase) = phrases.get(index as usize) {
             return unsafe { global_cstr(&String::from(phrase)) };
         }
@@ -924,7 +951,8 @@ pub extern "C" fn chewing_cand_open(ctx: &mut ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_close(ctx: &mut ChewingContext) -> c_int {
-    0
+    // FIXME exit selecting mode
+    chewing_handle_Up(ctx)
 }
 
 #[tracing::instrument(skip(ctx), ret)]

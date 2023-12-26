@@ -1959,7 +1959,7 @@ int main(int argc, char *argv[])
 
     test_jk_selection();
 
-    // test_KB();
+    test_KB();
 
     test_chewing_phone_to_bopomofo();
 

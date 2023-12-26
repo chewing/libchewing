@@ -1,8 +1,9 @@
 use std::cmp::min;
 
 use crate::{
-    conversion::{Break, Composition, Interval, Symbol},
+    conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
     dictionary::Dictionary,
+    editor::Editor,
 };
 
 #[derive(Debug)]
@@ -113,10 +114,24 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates<D: Dictionary>(&self, dict: &D) -> Vec<String> {
-        dict.lookup_phrase(&self.buffer[self.begin..self.end])
-            .map(|phrase| phrase.into())
-            .collect()
+    pub(crate) fn candidates<C: ConversionEngine, D: Dictionary>(
+        &self,
+        editor: &Editor<C, D>,
+        dict: &D,
+    ) -> Vec<String> {
+        let mut candidates = Vec::from_iter(
+            dict.lookup_phrase(&self.buffer[self.begin..self.end])
+                .map(|phrase| phrase.into()),
+        );
+        if self.end - self.begin == 1 {
+            let alt = editor
+                .syl
+                .alt_syllables(self.buffer[self.begin].as_syllable());
+            for &syl in alt {
+                candidates.extend(dict.lookup_word(syl).map(|ph| ph.into()))
+            }
+        }
+        candidates
     }
 
     pub(crate) fn interval(&self, phrase: String) -> Interval {

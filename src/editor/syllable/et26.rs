@@ -2,6 +2,7 @@
 
 use crate::{
     editor::keyboard::{KeyCode, KeyEvent},
+    syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
@@ -31,6 +32,24 @@ impl Et26 {
     fn has_initial_or_medial(&self) -> bool {
         self.syllable.has_initial() || self.syllable.has_medial()
     }
+
+    const ALT_TABLE: &'static [(Syllable, &'static [Syllable])] = &[
+        (syl![Bopomofo::OU], &[syl![Bopomofo::P]]),
+        (syl![Bopomofo::ANG], &[syl![Bopomofo::T]]),
+        (syl![Bopomofo::C], &[syl![Bopomofo::EH]]),
+        (syl![Bopomofo::Z], &[syl![Bopomofo::EI]]),
+        (syl![Bopomofo::ZH], &[syl![Bopomofo::J]]),
+        (syl![Bopomofo::ER], &[syl![Bopomofo::H]]),
+        (syl![Bopomofo::ENG], &[syl![Bopomofo::L]]),
+        (syl![Bopomofo::SH], &[syl![Bopomofo::X]]),
+        (syl![Bopomofo::G], &[syl![Bopomofo::Q]]),
+        (syl![Bopomofo::EN], &[syl![Bopomofo::N]]),
+        (syl![Bopomofo::AN], &[syl![Bopomofo::M]]),
+        (syl![Bopomofo::D], &[syl![Bopomofo::TONE5]]),
+        (syl![Bopomofo::F], &[syl![Bopomofo::TONE2]]),
+        (syl![Bopomofo::R], &[syl![Bopomofo::TONE3]]),
+        (syl![Bopomofo::K], &[syl![Bopomofo::TONE4]]),
+    ];
 }
 
 impl Default for Et26 {
@@ -218,7 +237,12 @@ impl SyllableEditor for Et26 {
         self.syllable
     }
 
-    fn key_seq(&self) -> Option<String> {
-        None
+    fn alt_syllables(&self, syl: Syllable) -> &[Syllable] {
+        for entry in Self::ALT_TABLE {
+            if entry.0 == syl {
+                return entry.1;
+            }
+        }
+        &[]
     }
 }

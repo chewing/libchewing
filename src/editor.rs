@@ -136,6 +136,12 @@ where
         self.syl.clear();
         self.commit_buffer.clear();
     }
+    pub fn clear_syllable_editor(&mut self) {
+        self.syl.clear();
+    }
+    pub fn set_syllable_editor(&mut self, syl: Box<dyn SyllableEditor>) {
+        self.syl = syl;
+    }
     pub fn language_mode(&self) -> LanguageMode {
         self.options.language_mode
     }
@@ -188,15 +194,22 @@ where
     pub fn len(&self) -> usize {
         self.com.inner.buffer.len()
     }
-    pub fn list_candidates(&self) -> Result<Vec<String>, ()> {
+    pub fn paginated_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);
         match &self.state {
             Transition::Selecting(_, sub_state) => Ok(sub_state
-                .candidates(&self.dict)
+                .candidates(self, &self.dict)
                 .into_iter()
                 .skip(sub_state.page_no * self.options.candidates_per_page)
                 .take(self.options.candidates_per_page)
                 .collect()),
+            _ => Err(()),
+        }
+    }
+    pub fn all_candidates(&self) -> Result<Vec<String>, ()> {
+        debug!("state {:?}", self.state);
+        match &self.state {
+            Transition::Selecting(_, sub_state) => Ok(sub_state.candidates(self, &self.dict)),
             _ => Err(()),
         }
     }
@@ -653,12 +666,13 @@ impl Selecting {
             sel: Selector::SpecialSymmbol(sel),
         }
     }
-    fn candidates<D>(&self, dict: &D) -> Vec<String>
+    fn candidates<C, D>(&self, editor: &Editor<C, D>, dict: &D) -> Vec<String>
     where
+        C: ConversionEngine,
         D: Dictionary,
     {
         match &self.sel {
-            Selector::Phrase(sel) => sel.candidates(dict),
+            Selector::Phrase(sel) => sel.candidates(editor, dict),
             Selector::Symbol(sel) => sel.menu(),
             Selector::SpecialSymmbol(sel) => sel.menu(),
         }
@@ -668,7 +682,7 @@ impl Selecting {
         C: ConversionEngine,
         D: Dictionary,
     {
-        self.candidates(dict)
+        self.candidates(editor, dict)
             .len()
             .div_ceil(editor.options.candidates_per_page)
     }
@@ -789,7 +803,7 @@ impl Selecting {
                 let offset = self.page_no * editor.options.candidates_per_page + n;
                 match self.sel {
                     Selector::Phrase(ref sel) => {
-                        let candidates = sel.candidates(&editor.dict);
+                        let candidates = sel.candidates(editor, &editor.dict);
                         match candidates.get(n) {
                             Some(phrase) => {
                                 editor.com.select(sel.interval(phrase.into()));

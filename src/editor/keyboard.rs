@@ -123,6 +123,18 @@ pub enum AnyKeyboardLayout {
     Qgmlwy(Qgmlwy),
 }
 
+impl AnyKeyboardLayout {
+    pub fn qwerty() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::Qwerty(Qwerty)
+    }
+    pub fn dvorak() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::Dvorak(Dvorak)
+    }
+    pub fn qgmlwy() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::Qgmlwy(Qgmlwy)
+    }
+}
+
 impl KeyboardLayout for AnyKeyboardLayout {
     fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
         match self {
