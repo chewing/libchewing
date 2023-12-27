@@ -2,7 +2,7 @@
 
 use std::cmp::min;
 
-use crate::conversion::{Break, Composition, Interval, Symbol};
+use crate::conversion::{Break, Composition, Glue, Interval, Symbol};
 
 /// TODO
 #[derive(Debug, Default, Clone)]
@@ -104,8 +104,41 @@ impl CompositionEditor {
         self.cursor += 1;
         // FIXME shift selections and breaks
     }
+    pub(crate) fn insert_glue(&mut self) {
+        let break_idx = self
+            .inner
+            .breaks
+            .iter()
+            .position(|&b| b == Break(self.cursor));
+        let glue_idx = self
+            .inner
+            .glues
+            .iter()
+            .position(|&b| b == Glue(self.cursor));
+        if glue_idx.is_none() {
+            self.inner.glues.push(Glue(self.cursor));
+        }
+        if let Some(break_idx) = break_idx {
+            self.inner.breaks.swap_remove(break_idx);
+        }
+    }
     pub(crate) fn insert_break(&mut self) {
-        self.inner.breaks.push(Break(self.cursor));
+        let break_idx = self
+            .inner
+            .breaks
+            .iter()
+            .position(|&b| b == Break(self.cursor));
+        let glue_idx = self
+            .inner
+            .glues
+            .iter()
+            .position(|&b| b == Glue(self.cursor));
+        if break_idx.is_none() {
+            self.inner.breaks.push(Break(self.cursor));
+        }
+        if let Some(glue_idx) = glue_idx {
+            self.inner.glues.swap_remove(glue_idx);
+        }
     }
     pub(crate) fn replace(&mut self, s: Symbol) {
         self.inner.buffer[self.cursor] = s;

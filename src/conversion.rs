@@ -40,6 +40,9 @@ impl Interval {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Break(pub usize);
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
+pub struct Glue(pub usize);
+
 /// A smallest unit of input in the pre-edit buffer.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Symbol {
@@ -95,6 +98,8 @@ pub struct Composition {
     /// TODO: doc
     /// TODO: merge with symbol?
     pub breaks: Vec<Break>,
+    /// TODO doc
+    pub glues: Vec<Glue>,
 }
 
 /// TODO: doc

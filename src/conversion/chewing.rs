@@ -9,7 +9,7 @@ use tracing::trace;
 
 use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Break, Composition, ConversionEngine, Interval, Symbol};
+use super::{Break, Composition, ConversionEngine, Glue, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug)]
@@ -30,6 +30,9 @@ where
         }
         let intervals = self.find_intervals(composition);
         self.find_best_path(composition.buffer.len(), intervals)
+            .into_iter()
+            .map(|interval| interval.into())
+            .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
     }
 
     fn convert_next(&self, composition: &Composition, next: usize) -> Vec<Interval> {
@@ -49,8 +52,28 @@ where
             .expect("should have path")
             .into_iter()
             .map(|it| it.into())
-            .collect()
+            .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
     }
+}
+
+fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec<Interval> {
+    if acc.is_empty() {
+        acc.push(interval);
+        return acc;
+    }
+    let last = acc.last().expect("acc should have at least one item");
+    if com.glues.contains(&Glue(last.end)) {
+        let last = acc.pop().expect("acc should have at least one item");
+        acc.push(Interval {
+            start: last.start,
+            end: interval.end,
+            is_phrase: true,
+            phrase: last.phrase + &interval.phrase,
+        })
+    } else {
+        acc.push(interval);
+    }
+    acc
 }
 
 impl<T> ChewingConversionEngine<T>
@@ -158,7 +181,11 @@ where
     /// highest_score[1] = P(0,1)
     /// ...
     /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(&self, len: usize, mut intervals: Vec<PossibleInterval>) -> Vec<Interval> {
+    fn find_best_path(
+        &self,
+        len: usize,
+        mut intervals: Vec<PossibleInterval>,
+    ) -> Vec<PossibleInterval> {
         let mut highest_score = vec![PossiblePath::default(); len + 1];
 
         // The interval shall be sorted by the increase order of end.
@@ -180,9 +207,6 @@ where
             .pop()
             .expect("highest_score has at least one element")
             .intervals
-            .into_iter()
-            .map(|interval| interval.into())
-            .collect()
     }
 
     fn find_all_paths<'g>(
@@ -513,6 +537,7 @@ mod tests {
             buffer: vec![],
             selections: vec![],
             breaks: vec![],
+            glues: vec![],
         };
         assert_eq!(Vec::<Interval>::new(), engine.convert(&composition));
     }
@@ -532,6 +557,7 @@ mod tests {
             ],
             selections: vec![],
             breaks: vec![],
+            glues: vec![],
         };
         assert_eq!(
             vec![
@@ -573,6 +599,7 @@ mod tests {
             ],
             selections: vec![],
             breaks: vec![Break(1), Break(5)],
+            glues: vec![],
         };
         assert_eq!(
             vec![
@@ -631,6 +658,7 @@ mod tests {
                 phrase: "戴錶".to_string(),
             }],
             breaks: vec![],
+            glues: vec![],
         };
         assert_eq!(
             vec![
@@ -674,6 +702,7 @@ mod tests {
                 phrase: "酷音".to_string(),
             }],
             breaks: vec![],
+            glues: vec![],
         };
         assert_eq!(
             vec![Interval {
@@ -699,6 +728,7 @@ mod tests {
             ],
             selections: vec![],
             breaks: vec![],
+            glues: vec![],
         };
         assert_eq!(
             vec![

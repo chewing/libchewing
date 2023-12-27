@@ -409,7 +409,12 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             Tab => {
-                editor.com.insert_break();
+                let interval_ends: Vec<_> = editor.conversion().iter().map(|it| it.end).collect();
+                if interval_ends.contains(&editor.cursor()) {
+                    editor.com.insert_glue();
+                } else {
+                    editor.com.insert_break();
+                }
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             // DoubleTab => {

@@ -871,7 +871,7 @@ void test_Tab_at_the_end()
 void test_Tab()
 {
     test_Tab_insert_breakpoint_between_word();
-    // test_Tab_connect_word();
+    test_Tab_connect_word();
     test_Tab_at_the_end();
 }
 
