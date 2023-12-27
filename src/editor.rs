@@ -408,6 +408,10 @@ impl Entering {
                 editor.nth_conversion += 1;
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
+            Tab => {
+                editor.com.insert_break();
+                Transition::Entering(EditorKeyBehavior::Absorb, self)
+            }
             // DoubleTab => {
             //     // editor.reset_user_break_and_connect_at_cursor();
             //     (EditorKeyBehavior::Absorb, &Entering)

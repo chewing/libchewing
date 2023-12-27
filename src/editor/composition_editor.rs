@@ -2,7 +2,7 @@
 
 use std::cmp::min;
 
-use crate::conversion::{Composition, Interval, Symbol};
+use crate::conversion::{Break, Composition, Interval, Symbol};
 
 /// TODO
 #[derive(Debug, Default, Clone)]
@@ -103,6 +103,9 @@ impl CompositionEditor {
         self.inner.buffer.insert(self.cursor, s);
         self.cursor += 1;
         // FIXME shift selections and breaks
+    }
+    pub(crate) fn insert_break(&mut self) {
+        self.inner.breaks.push(Break(self.cursor));
     }
     pub(crate) fn replace(&mut self, s: Symbol) {
         self.inner.buffer[self.cursor] = s;
