@@ -38,11 +38,17 @@ pub extern "C" fn rust_link_io() {}
 enum Owned {
     CString,
     CUShortSlice(usize),
+    CIntSlice(usize),
 }
 
 static mut OWNED: OnceLock<BTreeMap<*mut c_void, Owned>> = OnceLock::new();
 
 fn owned_into_raw<T>(owned: Owned, ptr: *mut T) -> *mut T {
+    unsafe {
+        if OWNED.get().is_none() {
+            let _ = OWNED.set(BTreeMap::new());
+        }
+    }
     let void_ptr: *mut c_void = ptr.cast();
     match unsafe { OWNED.get_mut() } {
         Some(map) => {
@@ -62,6 +68,7 @@ fn drop_owned(ptr: *mut c_void) {
                     Owned::CUShortSlice(len) => {
                         drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) })
                     }
+                    Owned::CIntSlice(len) => drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) }),
                 }
             }
         }
@@ -161,19 +168,29 @@ pub extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
 #[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_free(ptr: *mut c_void) {
-    drop_owned(ptr);
+    if !ptr.is_null() {
+        drop_owned(ptr);
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_Reset(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
     ctx.editor.clear();
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) -> c_int {
+pub extern "C" fn chewing_set_KBType(ctx: *mut ChewingContext, kbtype: c_int) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
     use KeyboardLayoutCompat as KB;
     let kb_compat = match KB::try_from(kbtype as u8) {
         Ok(kb) => kb,
@@ -206,13 +223,21 @@ pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) ->
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_KBType(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_KBType(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
     ctx.kb_compat as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_KBString(ctx: &ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_get_KBString(ctx: *const ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
     let kb_string = ctx.kb_compat.to_string();
     owned_into_raw(
         Owned::CString,
@@ -233,7 +258,12 @@ pub extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_ChiEngMode(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_ChiEngMode(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     match mode {
         CHINESE_MODE => ctx.editor.set_language_mode(LanguageMode::Chinese),
         SYMBOL_MODE => ctx.editor.set_language_mode(LanguageMode::English),
@@ -243,7 +273,12 @@ pub extern "C" fn chewing_set_ChiEngMode(ctx: &mut ChewingContext, mode: c_int) 
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_ChiEngMode(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.language_mode() {
         LanguageMode::Chinese => CHINESE_MODE,
         LanguageMode::English => SYMBOL_MODE,
@@ -252,7 +287,12 @@ pub extern "C" fn chewing_get_ChiEngMode(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_ShapeMode(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_ShapeMode(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     match mode {
         HALFSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Halfwidth),
         FULLSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Fullwidth),
@@ -262,7 +302,12 @@ pub extern "C" fn chewing_set_ShapeMode(ctx: &mut ChewingContext, mode: c_int) {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_ShapeMode(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.character_form() {
         CharacterForm::Halfwidth => HALFSHAPE_MODE,
         CharacterForm::Fullwidth => FULLSHAPE_MODE,
@@ -271,7 +316,12 @@ pub extern "C" fn chewing_get_ShapeMode(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_candPerPage(ctx: &mut ChewingContext, n: c_int) {
+pub extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         candidates_per_page: n as usize,
         ..ctx.editor.editor_options()
@@ -280,13 +330,23 @@ pub extern "C" fn chewing_set_candPerPage(ctx: &mut ChewingContext, n: c_int) {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_candPerPage(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_candPerPage(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.editor_options().candidates_per_page as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: &mut ChewingContext, n: c_int) {
+pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         auto_commit_threshold: n as usize,
         ..ctx.editor.editor_options()
@@ -295,37 +355,66 @@ pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: &mut ChewingContext, n: c_int
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_maxChiSymbolLen(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.editor_options().auto_commit_threshold as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_selKey(ctx: &mut ChewingContext, sel_keys: *const c_int, len: c_int) {
+pub extern "C" fn chewing_set_selKey(ctx: *mut ChewingContext, sel_keys: *const c_int, len: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
     // todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_selKey(ctx: &ChewingContext) -> *mut c_int {
+pub extern "C" fn chewing_get_selKey(ctx: *const ChewingContext) -> *mut c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return null_mut(),
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_addPhraseDirection(ctx: &mut ChewingContext, direction: c_int) {
+pub extern "C" fn chewing_set_addPhraseDirection(ctx: *mut ChewingContext, direction: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     // todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_addPhraseDirection(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_spaceAsSelection(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         space_is_select_key: match mode {
             0 => false,
@@ -337,7 +426,12 @@ pub extern "C" fn chewing_set_spaceAsSelection(ctx: &mut ChewingContext, mode: c
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_spaceAsSelection(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_spaceAsSelection(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.editor_options().space_is_select_key {
         true => 1,
         false => 0,
@@ -346,7 +440,12 @@ pub extern "C" fn chewing_get_spaceAsSelection(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_escCleanAllBuf(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         esc_clear_all_buffer: match mode {
             0 => false,
@@ -358,7 +457,12 @@ pub extern "C" fn chewing_set_escCleanAllBuf(ctx: &mut ChewingContext, mode: c_i
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_escCleanAllBuf(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_escCleanAllBuf(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.editor_options().esc_clear_all_buffer {
         true => 1,
         false => 0,
@@ -367,7 +471,12 @@ pub extern "C" fn chewing_get_escCleanAllBuf(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_autoShiftCur(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         auto_shift_cursor: match mode {
             0 => false,
@@ -379,25 +488,45 @@ pub extern "C" fn chewing_set_autoShiftCur(ctx: &mut ChewingContext, mode: c_int
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_autoShiftCur(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_easySymbolInput(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_easySymbolInput(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_phraseChoiceRearward(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingContext, mode: c_int) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.editor.set_editor_options(EditorOptions {
         phrase_choice_rearward: match mode {
             0 => false,
@@ -409,26 +538,35 @@ pub extern "C" fn chewing_set_phraseChoiceRearward(ctx: &mut ChewingContext, mod
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_phraseChoiceRearward(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_phraseChoiceRearward(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_set_autoLearn(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c_int) {
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_autoLearn(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_autoLearn(ctx: *const ChewingContext) -> c_int {
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_phoneSeq(ctx: &ChewingContext) -> *mut c_ushort {
-    // let syllable = Box::new(ctx.editor.syllable_buffer().to_u16());
+pub extern "C" fn chewing_get_phoneSeq(ctx: *const ChewingContext) -> *mut c_ushort {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return null_mut(),
+    };
+
     let syllables: Vec<_> = ctx
         .editor
         .symbols()
@@ -444,7 +582,12 @@ pub extern "C" fn chewing_get_phoneSeq(ctx: &ChewingContext) -> *mut c_ushort {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_get_phoneSeqLen(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_phoneSeqLen(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .symbols()
         .into_iter()
@@ -456,7 +599,7 @@ pub extern "C" fn chewing_get_phoneSeqLen(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_logger(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
     data: *mut c_void,
 ) {
@@ -465,115 +608,185 @@ pub extern "C" fn chewing_set_logger(
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_userphrase_enumerate(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_userphrase_enumerate(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_has_next(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     phrase_len: *mut c_uint,
     bopomofo_len: *mut c_uint,
 ) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return 0,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_get(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     phrase_buf: *mut c_char,
     phrase_len: c_uint,
     bopomofo_buf: *mut c_char,
     bopomofo_len: c_uint,
 ) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_add(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_remove(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_lookup(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return 0,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_first(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_first(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_last(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_last(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_has_next(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_has_next(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return 0,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_has_prev(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_has_prev(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return 0,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_next(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_next(ctx: *mut ChewingContext) -> c_int {
     // FIXME selecting next mode
     chewing_handle_Down(ctx)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_list_prev(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_list_prev(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_commit_preedit_buf(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_commit_preedit_buf(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_clean_preedit_buf(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_clean_preedit_buf(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.clear();
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_clean_bopomofo_buf(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_clean_bopomofo_buf(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.clear_syllable_editor();
     0
 }
@@ -599,7 +812,12 @@ pub extern "C" fn chewing_phone_to_bopomofo(
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Space(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Space(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::Space));
     0
@@ -607,14 +825,24 @@ pub extern "C" fn chewing_handle_Space(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Esc(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Esc(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Esc));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Enter(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Enter(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::Enter));
     1
@@ -622,14 +850,24 @@ pub extern "C" fn chewing_handle_Enter(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Del(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Del(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Del));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Backspace(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Backspace(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::Backspace));
     0
@@ -637,20 +875,35 @@ pub extern "C" fn chewing_handle_Backspace(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Tab(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Tab(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Tab));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_ShiftLeft(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_ShiftLeft(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Left(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Left(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     let key_event = ctx.keyboard.map(KeyCode::Left);
     ctx.editor.process_keyevent(key_event);
     0
@@ -658,13 +911,23 @@ pub extern "C" fn chewing_handle_Left(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_ShiftRight(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_ShiftRight(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Right(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Right(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::Right));
     0
@@ -672,28 +935,48 @@ pub extern "C" fn chewing_handle_Right(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Up(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Up(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Up));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Home(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Home(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Home));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_End(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_End(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::End));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_PageUp(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_PageUp(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::PageUp));
     0
@@ -701,7 +984,12 @@ pub extern "C" fn chewing_handle_PageUp(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_PageDown(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_PageDown(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map(KeyCode::PageDown));
     0
@@ -709,14 +997,24 @@ pub extern "C" fn chewing_handle_PageDown(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Down(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Down(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Down));
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Capslock(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_Capslock(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(
         ctx.keyboard
             .map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
@@ -726,7 +1024,12 @@ pub extern "C" fn chewing_handle_Capslock(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Default(ctx: &mut ChewingContext, key: c_int) -> c_int {
+pub extern "C" fn chewing_handle_Default(ctx: *mut ChewingContext, key: c_int) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map_ascii(key as u8));
     0
@@ -734,13 +1037,23 @@ pub extern "C" fn chewing_handle_Default(ctx: &mut ChewingContext, key: c_int) -
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_CtrlNum(ctx: &mut ChewingContext, key: c_int) -> c_int {
+pub extern "C" fn chewing_handle_CtrlNum(ctx: *mut ChewingContext, key: c_int) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_ShiftSpace(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_ShiftSpace(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.process_keyevent(
         ctx.keyboard
             .map_with_mod(KeyCode::Space, Modifiers::shift()),
@@ -750,13 +1063,23 @@ pub extern "C" fn chewing_handle_ShiftSpace(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_DblTab(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_handle_DblTab(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_handle_Numlock(ctx: &mut ChewingContext, key: c_int) -> c_int {
+pub extern "C" fn chewing_handle_Numlock(ctx: *mut ChewingContext, key: c_int) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map_ascii_numlock(key as u8));
     0
@@ -764,7 +1087,12 @@ pub extern "C" fn chewing_handle_Numlock(ctx: &mut ChewingContext, key: c_int) -
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_commit_Check(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_commit_Check(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     if ctx.editor.display_commit().is_empty() {
         0
     } else {
@@ -774,7 +1102,12 @@ pub extern "C" fn chewing_commit_Check(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_commit_String(ctx: &ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_commit_String(ctx: *const ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     let buffer = ctx.editor.display_commit();
     let cstr = match CString::new(buffer) {
         Ok(cstr) => cstr,
@@ -785,14 +1118,24 @@ pub extern "C" fn chewing_commit_String(ctx: &ChewingContext) -> *mut c_char {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_commit_String_static(ctx: &ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_commit_String_static(ctx: *const ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     let buffer = ctx.editor.display_commit();
     unsafe { global_cstr(&buffer) }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_buffer_String(ctx: &ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_buffer_String(ctx: *const ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     let buffer = ctx.editor.display();
     let cstr = match CString::new(buffer) {
         Ok(cstr) => cstr,
@@ -803,14 +1146,24 @@ pub extern "C" fn chewing_buffer_String(ctx: &ChewingContext) -> *mut c_char {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_buffer_String_static(ctx: &ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_buffer_String_static(ctx: *const ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     let buffer = ctx.editor.display();
     unsafe { global_cstr(&buffer) }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_buffer_Check(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_buffer_Check(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     if ctx.editor.display().len() > 0 {
         1
     } else {
@@ -820,20 +1173,35 @@ pub extern "C" fn chewing_buffer_Check(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_buffer_Len(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_buffer_Len(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.display().chars().count() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_bopomofo_String_static(ctx: &ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_bopomofo_String_static(ctx: *const ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     let syllable = ctx.editor.syllable_buffer().to_string();
     unsafe { global_cstr(&syllable) }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_bopomofo_Check(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_bopomofo_Check(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     if ctx.editor.entering_syllable() {
         1
     } else {
@@ -843,31 +1211,56 @@ pub extern "C" fn chewing_bopomofo_Check(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cursor_Current(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cursor_Current(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.cursor() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_CheckDone(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_TotalPage(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_TotalPage(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.total_page().unwrap_or_default() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_ChoicePerPage(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_ChoicePerPage(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.editor_options().candidates_per_page as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_TotalChoice(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.all_candidates() {
         Ok(candidates) => candidates.len() as c_int,
         Err(_) => 0,
@@ -876,13 +1269,23 @@ pub extern "C" fn chewing_cand_TotalChoice(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_CurrentPage(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_CurrentPage(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.editor.current_page_no().unwrap_or_default() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
+pub extern "C" fn chewing_cand_Enumerate(ctx: *mut ChewingContext) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     match ctx.editor.paginated_candidates() {
         Ok(candidates) => {
             debug!("candidates: {candidates:?}");
@@ -895,7 +1298,12 @@ pub extern "C" fn chewing_cand_Enumerate(ctx: &mut ChewingContext) {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_hasNext(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_hasNext(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.cand_iter
         .as_mut()
         .and_then(|it| it.peek())
@@ -904,7 +1312,12 @@ pub extern "C" fn chewing_cand_hasNext(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_String(ctx: &mut ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_cand_String(ctx: *mut ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
         Some(phrase) => {
             let cstr = match CString::new(String::from(phrase)) {
@@ -919,7 +1332,12 @@ pub extern "C" fn chewing_cand_String(ctx: &mut ChewingContext) -> *mut c_char {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_String_static(ctx: &mut ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_cand_String_static(ctx: *mut ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     match ctx.cand_iter.as_mut().unwrap().next() {
         Some(phrase) => unsafe { global_cstr(&String::from(phrase)) },
         None => unsafe { global_empty_cstr() },
@@ -929,18 +1347,28 @@ pub extern "C" fn chewing_cand_String_static(ctx: &mut ChewingContext) -> *const
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_string_by_index(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     index: c_int,
 ) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_string_by_index_static(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     index: c_int,
 ) -> *const c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     if let Ok(phrases) = ctx.editor.all_candidates() {
         if let Some(phrase) = phrases.get(index as usize) {
             return unsafe { global_cstr(&String::from(phrase)) };
@@ -951,27 +1379,37 @@ pub extern "C" fn chewing_cand_string_by_index_static(
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_choose_by_index(ctx: &mut ChewingContext, index: c_int) -> c_int {
+pub extern "C" fn chewing_cand_choose_by_index(ctx: *mut ChewingContext, index: c_int) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_open(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_open(ctx: *mut ChewingContext) -> c_int {
     // FIXME enter selecting mode
     chewing_handle_Down(ctx)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_cand_close(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_cand_close(ctx: *mut ChewingContext) -> c_int {
     // FIXME exit selecting mode
     chewing_handle_Up(ctx)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_interval_Enumerate(ctx: &mut ChewingContext) {
+pub extern "C" fn chewing_interval_Enumerate(ctx: *mut ChewingContext) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.interval_iter = Some(
         (Box::new(ctx.editor.intervals().filter(|it| it.is_phrase))
             as Box<dyn Iterator<Item = Interval>>)
@@ -981,7 +1419,12 @@ pub extern "C" fn chewing_interval_Enumerate(ctx: &mut ChewingContext) {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_interval_hasNext(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_interval_hasNext(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.interval_iter.as_mut().map_or(0, |it| match it.peek() {
         Some(_) => 1,
         None => 0,
@@ -990,7 +1433,12 @@ pub extern "C" fn chewing_interval_hasNext(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_interval_Get(ctx: &mut ChewingContext, it: *mut IntervalType) {
+pub extern "C" fn chewing_interval_Get(ctx: *mut ChewingContext, it: *mut IntervalType) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     let it = unsafe {
         match it.as_mut() {
             Some(it) => it,
@@ -1007,31 +1455,56 @@ pub extern "C" fn chewing_interval_Get(ctx: &mut ChewingContext, it: *mut Interv
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_aux_Check(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_aux_Check(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_aux_Length(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_aux_Length(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_aux_String(ctx: &ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_aux_String(ctx: *const ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_aux_String_static(ctx: &ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_aux_String_static(ctx: *const ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.last_key_behavior() {
         EditorKeyBehavior::Ignore => 1,
         _ => 0,
@@ -1040,7 +1513,12 @@ pub extern "C" fn chewing_keystroke_CheckIgnore(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: *const ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     match ctx.editor.last_key_behavior() {
         EditorKeyBehavior::Absorb => 1,
         _ => 0,
@@ -1049,7 +1527,7 @@ pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_Total(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_kbtype_Total(ctx: *const ChewingContext) -> c_int {
     (0..)
         .into_iter()
         .map_while(|id| KeyboardLayoutCompat::try_from(id).ok())
@@ -1058,7 +1536,12 @@ pub extern "C" fn chewing_kbtype_Total(ctx: &ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_Enumerate(ctx: &mut ChewingContext) {
+pub extern "C" fn chewing_kbtype_Enumerate(ctx: *mut ChewingContext) {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
     ctx.kbcompat_iter = Some(
         (Box::new(
             (0..)
@@ -1071,7 +1554,12 @@ pub extern "C" fn chewing_kbtype_Enumerate(ctx: &mut ChewingContext) {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_hasNext(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_kbtype_hasNext(ctx: *mut ChewingContext) -> c_int {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
     ctx.kbcompat_iter
         .as_mut()
         .and_then(|it| it.peek())
@@ -1080,7 +1568,12 @@ pub extern "C" fn chewing_kbtype_hasNext(ctx: &mut ChewingContext) -> c_int {
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_String(ctx: &mut ChewingContext) -> *mut c_char {
+pub extern "C" fn chewing_kbtype_String(ctx: *mut ChewingContext) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     match ctx.kbcompat_iter.as_mut().and_then(|it| it.next()) {
         Some(kb_compat) => {
             let cstr = match CString::new(String::from(kb_compat.to_string())) {
@@ -1095,7 +1588,12 @@ pub extern "C" fn chewing_kbtype_String(ctx: &mut ChewingContext) -> *mut c_char
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_String_static(ctx: &mut ChewingContext) -> *const c_char {
+pub extern "C" fn chewing_kbtype_String_static(ctx: *mut ChewingContext) -> *const c_char {
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return unsafe { global_empty_cstr() },
+    };
+
     match ctx.kbcompat_iter.as_mut().and_then(|it| it.next()) {
         Some(kb_compat) => unsafe { global_cstr(&kb_compat.to_string()) },
         None => unsafe { global_empty_cstr() },
@@ -1105,14 +1603,22 @@ pub extern "C" fn chewing_kbtype_String_static(ctx: &mut ChewingContext) -> *con
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_zuin_Check(ctx: &ChewingContext) -> c_int {
+pub extern "C" fn chewing_zuin_Check(ctx: *const ChewingContext) -> c_int {
     chewing_bopomofo_Check(ctx) ^ 1
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_zuin_String(ctx: &ChewingContext, zuin_count: *mut c_int) -> *mut c_char {
+pub extern "C" fn chewing_zuin_String(
+    ctx: *const ChewingContext,
+    zuin_count: *mut c_int,
+) -> *mut c_char {
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
+    };
+
     let syllable = ctx.editor.syllable_buffer().to_string();
     unsafe {
         *zuin_count = syllable.chars().count() as c_int;
@@ -1142,7 +1648,7 @@ pub extern "C" fn chewing_Terminate() {
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Configure(
-    ctx: &mut ChewingContext,
+    ctx: *mut ChewingContext,
     pcd: *mut ChewingConfigData,
 ) -> c_int {
     todo!()
@@ -1151,13 +1657,13 @@ pub extern "C" fn chewing_Configure(
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_set_hsuSelKeyType(ctx: &mut ChewingContext, mode: c_int) {
+pub extern "C" fn chewing_set_hsuSelKeyType(ctx: *mut ChewingContext, mode: c_int) {
     todo!()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_get_hsuSelKeyType(ctx: &mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_hsuSelKeyType(ctx: *mut ChewingContext) -> c_int {
     todo!()
 }
