@@ -151,8 +151,7 @@ pub extern "C" fn chewing_new2(
         keyboard,
         editor,
         kbcompat_iter: None,
-        candidates: None,
-        candidate_cursor: 0,
+        cand_iter: None,
         interval_iter: None,
     });
     Box::into_raw(context)
@@ -709,13 +708,7 @@ pub extern "C" fn chewing_cand_list_first(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    match ctx.candidates.as_ref() {
-        Some(_) => {
-            ctx.candidate_cursor = 0;
-            0
-        }
-        None => -1,
-    }
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -726,13 +719,7 @@ pub extern "C" fn chewing_cand_list_last(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    match ctx.candidates.as_ref() {
-        Some(candidates) => {
-            ctx.candidate_cursor = candidates.len() - 1;
-            0
-        }
-        None => -1,
-    }
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -743,13 +730,7 @@ pub extern "C" fn chewing_cand_list_has_next(ctx: *mut ChewingContext) -> c_int 
         None => return 0,
     };
 
-    match ctx.candidates.as_ref() {
-        Some(candidates) => match candidates.get(ctx.candidate_cursor + 1) {
-            Some(_) => 1,
-            None => 0,
-        },
-        None => 0,
-    }
+    1
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -760,13 +741,7 @@ pub extern "C" fn chewing_cand_list_has_prev(ctx: *mut ChewingContext) -> c_int 
         None => return 0,
     };
 
-    match ctx.candidates.as_ref() {
-        Some(candidates) => match candidates.get(ctx.candidate_cursor - 1) {
-            Some(_) => 1,
-            None => 0,
-        },
-        None => 0,
-    }
+    1
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -776,16 +751,7 @@ pub extern "C" fn chewing_cand_list_next(ctx: *mut ChewingContext) -> c_int {
         Some(ctx) => ctx,
         None => return -1,
     };
-    match ctx.candidates.as_ref() {
-        Some(candidates) => match candidates.get(ctx.candidate_cursor + 1) {
-            Some(_) => {
-                ctx.candidate_cursor += 1;
-                0
-            }
-            None => -1,
-        },
-        None => -1,
-    }
+    chewing_handle_Down(ctx)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -795,16 +761,7 @@ pub extern "C" fn chewing_cand_list_prev(ctx: *mut ChewingContext) -> c_int {
         Some(ctx) => ctx,
         None => return -1,
     };
-    match ctx.candidates.as_ref() {
-        Some(candidates) => match candidates.get(ctx.candidate_cursor - 1) {
-            Some(_) => {
-                ctx.candidate_cursor -= 1;
-                0
-            }
-            None => -1,
-        },
-        None => -1,
-    }
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1349,8 +1306,8 @@ pub extern "C" fn chewing_cand_Enumerate(ctx: *mut ChewingContext) {
     match ctx.editor.paginated_candidates() {
         Ok(candidates) => {
             debug!("candidates: {candidates:?}");
-            ctx.candidates = Some(candidates);
-            ctx.candidate_cursor = 0;
+            let phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
+            ctx.cand_iter = Some(phrases.peekable());
         }
         Err(_) => (),
     }
@@ -1364,13 +1321,10 @@ pub extern "C" fn chewing_cand_hasNext(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    match ctx.candidates.as_ref() {
-        Some(candidates) => match candidates.get(ctx.candidate_cursor) {
-            Some(_) => 1,
-            None => 0,
-        },
-        None => 0,
-    }
+    ctx.cand_iter
+        .as_mut()
+        .and_then(|it| it.peek())
+        .map_or(0, |_| 1)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1381,17 +1335,12 @@ pub extern "C" fn chewing_cand_String(ctx: *mut ChewingContext) -> *mut c_char {
         None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
     };
 
-    match ctx
-        .candidates
-        .as_ref()
-        .and_then(|candidates| candidates.get(ctx.candidate_cursor))
-    {
+    match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
         Some(phrase) => {
             let cstr = match CString::new(phrase.clone()) {
                 Ok(cstr) => cstr,
                 Err(_) => return owned_into_raw(Owned::CString, CString::default().into_raw()),
             };
-            ctx.candidate_cursor += 1;
             owned_into_raw(Owned::CString, cstr.into_raw())
         }
         None => owned_into_raw(Owned::CString, CString::default().into_raw()),
@@ -1406,15 +1355,8 @@ pub extern "C" fn chewing_cand_String_static(ctx: *mut ChewingContext) -> *const
         None => return unsafe { global_empty_cstr() },
     };
 
-    match ctx
-        .candidates
-        .as_ref()
-        .and_then(|candidates| candidates.get(ctx.candidate_cursor))
-    {
-        Some(phrase) => {
-            ctx.candidate_cursor += 1;
-            unsafe { global_cstr(phrase) }
-        }
+    match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
+        Some(phrase) => unsafe { global_cstr(&phrase) },
         None => unsafe { global_empty_cstr() },
     }
 }

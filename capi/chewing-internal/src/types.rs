@@ -257,9 +257,7 @@ pub struct ChewingContext {
         Rc<LayeredDictionary<AnyDictionary, ()>>,
     >,
     pub(crate) kbcompat_iter: Option<Peekable<Box<dyn Iterator<Item = KeyboardLayoutCompat>>>>,
-    pub(crate) candidates: Option<Vec<String>>,
-    pub(crate) candidate_cursor: usize,
-    // pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
+    pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
 }
 
