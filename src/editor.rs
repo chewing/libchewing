@@ -535,30 +535,12 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Commit, self)
             }
             _ => match editor.options.language_mode {
-                LanguageMode::Chinese if ev.modifiers.shift => {
-                    if editor.options.easy_symbol_input {
-                        match editor.abbr.find_abbrev(ev.unicode) {
-                            Some(expended) => {
-                                expended
-                                    .chars()
-                                    .for_each(|ch| editor.com.push(Symbol::Char(ch)));
-                                return Transition::Entering(EditorKeyBehavior::Absorb, self);
-                            }
-                            None => {}
-                        }
-                    }
-                    match special_symbol_input(ev.unicode) {
-                        Some(symbol) => {
-                            editor.com.push(Symbol::Char(symbol));
-                            Transition::Entering(EditorKeyBehavior::Absorb, self)
-                        }
-                        None => Transition::Entering(EditorKeyBehavior::Ignore, self),
-                    }
+                LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
+                    Transition::Selecting(
+                        EditorKeyBehavior::Absorb,
+                        Selecting::new_symbol(editor, Entering),
+                    )
                 }
-                LanguageMode::Chinese if ev.code == Grave => Transition::Selecting(
-                    EditorKeyBehavior::Absorb,
-                    Selecting::new_symbol(editor, Entering),
-                ),
                 LanguageMode::Chinese if ev.code == Space => {
                     match editor.options.character_form {
                         CharacterForm::Halfwidth => {
@@ -581,12 +563,39 @@ impl Entering {
                     }
                     Transition::Entering(EditorKeyBehavior::Commit, self)
                 }
-                LanguageMode::Chinese => match editor.syl.key_press(ev) {
-                    KeyBehavior::Absorb => {
-                        Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self.into())
+                LanguageMode::Chinese if editor.options.easy_symbol_input => {
+                    // Priortize symbol input
+                    if let Some(expended) = editor.abbr.find_abbrev(ev.unicode) {
+                        expended
+                            .chars()
+                            .for_each(|ch| editor.com.push(Symbol::Char(ch)));
+                        return Transition::Entering(EditorKeyBehavior::Absorb, self);
                     }
-                    _ => Transition::Entering(EditorKeyBehavior::Bell, self),
-                },
+                    if let Some(symbol) = special_symbol_input(ev.unicode) {
+                        editor.com.push(Symbol::Char(symbol));
+                        return Transition::Entering(EditorKeyBehavior::Absorb, self);
+                    }
+                    if ev.modifiers.is_none() && KeyBehavior::Absorb == editor.syl.key_press(ev) {
+                        return Transition::EnteringSyllable(
+                            EditorKeyBehavior::Absorb,
+                            self.into(),
+                        );
+                    }
+                    Transition::Entering(EditorKeyBehavior::Bell, self)
+                }
+                LanguageMode::Chinese => {
+                    if ev.modifiers.is_none() && KeyBehavior::Absorb == editor.syl.key_press(ev) {
+                        return Transition::EnteringSyllable(
+                            EditorKeyBehavior::Absorb,
+                            self.into(),
+                        );
+                    }
+                    if let Some(symbol) = special_symbol_input(ev.unicode) {
+                        editor.com.push(Symbol::Char(symbol));
+                        return Transition::Entering(EditorKeyBehavior::Absorb, self);
+                    }
+                    Transition::Entering(EditorKeyBehavior::Bell, self)
+                }
                 LanguageMode::English => {
                     match editor.options.character_form {
                         CharacterForm::Halfwidth => {

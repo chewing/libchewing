@@ -63,7 +63,7 @@ impl Modifiers {
         }
     }
     pub(crate) fn is_none(&self) -> bool {
-        !self.shift && !self.ctrl && !self.capslock
+        !self.shift && !self.ctrl && !self.capslock && !self.numlock
     }
 }
 
@@ -241,7 +241,7 @@ macro_rules! keycode_map {
 }
 
 #[rustfmt::skip]
-static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 81] = keycode_map! {
+static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 95] = keycode_map! {
   b'1' => (N1, Modifiers::new()),
   b'2' => (N2, Modifiers::new()),
   b'3' => (N3, Modifiers::new()),
@@ -324,6 +324,20 @@ static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 81] = keycode_map! {
   b'}' => (RBracket, Modifiers::shift()),
   b'+' => (Equal, Modifiers::shift()),
   b'_' => (Minus, Modifiers::shift()),
+  b':' => (SColon, Modifiers::shift()),
+  b'~' => (Grave, Modifiers::shift()),
+  b'!' => (N1, Modifiers::shift()),
+  b'@' => (N2, Modifiers::shift()),
+  b'#' => (N3, Modifiers::shift()),
+  b'$' => (N4, Modifiers::shift()),
+  b'%' => (N5, Modifiers::shift()),
+  b'^' => (N6, Modifiers::shift()),
+  b'&' => (N7, Modifiers::shift()),
+  b'*' => (N8, Modifiers::shift()),
+  b'(' => (N9, Modifiers::shift()),
+  b')' => (N0, Modifiers::shift()),
+  b'|' => (BSlash, Modifiers::shift()),
+  b'?' => (Slash, Modifiers::shift()),
 };
 
 // FIXME should we map to real numlock keycode?
