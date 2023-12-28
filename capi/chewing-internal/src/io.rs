@@ -136,11 +136,14 @@ pub extern "C" fn chewing_new2(
 
     let dict = Rc::new(LayeredDictionary::new(dictionaries, vec![]));
     let conversion_engine = ChewingConversionEngine::new(dict.clone());
+    let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
     let editor = Editor::new(conversion_engine, dict);
     let context = Box::new(ChewingContext {
+        kb_compat,
         keyboard,
         editor,
+        kbcompat_iter: None,
         cand_iter: None,
         interval_iter: None,
     });
@@ -172,11 +175,11 @@ pub extern "C" fn chewing_Reset(ctx: &mut ChewingContext) -> c_int {
 #[no_mangle]
 pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) -> c_int {
     use KeyboardLayoutCompat as KB;
-    let kbtype = match KB::try_from(kbtype as u8) {
+    let kb_compat = match KB::try_from(kbtype as u8) {
         Ok(kb) => kb,
-        Err(()) => return -1,
+        Err(()) => KB::Default,
     };
-    let (keyboard, syl): (AnyKeyboardLayout, Box<dyn SyllableEditor>) = match kbtype {
+    let (keyboard, syl): (AnyKeyboardLayout, Box<dyn SyllableEditor>) = match kb_compat {
         KB::Default => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
         KB::Hsu => (AnyKeyboardLayout::qwerty(), Box::new(Hsu::new())),
         KB::Ibm => (AnyKeyboardLayout::qwerty(), Box::new(Ibm::new())),
@@ -191,21 +194,32 @@ pub extern "C" fn chewing_set_KBType(ctx: &mut ChewingContext, kbtype: c_int) ->
         KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
         KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
     };
+    ctx.kb_compat = kb_compat;
     ctx.keyboard = keyboard;
     ctx.editor.set_syllable_editor(syl);
-    0
+    if kb_compat == KB::Default && kb_compat as c_int != kbtype {
+        -1
+    } else {
+        0
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_KBType(ctx: &ChewingContext) -> c_int {
-    todo!()
+    ctx.kb_compat as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_KBString(ctx: &ChewingContext) -> *mut c_char {
-    todo!()
+    let kb_string = ctx.kb_compat.to_string();
+    owned_into_raw(
+        Owned::CString,
+        CString::new(kb_string)
+            .expect("should have valid kb_string")
+            .into_raw(),
+    )
 }
 
 #[tracing::instrument(ret)]
@@ -1036,31 +1050,56 @@ pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: &ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_Total(ctx: &ChewingContext) -> c_int {
-    todo!()
+    (0..)
+        .into_iter()
+        .map_while(|id| KeyboardLayoutCompat::try_from(id).ok())
+        .count() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_Enumerate(ctx: &mut ChewingContext) {
-    todo!()
+    ctx.kbcompat_iter = Some(
+        (Box::new(
+            (0..)
+                .into_iter()
+                .map_while(|id| KeyboardLayoutCompat::try_from(id).ok()),
+        ) as Box<dyn Iterator<Item = KeyboardLayoutCompat>>)
+            .peekable(),
+    )
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_hasNext(ctx: &mut ChewingContext) -> c_int {
-    todo!()
+    ctx.kbcompat_iter
+        .as_mut()
+        .and_then(|it| it.peek())
+        .map_or(0, |_| 1)
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_String(ctx: &mut ChewingContext) -> *mut c_char {
-    todo!()
+    match ctx.kbcompat_iter.as_mut().and_then(|it| it.next()) {
+        Some(kb_compat) => {
+            let cstr = match CString::new(String::from(kb_compat.to_string())) {
+                Ok(cstr) => cstr,
+                Err(_) => return null_mut(),
+            };
+            owned_into_raw(Owned::CString, cstr.into_raw())
+        }
+        None => owned_into_raw(Owned::CString, CString::default().into_raw()),
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_kbtype_String_static(ctx: &mut ChewingContext) -> *const c_char {
-    todo!()
+    match ctx.kbcompat_iter.as_mut().and_then(|it| it.next()) {
+        Some(kb_compat) => unsafe { global_cstr(&kb_compat.to_string()) },
+        None => unsafe { global_empty_cstr() },
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]

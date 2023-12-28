@@ -3,7 +3,7 @@ use std::{fmt::Debug, iter::Peekable, rc::Rc};
 use chewing::{
     conversion::{ChewingConversionEngine, Interval},
     dictionary::{AnyDictionary, LayeredDictionary},
-    editor::{keyboard::AnyKeyboardLayout, Editor},
+    editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},
 };
 use chewing_public::types::IntervalType;
 use libc::{c_char, c_int, c_uint, c_void};
@@ -250,11 +250,13 @@ pub struct ChewingData;
 
 /// cbindgen:rename-all=None
 pub struct ChewingContext {
+    pub(crate) kb_compat: KeyboardLayoutCompat,
     pub(crate) keyboard: AnyKeyboardLayout,
     pub(crate) editor: Editor<
         ChewingConversionEngine<Rc<LayeredDictionary<AnyDictionary, ()>>>,
         Rc<LayeredDictionary<AnyDictionary, ()>>,
     >,
+    pub(crate) kbcompat_iter: Option<Peekable<Box<dyn Iterator<Item = KeyboardLayoutCompat>>>>,
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
 }

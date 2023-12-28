@@ -15,7 +15,10 @@
 //! Chewing currently supports the default layout, Hsu's layout, ET26 layout,
 //! DaChen CP26 layout, and the Pinyin layout.
 
-use std::{fmt::Debug, str::FromStr};
+use std::{
+    fmt::{Debug, Display},
+    str::FromStr,
+};
 
 use crate::zhuyin::Syllable;
 
@@ -97,6 +100,26 @@ impl FromStr for KeyboardLayoutCompat {
     }
 }
 
+impl Display for KeyboardLayoutCompat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KeyboardLayoutCompat::Default => f.write_str("KB_DEFAULT"),
+            KeyboardLayoutCompat::Hsu => f.write_str("KB_HSU"),
+            KeyboardLayoutCompat::Ibm => f.write_str("KB_IBM"),
+            KeyboardLayoutCompat::GinYieh => f.write_str("KB_GIN_YIEH"),
+            KeyboardLayoutCompat::Et => f.write_str("KB_ET"),
+            KeyboardLayoutCompat::Et26 => f.write_str("KB_ET26"),
+            KeyboardLayoutCompat::Dvorak => f.write_str("KB_DVORAK"),
+            KeyboardLayoutCompat::DvorakHsu => f.write_str("KB_DVORAK_HSU"),
+            KeyboardLayoutCompat::DachenCp26 => f.write_str("KB_DACHEN_CP26"),
+            KeyboardLayoutCompat::HanyuPinyin => f.write_str("KB_HANYU_PINYIN"),
+            KeyboardLayoutCompat::ThlPinyin => f.write_str("KB_THL_PINYIN"),
+            KeyboardLayoutCompat::Mps2Pinyin => f.write_str("KB_MPS2_PINYIN"),
+            KeyboardLayoutCompat::Carpalx => f.write_str("KB_CARPALX"),
+        }
+    }
+}
+
 impl TryFrom<u8> for KeyboardLayoutCompat {
     type Error = ();
 
@@ -115,7 +138,7 @@ impl TryFrom<u8> for KeyboardLayoutCompat {
             10 => Self::ThlPinyin,
             11 => Self::Mps2Pinyin,
             12 => Self::Carpalx,
-            _ => todo!("handle error"),
+            _ => return Err(()),
         })
     }
 }
