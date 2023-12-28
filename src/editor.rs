@@ -11,7 +11,7 @@ use std::{io, mem};
 
 pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
 pub use syllable::SyllableEditor;
-use tracing::{debug, trace};
+use tracing::{debug, trace, warn};
 
 use crate::{
     conversion::{
@@ -241,6 +241,24 @@ where
             _ => Err(()),
         }
     }
+    pub fn select(&mut self, n: usize) -> Result<(), ()> {
+        if !self.is_selecting() {
+            return Err(());
+        }
+        let old_state = mem::replace(&mut self.state, Transition::Invalid);
+        self.state = match old_state {
+            Transition::Selecting(_, s) => s.select(self, n),
+            _ => old_state,
+        };
+        if self.last_key_behavior() == EditorKeyBehavior::Absorb {
+            self.try_auto_commit();
+        }
+        if self.last_key_behavior() == EditorKeyBehavior::Bell {
+            Err(())
+        } else {
+            Ok(())
+        }
+    }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {
             character_form: match self.options.character_form {
@@ -268,15 +286,32 @@ where
     // fn check_and_reset_range(&mut self) {
     //     todo!()
     // }
-    // fn is_entering(&self) -> bool {
-    //     todo!()
-    // }
-    // fn is_selecting(&self) -> bool {
-    //     todo!()
-    // }
-    // fn start_selecting(&mut self) {
-    //     todo!()
-    // }
+    pub fn is_entering(&self) -> bool {
+        match self.state {
+            Transition::Entering(_, _) => true,
+            _ => false,
+        }
+    }
+    pub fn is_selecting(&self) -> bool {
+        match self.state {
+            Transition::Selecting(_, _) => true,
+            _ => false,
+        }
+    }
+    pub fn start_selecting(&mut self) -> Result<(), ()> {
+        let old_state = mem::replace(&mut self.state, Transition::Invalid);
+        self.state = match old_state {
+            Transition::Entering(_, s) => s.start_selecting(self),
+            // Force entering selection
+            Transition::EnteringSyllable(_, s) => Entering::from(s).start_selecting(self),
+            _ => old_state,
+        };
+        if self.is_selecting() {
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
     fn cancel_selecting(&mut self) {
         // pop cursor?
     }
@@ -384,6 +419,25 @@ impl From<Highlighting> for Entering {
 }
 
 impl Entering {
+    fn start_selecting<C, D>(self, editor: &mut Editor<C, D>) -> Transition
+    where
+        C: ConversionEngine,
+        D: Dictionary,
+    {
+        match editor.com.symbol_for_select() {
+            Some(symbol) => match symbol {
+                Symbol::Syllable(_) => Transition::Selecting(
+                    EditorKeyBehavior::Absorb,
+                    Selecting::new_phrase(editor, self),
+                ),
+                Symbol::Char(_) => Transition::Selecting(
+                    EditorKeyBehavior::Absorb,
+                    Selecting::new_special_symbol(editor, symbol, self),
+                ),
+            },
+            None => Transition::Entering(EditorKeyBehavior::Ignore, self),
+        }
+    }
     fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
@@ -487,19 +541,7 @@ impl Entering {
             }
             Down => {
                 debug!("buffer {:?}", editor.com);
-                match editor.com.symbol_for_select() {
-                    Some(symbol) => match symbol {
-                        Symbol::Syllable(_) => Transition::Selecting(
-                            EditorKeyBehavior::Absorb,
-                            Selecting::new_phrase(editor, self),
-                        ),
-                        Symbol::Char(_) => Transition::Selecting(
-                            EditorKeyBehavior::Absorb,
-                            Selecting::new_special_symbol(editor, symbol, self),
-                        ),
-                    },
-                    None => Transition::Entering(EditorKeyBehavior::Ignore, self),
-                }
+                self.start_selecting(editor)
             }
             End | PageUp | PageDown => {
                 editor.com.move_cursor_to_end();
@@ -751,6 +793,58 @@ impl Selecting {
             .len()
             .div_ceil(editor.options.candidates_per_page)
     }
+    fn select<C, D>(mut self, editor: &mut Editor<C, D>, n: usize) -> Transition
+    where
+        C: ConversionEngine,
+        D: Dictionary,
+    {
+        let offset = self.page_no * editor.options.candidates_per_page + n;
+        match self.sel {
+            Selector::Phrase(ref sel) => {
+                let candidates = sel.candidates(editor, &editor.dict);
+                match candidates.get(n) {
+                    Some(phrase) => {
+                        editor.com.select(sel.interval(phrase.into()));
+                        debug!("Auto Shift {}", editor.options.auto_shift_cursor);
+                        editor.com.pop_cursor();
+                        if editor.options.auto_shift_cursor {
+                            editor.com.move_cursor_right();
+                        }
+                        Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                    }
+                    None => Transition::Selecting(EditorKeyBehavior::Bell, self),
+                }
+            }
+            Selector::Symbol(ref mut sel) => match sel.select(offset) {
+                Some(s) => {
+                    match self.action {
+                        SelectingAction::Insert => editor.com.insert(s),
+                        SelectingAction::Replace => editor.com.replace(s),
+                    }
+                    editor.com.pop_cursor();
+                    Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                }
+                None => {
+                    self.page_no = 0;
+                    Transition::Selecting(EditorKeyBehavior::Absorb, self)
+                }
+            },
+            Selector::SpecialSymmbol(ref sel) => match sel.select(offset) {
+                Some(s) => {
+                    match self.action {
+                        SelectingAction::Insert => editor.com.insert(s),
+                        SelectingAction::Replace => editor.com.replace(s),
+                    }
+                    editor.com.pop_cursor();
+                    Transition::Entering(EditorKeyBehavior::Absorb, self.into())
+                }
+                None => {
+                    self.page_no = 0;
+                    Transition::Selecting(EditorKeyBehavior::Absorb, self)
+                }
+            },
+        }
+    }
     fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine,
@@ -865,52 +959,7 @@ impl Selecting {
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
-                let offset = self.page_no * editor.options.candidates_per_page + n;
-                match self.sel {
-                    Selector::Phrase(ref sel) => {
-                        let candidates = sel.candidates(editor, &editor.dict);
-                        match candidates.get(n) {
-                            Some(phrase) => {
-                                editor.com.select(sel.interval(phrase.into()));
-                                debug!("Auto Shift {}", editor.options.auto_shift_cursor);
-                                editor.com.pop_cursor();
-                                if editor.options.auto_shift_cursor {
-                                    editor.com.move_cursor_right();
-                                }
-                                Transition::Entering(EditorKeyBehavior::Absorb, self.into())
-                            }
-                            None => Transition::Selecting(EditorKeyBehavior::Bell, self),
-                        }
-                    }
-                    Selector::Symbol(ref mut sel) => match sel.select(offset) {
-                        Some(s) => {
-                            match self.action {
-                                SelectingAction::Insert => editor.com.insert(s),
-                                SelectingAction::Replace => editor.com.replace(s),
-                            }
-                            editor.com.pop_cursor();
-                            Transition::Entering(EditorKeyBehavior::Absorb, self.into())
-                        }
-                        None => {
-                            self.page_no = 0;
-                            Transition::Selecting(EditorKeyBehavior::Absorb, self)
-                        }
-                    },
-                    Selector::SpecialSymmbol(ref sel) => match sel.select(offset) {
-                        Some(s) => {
-                            match self.action {
-                                SelectingAction::Insert => editor.com.insert(s),
-                                SelectingAction::Replace => editor.com.replace(s),
-                            }
-                            editor.com.pop_cursor();
-                            Transition::Entering(EditorKeyBehavior::Absorb, self.into())
-                        }
-                        None => {
-                            self.page_no = 0;
-                            Transition::Selecting(EditorKeyBehavior::Absorb, self)
-                        }
-                    },
-                }
+                self.select(editor, n)
             }
             Esc => {
                 editor.cancel_selecting();
@@ -922,7 +971,8 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             _ => {
-                unreachable!("invalid state")
+                warn!("Invalid state transition");
+                Transition::Selecting(EditorKeyBehavior::Bell, self)
             }
         }
     }
