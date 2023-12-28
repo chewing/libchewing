@@ -505,7 +505,13 @@ pub extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, mode: c_
         None => return,
     };
 
-    todo!()
+    ctx.editor.set_editor_options(EditorOptions {
+        easy_symbol_input: match mode {
+            0 => false,
+            _ => true,
+        },
+        ..ctx.editor.editor_options()
+    });
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -516,7 +522,7 @@ pub extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext) -> c_i
         None => return -1,
     };
 
-    todo!()
+    ctx.editor.editor_options().easy_symbol_input as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]

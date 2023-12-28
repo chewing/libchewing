@@ -1,5 +1,6 @@
 //! TODO: doc
 
+mod abbrev;
 pub mod composition_editor;
 mod estimate;
 pub mod keyboard;
@@ -22,6 +23,7 @@ use crate::{
 };
 
 use self::{
+    abbrev::AbbrevTable,
     composition_editor::CompositionEditor,
     keyboard::KeyEvent,
     selection::{
@@ -51,6 +53,7 @@ pub enum UserPhraseAddDirection {
 
 #[derive(Debug, Clone, Copy)]
 pub struct EditorOptions {
+    pub easy_symbol_input: bool,
     pub esc_clear_all_buffer: bool,
     pub space_is_select_key: bool,
     pub auto_shift_cursor: bool,
@@ -66,6 +69,7 @@ pub struct EditorOptions {
 impl Default for EditorOptions {
     fn default() -> Self {
         Self {
+            easy_symbol_input: false,
             esc_clear_all_buffer: false,
             space_is_select_key: false,
             auto_shift_cursor: true,
@@ -109,6 +113,7 @@ where
     syl: Box<dyn SyllableEditor>,
     conv: C,
     dict: D,
+    abbr: AbbrevTable,
     options: EditorOptions,
     state: Transition,
 
@@ -127,6 +132,7 @@ where
             syl: Box::new(Standard::new()),
             conv,
             dict,
+            abbr: AbbrevTable::new().expect("unable to init abbrev table"),
             options: EditorOptions::default(),
             state: Transition::Entering(EditorKeyBehavior::Ignore, Entering),
             nth_conversion: 0,
@@ -530,6 +536,17 @@ impl Entering {
             }
             _ => match editor.options.language_mode {
                 LanguageMode::Chinese if ev.modifiers.shift => {
+                    if editor.options.easy_symbol_input {
+                        match editor.abbr.find_abbrev(ev.unicode) {
+                            Some(expended) => {
+                                expended
+                                    .chars()
+                                    .for_each(|ch| editor.com.push(Symbol::Char(ch)));
+                                return Transition::Entering(EditorKeyBehavior::Absorb, self);
+                            }
+                            None => {}
+                        }
+                    }
                     match special_symbol_input(ev.unicode) {
                         Some(symbol) => {
                             editor.com.push(Symbol::Char(symbol));
