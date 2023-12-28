@@ -1289,7 +1289,7 @@ pub extern "C" fn chewing_cand_Enumerate(ctx: *mut ChewingContext) {
     match ctx.editor.paginated_candidates() {
         Ok(candidates) => {
             debug!("candidates: {candidates:?}");
-            let mut phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
+            let phrases = Box::new(candidates.into_iter()) as Box<dyn Iterator<Item = String>>;
             ctx.cand_iter = Some(phrases.peekable());
         }
         Err(_) => (),

@@ -67,7 +67,7 @@ impl SymbolSelector {
                         .chars()
                         .nth(n)
                         .map(Symbol::Char)
-                        .expect("symbol"),
+                        .expect("index should out of boundary"),
                 )
             }
         }

@@ -203,6 +203,7 @@ where
     pub fn len(&self) -> usize {
         self.com.inner.buffer.len()
     }
+    /// All candidates after current page
     pub fn paginated_candidates(&self) -> Result<Vec<String>, ()> {
         debug!("state {:?}", self.state);
         match &self.state {
@@ -210,7 +211,6 @@ where
                 .candidates(self, &self.dict)
                 .into_iter()
                 .skip(sub_state.page_no * self.options.candidates_per_page)
-                .take(self.options.candidates_per_page)
                 .collect()),
             _ => Err(()),
         }
@@ -339,7 +339,14 @@ struct EnteringSyllable;
 #[derive(Debug)]
 struct Selecting {
     page_no: usize,
+    action: SelectingAction,
     sel: Selector,
+}
+
+#[derive(Debug)]
+enum SelectingAction {
+    Insert,
+    Replace,
 }
 
 #[derive(Debug)]
@@ -658,10 +665,11 @@ impl Selecting {
 
         Selecting {
             page_no: 0,
+            action: SelectingAction::Replace,
             sel: Selector::Phrase(sel),
         }
     }
-    fn new_symbol<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
+    fn new_symbol<C, D>(_editor: &mut Editor<C, D>, _state: Entering) -> Self
     where
         C: ConversionEngine,
         D: Dictionary,
@@ -671,6 +679,7 @@ impl Selecting {
         let sel = SymbolSelector::new(reader).expect("parse symbols table");
         Selecting {
             page_no: 0,
+            action: SelectingAction::Insert,
             sel: Selector::Symbol(sel),
         }
     }
@@ -683,9 +692,17 @@ impl Selecting {
         editor.com.clamp_cursor();
 
         let sel = SpecialSymbolSelector::new(symbol);
-        Selecting {
-            page_no: 0,
-            sel: Selector::SpecialSymmbol(sel),
+        if sel.menu().is_empty() {
+            // If there's no special symbol then fallback to dynamic symbol table
+            let mut sel = Self::new_symbol(editor, _state);
+            sel.action = SelectingAction::Replace;
+            sel
+        } else {
+            Selecting {
+                page_no: 0,
+                action: SelectingAction::Replace,
+                sel: Selector::SpecialSymmbol(sel),
+            }
         }
     }
     fn candidates<C, D>(&self, editor: &Editor<C, D>, dict: &D) -> Vec<String>
@@ -803,7 +820,7 @@ impl Selecting {
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
-            PageUp => {
+            Left | PageUp => {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
@@ -811,7 +828,7 @@ impl Selecting {
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
-            PageDown => {
+            Right | PageDown => {
                 if self.page_no < self.total_page(editor, &editor.dict) - 1 {
                     self.page_no += 1;
                 } else {
@@ -841,19 +858,31 @@ impl Selecting {
                     }
                     Selector::Symbol(ref mut sel) => match sel.select(offset) {
                         Some(s) => {
-                            editor.com.insert(s);
+                            match self.action {
+                                SelectingAction::Insert => editor.com.insert(s),
+                                SelectingAction::Replace => editor.com.replace(s),
+                            }
                             editor.com.pop_cursor();
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
-                        None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+                        None => {
+                            self.page_no = 0;
+                            Transition::Selecting(EditorKeyBehavior::Absorb, self)
+                        }
                     },
                     Selector::SpecialSymmbol(ref sel) => match sel.select(offset) {
                         Some(s) => {
-                            editor.com.replace(s);
+                            match self.action {
+                                SelectingAction::Insert => editor.com.insert(s),
+                                SelectingAction::Replace => editor.com.replace(s),
+                            }
                             editor.com.pop_cursor();
                             Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                         }
-                        None => Transition::Selecting(EditorKeyBehavior::Absorb, self),
+                        None => {
+                            self.page_no = 0;
+                            Transition::Selecting(EditorKeyBehavior::Absorb, self)
+                        }
                     },
                 }
             }
