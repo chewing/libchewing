@@ -946,7 +946,9 @@ pub extern "C" fn chewing_handle_ShiftLeft(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    todo!()
+    ctx.editor
+        .process_keyevent(ctx.keyboard.map_with_mod(KeyCode::Left, Modifiers::shift()));
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -970,7 +972,11 @@ pub extern "C" fn chewing_handle_ShiftRight(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    todo!()
+    ctx.editor.process_keyevent(
+        ctx.keyboard
+            .map_with_mod(KeyCode::Right, Modifiers::shift()),
+    );
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]

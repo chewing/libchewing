@@ -560,6 +560,18 @@ impl Entering {
                 editor.com.move_cursor_to_beginning();
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
+            Left if ev.modifiers.shift => {
+                if editor.com.is_empty() {
+                    return Transition::Entering(EditorKeyBehavior::Ignore, self);
+                }
+                Transition::Highlighting(EditorKeyBehavior::Absorb, self.into())
+            }
+            Right if ev.modifiers.shift => {
+                if editor.com.is_empty() {
+                    return Transition::Entering(EditorKeyBehavior::Ignore, self);
+                }
+                Transition::Highlighting(EditorKeyBehavior::Absorb, self.into())
+            }
             Left => {
                 editor.com.move_cursor_left();
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
@@ -1035,6 +1047,12 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Bell, self)
             }
         }
+    }
+}
+
+impl From<Entering> for Highlighting {
+    fn from(value: Entering) -> Self {
+        Highlighting
     }
 }
 
