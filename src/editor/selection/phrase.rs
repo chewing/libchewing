@@ -11,6 +11,7 @@ pub(crate) struct PhraseSelector {
     begin: usize,
     end: usize,
     forward_select: bool,
+    orig: usize,
     buffer: Vec<Symbol>,
     selections: Vec<Interval>,
     breaks: Vec<Break>,
@@ -22,6 +23,7 @@ impl PhraseSelector {
             begin: 0,
             end: com.buffer.len(),
             forward_select,
+            orig: 0,
             buffer: com.buffer,
             selections: com.selections,
             breaks: com.breaks,
@@ -29,6 +31,7 @@ impl PhraseSelector {
     }
 
     pub(crate) fn init<D: Dictionary>(&mut self, cursor: usize, dict: &D) {
+        self.orig = cursor;
         if self.forward_select {
             self.begin = if cursor == self.buffer.len() {
                 cursor - 1
@@ -59,6 +62,85 @@ impl PhraseSelector {
 
     pub(crate) fn begin(&self) -> usize {
         self.begin
+    }
+
+    pub(crate) fn next_selection_point<D: Dictionary>(&self, dict: &D) -> Option<(usize, usize)> {
+        let (mut begin, mut end) = (self.begin, self.end);
+        loop {
+            if self.forward_select {
+                end -= 1;
+                if begin == end {
+                    return None;
+                }
+            } else {
+                begin += 1;
+                if begin == end {
+                    return None;
+                }
+            }
+            let syllables = &self.buffer[begin..end];
+            if dict.lookup_phrase(syllables).next().is_some() {
+                return Some((begin, end));
+            }
+        }
+    }
+    pub(crate) fn prev_selection_point<D: Dictionary>(&self, dict: &D) -> Option<(usize, usize)> {
+        let (mut begin, mut end) = (self.begin, self.end);
+        loop {
+            if self.forward_select {
+                if end == self.buffer.len() {
+                    return None;
+                }
+                end += 1;
+                if end > self.next_break_point(self.orig) {
+                    return None;
+                }
+            } else {
+                if begin == 0 {
+                    return None;
+                }
+                begin -= 1;
+                if begin < self.after_previous_break_point(self.orig) {
+                    return None;
+                }
+            }
+            let syllables = &self.buffer[begin..end];
+            if dict.lookup_phrase(syllables).next().is_some() {
+                return Some((begin, end));
+            }
+        }
+    }
+    pub(crate) fn jump_to_next_selection_point<D: Dictionary>(
+        &mut self,
+        dict: &D,
+    ) -> Result<(), ()> {
+        if let Some((begin, end)) = self.next_selection_point(dict) {
+            self.begin = begin;
+            self.end = end;
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+    pub(crate) fn jump_to_prev_selection_point<D: Dictionary>(
+        &mut self,
+        dict: &D,
+    ) -> Result<(), ()> {
+        if let Some((begin, end)) = self.prev_selection_point(dict) {
+            self.begin = begin;
+            self.end = end;
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+    pub(crate) fn jump_to_first_selection_point<D: Dictionary>(&mut self, dict: &D) {
+        self.init(self.orig, dict);
+    }
+    pub(crate) fn jump_to_last_selection_point<D: Dictionary>(&mut self, dict: &D) {
+        while let Some(_) = self.next_selection_point(dict) {
+            let _ = self.jump_to_next_selection_point(dict);
+        }
     }
 
     pub(crate) fn next<D: Dictionary>(&mut self, dict: &D) {
@@ -162,6 +244,7 @@ mod tests {
             begin: 0,
             end: 1,
             forward_select: false,
+            orig: 0,
             buffer: vec![Symbol::Syllable(syl![C, E, TONE4])],
             selections: vec![],
             breaks: vec![],
@@ -180,6 +263,7 @@ mod tests {
             begin: 0,
             end: 1,
             forward_select: false,
+            orig: 0,
             buffer: vec![Symbol::Char(',')],
             selections: vec![],
             breaks: vec![],
@@ -194,6 +278,7 @@ mod tests {
             begin: 0,
             end: 1,
             forward_select: true,
+            orig: 0,
             buffer: vec![Symbol::Syllable(syl![C, E, TONE4])],
             selections: vec![],
             breaks: vec![],
@@ -212,6 +297,7 @@ mod tests {
             begin: 0,
             end: 1,
             forward_select: true,
+            orig: 0,
             buffer: vec![Symbol::Char(',')],
             selections: vec![],
             breaks: vec![],
@@ -226,6 +312,7 @@ mod tests {
             begin: 0,
             end: 2,
             forward_select: false,
+            orig: 0,
             buffer: vec![
                 Symbol::Syllable(syl![C, E, TONE4]),
                 Symbol::Syllable(syl![C, E, TONE4]),
@@ -245,6 +332,7 @@ mod tests {
             begin: 0,
             end: 2,
             forward_select: false,
+            orig: 0,
             buffer: vec![Symbol::Char(','), Symbol::Syllable(syl![C, E, TONE4])],
             selections: vec![],
             breaks: vec![],
@@ -261,6 +349,7 @@ mod tests {
             begin: 0,
             end: 2,
             forward_select: false,
+            orig: 0,
             buffer: vec![
                 Symbol::Syllable(syl![C, E, TONE4]),
                 Symbol::Syllable(syl![C, E, TONE4]),

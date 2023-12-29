@@ -312,6 +312,66 @@ where
             Err(())
         }
     }
+    pub fn has_next_selection_point(&self) -> bool {
+        match &self.state {
+            Transition::Selecting(_, s) => match &s.sel {
+                Selector::Phrase(s) => s.next_selection_point(&self.dict).is_some(),
+                Selector::Symbol(_) => false,
+                Selector::SpecialSymmbol(_) => false,
+            },
+            _ => false,
+        }
+    }
+    pub fn has_prev_selection_point(&self) -> bool {
+        match &self.state {
+            Transition::Selecting(_, s) => match &s.sel {
+                Selector::Phrase(s) => s.prev_selection_point(&self.dict).is_some(),
+                Selector::Symbol(_) => false,
+                Selector::SpecialSymmbol(_) => false,
+            },
+            _ => false,
+        }
+    }
+    pub fn jump_to_next_selection_point(&mut self) -> Result<(), ()> {
+        match &mut self.state {
+            Transition::Selecting(_, s) => match &mut s.sel {
+                Selector::Phrase(s) => s.jump_to_next_selection_point(&self.dict),
+                Selector::Symbol(_) => Err(()),
+                Selector::SpecialSymmbol(_) => Err(()),
+            },
+            _ => Err(()),
+        }
+    }
+    pub fn jump_to_prev_selection_point(&mut self) -> Result<(), ()> {
+        match &mut self.state {
+            Transition::Selecting(_, s) => match &mut s.sel {
+                Selector::Phrase(s) => s.jump_to_prev_selection_point(&self.dict),
+                Selector::Symbol(_) => Err(()),
+                Selector::SpecialSymmbol(_) => Err(()),
+            },
+            _ => Err(()),
+        }
+    }
+    pub fn jump_to_first_selection_point(&mut self) {
+        match &mut self.state {
+            Transition::Selecting(_, s) => match &mut s.sel {
+                Selector::Phrase(s) => s.jump_to_first_selection_point(&self.dict),
+                Selector::Symbol(_) => {}
+                Selector::SpecialSymmbol(_) => {}
+            },
+            _ => {}
+        }
+    }
+    pub fn jump_to_last_selection_point(&mut self) {
+        match &mut self.state {
+            Transition::Selecting(_, s) => match &mut s.sel {
+                Selector::Phrase(s) => s.jump_to_last_selection_point(&self.dict),
+                Selector::Symbol(_) => {}
+                Selector::SpecialSymmbol(_) => {}
+            },
+            _ => {}
+        }
+    }
     fn cancel_selecting(&mut self) {
         // pop cursor?
     }

@@ -699,9 +699,9 @@ void test_cand_list_no_cand_windows()
 
 void test_cand_list()
 {
-    // test_cand_list_word();
-    // test_cand_list_symbol();
-    // test_cand_list_no_cand_windows();
+    test_cand_list_word();
+    test_cand_list_symbol();
+    test_cand_list_no_cand_windows();
 }
 
 void test_commit_preedit_normal()

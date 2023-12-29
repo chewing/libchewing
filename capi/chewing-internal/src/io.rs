@@ -708,6 +708,11 @@ pub extern "C" fn chewing_cand_list_first(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
+    if !ctx.editor.is_selecting() {
+        return -1;
+    }
+
+    ctx.editor.jump_to_first_selection_point();
     0
 }
 
@@ -719,6 +724,11 @@ pub extern "C" fn chewing_cand_list_last(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
+    if !ctx.editor.is_selecting() {
+        return -1;
+    }
+
+    ctx.editor.jump_to_last_selection_point();
     0
 }
 
@@ -730,7 +740,14 @@ pub extern "C" fn chewing_cand_list_has_next(ctx: *mut ChewingContext) -> c_int 
         None => return 0,
     };
 
-    1
+    if !ctx.editor.is_selecting() {
+        return 0;
+    }
+
+    match ctx.editor.has_next_selection_point() {
+        true => 1,
+        false => 0,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -741,7 +758,14 @@ pub extern "C" fn chewing_cand_list_has_prev(ctx: *mut ChewingContext) -> c_int 
         None => return 0,
     };
 
-    1
+    if !ctx.editor.is_selecting() {
+        return 0;
+    }
+
+    match ctx.editor.has_prev_selection_point() {
+        true => 1,
+        false => 0,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -751,7 +775,13 @@ pub extern "C" fn chewing_cand_list_next(ctx: *mut ChewingContext) -> c_int {
         Some(ctx) => ctx,
         None => return -1,
     };
-    chewing_handle_Down(ctx)
+    if !ctx.editor.is_selecting() {
+        return -1;
+    }
+    match ctx.editor.jump_to_next_selection_point() {
+        Ok(_) => 0,
+        Err(_) => -1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -761,7 +791,13 @@ pub extern "C" fn chewing_cand_list_prev(ctx: *mut ChewingContext) -> c_int {
         Some(ctx) => ctx,
         None => return -1,
     };
-    0
+    if !ctx.editor.is_selecting() {
+        return -1;
+    }
+    match ctx.editor.jump_to_prev_selection_point() {
+        Ok(_) => 0,
+        Err(_) => -1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
