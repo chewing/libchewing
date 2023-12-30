@@ -303,6 +303,9 @@ where
     pub fn learn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
         let _ = self.dict.update(&syllables, (phrase, 100).into(), 0, 0);
     }
+    pub fn unlearn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
+        let _ = self.dict.remove(&syllables, phrase);
+    }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {
             character_form: match self.options.character_form {

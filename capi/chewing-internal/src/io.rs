@@ -182,6 +182,11 @@ pub extern "C" fn chewing_new2(
 #[no_mangle]
 pub extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
     if !ctx.is_null() {
+        unsafe {
+            if OWNED.get().is_none() {
+                let _ = OWNED.take();
+            }
+        }
         drop(unsafe { Box::from_raw(ctx) })
     }
 }
@@ -777,8 +782,16 @@ pub extern "C" fn chewing_userphrase_add(
         None => return 0,
     };
 
+    if syllables.len() > 11 {
+        return 0;
+    }
+
     match unsafe { str_from_ptr_with_nul(phrase_buf) } {
         Some(phrase) => {
+            // FIXME should be handled by lower level
+            if syllables.len() != phrase.chars().count() {
+                return 0;
+            }
             ctx.editor.learn_phrase(&syllables, &phrase);
             1
         }
@@ -793,12 +806,32 @@ pub extern "C" fn chewing_userphrase_remove(
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return -1,
     };
 
-    todo!()
+    // FIXME should be handled by lower level
+    if chewing_userphrase_lookup(ctx, phrase_buf, bopomofo_buf) != 1 {
+        return 0;
+    }
+
+    let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
+        Some(bopomofo) => bopomofo
+            .split_ascii_whitespace()
+            .into_iter()
+            .map_while(|it| it.parse::<Syllable>().ok())
+            .collect::<Vec<_>>(),
+        None => return -1,
+    };
+
+    match unsafe { str_from_ptr_with_nul(phrase_buf) } {
+        Some(phrase) => {
+            ctx.editor.unlearn_phrase(&syllables, &phrase);
+            1
+        }
+        None => -1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]

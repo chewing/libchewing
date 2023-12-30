@@ -933,10 +933,10 @@ int main(int argc, char *argv[])
     test_CtrlNum();
     test_userphrase_autolearn();
     test_userphrase_enumerate();
-    // test_userphrase_manipulate();
-    // test_userphrase_lookup();
-    // test_userphrase_double_free();
-    // test_userphrase_remove();
+    test_userphrase_manipulate();
+    test_userphrase_lookup();
+    test_userphrase_double_free();
+    test_userphrase_remove();
 
     fclose(fd);
 
