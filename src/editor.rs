@@ -997,9 +997,20 @@ impl Selecting {
     where
         C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
-        self.candidates(editor, dict)
-            .len()
-            .div_ceil(editor.options.candidates_per_page)
+        // MSRV: stable after rust 1.73
+        fn div_ceil(lhs: usize, rhs: usize) -> usize {
+            let d = lhs / rhs;
+            let r = lhs % rhs;
+            if r > 0 && rhs > 0 {
+                d + 1
+            } else {
+                d
+            }
+        }
+        div_ceil(
+            self.candidates(editor, dict).len(),
+            editor.options.candidates_per_page,
+        )
     }
     fn select<C>(mut self, editor: &mut Editor<C>, n: usize) -> Transition
     where
