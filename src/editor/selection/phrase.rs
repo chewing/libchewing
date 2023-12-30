@@ -196,7 +196,7 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates<C: ConversionEngine, D: Dictionary>(
+    pub(crate) fn candidates<C: ConversionEngine<D>, D: Dictionary>(
         &self,
         editor: &Editor<C, D>,
         dict: &D,

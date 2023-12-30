@@ -13,34 +13,33 @@ use super::{Break, Composition, ConversionEngine, Glue, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug)]
-pub struct ChewingConversionEngine<T>
-where
-    T: Dictionary,
-{
-    dict: T,
-}
+pub struct ChewingEngine;
 
-impl<T> ConversionEngine for ChewingConversionEngine<T>
-where
-    T: Dictionary,
-{
-    fn convert(&self, composition: &Composition) -> Vec<Interval> {
+impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
+    fn convert(&self, dict: &C, composition: &Composition) -> Vec<Interval> {
         if composition.buffer.is_empty() {
             return vec![];
         }
-        let intervals = self.find_intervals(composition);
+        let intervals = self.find_intervals(dict, composition);
         self.find_best_path(composition.buffer.len(), intervals)
             .into_iter()
             .map(|interval| interval.into())
             .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
     }
 
-    fn convert_next(&self, composition: &Composition, next: usize) -> Vec<Interval> {
+    fn convert_next(&self, dict: &C, composition: &Composition, next: usize) -> Vec<Interval> {
         if composition.buffer.is_empty() {
             return vec![];
         }
         let mut graph = Graph::default();
-        let paths = self.find_all_paths(&mut graph, composition, 0, composition.buffer.len(), None);
+        let paths = self.find_all_paths(
+            dict,
+            &mut graph,
+            composition,
+            0,
+            composition.buffer.len(),
+            None,
+        );
         let mut trimmed_paths = self.trim_paths(paths);
         trimmed_paths.sort();
         trimmed_paths
@@ -76,17 +75,17 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
     acc
 }
 
-impl<T> ChewingConversionEngine<T>
-where
-    T: Dictionary,
-{
+impl ChewingEngine {
     /// TODO: doc
-    pub fn new(dict: T) -> ChewingConversionEngine<T> {
-        ChewingConversionEngine { dict }
+    pub fn new() -> ChewingEngine {
+        ChewingEngine
     }
+}
 
-    fn find_best_phrase(
+impl ChewingEngine {
+    fn find_best_phrase<D: Dictionary + ?Sized>(
         &self,
+        dict: &D,
         start: usize,
         symbols: &[Symbol],
         selections: &[Interval],
@@ -117,7 +116,7 @@ where
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in self.dict.lookup_phrase(&syllables) {
+        'next_phrase: for phrase in dict.lookup_phrase(&syllables) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
@@ -145,11 +144,16 @@ where
 
         best_phrase
     }
-    fn find_intervals(&self, comp: &Composition) -> Vec<PossibleInterval> {
+    fn find_intervals<D: Dictionary + ?Sized>(
+        &self,
+        dict: &D,
+        comp: &Composition,
+    ) -> Vec<PossibleInterval> {
         let mut intervals = vec![];
         for begin in 0..comp.buffer.len() {
             for end in begin..=comp.buffer.len() {
                 if let Some(phrase) = self.find_best_phrase(
+                    dict,
                     begin,
                     &comp.buffer[begin..end],
                     &comp.selections,
@@ -209,8 +213,9 @@ where
             .intervals
     }
 
-    fn find_all_paths<'g>(
+    fn find_all_paths<'g, D: Dictionary + ?Sized>(
         &'g self,
+        dict: &D,
         graph: &mut Graph<'g>,
         composition: &Composition,
         start: usize,
@@ -225,6 +230,7 @@ where
             let entry = graph.entry((start, end));
             if let Some(phrase) = entry.or_insert_with(|| {
                 self.find_best_phrase(
+                    dict,
                     start,
                     &composition.buffer[start..end],
                     &composition.selections,
@@ -238,6 +244,7 @@ where
                     phrase: phrase.clone(),
                 });
                 result.append(&mut self.find_all_paths(
+                    dict,
                     graph,
                     composition,
                     end,
@@ -482,7 +489,7 @@ mod tests {
         zhuyin::Bopomofo::*,
     };
 
-    use super::{ChewingConversionEngine, PossibleInterval, PossiblePath};
+    use super::{ChewingEngine, PossibleInterval, PossiblePath};
 
     fn test_dictionary() -> impl Dictionary {
         HashMap::from([
@@ -532,20 +539,20 @@ mod tests {
     #[test]
     fn convert_empty_composition() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![],
             selections: vec![],
             breaks: vec![],
             glues: vec![],
         };
-        assert_eq!(Vec::<Interval>::new(), engine.convert(&composition));
+        assert_eq!(Vec::<Interval>::new(), engine.convert(&dict, &composition));
     }
 
     #[test]
     fn convert_simple_chinese_composition() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![
                 Symbol::Syllable(syl![G, U, O, TONE2]),
@@ -580,14 +587,14 @@ mod tests {
                     phrase: "代表".to_string()
                 },
             ],
-            engine.convert(&composition)
+            engine.convert(&dict, &composition)
         );
     }
 
     #[test]
     fn convert_chinese_composition_with_breaks() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![
                 Symbol::Syllable(syl![G, U, O, TONE2]),
@@ -634,14 +641,14 @@ mod tests {
                     phrase: "表".to_string()
                 },
             ],
-            engine.convert(&composition)
+            engine.convert(&dict, &composition)
         );
     }
 
     #[test]
     fn convert_chinese_composition_with_good_selection() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![
                 Symbol::Syllable(syl![G, U, O, TONE2]),
@@ -681,14 +688,14 @@ mod tests {
                     phrase: "戴錶".to_string()
                 },
             ],
-            engine.convert(&composition)
+            engine.convert(&dict, &composition)
         );
     }
 
     #[test]
     fn convert_chinese_composition_with_substring_selection() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![
                 Symbol::Syllable(syl![X, I, EN]),
@@ -711,14 +718,14 @@ mod tests {
                 is_phrase: true,
                 phrase: "新酷音".to_string()
             },],
-            engine.convert(&composition)
+            engine.convert(&dict, &composition)
         );
     }
 
     #[test]
     fn convert_cycle_alternatives() {
         let dict = test_dictionary();
-        let engine = ChewingConversionEngine::new(dict);
+        let engine = ChewingEngine::new();
         let composition = Composition {
             buffer: vec![
                 Symbol::Syllable(syl![C, E, TONE4]),
@@ -745,7 +752,7 @@ mod tests {
                     phrase: "一下".to_string()
                 }
             ],
-            engine.convert_next(&composition, 0)
+            engine.convert_next(&dict, &composition, 0)
         );
         assert_eq!(
             vec![
@@ -762,7 +769,7 @@ mod tests {
                     phrase: "下".to_string()
                 }
             ],
-            engine.convert_next(&composition, 1)
+            engine.convert_next(&dict, &composition, 1)
         );
         assert_eq!(
             vec![
@@ -779,7 +786,7 @@ mod tests {
                     phrase: "一下".to_string()
                 }
             ],
-            engine.convert_next(&composition, 2)
+            engine.convert_next(&dict, &composition, 2)
         );
     }
 

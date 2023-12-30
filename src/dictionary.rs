@@ -8,7 +8,7 @@ use std::{
     iter::Peekable,
     path::Path,
     rc::Rc,
-    sync::Arc,
+    sync::{Arc, RwLock},
 };
 
 use thiserror::Error;
@@ -32,7 +32,7 @@ pub struct DictionaryUpdateError {
     /// TODO: doc
     /// TODO: change this to anyhow::Error?
     #[from]
-    pub source: Box<dyn std::error::Error + Send + Sync>,
+    pub source: Option<Box<dyn std::error::Error + Send + Sync>>,
 }
 
 /// The error type which is returned from building or updating a dictionary.
@@ -301,118 +301,56 @@ pub trait Dictionary: Debug {
     fn entries(&self) -> DictEntries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
-    /// Returns a mutable reference to the dictionary if the underlying
-    /// implementation allows update.
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut>;
-}
 
-/// An interface for updating dictionaries.
-///
-/// For more about the concept of dictionaries generally, please see the
-/// [module-level documentation][crate::dictionary].
-///
-/// # Examples
-///
-/// The std [`HashMap`] implements the `DictionaryMut` trait so it can be used in
-/// tests.
-///
-/// ```
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::collections::HashMap;
-///
-/// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
-///
-/// let mut dict = HashMap::new();
-/// let dict_mut = dict.as_mut_dict().unwrap();
-/// dict_mut.insert(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
-/// # Ok(())
-/// # }
-/// ```
-pub trait DictionaryMut {
+    /// An method for updating dictionaries.
+    ///
+    /// For more about the concept of dictionaries generally, please see the
+    /// [module-level documentation][crate::dictionary].
+    ///
+    /// # Examples
+    ///
+    /// The std [`HashMap`] implements the `DictionaryMut` trait so it can be used in
+    /// tests.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use std::collections::HashMap;
+    ///
+    /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+    ///
+    /// let mut dict = HashMap::new();
+    /// let dict_mut = dict.as_mut_dict().unwrap();
+    /// dict_mut.insert(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
+    /// # Ok(())
+    /// # }
+    /// ```
     /// TODO: doc
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(DictionaryUpdateError { source: None })
+    }
 
     /// TODO: doc
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(DictionaryUpdateError { source: None })
+    }
 
     /// TODO: doc
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError>;
-}
-
-impl<T> Dictionary for Box<T>
-where
-    T: Dictionary + ?Sized,
-{
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        self.as_ref().lookup_phrase(syllables)
-    }
-
-    fn entries(&self) -> DictEntries<'_> {
-        self.as_ref().entries()
-    }
-
-    fn about(&self) -> DictionaryInfo {
-        self.as_ref().about()
-    }
-
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        self.as_mut().as_mut_dict()
-    }
-}
-
-impl<T> Dictionary for Rc<T>
-where
-    T: Dictionary + ?Sized,
-{
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        self.as_ref().lookup_phrase(syllables)
-    }
-
-    fn entries(&self) -> DictEntries<'_> {
-        self.as_ref().entries()
-    }
-
-    fn about(&self) -> DictionaryInfo {
-        self.as_ref().about()
-    }
-
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Rc::get_mut(self).and_then(|this| this.as_mut_dict())
-    }
-}
-
-impl<T> Dictionary for Arc<T>
-where
-    T: Dictionary + ?Sized,
-{
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        self.as_ref().lookup_phrase(syllables)
-    }
-
-    fn entries(&self) -> DictEntries<'_> {
-        self.as_ref().entries()
-    }
-
-    fn about(&self) -> DictionaryInfo {
-        self.as_ref().about()
-    }
-
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Arc::get_mut(self).and_then(|this| this.as_mut_dict())
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(DictionaryUpdateError { source: None })
     }
 }
 
@@ -469,30 +407,28 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
         Default::default()
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Some(self)
-    }
-}
-
-impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase>> {
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
+        let syllables = syllables
+            .into_iter()
+            .map(|s| s.as_ref().clone())
+            .collect::<Vec<_>>();
         let vec = self.entry(syllables.to_vec()).or_default();
         if vec.iter().any(|it| it.as_str() == phrase.as_str()) {
             return Err(DictionaryUpdateError {
-                source: Box::new(DuplicatePhraseError),
+                source: Some(Box::new(DuplicatePhraseError)),
             });
         }
         vec.push(phrase);
         Ok(())
     }
 
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        _syllables: &[Syllable],
+        _syllables: &[Syl],
         _phrase: Phrase,
         _user_freq: u32,
         _time: u64,
@@ -500,11 +436,15 @@ impl DictionaryMut for HashMap<Vec<Syllable>, Vec<Phrase>> {
         Ok(())
     }
 
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
+        let syllables = syllables
+            .into_iter()
+            .map(|s| s.as_ref().clone())
+            .collect::<Vec<_>>();
         let vec = self.entry(syllables.to_vec()).or_default();
         *vec = vec
             .iter()
@@ -561,10 +501,40 @@ impl Dictionary for AnyDictionary {
         }
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
+    fn insert<Syl: AsRef<Syllable>>(
+        &mut self,
+        syllables: &[Syl],
+        phrase: Phrase,
+    ) -> Result<(), DictionaryUpdateError> {
         match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.as_mut_dict(),
-            AnyDictionary::TrieDictionary(dict) => dict.as_mut_dict(),
+            AnyDictionary::SqliteDictionary(dict) => dict.insert(syllables, phrase),
+            AnyDictionary::TrieDictionary(dict) => dict.insert(syllables, phrase),
+        }
+    }
+
+    fn update<Syl: AsRef<Syllable>>(
+        &mut self,
+        syllables: &[Syl],
+        phrase: Phrase,
+        user_freq: u32,
+        time: u64,
+    ) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => {
+                dict.update(syllables, phrase, user_freq, time)
+            }
+            AnyDictionary::TrieDictionary(dict) => dict.update(syllables, phrase, user_freq, time),
+        }
+    }
+
+    fn remove<Syl: AsRef<Syllable>>(
+        &mut self,
+        syllables: &[Syl],
+        phrase_str: &str,
+    ) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.remove(syllables, phrase_str),
+            AnyDictionary::TrieDictionary(dict) => dict.remove(syllables, phrase_str),
         }
     }
 }

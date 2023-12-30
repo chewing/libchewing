@@ -3,9 +3,11 @@
 mod chewing;
 mod symbol;
 
+use std::task::Context;
+
 use crate::zhuyin::Syllable;
 
-pub use self::chewing::ChewingConversionEngine;
+pub use self::chewing::ChewingEngine;
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
 
 /// TODO: doc
@@ -103,9 +105,9 @@ pub struct Composition {
 }
 
 /// TODO: doc
-pub trait ConversionEngine {
+pub trait ConversionEngine<C: ?Sized> {
     /// TODO: doc
-    fn convert(&self, composition: &Composition) -> Vec<Interval>;
+    fn convert(&self, context: &C, composition: &Composition) -> Vec<Interval>;
     /// TODO: doc
-    fn convert_next(&self, composition: &Composition, next: usize) -> Vec<Interval>;
+    fn convert_next(&self, context: &C, composition: &Composition, next: usize) -> Vec<Interval>;
 }

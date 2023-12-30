@@ -2,17 +2,19 @@ use std::{
     cmp::min,
     collections::BTreeMap,
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
+    mem,
     ptr::{null, null_mut},
     rc::Rc,
-    slice,
+    slice, str,
     sync::OnceLock,
     u8,
 };
 
 use chewing::{
-    conversion::{ChewingConversionEngine, Interval, Symbol},
+    conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{
-        LayeredDictionary, Phrase, Phrases, SystemDictionaryLoader, UserDictionaryLoader,
+        Dictionary, LayeredDictionary, Phrase, Phrases, SystemDictionaryLoader,
+        UserDictionaryLoader,
     },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
@@ -92,6 +94,24 @@ unsafe fn global_empty_cstr() -> *mut c_char {
     unsafe { EMPTY_STRING_BUFFER.as_mut_ptr().cast() }
 }
 
+unsafe fn slice_from_ptr_with_nul<'a>(ptr: *const c_char) -> Option<&'a [c_char]> {
+    if ptr.is_null() {
+        return None;
+    }
+    let mut len = 0;
+    let mut needle = ptr;
+    while unsafe { needle.read() } != 0 {
+        needle = unsafe { needle.add(1) };
+        len += 1;
+    }
+    Some(unsafe { slice::from_raw_parts(ptr, len) })
+}
+
+unsafe fn str_from_ptr_with_nul<'a>(ptr: *const c_char) -> Option<&'a str> {
+    unsafe { slice_from_ptr_with_nul(ptr) }
+        .and_then(|data| str::from_utf8(unsafe { mem::transmute(data) }).ok())
+}
+
 #[tracing::instrument(ret)]
 #[no_mangle]
 pub extern "C" fn chewing_new() -> *mut ChewingContext {
@@ -141,8 +161,8 @@ pub extern "C" fn chewing_new2(
     };
     dictionaries.insert(0, user_dictionary);
 
-    let dict = Rc::new(LayeredDictionary::new(dictionaries, vec![]));
-    let conversion_engine = ChewingConversionEngine::new(dict.clone());
+    let dict = LayeredDictionary::new(dictionaries, vec![]);
+    let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
     let editor = Editor::new(conversion_engine, dict);
@@ -550,19 +570,35 @@ pub extern "C" fn chewing_get_phraseChoiceRearward(ctx: *const ChewingContext) -
         None => return -1,
     };
 
-    todo!()
+    ctx.editor.editor_options().phrase_choice_rearward as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c_int) {
-    todo!()
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+
+    ctx.editor.set_editor_options(EditorOptions {
+        auto_learn_phrase: match mode {
+            0 => false,
+            _ => true,
+        },
+        ..Default::default()
+    });
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_get_autoLearn(ctx: *const ChewingContext) -> c_int {
-    todo!()
+    let ctx = match unsafe { ctx.as_ref() } {
+        Some(ctx) => ctx,
+        None => return -1,
+    };
+
+    ctx.editor.editor_options().auto_learn_phrase as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -692,12 +728,32 @@ pub extern "C" fn chewing_userphrase_lookup(
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return 0,
     };
+    let phrase = match unsafe { str_from_ptr_with_nul(phrase_buf) } {
+        Some(ph) => ph,
+        None => return 0,
+    };
+    let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
+        Some(bopomofo) => bopomofo
+            .split_ascii_whitespace()
+            .into_iter()
+            .map_while(|it| it.parse::<Syllable>().ok())
+            .collect::<Vec<_>>(),
+        None => return 0,
+    };
 
-    todo!()
+    match ctx
+        .editor
+        .user_dict()
+        .lookup_phrase(&syllables)
+        .any(|ph| ph.as_str() == phrase)
+    {
+        true => 1,
+        false => 0,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1102,7 +1158,23 @@ pub extern "C" fn chewing_handle_CtrlNum(ctx: *mut ChewingContext, key: c_int) -
         None => return -1,
     };
 
-    todo!()
+    let keycode = match key as u8 {
+        b'0' => KeyCode::N0,
+        b'1' => KeyCode::N1,
+        b'2' => KeyCode::N2,
+        b'3' => KeyCode::N3,
+        b'4' => KeyCode::N4,
+        b'5' => KeyCode::N5,
+        b'6' => KeyCode::N6,
+        b'7' => KeyCode::N7,
+        b'8' => KeyCode::N8,
+        b'9' => KeyCode::N9,
+        _ => return -1,
+    };
+
+    ctx.editor
+        .process_keyevent(ctx.keyboard.map_with_mod(keycode, Modifiers::control()));
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1530,7 +1602,10 @@ pub extern "C" fn chewing_aux_Check(ctx: *const ChewingContext) -> c_int {
         None => return -1,
     };
 
-    todo!()
+    match !ctx.editor.notification().is_empty() {
+        true => 1,
+        false => 0,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1541,7 +1616,7 @@ pub extern "C" fn chewing_aux_Length(ctx: *const ChewingContext) -> c_int {
         None => return -1,
     };
 
-    0
+    ctx.editor.notification().chars().count() as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1552,7 +1627,8 @@ pub extern "C" fn chewing_aux_String(ctx: *const ChewingContext) -> *mut c_char 
         None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
     };
 
-    todo!()
+    let cstring = CString::new(ctx.editor.notification()).unwrap();
+    owned_into_raw(Owned::CString, cstring.into_raw())
 }
 
 #[tracing::instrument(skip(ctx), ret)]

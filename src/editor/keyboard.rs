@@ -46,6 +46,14 @@ impl Modifiers {
             numlock: false,
         }
     }
+    pub const fn control() -> Modifiers {
+        Modifiers {
+            shift: false,
+            ctrl: true,
+            capslock: false,
+            numlock: false,
+        }
+    }
     pub const fn capslock() -> Modifiers {
         Modifiers {
             shift: false,

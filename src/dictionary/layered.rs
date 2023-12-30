@@ -5,8 +5,7 @@ use indexmap::IndexSet;
 use crate::zhuyin::Syllable;
 
 use super::{
-    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryMut, DictionaryUpdateError,
-    Phrase, Phrases,
+    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase, Phrases,
 };
 
 /// A collection of dictionaries that returns the union of the lookup results.
@@ -74,6 +73,9 @@ where
     fn is_blocked(&self, phrase: &str) -> bool {
         self.blocked.iter().any(|b| b.is_blocked(phrase))
     }
+    pub fn base(&mut self) -> &mut T {
+        &mut self.inner[0]
+    }
 }
 
 impl<T, B> Dictionary for LayeredDictionary<T, B>
@@ -131,53 +133,40 @@ where
         }
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Some(self)
-    }
-}
-
-impl<T, B> DictionaryMut for LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.insert(syllables, phrase.clone())?;
-            }
+            // TODO check mutability?
+            let _ = dict.insert(syllables, phrase.clone());
         }
         Ok(())
     }
 
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.update(syllables, phrase.clone(), user_freq, time)?;
-            }
+            // TODO check mutability?
+            let _ = dict.update(syllables, phrase.clone(), user_freq, time);
         }
         Ok(())
     }
 
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.remove(syllables, phrase_str)?;
-            }
+            // TODO check mutability?
+            let _ = dict.remove(syllables, phrase_str);
         }
         Ok(())
     }

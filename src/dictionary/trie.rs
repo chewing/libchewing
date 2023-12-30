@@ -17,8 +17,8 @@ use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 use crate::zhuyin::Syllable;
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut,
-    DuplicatePhraseError, Phrase, Phrases,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DuplicatePhraseError,
+    Phrase, Phrases,
 };
 
 const DICT_FORMAT: u32 = 0;
@@ -342,10 +342,6 @@ impl Dictionary for TrieDictionary {
 
     fn about(&self) -> DictionaryInfo {
         self.info.clone()
-    }
-
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        None
     }
 }
 

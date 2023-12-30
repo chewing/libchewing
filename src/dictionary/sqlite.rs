@@ -7,7 +7,7 @@ use crate::zhuyin::{IntoSyllablesBytes, Syllable};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryMut, DictionaryUpdateError, Phrase, Phrases,
+    DictionaryUpdateError, Phrase, Phrases,
 };
 
 /// TODO: doc
@@ -258,6 +258,14 @@ impl SqliteDictionary {
     }
 }
 
+impl From<RusqliteError> for DictionaryUpdateError {
+    fn from(source: RusqliteError) -> Self {
+        DictionaryUpdateError {
+            source: Some(source.into()),
+        }
+    }
+}
+
 impl Dictionary for SqliteDictionary {
     fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'static> {
         let syllables_bytes = syllables.into_syllables_bytes();
@@ -327,27 +335,9 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        if self.read_only {
-            None
-        } else {
-            Some(self)
-        }
-    }
-}
-
-impl From<RusqliteError> for DictionaryUpdateError {
-    fn from(source: RusqliteError) -> Self {
-        DictionaryUpdateError {
-            source: source.into(),
-        }
-    }
-}
-
-impl DictionaryMut for SqliteDictionary {
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         let syllables_bytes = syllables.into_syllables_bytes();
@@ -362,9 +352,9 @@ impl DictionaryMut for SqliteDictionary {
         Ok(())
     }
 
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
@@ -411,9 +401,9 @@ impl DictionaryMut for SqliteDictionary {
         Ok(())
     }
 
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         let syllables_bytes = syllables.into_syllables_bytes();
@@ -535,7 +525,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use crate::{
-        dictionary::{Dictionary, DictionaryMut, Phrase},
+        dictionary::{Dictionary, Phrase},
         syl,
         zhuyin::Bopomofo,
     };
