@@ -5,7 +5,7 @@ use chewing::{
     dictionary::{AnyDictionary, DictEntries, LayeredDictionary},
     editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},
 };
-use chewing_public::types::IntervalType;
+use chewing_public::types::{IntervalType, MAX_SELKEY};
 use libc::{c_char, c_int, c_uint, c_void};
 
 // use crate::userphrase::UserphraseDbAndEstimate;
@@ -257,7 +257,11 @@ pub struct ChewingContext {
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
     pub(crate) userphrase_iter: Option<Peekable<DictEntries>>,
+    pub(crate) sel_keys: SelKeys,
 }
+
+#[repr(C)]
+pub(crate) struct SelKeys(pub(crate) [c_int; MAX_SELKEY]);
 
 #[repr(C)]
 pub struct Phrase {

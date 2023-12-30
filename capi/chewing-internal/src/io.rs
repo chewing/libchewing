@@ -28,11 +28,12 @@ use chewing::{
     zhuyin::Syllable,
 };
 use chewing_public::types::{
-    ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, SYMBOL_MODE,
+    ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, MAX_SELKEY,
+    SYMBOL_MODE,
 };
 use tracing::{debug, level_filters::LevelFilter, warn};
 
-use crate::types::ChewingContext;
+use crate::types::{ChewingContext, SelKeys};
 
 #[no_mangle]
 pub extern "C" fn rust_link_io() {}
@@ -133,23 +134,20 @@ pub extern "C" fn chewing_new2(
             let _ = OWNED.set(BTreeMap::new());
         }
     }
-    let mut dictionaries = if syspath.is_null() {
-        SystemDictionaryLoader::new()
-            .load()
-            .expect("unable to find any system dictionary")
+    let dictionaries = if syspath.is_null() {
+        SystemDictionaryLoader::new().load()
     } else {
         let search_path = unsafe { CStr::from_ptr(syspath) }
             .to_str()
             .expect("invalid syspath string");
-        SystemDictionaryLoader::new()
-            .sys_path(search_path)
-            .load()
-            .expect("unable to find any system dictionary")
+        SystemDictionaryLoader::new().sys_path(search_path).load()
+    };
+    let mut dictionaries = match dictionaries {
+        Some(d) => d,
+        None => return null_mut(),
     };
     let user_dictionary = if userpath.is_null() {
-        UserDictionaryLoader::new()
-            .load()
-            .expect("unable to load user dictionary")
+        UserDictionaryLoader::new().load()
     } else {
         let data_path = unsafe { CStr::from_ptr(userpath) }
             .to_str()
@@ -157,7 +155,10 @@ pub extern "C" fn chewing_new2(
         UserDictionaryLoader::new()
             .userphrase_path(data_path)
             .load()
-            .expect("unable to load user dictionary")
+    };
+    let user_dictionary = match user_dictionary {
+        Some(d) => d,
+        None => return null_mut(),
     };
     dictionaries.insert(0, user_dictionary);
 
@@ -174,6 +175,18 @@ pub extern "C" fn chewing_new2(
         cand_iter: None,
         interval_iter: None,
         userphrase_iter: None,
+        sel_keys: SelKeys([
+            b'1' as i32,
+            b'2' as i32,
+            b'3' as i32,
+            b'4' as i32,
+            b'5' as i32,
+            b'6' as i32,
+            b'7' as i32,
+            b'8' as i32,
+            b'9' as i32,
+            b'0' as i32,
+        ]),
     });
     Box::into_raw(context)
 }
@@ -348,6 +361,10 @@ pub extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_int) {
         None => return,
     };
 
+    if n == 0 || n > 10 {
+        return;
+    }
+
     ctx.editor.set_editor_options(EditorOptions {
         candidates_per_page: n as usize,
         ..ctx.editor.editor_options()
@@ -373,6 +390,10 @@ pub extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n: c_int
         None => return,
     };
 
+    if n < 0 || n > 39 {
+        return;
+    }
+
     ctx.editor.set_editor_options(EditorOptions {
         auto_commit_threshold: n as usize,
         ..ctx.editor.editor_options()
@@ -397,7 +418,13 @@ pub extern "C" fn chewing_set_selKey(ctx: *mut ChewingContext, sel_keys: *const 
         Some(ctx) => ctx,
         None => return,
     };
-    // todo!()
+
+    if sel_keys.is_null() || len != 10 {
+        return;
+    }
+
+    let sel_keys = unsafe { slice::from_raw_parts(sel_keys, len as usize) };
+    ctx.sel_keys.0.copy_from_slice(sel_keys);
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -408,7 +435,7 @@ pub extern "C" fn chewing_get_selKey(ctx: *const ChewingContext) -> *mut c_int {
         None => return null_mut(),
     };
 
-    todo!()
+    ctx.sel_keys.0.as_ptr().cast_mut()
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -418,6 +445,10 @@ pub extern "C" fn chewing_set_addPhraseDirection(ctx: *mut ChewingContext, direc
         Some(ctx) => ctx,
         None => return,
     };
+
+    if direction != 0 && direction != 1 {
+        return;
+    }
 
     ctx.editor.set_editor_options(EditorOptions {
         user_phrase_add_dir: match direction {
@@ -450,6 +481,10 @@ pub extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, mode: c
         None => return,
     };
 
+    if mode != 0 && mode != 1 {
+        return;
+    }
+
     ctx.editor.set_editor_options(EditorOptions {
         space_is_select_key: match mode {
             0 => false,
@@ -480,6 +515,10 @@ pub extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mode: c_i
         Some(ctx) => ctx,
         None => return,
     };
+
+    if mode != 0 && mode != 1 {
+        return;
+    }
 
     ctx.editor.set_editor_options(EditorOptions {
         esc_clear_all_buffer: match mode {
@@ -512,6 +551,10 @@ pub extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode: c_int
         None => return,
     };
 
+    if mode != 0 && mode != 1 {
+        return;
+    }
+
     ctx.editor.set_editor_options(EditorOptions {
         auto_shift_cursor: match mode {
             0 => false,
@@ -529,7 +572,7 @@ pub extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) -> c_int 
         None => return -1,
     };
 
-    todo!()
+    ctx.editor.editor_options().auto_shift_cursor as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -539,6 +582,10 @@ pub extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, mode: c_
         Some(ctx) => ctx,
         None => return,
     };
+
+    if mode != 0 && mode != 1 {
+        return;
+    }
 
     ctx.editor.set_editor_options(EditorOptions {
         easy_symbol_input: match mode {
@@ -568,6 +615,10 @@ pub extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingContext, mod
         None => return,
     };
 
+    if mode != 0 && mode != 1 {
+        return;
+    }
+
     ctx.editor.set_editor_options(EditorOptions {
         phrase_choice_rearward: match mode {
             0 => false,
@@ -595,6 +646,10 @@ pub extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c_int) {
         Some(ctx) => ctx,
         None => return,
     };
+
+    if mode != 0 && mode != 1 {
+        return;
+    }
 
     ctx.editor.set_editor_options(EditorOptions {
         disable_auto_learn_phrase: match mode {
@@ -1253,6 +1308,31 @@ pub extern "C" fn chewing_handle_Default(ctx: *mut ChewingContext, key: c_int) -
         None => return -1,
     };
 
+    // XXX hack for selkey
+    let key = if ctx.editor.is_selecting() {
+        match ctx.sel_keys.0.iter().position(|&it| it == key) {
+            Some(idx) => {
+                let key = match idx {
+                    0 => b'1',
+                    1 => b'2',
+                    2 => b'3',
+                    3 => b'4',
+                    4 => b'5',
+                    5 => b'6',
+                    6 => b'7',
+                    7 => b'8',
+                    8 => b'9',
+                    9 => b'0',
+                    _ => b'0',
+                };
+                key as c_int
+            }
+            None => key,
+        }
+    } else {
+        key
+    };
+
     ctx.editor
         .process_keyevent(ctx.keyboard.map_ascii(key as u8));
     0
@@ -1308,7 +1388,8 @@ pub extern "C" fn chewing_handle_DblTab(ctx: *mut ChewingContext) -> c_int {
         None => return -1,
     };
 
-    todo!()
+    // todo!()
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1594,7 +1675,15 @@ pub extern "C" fn chewing_cand_string_by_index(
         None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
     };
 
-    todo!()
+    if let Ok(phrases) = ctx.editor.all_candidates() {
+        if let Some(phrase) = phrases.get(index as usize) {
+            return owned_into_raw(
+                Owned::CString,
+                CString::new(phrase.to_owned()).unwrap().into_raw(),
+            );
+        }
+    }
+    owned_into_raw(Owned::CString, CString::default().into_raw())
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1610,7 +1699,7 @@ pub extern "C" fn chewing_cand_string_by_index_static(
 
     if let Ok(phrases) = ctx.editor.all_candidates() {
         if let Some(phrase) = phrases.get(index as usize) {
-            return unsafe { global_cstr(&String::from(phrase)) };
+            return unsafe { global_cstr(&phrase) };
         }
     }
     unsafe { global_empty_cstr() }
@@ -1747,7 +1836,7 @@ pub extern "C" fn chewing_aux_String_static(ctx: *const ChewingContext) -> *cons
         None => return unsafe { global_empty_cstr() },
     };
 
-    todo!()
+    unsafe { global_cstr(&ctx.editor.notification()) }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -1887,15 +1976,13 @@ pub extern "C" fn chewing_zuin_String(
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Init(data_path: *const c_char, hash_path: *const c_char) -> c_int {
-    todo!()
+    0
 }
 
 #[tracing::instrument(ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_Terminate() {
-    todo!()
-}
+pub extern "C" fn chewing_Terminate() {}
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
@@ -1904,19 +1991,32 @@ pub extern "C" fn chewing_Configure(
     ctx: *mut ChewingContext,
     pcd: *mut ChewingConfigData,
 ) -> c_int {
-    todo!()
+    let pcd = match unsafe { pcd.as_ref() } {
+        Some(pcd) => pcd,
+        None => return -1,
+    };
+
+    chewing_set_candPerPage(ctx, pcd.cand_per_page);
+    chewing_set_maxChiSymbolLen(ctx, pcd.max_chi_symbol_len);
+    chewing_set_selKey(ctx, pcd.sel_key.as_ptr(), MAX_SELKEY as i32);
+    chewing_set_addPhraseDirection(ctx, pcd.b_add_phrase_forward);
+    chewing_set_spaceAsSelection(ctx, pcd.b_space_as_selection);
+    chewing_set_escCleanAllBuf(ctx, pcd.b_esc_clean_all_buf);
+    chewing_set_autoShiftCur(ctx, pcd.b_auto_shift_cur);
+    chewing_set_easySymbolInput(ctx, pcd.b_easy_symbol_input);
+    chewing_set_phraseChoiceRearward(ctx, pcd.b_phrase_choice_rearward);
+
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_set_hsuSelKeyType(ctx: *mut ChewingContext, mode: c_int) {
-    todo!()
-}
+pub extern "C" fn chewing_set_hsuSelKeyType(ctx: *mut ChewingContext, mode: c_int) {}
 
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_get_hsuSelKeyType(ctx: *mut ChewingContext) -> c_int {
-    todo!()
+    0
 }

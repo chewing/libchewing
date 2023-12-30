@@ -78,11 +78,11 @@ impl Default for EditorOptions {
             auto_shift_cursor: false,
             phrase_choice_rearward: false,
             disable_auto_learn_phrase: false,
-            auto_commit_threshold: 16,
+            auto_commit_threshold: 39,
             candidates_per_page: 10,
             language_mode: LanguageMode::Chinese,
             character_form: CharacterForm::Halfwidth,
-            user_phrase_add_dir: UserPhraseAddDirection::Backward,
+            user_phrase_add_dir: UserPhraseAddDirection::Forward,
         }
     }
 }
