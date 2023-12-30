@@ -1,10 +1,8 @@
 use std::{
-    ffi::CStr,
+    ffi::{c_char, c_int, c_uchar, CStr},
     ptr::{self, null},
     str,
 };
-
-use libc::{c_char, c_int, c_uchar};
 
 #[no_mangle]
 pub extern "C" fn rust_link_utf8() {}

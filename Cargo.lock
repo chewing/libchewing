@@ -170,8 +170,6 @@ dependencies = [
  "cbindgen",
  "chewing",
  "chewing-public",
- "ffi-opaque",
- "libc",
  "tracing",
  "tracing-subscriber",
 ]
@@ -274,12 +272,6 @@ name = "fastrand"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
-
-[[package]]
-name = "ffi-opaque"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec54ac60a7f2ee9a97cad9946f9bf629a3bc6a7ae59e68983dc9318f5a54b81a"
 
 [[package]]
 name = "getrandom"

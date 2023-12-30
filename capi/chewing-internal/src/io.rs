@@ -4,7 +4,6 @@ use std::{
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
     mem,
     ptr::{null, null_mut},
-    rc::Rc,
     slice, str,
     sync::OnceLock,
     u8,
@@ -12,15 +11,11 @@ use std::{
 
 use chewing::{
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{
-        Dictionary, LayeredDictionary, Phrase, Phrases, SystemDictionaryLoader,
-        UserDictionaryLoader,
-    },
+    dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
-            DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyBehavior, KeyboardLayoutCompat, Pinyin,
-            Standard,
+            DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
         SyllableEditor, UserPhraseAddDirection,
@@ -31,7 +26,7 @@ use chewing_public::types::{
     ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, MAX_SELKEY,
     SYMBOL_MODE,
 };
-use tracing::{debug, level_filters::LevelFilter, warn};
+use tracing::{debug, warn};
 
 use crate::types::{ChewingContext, SelKeys};
 
@@ -41,7 +36,6 @@ pub extern "C" fn rust_link_io() {}
 enum Owned {
     CString,
     CUShortSlice(usize),
-    CIntSlice(usize),
 }
 
 static mut OWNED: OnceLock<BTreeMap<*mut c_void, Owned>> = OnceLock::new();
@@ -71,7 +65,6 @@ fn drop_owned(ptr: *mut c_void) {
                     Owned::CUShortSlice(len) => {
                         drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) })
                     }
-                    Owned::CIntSlice(len) => drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) }),
                 }
             }
         }

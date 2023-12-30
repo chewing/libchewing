@@ -1,9 +1,11 @@
-use std::{ffi::CString, slice};
+use std::{
+    ffi::{c_char, CString},
+    slice,
+};
 
 use chewing::dictionary::Phrase;
-use libc::c_char;
 
-pub trait CopyToCString {
+pub(crate) trait CopyToCString {
     fn copy_to(&self, buf: &mut [c_char]);
 }
 

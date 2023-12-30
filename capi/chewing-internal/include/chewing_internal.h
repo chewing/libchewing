@@ -68,16 +68,6 @@
 
 #define SYMBOL_CHOICE_UPDATE 3
 
-typedef enum BOPOMOFO {
-  BOPOMOFO_IGNORE,
-  BOPOMOFO_ABSORB,
-  BOPOMOFO_COMMIT,
-  BOPOMOFO_KEY_ERROR,
-  BOPOMOFO_ERROR,
-  BOPOMOFO_NO_WORD,
-  BOPOMOFO_OPEN_SYMBOL_TABLE,
-} BOPOMOFO;
-
 typedef enum KB {
   KB_DEFAULT,
   KB_HSU,
@@ -95,35 +85,36 @@ typedef enum KB {
   KB_TYPE_NUM,
 } KB;
 
-enum UserUpdate
-#ifdef __cplusplus
-  : uint8_t
-#endif // __cplusplus
- {
-  USER_UPDATE_INSERT = 1,
-  USER_UPDATE_MODIFY = 2,
-  USER_UPDATE_FAIL = 4,
-};
-#ifndef __cplusplus
-typedef uint8_t UserUpdate;
-#endif // __cplusplus
-
 typedef struct ChewingContext ChewingContext;
 
-typedef struct ChewingData ChewingData;
-
-typedef struct Phrase {
-  char phrase[MAX_PHONE_SEQ_BUF];
-  int freq;
-} Phrase;
+/**
+ * A type containing a phrase string and its frequency.
+ *
+ * # Examples
+ *
+ * A `Phrase` can be created from/to a tuple.
+ *
+ * ```
+ * use chewing::dictionary::Phrase;
+ *
+ * let phrase = Phrase::new("測", 1);
+ * assert_eq!(phrase, ("測", 1).into());
+ * assert_eq!(("測".to_string(), 1u32), phrase.into());
+ * ```
+ *
+ * Phrases are ordered by their frequency.
+ *
+ * ```
+ * use chewing::dictionary::Phrase;
+ *
+ * assert!(Phrase::new("測", 100) > Phrase::new("冊", 1));
+ * ```
+ */
+typedef struct Phrase Phrase;
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-extern int toPreeditBufIndex(struct ChewingData *pgdata, int pos);
-
-extern int HaninSymbolInput(struct ChewingData *pgdata);
 
 void rust_link_io(void);
 
