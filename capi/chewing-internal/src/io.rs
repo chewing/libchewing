@@ -591,7 +591,7 @@ pub extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c_int) {
     };
 
     ctx.editor.set_editor_options(EditorOptions {
-        auto_learn_phrase: match mode {
+        disable_auto_learn_phrase: match mode {
             0 => false,
             _ => true,
         },
@@ -607,7 +607,7 @@ pub extern "C" fn chewing_get_autoLearn(ctx: *const ChewingContext) -> c_int {
         None => return -1,
     };
 
-    ctx.editor.editor_options().auto_learn_phrase as c_int
+    ctx.editor.editor_options().disable_auto_learn_phrase as c_int
 }
 
 #[tracing::instrument(skip(ctx), ret)]

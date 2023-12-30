@@ -423,7 +423,7 @@ void test_userphrase_auto_learn_only_after_commit()
     chewing_delete(ctx);
 }
 
-void test_userphrase()
+void test_userphrase_autolearn()
 {
     test_userphrase_auto_learn();
     test_userphrase_auto_learn_with_symbol();
@@ -931,7 +931,7 @@ int main(int argc, char *argv[])
     test_ShiftLeft();
     test_ShiftRight();
     test_CtrlNum();
-    // test_userphrase();
+    test_userphrase_autolearn();
     // test_userphrase_enumerate();
     // test_userphrase_manipulate();
     // test_userphrase_lookup();

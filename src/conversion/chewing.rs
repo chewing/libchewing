@@ -498,7 +498,10 @@ mod tests {
             (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),
             (vec![syl![H, U, EI, TONE4]], vec![("會", 1).into()]),
             (vec![syl![D, AI, TONE4]], vec![("代", 1).into()]),
-            (vec![syl![B, I, AU, TONE3]], vec![("表", 1).into()]),
+            (
+                vec![syl![B, I, AU, TONE3]],
+                vec![("表", 1).into(), ("錶", 1).into()],
+            ),
             (
                 vec![syl![G, U, O, TONE2], syl![M, I, EN, TONE2]],
                 vec![("國民", 200).into()],
@@ -717,6 +720,43 @@ mod tests {
                 end: 3,
                 is_phrase: true,
                 phrase: "新酷音".to_string()
+            },],
+            engine.convert(&dict, &composition)
+        );
+    }
+
+    #[test]
+    fn multiple_single_word_selection() {
+        let dict = test_dictionary();
+        let engine = ChewingEngine::new();
+        let composition = Composition {
+            buffer: vec![
+                Symbol::Syllable(syl![D, AI, TONE4]),
+                Symbol::Syllable(syl![B, I, AU, TONE3]),
+            ],
+            selections: vec![
+                Interval {
+                    start: 0,
+                    end: 1,
+                    is_phrase: true,
+                    phrase: "代".to_string(),
+                },
+                Interval {
+                    start: 1,
+                    end: 2,
+                    is_phrase: true,
+                    phrase: "錶".to_string(),
+                },
+            ],
+            breaks: vec![],
+            glues: vec![],
+        };
+        assert_eq!(
+            vec![Interval {
+                start: 0,
+                end: 2,
+                is_phrase: true,
+                phrase: "代錶".to_string()
             },],
             engine.convert(&dict, &composition)
         );

@@ -22,7 +22,6 @@ use crate::{
     },
     dictionary::{AnyDictionary, Dictionary, LayeredDictionary},
     editor::keyboard::KeyCode,
-    syl,
     zhuyin::Syllable,
 };
 
@@ -62,7 +61,7 @@ pub struct EditorOptions {
     pub space_is_select_key: bool,
     pub auto_shift_cursor: bool,
     pub phrase_choice_rearward: bool,
-    pub auto_learn_phrase: bool,
+    pub disable_auto_learn_phrase: bool,
     pub auto_commit_threshold: usize,
     pub candidates_per_page: usize,
     pub language_mode: LanguageMode,
@@ -78,7 +77,7 @@ impl Default for EditorOptions {
             space_is_select_key: false,
             auto_shift_cursor: false,
             phrase_choice_rearward: false,
-            auto_learn_phrase: true,
+            disable_auto_learn_phrase: false,
             auto_commit_threshold: 16,
             candidates_per_page: 10,
             language_mode: LanguageMode::Chinese,
@@ -441,6 +440,58 @@ where
         self.state = Transition::Entering(EditorKeyBehavior::Commit, Entering);
         // FIXME fix selections and breaks
     }
+    // FIXME assumes intervals covers whole composition buffer
+    fn auto_learn(&mut self, intervals: &[Interval]) {
+        debug!("intervals {:?}", intervals);
+        let mut pending = String::new();
+        let mut syllables = Vec::new();
+        for interval in intervals {
+            if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.phrase) {
+                pending.push_str(&interval.phrase);
+                syllables.extend_from_slice(&self.com.inner.buffer[interval.start..interval.end]);
+            } else {
+                if !pending.is_empty() {
+                    debug!("autolearn-2 {:?} as {}", &syllables, &pending);
+                    let _ = self.dict.update(&syllables, (&pending, 100).into(), 100, 0);
+                    pending.clear();
+                    syllables.clear();
+                }
+                if interval.is_phrase {
+                    debug!(
+                        "autolearn-3 {:?} as {}",
+                        &self.com.inner.buffer[interval.start..interval.end],
+                        &interval.phrase
+                    );
+                    let _ = self.dict.update(
+                        &self.com.inner.buffer[interval.start..interval.end],
+                        (&interval.phrase, 100).into(),
+                        100,
+                        100,
+                    );
+                }
+            }
+        }
+        if !pending.is_empty() {
+            debug!("autolearn-1 {:?} as {}", &syllables, &pending);
+            let _ = self.dict.update(&syllables, (&pending, 100).into(), 100, 0);
+            pending.clear();
+            syllables.clear();
+        }
+    }
+}
+
+#[rustfmt::skip]
+fn is_break_word(word: &str) -> bool {
+    ["是", "的", "了", "不",
+     "也", "而", "你", "我",
+     "他", "與", "它", "她",
+     "其", "就", "和", "或",
+     "們", "性", "員", "子",
+     "上", "下", "中", "內",
+     "外", "化", "者", "家",
+     "兒", "年", "月", "日",
+     "時", "分", "秒", "街",
+     "路", "村", "在"].contains(&word)
 }
 
 impl<C> Editor<C>
@@ -695,8 +746,12 @@ impl Entering {
             }
             Enter => {
                 editor.commit_buffer.clear();
-                let output = editor
-                    .conversion()
+                let intervals = editor.conversion();
+                debug!("buffer {:?}", editor.com);
+                if !editor.options.disable_auto_learn_phrase {
+                    editor.auto_learn(&intervals);
+                }
+                let output = intervals
                     .into_iter()
                     .map(|interval| interval.phrase)
                     .collect::<String>();

@@ -3,6 +3,8 @@
 mod chewing;
 mod symbol;
 
+use std::cmp::{max, min};
+
 use crate::zhuyin::Syllable;
 
 pub use self::chewing::ChewingEngine;
@@ -25,6 +27,9 @@ impl Interval {
     /// TODO: doc
     pub fn contains(&self, other: &Interval) -> bool {
         self.start <= other.start && self.end >= other.end
+    }
+    pub fn overlaps(&self, other: &Interval) -> bool {
+        max(self.start, other.start) < min(self.end, other.end)
     }
     /// TODO: doc
     pub fn len(&self) -> usize {

@@ -157,6 +157,15 @@ impl CompositionEditor {
         }
     }
     pub(crate) fn select(&mut self, interval: Interval) {
+        let mut to_remove = vec![];
+        for (i, selection) in self.inner.selections.iter().enumerate() {
+            if selection.overlaps(&interval) {
+                to_remove.push(i);
+            }
+        }
+        for i in to_remove {
+            self.inner.selections.swap_remove(i);
+        }
         self.inner.selections.push(interval);
     }
 }
