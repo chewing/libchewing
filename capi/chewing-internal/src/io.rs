@@ -173,6 +173,7 @@ pub extern "C" fn chewing_new2(
         kbcompat_iter: None,
         cand_iter: None,
         interval_iter: None,
+        userphrase_iter: None,
     });
     Box::into_raw(context)
 }
@@ -660,12 +661,13 @@ pub extern "C" fn chewing_set_logger(
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_userphrase_enumerate(ctx: *mut ChewingContext) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return -1,
     };
 
-    todo!()
+    ctx.userphrase_iter = Some(ctx.editor.user_dict().entries().peekable());
+    0
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -675,12 +677,37 @@ pub extern "C" fn chewing_userphrase_has_next(
     phrase_len: *mut c_uint,
     bopomofo_len: *mut c_uint,
 ) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return 0,
     };
 
-    todo!()
+    if ctx.userphrase_iter.is_none() {
+        return 0;
+    }
+
+    match ctx.userphrase_iter.as_mut().unwrap().peek() {
+        Some(entry) => {
+            if !phrase_len.is_null() {
+                let phrase = entry.1.as_str().as_bytes();
+                unsafe { phrase_len.write((phrase.len() + 1) as u32) }
+            }
+            if !bopomofo_len.is_null() {
+                let bopomofo = entry
+                    .0
+                    .iter()
+                    .map(|it| it.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                unsafe { bopomofo_len.write((bopomofo.len() + 1) as u32) }
+            }
+            1
+        }
+        None => {
+            ctx.userphrase_iter = None;
+            0
+        }
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -692,12 +719,42 @@ pub extern "C" fn chewing_userphrase_get(
     bopomofo_buf: *mut c_char,
     bopomofo_len: c_uint,
 ) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return -1,
     };
 
-    todo!()
+    if ctx.userphrase_iter.is_none() {
+        return -1;
+    }
+
+    match ctx.userphrase_iter.as_mut().unwrap().next() {
+        Some(entry) => {
+            if !phrase_buf.is_null() {
+                let phrase = entry.1.as_str().as_bytes();
+                let phrase_buf =
+                    unsafe { slice::from_raw_parts_mut(phrase_buf.cast(), phrase_len as usize) };
+                phrase_buf[..phrase.len()].copy_from_slice(phrase);
+                phrase_buf[phrase.len()] = 0;
+            }
+            if !bopomofo_buf.is_null() {
+                let bopomofo = entry
+                    .0
+                    .iter()
+                    .map(|it| it.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                let bopomofo = bopomofo.as_bytes();
+                let bopomofo_buf = unsafe {
+                    slice::from_raw_parts_mut(bopomofo_buf.cast(), bopomofo_len as usize)
+                };
+                bopomofo_buf[..bopomofo.len()].copy_from_slice(bopomofo);
+                bopomofo_buf[bopomofo.len()] = 0;
+            }
+            0
+        }
+        None => -1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -707,12 +764,26 @@ pub extern "C" fn chewing_userphrase_add(
     phrase_buf: *const c_char,
     bopomofo_buf: *const c_char,
 ) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return -1,
     };
+    let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
+        Some(bopomofo) => bopomofo
+            .split_ascii_whitespace()
+            .into_iter()
+            .map_while(|it| it.parse::<Syllable>().ok())
+            .collect::<Vec<_>>(),
+        None => return 0,
+    };
 
-    todo!()
+    match unsafe { str_from_ptr_with_nul(phrase_buf) } {
+        Some(phrase) => {
+            ctx.editor.learn_phrase(&syllables, &phrase);
+            1
+        }
+        None => -1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]

@@ -252,7 +252,7 @@ impl Display for Phrase {
 pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
 /// TODO: doc
-pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
+pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 
 /// An interface for looking up dictionaries.
 ///
@@ -294,7 +294,7 @@ pub trait Dictionary: Debug {
     /// result should use a stable order each time for the same input.
     fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_>;
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries<'_>;
+    fn entries(&self) -> DictEntries;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
 
@@ -391,10 +391,11 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
             .unwrap_or_else(|| Box::new(std::iter::empty()))
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> DictEntries {
         Box::new(
-            self.iter()
-                .flat_map(|(k, v)| v.iter().map(|phrase| (k.clone(), phrase.clone()))),
+            self.clone()
+                .into_iter()
+                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
         )
     }
 
@@ -484,7 +485,7 @@ impl Dictionary for AnyDictionary {
         }
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> DictEntries {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.entries(),
             AnyDictionary::TrieDictionary(dict) => dict.entries(),

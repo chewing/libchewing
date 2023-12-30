@@ -752,12 +752,20 @@ mod tests {
             glues: vec![],
         };
         assert_eq!(
-            vec![Interval {
-                start: 0,
-                end: 2,
-                is_phrase: true,
-                phrase: "代錶".to_string()
-            },],
+            vec![
+                Interval {
+                    start: 0,
+                    end: 1,
+                    is_phrase: true,
+                    phrase: "代".to_string()
+                },
+                Interval {
+                    start: 1,
+                    end: 2,
+                    is_phrase: true,
+                    phrase: "錶".to_string()
+                }
+            ],
             engine.convert(&dict, &composition)
         );
     }

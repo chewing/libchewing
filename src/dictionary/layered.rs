@@ -121,7 +121,7 @@ where
         )
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> DictEntries {
         todo!("entries from all layers")
         // Box::new(std::iter::empty())
     }

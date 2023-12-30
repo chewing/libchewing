@@ -297,7 +297,8 @@ impl Dictionary for SqliteDictionary {
         )
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    // FIXME too many clone
+    fn entries(&self) -> DictEntries {
         let mut stmt = self
             .conn
             .prepare_cached(

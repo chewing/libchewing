@@ -265,7 +265,6 @@ where
             Ok(())
         }
     }
-    #[tracing::instrument(skip(self), ret)]
     fn learn_phrase_in_range(&mut self, start: usize, end: usize) -> Result<String, String> {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
@@ -300,6 +299,9 @@ where
             .insert(&syllables, (&phrase, 100).into())
             .map(|_| phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned())
+    }
+    pub fn learn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
+        let _ = self.dict.update(&syllables, (phrase, 100).into(), 0, 0);
     }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {

@@ -336,7 +336,7 @@ impl Dictionary for TrieDictionary {
         })
     }
 
-    fn entries(&self) -> super::DictEntries<'_> {
+    fn entries(&self) -> super::DictEntries {
         todo!();
     }
 

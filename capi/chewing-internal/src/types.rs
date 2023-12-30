@@ -2,7 +2,7 @@ use std::{fmt::Debug, iter::Peekable, rc::Rc};
 
 use chewing::{
     conversion::{ChewingEngine, Interval},
-    dictionary::{AnyDictionary, LayeredDictionary},
+    dictionary::{AnyDictionary, DictEntries, LayeredDictionary},
     editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},
 };
 use chewing_public::types::IntervalType;
@@ -256,6 +256,7 @@ pub struct ChewingContext {
     pub(crate) kbcompat_iter: Option<Peekable<Box<dyn Iterator<Item = KeyboardLayoutCompat>>>>,
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
+    pub(crate) userphrase_iter: Option<Peekable<DictEntries>>,
 }
 
 #[repr(C)]
