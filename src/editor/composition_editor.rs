@@ -25,6 +25,7 @@ impl CompositionEditor {
         if let Some(cursor) = self.cursor_stack.pop() {
             self.cursor = cursor;
         }
+        self.cursor = min(self.cursor, self.inner.buffer.len());
     }
     pub(crate) fn clamp_cursor(&mut self) {
         if self.cursor == self.inner.buffer.len() {
@@ -71,17 +72,23 @@ impl CompositionEditor {
         self.inner.breaks.clear();
         self.cursor = 0;
     }
+    pub(crate) fn pop_front(&mut self, n: usize) {
+        assert!(n < self.inner.buffer.len());
+        self.inner.buffer.splice(0..n, []);
+        self.cursor -= n;
+    }
     pub(crate) fn remove_after_cursor(&mut self) {
         if self.cursor == self.inner.buffer.len() {
             return;
         }
-        self.inner.buffer.splice(self.cursor..self.cursor + 1, []);
+        self.inner.buffer.remove(self.cursor);
     }
     pub(crate) fn remove_before_cursor(&mut self) {
         if self.cursor == 0 {
             return;
         }
-        self.inner.buffer.splice(self.cursor - 1..self.cursor, []);
+        self.inner.buffer.remove(self.cursor - 1);
+        self.cursor -= 1;
     }
     pub(crate) fn move_cursor_to_end(&mut self) {
         self.cursor = self.inner.buffer.len();

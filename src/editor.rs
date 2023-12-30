@@ -143,9 +143,11 @@ where
         }
     }
     pub fn clear(&mut self) {
+        self.state = Transition::Entering(EditorKeyBehavior::Absorb, Entering);
         self.com.clear();
         self.syl.clear();
         self.commit_buffer.clear();
+        self.notice_buffer.clear();
     }
     pub fn clear_syllable_editor(&mut self) {
         self.syl.clear();
@@ -422,9 +424,6 @@ where
     fn cancel_selecting(&mut self) {
         // pop cursor?
     }
-    fn start_hanin_symbol_input(&mut self) {
-        todo!()
-    }
     fn try_auto_commit(&mut self) {
         let intervals: Vec<_> = self.intervals().collect();
         let len: usize = intervals.iter().map(|it| it.len()).sum();
@@ -441,7 +440,7 @@ where
                 break;
             }
         }
-        self.com.inner.buffer.splice(0..remove, []);
+        self.com.pop_front(remove);
         self.state = Transition::Entering(EditorKeyBehavior::Commit, Entering);
         // FIXME fix selections and breaks
     }
@@ -630,10 +629,9 @@ impl Entering {
             }
             code @ (N0 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) if ev.modifiers.ctrl => {
                 if code == N0 || code == N1 {
-                    editor.start_hanin_symbol_input();
                     return Transition::Selecting(
                         EditorKeyBehavior::Absorb,
-                        Selecting::new_phrase(editor, self),
+                        Selecting::new_symbol(editor, self),
                     );
                 }
                 let n = code as usize;
@@ -786,7 +784,7 @@ impl Entering {
                 LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
                     Transition::Selecting(
                         EditorKeyBehavior::Absorb,
-                        Selecting::new_symbol(editor, Entering),
+                        Selecting::new_symbol(editor, self),
                     )
                 }
                 LanguageMode::Chinese if ev.code == Space => {
@@ -911,7 +909,9 @@ impl EnteringSyllable {
                     Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self)
                 }
                 KeyBehavior::Commit => {
-                    editor.com.push(Symbol::Syllable(editor.syl.read()));
+                    if editor.dict.lookup_word(editor.syl.read()).next().is_some() {
+                        editor.com.push(Symbol::Syllable(editor.syl.read()));
+                    }
                     editor.syl.clear();
                     Transition::Entering(EditorKeyBehavior::Absorb, self.into())
                 }
