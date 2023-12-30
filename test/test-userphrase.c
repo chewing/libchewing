@@ -930,7 +930,7 @@ int main(int argc, char *argv[])
 
     test_ShiftLeft();
     test_ShiftRight();
-    // test_CtrlNum();
+    test_CtrlNum();
     // test_userphrase();
     // test_userphrase_enumerate();
     // test_userphrase_manipulate();

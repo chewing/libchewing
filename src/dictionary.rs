@@ -1,14 +1,11 @@
 //! Dictionaries for looking up phrases.
 
 use std::{
-    borrow::{Borrow, Cow},
+    borrow::Borrow,
     cmp::Ordering,
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
-    iter::Peekable,
     path::Path,
-    rc::Rc,
-    sync::{Arc, RwLock},
 };
 
 use thiserror::Error;
@@ -275,8 +272,7 @@ pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a
 /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
 ///
 /// let mut dict = HashMap::new();
-/// let dict_mut = dict.as_mut_dict().unwrap();
-/// dict_mut.insert(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
+/// <HashMap<_, _> as Dictionary>::insert(&mut dict, &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
 /// for phrase in dict.lookup_word(
 ///     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
@@ -319,8 +315,7 @@ pub trait Dictionary: Debug {
     /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
     ///
     /// let mut dict = HashMap::new();
-    /// let dict_mut = dict.as_mut_dict().unwrap();
-    /// dict_mut.insert(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
+    /// <HashMap<_, _> as Dictionary>::insert(&mut dict, &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
     /// # Ok(())
     /// # }
     /// ```
@@ -477,6 +472,7 @@ impl BlockList for () {
 pub enum AnyDictionary {
     SqliteDictionary(SqliteDictionary),
     TrieDictionary(TrieDictionary),
+    HashMapDictionary(HashMap<Vec<Syllable>, Vec<Phrase>>),
 }
 
 impl Dictionary for AnyDictionary {
@@ -484,6 +480,7 @@ impl Dictionary for AnyDictionary {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.lookup_phrase(syllables),
             AnyDictionary::TrieDictionary(dict) => dict.lookup_phrase(syllables),
+            AnyDictionary::HashMapDictionary(dict) => dict.lookup_phrase(syllables),
         }
     }
 
@@ -491,6 +488,7 @@ impl Dictionary for AnyDictionary {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.entries(),
             AnyDictionary::TrieDictionary(dict) => dict.entries(),
+            AnyDictionary::HashMapDictionary(dict) => dict.entries(),
         }
     }
 
@@ -498,6 +496,7 @@ impl Dictionary for AnyDictionary {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.about(),
             AnyDictionary::TrieDictionary(dict) => dict.about(),
+            AnyDictionary::HashMapDictionary(dict) => dict.about(),
         }
     }
 
@@ -509,6 +508,9 @@ impl Dictionary for AnyDictionary {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.insert(syllables, phrase),
             AnyDictionary::TrieDictionary(dict) => dict.insert(syllables, phrase),
+            AnyDictionary::HashMapDictionary(dict) => {
+                <HashMap<_, _> as Dictionary>::insert(dict, syllables, phrase)
+            }
         }
     }
 
@@ -524,6 +526,9 @@ impl Dictionary for AnyDictionary {
                 dict.update(syllables, phrase, user_freq, time)
             }
             AnyDictionary::TrieDictionary(dict) => dict.update(syllables, phrase, user_freq, time),
+            AnyDictionary::HashMapDictionary(dict) => {
+                dict.update(syllables, phrase, user_freq, time)
+            }
         }
     }
 
@@ -535,6 +540,9 @@ impl Dictionary for AnyDictionary {
         match self {
             AnyDictionary::SqliteDictionary(dict) => dict.remove(syllables, phrase_str),
             AnyDictionary::TrieDictionary(dict) => dict.remove(syllables, phrase_str),
+            AnyDictionary::HashMapDictionary(dict) => {
+                <HashMap<_, _> as Dictionary>::remove(dict, syllables, phrase_str)
+            }
         }
     }
 }

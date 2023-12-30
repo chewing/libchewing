@@ -3,8 +3,6 @@
 mod chewing;
 mod symbol;
 
-use std::task::Context;
-
 use crate::zhuyin::Syllable;
 
 pub use self::chewing::ChewingEngine;

@@ -252,7 +252,7 @@ pub struct ChewingData;
 pub struct ChewingContext {
     pub(crate) kb_compat: KeyboardLayoutCompat,
     pub(crate) keyboard: AnyKeyboardLayout,
-    pub(crate) editor: Editor<ChewingEngine, LayeredDictionary<AnyDictionary, ()>>,
+    pub(crate) editor: Editor<ChewingEngine>,
     pub(crate) kbcompat_iter: Option<Peekable<Box<dyn Iterator<Item = KeyboardLayoutCompat>>>>,
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,

@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
-    dictionary::Dictionary,
+    dictionary::{AnyDictionary, Dictionary, LayeredDictionary},
     editor::Editor,
 };
 
@@ -196,10 +196,10 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates<C: ConversionEngine<D>, D: Dictionary>(
+    pub(crate) fn candidates<C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>>(
         &self,
-        editor: &Editor<C, D>,
-        dict: &D,
+        editor: &Editor<C>,
+        dict: &LayeredDictionary<AnyDictionary, ()>,
     ) -> Vec<String> {
         let mut candidates = Vec::from_iter(
             dict.lookup_phrase(&self.buffer[self.begin..self.end])

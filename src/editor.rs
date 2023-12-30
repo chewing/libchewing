@@ -76,7 +76,7 @@ impl Default for EditorOptions {
             easy_symbol_input: false,
             esc_clear_all_buffer: false,
             space_is_select_key: false,
-            auto_shift_cursor: true,
+            auto_shift_cursor: false,
             phrase_choice_rearward: false,
             auto_learn_phrase: true,
             auto_commit_threshold: 16,
@@ -108,15 +108,14 @@ pub enum EditorKeyBehavior {
 }
 
 #[derive(Debug)]
-pub struct Editor<C, D>
+pub struct Editor<C>
 where
-    C: ConversionEngine<D>,
-    D: Dictionary,
+    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
 {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
     conv: C,
-    dict: D,
+    dict: LayeredDictionary<AnyDictionary, ()>,
     abbr: AbbrevTable,
     options: EditorOptions,
     state: Transition,
@@ -126,12 +125,11 @@ where
     notice_buffer: String,
 }
 
-impl<C, D> Editor<C, D>
+impl<C> Editor<C>
 where
-    C: ConversionEngine<D>,
-    D: Dictionary,
+    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
 {
-    pub fn new(conv: C, dict: D) -> Editor<C, D> {
+    pub fn new(conv: C, dict: LayeredDictionary<AnyDictionary, ()>) -> Editor<C> {
         Editor {
             com: CompositionEditor::default(),
             syl: Box::new(Standard::new()),
@@ -269,27 +267,21 @@ where
         }
     }
     #[tracing::instrument(skip(self), ret)]
-    fn learn_phrase_in_range(&mut self, start: usize, end: usize) -> Result<String, &'static str> {
+    fn learn_phrase_in_range(&mut self, start: usize, end: usize) -> Result<String, String> {
         let result = self.learn_phrase_in_range_quiet(start, end);
-        match result {
-            Ok(ref phrase) => self.notice_buffer = format!("加入：{}", phrase),
+        match &result {
+            Ok(phrase) => self.notice_buffer = format!("加入：{}", phrase),
             Err(msg) => self.notice_buffer = msg.to_owned(),
         }
         result
     }
-    fn learn_phrase_in_range_quiet(
-        &mut self,
-        start: usize,
-        end: usize,
-    ) -> Result<String, &'static str> {
+    fn learn_phrase_in_range_quiet(&mut self, start: usize, end: usize) -> Result<String, String> {
         if end > self.com.inner.buffer.len() {
-            return Err("");
+            return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
-        if self.com.inner.buffer[start..end]
-            .iter()
-            .any(Symbol::is_char)
-        {
-            return Err("加詞失敗：字數不符或夾雜符號");
+        let syllables = self.com.inner.buffer[start..end].to_vec();
+        if syllables.iter().any(Symbol::is_char) {
+            return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
         let phrase = self
             .display()
@@ -297,10 +289,18 @@ where
             .skip(start)
             .take(end - start)
             .collect::<String>();
+        if self
+            .user_dict()
+            .lookup_phrase(&syllables)
+            .into_iter()
+            .any(|it| it.as_str() == phrase)
+        {
+            return Err(format!("已有：{phrase}"));
+        }
         self.dict
-            .insert(&self.com.inner.buffer[start..end], (&phrase, 100).into())
+            .insert(&syllables, (&phrase, 100).into())
             .map(|_| phrase)
-            .map_err(|_| "已有：")
+            .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned())
     }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {
@@ -443,7 +443,7 @@ where
     }
 }
 
-impl<C> Editor<C, LayeredDictionary<AnyDictionary, ()>>
+impl<C> Editor<C>
 where
     C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
 {
@@ -452,10 +452,9 @@ where
     }
 }
 
-impl<C, D> BasicEditor for Editor<C, D>
+impl<C> BasicEditor for Editor<C>
 where
-    C: ConversionEngine<D>,
-    D: Dictionary,
+    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
 {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
         trace!("process_keyevent: {}", &key_event);
@@ -535,10 +534,9 @@ impl From<Highlighting> for Entering {
 }
 
 impl Entering {
-    fn start_selecting<C, D>(self, editor: &mut Editor<C, D>) -> Transition
+    fn start_selecting<C>(self, editor: &mut Editor<C>) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         match editor.com.symbol_for_select() {
             Some(symbol) => match symbol {
@@ -554,10 +552,9 @@ impl Entering {
             None => Transition::Entering(EditorKeyBehavior::Ignore, self),
         }
     }
-    fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
+    fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         use KeyCode::*;
 
@@ -583,9 +580,24 @@ impl Entering {
                         Selecting::new_phrase(editor, self),
                     );
                 }
-
-                debug!("handle add new phrases with ctrl-num");
-                Transition::Entering(EditorKeyBehavior::Absorb, self)
+                let n = code as usize;
+                let result = match editor.options.user_phrase_add_dir {
+                    UserPhraseAddDirection::Forward => {
+                        editor.learn_phrase_in_range(editor.cursor(), editor.cursor() + n)
+                    }
+                    UserPhraseAddDirection::Backward => {
+                        if editor.cursor() >= n {
+                            editor.learn_phrase_in_range(editor.cursor() - n, editor.cursor())
+                        } else {
+                            editor.notice_buffer = "加詞失敗：字數不符或夾雜符號".to_owned();
+                            Err("加詞失敗：字數不符或夾雜符號".to_owned())
+                        }
+                    }
+                };
+                match result {
+                    Ok(_) => Transition::Entering(EditorKeyBehavior::Absorb, self),
+                    Err(_) => Transition::Entering(EditorKeyBehavior::Bell, self),
+                }
             }
             Tab if editor.com.is_end_of_buffer() => {
                 editor.nth_conversion += 1;
@@ -806,10 +818,9 @@ impl From<Entering> for EnteringSyllable {
 }
 
 impl EnteringSyllable {
-    fn next<C, D>(self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
+    fn next<C>(self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         use KeyCode::*;
 
@@ -851,10 +862,9 @@ impl EnteringSyllable {
 }
 
 impl Selecting {
-    fn new_phrase<C, D>(editor: &mut Editor<C, D>, _state: Entering) -> Self
+    fn new_phrase<C>(editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         editor.com.push_cursor();
         editor.com.clamp_cursor();
@@ -871,10 +881,9 @@ impl Selecting {
             sel: Selector::Phrase(sel),
         }
     }
-    fn new_symbol<C, D>(_editor: &mut Editor<C, D>, _state: Entering) -> Self
+    fn new_symbol<C>(_editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         // FIXME load from data
         let reader = io::Cursor::new(include_str!("../data/symbols.dat"));
@@ -885,10 +894,9 @@ impl Selecting {
             sel: Selector::Symbol(sel),
         }
     }
-    fn new_special_symbol<C, D>(editor: &mut Editor<C, D>, symbol: Symbol, _state: Entering) -> Self
+    fn new_special_symbol<C>(editor: &mut Editor<C>, symbol: Symbol, _state: Entering) -> Self
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         editor.com.push_cursor();
         editor.com.clamp_cursor();
@@ -907,10 +915,13 @@ impl Selecting {
             }
         }
     }
-    fn candidates<C, D>(&self, editor: &Editor<C, D>, dict: &D) -> Vec<String>
+    fn candidates<C>(
+        &self,
+        editor: &Editor<C>,
+        dict: &LayeredDictionary<AnyDictionary, ()>,
+    ) -> Vec<String>
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         match &self.sel {
             Selector::Phrase(sel) => sel.candidates(editor, dict),
@@ -918,19 +929,21 @@ impl Selecting {
             Selector::SpecialSymmbol(sel) => sel.menu(),
         }
     }
-    fn total_page<C, D>(&self, editor: &Editor<C, D>, dict: &D) -> usize
+    fn total_page<C>(
+        &self,
+        editor: &Editor<C>,
+        dict: &LayeredDictionary<AnyDictionary, ()>,
+    ) -> usize
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         self.candidates(editor, dict)
             .len()
             .div_ceil(editor.options.candidates_per_page)
     }
-    fn select<C, D>(mut self, editor: &mut Editor<C, D>, n: usize) -> Transition
+    fn select<C>(mut self, editor: &mut Editor<C>, n: usize) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         let offset = self.page_no * editor.options.candidates_per_page + n;
         match self.sel {
@@ -979,10 +992,9 @@ impl Selecting {
             },
         }
     }
-    fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
+    fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         use KeyCode::*;
 
@@ -1113,17 +1125,15 @@ impl Selecting {
 }
 
 impl Highlighting {
-    fn new<C, D>(moving_cursor: usize, editor: &mut Editor<C, D>, _state: Entering) -> Self
+    fn new<C>(moving_cursor: usize, editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         Highlighting { moving_cursor }
     }
-    fn next<C, D>(mut self, editor: &mut Editor<C, D>, ev: KeyEvent) -> Transition
+    fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<D>,
-        D: Dictionary,
+        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         use KeyCode::*;
 
@@ -1167,6 +1177,7 @@ mod tests {
 
     use crate::{
         conversion::ChewingEngine,
+        dictionary::{AnyDictionary, LayeredDictionary},
         editor::{keyboard::Modifiers, EditorKeyBehavior},
         syl,
         zhuyin::Bopomofo,
@@ -1180,7 +1191,10 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo() {
         let keyboard = Qwerty;
-        let dict = HashMap::new();
+        let dict = LayeredDictionary::new(
+            vec![AnyDictionary::HashMapDictionary(HashMap::new())],
+            vec![],
+        );
         let conversion_engine = ChewingEngine::new();
         let mut editor = Editor::new(conversion_engine, dict);
 
@@ -1204,7 +1218,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-
+        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let mut editor = Editor::new(conversion_engine, dict);
 
@@ -1234,6 +1248,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
+        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
 
         let conversion_engine = ChewingEngine::new();
         let mut editor = Editor::new(conversion_engine, dict);
@@ -1274,6 +1289,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
+        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
 
         let conversion_engine = ChewingEngine::new();
         let mut editor = Editor::new(conversion_engine, dict);
@@ -1313,12 +1329,14 @@ mod tests {
     #[test]
     fn editing_chinese_mode_input_special_symbol() {
         let keyboard = Qwerty;
-        let dictionary = HashMap::from([(
+        let dict = HashMap::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
+        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dictionary);
+        let mut editor = Editor::new(conversion_engine, dict);
 
         let keys = [
             keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
@@ -1350,9 +1368,11 @@ mod tests {
     #[test]
     fn editing_mode_input_full_shape_symbol() {
         let keyboard = Qwerty;
-        let dictionary = HashMap::new();
+        let dict = HashMap::new();
+        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dictionary);
+        let mut editor = Editor::new(conversion_engine, dict);
         editor.switch_character_form();
 
         let steps = [

@@ -23,7 +23,7 @@ use chewing::{
             Standard,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        SyllableEditor,
+        SyllableEditor, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -413,7 +413,13 @@ pub extern "C" fn chewing_set_addPhraseDirection(ctx: *mut ChewingContext, direc
         None => return,
     };
 
-    // todo!()
+    ctx.editor.set_editor_options(EditorOptions {
+        user_phrase_add_dir: match direction {
+            0 => UserPhraseAddDirection::Forward,
+            _ => UserPhraseAddDirection::Backward,
+        },
+        ..ctx.editor.editor_options()
+    });
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -424,7 +430,10 @@ pub extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingContext) -> 
         None => return -1,
     };
 
-    todo!()
+    match ctx.editor.editor_options().user_phrase_add_dir {
+        UserPhraseAddDirection::Forward => 0,
+        UserPhraseAddDirection::Backward => 1,
+    }
 }
 
 #[tracing::instrument(skip(ctx), ret)]
@@ -732,10 +741,6 @@ pub extern "C" fn chewing_userphrase_lookup(
         Some(ctx) => ctx,
         None => return 0,
     };
-    let phrase = match unsafe { str_from_ptr_with_nul(phrase_buf) } {
-        Some(ph) => ph,
-        None => return 0,
-    };
     let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
         Some(bopomofo) => bopomofo
             .split_ascii_whitespace()
@@ -745,14 +750,13 @@ pub extern "C" fn chewing_userphrase_lookup(
         None => return 0,
     };
 
-    match ctx
-        .editor
-        .user_dict()
-        .lookup_phrase(&syllables)
-        .any(|ph| ph.as_str() == phrase)
-    {
-        true => 1,
-        false => 0,
+    match unsafe { str_from_ptr_with_nul(phrase_buf) } {
+        Some(phrase) => ctx
+            .editor
+            .user_dict()
+            .lookup_phrase(&syllables)
+            .any(|ph| ph.as_str() == phrase) as c_int,
+        None => (ctx.editor.user_dict().lookup_phrase(&syllables).count() > 0) as c_int,
     }
 }
 
