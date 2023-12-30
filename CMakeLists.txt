@@ -70,6 +70,11 @@ if(MSVC)
     set(WITH_INTERNAL_SQLITE3 true)
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "Android")
+    set(WITH_INTERNAL_SQLITE3 true)
+endif()
+
+# Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
 option(WITH_RUST "Use rust implemented internals (experimental)" false)
