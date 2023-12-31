@@ -116,6 +116,7 @@ where
     conv: C,
     dict: LayeredDictionary<AnyDictionary, ()>,
     abbr: AbbrevTable,
+    estimate: SqliteUserFreqEstimate,
     options: EditorOptions,
     state: Transition,
 
@@ -128,13 +129,18 @@ impl<C> Editor<C>
 where
     C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
 {
-    pub fn new(conv: C, dict: LayeredDictionary<AnyDictionary, ()>) -> Editor<C> {
+    pub fn new(
+        conv: C,
+        dict: LayeredDictionary<AnyDictionary, ()>,
+        estimate: SqliteUserFreqEstimate,
+    ) -> Editor<C> {
         Editor {
             com: CompositionEditor::default(),
             syl: Box::new(Standard::new()),
             conv,
             dict,
             abbr: AbbrevTable::new().expect("unable to init abbrev table"),
+            estimate,
             options: EditorOptions::default(),
             state: Transition::Entering(EditorKeyBehavior::Ignore, Entering),
             nth_conversion: 0,
@@ -302,8 +308,24 @@ where
             .map(|_| phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned())
     }
-    pub fn learn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
-        let _ = self.dict.update(&syllables, (phrase, 100).into(), 0, 0);
+    pub fn learn_phrase<Syl: AsRef<Syllable>>(&mut self, syllables: &[Syl], phrase: &str) {
+        let phrases = Vec::from_iter(self.dict.lookup_phrase(syllables));
+        if phrases.is_empty() {
+            // FIXME provide max_freq, orig_freq
+            let _ = self.dict.insert(syllables, (phrase, 1).into());
+            return;
+        }
+        let phrase_freq = phrases
+            .iter()
+            .find(|p| p.as_str() == phrase)
+            .map(|p| p.freq())
+            .unwrap_or(1);
+        let phrase = (phrase, phrase_freq).into();
+        let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap();
+        let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
+        let time = self.estimate.now().unwrap();
+
+        let _ = self.dict.update(&syllables, phrase, user_freq, time);
     }
     pub fn unlearn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
         let _ = self.dict.remove(&syllables, phrase);
@@ -456,7 +478,7 @@ where
             } else {
                 if !pending.is_empty() {
                     debug!("autolearn-2 {:?} as {}", &syllables, &pending);
-                    let _ = self.dict.update(&syllables, (&pending, 100).into(), 100, 0);
+                    let _ = self.learn_phrase(&syllables, &pending);
                     pending.clear();
                     syllables.clear();
                 }
@@ -466,18 +488,17 @@ where
                         &self.com.inner.buffer[interval.start..interval.end],
                         &interval.phrase
                     );
-                    let _ = self.dict.update(
-                        &self.com.inner.buffer[interval.start..interval.end],
-                        (&interval.phrase, 100).into(),
-                        100,
-                        100,
+                    // FIXME avoid copy
+                    let _ = self.learn_phrase(
+                        &self.com.inner.buffer[interval.start..interval.end].to_vec(),
+                        &interval.phrase,
                     );
                 }
             }
         }
         if !pending.is_empty() {
             debug!("autolearn-1 {:?} as {}", &syllables, &pending);
-            let _ = self.dict.update(&syllables, (&pending, 100).into(), 100, 0);
+            let _ = self.learn_phrase(&syllables, &pending);
             pending.clear();
             syllables.clear();
         }
@@ -513,6 +534,7 @@ where
 {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
         trace!("process_keyevent: {}", &key_event);
+        let _ = self.estimate.tick();
         // reset?
         self.notice_buffer.clear();
         let old_state = mem::replace(&mut self.state, Transition::Invalid);
@@ -1246,10 +1268,12 @@ impl Highlighting {
 mod tests {
     use std::collections::HashMap;
 
+    use estimate::SqliteUserFreqEstimate;
+
     use crate::{
         conversion::ChewingEngine,
         dictionary::{AnyDictionary, LayeredDictionary},
-        editor::{keyboard::Modifiers, EditorKeyBehavior},
+        editor::{estimate, keyboard::Modifiers, EditorKeyBehavior},
         syl,
         zhuyin::Bopomofo,
     };
@@ -1267,7 +1291,8 @@ mod tests {
             vec![],
         );
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let ev = keyboard.map(KeyCode::H);
         let key_behavior = editor.process_keyevent(ev);
@@ -1291,7 +1316,8 @@ mod tests {
         )]);
         let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
         let key_behaviors: Vec<_> = keys
@@ -1320,9 +1346,9 @@ mod tests {
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
-
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
             keyboard.map(KeyCode::H),
@@ -1361,9 +1387,9 @@ mod tests {
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
-
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
             // Switch to english mode
@@ -1405,9 +1431,9 @@ mod tests {
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
-
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
             keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
@@ -1441,9 +1467,10 @@ mod tests {
         let keyboard = Qwerty;
         let dict = HashMap::new();
         let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
-
         let conversion_engine = ChewingEngine::new();
-        let mut editor = Editor::new(conversion_engine, dict);
+        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let mut editor = Editor::new(conversion_engine, dict, estimate);
+
         editor.switch_character_form();
 
         let steps = [

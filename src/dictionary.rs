@@ -13,7 +13,7 @@ use thiserror::Error;
 use crate::zhuyin::Syllable;
 
 pub use layered::LayeredDictionary;
-pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
+pub use loader::{SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 

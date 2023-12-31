@@ -20,7 +20,10 @@ use crate::{
         types::{ChewingContext, SelKeys},
     },
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{
+        Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader,
+        UserFreqEstimateLoader,
+    },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
@@ -157,11 +160,26 @@ pub extern "C" fn chewing_new2(
     };
     dictionaries.insert(0, user_dictionary);
 
+    let estimate = if userpath.is_null() {
+        UserFreqEstimateLoader::new().load()
+    } else {
+        let data_path = unsafe { CStr::from_ptr(userpath) }
+            .to_str()
+            .expect("invalid syspath string");
+        UserFreqEstimateLoader::new()
+            .userphrase_path(data_path)
+            .load()
+    };
+    let estimate = match estimate {
+        Some(d) => d,
+        None => return null_mut(),
+    };
+
     let dict = LayeredDictionary::new(dictionaries, vec![]);
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
-    let editor = Editor::new(conversion_engine, dict);
+    let editor = Editor::new(conversion_engine, dict, estimate);
     let context = Box::new(ChewingContext {
         kb_compat,
         keyboard,
