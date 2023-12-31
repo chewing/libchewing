@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dirs_next::{data_dir as user_data_dir, home_dir};
+use directories::{BaseDirs, ProjectDirs};
 
 const UNIX_SYS_PATH: &str = "/usr/share/libchewing";
 
@@ -78,17 +78,26 @@ pub fn data_dir() -> Option<PathBuf> {
             return Some(path);
         }
     }
-    user_data_dir().map(|path| path.join("chewing"))
+    ProjectDirs::from("im", "chewing", "chewing")
+        .as_ref()
+        .map(ProjectDirs::data_dir)
+        .map(Path::to_owned)
 }
 
 fn legacy_data_dir() -> Option<PathBuf> {
     #[cfg(target_os = "windows")]
-    return home_dir().map(|path| path.join("ChewingTextService"));
+    return BaseDirs::new()
+        .as_ref()
+        .map(BaseDirs::home_dir)
+        .map(|path| path.join("ChewingTextService"));
 
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     return Some("/Library/ChewingOSX".into());
 
-    home_dir().map(|path| path.join(".chewing"))
+    BaseDirs::new()
+        .as_ref()
+        .map(BaseDirs::home_dir)
+        .map(|path| path.join(".chewing"))
 }
 
 /// Returns the path to the user's default userphrase database file.
