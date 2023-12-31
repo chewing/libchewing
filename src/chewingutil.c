@@ -28,8 +28,6 @@
 #include "choice-private.h"
 #include "private.h"
 
-#ifndef WITH_RUST
-
 #include "global.h"
 #include "bopomofo-private.h"
 #include "chewing-utf8-util.h"
@@ -43,8 +41,6 @@
 #    include <stdio.h>
 #else
 #    include "plat_path.h"
-#endif
-
 #endif
 
 extern const char *const zhuin_tab[];
@@ -131,17 +127,6 @@ int HaninSymbolInput(ChewingData *pgdata)
         pci->nTotalChoice++;
     }
 
-#ifdef WITH_RUST
-    if (pgdata->availInfo.nAvail) {
-        for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
-            if (pgdata->availInfo.avail[i].id) {
-                FreeTreePhrase(pgdata->availInfo.avail[i].id);
-            }
-        }
-    }
-    pgdata->availInfo.nAvail = 0;
-#endif
-
     pai->avail[0].len = 1;
     pai->avail[0].id = NULL;
     pai->nAvail = 1;
@@ -156,9 +141,7 @@ int HaninSymbolInput(ChewingData *pgdata)
 
 static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symkey, const char *const chibuf)
 {
-#ifndef WITH_RUST
     int kbtype;
-#endif
     PreeditBuf *buf;
 
     if (key == symkey && NULL != chibuf) {
@@ -181,15 +164,11 @@ static int _Inner_InternalSpecialSymbol(int key, ChewingData *pgdata, char symke
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         pgdata->chiSymbolCursor++;
         pgdata->chiSymbolBufLen++;
-#ifdef WITH_RUST
-        BopomofoRemoveAll(&pgdata->bopomofoData);
-#else
         /* reset Bopomofo data */
         /* Don't forget the kbtype */
         kbtype = pgdata->bopomofoData.kbtype;
         memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
         pgdata->bopomofoData.kbtype = kbtype;
-#endif
         return 1;
     }
     return 0;
@@ -352,16 +331,6 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
                       pgdata->staticData.symbolTable[sel_i]->symbols[i], 1, 1);
             pci->nTotalChoice++;
         }
-#ifdef WITH_RUST
-        if (pgdata->availInfo.nAvail) {
-            for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
-                if (pgdata->availInfo.avail[i].id) {
-                    FreeTreePhrase(pgdata->availInfo.avail[i].id);
-                }
-            }
-        }
-        pgdata->availInfo.nAvail = 0;
-#endif
         pai->avail[0].len = 1;
         pai->avail[0].id = NULL;
         pai->nAvail = 1;
@@ -397,14 +366,10 @@ int SymbolChoice(ChewingData *pgdata, int sel_i)
         pgdata->bUserArrCnnct[PhoneSeqCursor(pgdata)] = 0;
         ChoiceEndChoice(pgdata);
 
-#ifdef WITH_RUST
-        BopomofoRemoveAll(&pgdata->bopomofoData);
-#else
         memset(&pgdata->bopomofoData.pho_inx, 0, sizeof(pgdata->bopomofoData.pho_inx));
         memset(&pgdata->bopomofoData.pho_inx_alt, 0, sizeof(pgdata->bopomofoData.pho_inx_alt));
         pgdata->bopomofoData.phone = 0;
         pgdata->bopomofoData.phoneAlt = 0;
-#endif
 
         if (symbol_type == SYMBOL_CHOICE_INSERT) {
             pgdata->chiSymbolBufLen++;
@@ -899,14 +864,6 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
         BopomofoKeyseq(&pgdata->bopomofoData, key_seq);
         strcpy(pgo->bopomofoBuf, key_seq);
     } else {
-#if WITH_RUST
-        int pho_inx[4];
-        BopomofoPhoInx(&pgdata->bopomofoData, pho_inx);
-        uint16_t pho_num = UintFromPhoneInx(&pho_inx);
-        PhoneFromUint(pgo->bopomofoBuf,
-                     sizeof(pgo->bopomofoBuf),
-                     pho_num);
-#else
         for (i = 0; i < BOPOMOFO_SIZE; i++) {
             inx = pgdata->bopomofoData.pho_inx[i];
             if (inx != 0) {
@@ -915,7 +872,6 @@ int MakeOutput(ChewingOutput *pgo, ChewingData *pgdata)
                           1, STRNCPY_CLOSE);
             }
         }
-#endif
     }
 
     ShiftInterval(pgo, pgdata);
@@ -1286,17 +1242,6 @@ int OpenSymbolChoice(ChewingData *pgdata)
     pci->nPage = CEIL_DIV(pci->nTotalChoice, pci->nChoicePerPage);
     pci->pageNo = 0;
     pci->isSymbol = SYMBOL_CHOICE_UPDATE;
-
-#ifdef WITH_RUST
-    if (pgdata->availInfo.nAvail) {
-        for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
-            if (pgdata->availInfo.avail[i].id) {
-                FreeTreePhrase(pgdata->availInfo.avail[i].id);
-            }
-        }
-    }
-    pgdata->availInfo.nAvail = 0;
-#endif
 
     pgdata->bSelect = 1;
     pgdata->availInfo.nAvail = 1;
