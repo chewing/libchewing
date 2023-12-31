@@ -16,7 +16,10 @@ indexmap = "2.1.0"
 riff = "2.0.0"
 rusqlite = "0.30.0"
 thiserror = "1.0.0"
-tracing = "0.1.40"
+tracing = { version = "0.1.40", features = [
+    "max_level_trace",
+    "release_max_level_warn",
+] }
 
 [target.'cfg(windows)'.dependencies]
 rusqlite = { version = "0.30.0", features = ["bundled"] }
