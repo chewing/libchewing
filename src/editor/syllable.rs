@@ -182,6 +182,7 @@ pub trait SyllableEditor: Debug {
     }
     /// Returns the alternative syllable, if supported by the layout.
     fn alt_syllables(&self, syl: Syllable) -> &[Syllable] {
+        let _ = syl;
         &[]
     }
 }

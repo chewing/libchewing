@@ -44,10 +44,9 @@ pub unsafe extern "C" fn ueStrNBytes(str: *const c_char, n: c_int) -> c_int {
         .sum::<usize>() as c_int
 }
 
-#[repr(C)]
-pub enum StrNCpyClose {
+enum StrNCpyClose {
     StrncpyClose = 1,
-    StrncpyNotClose = 0,
+    // StrncpyNotClose = 0,
 }
 
 #[no_mangle]

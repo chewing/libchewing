@@ -607,7 +607,7 @@ impl Entering {
             None => Transition::Entering(EditorKeyBehavior::Ignore, self),
         }
     }
-    fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
+    fn next<C>(self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
         C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
@@ -1196,7 +1196,7 @@ impl Selecting {
 }
 
 impl Highlighting {
-    fn new<C>(moving_cursor: usize, editor: &mut Editor<C>, _state: Entering) -> Self
+    fn new<C>(moving_cursor: usize, _editor: &mut Editor<C>, _state: Entering) -> Self
     where
         C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
@@ -1244,7 +1244,7 @@ impl Highlighting {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, rc::Rc};
+    use std::collections::HashMap;
 
     use crate::{
         conversion::ChewingEngine,

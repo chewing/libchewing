@@ -325,6 +325,7 @@ pub trait Dictionary: Debug {
         syllables: &[Syl],
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
+        let _ = (syllables, phrase);
         Err(DictionaryUpdateError { source: None })
     }
 
@@ -336,6 +337,7 @@ pub trait Dictionary: Debug {
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
+        let _ = (syllables, phrase, user_freq, time);
         Err(DictionaryUpdateError { source: None })
     }
 
@@ -345,6 +347,7 @@ pub trait Dictionary: Debug {
         syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
+        let _ = (syllables, phrase_str);
         Err(DictionaryUpdateError { source: None })
     }
 }

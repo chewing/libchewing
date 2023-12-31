@@ -25,6 +25,7 @@ pub enum SqliteDictionaryError {
         /// TODO: doc
         table: String,
     },
+    ReadOnly,
 }
 
 /// TODO: doc
@@ -341,6 +342,11 @@ impl Dictionary for SqliteDictionary {
         syllables: &[Syl],
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
+        if self.read_only {
+            return Err(DictionaryUpdateError {
+                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+            });
+        }
         let syllables_bytes = syllables.into_syllables_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
@@ -360,6 +366,11 @@ impl Dictionary for SqliteDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
+        if self.read_only {
+            return Err(DictionaryUpdateError {
+                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+            });
+        }
         let syllables_bytes = syllables.into_syllables_bytes();
         let tx = self.conn.transaction()?;
         {

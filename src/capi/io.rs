@@ -703,10 +703,10 @@ pub extern "C" fn chewing_get_phoneSeqLen(ctx: *const ChewingContext) -> c_int {
         .count() as c_int
 }
 
-#[tracing::instrument(skip(ctx), ret)]
+#[tracing::instrument(skip(_ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_set_logger(
-    ctx: *mut ChewingContext,
+    _ctx: *mut ChewingContext,
     logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
     data: *mut c_void,
 ) {
@@ -1378,7 +1378,7 @@ pub extern "C" fn chewing_handle_ShiftSpace(ctx: *mut ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_handle_DblTab(ctx: *mut ChewingContext) -> c_int {
-    let ctx = match unsafe { ctx.as_mut() } {
+    let _ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
         None => return -1,
     };
@@ -1538,7 +1538,7 @@ pub extern "C" fn chewing_cursor_Current(ctx: *const ChewingContext) -> c_int {
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c_int {
-    let ctx = match unsafe { ctx.as_ref() } {
+    let _ctx = match unsafe { ctx.as_ref() } {
         Some(ctx) => ctx,
         None => return -1,
     };
@@ -1862,9 +1862,9 @@ pub extern "C" fn chewing_keystroke_CheckAbsorb(ctx: *const ChewingContext) -> c
     }
 }
 
-#[tracing::instrument(skip(ctx), ret)]
+#[tracing::instrument(skip(_ctx), ret)]
 #[no_mangle]
-pub extern "C" fn chewing_kbtype_Total(ctx: *const ChewingContext) -> c_int {
+pub extern "C" fn chewing_kbtype_Total(_ctx: *const ChewingContext) -> c_int {
     (0..)
         .into_iter()
         .map_while(|id| KeyboardLayoutCompat::try_from(id).ok())
@@ -2004,14 +2004,14 @@ pub extern "C" fn chewing_Configure(
     0
 }
 
-#[tracing::instrument(skip(ctx), ret)]
+#[tracing::instrument(skip(_ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_set_hsuSelKeyType(ctx: *mut ChewingContext, mode: c_int) {}
+pub extern "C" fn chewing_set_hsuSelKeyType(_ctx: *mut ChewingContext, mode: c_int) {}
 
-#[tracing::instrument(skip(ctx), ret)]
+#[tracing::instrument(skip(_ctx), ret)]
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_get_hsuSelKeyType(ctx: *mut ChewingContext) -> c_int {
+pub extern "C" fn chewing_get_hsuSelKeyType(_ctx: *mut ChewingContext) -> c_int {
     0
 }

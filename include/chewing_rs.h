@@ -377,7 +377,7 @@ int chewing_keystroke_CheckIgnore(const struct ChewingContext *ctx);
 
 int chewing_keystroke_CheckAbsorb(const struct ChewingContext *ctx);
 
-int chewing_kbtype_Total(const struct ChewingContext *ctx);
+int chewing_kbtype_Total(const struct ChewingContext *_ctx);
 
 void chewing_kbtype_Enumerate(struct ChewingContext *ctx);
 
@@ -397,9 +397,9 @@ void chewing_Terminate(void);
 
 int chewing_Configure(struct ChewingContext *ctx, struct ChewingConfigData *pcd);
 
-void chewing_set_hsuSelKeyType(struct ChewingContext *ctx, int mode);
+void chewing_set_hsuSelKeyType(struct ChewingContext *_ctx, int mode);
 
-int chewing_get_hsuSelKeyType(struct ChewingContext *ctx);
+int chewing_get_hsuSelKeyType(struct ChewingContext *_ctx);
 
 void rust_link_key2pho(void);
 
