@@ -968,7 +968,7 @@ impl Selecting {
         C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
     {
         // FIXME load from data
-        let reader = io::Cursor::new(include_str!("../data/symbols.dat"));
+        let reader = io::Cursor::new(include_str!("../../data/symbols.dat"));
         let sel = SymbolSelector::new(reader).expect("parse symbols table");
         Selecting {
             page_no: 0,
