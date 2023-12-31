@@ -11,7 +11,7 @@ include = ["src/**/*.rs", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
 
 [dependencies]
 bytemuck = { version = "1.13.1", features = ["derive"] }
-dirs-next = "2.0.0"
+directories = "5.0.0"
 indexmap = "2.0.0"
 riff = "2.0.0"
 rusqlite = "0.30.0"
