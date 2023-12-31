@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022
+ * Copyright (c) 2023
  *      libchewing Core Team. See ChangeLog for details.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
  */
 
-#ifndef chewing_internal_bindings_h
-#define chewing_internal_bindings_h
+#ifndef chewing_public_bindings_h
+#define chewing_public_bindings_h
 
 #pragma once
 
@@ -15,58 +15,93 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "chewing_rs.h"
 
-#define MAX_UTF8_SIZE 4
+/** @brief context handle used for Chewing IM APIs
+ */
+typedef struct ChewingContext ChewingContext;
 
-#define MAX_UTF8_BUF (MAX_UTF8_SIZE + 1)
+/* specified to Chewing API */
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+#    define CHEWING_DLL_IMPORT __declspec(dllimport)
+#    define CHEWING_DLL_EXPORT __declspec(dllexport)
+#    ifdef CHEWINGDLL_EXPORTS
+#        define CHEWING_API CHEWING_DLL_EXPORT
+#        define CHEWING_PRIVATE
+#    elif CHEWINGDLL_IMPORTS
+#        define CHEWING_API CHEWING_DLL_IMPORT
+#        define CHEWING_PRIVATE
+#    else
+#        define CHEWING_API
+#        define CHEWING_PRIVATE
+#    endif
+#elif (__GNUC__ > 3) && (defined(__ELF__) || defined(__PIC__))
+#    define CHEWING_API __attribute__((__visibility__("default")))
+#    define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
+#else
+#    define CHEWING_API
+#    define CHEWING_PRIVATE
+#endif
 
-#define BOPOMOFO_SIZE 4
+#ifndef UNUSED
+#    if defined(__GNUC__)       /* gcc specific */
+#        define UNUSED __attribute__((unused))
+#    else
+#        define UNUSED
+#    endif
+#endif
 
-#define MAX_BOPOMOFO_UTF8_BUF ((BOPOMOFO_SIZE * MAX_UTF8_SIZE) + 1)
+#ifndef DEPRECATED
+#    if defined(__GNUC__) && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1) /* gcc specific */
+#        define DEPRECATED __attribute__((deprecated))
+#        if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
+#            define DEPRECATED_FOR(f) __attribute__((deprecated("Use " #f " instead")))
+#        else
+#            define DEPRECATED_FOR(f) DEPRECATED
+#        endif
+#    else
+#        define DEPRECATED
+#        define DEPRECATED_FOR(f)
+#    endif
+#endif
 
-#define PINYIN_SIZE 10
 
-#define MAX_PHRASE_LEN 11
+#define CHINESE_MODE 1
 
-#define MAX_PHRASE_UTF8_BUF ((MAX_PHRASE_LEN * MAX_UTF8_SIZE) + 1)
+#define SYMBOL_MODE 0
 
-#define MAX_PHONE_SEQ_LEN 50
+#define FULLSHAPE_MODE 1
 
-#define MAX_PHONE_SEQ_BUF (MAX_PHONE_SEQ_LEN + 1)
+#define HALFSHAPE_MODE 0
 
-#define MAX_PHONE_SEQ_UTF8_BUF ((MAX_PHONE_SEQ_LEN * MAX_UTF8_SIZE) + 1)
+#define AUTOLEARN_DISABLED 1
 
-#define MIN_CHI_SYMBOL_LEN 0
+#define AUTOLEARN_ENABLED 0
 
-#define MAX_CHI_SYMBOL_LEN (MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN)
+#define MIN_SELKEY 1
 
-#define MAX_INTERVAL (((MAX_PHONE_SEQ_LEN + 1) * MAX_PHONE_SEQ_LEN) / 2)
+#define MAX_SELKEY 10
 
-#define MAX_CHOICE 567
+#define CHEWING_LOG_VERBOSE 1
 
-#define MAX_CHOICE_BUF 50
+#define CHEWING_LOG_DEBUG 2
 
-#define EASY_SYMBOL_KEY_TAB_LEN 36
+#define CHEWING_LOG_INFO 3
 
-#define AUX_PREFIX_LEN 3
+#define CHEWING_LOG_WARN 4
 
-#define MAX_SHOW_MSG_BUF ((MAX_UTF8_SIZE * (MAX_PHRASE_LEN + AUX_PREFIX_LEN)) + 1)
+#define CHEWING_LOG_ERROR 5
 
-#define N_HASH_BIT 14
+/**
+ * Use "asdfjkl789" as selection key
+ */
+#define HSU_SELKEY_TYPE1 1
 
-#define HASH_TABLE_SIZE (1 << N_HASH_BIT)
-
-#define WORD_CHOICE 0
-
-#define SYMBOL_CATEGORY_CHOICE 1
-
-#define SYMBOL_CHOICE_INSERT 2
-
-#define SYMBOL_CHOICE_UPDATE 3
+/**
+ * Use "asdfzxcv89" as selection key
+ */
+#define HSU_SELKEY_TYPE2 2
 
 typedef enum KB {
   KB_DEFAULT,
@@ -87,30 +122,32 @@ typedef enum KB {
 
 typedef struct ChewingContext ChewingContext;
 
+typedef struct IntervalType {
+  /**
+   * Starting position of certain interval
+   */
+  int from;
+  /**
+   * Ending position of certain interval (exclusive)
+   */
+  int to;
+} IntervalType;
+
 /**
- * A type containing a phrase string and its frequency.
- *
- * # Examples
- *
- * A `Phrase` can be created from/to a tuple.
- *
- * ```
- * use chewing::dictionary::Phrase;
- *
- * let phrase = Phrase::new("測", 1);
- * assert_eq!(phrase, ("測", 1).into());
- * assert_eq!(("測".to_string(), 1u32), phrase.into());
- * ```
- *
- * Phrases are ordered by their frequency.
- *
- * ```
- * use chewing::dictionary::Phrase;
- *
- * assert!(Phrase::new("測", 100) > Phrase::new("冊", 1));
- * ```
+ * Deprecated, use chewing_set_ series of functions to set parameters instead.
  */
-typedef struct Phrase Phrase;
+typedef struct ChewingConfigData {
+  int candPerPage;
+  int maxChiSymbolLen;
+  int selKey[MAX_SELKEY];
+  int bAddPhraseForward;
+  int bSpaceAsSelection;
+  int bEscCleanAllBuf;
+  int bAutoShiftCur;
+  int bEasySymbolInput;
+  int bPhraseChoiceRearward;
+  int hsuSelKeyType;
+} ChewingConfigData;
 
 #ifdef __cplusplus
 extern "C" {
@@ -326,7 +363,7 @@ void chewing_interval_Enumerate(struct ChewingContext *ctx);
 
 int chewing_interval_hasNext(struct ChewingContext *ctx);
 
-void chewing_interval_Get(struct ChewingContext *ctx, IntervalType *it);
+void chewing_interval_Get(struct ChewingContext *ctx, struct IntervalType *it);
 
 int chewing_aux_Check(const struct ChewingContext *ctx);
 
@@ -358,7 +395,7 @@ int chewing_Init(const char *data_path, const char *hash_path);
 
 void chewing_Terminate(void);
 
-int chewing_Configure(struct ChewingContext *ctx, ChewingConfigData *pcd);
+int chewing_Configure(struct ChewingContext *ctx, struct ChewingConfigData *pcd);
 
 void chewing_set_hsuSelKeyType(struct ChewingContext *ctx, int mode);
 
@@ -370,20 +407,20 @@ uint16_t UintFromPhone(const char *phone);
 
 uint16_t UintFromPhoneInx(const int *ph_inx);
 
-int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num);
+int PhoneFromUint(char *phone, uintptr_t phone_len, uint16_t phone_num);
 
-ptrdiff_t UintArrayFromBopomofo(uint16_t *phone_seq, size_t phone_len, const char *bopomofo_buf);
+intptr_t UintArrayFromBopomofo(uint16_t *phone_seq, uintptr_t phone_len, const char *bopomofo_buf);
 
 int GetPhoneLenFromUint(uint16_t phone_num);
 
 void rust_link_path(void);
 
-int get_search_path(char *path, size_t path_len);
+int get_search_path(char *path, uintptr_t path_len);
 
 int find_path_by_files(const char *search_path,
                        const char *const *files,
-                       uint8_t *output,
-                       size_t output_len);
+                       char *output,
+                       uintptr_t output_len);
 
 void rust_link_utf8(void);
 
@@ -393,16 +430,16 @@ int ueBytesFromChar(unsigned char b);
 
 int ueStrNBytes(const char *str, int n);
 
-int ueStrNCpy(char *dest, const char *src, size_t n, int end);
+int ueStrNCpy(char *dest, const char *src, uintptr_t n, int end);
 
-char *ueStrSeek(char *src, size_t n);
+char *ueStrSeek(char *src, uintptr_t n);
 
-const char *ueConstStrSeek(const char *src, size_t n);
+const char *ueConstStrSeek(const char *src, uintptr_t n);
 
-const char *ueStrStr(const char *str, size_t _lstr, const char *substr, size_t _lsub);
+const char *ueStrStr(const char *str, uintptr_t _lstr, const char *substr, uintptr_t _lsub);
 
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus
 
-#endif /* chewing_internal_bindings_h */
+#endif /* chewing_public_bindings_h */

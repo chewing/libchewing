@@ -165,9 +165,8 @@ set(ALL_INC
 )
 
 if (WITH_RUST)
-    include_directories(capi/chewing-public/include)
     include_directories(capi/chewing-internal/include)
-    list(APPEND ALL_INC capi/chewing-public/include/chewing_rs.h)
+    list(APPEND ALL_INC capi/chewing-internal/include/chewing_rs.h)
 endif()
 
 add_subdirectory(doc)
@@ -284,7 +283,7 @@ if (BUILD_DLL OR NOT MSVC)
         $<TARGET_OBJECTS:common>
     )
     if (WITH_RUST)
-        corrosion_set_env_vars(chewing-public CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
+        corrosion_set_env_vars(chewing-internal CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
         if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
             target_link_options(chewing_shared PRIVATE "-Wl,-version-script,${CMAKE_BINARY_DIR}/symbols.map")
             target_link_options(chewing_shared PRIVATE "-Wl,--gc-sections")
@@ -312,7 +311,6 @@ endif()
 
 foreach(lib ${LIBS})
     if (WITH_RUST)
-        target_link_libraries(${lib} PRIVATE chewing-public)
         target_link_libraries(${lib} PRIVATE chewing-internal)
         if (WITH_SQLITE3)
             target_link_libraries(chewing-internal INTERFACE ${SQLite3_LIBRARIES})

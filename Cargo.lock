@@ -169,18 +169,8 @@ version = "0.5.1-alpha.1"
 dependencies = [
  "cbindgen",
  "chewing",
- "chewing-public",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "chewing-public"
-version = "0.5.1-alpha.1"
-dependencies = [
- "cbindgen",
- "chewing",
- "libc",
 ]
 
 [[package]]

@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 chewing = { version = "0.5.1-alpha.1", path = "../.." }
-chewing-public = { version = "0.5.1-alpha.1", path = "../chewing-public" }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 

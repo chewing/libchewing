@@ -22,13 +22,15 @@ use chewing::{
     },
     zhuyin::Syllable,
 };
-use chewing_public::types::{
-    ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, MAX_SELKEY,
-    SYMBOL_MODE,
-};
 use tracing::{debug, warn};
 
-use crate::types::{ChewingContext, SelKeys};
+use crate::{
+    public::{
+        ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, MAX_SELKEY,
+        SYMBOL_MODE,
+    },
+    types::{ChewingContext, SelKeys},
+};
 
 #[no_mangle]
 pub extern "C" fn rust_link_io() {}

@@ -45,7 +45,7 @@ pub extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
 pub unsafe extern "C" fn find_path_by_files(
     search_path: *const c_char,
     files: *const *const c_char,
-    output: *mut u8,
+    output: *mut c_char,
     output_len: usize,
 ) -> c_int {
     let search_path = unsafe { CStr::from_ptr(search_path) };
@@ -68,7 +68,7 @@ pub unsafe extern "C" fn find_path_by_files(
                 if path.len() > output_len {
                     return -1;
                 }
-                let output = unsafe { slice::from_raw_parts_mut(output, path.len()) };
+                let output = unsafe { slice::from_raw_parts_mut(output.cast(), path.len()) };
                 output.copy_from_slice(path);
 
                 return 0;
