@@ -80,7 +80,8 @@ option(USE_VALGRIND "Use valgrind when testing" true)
 option(WITH_RUST "Use rust implemented internals (experimental)" false)
 if (WITH_RUST)
     add_subdirectory(cmake/corrosion)
-    corrosion_import_crate(MANIFEST_PATH Cargo.toml NO_LINKER_OVERRIDE)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing FEATURES capi)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-tools)
     add_compile_definitions(WITH_RUST)
 endif()
 
@@ -165,9 +166,7 @@ set(ALL_INC
 )
 
 if (WITH_RUST)
-    include_directories(capi/chewing-public/include)
-    include_directories(capi/chewing-internal/include)
-    list(APPEND ALL_INC capi/chewing-public/include/chewing_rs.h)
+    list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
 endif()
 
 add_subdirectory(doc)
@@ -185,21 +184,14 @@ target_compile_definitions(common PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
-add_library(chewing OBJECT
+add_library(chewing_c OBJECT
     ${ALL_INC}
-    ${INC_DIR}/internal/chewing-private.h
-    ${INC_DIR}/internal/chewingutil.h
-    ${INC_DIR}/internal/choice-private.h
-    ${INC_DIR}/internal/global-private.h
-
-    ${SRC_DIR}/compat.c
-    ${SRC_DIR}/chewingio.c
-    ${SRC_DIR}/chewingutil.c
-    ${SRC_DIR}/choice.c
-    ${SRC_DIR}/mod_aux.c
-    ${SRC_DIR}/private.h
 )
-if (NOT WITH_RUST)
+if (WITH_RUST)
+target_sources(chewing_c PRIVATE
+    src/rust_wrapper.c
+)
+else()
 target_sources(common PRIVATE
     ${SRC_DIR}/porting_layer/include/plat_mmap.h
     ${SRC_DIR}/porting_layer/include/plat_path.h
@@ -214,21 +206,31 @@ target_sources(common PRIVATE
     ${SRC_DIR}/common/chewing-utf8-util.c
     ${SRC_DIR}/common/key2pho.c
 )
-target_sources(chewing PRIVATE
+target_sources(chewing_c PRIVATE
+    ${INC_DIR}/internal/bopomofo-private.h
+    ${INC_DIR}/internal/chewing-private.h
+    ${INC_DIR}/internal/chewingutil.h
+    ${INC_DIR}/internal/choice-private.h
     ${INC_DIR}/internal/dict-private.h
+    ${INC_DIR}/internal/global-private.h
     ${INC_DIR}/internal/pinyin-private.h
     ${INC_DIR}/internal/tree-private.h
     ${INC_DIR}/internal/userphrase-private.h
-    ${INC_DIR}/internal/bopomofo-private.h
 
+    ${SRC_DIR}/bopomofo.c
+    ${SRC_DIR}/chewingio.c
+    ${SRC_DIR}/chewingutil.c
+    ${SRC_DIR}/choice.c
+    ${SRC_DIR}/compat.c
     ${SRC_DIR}/dict.c
+    ${SRC_DIR}/mod_aux.c
     ${SRC_DIR}/pinyin.c
+    ${SRC_DIR}/private.h
     ${SRC_DIR}/tree.c
     ${SRC_DIR}/userphrase.c
-    ${SRC_DIR}/bopomofo.c
 )
 endif()
-target_compile_definitions(chewing PRIVATE
+target_compile_definitions(chewing_c PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
@@ -277,11 +279,11 @@ if (BUILD_DLL OR NOT MSVC)
         add_compile_definitions(CHEWINGDLL_EXPORTS)
     endif()
     add_library(chewing_shared SHARED
-        $<TARGET_OBJECTS:chewing>
+        $<TARGET_OBJECTS:chewing_c>
         $<TARGET_OBJECTS:common>
     )
     if (WITH_RUST)
-        corrosion_set_env_vars(chewing-public CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
+        corrosion_set_env_vars(chewing CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
         if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
             target_link_options(chewing_shared PRIVATE "-Wl,-version-script,${CMAKE_BINARY_DIR}/symbols.map")
             target_link_options(chewing_shared PRIVATE "-Wl,--gc-sections")
@@ -300,7 +302,7 @@ endif()
 
 if (NOT BUILD_DLL)
     add_library(chewing_static STATIC
-        $<TARGET_OBJECTS:chewing>
+        $<TARGET_OBJECTS:chewing_c>
         $<TARGET_OBJECTS:common>
     )
     list(APPEND LIBS chewing_static)
@@ -309,10 +311,9 @@ endif()
 
 foreach(lib ${LIBS})
     if (WITH_RUST)
-        target_link_libraries(${lib} PRIVATE chewing-public)
-        target_link_libraries(${lib} PRIVATE chewing-internal)
+        target_link_libraries(${lib} PRIVATE chewing)
         if (WITH_SQLITE3)
-            target_link_libraries(chewing-internal INTERFACE ${SQLite3_LIBRARIES})
+            target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
         endif()
     else()
         target_link_libraries(${lib} userphrase)

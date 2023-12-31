@@ -7,7 +7,7 @@ use crate::zhuyin::{IntoSyllablesBytes, Syllable};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryMut, DictionaryUpdateError, Phrase, Phrases,
+    DictionaryUpdateError, Phrase, Phrases,
 };
 
 /// TODO: doc
@@ -25,6 +25,7 @@ pub enum SqliteDictionaryError {
         /// TODO: doc
         table: String,
     },
+    ReadOnly,
 }
 
 /// TODO: doc
@@ -258,8 +259,16 @@ impl SqliteDictionary {
     }
 }
 
+impl From<RusqliteError> for DictionaryUpdateError {
+    fn from(source: RusqliteError) -> Self {
+        DictionaryUpdateError {
+            source: Some(source.into()),
+        }
+    }
+}
+
 impl Dictionary for SqliteDictionary {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'static> {
         let syllables_bytes = syllables.into_syllables_bytes();
         let mut stmt = self
             .conn
@@ -289,7 +298,8 @@ impl Dictionary for SqliteDictionary {
         )
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    // FIXME too many clone
+    fn entries(&self) -> DictEntries {
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -327,29 +337,16 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        if self.read_only {
-            None
-        } else {
-            Some(self)
-        }
-    }
-}
-
-impl From<RusqliteError> for DictionaryUpdateError {
-    fn from(source: RusqliteError) -> Self {
-        DictionaryUpdateError {
-            source: source.into(),
-        }
-    }
-}
-
-impl DictionaryMut for SqliteDictionary {
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        syllables: &[Syl],
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
+        if self.read_only {
+            return Err(DictionaryUpdateError {
+                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+            });
+        }
         let syllables_bytes = syllables.into_syllables_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
@@ -362,13 +359,18 @@ impl DictionaryMut for SqliteDictionary {
         Ok(())
     }
 
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        syllables: &[Syl],
+        phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
+        if self.read_only {
+            return Err(DictionaryUpdateError {
+                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+            });
+        }
         let syllables_bytes = syllables.into_syllables_bytes();
         let tx = self.conn.transaction()?;
         {
@@ -411,9 +413,9 @@ impl DictionaryMut for SqliteDictionary {
         Ok(())
     }
 
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         let syllables_bytes = syllables.into_syllables_bytes();
@@ -491,7 +493,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
         let sort_id = if syllables.len() == 1 {
             self.sort_id += 1;
@@ -535,7 +537,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use crate::{
-        dictionary::{Dictionary, DictionaryMut, Phrase},
+        dictionary::{Dictionary, Phrase},
         syl,
         zhuyin::Bopomofo,
     };

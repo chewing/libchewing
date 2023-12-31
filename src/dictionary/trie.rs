@@ -17,8 +17,8 @@ use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 use crate::zhuyin::Syllable;
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut,
-    DuplicatePhraseError, Phrase, Phrases,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DuplicatePhraseError,
+    Phrase, Phrases,
 };
 
 const DICT_FORMAT: u32 = 0;
@@ -293,8 +293,8 @@ struct PhrasesIter<'a> {
     bytes: &'a [u8],
 }
 
-impl<'a> Iterator for PhrasesIter<'a> {
-    type Item = Phrase<'a>;
+impl Iterator for PhrasesIter<'_> {
+    type Item = Phrase;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.bytes.is_empty() {
@@ -310,10 +310,11 @@ impl<'a> Iterator for PhrasesIter<'a> {
 }
 
 impl Dictionary for TrieDictionary {
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
         let mut node = root;
         'next: for syl in syllables {
+            let syl = syl.as_ref();
             debug_assert!(syl.to_u16() != 0);
             let child_nodes: &[TrieNodePod] =
                 cast_slice(&self.dict[node.child_begin()..node.child_end()]);
@@ -335,16 +336,12 @@ impl Dictionary for TrieDictionary {
         })
     }
 
-    fn entries(&self) -> super::DictEntries<'_, '_> {
+    fn entries(&self) -> super::DictEntries {
         todo!();
     }
 
     fn about(&self) -> DictionaryInfo {
         self.info.clone()
-    }
-
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        None
     }
 }
 
@@ -616,7 +613,7 @@ struct TrieBuilderNode {
     syllable: Option<Syllable>,
     children: Vec<usize>,
     leaf_id: Option<NonZeroUsize>,
-    phrases: Vec<Phrase<'static>>,
+    phrases: Vec<Phrase>,
 }
 
 /// A container for trie dictionary statistics.
@@ -1002,7 +999,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
     fn insert(
         &mut self,
         syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
         let leaf_id = self.find_or_insert_internal(syllables);
         if self.arena[leaf_id]
@@ -1014,7 +1011,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
                 source: Box::new(DuplicatePhraseError),
             });
         }
-        self.arena[leaf_id].phrases.push(phrase.into_owned());
+        self.arena[leaf_id].phrases.push(phrase);
         Ok(())
     }
 
@@ -1186,7 +1183,7 @@ mod tests {
             .collect::<Vec<_>>()
         );
         assert_eq!(
-            Vec::<Phrase<'_>>::new(),
+            Vec::<Phrase>::new(),
             dict.lookup_phrase(&[
                 syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
                 syl![Bopomofo::U, Bopomofo::TONE4]
@@ -1242,7 +1239,7 @@ mod tests {
                 Phrase::new("側", 0),
             ],
             dict.lookup_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
-                .collect::<Vec<Phrase<'_>>>()
+                .collect::<Vec<Phrase>>()
         );
         Ok(())
     }
@@ -1301,7 +1298,7 @@ mod tests {
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<Phrase<'_>>>()
+            .collect::<Vec<Phrase>>()
         );
         Ok(())
     }

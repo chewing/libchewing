@@ -20,11 +20,9 @@
 #include "chewingio.h"
 #include "private.h"
 
-#ifndef WITH_RUST
 #include "global.h"
 #include "bopomofo-private.h"
 #include "chewing-utf8-util.h"
-#endif
 
 /**
  * @param ctx handle to Chewing IM context

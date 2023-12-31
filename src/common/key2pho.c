@@ -46,10 +46,8 @@ const char *const zhuin_tab[] = {               /* number of bits */
 
 static const int zhuin_tab_num[] = { 22, 4, 14, 5 };
 
-#ifndef WITH_RUST
 static const int shift[] = { 9, 7, 3, 0 };
 static const int mask[] = { 0x1F, 0x3, 0xF, 0x7 };
-#endif
 
 static const char *const ph_str =
     "\xE3\x84\x85\xE3\x84\x86\xE3\x84\x87\xE3\x84\x88"
@@ -94,7 +92,6 @@ static const char *const key_str[KB_TYPE_NUM] = {
  *
  * return the number it means. 0 means error.
  */
-#ifndef WITH_RUST
 uint16_t UintFromPhone(const char *zhuin)
 {
     const char *iter;
@@ -126,7 +123,6 @@ uint16_t UintFromPhone(const char *zhuin)
     }
     return result;
 }
-#endif
 
 int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes)
 {
@@ -158,7 +154,6 @@ int PhoneFromKey(char *pho, const char *inputkey, int kbtype, int searchTimes)
     return 1;
 }
 
-#ifndef WITH_RUST
 int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
 {
     int i;
@@ -187,7 +182,6 @@ int PhoneFromUint(char *phone, size_t phone_len, uint16_t phone_num)
         return -1;
     return 0;
 }
-#endif
 
 int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes)
 {
@@ -208,7 +202,6 @@ int PhoneInxFromKey(int key, int type, int kbtype, int searchTimes)
     return zhuin_tab_num[type] - ueStrLen(p);
 }
 
-#ifndef WITH_RUST
 uint16_t UintFromPhoneInx(const int ph_inx[])
 {
     int i;
@@ -223,7 +216,6 @@ uint16_t UintFromPhoneInx(const int ph_inx[])
 
     return result;
 }
-#endif
 
 size_t GetPhoneLen(const uint16_t *phoneSeq)
 {
@@ -236,7 +228,6 @@ size_t GetPhoneLen(const uint16_t *phoneSeq)
     return len;
 }
 
-#ifndef WITH_RUST
 static size_t GetBopomofoCount(const char *bopomofo_buf)
 {
     size_t count = 0;
@@ -250,7 +241,6 @@ static size_t GetBopomofoCount(const char *bopomofo_buf)
 
     return count;
 }
-#endif
 
 size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len, const uint16_t *phoneSeq)
 {
@@ -276,7 +266,6 @@ size_t BopomofoFromUintArray(char *const bopomofo_buf, const size_t bopomofo_len
     return buf_len;
 }
 
-#ifndef WITH_RUST
 ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const char *bopomofo_buf)
 {
     size_t i;
@@ -301,14 +290,12 @@ ssize_t UintArrayFromBopomofo(uint16_t *phone_seq, const size_t phone_len, const
 
     return len;
 }
-#endif
 
 size_t GetBopomofoBufLen(size_t len)
 {
     return (MAX_UTF8_SIZE * BOPOMOFO_SIZE + 1) * len;
 }
 
-#ifndef WITH_RUST
 size_t GetPhoneLenFromUint(uint16_t phone_num)
 {
     int i;
@@ -325,4 +312,3 @@ size_t GetPhoneLenFromUint(uint16_t phone_num)
     }
     return len > 0 ? (len + 1) : -1;
 }
-#endif

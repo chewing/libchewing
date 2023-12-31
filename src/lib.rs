@@ -1,8 +1,8 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(macro_use_extern_crate)]
 #![deny(missing_abi)]
-#![warn(missing_debug_implementations)]
-#![deny(missing_docs)]
+// #![warn(missing_debug_implementations)]
+// #![deny(missing_docs)]
 #![warn(noop_method_call)]
 #![warn(single_use_lifetimes)]
 #![deny(unreachable_pub)]
@@ -12,7 +12,7 @@
 #![warn(unused_macro_rules)]
 #![warn(unused_qualifications)]
 #![warn(unused_tuple_struct_fields)]
-#![warn(variant_size_differences)]
+// #![warn(variant_size_differences)]
 
 //! TODO: docs
 //!
@@ -20,6 +20,8 @@
 //!
 //! 1. **Phonetic Key**
 
+#[cfg(feature = "capi")]
+pub mod capi;
 pub mod conversion;
 pub mod dictionary;
 pub mod editor;

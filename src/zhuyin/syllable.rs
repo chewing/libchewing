@@ -1,5 +1,6 @@
 use std::{
     fmt::{Display, Write},
+    num::NonZeroU16,
     str::FromStr,
 };
 
@@ -10,23 +11,41 @@ use super::{Bopomofo, BopomofoKind, ParseBopomofoError};
 /// The consonants and vowels that are taken together to make a single sound.
 ///
 /// <https://en.m.wikipedia.org/wiki/Syllable#Chinese_model>
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[repr(transparent)]
 pub struct Syllable {
-    value: u16,
+    value: NonZeroU16,
+}
+
+impl core::fmt::Debug for Syllable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Syllable")
+            .field("value", &self.value)
+            .field("to_string()", &self.to_string())
+            .finish()
+    }
 }
 
 impl Syllable {
+    const EMPTY_PATTERN: u16 = 0b1000000_00_0000_000;
+    pub const EMPTY: Syllable = Syllable {
+        value: match NonZeroU16::new(Self::EMPTY_PATTERN) {
+            Some(v) => v,
+            None => unreachable!(),
+        },
+    };
     /// TODO: docs
     pub const fn new() -> Syllable {
-        Syllable { value: 0 }
+        Syllable::EMPTY
     }
     /// TODO: docs
     pub const fn builder() -> SyllableBuilder {
         SyllableBuilder::new()
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub const fn initial(&self) -> Option<Bopomofo> {
-        let index = self.value >> 9;
+        let index = (self.value.get() & 0b0111111_00_0000_000) >> 9;
         if index == 0 {
             None
         } else {
@@ -39,7 +58,7 @@ impl Syllable {
     /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn medial(&self) -> Option<Bopomofo> {
-        let index = (self.value & 0b0000000_11_0000_000) >> 7;
+        let index = (self.value.get() & 0b0000000_11_0000_000) >> 7;
         if index == 0 {
             None
         } else {
@@ -52,7 +71,7 @@ impl Syllable {
     /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn rime(&self) -> Option<Bopomofo> {
-        let index = (self.value & 0b0000000_00_1111_000) >> 3;
+        let index = (self.value.get() & 0b0000000_00_1111_000) >> 3;
         if index == 0 {
             None
         } else {
@@ -65,7 +84,7 @@ impl Syllable {
     /// TODO: docs
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn tone(&self) -> Option<Bopomofo> {
-        let index = self.value & 0b0000000_00_0000_111;
+        let index = self.value.get() & 0b0000000_00_0000_111;
         if index == 0 {
             None
         } else {
@@ -76,48 +95,68 @@ impl Syllable {
         }
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_initial(&mut self) -> Option<Bopomofo> {
         let ret = self.initial();
-        self.value &= 0b0000_0001_1111_1111;
+        let value = self.value.get() & 0b0000000_11_1111_111;
+        self.value = match value {
+            0 => Syllable::EMPTY.value,
+            _ => NonZeroU16::new(value).unwrap(),
+        };
         ret
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_medial(&mut self) -> Option<Bopomofo> {
         let ret = self.medial();
-        self.value &= 0b1111_1110_0111_1111;
+        let value = self.value.get() & 0b1111111_00_1111_111;
+        self.value = match value {
+            0 => Syllable::EMPTY.value,
+            _ => NonZeroU16::new(value).unwrap(),
+        };
         ret
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_rime(&mut self) -> Option<Bopomofo> {
         let ret = self.rime();
-        self.value &= 0b1111_1111_1000_0111;
+        let value = self.value.get() & 0b1111111_11_0000_111;
+        self.value = match value {
+            0 => Syllable::EMPTY.value,
+            _ => NonZeroU16::new(value).unwrap(),
+        };
         ret
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_tone(&mut self) -> Option<Bopomofo> {
         let ret = self.tone();
-        self.value &= 0b1111_1111_1111_1000;
+        let value = self.value.get() & 0b1111111_11_1111_000;
+        self.value = match value {
+            0 => Syllable::EMPTY.value,
+            _ => NonZeroU16::new(value).unwrap(),
+        };
         ret
     }
     /// TODO: docs
-    pub fn is_empty(&self) -> bool {
-        self.value == 0
+    pub const fn is_empty(&self) -> bool {
+        self.value.get() == Syllable::EMPTY.value.get()
     }
     /// TODO: docs
     pub fn has_initial(&self) -> bool {
-        self.initial().is_some()
+        self.value.get() & 0b0111111_00_0000_000 != 0
     }
     /// TODO: docs
     pub fn has_medial(&self) -> bool {
-        self.medial().is_some()
+        self.value.get() & 0b0000000_11_0000_000 != 0
     }
     /// TODO: docs
     pub fn has_rime(&self) -> bool {
-        self.rime().is_some()
+        self.value.get() & 0b0000000_00_1111_000 != 0
     }
     /// TODO: docs
     pub fn has_tone(&self) -> bool {
-        self.tone().is_some()
+        self.value.get() & 0b0000000_00_0000_111 != 0
     }
     /// Returns the `Syllable` encoded in a u16 integer.
     ///
@@ -135,7 +174,7 @@ impl Syllable {
             !self.is_empty(),
             "empty syllable cannot be converted to u16"
         );
-        self.value
+        self.value.get()
     }
     /// Returns the `Syllable` encoded in a u16 integer in little-endian bytes.
     ///
@@ -153,44 +192,37 @@ impl Syllable {
     }
     /// TODO: docs
     pub fn update(&mut self, bopomofo: Bopomofo) {
-        match bopomofo.kind() {
-            BopomofoKind::Initial => {
-                self.remove_initial();
-                self.value |= (bopomofo as u16 + 1) << 9;
-            }
-            BopomofoKind::Medial => {
-                self.remove_medial();
-                self.value |= (bopomofo as u16 - 20) << 7;
-            }
-            BopomofoKind::Rime => {
-                self.remove_rime();
-                self.value |= (bopomofo as u16 - 23) << 3;
-            }
-            BopomofoKind::Tone => {
-                self.remove_tone();
-                self.value |= bopomofo as u16 - 36;
-            }
+        let orig = self.value.get();
+        let value = match bopomofo.kind() {
+            BopomofoKind::Initial => (orig & 0b0000000_11_1111_111) | (bopomofo as u16 + 1) << 9,
+            BopomofoKind::Medial => (orig & 0b0111111_00_1111_111) | (bopomofo as u16 - 20) << 7,
+            BopomofoKind::Rime => (orig & 0b0111111_11_0000_111) | (bopomofo as u16 - 23) << 3,
+            BopomofoKind::Tone => (orig & 0b0111111_11_1111_000) | bopomofo as u16 - 36,
+        };
+        self.value = match NonZeroU16::new(value) {
+            Some(v) => v,
+            None => unreachable!(),
         };
     }
     /// TODO: docs
     pub fn pop(&mut self) -> Option<Bopomofo> {
-        if self.tone().is_some() {
+        if self.has_tone() {
             return self.remove_tone();
         }
-        if self.rime().is_some() {
+        if self.has_rime() {
             return self.remove_rime();
         }
-        if self.medial().is_some() {
+        if self.has_medial() {
             return self.remove_medial();
         }
-        if self.initial().is_some() {
+        if self.has_initial() {
             return self.remove_initial();
         }
         None
     }
     /// TODO: docs
     pub fn clear(&mut self) {
-        *self = Syllable::new()
+        *self = Syllable::EMPTY
     }
 }
 
@@ -218,7 +250,12 @@ impl TryFrom<u16> for Syllable {
     #[allow(clippy::unusual_byte_groupings)]
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         // TODO check invalid value
-        Ok(Syllable { value })
+        Ok(Syllable {
+            value: NonZeroU16::try_from(value).map_err(|err| DecodeSyllableError {
+                msg: String::from("invalid raw value"),
+                source: Box::new(err),
+            })?,
+        })
     }
 }
 
@@ -235,21 +272,23 @@ impl FromStr for Syllable {
     }
 }
 
+impl AsRef<Syllable> for Syllable {
+    fn as_ref(&self) -> &Syllable {
+        self
+    }
+}
+
 /// TODO: docs
 pub trait IntoSyllablesBytes {
     /// TODO: docs
-    fn into_syllables_bytes(self) -> Vec<u8>;
+    fn into_syllables_bytes(&self) -> Vec<u8>;
 }
 
-impl<T> IntoSyllablesBytes for T
-where
-    T: IntoIterator,
-    T::Item: Into<u16>,
-{
-    fn into_syllables_bytes(self) -> Vec<u8> {
+impl<Syl: AsRef<Syllable>> IntoSyllablesBytes for &[Syl] {
+    fn into_syllables_bytes(&self) -> Vec<u8> {
         let mut syllables_bytes = vec![];
-        self.into_iter()
-            .for_each(|syl| syllables_bytes.extend_from_slice(&syl.into().to_le_bytes()));
+        self.iter()
+            .for_each(|syl| syllables_bytes.extend_from_slice(&syl.as_ref().to_le_bytes()));
         syllables_bytes
     }
 }
@@ -281,9 +320,13 @@ impl Default for SyllableBuilder {
 impl SyllableBuilder {
     /// TODO: docs
     pub const fn new() -> SyllableBuilder {
-        SyllableBuilder { value: 0, step: 0 }
+        SyllableBuilder {
+            value: Syllable::EMPTY_PATTERN,
+            step: 0,
+        }
     }
     /// TODO: docs
+    #[allow(clippy::unusual_byte_groupings)]
     pub const fn insert(
         mut self,
         bopomofo: Bopomofo,
@@ -295,12 +338,13 @@ impl SyllableBuilder {
                         msg: "bopomofo is in incorrect order",
                     });
                 }
-                if self.value & 0b1111_1110_0000_0000 != 0 {
+                if self.value & 0b0111111_00_0000_000 != 0 {
                     return Err(BuildSyllableError {
                         msg: "multiple initial bopomofo",
                     });
                 }
                 self.step = 1;
+                self.value &= 0b0000000_11_1111_111;
                 self.value |= (bopomofo as u16 + 1) << 9;
             }
             BopomofoKind::Medial => {
@@ -309,12 +353,13 @@ impl SyllableBuilder {
                         msg: "bopomofo is in incorrect order",
                     });
                 }
-                if self.value & 0b0000_0001_1000_0000 != 0 {
+                if self.value & 0b0000000_11_0000_000 != 0 {
                     return Err(BuildSyllableError {
                         msg: "multiple medial bopomofo",
                     });
                 }
                 self.step = 2;
+                self.value &= 0b0111111_00_1111_111;
                 self.value |= (bopomofo as u16 - 20) << 7;
             }
             BopomofoKind::Rime => {
@@ -323,12 +368,13 @@ impl SyllableBuilder {
                         msg: "bopomofo is in incorrect order",
                     });
                 }
-                if self.value & 0b0000_0000_0111_1000 != 0 {
+                if self.value & 0b0000000_00_1111_000 != 0 {
                     return Err(BuildSyllableError {
                         msg: "multiple rime bopomofo",
                     });
                 }
                 self.step = 3;
+                self.value &= 0b0111111_11_0000_111;
                 self.value |= (bopomofo as u16 - 23) << 3;
             }
             BopomofoKind::Tone => {
@@ -337,12 +383,13 @@ impl SyllableBuilder {
                         msg: "bopomofo is in incorrect order",
                     });
                 }
-                if self.value & 0b0000_0000_0000_0111 != 0 {
+                if self.value & 0b0000000_00_0000_111 != 0 {
                     return Err(BuildSyllableError {
                         msg: "multiple tone bopomofo",
                     });
                 }
                 self.step = 4;
+                self.value &= 0b0111111_11_1111_000;
                 self.value |= bopomofo as u16 - 36;
             }
         };
@@ -350,7 +397,12 @@ impl SyllableBuilder {
     }
     /// TODO: docs
     pub const fn build(self) -> Syllable {
-        Syllable { value: self.value }
+        Syllable {
+            value: match NonZeroU16::new(self.value) {
+                Some(v) => v,
+                None => unreachable!(),
+            },
+        }
     }
 }
 
@@ -442,6 +494,19 @@ mod test {
 
         let syl = Syllable::builder().insert(Bopomofo::F).unwrap().build();
         assert_eq!(0x800, syl.to_u16());
+    }
+
+    #[test]
+    fn syllable_update_as_u16() {
+        let mut syl = Syllable::new();
+        syl.update(Bopomofo::I);
+        assert_eq!(128, syl.to_u16());
+
+        syl.update(Bopomofo::TONE2);
+        assert_eq!(130, syl.to_u16());
+
+        syl.update(Bopomofo::X);
+        assert_eq!(7298, syl.to_u16());
     }
 
     #[test]

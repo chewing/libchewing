@@ -5,8 +5,7 @@ use indexmap::IndexSet;
 use crate::zhuyin::Syllable;
 
 use super::{
-    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryMut, DictionaryUpdateError,
-    Phrase, Phrases,
+    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase, Phrases,
 };
 
 /// A collection of dictionaries that returns the union of the lookup results.
@@ -18,8 +17,8 @@ use super::{
 ///
 /// use chewing::{dictionary::{LayeredDictionary, Dictionary}, syl, zhuyin::Bopomofo};
 ///
-/// let mut sys_dict = Box::new(HashMap::new());
-/// let mut user_dict = Box::new(HashMap::new());
+/// let mut sys_dict = HashMap::new();
+/// let mut user_dict = HashMap::new();
 /// sys_dict.insert(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
@@ -29,7 +28,7 @@ use super::{
 ///     vec![("策", 100).into(), ("冊", 100).into()]
 /// );
 ///
-/// let user_block_list = Box::new(HashSet::from(["側".to_string()]));
+/// let user_block_list = HashSet::from(["側".to_string()]);
 ///
 /// let dict = LayeredDictionary::new(vec![sys_dict, user_dict], vec![user_block_list]);
 /// assert_eq!(
@@ -49,18 +48,23 @@ use super::{
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct LayeredDictionary {
-    inner: Vec<Box<dyn Dictionary>>,
-    blocked: Vec<Box<dyn BlockList>>,
+pub struct LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
+    inner: Vec<T>,
+    blocked: Vec<B>,
 }
 
-impl LayeredDictionary {
+impl<T, B> LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
     /// Creates a new `LayeredDictionary` with the list of dictionaries and
     /// block lists.
-    pub fn new(
-        dictionaries: Vec<Box<dyn Dictionary>>,
-        block_lists: Vec<Box<dyn BlockList>>,
-    ) -> LayeredDictionary {
+    pub fn new(dictionaries: Vec<T>, block_lists: Vec<B>) -> LayeredDictionary<T, B> {
         LayeredDictionary {
             inner: dictionaries,
             blocked: block_lists,
@@ -69,9 +73,16 @@ impl LayeredDictionary {
     fn is_blocked(&self, phrase: &str) -> bool {
         self.blocked.iter().any(|b| b.is_blocked(phrase))
     }
+    pub fn base(&mut self) -> &mut T {
+        &mut self.inner[0]
+    }
 }
 
-impl Dictionary for LayeredDictionary {
+impl<T, B> Dictionary for LayeredDictionary<T, B>
+where
+    T: Dictionary,
+    B: BlockList,
+{
     /// Lookup phrases from all underlying dictionaries.
     ///
     /// Phrases are ordered by their first apperance in the underlying dictionaries.
@@ -90,7 +101,7 @@ impl Dictionary for LayeredDictionary {
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase(&self, syllables: &[Syllable]) -> Phrases<'_, '_> {
+    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         let (base, layers) = match self.inner.split_first() {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
@@ -110,7 +121,7 @@ impl Dictionary for LayeredDictionary {
         )
     }
 
-    fn entries(&self) -> DictEntries<'_, '_> {
+    fn entries(&self) -> DictEntries {
         todo!("entries from all layers")
         // Box::new(std::iter::empty())
     }
@@ -122,64 +133,55 @@ impl Dictionary for LayeredDictionary {
         }
     }
 
-    fn as_mut_dict(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Some(self)
-    }
-}
-
-impl DictionaryMut for LayeredDictionary {
-    fn insert(
+    fn insert<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase<'static>,
+        syllables: &[Syl],
+        phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.insert(syllables, phrase.clone())?;
-            }
+            // TODO check mutability?
+            let _ = dict.insert(syllables, phrase.clone());
         }
         Ok(())
     }
 
-    fn update(
+    fn update<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase<'_>,
+        syllables: &[Syl],
+        phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.update(syllables, phrase.clone(), user_freq, time)?;
-            }
+            // TODO check mutability?
+            let _ = dict.update(syllables, phrase.clone(), user_freq, time);
         }
         Ok(())
     }
 
-    fn remove(
+    fn remove<Syl: AsRef<Syllable>>(
         &mut self,
-        syllables: &[Syllable],
+        syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
-            if let Some(dict_mut) = dict.as_mut_dict() {
-                dict_mut.remove(syllables, phrase_str)?;
-            }
+            // TODO check mutability?
+            let _ = dict.remove(syllables, phrase_str);
         }
         Ok(())
     }
 }
 
 #[derive(Debug, Eq)]
-struct LookupPhrase<'a>(Phrase<'a>);
+struct LookupPhrase(Phrase);
 
-impl Hash for LookupPhrase<'_> {
+impl Hash for LookupPhrase {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.phrase.hash(state);
     }
 }
 
-impl PartialEq for LookupPhrase<'_> {
+impl PartialEq for LookupPhrase {
     fn eq(&self, other: &Self) -> bool {
         self.0.phrase == other.0.phrase
     }

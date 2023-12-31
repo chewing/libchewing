@@ -148,3 +148,6 @@ contrib/test.sqlite3
 
 # rust
 /target
+
+# clangd
+/.cache/clangd

@@ -19,7 +19,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         with_rust: ['true', 'false']
-        rust_version: ['1.64', 'stable']
+        rust_version: ['1.70', 'stable']
         exclude:
           - with_rust: 'false'
             rust_version: 'stable'

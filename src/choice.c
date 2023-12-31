@@ -24,14 +24,12 @@
 #include "choice-private.h"
 #include "private.h"
 
-#ifndef WITH_RUST
 #include "global.h"
 #include "bopomofo-private.h"
 #include "chewing-utf8-util.h"
 #include "dict-private.h"
 #include "tree-private.h"
 #include "userphrase-private.h"
-#endif
 
 void ChangeSelectIntervalAndBreakpoint(ChewingData *pgdata, int from, int to, const char *str)
 {
@@ -74,11 +72,7 @@ static void SetAvailInfo(ChewingData *pgdata, int begin, int end)
     const int *bSymbolArrBrkpt = pgdata->bSymbolArrBrkpt;
     int symbolArrBrkpt[ARRAY_SIZE(pgdata->bSymbolArrBrkpt)] = { 0 };
 
-#ifdef WITH_RUST
-    const void* tree_pos;
-#else
     const TreeType *tree_pos;
-#endif
     int diff;
     uint16_t userPhoneSeq[MAX_PHONE_SEQ_LEN];
 
@@ -87,17 +81,6 @@ static void SetAvailInfo(ChewingData *pgdata, int begin, int end)
     int pos;
 
     head = tail = 0;
-
-#ifdef WITH_RUST
-    if (pgdata->availInfo.nAvail) {
-        for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
-            if (pgdata->availInfo.avail[i].id) {
-                FreeTreePhrase(pgdata->availInfo.avail[i].id);
-            }
-        }
-    }
-    pgdata->availInfo.nAvail = 0;
-#endif
 
     pai->nAvail = 0;
 
@@ -543,15 +526,6 @@ int ChoiceEndChoice(ChewingData *pgdata)
 
     pgdata->chiSymbolCursor = pgdata->choiceInfo.oldChiSymbolCursor;
     assert(pgdata->chiSymbolCursor <= pgdata->chiSymbolBufLen);
-
-#ifdef WITH_RUST
-    for (int i = 0; i < pgdata->availInfo.nAvail; ++i) {
-        if (pgdata->availInfo.avail[i].id) {
-            FreeTreePhrase(pgdata->availInfo.avail[i].id);
-        }
-    }
-    pgdata->availInfo.nAvail = 0;
-#endif
 
     pgdata->choiceInfo.isSymbol = WORD_CHOICE;
     return 0;

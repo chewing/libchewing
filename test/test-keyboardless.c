@@ -820,7 +820,7 @@ void test_clean_preedit_during_cand_selecting()
     ok(ret == 0, "chewing_cand_open() returns `%d' shall be `%d'", ret, 0);
 
     ret = chewing_clean_preedit_buf(ctx);
-    ok(ret == -1, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, -1);
+    ok(ret == -1, "chewing_clean_preedit_buf() returns `%d' shall be `%d'", ret, -1);
 
     ok_preedit_buffer(ctx, phrase);
     ok_commit_buffer(ctx, "");

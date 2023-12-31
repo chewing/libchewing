@@ -31,7 +31,6 @@ typedef SSIZE_T ssize_t;
 
 #ifdef WITH_RUST
 #   include "chewing_rs.h"
-#   include "chewing_internal.h"
 #else
 #   include "global.h"
 #   include "plat_mmap.h"
