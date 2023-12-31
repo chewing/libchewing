@@ -26,6 +26,10 @@ pub struct CmdBuild {
     #[argh(option, default = "false")]
     pub with_hash: bool,
 
+    /// instrument binary to generate coverage infomation
+    #[argh(option, default = "false")]
+    pub with_coverage: bool,
+
     /// show more information during build
     #[argh(option, default = "false")]
     pub verbose: bool,
