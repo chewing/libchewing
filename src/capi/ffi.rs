@@ -3,7 +3,7 @@ use std::{
     slice,
 };
 
-use chewing::dictionary::Phrase;
+use crate::dictionary::Phrase;
 
 pub(crate) trait CopyToCString {
     fn copy_to(&self, buf: &mut [c_char]);

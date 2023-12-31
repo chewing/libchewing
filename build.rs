@@ -6,23 +6,26 @@ use std::{
 };
 
 fn main() {
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    cbindgen::generate(crate_dir)
-        .expect("Unable to generate C headers for Rust code")
-        .write_to_file("include/chewing_rs.h");
+    #[cfg(feature = "capi")]
+    {
+        let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        cbindgen::generate(crate_dir)
+            .expect("Unable to generate C headers for Rust code")
+            .write_to_file("include/chewing_rs.h");
+        println!("cargo:rerun-if-env-changed=CMAKE_BINARY_DIR");
 
-    println!("cargo:rerun-if-env-changed=CMAKE_BINARY_DIR");
-    if let Ok(cmake_build_dir) = env::var("CMAKE_BINARY_DIR") {
-        let mut path = PathBuf::new();
-        path.push(cmake_build_dir);
-        path.push("symbols.map");
-        let mut symbols_file = File::create(path).expect("open file");
-        #[cfg(target_os = "linux")]
-        write_version_script(&mut symbols_file).expect("writing to file");
-        #[cfg(target_os = "macos")]
-        write_exported_symbols(&mut symbols_file).expect("writing to file");
-        #[cfg(target_os = "windows")]
-        write_def(&mut symbols_file).expect("writing to file");
+        if let Ok(cmake_build_dir) = env::var("CMAKE_BINARY_DIR") {
+            let mut path = PathBuf::new();
+            path.push(cmake_build_dir);
+            path.push("symbols.map");
+            let mut symbols_file = File::create(path).expect("open file");
+            #[cfg(target_os = "linux")]
+            write_version_script(&mut symbols_file).expect("writing to file");
+            #[cfg(target_os = "macos")]
+            write_exported_symbols(&mut symbols_file).expect("writing to file");
+            #[cfg(target_os = "windows")]
+            write_def(&mut symbols_file).expect("writing to file");
+        }
     }
 }
 

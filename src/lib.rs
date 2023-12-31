@@ -20,6 +20,8 @@
 //!
 //! 1. **Phonetic Key**
 
+#[cfg(feature = "capi")]
+pub mod capi;
 pub mod conversion;
 pub mod dictionary;
 pub mod editor;

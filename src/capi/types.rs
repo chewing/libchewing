@@ -1,7 +1,7 @@
 use std::{ffi::c_int, iter::Peekable};
 
-use crate::public::MAX_SELKEY;
-use chewing::{
+use crate::{
+    capi::public::MAX_SELKEY,
     conversion::{ChewingEngine, Interval},
     dictionary::DictEntries,
     editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},

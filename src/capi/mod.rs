@@ -1,4 +1,5 @@
 #![deny(unsafe_op_in_unsafe_fn)]
+#![allow(unsafe_code)]
 
 pub mod ffi;
 pub mod io;

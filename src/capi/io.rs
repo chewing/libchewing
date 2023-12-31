@@ -9,7 +9,16 @@ use std::{
     u8,
 };
 
-use chewing::{
+use tracing::{debug, warn};
+
+use crate::{
+    capi::{
+        public::{
+            ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE,
+            MAX_SELKEY, SYMBOL_MODE,
+        },
+        types::{ChewingContext, SelKeys},
+    },
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
@@ -21,15 +30,6 @@ use chewing::{
         SyllableEditor, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
-};
-use tracing::{debug, warn};
-
-use crate::{
-    public::{
-        ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE, MAX_SELKEY,
-        SYMBOL_MODE,
-    },
-    types::{ChewingContext, SelKeys},
 };
 
 #[no_mangle]
@@ -710,7 +710,7 @@ pub extern "C" fn chewing_set_logger(
     logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
     data: *mut c_void,
 ) {
-    let _ = tracing_subscriber::fmt::try_init();
+    // let _ = tracing_subscriber::fmt::try_init();
 }
 
 #[tracing::instrument(skip(ctx), ret)]

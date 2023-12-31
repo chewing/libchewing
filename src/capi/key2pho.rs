@@ -3,7 +3,7 @@ use std::{
     ptr, slice,
 };
 
-use chewing::zhuyin::{Bopomofo, Syllable};
+use crate::zhuyin::{Bopomofo, Syllable};
 
 #[no_mangle]
 pub extern "C" fn rust_link_key2pho() {}
