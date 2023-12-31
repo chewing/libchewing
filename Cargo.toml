@@ -20,6 +20,9 @@ tracing = { version = "0.1.40", features = [
     "max_level_trace",
     "release_max_level_warn",
 ] }
+tracing-subscriber = { version = "0.3.18", features = [
+    "env-filter",
+], optional = true }
 
 [target.'cfg(windows)'.dependencies]
 rusqlite = { version = "0.30.0", features = ["bundled"] }
@@ -30,6 +33,7 @@ crate-type = ["lib", "staticlib"]
 [features]
 default = []
 capi = ["cbindgen"]
+test-tracing = ["tracing-subscriber"]
 
 [build-dependencies]
 # https://github.com/mozilla/cbindgen/issues/891
