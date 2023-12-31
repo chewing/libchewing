@@ -42,6 +42,10 @@ jobs:
     - name: Test
       run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
 
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   build_with_hash:
     runs-on: ubuntu-latest
@@ -56,3 +60,8 @@ jobs:
 
     - name: Test
       run: cargo xtask test --build-type ${{env.BUILD_TYPE}} --with-rust false
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
