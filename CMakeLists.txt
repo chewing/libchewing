@@ -269,7 +269,9 @@ if(NOT WITH_RUST)
             ${SRC_DIR}/userphrase-hash.c
         )
     endif()
-    target_link_libraries(libchewing PRIVATE userphrase)
+    target_link_libraries(libchewing
+        PRIVATE common
+        PRIVATE userphrase)
     if(BUILD_SHARED_LIBS AND MSVC)
         target_compile_definitions(libchewing PRIVATE CHEWINGDLL_EXPORTS)
     endif()
