@@ -30,15 +30,15 @@ mod capi {
 
     #[cfg(target_os = "linux")]
     pub(super) fn write_version_script(f: &mut impl Write) -> Result<()> {
-        for (version, symbol_list) in SYMBOLS {
-            writeln!(f, "{version} {{")?;
-            writeln!(f, "    global:")?;
+        writeln!(f, "{{")?;
+        writeln!(f, "    global:")?;
+        for (_version, symbol_list) in SYMBOLS {
             for sym in symbol_list.iter() {
                 writeln!(f, "        {sym};")?;
             }
-            writeln!(f, "}};")?;
         }
-        writeln!(f, "LOCAL {{ local: *; }};")?;
+        writeln!(f, "    local: *;")?;
+        writeln!(f, "}};")?;
         Ok(())
     }
 
