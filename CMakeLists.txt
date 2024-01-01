@@ -281,7 +281,7 @@ if(WITH_RUST)
     target_link_libraries(libchewing PRIVATE chewing)
     target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
     if(BUILD_SHARED_LIBS)
-        if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
+        if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
             target_link_options(libchewing
                 PRIVATE LINKER:-version-script,${CMAKE_BINARY_DIR}/symbols.map
                 PRIVATE LINKER:--gc-sections
