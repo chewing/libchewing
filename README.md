@@ -25,9 +25,9 @@ as full open source efforts.
    - Development: <https://matrix.to/#/#libchewing:matrix.org>
    - General: <https://matrix.to/#/#chewing-users:matrix.org>
 + Build Status:
-   - Travis-Ci: [![Status-Icon](https://travis-ci.org/chewing/libchewing.svg?branch=master)](https://travis-ci.org/chewing/libchewing)
+   - Github Actions: [![CI](https://github.com/chewing/libchewing/actions/workflows/ci.yml/badge.svg)](https://github.com/chewing/libchewing/actions/workflows/ci.yml)
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
-   - Coveralls: [![Coverage Status](https://img.shields.io/coveralls/chewing/libchewing.svg)](https://coveralls.io/r/chewing/libchewing?branch=master)
+   - Codecov: [![codecov](https://codecov.io/gh/chewing/libchewing/graph/badge.svg?token=r1piKsG5uF)](https://codecov.io/gh/chewing/libchewing)
 
 
 ## History
@@ -132,26 +132,13 @@ build libchewing. If any tools you use below this version, libchewing might not
 be built.
 
 + Build tools:
-   - autoconf >= 2.65
-   - automake >= 1.11.6
-   - libtool >= 2.4.2
-   - cmake >= 2.8.8 (optional)
+   - cmake >= 3.21.0
 + Toolchain / IDE:
    - clang >= 3.2
    - gcc >= 4.6.3
    - Visual Studio Express 2012
 + Documentation tools:
    - texinfo >= 4.12
-
-
-## Continuous Integration (CI) Service
-
-libchewing uses the following CI services:
-
-- <https://travis-ci.org/chewing/libchewing> (testing)
-- <https://drone.io/github.com/chewing/libchewing> (testing)
-- <https://coveralls.io/r/chewing/libchewing> (coverage report)
-- <https://launchpad.net/~chewing/+archive/chewing> (ubuntu PPA)
 
 
 ## Installation

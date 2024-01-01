@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19.0)
+cmake_minimum_required(VERSION 3.21.0)
 project(libchewing)
 
 set(LIBCHEWING_VERSION 0.5.1)
