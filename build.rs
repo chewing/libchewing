@@ -188,7 +188,7 @@ mod capi {
             ],
         ),
         (
-            "CHEWING_INTERNAL",
+            "INTERNAL",
             &[
                 "find_path_by_files",
                 "get_search_path",

@@ -192,7 +192,6 @@ add_library(common OBJECT
     src/porting_layer/src/asprintf.h
 
     src/porting_layer/src/asprintf.c
-    src/chewing.c
 )
 target_compile_definitions(common PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
@@ -202,9 +201,7 @@ add_library(chewing_c OBJECT
     ${ALL_INC}
 )
 if (WITH_RUST)
-target_sources(chewing_c PRIVATE
-    src/rust_wrapper.c
-)
+set_target_properties(chewing_c PROPERTIES LINKER_LANGUAGE C)
 else()
 target_sources(common PRIVATE
     ${SRC_DIR}/porting_layer/include/plat_mmap.h
@@ -308,6 +305,11 @@ if (BUILD_DLL OR NOT MSVC)
             target_link_options(chewing_shared PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
             set_target_properties(chewing_shared PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
+        target_link_options(chewing_shared
+            PRIVATE LINKER:-u,chewing_new
+            PRIVATE LINKER:-u,ueStrLen
+            PRIVATE LINKER:-u,UintFromPhone
+            PRIVATE LINKER:-u,find_path_by_files)
     endif()
 
     list(APPEND LIBS chewing_shared)

@@ -8,9 +8,6 @@ use std::{
 
 use crate::path;
 
-#[no_mangle]
-pub extern "C" fn rust_link_path() {}
-
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';
 
