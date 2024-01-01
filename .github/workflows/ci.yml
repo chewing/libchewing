@@ -42,7 +42,6 @@ jobs:
     - name: Test
       run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
 
-
   build_with_hash:
     runs-on: ubuntu-latest
 
@@ -55,4 +54,43 @@ jobs:
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust false --with-hash true --verbose true
 
     - name: Test
-      run: cargo xtask test --build-type ${{env.BUILD_TYPE}} --with-rust false
+      run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
+
+  coverage:
+    strategy:
+      matrix:
+        with_rust: ['true', 'false']
+    runs-on: ubuntu-latest
+    name: with_rust=${{ matrix.with_rust }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Setup rustup
+      run: |
+        rustup default stable
+        rustup update
+        rustup component add llvm-tools
+
+    - name: Setup grcov
+      run: |
+        curl -LO https://github.com/mozilla/grcov/releases/download/v0.8.19/grcov-x86_64-unknown-linux-gnu.tar.bz2
+        echo 098be4d60b8016913542d58456fea6e771890096d1bf86e7f83dac650ba4b58a grcov-x86_64-unknown-linux-gnu.tar.bz2 | sha256sum -c -
+        tar xf grcov-x86_64-unknown-linux-gnu.tar.bz2
+
+    - name: Build
+      env:
+        CC: clang
+      run: cargo xtask build --build-type Debug --with-rust ${{matrix.with_rust}} --with-coverage true --verbose true
+
+    - name: Test
+      run: |
+        cargo xtask test --build-type Debug
+        ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

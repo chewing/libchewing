@@ -12,6 +12,7 @@ use cli::{Cli, Cmds};
 struct BuildOpts {
     with_rust: bool,
     with_hash: bool,
+    with_coverage: bool,
     verbose: bool,
     build_type: String,
 }
@@ -28,10 +29,11 @@ impl BuildOpts {
         // Configure CMake
         let with_rust: String = format!("-DWITH_RUST={}", self.with_rust);
         let with_sqlite3: String = format!("-DWITH_SQLITE3={}", !self.with_hash);
+        let with_coverage: String = format!("-DENABLE_GCOV={}", self.with_coverage);
         let build_type: String = format!("-DCMAKE_BUILD_TYPE={}", self.build_type);
         cmd!(
             sh,
-            "cmake -B ./build {with_rust} {build_type} {with_sqlite3}"
+            "cmake -B ./build {with_rust} {build_type} {with_sqlite3} {with_coverage}"
         )
         .run()
         .with_context(|| "cannot configure cmake")?;
@@ -70,6 +72,7 @@ fn main() -> Result<()> {
             BuildOpts {
                 with_rust: cmd.with_rust,
                 with_hash: cmd.with_hash,
+                with_coverage: cmd.with_coverage,
                 verbose: cmd.verbose,
                 build_type: cmd.build_type.clone(),
             }
