@@ -290,12 +290,12 @@ if(WITH_RUST)
                 PRIVATE LINKER:-u,UintFromPhone
                 PRIVATE LINKER:-u,find_path_by_files
             )
-        elseif(CMAKE_COMPILER_ID MATCHES AppleClang)
+        elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
             target_link_options(libchewing
                 PRIVATE LINKER:-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map
                 PRIVATE LINKER:-dead_strip
             )
-        else()
+        elseif(MSVC)
             target_link_options(libchewing PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
