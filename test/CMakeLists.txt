@@ -53,11 +53,7 @@ endif()
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     target_link_libraries(${target} testhelper)
-    if (BUILD_DLL)
-        target_link_libraries(${target} chewing_shared)
-    else()
-        target_link_libraries(${target} chewing_static)
-    endif()
+    target_link_libraries(${target} libchewing)
     target_compile_definitions(${target} PRIVATE
         CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
         TEST_HASH_DIR=\"${TEST_BIN_DIR}\"
@@ -72,9 +68,9 @@ add_library(testhelper STATIC
     ${TEST_SRC_DIR}/testhelper.c
     $<TARGET_OBJECTS:common>
 )
-if (NOT WITH_RUST)
-    target_link_libraries(testhelper userphrase)
-endif()
+# if (NOT WITH_RUST)
+#     target_link_libraries(testhelper userphrase)
+# endif()
 target_compile_definitions(testhelper PRIVATE
     CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
     TEST_HASH_DIR=\"${TEST_BIN_DIR}\"
