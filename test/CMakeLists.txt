@@ -54,7 +54,7 @@ foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     target_link_libraries(${target} testhelper)
     # XXX workaround MSVC issue
-    if(MSVC AND WITH_RUST)
+    if(CMAKE_C_COMPILER_ID MATCHES MSVC AND WITH_RUST)
         target_link_libraries(${target} chewing)
     else()
         target_link_libraries(${target} libchewing)

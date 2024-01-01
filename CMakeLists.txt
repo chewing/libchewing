@@ -41,7 +41,7 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
             set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
         endif()
     endif()
-elseif(MSVC)
+elseif(CMAKE_C_COMPILER_ID MATCHES MSVC)
     # /wd4819
     # Without BOM, Visual Studio does not treat source file as UTF-8
     # encoding, thus it will complain about invalid character. Use
@@ -70,7 +70,7 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
 option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
-if(MSVC)
+if(CMAKE_C_COMPILER_ID MATCHES MSVC)
     set(WITH_INTERNAL_SQLITE3 true)
 endif()
 
@@ -274,7 +274,7 @@ if(NOT WITH_RUST)
     target_link_libraries(libchewing
         PRIVATE common
         PRIVATE userphrase)
-    if(BUILD_SHARED_LIBS AND MSVC)
+    if(BUILD_SHARED_LIBS AND CMAKE_C_COMPILER_ID MATCHES MSVC)
         target_compile_definitions(libchewing PRIVATE CHEWINGDLL_EXPORTS)
     endif()
 endif()
@@ -297,7 +297,7 @@ if(WITH_RUST)
                 PRIVATE LINKER:-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map
                 PRIVATE LINKER:-dead_strip
             )
-        elseif(MSVC)
+        elseif(CMAKE_C_COMPILER_ID MATCHES MSVC)
             target_link_options(libchewing PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()

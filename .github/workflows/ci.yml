@@ -11,6 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  CMAKE_GENERATOR: Ninja
 
 jobs:
   build:
@@ -20,6 +21,13 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         with_rust: ['true', 'false']
         rust_version: ['1.70', 'stable']
+        include:
+          - os: ubuntu-latest
+            c_compiler: cc
+          - os: windows-latest
+            c_compiler: cl.exe
+          - os: macos-latest
+            c_compiler: cc
         exclude:
           - with_rust: 'false'
             rust_version: 'stable'
@@ -31,12 +39,23 @@ jobs:
       with:
         submodules: 'true'
 
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt-get install ninja-build
+    - if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install ninja
+    - if: ${{ matrix.os == 'windows-latest' }}
+      run: choco install ninja
+    - if: ${{ matrix.os == 'windows-latest' }}
+      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+
     - name: Setup rustup
       run: |
         rustup default ${{ matrix.rust_version }}
         rustup update
 
     - name: Build
+      env:
+        CC: ${{ matrix.c_compiler }}
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --verbose true
 
     - name: Test
@@ -50,6 +69,8 @@ jobs:
       with:
         submodules: 'true'
 
+    - run: sudo apt-get install ninja-build
+
     - name: Build
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust false --with-hash true --verbose true
 
@@ -61,12 +82,14 @@ jobs:
       matrix:
         with_rust: ['true', 'false']
     runs-on: ubuntu-latest
-    name: with_rust=${{ matrix.with_rust }}
+    name: Coverage with_rust=${{ matrix.with_rust }}
 
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: 'true'
+
+    - run: sudo apt-get install ninja-build
 
     - name: Setup rustup
       run: |
