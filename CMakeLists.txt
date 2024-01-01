@@ -54,6 +54,8 @@ elseif(MSVC)
     if(MSVC_VERSION LESS 1900)
         add_compile_definitions(snprintf=_snprintf)
     endif()
+
+    set(BUILD_SHARED_LIBS OFF)
 endif()
 
 
