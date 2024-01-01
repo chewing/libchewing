@@ -277,12 +277,9 @@ if(NOT WITH_RUST)
     endif()
 endif()
 
-if(WITH_SQLITE3)
-    target_link_libraries(libchewing PRIVATE ${SQLite3_LIBRARIES})
-endif()
-
 if(WITH_RUST)
     target_link_libraries(libchewing PRIVATE chewing)
+    target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
     if(BUILD_SHARED_LIBS)
         if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
             target_link_options(libchewing
@@ -295,15 +292,18 @@ if(WITH_RUST)
             )
         elseif(CMAKE_COMPILER_ID MATCHES AppleClang)
             target_link_options(libchewing
-                PRIVATE "LINKER:-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map"
-                PRIVATE "LINKER-dead_strip"
+                PRIVATE LINKER:-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map
+                PRIVATE LINKER:-dead_strip
             )
         else()
             target_link_options(libchewing PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
+elseif(WITH_SQLITE3)
+   target_link_libraries(libchewing PRIVATE ${SQLite3_LIBRARIES})
 endif()
+
 
 set_target_properties(libchewing PROPERTIES
     OUTPUT_NAME chewing
