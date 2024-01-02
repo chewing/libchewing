@@ -25,12 +25,6 @@ jobs:
           - os: ubuntu-latest
             with_rust: true
             rust_version: stable
-          - os: ubuntu-latest
-            c_compiler: cc
-          - os: windows-latest
-            c_compiler: cl.exe
-          - os: macos-latest
-            c_compiler: cc
         exclude:
           - with_rust: 'false'
             rust_version: 'stable'
@@ -57,8 +51,6 @@ jobs:
         rustup update
 
     - name: Build
-      env:
-        CC: ${{ matrix.c_compiler }}
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --verbose true
 
     - name: Test

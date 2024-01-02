@@ -32,12 +32,8 @@ crate-type = ["lib", "staticlib"]
 
 [features]
 default = []
-capi = ["cbindgen"]
+capi = []
 test-tracing = ["tracing-subscriber"]
-
-[build-dependencies]
-# https://github.com/mozilla/cbindgen/issues/891
-cbindgen = { version = "0.24.5", optional = true }
 
 [dev-dependencies]
 tempfile = "3"

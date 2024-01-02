@@ -38,7 +38,11 @@ endif()
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
 foreach(target ${ALL_TESTCASES})
-    add_test(${target} ${TEST_BIN_DIR}/${target})
+    add_test(
+        NAME ${target}
+        COMMAND ${TEST_BIN_DIR}/${target}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
 endforeach()
 
 if(USE_VALGRIND)

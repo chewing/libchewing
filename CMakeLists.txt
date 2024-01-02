@@ -54,8 +54,6 @@ elseif(MSVC)
     if(MSVC_VERSION LESS 1900)
         add_compile_definitions(snprintf=_snprintf)
     endif()
-
-    set(BUILD_SHARED_LIBS OFF)
 endif()
 
 
@@ -91,7 +89,6 @@ if(WITH_RUST)
     endif()
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-tools)
     add_compile_definitions(WITH_RUST)
-    corrosion_set_env_vars(chewing CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
     if(ENABLE_GCOV)
         corrosion_set_env_vars(chewing CARGO_INCREMENTAL=0)
         corrosion_add_target_local_rustflags(chewing -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort)
@@ -215,7 +212,7 @@ target_compile_definitions(common PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
-add_library(libchewing ${ALL_INC})
+add_library(libchewing ${ALL_INC} src/chewing.c)
 set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
 target_compile_definitions(libchewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
@@ -285,7 +282,7 @@ if(WITH_RUST)
     if(BUILD_SHARED_LIBS)
         if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
             target_link_options(libchewing
-                PRIVATE LINKER:-version-script,${CMAKE_BINARY_DIR}/symbols.map
+                PRIVATE LINKER:-version-script,${CMAKE_SOURCE_DIR}/src/symbols-elf.map
                 PRIVATE LINKER:--gc-sections
                 PRIVATE LINKER:-u,chewing_new
                 PRIVATE LINKER:-u,ueStrLen
@@ -294,11 +291,13 @@ if(WITH_RUST)
             )
         elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
             target_link_options(libchewing
-                PRIVATE LINKER:-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map
+                PRIVATE LINKER:-exported_symbols_list,${CMAKE_SOURCE_DIR}/src/symbols-mach_o.map
                 PRIVATE LINKER:-dead_strip
             )
         elseif(MSVC)
-            target_link_options(libchewing PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
+            target_link_options(libchewing
+                PRIVATE /DEF:${CMAKE_SOURCE_DIR}/src/symbols-msvc.map
+                PRIVATE /MACHINE:X64)
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
