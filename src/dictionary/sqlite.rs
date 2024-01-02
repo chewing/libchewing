@@ -84,6 +84,7 @@ impl SqliteDictionary {
     fn initialize_tables(conn: &Connection) -> Result<(), SqliteDictionaryError> {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
+        conn.pragma_update(None, "wal_autocheckpoint", 0)?;
         conn.execute(
             "CREATE TABLE IF NOT EXISTS dictionary_v1 (
                 syllables BLOB NOT NULL,
@@ -269,7 +270,7 @@ impl From<RusqliteError> for DictionaryUpdateError {
 
 impl Dictionary for SqliteDictionary {
     fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'static> {
-        let syllables_bytes = syllables.into_syllables_bytes();
+        let syllables_bytes = syllables.into_bytes();
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -337,6 +338,11 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
+        Ok(())
+    }
+
     fn insert<Syl: AsRef<Syllable>>(
         &mut self,
         syllables: &[Syl],
@@ -347,7 +353,7 @@ impl Dictionary for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.into_syllables_bytes();
+        let syllables_bytes = syllables.into_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -371,7 +377,7 @@ impl Dictionary for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.into_syllables_bytes();
+        let syllables_bytes = syllables.into_bytes();
         let tx = self.conn.transaction()?;
         {
             let mut stmt = tx.prepare_cached(
@@ -418,7 +424,7 @@ impl Dictionary for SqliteDictionary {
         syllables: &[Syl],
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllables_bytes = syllables.into_syllables_bytes();
+        let syllables_bytes = syllables.into_bytes();
         let mut stmt = self
             .conn
             .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")?;
@@ -501,7 +507,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         } else {
             0
         };
-        let syllables_bytes = syllables.into_syllables_bytes();
+        let syllables_bytes = syllables.into_bytes();
         let mut stmt = self.dict.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,

@@ -62,6 +62,7 @@ impl SqliteUserFreqEstimate {
     fn initialize_tables(conn: &Connection) -> Result<(), EstimateError> {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
+        conn.pragma_update(None, "wal_autocheckpoint", 0)?;
         conn.execute(
             "CREATE TABLE IF NOT EXISTS config_v1 (
                 id INTEGER PRIMARY KEY,
@@ -84,14 +85,11 @@ const MAX_USER_FREQ: u32 = 99999999;
 
 impl UserFreqEstimate for SqliteUserFreqEstimate {
     fn tick(&mut self) -> Result<(), EstimateError> {
-        // TODO debounce write
-        self.conn
-            .execute("UPDATE config_v1 SET value = value + 1 WHERE id = 0", [])?;
-        self.lifetime =
-            self.conn
-                .query_row("SELECT value FROM config_v1 WHERE id = 0", [], |row| {
-                    row.get(0)
-                })?;
+        self.lifetime = self.conn.query_row(
+            "UPDATE config_v1 SET value = value + 1 WHERE id = 0 RETURNING value",
+            [],
+            |row| row.get(0),
+        )?;
         Ok(())
     }
 

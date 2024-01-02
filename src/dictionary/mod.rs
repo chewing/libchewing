@@ -298,6 +298,20 @@ pub trait Dictionary: Debug {
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
 
+    /// Reopens the dictionary if it was changed by a different process
+    ///
+    /// It should not fail if the dictionary is read-only or able to sync across
+    /// processes automatically.
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+    /// Flushes all the changes back to the filesystem
+    ///
+    /// The change made to the dictionary might not be persisted without
+    /// calling this method.
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -501,6 +515,22 @@ impl Dictionary for AnyDictionary {
             AnyDictionary::SqliteDictionary(dict) => dict.about(),
             AnyDictionary::TrieDictionary(dict) => dict.about(),
             AnyDictionary::HashMapDictionary(dict) => dict.about(),
+        }
+    }
+
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.reopen(),
+            AnyDictionary::TrieDictionary(dict) => dict.reopen(),
+            AnyDictionary::HashMapDictionary(dict) => dict.reopen(),
+        }
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.flush(),
+            AnyDictionary::TrieDictionary(dict) => dict.flush(),
+            AnyDictionary::HashMapDictionary(dict) => dict.flush(),
         }
     }
 
