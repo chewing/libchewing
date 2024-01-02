@@ -53,12 +53,7 @@ endif()
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     target_link_libraries(${target} testhelper)
-    # XXX workaround MSVC issue
-    if(CMAKE_C_COMPILER_ID MATCHES MSVC AND WITH_RUST)
-        target_link_libraries(${target} chewing)
-    else()
-        target_link_libraries(${target} libchewing)
-    endif()
+    target_link_libraries(${target} libchewing)
     target_compile_definitions(${target} PRIVATE
         CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
         TEST_HASH_DIR=\"${TEST_BIN_DIR}\"
