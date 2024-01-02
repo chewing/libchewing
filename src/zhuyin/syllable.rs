@@ -281,11 +281,11 @@ impl AsRef<Syllable> for Syllable {
 /// TODO: docs
 pub trait IntoSyllablesBytes {
     /// TODO: docs
-    fn into_syllables_bytes(&self) -> Vec<u8>;
+    fn into_bytes(&self) -> Vec<u8>;
 }
 
 impl<Syl: AsRef<Syllable>> IntoSyllablesBytes for &[Syl] {
-    fn into_syllables_bytes(&self) -> Vec<u8> {
+    fn into_bytes(&self) -> Vec<u8> {
         let mut syllables_bytes = vec![];
         self.iter()
             .for_each(|syl| syllables_bytes.extend_from_slice(&syl.as_ref().to_le_bytes()));

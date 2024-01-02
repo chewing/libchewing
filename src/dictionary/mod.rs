@@ -518,6 +518,22 @@ impl Dictionary for AnyDictionary {
         }
     }
 
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.reopen(),
+            AnyDictionary::TrieDictionary(dict) => dict.reopen(),
+            AnyDictionary::HashMapDictionary(dict) => dict.reopen(),
+        }
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        match self {
+            AnyDictionary::SqliteDictionary(dict) => dict.flush(),
+            AnyDictionary::TrieDictionary(dict) => dict.flush(),
+            AnyDictionary::HashMapDictionary(dict) => dict.flush(),
+        }
+    }
+
     fn insert<Syl: AsRef<Syllable>>(
         &mut self,
         syllables: &[Syl],
