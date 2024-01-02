@@ -338,6 +338,11 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
+        Ok(())
+    }
+
     fn insert<Syl: AsRef<Syllable>>(
         &mut self,
         syllables: &[Syl],

@@ -120,6 +120,7 @@ where
     options: EditorOptions,
     state: Transition,
 
+    dirty_dict: bool,
     nth_conversion: usize,
     commit_buffer: String,
     notice_buffer: String,
@@ -143,6 +144,7 @@ where
             estimate,
             options: EditorOptions::default(),
             state: Transition::Entering(EditorKeyBehavior::Ignore, Entering),
+            dirty_dict: false,
             nth_conversion: 0,
             commit_buffer: String::new(),
             notice_buffer: String::new(),
@@ -303,10 +305,15 @@ where
         {
             return Err(format!("已有：{phrase}"));
         }
-        self.dict
+        let result = self
+            .dict
             .insert(&syllables, (&phrase, 100).into())
             .map(|_| phrase)
-            .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned())
+            .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned());
+        if result.is_ok() {
+            self.dirty_dict = true;
+        }
+        result
     }
     pub fn learn_phrase<Syl: AsRef<Syllable>>(&mut self, syllables: &[Syl], phrase: &str) {
         let phrases = Vec::from_iter(self.dict.lookup_phrase(syllables));
@@ -326,9 +333,11 @@ where
         let time = self.estimate.now().unwrap();
 
         let _ = self.dict.update(&syllables, phrase, user_freq, time);
+        self.dirty_dict = true;
     }
     pub fn unlearn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
         let _ = self.dict.remove(&syllables, phrase);
+        self.dirty_dict = true;
     }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {
@@ -547,6 +556,11 @@ where
         };
         if self.last_key_behavior() == EditorKeyBehavior::Absorb {
             self.try_auto_commit();
+        }
+        if self.dirty_dict {
+            let _ = self.user_dict().reopen();
+            let _ = self.user_dict().flush();
+            self.dirty_dict = false;
         }
         self.last_key_behavior()
     }
