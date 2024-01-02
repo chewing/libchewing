@@ -12,11 +12,13 @@ use thiserror::Error;
 
 use crate::zhuyin::Syllable;
 
+pub use cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
 pub use loader::{SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 
+mod cdb;
 mod layered;
 mod loader;
 mod sqlite;
@@ -488,6 +490,7 @@ impl BlockList for () {
 
 #[derive(Debug)]
 pub enum AnyDictionary {
+    CdbDictionary(CdbDictionary),
     SqliteDictionary(SqliteDictionary),
     TrieDictionary(TrieDictionary),
     HashMapDictionary(HashMap<Vec<Syllable>, Vec<Phrase>>),
@@ -496,6 +499,7 @@ pub enum AnyDictionary {
 impl Dictionary for AnyDictionary {
     fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.lookup_phrase(syllables),
             AnyDictionary::SqliteDictionary(dict) => dict.lookup_phrase(syllables),
             AnyDictionary::TrieDictionary(dict) => dict.lookup_phrase(syllables),
             AnyDictionary::HashMapDictionary(dict) => dict.lookup_phrase(syllables),
@@ -504,6 +508,7 @@ impl Dictionary for AnyDictionary {
 
     fn entries(&self) -> DictEntries {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.entries(),
             AnyDictionary::SqliteDictionary(dict) => dict.entries(),
             AnyDictionary::TrieDictionary(dict) => dict.entries(),
             AnyDictionary::HashMapDictionary(dict) => dict.entries(),
@@ -512,6 +517,7 @@ impl Dictionary for AnyDictionary {
 
     fn about(&self) -> DictionaryInfo {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.about(),
             AnyDictionary::SqliteDictionary(dict) => dict.about(),
             AnyDictionary::TrieDictionary(dict) => dict.about(),
             AnyDictionary::HashMapDictionary(dict) => dict.about(),
@@ -520,6 +526,7 @@ impl Dictionary for AnyDictionary {
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.reopen(),
             AnyDictionary::SqliteDictionary(dict) => dict.reopen(),
             AnyDictionary::TrieDictionary(dict) => dict.reopen(),
             AnyDictionary::HashMapDictionary(dict) => dict.reopen(),
@@ -528,6 +535,7 @@ impl Dictionary for AnyDictionary {
 
     fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.flush(),
             AnyDictionary::SqliteDictionary(dict) => dict.flush(),
             AnyDictionary::TrieDictionary(dict) => dict.flush(),
             AnyDictionary::HashMapDictionary(dict) => dict.flush(),
@@ -540,6 +548,7 @@ impl Dictionary for AnyDictionary {
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.insert(syllables, phrase),
             AnyDictionary::SqliteDictionary(dict) => dict.insert(syllables, phrase),
             AnyDictionary::TrieDictionary(dict) => dict.insert(syllables, phrase),
             AnyDictionary::HashMapDictionary(dict) => {
@@ -556,6 +565,7 @@ impl Dictionary for AnyDictionary {
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.update(syllables, phrase, user_freq, time),
             AnyDictionary::SqliteDictionary(dict) => {
                 dict.update(syllables, phrase, user_freq, time)
             }
@@ -572,12 +582,19 @@ impl Dictionary for AnyDictionary {
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         match self {
+            AnyDictionary::CdbDictionary(dict) => dict.remove(syllables, phrase_str),
             AnyDictionary::SqliteDictionary(dict) => dict.remove(syllables, phrase_str),
             AnyDictionary::TrieDictionary(dict) => dict.remove(syllables, phrase_str),
             AnyDictionary::HashMapDictionary(dict) => {
                 <HashMap<_, _> as Dictionary>::remove(dict, syllables, phrase_str)
             }
         }
+    }
+}
+
+impl From<CdbDictionary> for AnyDictionary {
+    fn from(value: CdbDictionary) -> Self {
+        Self::CdbDictionary(value)
     }
 }
 

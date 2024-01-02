@@ -2,7 +2,8 @@ use anyhow::{bail, Context, Result};
 use argh::FromArgs;
 use chewing::{
     dictionary::{
-        DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieDictionaryBuilder,
+        CdbDictionaryBuilder, DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder,
+        TrieDictionaryBuilder,
     },
     zhuyin::{Bopomofo, Syllable},
 };
@@ -40,7 +41,7 @@ impl<T> IntoParseError<T> for Result<T> {
 #[derive(FromArgs)]
 /// This program creates a new chewing phrase dictionary file.
 pub struct Args {
-    /// choose the underlying database implementation, must be either "trie" or "sqlite"
+    /// choose the underlying database implementation, must be either "trie", "cdb", or "sqlite"
     #[argh(option, short = 't', default = "String::from(\"trie\")")]
     pub db_type: String,
 
@@ -79,6 +80,7 @@ fn main() -> Result<()> {
     let mut builder: Box<dyn DictionaryBuilder> = match args.db_type.as_str() {
         "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
         "trie" => Box::new(TrieDictionaryBuilder::new()),
+        "cdb" => Box::new(CdbDictionaryBuilder::new()),
         _ => bail!("Unknown database type {}", args.db_type),
     };
 

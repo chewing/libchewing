@@ -5,7 +5,7 @@ use crate::{
     path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
-use super::{AnyDictionary, SqliteDictionary, TrieDictionary};
+use super::{AnyDictionary, CdbDictionary, SqliteDictionary, TrieDictionary};
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -34,6 +34,8 @@ impl SystemDictionaryLoader {
             db.into()
         } else if let Ok(db) = TrieDictionary::open(&tsi_db_path) {
             db.into()
+        } else if let Ok(db) = CdbDictionary::open(&tsi_db_path) {
+            db.into()
         } else {
             return None;
         };
@@ -43,6 +45,8 @@ impl SystemDictionaryLoader {
         let word_db = if let Ok(db) = SqliteDictionary::open_read_only(&word_db_path) {
             db.into()
         } else if let Ok(db) = TrieDictionary::open(&word_db_path) {
+            db.into()
+        } else if let Ok(db) = CdbDictionary::open(&word_db_path) {
             db.into()
         } else {
             return None;
@@ -75,6 +79,8 @@ impl UserDictionaryLoader {
         let dict = if let Ok(db) = SqliteDictionary::open(&data_path) {
             db.into()
         } else if let Ok(db) = TrieDictionary::open(&data_path) {
+            db.into()
+        } else if let Ok(db) = CdbDictionary::open(&data_path) {
             db.into()
         } else {
             return None;
