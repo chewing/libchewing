@@ -20,8 +20,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         with_rust: ['true', 'false']
-        rust_version: ['1.70', 'stable']
+        rust_version: ['1.70']
         include:
+          - os: ubuntu-latest
+            with_rust: true
+            rust_version: stable
           - os: ubuntu-latest
             c_compiler: cc
           - os: windows-latest
