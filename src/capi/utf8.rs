@@ -5,9 +5,6 @@ use std::{
 };
 
 #[no_mangle]
-pub extern "C" fn rust_link_utf8() {}
-
-#[no_mangle]
 pub unsafe extern "C" fn ueStrLen(str: *const c_char) -> c_int {
     let cstr = unsafe { CStr::from_ptr(str) };
     cstr.to_str().unwrap_or("").chars().count() as c_int

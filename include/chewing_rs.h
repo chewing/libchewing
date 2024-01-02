@@ -153,8 +153,6 @@ typedef struct ChewingConfigData {
 extern "C" {
 #endif // __cplusplus
 
-void rust_link_io(void);
-
 struct ChewingContext *chewing_new(void);
 
 void chewing_delete(struct ChewingContext *ctx);
@@ -401,19 +399,7 @@ void chewing_set_hsuSelKeyType(struct ChewingContext *_ctx, int mode);
 
 int chewing_get_hsuSelKeyType(struct ChewingContext *_ctx);
 
-void rust_link_key2pho(void);
-
 uint16_t UintFromPhone(const char *phone);
-
-uint16_t UintFromPhoneInx(const int *ph_inx);
-
-int PhoneFromUint(char *phone, uintptr_t phone_len, uint16_t phone_num);
-
-intptr_t UintArrayFromBopomofo(uint16_t *phone_seq, uintptr_t phone_len, const char *bopomofo_buf);
-
-int GetPhoneLenFromUint(uint16_t phone_num);
-
-void rust_link_path(void);
 
 int get_search_path(char *path, uintptr_t path_len);
 
@@ -421,8 +407,6 @@ int find_path_by_files(const char *search_path,
                        const char *const *files,
                        char *output,
                        uintptr_t output_len);
-
-void rust_link_utf8(void);
 
 int ueStrLen(const char *str);
 

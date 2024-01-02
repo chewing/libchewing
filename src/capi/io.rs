@@ -35,9 +35,6 @@ use crate::{
     zhuyin::Syllable,
 };
 
-#[no_mangle]
-pub extern "C" fn rust_link_io() {}
-
 enum Owned {
     CString,
     CUShortSlice(usize),

@@ -15,15 +15,14 @@ endif()
 
 include(CheckCCompilerFlag)
 
-option(BUILD_DLL "Build dynamic link library (*.dll) instead of static lib." true)
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
-if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
-    ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
     set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
     add_compile_definitions(_GNU_SOURCE)
     option(ENABLE_GCOV "Coverage support" false)
     if(ENABLE_GCOV)
-        if (WITH_RUST AND ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+        if(WITH_RUST AND CMAKE_C_COMPILER_ID MATCHES Clang)
             set(CMAKE_C_FLAGS "-fprofile-instr-generate -fcoverage-mapping ${CMAKE_C_FLAGS}")
         else()
             set(CMAKE_C_FLAGS "--coverage ${CMAKE_C_FLAGS}")
@@ -55,8 +54,6 @@ elseif(MSVC)
     if(MSVC_VERSION LESS 1900)
         add_compile_definitions(snprintf=_snprintf)
     endif()
-
-    set(BUILD_DLL false)
 endif()
 
 
@@ -83,16 +80,15 @@ endif()
 option(USE_VALGRIND "Use valgrind when testing" true)
 
 option(WITH_RUST "Use rust implemented internals (experimental)" false)
-if (WITH_RUST)
+if(WITH_RUST)
     add_subdirectory(cmake/corrosion)
-    if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    if(CMAKE_BUILD_TYPE MATCHES DEBUG)
         corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing FEATURES capi test-tracing)
     else()
         corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing FEATURES capi)
     endif()
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-tools)
     add_compile_definitions(WITH_RUST)
-    corrosion_set_env_vars(chewing CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR})
     if(ENABLE_GCOV)
         corrosion_set_env_vars(chewing CARGO_INCREMENTAL=0)
         corrosion_add_target_local_rustflags(chewing -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort)
@@ -106,12 +102,31 @@ check_type_size(uint16_t UINT16_T)
 set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
-if (WITH_SQLITE3)
-    if (WITH_INTERNAL_SQLITE3)
+if(WITH_SQLITE3)
+    if(WITH_INTERNAL_SQLITE3)
         set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
         include_directories(
             ${SQLITE3_SRC_DIR}
         )
+        find_package (Threads)
+        add_library(sqlite3_library STATIC
+            ${SQLITE3_SRC_DIR}/sqlite3.c
+            ${SQLITE3_SRC_DIR}/sqlite3.h
+        )
+        target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
+        add_executable(sqlite3
+            ${SQLITE3_SRC_DIR}/shell.c
+        )
+        target_link_libraries(sqlite3 sqlite3_library)
+        set_target_properties(sqlite3 PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
+        )
+        set(SQLite3_LIBRARIES sqlite3_library)
     else()
         find_package(SQLite3 REQUIRED)
         include_directories(SQLite3_INCLUDE_DIRS)
@@ -179,7 +194,7 @@ set(ALL_INC
     ${INC_DIR}/mod_aux.h
 )
 
-if (WITH_RUST)
+if(WITH_RUST)
     list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
 endif()
 
@@ -192,159 +207,117 @@ add_library(common OBJECT
     src/porting_layer/src/asprintf.h
 
     src/porting_layer/src/asprintf.c
-    src/chewing.c
 )
 target_compile_definitions(common PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 
-add_library(chewing_c OBJECT
-    ${ALL_INC}
-)
-if (WITH_RUST)
-target_sources(chewing_c PRIVATE
-    src/rust_wrapper.c
-)
-else()
-target_sources(common PRIVATE
-    ${SRC_DIR}/porting_layer/include/plat_mmap.h
-    ${SRC_DIR}/porting_layer/include/plat_path.h
-    ${SRC_DIR}/porting_layer/include/plat_types.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
-
-    ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
-    ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
-    ${SRC_DIR}/porting_layer/src/plat_path.c
-    ${SRC_DIR}/porting_layer/src/rpl_malloc.c
-    ${SRC_DIR}/common/chewing-utf8-util.c
-    ${SRC_DIR}/common/key2pho.c
-)
-target_sources(chewing_c PRIVATE
-    ${INC_DIR}/internal/bopomofo-private.h
-    ${INC_DIR}/internal/chewing-private.h
-    ${INC_DIR}/internal/chewingutil.h
-    ${INC_DIR}/internal/choice-private.h
-    ${INC_DIR}/internal/dict-private.h
-    ${INC_DIR}/internal/global-private.h
-    ${INC_DIR}/internal/pinyin-private.h
-    ${INC_DIR}/internal/tree-private.h
-    ${INC_DIR}/internal/userphrase-private.h
-
-    ${SRC_DIR}/bopomofo.c
-    ${SRC_DIR}/chewingio.c
-    ${SRC_DIR}/chewingutil.c
-    ${SRC_DIR}/choice.c
-    ${SRC_DIR}/compat.c
-    ${SRC_DIR}/dict.c
-    ${SRC_DIR}/mod_aux.c
-    ${SRC_DIR}/pinyin.c
-    ${SRC_DIR}/private.h
-    ${SRC_DIR}/tree.c
-    ${SRC_DIR}/userphrase.c
-)
-endif()
-target_compile_definitions(chewing_c PRIVATE
+add_library(libchewing ${ALL_INC} src/chewing.c)
+set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
+target_compile_definitions(libchewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
+if(NOT WITH_RUST)
+    target_sources(common PRIVATE
+        ${SRC_DIR}/porting_layer/include/plat_mmap.h
+        ${SRC_DIR}/porting_layer/include/plat_path.h
+        ${SRC_DIR}/porting_layer/include/plat_types.h
+        ${SRC_DIR}/porting_layer/include/sys/plat_posix.h
+        ${SRC_DIR}/porting_layer/include/sys/plat_windows.h
 
-if (WITH_INTERNAL_SQLITE3)
-    find_package (Threads)
-    add_library(sqlite3_library STATIC
-        ${SQLITE3_SRC_DIR}/sqlite3.c
-        ${SQLITE3_SRC_DIR}/sqlite3.h
+        ${SRC_DIR}/porting_layer/src/plat_mmap_posix.c
+        ${SRC_DIR}/porting_layer/src/plat_mmap_windows.c
+        ${SRC_DIR}/porting_layer/src/plat_path.c
+        ${SRC_DIR}/porting_layer/src/rpl_malloc.c
+        ${SRC_DIR}/common/chewing-utf8-util.c
+        ${SRC_DIR}/common/key2pho.c
     )
-    target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+    target_sources(libchewing PRIVATE
+        ${INC_DIR}/internal/bopomofo-private.h
+        ${INC_DIR}/internal/chewing-private.h
+        ${INC_DIR}/internal/chewingutil.h
+        ${INC_DIR}/internal/choice-private.h
+        ${INC_DIR}/internal/dict-private.h
+        ${INC_DIR}/internal/global-private.h
+        ${INC_DIR}/internal/pinyin-private.h
+        ${INC_DIR}/internal/tree-private.h
+        ${INC_DIR}/internal/userphrase-private.h
 
-    add_executable(sqlite3
-        ${SQLITE3_SRC_DIR}/shell.c
+        ${SRC_DIR}/bopomofo.c
+        ${SRC_DIR}/chewingio.c
+        ${SRC_DIR}/chewingutil.c
+        ${SRC_DIR}/choice.c
+        ${SRC_DIR}/compat.c
+        ${SRC_DIR}/dict.c
+        ${SRC_DIR}/mod_aux.c
+        ${SRC_DIR}/pinyin.c
+        ${SRC_DIR}/private.h
+        ${SRC_DIR}/tree.c
+        ${SRC_DIR}/userphrase.c
     )
-    target_link_libraries(sqlite3 sqlite3_library)
-    set_target_properties(sqlite3 PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
-    )
-    set(SQLite3_LIBRARIES sqlite3_library)
-endif()
-
-if (WITH_SQLITE3)
-    if (NOT WITH_RUST)
-        add_library(userphrase STATIC
+    if(WITH_SQLITE3)
+        add_library(userphrase OBJECT
             ${INC_DIR}/internal/chewing-sql.h
-
             ${SRC_DIR}/chewing-sql.c
             ${SRC_DIR}/userphrase-sql.c
         )
-    endif()
-else()
-    add_library(userphrase STATIC
-        ${INC_DIR}/internal/hash-private.h
-
-        ${SRC_DIR}/hash.c
-        ${SRC_DIR}/userphrase-hash.c
-    )
-endif()
-
-if (BUILD_DLL OR NOT MSVC)
-    if (MSVC)
-        add_compile_definitions(CHEWINGDLL_EXPORTS)
-    endif()
-    add_library(chewing_shared SHARED
-        $<TARGET_OBJECTS:chewing_c>
-        $<TARGET_OBJECTS:common>
-    )
-    if (WITH_RUST)
-        if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR
-            ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
-            target_link_options(chewing_shared PRIVATE "-Wl,-version-script,${CMAKE_BINARY_DIR}/symbols.map")
-            target_link_options(chewing_shared PRIVATE "-Wl,--gc-sections")
-        elseif (${CMAKE_C_COMPILER_ID} STREQUAL "AppleClang")
-            target_link_options(chewing_shared PRIVATE "-Wl,-exported_symbols_list,${CMAKE_BINARY_DIR}/symbols.map")
-            target_link_options(chewing_shared PRIVATE "-Wl,-dead_strip")
-        elseif (MSVC)
-            target_link_options(chewing_shared PRIVATE "/DEF ${CMAKE_BINARY_DIR}/symbols.map")
-            set_target_properties(chewing_shared PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-        endif()
-    endif()
-
-    list(APPEND LIBS chewing_shared)
-    add_dependencies(check chewing_shared)
-endif()
-
-if (NOT BUILD_DLL)
-    add_library(chewing_static STATIC
-        $<TARGET_OBJECTS:chewing_c>
-        $<TARGET_OBJECTS:common>
-    )
-    list(APPEND LIBS chewing_static)
-    add_dependencies(check chewing_static)
-endif()
-
-foreach(lib ${LIBS})
-    if (WITH_RUST)
-        target_link_libraries(${lib} PRIVATE chewing)
-        if (WITH_SQLITE3)
-            target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
-        endif()
     else()
-        target_link_libraries(${lib} userphrase)
-        if (WITH_SQLITE3)
-            target_link_libraries(userphrase ${SQLite3_LIBRARIES})
+        add_library(userphrase OBJECT
+            ${INC_DIR}/internal/hash-private.h
+            ${SRC_DIR}/hash.c
+            ${SRC_DIR}/userphrase-hash.c
+        )
+    endif()
+    target_link_libraries(libchewing
+        PRIVATE common
+        PRIVATE userphrase)
+    if(BUILD_SHARED_LIBS AND MSVC)
+        target_compile_definitions(libchewing PRIVATE CHEWINGDLL_EXPORTS)
+    endif()
+endif()
+
+if(WITH_RUST)
+    target_link_libraries(libchewing PRIVATE chewing)
+    target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
+    if(BUILD_SHARED_LIBS)
+        if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
+            target_link_options(libchewing
+                PRIVATE LINKER:-version-script,${CMAKE_SOURCE_DIR}/src/symbols-elf.map
+                PRIVATE LINKER:--gc-sections
+                PRIVATE LINKER:-u,chewing_new
+                PRIVATE LINKER:-u,ueStrLen
+                PRIVATE LINKER:-u,UintFromPhone
+                PRIVATE LINKER:-u,find_path_by_files
+            )
+        elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
+            target_link_options(libchewing
+                PRIVATE LINKER:-exported_symbols_list,${CMAKE_SOURCE_DIR}/src/symbols-mach_o.map
+                PRIVATE LINKER:-dead_strip
+            )
+        elseif(MSVC)
+            target_link_options(libchewing
+                PRIVATE /DEF:${CMAKE_SOURCE_DIR}/src/symbols-msvc.map
+                PRIVATE /MACHINE:X64)
+            set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
-endforeach()
+elseif(WITH_SQLITE3)
+   target_link_libraries(libchewing PRIVATE ${SQLite3_LIBRARIES})
+endif()
 
-set_target_properties(${LIBS} PROPERTIES
-    OUTPUT_NAME chewing
-    SOVERSION 3
-    VERSION 3.3.1
-)
+if(MSVC)
+    set_target_properties(libchewing PROPERTIES
+        OUTPUT_NAME chewing-msvc
+    )
+else()
+    set_target_properties(libchewing PROPERTIES
+        OUTPUT_NAME chewing
+        SOVERSION 3
+        VERSION 3.3.1
+    )
+endif()
 
-# install
 install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-install(TARGETS ${LIBS} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS libchewing DESTINATION ${CMAKE_INSTALL_LIBDIR})
