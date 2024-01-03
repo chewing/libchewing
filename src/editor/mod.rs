@@ -295,7 +295,7 @@ where
             .collect::<String>();
         if self
             .user_dict()
-            .lookup_phrase(&syllables)
+            .lookup_all_phrases(&syllables)
             .into_iter()
             .any(|it| it.as_str() == phrase)
         {
@@ -312,7 +312,7 @@ where
         result
     }
     pub fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
-        let phrases = Vec::from_iter(self.dict.lookup_phrase(syllables));
+        let phrases = self.dict.lookup_all_phrases(syllables);
         if phrases.is_empty() {
             // FIXME provide max_freq, orig_freq
             let _ = self.dict.add_phrase(syllables, (phrase, 1).into());
@@ -941,7 +941,12 @@ impl EnteringSyllable {
                     Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self)
                 }
                 KeyBehavior::Commit => {
-                    if editor.dict.lookup_word(editor.syl.read()).next().is_some() {
+                    // FIXME lookup one?
+                    if editor
+                        .dict
+                        .lookup_first_phrase(&[editor.syl.read()])
+                        .is_some()
+                    {
                         editor.com.push(Symbol::Syllable(editor.syl.read()));
                     }
                     editor.syl.clear();

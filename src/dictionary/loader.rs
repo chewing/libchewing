@@ -70,18 +70,17 @@ impl UserDictionaryLoader {
         self
     }
     pub fn load(self) -> Option<Box<dyn Dictionary>> {
-        let mut data_path = if let Some(data_path) = self.data_path {
+        let data_path = if let Some(data_path) = self.data_path {
             data_path
         } else {
             userphrase_path()?
         };
-        data_path.set_extension("cdb");
 
-        let dict = /*if let Ok(db) = SqliteDictionary::open(&data_path) {
+        let dict = if let Ok(db) = SqliteDictionary::open(&data_path) {
             Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = TrieDictionary::open(&data_path) {
             Box::new(db) as Box<dyn Dictionary>
-        } else*/ if let Ok(db) = CdbDictionary::open(&data_path) {
+        } else if let Ok(db) = CdbDictionary::open(&data_path) {
             Box::new(db) as Box<dyn Dictionary>
         } else {
             return None;
@@ -111,7 +110,7 @@ impl UserFreqEstimateLoader {
             userphrase_path()?
         };
 
-        let estimate = if let Ok(db) = SqliteUserFreqEstimate::open_in_memory() {
+        let estimate = if let Ok(db) = SqliteUserFreqEstimate::open(&data_path) {
             db.into()
         } else {
             return None;

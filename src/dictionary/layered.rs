@@ -4,9 +4,7 @@ use indexmap::IndexSet;
 
 use crate::zhuyin::SyllableSlice;
 
-use super::{
-    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase, Phrases,
-};
+use super::{BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -39,9 +37,10 @@ use super::{
 ///     ]
 ///     .into_iter()
 ///     .collect::<HashSet<_>>(),
-///     dict.lookup_phrase(&[
+///     dict.lookup_all_phrases(&[
 ///         syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
 ///     ])
+///     .into_iter()
 ///     .collect::<HashSet<_>>(),
 /// );
 /// # Ok(())
@@ -92,29 +91,32 @@ impl Dictionary for LayeredDictionary {
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let (base, layers) = match self.inner.split_first() {
             Some(d) => d,
-            None => return Box::new(std::iter::empty()),
+            None => return vec![],
         };
         let mut phrases = IndexSet::with_capacity(128);
-        phrases.extend(base.lookup_phrase(syllables).map(LookupPhrase));
+        phrases.extend(
+            base.lookup_all_phrases(syllables)
+                .into_iter()
+                .map(LookupPhrase),
+        );
         for d in layers {
-            for phrase in d.lookup_phrase(syllables) {
+            for phrase in d.lookup_all_phrases(syllables) {
                 phrases.replace(LookupPhrase(phrase));
             }
         }
-        Box::new(
-            phrases
-                .into_iter()
-                .map(|p| p.0)
-                .filter(|phrase| !self.is_blocked(&phrase.phrase)),
-        )
+        phrases
+            .into_iter()
+            .map(|p| p.0)
+            .filter(|phrase| !self.is_blocked(&phrase.phrase))
+            .take(first)
+            .collect()
     }
 
-    fn entries(&self) -> DictEntries {
-        todo!("entries from all layers")
-        // Box::new(std::iter::empty())
+    fn entries(&self) -> Option<DictEntries> {
+        None
     }
 
     fn about(&self) -> DictionaryInfo {

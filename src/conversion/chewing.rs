@@ -116,7 +116,7 @@ impl ChewingEngine {
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in dict.lookup_phrase(&syllables) {
+        'next_phrase: for phrase in dict.lookup_all_phrases(&syllables) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.

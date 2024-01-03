@@ -245,8 +245,8 @@ impl Display for Phrase {
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100).into()]),
 /// ]);
 ///
-/// for phrase in dict.lookup_word(
-///     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
+/// for phrase in dict.lookup_all_phrases(
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -277,8 +277,8 @@ pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 /// let mut dict = HashMap::new();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
-/// for phrase in dict.lookup_word(
-///     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
+/// for phrase in dict.lookup_all_phrases(
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -287,17 +287,26 @@ pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 /// # }
 /// ```
 pub trait Dictionary: Any + Debug {
-    /// Returns an iterator to all single syllable words matched by the
-    /// syllable, if any. The result should use a stable order each time for the
-    /// same input.
-    fn lookup_word(&self, syllable: Syllable) -> Phrases<'_> {
-        self.lookup_phrase(&[syllable])
+    /// Returns first N phrases matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase>;
+    /// Returns the first phrase matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_first_phrase(&self, syllables: &dyn SyllableSlice) -> Option<Phrase> {
+        self.lookup_first_n_phrases(syllables, 1).into_iter().next()
     }
-    /// Returns an iterator to all phrases matched by the syllables, if any. The
-    /// result should use a stable order each time for the same input.
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_>;
+    /// Returns all phrases matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_all_phrases(&self, syllables: &dyn SyllableSlice) -> Vec<Phrase> {
+        self.lookup_first_n_phrases(syllables, usize::MAX)
+    }
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries;
+    ///
+    /// Some dictionary backend does not support this operation.
+    fn entries(&self) -> Option<DictEntries>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
     /// Reopens the dictionary if it was changed by a different process
@@ -386,20 +395,17 @@ pub trait DictionaryBuilder {
 }
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
-        let syllables = syllables.as_slice().into_owned();
-        self.get(&syllables)
-            .cloned()
-            .map(|v| Box::new(v.into_iter()) as Phrases<'_>)
-            .unwrap_or_else(|| Box::new(std::iter::empty()))
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        let syllables = dbg!(syllables.as_slice().into_owned());
+        let mut phrases = dbg!(self.get(&syllables).cloned().unwrap_or_default());
+        phrases.truncate(first);
+        dbg!(phrases)
     }
 
-    fn entries(&self) -> DictEntries {
-        Box::new(
-            self.clone()
-                .into_iter()
-                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
-        )
+    fn entries(&self) -> Option<DictEntries> {
+        Some(Box::new(self.clone().into_iter().flat_map(|(k, v)| {
+            v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))
+        })))
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -471,5 +477,46 @@ impl BlockList for HashSet<String> {
 impl BlockList for () {
     fn is_blocked(&self, _phrase: &str) -> bool {
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
+
+    use super::Dictionary;
+
+    #[test]
+    fn hashmap_lookup_first_one() {
+        let dict = HashMap::from([(
+            vec![syl![C, E, TONE4], syl![SH, TONE4]],
+            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
+        )]);
+
+        assert_eq!(
+            "測試",
+            dict.lookup_first_phrase(&[syl![C, E, TONE4], syl![SH, TONE4]])
+                .unwrap()
+                .as_str()
+        )
+    }
+
+    #[test]
+    fn hashmap_lookup_all() {
+        let dict = HashMap::from([(
+            vec![syl![C, E, TONE4], syl![SH, TONE4]],
+            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
+        )]);
+
+        assert_eq!(
+            vec![
+                Phrase::new("測試", 1),
+                Phrase::new("策試", 1),
+                Phrase::new("策士", 1)
+            ],
+            dict.lookup_all_phrases(&[syl![C, E, TONE4], syl![SH, TONE4]])
+        )
     }
 }

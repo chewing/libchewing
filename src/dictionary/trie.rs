@@ -18,8 +18,8 @@ use thiserror::Error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUpdateError,
-    DuplicatePhraseError, Phrase, Phrases,
+    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
+    DictionaryUpdateError, DuplicatePhraseError, Phrase,
 };
 
 const DICT_FORMAT: u32 = 0;
@@ -132,11 +132,11 @@ impl<'a> PhraseData<&'a [u8]> {
 /// let dict = TrieDictionary::new(&mut file)?;
 ///
 /// // Find the phrase ㄗˋㄉ一ㄢˇ (dictionary)
-/// let mut phrases = dict.lookup_phrase(&[
+/// let mut phrase = dict.lookup_first_phrase(&[
 ///     syl![Bopomofo::Z, Bopomofo::TONE4],
 ///     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN]
 /// ]);
-/// assert_eq!("字典", phrases.next().unwrap().as_str());
+/// assert_eq!("字典", phrase.unwrap().as_str());
 /// # Ok(())
 /// # }
 /// ```
@@ -324,7 +324,7 @@ impl Iterator for PhrasesIter<'_> {
 }
 
 impl Dictionary for TrieDictionary {
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
         let mut node = root;
         'next: for syl in syllables.as_slice().iter() {
@@ -337,20 +337,22 @@ impl Dictionary for TrieDictionary {
                 node = &child_nodes[child];
                 continue 'next;
             }
-            return Box::new(std::iter::empty());
+            return vec![];
         }
         let leaf_data = &self.dict[node.child_begin()..];
         let leaf: &TrieLeafPod = from_bytes(&leaf_data[..TrieLeafPod::SIZE]);
         if leaf.reserved_zero() != 0 {
-            return Box::new(std::iter::empty());
+            return vec![];
         }
-        Box::new(PhrasesIter {
+        PhrasesIter {
             bytes: &self.data[leaf.data_begin()..leaf.data_end()],
-        })
+        }
+        .take(first)
+        .collect()
     }
 
-    fn entries(&self) -> super::DictEntries {
-        todo!();
+    fn entries(&self) -> Option<DictEntries> {
+        None
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -1174,8 +1176,7 @@ mod tests {
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
-            dict.lookup_word(syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4])
-                .collect::<Vec<_>>()
+            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]])
         );
 
         Ok(())
@@ -1213,29 +1214,26 @@ mod tests {
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4]
             ])
-            .collect::<Vec<_>>()
         );
         assert_eq!(
             vec![Phrase::new("測試成功", 3)],
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
                 syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
                 syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
             ])
-            .collect::<Vec<_>>()
         );
         assert_eq!(
             Vec::<Phrase>::new(),
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
                 syl![Bopomofo::U, Bopomofo::TONE4]
             ])
-            .collect::<Vec<_>>()
         );
 
         Ok(())
@@ -1285,8 +1283,7 @@ mod tests {
                 Phrase::new("測", 0),
                 Phrase::new("側", 0),
             ],
-            dict.lookup_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
-                .collect::<Vec<Phrase>>()
+            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
         );
         Ok(())
     }
@@ -1341,11 +1338,10 @@ mod tests {
                 Phrase::new("側視", 318),
                 Phrase::new("側室", 318),
             ],
-            dict.lookup_phrase(&vec![
+            dict.lookup_all_phrases(&vec![
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<Phrase>>()
         );
         Ok(())
     }

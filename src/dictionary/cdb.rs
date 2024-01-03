@@ -4,7 +4,7 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{self, Write},
-    iter, mem,
+    mem,
     path::{Path, PathBuf},
 };
 
@@ -15,7 +15,7 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase, Phrases,
+    DictionaryUpdateError, Phrase,
 };
 
 mod serde {
@@ -151,7 +151,7 @@ impl CdbDictionary {
 }
 
 impl Dictionary for CdbDictionary {
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let syllable_bytes = syllables.get_bytes();
         let base_bytes = self.base.get(&syllable_bytes);
         let base_phrases = match &base_bytes {
@@ -162,7 +162,7 @@ impl Dictionary for CdbDictionary {
             Some(phrases) => phrases.clone().into_iter(),
             None => vec![].into_iter(),
         };
-        let phrases = base_phrases
+        base_phrases
             .chain(added_phrases)
             .filter(|it| {
                 let phrase_key = (syllable_bytes.as_slice().into(), it.as_str().into());
@@ -175,12 +175,12 @@ impl Dictionary for CdbDictionary {
                     None => it,
                 }
             })
-            .collect::<Vec<_>>();
-        Box::new(phrases.into_iter())
+            .take(first)
+            .collect()
     }
 
-    fn entries(&self) -> DictEntries {
-        Box::new(iter::empty())
+    fn entries(&self) -> Option<DictEntries> {
+        None
     }
 
     fn about(&self) -> DictionaryInfo {

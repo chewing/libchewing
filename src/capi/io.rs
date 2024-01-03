@@ -2,7 +2,7 @@ use std::{
     cmp::min,
     collections::BTreeMap,
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
-    mem,
+    iter, mem,
     ptr::{null, null_mut},
     slice, str,
     sync::OnceLock,
@@ -736,7 +736,13 @@ pub extern "C" fn chewing_userphrase_enumerate(ctx: *mut ChewingContext) -> c_in
         None => return -1,
     };
 
-    ctx.userphrase_iter = Some(ctx.editor.user_dict().entries().peekable());
+    ctx.userphrase_iter = Some(
+        ctx.editor
+            .user_dict()
+            .entries()
+            .unwrap_or(Box::new(iter::empty()))
+            .peekable(),
+    );
     0
 }
 
@@ -923,9 +929,14 @@ pub extern "C" fn chewing_userphrase_lookup(
         Some(phrase) => ctx
             .editor
             .user_dict()
-            .lookup_phrase(&syllables)
+            .lookup_all_phrases(&syllables)
+            .iter()
             .any(|ph| ph.as_str() == phrase) as c_int,
-        None => (ctx.editor.user_dict().lookup_phrase(&syllables).count() > 0) as c_int,
+        None => ctx
+            .editor
+            .user_dict()
+            .lookup_first_phrase(&syllables)
+            .is_some() as c_int,
     }
 }
 

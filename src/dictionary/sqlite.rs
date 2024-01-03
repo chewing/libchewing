@@ -7,7 +7,7 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase, Phrases,
+    DictionaryUpdateError, Phrase,
 };
 
 /// TODO: doc
@@ -269,7 +269,7 @@ impl From<RusqliteError> for DictionaryUpdateError {
 }
 
 impl Dictionary for SqliteDictionary {
-    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'static> {
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let syllables_bytes = syllables.get_bytes();
         let mut stmt = self
             .conn
@@ -283,24 +283,22 @@ impl Dictionary for SqliteDictionary {
                 ORDER BY sort_id ASC, max(freq, coalesce(user_freq, 0)) DESC, phrase DESC",
             )
             .expect("SQL error");
-        Box::new(
-            stmt.query_map([syllables_bytes], |row| {
-                let (phrase, freq, time): (String, _, _) = row.try_into()?;
-                let mut phrase = Phrase::new(phrase, freq);
-                if let Some(last_used) = time {
-                    phrase = phrase.with_time(last_used);
-                }
-                Ok(phrase)
-            })
-            .unwrap()
-            .map(|r| r.unwrap())
-            .collect::<Vec<_>>()
-            .into_iter(),
-        )
+        stmt.query_map([syllables_bytes], |row| {
+            let (phrase, freq, time): (String, _, _) = row.try_into()?;
+            let mut phrase = Phrase::new(phrase, freq);
+            if let Some(last_used) = time {
+                phrase = phrase.with_time(last_used);
+            }
+            Ok(phrase)
+        })
+        .unwrap()
+        .map(|r| r.unwrap())
+        .take(first)
+        .collect()
     }
 
     // FIXME too many clone
-    fn entries(&self) -> DictEntries {
+    fn entries(&self) -> Option<DictEntries> {
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -308,7 +306,7 @@ impl Dictionary for SqliteDictionary {
                 FROM dictionary_v1 LEFT JOIN userphrase_v2 ON userphrase_id = id",
             )
             .expect("SQL error");
-        Box::new(
+        Some(Box::new(
             stmt.query_map([], |row| {
                 let (syllables_bytes, phrase, freq, time): (Vec<u8>, String, _, _) =
                     row.try_into()?;
@@ -331,7 +329,7 @@ impl Dictionary for SqliteDictionary {
             .map(|r| r.unwrap())
             .collect::<Vec<_>>()
             .into_iter(),
-        )
+        ))
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -599,11 +597,10 @@ mod tests {
                 Phrase::new("策士", 9318).with_time(186613),
                 Phrase::new("測試", 9318).with_time(186613)
             ],
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<_>>()
         );
     }
 
@@ -621,11 +618,10 @@ mod tests {
         )?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<_>>()
         );
         Ok(())
     }
@@ -641,11 +637,10 @@ mod tests {
         dict.update_phrase(&syllables, ("測試", 9318).into(), 9900, 0)?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_phrase(&[
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
-            .collect::<Vec<_>>()
         );
         Ok(())
     }
