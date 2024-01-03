@@ -1,9 +1,6 @@
-use std::path::Path;
-
-use rusqlite::Connection;
 use thiserror::Error;
 
-use crate::dictionary::Phrase;
+use crate::dictionary::{Dictionary, Phrase};
 
 /// TODO: doc
 /// TODO: change to enum?
@@ -25,56 +22,28 @@ pub trait UserFreqEstimate {
 
 /// TODO: doc
 #[derive(Debug)]
-pub struct SqliteUserFreqEstimate {
-    conn: Connection,
+pub struct LaxUserFreqEstimate {
     lifetime: u64,
 }
 
-impl From<rusqlite::Error> for EstimateError {
-    fn from(source: rusqlite::Error) -> Self {
-        EstimateError {
-            source: source.into(),
+impl LaxUserFreqEstimate {
+    /// TODO: doc
+    pub fn open(user_dict: &dyn Dictionary) -> Result<LaxUserFreqEstimate, EstimateError> {
+        if let Some(entries) = user_dict.entries() {
+            let lifetime = entries
+                .map(|it| it.1.last_used().unwrap_or_default())
+                .max()
+                .unwrap_or_default();
+            Ok(LaxUserFreqEstimate { lifetime })
+        } else {
+            Ok(LaxUserFreqEstimate { lifetime: 0 })
         }
     }
-}
 
-impl SqliteUserFreqEstimate {
-    /// TODO: doc
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<SqliteUserFreqEstimate, EstimateError> {
-        let conn = Connection::open(path)?;
-        Self::initialize_tables(&conn)?;
-        let lifetime = conn.query_row("SELECT value FROM config_v1 WHERE id = 0", [], |row| {
-            row.get(0)
-        })?;
-        Ok(SqliteUserFreqEstimate { conn, lifetime })
-    }
-
-    /// TODO: doc
-    pub fn open_in_memory() -> Result<SqliteUserFreqEstimate, EstimateError> {
-        let conn = Connection::open_in_memory()?;
-        Self::initialize_tables(&conn)?;
-        let lifetime = conn.query_row("SELECT value FROM config_v1 WHERE id = 0", [], |row| {
-            row.get(0)
-        })?;
-        Ok(SqliteUserFreqEstimate { conn, lifetime })
-    }
-
-    fn initialize_tables(conn: &Connection) -> Result<(), EstimateError> {
-        conn.pragma_update(None, "journal_mode", "WAL")?;
-        conn.pragma_update(None, "synchronous", "NORMAL")?;
-        conn.pragma_update(None, "wal_autocheckpoint", 0)?;
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS config_v1 (
-                id INTEGER PRIMARY KEY,
-                value INTEGER
-            ) WITHOUT ROWID",
-            [],
-        )?;
-        conn.execute(
-            "INSERT OR IGNORE INTO config_v1 (id, value) VALUES (0, 0)",
-            [],
-        )?;
-        Ok(())
+    pub fn open_in_memory(initial_lifetime: u64) -> LaxUserFreqEstimate {
+        LaxUserFreqEstimate {
+            lifetime: initial_lifetime,
+        }
     }
 }
 
@@ -83,13 +52,9 @@ const MEDIUM_INCREASE_FREQ: u32 = 5;
 const LONG_DECREASE_FREQ: u32 = 10;
 const MAX_USER_FREQ: u32 = 99999999;
 
-impl UserFreqEstimate for SqliteUserFreqEstimate {
+impl UserFreqEstimate for LaxUserFreqEstimate {
     fn tick(&mut self) -> Result<(), EstimateError> {
-        self.lifetime = self.conn.query_row(
-            "UPDATE config_v1 SET value = value + 1 WHERE id = 0 RETURNING value",
-            [],
-            |row| row.get(0),
-        )?;
+        self.lifetime += 1;
         Ok(())
     }
 
@@ -118,5 +83,41 @@ impl UserFreqEstimate for SqliteUserFreqEstimate {
             let delta = ((phrase.freq() - orig_freq) / 5).max(LONG_DECREASE_FREQ);
             (phrase.freq() - delta).max(orig_freq)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{dictionary::Phrase, syl, zhuyin::Syllable};
+
+    use super::LaxUserFreqEstimate;
+
+    #[test]
+    fn load_from_dictionary() {
+        let user_dict: HashMap<Vec<Syllable>, Vec<Phrase>> = HashMap::from([
+            (
+                vec![syl![crate::zhuyin::Bopomofo::A]],
+                vec![
+                    ("A", 1, 1).into(),
+                    ("B", 1, 2).into(),
+                    ("C", 1, 99).into(),
+                    ("D", 1, 3).into(),
+                ],
+            ),
+            (
+                vec![syl![crate::zhuyin::Bopomofo::I]],
+                vec![
+                    ("I", 1, 5).into(),
+                    ("J", 1, 100).into(),
+                    ("K", 1, 4).into(),
+                    ("L", 1, 3).into(),
+                ],
+            ),
+        ]);
+        let estimate = LaxUserFreqEstimate::open(&user_dict).unwrap();
+
+        assert_eq!(100, estimate.lifetime);
     }
 }

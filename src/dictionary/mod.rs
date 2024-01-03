@@ -15,7 +15,7 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 
 pub use self::cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
-pub use loader::{SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader};
+pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 

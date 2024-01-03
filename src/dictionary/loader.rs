@@ -1,9 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::{
-    editor::SqliteUserFreqEstimate,
-    path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
-};
+use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 
 use super::{CdbDictionary, Dictionary, SqliteDictionary, TrieDictionary};
 
@@ -87,35 +84,5 @@ impl UserDictionaryLoader {
         };
 
         Some(dict)
-    }
-}
-
-#[derive(Debug)]
-pub struct UserFreqEstimateLoader {
-    data_path: Option<PathBuf>,
-}
-
-impl UserFreqEstimateLoader {
-    pub fn new() -> UserFreqEstimateLoader {
-        UserFreqEstimateLoader { data_path: None }
-    }
-    pub fn userphrase_path(mut self, path: impl AsRef<Path>) -> UserFreqEstimateLoader {
-        self.data_path = Some(path.as_ref().to_path_buf());
-        self
-    }
-    pub fn load(self) -> Option<SqliteUserFreqEstimate> {
-        let data_path = if let Some(data_path) = self.data_path {
-            data_path
-        } else {
-            userphrase_path()?
-        };
-
-        let estimate = if let Ok(db) = SqliteUserFreqEstimate::open(&data_path) {
-            db.into()
-        } else {
-            return None;
-        };
-
-        Some(estimate)
     }
 }

@@ -20,16 +20,14 @@ use crate::{
         types::{ChewingContext, SelKeys},
     },
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{
-        LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader,
-    },
+    dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        SyllableEditor, UserPhraseAddDirection,
+        LaxUserFreqEstimate, SyllableEditor, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -155,19 +153,10 @@ pub extern "C" fn chewing_new2(
         None => return null_mut(),
     };
 
-    let estimate = if userpath.is_null() {
-        UserFreqEstimateLoader::new().load()
-    } else {
-        let data_path = unsafe { CStr::from_ptr(userpath) }
-            .to_str()
-            .expect("invalid syspath string");
-        UserFreqEstimateLoader::new()
-            .userphrase_path(data_path)
-            .load()
-    };
+    let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
     let estimate = match estimate {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
 
     let dict = LayeredDictionary::new(dictionaries, user_dictionary);

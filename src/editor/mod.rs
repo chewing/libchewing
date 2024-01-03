@@ -12,7 +12,7 @@ use std::{
     io, mem,
 };
 
-pub use estimate::{EstimateError, SqliteUserFreqEstimate, UserFreqEstimate};
+pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
 pub use syllable::SyllableEditor;
 use tracing::{debug, trace, warn};
 
@@ -116,7 +116,7 @@ where
     conv: C,
     dict: LayeredDictionary,
     abbr: AbbrevTable,
-    estimate: SqliteUserFreqEstimate,
+    estimate: LaxUserFreqEstimate,
     options: EditorOptions,
     state: Transition,
 
@@ -130,7 +130,7 @@ impl<C> Editor<C>
 where
     C: ConversionEngine<LayeredDictionary>,
 {
-    pub fn new(conv: C, dict: LayeredDictionary, estimate: SqliteUserFreqEstimate) -> Editor<C> {
+    pub fn new(conv: C, dict: LayeredDictionary, estimate: LaxUserFreqEstimate) -> Editor<C> {
         Editor {
             com: CompositionEditor::default(),
             syl: Box::new(Standard::new()),
@@ -1275,7 +1275,7 @@ impl Highlighting {
 mod tests {
     use std::collections::HashMap;
 
-    use estimate::SqliteUserFreqEstimate;
+    use estimate::LaxUserFreqEstimate;
 
     use crate::{
         conversion::ChewingEngine,
@@ -1295,7 +1295,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = LayeredDictionary::new(vec![Box::new(HashMap::new())], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let ev = keyboard.map(KeyCode::H);
@@ -1320,7 +1320,7 @@ mod tests {
         )]);
         let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
@@ -1351,7 +1351,7 @@ mod tests {
         )]);
         let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
@@ -1392,7 +1392,7 @@ mod tests {
         )]);
         let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
@@ -1436,7 +1436,7 @@ mod tests {
         )]);
         let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         let keys = [
@@ -1472,7 +1472,7 @@ mod tests {
         let dict = HashMap::new();
         let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
+        let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let mut editor = Editor::new(conversion_engine, dict, estimate);
 
         editor.switch_character_form();
