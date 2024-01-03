@@ -2,7 +2,7 @@ use std::hash::{Hash, Hasher};
 
 use indexmap::IndexSet;
 
-use crate::zhuyin::Syllable;
+use crate::zhuyin::SyllableSlice;
 
 use super::{
     BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase, Phrases,
@@ -17,8 +17,8 @@ use super::{
 ///
 /// use chewing::{dictionary::{LayeredDictionary, Dictionary}, syl, zhuyin::Bopomofo};
 ///
-/// let mut sys_dict = HashMap::new();
-/// let mut user_dict = HashMap::new();
+/// let mut sys_dict = Box::new(HashMap::new());
+/// let mut user_dict = Box::new(HashMap::new());
 /// sys_dict.insert(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
@@ -28,7 +28,7 @@ use super::{
 ///     vec![("策", 100).into(), ("冊", 100).into()]
 /// );
 ///
-/// let user_block_list = HashSet::from(["側".to_string()]);
+/// let user_block_list = Box::new(HashSet::from(["側".to_string()]));
 ///
 /// let dict = LayeredDictionary::new(vec![sys_dict, user_dict], vec![user_block_list]);
 /// assert_eq!(
@@ -48,23 +48,18 @@ use super::{
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
-    inner: Vec<T>,
-    blocked: Vec<B>,
+pub struct LayeredDictionary {
+    inner: Vec<Box<dyn Dictionary>>,
+    blocked: Vec<Box<dyn BlockList>>,
 }
 
-impl<T, B> LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
+impl LayeredDictionary {
     /// Creates a new `LayeredDictionary` with the list of dictionaries and
     /// block lists.
-    pub fn new(dictionaries: Vec<T>, block_lists: Vec<B>) -> LayeredDictionary<T, B> {
+    pub fn new(
+        dictionaries: Vec<Box<dyn Dictionary>>,
+        block_lists: Vec<Box<dyn BlockList>>,
+    ) -> LayeredDictionary {
         LayeredDictionary {
             inner: dictionaries,
             blocked: block_lists,
@@ -73,16 +68,12 @@ where
     fn is_blocked(&self, phrase: &str) -> bool {
         self.blocked.iter().any(|b| b.is_blocked(phrase))
     }
-    pub fn base(&mut self) -> &mut T {
-        &mut self.inner[0]
+    pub fn base(&mut self) -> &mut dyn Dictionary {
+        self.inner[0].as_mut()
     }
 }
 
-impl<T, B> Dictionary for LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
+impl Dictionary for LayeredDictionary {
     /// Lookup phrases from all underlying dictionaries.
     ///
     /// Phrases are ordered by their first apperance in the underlying dictionaries.
@@ -101,7 +92,7 @@ where
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
+    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
         let (base, layers) = match self.inner.split_first() {
             Some(d) => d,
             None => return Box::new(std::iter::empty()),
@@ -133,40 +124,40 @@ where
         }
     }
 
-    fn insert<Syl: AsRef<Syllable>>(
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
             // TODO check mutability?
-            let _ = dict.insert(syllables, phrase.clone());
+            let _ = dict.add_phrase(syllables, phrase.clone());
         }
         Ok(())
     }
 
-    fn update<Syl: AsRef<Syllable>>(
+    fn update_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
             // TODO check mutability?
-            let _ = dict.update(syllables, phrase.clone(), user_freq, time);
+            let _ = dict.update_phrase(syllables, phrase.clone(), user_freq, time);
         }
         Ok(())
     }
 
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         for dict in &mut self.inner {
             // TODO check mutability?
-            let _ = dict.remove(syllables, phrase_str);
+            let _ = dict.remove_phrase(syllables, phrase_str);
         }
         Ok(())
     }

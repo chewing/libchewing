@@ -11,7 +11,7 @@ use std::{
 use cdb::{CDBMake, CDBWriter, CDB};
 use thiserror::Error;
 
-use crate::zhuyin::{IntoSyllablesBytes, Syllable};
+use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
@@ -61,6 +61,7 @@ mod serde {
     impl Iterator for PhrasesIter<'_> {
         type Item = Phrase;
 
+        #[inline(always)]
         fn next(&mut self) -> Option<Self::Item> {
             if self.bytes.is_empty() {
                 return None;
@@ -150,8 +151,8 @@ impl CdbDictionary {
 }
 
 impl Dictionary for CdbDictionary {
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        let syllable_bytes = syllables.into_bytes();
+    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
+        let syllable_bytes = syllables.get_bytes();
         let base_bytes = self.base.get(&syllable_bytes);
         let base_phrases = match &base_bytes {
             Some(record) => PhrasesIter::new(record.as_deref().unwrap_or(&[])),
@@ -192,6 +193,7 @@ impl Dictionary for CdbDictionary {
     }
 
     fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        #[inline(always)]
         fn write_phrase(data_buf: &mut Vec<u8>, phrase: &Phrase) -> Result<(), io::Error> {
             data_buf.write_all(&phrase.freq().to_le_bytes())?;
             data_buf.write_all(&phrase.last_used().unwrap_or_default().to_le_bytes())?;
@@ -251,12 +253,12 @@ impl Dictionary for CdbDictionary {
         dbg!(self.reopen())
     }
 
-    fn insert<Syl: AsRef<Syllable>>(
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.into_bytes();
+        let syllable_bytes = syllables.get_bytes();
         let phrase_key = (syllable_bytes.into(), phrase.to_string().into());
         if self.updated.contains_key(&phrase_key) {
             return Err(DictionaryUpdateError { source: None });
@@ -269,26 +271,26 @@ impl Dictionary for CdbDictionary {
         Ok(())
     }
 
-    fn update<Syl: AsRef<Syllable>>(
+    fn update_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.into_bytes();
+        let syllable_bytes = syllables.get_bytes();
         let phrase_key = (syllable_bytes.into(), String::from(phrase).into());
         self.graveyard.remove(&phrase_key);
         self.updated.insert(phrase_key, (user_freq, time));
         Ok(())
     }
 
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.into_bytes();
+        let syllable_bytes = syllables.get_bytes();
         let phrase_key = (syllable_bytes.into(), phrase_str.to_owned().into());
         self.graveyard.insert(phrase_key);
         Ok(())
@@ -338,7 +340,7 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
         phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
         self.added
-            .entry(syllables.into_bytes())
+            .entry(syllables.get_bytes())
             .or_default()
             .push(phrase);
         Ok(())

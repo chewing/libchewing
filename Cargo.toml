@@ -29,7 +29,7 @@ tracing-subscriber = { version = "0.3.18", features = [
 rusqlite = { version = "0.30.0", features = ["bundled"] }
 
 [lib]
-crate-type = ["lib", "staticlib"]
+crate-type = ["rlib", "staticlib"]
 
 [features]
 default = []
@@ -45,3 +45,4 @@ members = ["tools", "xtask"]
 [profile.release]
 lto = true
 debug = true
+panic = "abort"

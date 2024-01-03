@@ -21,8 +21,7 @@ use crate::{
     },
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{
-        Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader,
-        UserFreqEstimateLoader,
+        LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader,
     },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},

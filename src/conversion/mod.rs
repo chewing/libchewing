@@ -3,9 +3,12 @@
 mod chewing;
 mod symbol;
 
-use std::cmp::{max, min};
+use std::{
+    borrow::Cow,
+    cmp::{max, min},
+};
 
-use crate::zhuyin::Syllable;
+use crate::zhuyin::{Syllable, SyllableSlice};
 
 pub use self::chewing::ChewingEngine;
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
@@ -84,12 +87,27 @@ impl Symbol {
     }
 }
 
-impl AsRef<Syllable> for Symbol {
-    fn as_ref(&self) -> &Syllable {
-        match self {
-            Symbol::Syllable(s) => s,
-            Symbol::Char(_) => panic!(),
-        }
+impl SyllableSlice for &[Symbol] {
+    fn as_slice(&self) -> Cow<'static, [Syllable]> {
+        self.iter()
+            .map_while(|sym| match sym {
+                Symbol::Syllable(syl) => Some(*syl),
+                Symbol::Char(_) => None,
+            })
+            .collect::<Vec<_>>()
+            .into()
+    }
+}
+
+impl SyllableSlice for Vec<Symbol> {
+    fn as_slice(&self) -> Cow<'static, [Syllable]> {
+        self.iter()
+            .map_while(|sym| match sym {
+                Symbol::Syllable(syl) => Some(*syl),
+                Symbol::Char(_) => None,
+            })
+            .collect::<Vec<_>>()
+            .into()
     }
 }
 

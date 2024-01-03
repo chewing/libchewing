@@ -14,7 +14,7 @@ use std::{
 use bytemuck::{bytes_of, cast_slice, from_bytes, pod_read_unaligned, Pod, Zeroable};
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
-use crate::zhuyin::Syllable;
+use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DuplicatePhraseError,
@@ -296,6 +296,7 @@ struct PhrasesIter<'a> {
 impl Iterator for PhrasesIter<'_> {
     type Item = Phrase;
 
+    #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.bytes.is_empty() {
             return None;
@@ -310,11 +311,10 @@ impl Iterator for PhrasesIter<'_> {
 }
 
 impl Dictionary for TrieDictionary {
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
+    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'_> {
         let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
         let mut node = root;
-        'next: for syl in syllables {
-            let syl = syl.as_ref();
+        'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
             let child_nodes: &[TrieNodePod] =
                 cast_slice(&self.dict[node.child_begin()..node.child_end()]);

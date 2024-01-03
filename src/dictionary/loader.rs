@@ -5,7 +5,7 @@ use crate::{
     path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
-use super::{AnyDictionary, CdbDictionary, SqliteDictionary, TrieDictionary};
+use super::{CdbDictionary, Dictionary, SqliteDictionary, TrieDictionary};
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -20,7 +20,7 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(path.into());
         self
     }
-    pub fn load(self) -> Option<Vec<AnyDictionary>> {
+    pub fn load(self) -> Option<Vec<Box<dyn Dictionary>>> {
         let search_path = if let Some(sys_path) = self.sys_path {
             sys_path
         } else {
@@ -31,11 +31,11 @@ impl SystemDictionaryLoader {
         let mut tsi_db_path = sys_path.clone();
         tsi_db_path.push("tsi.dat");
         let tsi_db = if let Ok(db) = SqliteDictionary::open_read_only(&tsi_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = TrieDictionary::open(&tsi_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = CdbDictionary::open(&tsi_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else {
             return None;
         };
@@ -43,11 +43,11 @@ impl SystemDictionaryLoader {
         let mut word_db_path = sys_path;
         word_db_path.push("word.dat");
         let word_db = if let Ok(db) = SqliteDictionary::open_read_only(&word_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = TrieDictionary::open(&word_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = CdbDictionary::open(&word_db_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
         } else {
             return None;
         };
@@ -69,19 +69,20 @@ impl UserDictionaryLoader {
         self.data_path = Some(path.as_ref().to_path_buf());
         self
     }
-    pub fn load(self) -> Option<AnyDictionary> {
-        let data_path = if let Some(data_path) = self.data_path {
+    pub fn load(self) -> Option<Box<dyn Dictionary>> {
+        let mut data_path = if let Some(data_path) = self.data_path {
             data_path
         } else {
             userphrase_path()?
         };
+        data_path.set_extension("cdb");
 
-        let dict = if let Ok(db) = SqliteDictionary::open(&data_path) {
-            db.into()
+        let dict = /*if let Ok(db) = SqliteDictionary::open(&data_path) {
+            Box::new(db) as Box<dyn Dictionary>
         } else if let Ok(db) = TrieDictionary::open(&data_path) {
-            db.into()
-        } else if let Ok(db) = CdbDictionary::open(&data_path) {
-            db.into()
+            Box::new(db) as Box<dyn Dictionary>
+        } else*/ if let Ok(db) = CdbDictionary::open(&data_path) {
+            Box::new(db) as Box<dyn Dictionary>
         } else {
             return None;
         };
@@ -110,7 +111,7 @@ impl UserFreqEstimateLoader {
             userphrase_path()?
         };
 
-        let estimate = if let Ok(db) = SqliteUserFreqEstimate::open(&data_path) {
+        let estimate = if let Ok(db) = SqliteUserFreqEstimate::open_in_memory() {
             db.into()
         } else {
             return None;

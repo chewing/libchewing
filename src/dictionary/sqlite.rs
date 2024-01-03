@@ -3,7 +3,7 @@ use std::{path::Path, str};
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
 use thiserror::Error;
 
-use crate::zhuyin::{IntoSyllablesBytes, Syllable};
+use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
@@ -269,8 +269,8 @@ impl From<RusqliteError> for DictionaryUpdateError {
 }
 
 impl Dictionary for SqliteDictionary {
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'static> {
-        let syllables_bytes = syllables.into_bytes();
+    fn lookup_phrase(&self, syllables: &dyn SyllableSlice) -> Phrases<'static> {
+        let syllables_bytes = syllables.get_bytes();
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -343,9 +343,9 @@ impl Dictionary for SqliteDictionary {
         Ok(())
     }
 
-    fn insert<Syl: AsRef<Syllable>>(
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
         if self.read_only {
@@ -353,7 +353,7 @@ impl Dictionary for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.into_bytes();
+        let syllables_bytes = syllables.get_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -365,9 +365,9 @@ impl Dictionary for SqliteDictionary {
         Ok(())
     }
 
-    fn update<Syl: AsRef<Syllable>>(
+    fn update_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
         user_freq: u32,
         time: u64,
@@ -377,7 +377,7 @@ impl Dictionary for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.into_bytes();
+        let syllables_bytes = syllables.get_bytes();
         let tx = self.conn.transaction()?;
         {
             let mut stmt = tx.prepare_cached(
@@ -419,12 +419,12 @@ impl Dictionary for SqliteDictionary {
         Ok(())
     }
 
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllables_bytes = syllables.into_bytes();
+        let syllables_bytes = syllables.get_bytes();
         let mut stmt = self
             .conn
             .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")?;
@@ -507,7 +507,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         } else {
             0
         };
-        let syllables_bytes = syllables.into_bytes();
+        let syllables_bytes = syllables.get_bytes();
         let mut stmt = self.dict.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -606,7 +606,7 @@ mod tests {
     #[test]
     fn insert_and_update_user_freq() -> Result<(), Box<dyn Error>> {
         let mut dict = SqliteDictionary::open_in_memory()?;
-        dict.update(
+        dict.update_phrase(
             &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
@@ -633,8 +633,8 @@ mod tests {
             syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
             syl![Bopomofo::SH, Bopomofo::TONE4],
         ];
-        dict.insert(&syllables, ("測試", 9318).into())?;
-        dict.update(&syllables, ("測試", 9318).into(), 9900, 0)?;
+        dict.add_phrase(&syllables, ("測試", 9318).into())?;
+        dict.update_phrase(&syllables, ("測試", 9318).into(), 9900, 0)?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
             dict.lookup_phrase(&[

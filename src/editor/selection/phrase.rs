@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
-    dictionary::{AnyDictionary, Dictionary, LayeredDictionary},
+    dictionary::{Dictionary, LayeredDictionary},
     editor::Editor,
 };
 
@@ -49,7 +49,7 @@ impl PhraseSelector {
                 !syllables.is_empty(),
                 "should not enter here if there's no syllable in range"
             );
-            if dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(&syllables).next().is_some() {
                 break;
             }
             if self.forward_select {
@@ -79,7 +79,7 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.buffer[begin..end];
-            if dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(&syllables).next().is_some() {
                 return Some((begin, end));
             }
         }
@@ -105,7 +105,7 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.buffer[begin..end];
-            if dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(&syllables).next().is_some() {
                 return Some((begin, end));
             }
         }
@@ -157,7 +157,7 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.buffer[self.begin..self.end];
-            if dict.lookup_phrase(syllables).next().is_some() {
+            if dict.lookup_phrase(&syllables).next().is_some() {
                 break;
             }
         }
@@ -196,13 +196,13 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates<C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>>(
+    pub(crate) fn candidates<C: ConversionEngine<LayeredDictionary>>(
         &self,
         editor: &Editor<C>,
-        dict: &LayeredDictionary<AnyDictionary, ()>,
+        dict: &LayeredDictionary,
     ) -> Vec<String> {
         let mut candidates = Vec::from_iter(
-            dict.lookup_phrase(&self.buffer[self.begin..self.end])
+            dict.lookup_phrase(&&self.buffer[self.begin..self.end])
                 .map(|phrase| phrase.into()),
         );
         if self.end - self.begin == 1 {

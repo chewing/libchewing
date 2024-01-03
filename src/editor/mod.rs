@@ -20,9 +20,9 @@ use crate::{
     conversion::{
         full_width_symbol_input, special_symbol_input, ConversionEngine, Interval, Symbol,
     },
-    dictionary::{AnyDictionary, Dictionary, LayeredDictionary},
+    dictionary::{Dictionary, LayeredDictionary},
     editor::keyboard::KeyCode,
-    zhuyin::Syllable,
+    zhuyin::{Syllable, SyllableSlice},
 };
 
 use self::{
@@ -109,12 +109,12 @@ pub enum EditorKeyBehavior {
 #[derive(Debug)]
 pub struct Editor<C>
 where
-    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+    C: ConversionEngine<LayeredDictionary>,
 {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
     conv: C,
-    dict: LayeredDictionary<AnyDictionary, ()>,
+    dict: LayeredDictionary,
     abbr: AbbrevTable,
     estimate: SqliteUserFreqEstimate,
     options: EditorOptions,
@@ -128,13 +128,9 @@ where
 
 impl<C> Editor<C>
 where
-    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+    C: ConversionEngine<LayeredDictionary>,
 {
-    pub fn new(
-        conv: C,
-        dict: LayeredDictionary<AnyDictionary, ()>,
-        estimate: SqliteUserFreqEstimate,
-    ) -> Editor<C> {
+    pub fn new(conv: C, dict: LayeredDictionary, estimate: SqliteUserFreqEstimate) -> Editor<C> {
         Editor {
             com: CompositionEditor::default(),
             syl: Box::new(Standard::new()),
@@ -307,7 +303,7 @@ where
         }
         let result = self
             .dict
-            .insert(&syllables, (&phrase, 100).into())
+            .add_phrase(&syllables, (&phrase, 100).into())
             .map(|_| phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned());
         if result.is_ok() {
@@ -315,11 +311,11 @@ where
         }
         result
     }
-    pub fn learn_phrase<Syl: AsRef<Syllable>>(&mut self, syllables: &[Syl], phrase: &str) {
+    pub fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
         let phrases = Vec::from_iter(self.dict.lookup_phrase(syllables));
         if phrases.is_empty() {
             // FIXME provide max_freq, orig_freq
-            let _ = self.dict.insert(syllables, (phrase, 1).into());
+            let _ = self.dict.add_phrase(syllables, (phrase, 1).into());
             return;
         }
         let phrase_freq = phrases
@@ -332,11 +328,11 @@ where
         let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
         let time = self.estimate.now().unwrap();
 
-        let _ = self.dict.update(&syllables, phrase, user_freq, time);
+        let _ = self.dict.update_phrase(syllables, phrase, user_freq, time);
         self.dirty_dict = true;
     }
-    pub fn unlearn_phrase(&mut self, syllables: &[Syllable], phrase: &str) {
-        let _ = self.dict.remove(&syllables, phrase);
+    pub fn unlearn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
+        let _ = self.dict.remove_phrase(syllables, phrase);
         self.dirty_dict = true;
     }
     pub fn switch_character_form(&mut self) {
@@ -530,16 +526,16 @@ fn is_break_word(word: &str) -> bool {
 
 impl<C> Editor<C>
 where
-    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+    C: ConversionEngine<LayeredDictionary>,
 {
-    pub fn user_dict(&mut self) -> &mut AnyDictionary {
+    pub fn user_dict(&mut self) -> &mut dyn Dictionary {
         self.dict.base()
     }
 }
 
 impl<C> BasicEditor for Editor<C>
 where
-    C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+    C: ConversionEngine<LayeredDictionary>,
 {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
         trace!("process_keyevent: {}", &key_event);
@@ -627,7 +623,7 @@ impl From<Highlighting> for Entering {
 impl Entering {
     fn start_selecting<C>(self, editor: &mut Editor<C>) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         match editor.com.symbol_for_select() {
             Some(symbol) => match symbol {
@@ -645,7 +641,7 @@ impl Entering {
     }
     fn next<C>(self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         use KeyCode::*;
 
@@ -914,7 +910,7 @@ impl From<Entering> for EnteringSyllable {
 impl EnteringSyllable {
     fn next<C>(self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         use KeyCode::*;
 
@@ -960,7 +956,7 @@ impl EnteringSyllable {
 impl Selecting {
     fn new_phrase<C>(editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         editor.com.push_cursor();
         editor.com.clamp_cursor();
@@ -979,7 +975,7 @@ impl Selecting {
     }
     fn new_symbol<C>(_editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         // FIXME load from data
         let reader = io::Cursor::new(include_str!("../../data/symbols.dat"));
@@ -992,7 +988,7 @@ impl Selecting {
     }
     fn new_special_symbol<C>(editor: &mut Editor<C>, symbol: Symbol, _state: Entering) -> Self
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         editor.com.push_cursor();
         editor.com.clamp_cursor();
@@ -1011,13 +1007,9 @@ impl Selecting {
             }
         }
     }
-    fn candidates<C>(
-        &self,
-        editor: &Editor<C>,
-        dict: &LayeredDictionary<AnyDictionary, ()>,
-    ) -> Vec<String>
+    fn candidates<C>(&self, editor: &Editor<C>, dict: &LayeredDictionary) -> Vec<String>
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         match &self.sel {
             Selector::Phrase(sel) => sel.candidates(editor, dict),
@@ -1025,13 +1017,9 @@ impl Selecting {
             Selector::SpecialSymmbol(sel) => sel.menu(),
         }
     }
-    fn total_page<C>(
-        &self,
-        editor: &Editor<C>,
-        dict: &LayeredDictionary<AnyDictionary, ()>,
-    ) -> usize
+    fn total_page<C>(&self, editor: &Editor<C>, dict: &LayeredDictionary) -> usize
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         // MSRV: stable after rust 1.73
         fn div_ceil(lhs: usize, rhs: usize) -> usize {
@@ -1050,7 +1038,7 @@ impl Selecting {
     }
     fn select<C>(mut self, editor: &mut Editor<C>, n: usize) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         let offset = self.page_no * editor.options.candidates_per_page + n;
         match self.sel {
@@ -1101,7 +1089,7 @@ impl Selecting {
     }
     fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         use KeyCode::*;
 
@@ -1234,13 +1222,13 @@ impl Selecting {
 impl Highlighting {
     fn new<C>(moving_cursor: usize, _editor: &mut Editor<C>, _state: Entering) -> Self
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         Highlighting { moving_cursor }
     }
     fn next<C>(mut self, editor: &mut Editor<C>, ev: KeyEvent) -> Transition
     where
-        C: ConversionEngine<LayeredDictionary<AnyDictionary, ()>>,
+        C: ConversionEngine<LayeredDictionary>,
     {
         use KeyCode::*;
 
@@ -1286,7 +1274,7 @@ mod tests {
 
     use crate::{
         conversion::ChewingEngine,
-        dictionary::{AnyDictionary, LayeredDictionary},
+        dictionary::LayeredDictionary,
         editor::{estimate, keyboard::Modifiers, EditorKeyBehavior},
         syl,
         zhuyin::Bopomofo,
@@ -1300,10 +1288,7 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo() {
         let keyboard = Qwerty;
-        let dict = LayeredDictionary::new(
-            vec![AnyDictionary::HashMapDictionary(HashMap::new())],
-            vec![],
-        );
+        let dict = LayeredDictionary::new(vec![Box::new(HashMap::new())], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1328,7 +1313,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1359,7 +1344,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1400,7 +1385,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1444,7 +1429,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1480,7 +1465,7 @@ mod tests {
     fn editing_mode_input_full_shape_symbol() {
         let keyboard = Qwerty;
         let dict = HashMap::new();
-        let dict = LayeredDictionary::new(vec![AnyDictionary::HashMapDictionary(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
