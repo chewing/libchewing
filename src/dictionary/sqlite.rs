@@ -338,6 +338,10 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
     fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
         self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
         Ok(())

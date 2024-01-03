@@ -300,21 +300,16 @@ pub trait Dictionary: Any + Debug {
     fn entries(&self) -> DictEntries;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
-
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError>;
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError>;
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -341,10 +336,7 @@ pub trait Dictionary: Any + Debug {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 
     /// TODO: doc
     fn update_phrase(
@@ -353,20 +345,14 @@ pub trait Dictionary: Any + Debug {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase, user_freq, time);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 
     /// TODO: doc
     fn remove_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase_str);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 }
 
 /// TODO: doc
@@ -418,6 +404,14 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
 
     fn about(&self) -> DictionaryInfo {
         Default::default()
+    }
+
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
     }
 
     fn add_phrase(

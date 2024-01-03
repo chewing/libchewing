@@ -124,6 +124,14 @@ impl Dictionary for LayeredDictionary {
         }
     }
 
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.inner.iter_mut().map(|it| it.reopen()).collect()
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.inner.iter_mut().map(|it| it.flush()).collect()
+    }
+
     fn add_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,

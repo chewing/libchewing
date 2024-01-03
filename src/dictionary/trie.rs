@@ -13,12 +13,13 @@ use std::{
 
 use bytemuck::{bytes_of, cast_slice, from_bytes, pod_read_unaligned, Pod, Zeroable};
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
+use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DuplicatePhraseError,
-    Phrase, Phrases,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUpdateError,
+    DuplicatePhraseError, Phrase, Phrases,
 };
 
 const DICT_FORMAT: u32 = 0;
@@ -147,6 +148,18 @@ pub struct TrieDictionary {
     info: DictionaryInfo,
     dict: Vec<u8>,
     data: Vec<u8>,
+}
+
+#[derive(Debug, Error)]
+#[error("XXX")]
+pub(crate) enum TrieDictionaryError {
+    ReadOnly,
+}
+
+fn read_only_error() -> DictionaryUpdateError {
+    DictionaryUpdateError {
+        source: Some(Box::new(TrieDictionaryError::ReadOnly)),
+    }
 }
 
 impl TrieDictionary {
@@ -342,6 +355,40 @@ impl Dictionary for TrieDictionary {
 
     fn about(&self) -> DictionaryInfo {
         self.info.clone()
+    }
+
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn add_phrase(
+        &mut self,
+        _syllables: &dyn SyllableSlice,
+        _phrase: Phrase,
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(read_only_error())
+    }
+
+    fn update_phrase(
+        &mut self,
+        _syllables: &dyn SyllableSlice,
+        _phrase: Phrase,
+        _user_freq: u32,
+        _time: u64,
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(read_only_error())
+    }
+
+    fn remove_phrase(
+        &mut self,
+        _syllables: &dyn SyllableSlice,
+        _phrase_str: &str,
+    ) -> Result<(), DictionaryUpdateError> {
+        Err(read_only_error())
     }
 }
 
