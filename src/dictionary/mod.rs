@@ -4,7 +4,7 @@ use std::{
     any::Any,
     borrow::Borrow,
     cmp::Ordering,
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     fmt::{Debug, Display},
     path::Path,
 };
@@ -459,24 +459,6 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
             .filter(|p| p.as_str() != phrase_str)
             .collect::<Vec<_>>();
         Ok(())
-    }
-}
-
-/// A block list contains unwanted phrases.
-pub trait BlockList: Debug {
-    /// Returns if whether a phrase is in the block list.
-    fn is_blocked(&self, phrase: &str) -> bool;
-}
-
-impl BlockList for HashSet<String> {
-    fn is_blocked(&self, phrase: &str) -> bool {
-        self.contains(phrase)
-    }
-}
-
-impl BlockList for () {
-    fn is_blocked(&self, _phrase: &str) -> bool {
-        false
     }
 }
 

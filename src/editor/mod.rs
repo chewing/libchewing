@@ -529,7 +529,7 @@ where
     C: ConversionEngine<LayeredDictionary>,
 {
     pub fn user_dict(&mut self) -> &mut dyn Dictionary {
-        self.dict.base()
+        self.dict.user_dict()
     }
 }
 
@@ -554,8 +554,8 @@ where
             self.try_auto_commit();
         }
         if self.dirty_dict {
-            let _ = self.user_dict().reopen();
-            let _ = self.user_dict().flush();
+            let _ = self.dict.reopen();
+            let _ = self.dict.flush();
             self.dirty_dict = false;
         }
         self.last_key_behavior()
@@ -1293,7 +1293,7 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo() {
         let keyboard = Qwerty;
-        let dict = LayeredDictionary::new(vec![Box::new(HashMap::new())], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(HashMap::new())], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1318,7 +1318,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1349,7 +1349,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1390,7 +1390,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1434,7 +1434,7 @@ mod tests {
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
-        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);
@@ -1470,7 +1470,7 @@ mod tests {
     fn editing_mode_input_full_shape_symbol() {
         let keyboard = Qwerty;
         let dict = HashMap::new();
-        let dict = LayeredDictionary::new(vec![Box::new(dict)], vec![]);
+        let dict = LayeredDictionary::new(vec![Box::new(dict)], Box::new(HashMap::new()));
         let conversion_engine = ChewingEngine::new();
         let estimate = SqliteUserFreqEstimate::open_in_memory().unwrap();
         let mut editor = Editor::new(conversion_engine, dict, estimate);

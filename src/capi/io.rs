@@ -136,7 +136,7 @@ pub extern "C" fn chewing_new2(
             .expect("invalid syspath string");
         SystemDictionaryLoader::new().sys_path(search_path).load()
     };
-    let mut dictionaries = match dictionaries {
+    let dictionaries = match dictionaries {
         Some(d) => d,
         None => return null_mut(),
     };
@@ -154,7 +154,6 @@ pub extern "C" fn chewing_new2(
         Some(d) => d,
         None => return null_mut(),
     };
-    dictionaries.insert(0, user_dictionary);
 
     let estimate = if userpath.is_null() {
         UserFreqEstimateLoader::new().load()
@@ -171,7 +170,7 @@ pub extern "C" fn chewing_new2(
         None => return null_mut(),
     };
 
-    let dict = LayeredDictionary::new(dictionaries, vec![]);
+    let dict = LayeredDictionary::new(dictionaries, user_dictionary);
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
