@@ -452,11 +452,11 @@ where
         // pop cursor?
     }
     fn try_auto_commit(&mut self) {
-        let intervals: Vec<_> = self.intervals().collect();
-        let len: usize = intervals.iter().map(|it| it.len()).sum();
+        let len = self.com.len();
         if len <= self.options.auto_commit_threshold {
             return;
         }
+        let intervals: Vec<_> = self.intervals().collect();
 
         let mut remove = 0;
         self.commit_buffer.clear();
