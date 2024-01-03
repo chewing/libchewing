@@ -13,7 +13,7 @@ use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-pub use cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
+pub use self::cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
 pub use loader::{SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};

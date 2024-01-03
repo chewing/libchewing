@@ -119,7 +119,7 @@ impl From<CdbDictionaryError> for DictionaryUpdateError {
 impl From<BuildDictionaryError> for CdbDictionaryError {
     fn from(value: BuildDictionaryError) -> Self {
         CdbDictionaryError {
-            source: io::Error::other(value),
+            source: io::Error::new(io::ErrorKind::Other, value),
         }
     }
 }
