@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use cdb::{CDBKeyValueIter, CDBMake, CDBValueIter, CDBWriter, CDB};
+use cdb2::{CDBKeyValueIter, CDBMake, CDBValueIter, CDBWriter, CDB};
 use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
