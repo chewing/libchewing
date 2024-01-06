@@ -1,5 +1,6 @@
 use std::{
-    fmt::{Display, Write},
+    borrow::Cow,
+    fmt::{Debug, Display, Write},
     num::NonZeroU16,
     str::FromStr,
 };
@@ -17,7 +18,7 @@ pub struct Syllable {
     value: NonZeroU16,
 }
 
-impl core::fmt::Debug for Syllable {
+impl Debug for Syllable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Syllable")
             .field("value", &self.value)
@@ -278,18 +279,32 @@ impl AsRef<Syllable> for Syllable {
     }
 }
 
-/// TODO: docs
-pub trait IntoSyllablesBytes {
-    /// TODO: docs
-    fn into_bytes(&self) -> Vec<u8>;
-}
-
-impl<Syl: AsRef<Syllable>> IntoSyllablesBytes for &[Syl] {
-    fn into_bytes(&self) -> Vec<u8> {
+pub trait SyllableSlice: Debug {
+    fn as_slice(&self) -> Cow<'_, [Syllable]>;
+    fn get_bytes(&self) -> Vec<u8> {
         let mut syllables_bytes = vec![];
-        self.iter()
+        self.as_slice()
+            .iter()
             .for_each(|syl| syllables_bytes.extend_from_slice(&syl.as_ref().to_le_bytes()));
         syllables_bytes
+    }
+}
+
+impl SyllableSlice for &[Syllable] {
+    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+        Cow::Borrowed(*self)
+    }
+}
+
+impl SyllableSlice for Vec<Syllable> {
+    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+        Cow::Borrowed(self)
+    }
+}
+
+impl<const N: usize> SyllableSlice for [Syllable; N] {
+    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+        Cow::Borrowed(self)
     }
 }
 

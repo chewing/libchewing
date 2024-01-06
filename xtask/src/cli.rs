@@ -22,7 +22,7 @@ pub struct CmdBuild {
     #[argh(option, default = "true")]
     pub with_rust: bool,
 
-    /// using hash implementation for user-dictionary, not compatible with --with-rust
+    /// using hash implementation for user-dictionary
     #[argh(option, default = "false")]
     pub with_hash: bool,
 

@@ -106,5 +106,12 @@ fn legacy_data_dir() -> Option<PathBuf> {
 /// and also respects the `CHEWING_USER_PATH` environment variable.
 pub fn userphrase_path() -> Option<PathBuf> {
     // TODO support uhash.dat
-    data_dir().map(|path| path.join("chewing.sqlite3"))
+    #[cfg(feature = "sqlite")]
+    {
+        data_dir().map(|path| path.join("chewing.sqlite3"))
+    }
+    #[cfg(not(feature = "sqlite"))]
+    {
+        data_dir().map(|path| path.join("uhash.dat"))
+    }
 }

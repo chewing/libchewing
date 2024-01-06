@@ -15,6 +15,9 @@ pub struct CompositionEditor {
 }
 
 impl CompositionEditor {
+    pub(crate) fn len(&self) -> usize {
+        self.inner.buffer.len()
+    }
     pub(crate) fn cursor(&self) -> usize {
         self.cursor
     }

@@ -2,7 +2,7 @@ use std::{
     cmp::min,
     collections::BTreeMap,
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
-    mem,
+    iter, mem,
     ptr::{null, null_mut},
     slice, str,
     sync::OnceLock,
@@ -20,17 +20,14 @@ use crate::{
         types::{ChewingContext, SelKeys},
     },
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{
-        Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader,
-        UserFreqEstimateLoader,
-    },
+    dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        SyllableEditor, UserPhraseAddDirection,
+        LaxUserFreqEstimate, SyllableEditor, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -137,7 +134,7 @@ pub extern "C" fn chewing_new2(
             .expect("invalid syspath string");
         SystemDictionaryLoader::new().sys_path(search_path).load()
     };
-    let mut dictionaries = match dictionaries {
+    let dictionaries = match dictionaries {
         Some(d) => d,
         None => return null_mut(),
     };
@@ -155,24 +152,14 @@ pub extern "C" fn chewing_new2(
         Some(d) => d,
         None => return null_mut(),
     };
-    dictionaries.insert(0, user_dictionary);
 
-    let estimate = if userpath.is_null() {
-        UserFreqEstimateLoader::new().load()
-    } else {
-        let data_path = unsafe { CStr::from_ptr(userpath) }
-            .to_str()
-            .expect("invalid syspath string");
-        UserFreqEstimateLoader::new()
-            .userphrase_path(data_path)
-            .load()
-    };
+    let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
     let estimate = match estimate {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
 
-    let dict = LayeredDictionary::new(dictionaries, vec![]);
+    let dict = LayeredDictionary::new(dictionaries, user_dictionary);
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
@@ -737,7 +724,13 @@ pub extern "C" fn chewing_userphrase_enumerate(ctx: *mut ChewingContext) -> c_in
         None => return -1,
     };
 
-    ctx.userphrase_iter = Some(ctx.editor.user_dict().entries().peekable());
+    ctx.userphrase_iter = Some(
+        ctx.editor
+            .user_dict()
+            .entries()
+            .unwrap_or(Box::new(iter::empty()))
+            .peekable(),
+    );
     0
 }
 
@@ -924,9 +917,14 @@ pub extern "C" fn chewing_userphrase_lookup(
         Some(phrase) => ctx
             .editor
             .user_dict()
-            .lookup_phrase(&syllables)
+            .lookup_all_phrases(&syllables)
+            .iter()
             .any(|ph| ph.as_str() == phrase) as c_int,
-        None => (ctx.editor.user_dict().lookup_phrase(&syllables).count() > 0) as c_int,
+        None => ctx
+            .editor
+            .user_dict()
+            .lookup_first_phrase(&syllables)
+            .is_some() as c_int,
     }
 }
 

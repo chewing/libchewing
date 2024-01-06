@@ -1,24 +1,24 @@
-use std::hash::{Hash, Hasher};
-
-use indexmap::IndexSet;
-
-use crate::zhuyin::Syllable;
-
-use super::{
-    BlockList, DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase, Phrases,
+use std::{
+    cmp,
+    collections::{hash_map::Entry, HashMap},
+    iter,
 };
+
+use crate::zhuyin::SyllableSlice;
+
+use super::{DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::collections::{HashMap, HashSet};
+/// use std::collections::HashMap;
 ///
-/// use chewing::{dictionary::{LayeredDictionary, Dictionary}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{LayeredDictionary, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
 ///
-/// let mut sys_dict = HashMap::new();
-/// let mut user_dict = HashMap::new();
+/// let mut sys_dict = Box::new(HashMap::new());
+/// let mut user_dict = Box::new(HashMap::new());
 /// sys_dict.insert(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
@@ -28,61 +28,46 @@ use super::{
 ///     vec![("策", 100).into(), ("冊", 100).into()]
 /// );
 ///
-/// let user_block_list = HashSet::from(["側".to_string()]);
-///
-/// let dict = LayeredDictionary::new(vec![sys_dict, user_dict], vec![user_block_list]);
+/// let dict = LayeredDictionary::new(vec![sys_dict], user_dict);
 /// assert_eq!(
 ///     [
-///         ("策", 100).into(),
-///         ("冊", 100).into(),
 ///         ("測", 1).into(),
+///         ("冊", 100).into(),
+///         ("側", 1).into(),
+///         ("策", 100).into(),
 ///     ]
 ///     .into_iter()
-///     .collect::<HashSet<_>>(),
-///     dict.lookup_phrase(&[
+///     .collect::<Vec<Phrase>>(),
+///     dict.lookup_all_phrases(&[
 ///         syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
-///     ])
-///     .collect::<HashSet<_>>(),
+///     ]),
 /// );
 /// # Ok(())
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
-    inner: Vec<T>,
-    blocked: Vec<B>,
+pub struct LayeredDictionary {
+    sys_dict: Vec<Box<dyn Dictionary>>,
+    user_dict: Box<dyn Dictionary>,
 }
 
-impl<T, B> LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
-    /// Creates a new `LayeredDictionary` with the list of dictionaries and
-    /// block lists.
-    pub fn new(dictionaries: Vec<T>, block_lists: Vec<B>) -> LayeredDictionary<T, B> {
+impl LayeredDictionary {
+    /// Creates a new `LayeredDictionary` with the list of dictionaries.
+    pub fn new(
+        sys_dict: Vec<Box<dyn Dictionary>>,
+        user_dict: Box<dyn Dictionary>,
+    ) -> LayeredDictionary {
         LayeredDictionary {
-            inner: dictionaries,
-            blocked: block_lists,
+            sys_dict,
+            user_dict,
         }
     }
-    fn is_blocked(&self, phrase: &str) -> bool {
-        self.blocked.iter().any(|b| b.is_blocked(phrase))
-    }
-    pub fn base(&mut self) -> &mut T {
-        &mut self.inner[0]
+    pub fn user_dict(&mut self) -> &mut dyn Dictionary {
+        self.user_dict.as_mut()
     }
 }
 
-impl<T, B> Dictionary for LayeredDictionary<T, B>
-where
-    T: Dictionary,
-    B: BlockList,
-{
+impl Dictionary for LayeredDictionary {
     /// Lookup phrases from all underlying dictionaries.
     ///
     /// Phrases are ordered by their first apperance in the underlying dictionaries.
@@ -91,39 +76,40 @@ where
     ///
     /// ```pseudo_code
     /// Set phrases = list()
-    /// Set [d_base, d_layers] = d_list
-    /// Foreach phrase, freq in d_base.lookup(syllables)
-    ///   Add phrases <- (phrase, freq)
     /// Foreach d in d_layers
-    ///   Foreach phrase, freq in d.lookup_syllables)
+    ///   Foreach phrase, freq in d.lookup_syllables()
     ///     If phrase in phrases
-    ///       Set phrases[phrase].freq = freq
+    ///       Set phrases[phrase].freq = max(phrases[phrase].freq, freq)
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        let (base, layers) = match self.inner.split_first() {
-            Some(d) => d,
-            None => return Box::new(std::iter::empty()),
-        };
-        let mut phrases = IndexSet::with_capacity(128);
-        phrases.extend(base.lookup_phrase(syllables).map(LookupPhrase));
-        for d in layers {
-            for phrase in d.lookup_phrase(syllables) {
-                phrases.replace(LookupPhrase(phrase));
-            }
-        }
-        Box::new(
-            phrases
-                .into_iter()
-                .map(|p| p.0)
-                .filter(|phrase| !self.is_blocked(&phrase.phrase)),
-        )
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        let mut sort_map: HashMap<String, usize> = HashMap::new();
+        let mut phrases: Vec<Phrase> = Vec::new();
+
+        self.sys_dict
+            .iter()
+            .chain(iter::once(&self.user_dict))
+            .for_each(|d| {
+                for phrase in d.lookup_all_phrases(syllables) {
+                    match sort_map.entry(phrase.to_string()) {
+                        Entry::Occupied(entry) => {
+                            let index = *entry.get();
+                            phrases[index] = cmp::max(&phrase, &phrases[index]).clone();
+                        }
+                        Entry::Vacant(entry) => {
+                            entry.insert(phrases.len());
+                            phrases.push(phrase);
+                        }
+                    }
+                }
+            });
+        phrases.truncate(first);
+        phrases
     }
 
-    fn entries(&self) -> DictEntries {
-        todo!("entries from all layers")
-        // Box::new(std::iter::empty())
+    fn entries(&self) -> Option<DictEntries> {
+        None
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -133,56 +119,38 @@ where
         }
     }
 
-    fn insert<Syl: AsRef<Syllable>>(
-        &mut self,
-        syllables: &[Syl],
-        phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        for dict in &mut self.inner {
-            // TODO check mutability?
-            let _ = dict.insert(syllables, phrase.clone());
-        }
-        Ok(())
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.user_dict.reopen()
     }
 
-    fn update<Syl: AsRef<Syllable>>(
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        self.user_dict.flush()
+    }
+
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
+        phrase: Phrase,
+    ) -> Result<(), DictionaryUpdateError> {
+        self.user_dict.add_phrase(syllables, phrase)
+    }
+
+    fn update_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
-        for dict in &mut self.inner {
-            // TODO check mutability?
-            let _ = dict.update(syllables, phrase.clone(), user_freq, time);
-        }
-        Ok(())
+        self.user_dict
+            .update_phrase(syllables, phrase, user_freq, time)
     }
 
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        for dict in &mut self.inner {
-            // TODO check mutability?
-            let _ = dict.remove(syllables, phrase_str);
-        }
-        Ok(())
-    }
-}
-
-#[derive(Debug, Eq)]
-struct LookupPhrase(Phrase);
-
-impl Hash for LookupPhrase {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.phrase.hash(state);
-    }
-}
-
-impl PartialEq for LookupPhrase {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.phrase == other.0.phrase
+        self.user_dict.remove_phrase(syllables, phrase_str)
     }
 }

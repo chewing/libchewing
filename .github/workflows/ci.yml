@@ -20,16 +20,22 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         with_rust: ['true', 'false']
+        with_hash: ['true', 'false']
         rust_version: ['1.70']
         include:
           - os: ubuntu-latest
             with_rust: true
             rust_version: stable
+            with_hash: true
+          - os: ubuntu-latest
+            with_rust: true
+            rust_version: stable
+            with_hash: false
         exclude:
           - with_rust: 'false'
             rust_version: 'stable'
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}, rust_version=${{ matrix.rust_version }}
+    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}, with_hash=${{ matrix.with_hash }} rust_version=${{ matrix.rust_version }}
 
     steps:
     - uses: actions/checkout@v3
@@ -51,23 +57,7 @@ jobs:
         rustup update
 
     - name: Build
-      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --verbose true
-
-    - name: Test
-      run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
-
-  build_with_hash:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-
-    - run: sudo apt-get install ninja-build
-
-    - name: Build
-      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust false --with-hash true --verbose true
+      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --verbose true
 
     - name: Test
       run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
@@ -76,8 +66,9 @@ jobs:
     strategy:
       matrix:
         with_rust: ['true', 'false']
+        with_hash: ['true', 'false']
     runs-on: ubuntu-latest
-    name: Coverage with_rust=${{ matrix.with_rust }}
+    name: Coverage with_rust=${{ matrix.with_rust }} with_hash=${{ matrix.with_hash }}
 
     steps:
     - uses: actions/checkout@v3
@@ -101,7 +92,7 @@ jobs:
     - name: Build
       env:
         CC: clang
-      run: cargo xtask build --build-type Debug --with-rust ${{matrix.with_rust}} --with-coverage true --verbose true
+      run: cargo xtask build --build-type Debug --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --with-coverage true --verbose true
 
     - name: Test
       run: |

@@ -1,24 +1,30 @@
 //! Dictionaries for looking up phrases.
 
 use std::{
+    any::Any,
     borrow::Borrow,
     cmp::Ordering,
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     fmt::{Debug, Display},
     path::Path,
 };
 
 use thiserror::Error;
 
-use crate::zhuyin::Syllable;
+use crate::zhuyin::{Syllable, SyllableSlice};
 
+pub use self::cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
-pub use loader::{SystemDictionaryLoader, UserDictionaryLoader, UserFreqEstimateLoader};
+pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
+#[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 
+mod cdb;
+mod kv;
 mod layered;
 mod loader;
+#[cfg(feature = "sqlite")]
 mod sqlite;
 mod trie;
 
@@ -242,8 +248,8 @@ impl Display for Phrase {
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100).into()]),
 /// ]);
 ///
-/// for phrase in dict.lookup_word(
-///     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
+/// for phrase in dict.lookup_all_phrases(
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -272,10 +278,10 @@ pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
 ///
 /// let mut dict = HashMap::new();
-/// <HashMap<_, _> as Dictionary>::insert(&mut dict, &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
+/// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
-/// for phrase in dict.lookup_word(
-///     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
+/// for phrase in dict.lookup_all_phrases(
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -283,35 +289,39 @@ pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 /// # Ok(())
 /// # }
 /// ```
-pub trait Dictionary: Debug {
-    /// Returns an iterator to all single syllable words matched by the
-    /// syllable, if any. The result should use a stable order each time for the
-    /// same input.
-    fn lookup_word(&self, syllable: Syllable) -> Phrases<'_> {
-        self.lookup_phrase(&[syllable])
+pub trait Dictionary: Any + Debug {
+    /// Returns first N phrases matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase>;
+    /// Returns the first phrase matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_first_phrase(&self, syllables: &dyn SyllableSlice) -> Option<Phrase> {
+        self.lookup_first_n_phrases(syllables, 1).into_iter().next()
     }
-    /// Returns an iterator to all phrases matched by the syllables, if any. The
-    /// result should use a stable order each time for the same input.
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_>;
+    /// Returns all phrases matched by the syllables.
+    ///
+    /// The result should use a stable order each time for the same input.
+    fn lookup_all_phrases(&self, syllables: &dyn SyllableSlice) -> Vec<Phrase> {
+        self.lookup_first_n_phrases(syllables, usize::MAX)
+    }
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries;
+    ///
+    /// Some dictionary backend does not support this operation.
+    fn entries(&self) -> Option<DictEntries>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
-
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError>;
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError>;
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -329,41 +339,32 @@ pub trait Dictionary: Debug {
     /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
     ///
     /// let mut dict = HashMap::new();
-    /// <HashMap<_, _> as Dictionary>::insert(&mut dict, &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
+    /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
     /// # Ok(())
     /// # }
     /// ```
     /// TODO: doc
-    fn insert<Syl: AsRef<Syllable>>(
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 
     /// TODO: doc
-    fn update<Syl: AsRef<Syllable>>(
+    fn update_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase, user_freq, time);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 
     /// TODO: doc
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let _ = (syllables, phrase_str);
-        Err(DictionaryUpdateError { source: None })
-    }
+    ) -> Result<(), DictionaryUpdateError>;
 }
 
 /// TODO: doc
@@ -397,39 +398,38 @@ pub trait DictionaryBuilder {
 }
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        let syllables = syllables
-            .into_iter()
-            .map(|s| s.as_ref().clone())
-            .collect::<Vec<_>>();
-        self.get(&syllables)
-            .cloned()
-            .map(|v| Box::new(v.into_iter()) as Phrases<'_>)
-            .unwrap_or_else(|| Box::new(std::iter::empty()))
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        let syllables = dbg!(syllables.as_slice().into_owned());
+        let mut phrases = dbg!(self.get(&syllables).cloned().unwrap_or_default());
+        phrases.truncate(first);
+        dbg!(phrases)
     }
 
-    fn entries(&self) -> DictEntries {
-        Box::new(
-            self.clone()
-                .into_iter()
-                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
-        )
+    fn entries(&self) -> Option<DictEntries> {
+        Some(Box::new(self.clone().into_iter().flat_map(|(k, v)| {
+            v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))
+        })))
     }
 
     fn about(&self) -> DictionaryInfo {
         Default::default()
     }
 
-    fn insert<Syl: AsRef<Syllable>>(
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn add_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables
-            .into_iter()
-            .map(|s| s.as_ref().clone())
-            .collect::<Vec<_>>();
-        let vec = self.entry(syllables.to_vec()).or_default();
+        let syllables = syllables.as_slice().into_owned();
+        let vec = self.entry(syllables).or_default();
         if vec.iter().any(|it| it.as_str() == phrase.as_str()) {
             return Err(DictionaryUpdateError {
                 source: Some(Box::new(DuplicatePhraseError)),
@@ -439,9 +439,9 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
         Ok(())
     }
 
-    fn update<Syl: AsRef<Syllable>>(
+    fn update_phrase(
         &mut self,
-        _syllables: &[Syl],
+        _syllables: &dyn SyllableSlice,
         _phrase: Phrase,
         _user_freq: u32,
         _time: u64,
@@ -449,16 +449,13 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
         Ok(())
     }
 
-    fn remove<Syl: AsRef<Syllable>>(
+    fn remove_phrase(
         &mut self,
-        syllables: &[Syl],
+        syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables
-            .into_iter()
-            .map(|s| s.as_ref().clone())
-            .collect::<Vec<_>>();
-        let vec = self.entry(syllables.to_vec()).or_default();
+        let syllables = syllables.as_slice().into_owned();
+        let vec = self.entry(syllables).or_default();
         *vec = vec
             .iter()
             .cloned()
@@ -468,127 +465,43 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
     }
 }
 
-/// A block list contains unwanted phrases.
-pub trait BlockList: Debug {
-    /// Returns if whether a phrase is in the block list.
-    fn is_blocked(&self, phrase: &str) -> bool;
-}
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
 
-impl BlockList for HashSet<String> {
-    fn is_blocked(&self, phrase: &str) -> bool {
-        self.contains(phrase)
-    }
-}
+    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
 
-impl BlockList for () {
-    fn is_blocked(&self, _phrase: &str) -> bool {
-        false
-    }
-}
+    use super::Dictionary;
 
-#[derive(Debug)]
-pub enum AnyDictionary {
-    SqliteDictionary(SqliteDictionary),
-    TrieDictionary(TrieDictionary),
-    HashMapDictionary(HashMap<Vec<Syllable>, Vec<Phrase>>),
-}
+    #[test]
+    fn hashmap_lookup_first_one() {
+        let dict = HashMap::from([(
+            vec![syl![C, E, TONE4], syl![SH, TONE4]],
+            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
+        )]);
 
-impl Dictionary for AnyDictionary {
-    fn lookup_phrase<Syl: AsRef<Syllable>>(&self, syllables: &[Syl]) -> Phrases<'_> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.lookup_phrase(syllables),
-            AnyDictionary::TrieDictionary(dict) => dict.lookup_phrase(syllables),
-            AnyDictionary::HashMapDictionary(dict) => dict.lookup_phrase(syllables),
-        }
+        assert_eq!(
+            "測試",
+            dict.lookup_first_phrase(&[syl![C, E, TONE4], syl![SH, TONE4]])
+                .unwrap()
+                .as_str()
+        )
     }
 
-    fn entries(&self) -> DictEntries {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.entries(),
-            AnyDictionary::TrieDictionary(dict) => dict.entries(),
-            AnyDictionary::HashMapDictionary(dict) => dict.entries(),
-        }
-    }
+    #[test]
+    fn hashmap_lookup_all() {
+        let dict = HashMap::from([(
+            vec![syl![C, E, TONE4], syl![SH, TONE4]],
+            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
+        )]);
 
-    fn about(&self) -> DictionaryInfo {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.about(),
-            AnyDictionary::TrieDictionary(dict) => dict.about(),
-            AnyDictionary::HashMapDictionary(dict) => dict.about(),
-        }
-    }
-
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.reopen(),
-            AnyDictionary::TrieDictionary(dict) => dict.reopen(),
-            AnyDictionary::HashMapDictionary(dict) => dict.reopen(),
-        }
-    }
-
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.flush(),
-            AnyDictionary::TrieDictionary(dict) => dict.flush(),
-            AnyDictionary::HashMapDictionary(dict) => dict.flush(),
-        }
-    }
-
-    fn insert<Syl: AsRef<Syllable>>(
-        &mut self,
-        syllables: &[Syl],
-        phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.insert(syllables, phrase),
-            AnyDictionary::TrieDictionary(dict) => dict.insert(syllables, phrase),
-            AnyDictionary::HashMapDictionary(dict) => {
-                <HashMap<_, _> as Dictionary>::insert(dict, syllables, phrase)
-            }
-        }
-    }
-
-    fn update<Syl: AsRef<Syllable>>(
-        &mut self,
-        syllables: &[Syl],
-        phrase: Phrase,
-        user_freq: u32,
-        time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => {
-                dict.update(syllables, phrase, user_freq, time)
-            }
-            AnyDictionary::TrieDictionary(dict) => dict.update(syllables, phrase, user_freq, time),
-            AnyDictionary::HashMapDictionary(dict) => {
-                dict.update(syllables, phrase, user_freq, time)
-            }
-        }
-    }
-
-    fn remove<Syl: AsRef<Syllable>>(
-        &mut self,
-        syllables: &[Syl],
-        phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        match self {
-            AnyDictionary::SqliteDictionary(dict) => dict.remove(syllables, phrase_str),
-            AnyDictionary::TrieDictionary(dict) => dict.remove(syllables, phrase_str),
-            AnyDictionary::HashMapDictionary(dict) => {
-                <HashMap<_, _> as Dictionary>::remove(dict, syllables, phrase_str)
-            }
-        }
-    }
-}
-
-impl From<SqliteDictionary> for AnyDictionary {
-    fn from(value: SqliteDictionary) -> Self {
-        Self::SqliteDictionary(value)
-    }
-}
-
-impl From<TrieDictionary> for AnyDictionary {
-    fn from(value: TrieDictionary) -> Self {
-        Self::TrieDictionary(value)
+        assert_eq!(
+            vec![
+                Phrase::new("測試", 1),
+                Phrase::new("策試", 1),
+                Phrase::new("策士", 1)
+            ],
+            dict.lookup_all_phrases(&[syl![C, E, TONE4], syl![SH, TONE4]])
+        )
     }
 }
