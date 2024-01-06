@@ -1,6 +1,4 @@
 use std::{
-    borrow::Cow,
-    collections::{HashMap, HashSet},
     fmt::Debug,
     fs::File,
     io::{self, Write},
@@ -8,85 +6,22 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use cdb::{CDBMake, CDBWriter, CDB};
+use cdb::{CDBKeyValueIter, CDBMake, CDBValueIter, CDBWriter, CDB};
 use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
+    kv::{KVDictionary, KVStore},
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
     DictionaryUpdateError, Phrase,
 };
 
-mod serde {
-    use std::str;
-
-    use bytemuck;
-
-    use super::Phrase;
-
-    pub(crate) struct PhraseData<T>(T);
-
-    impl<'a> PhraseData<&'a [u8]> {
-        pub(crate) fn frequency(&self) -> u32 {
-            bytemuck::pod_read_unaligned(&self.0[..4])
-        }
-        pub(crate) fn last_used(&self) -> u64 {
-            bytemuck::pod_read_unaligned(&self.0[4..12])
-        }
-        pub(crate) fn phrase_str(&self) -> &'a str {
-            let len = self.0[12] as usize;
-            let data = &self.0[13..];
-            str::from_utf8(&data[..len]).expect("should be utf8 encoded string")
-        }
-        pub(crate) fn len(&self) -> usize {
-            13 + self.0[12] as usize
-        }
-    }
-
-    pub(crate) struct PhrasesIter<'a> {
-        bytes: &'a [u8],
-    }
-
-    impl<'a> PhrasesIter<'a> {
-        pub(crate) fn new(bytes: &'a [u8]) -> PhrasesIter<'a> {
-            PhrasesIter { bytes }
-        }
-
-        pub(crate) fn empty() -> PhrasesIter<'static> {
-            PhrasesIter { bytes: &[] }
-        }
-    }
-
-    impl Iterator for PhrasesIter<'_> {
-        type Item = Phrase;
-
-        #[inline(always)]
-        fn next(&mut self) -> Option<Self::Item> {
-            if self.bytes.is_empty() {
-                return None;
-            }
-            let phrase_data = PhraseData(self.bytes);
-            self.bytes = &self.bytes[phrase_data.len()..];
-            Some(
-                Phrase::new(phrase_data.phrase_str(), phrase_data.frequency())
-                    .with_time(phrase_data.last_used()),
-            )
-        }
-    }
-}
-
-use serde::PhrasesIter;
-
 pub struct CdbDictionary {
     path: PathBuf,
-    base: CDB,
-    added: HashMap<Vec<u8>, Vec<Phrase>>,
-    updated: HashMap<PhraseKey, (u32, u64)>,
-    graveyard: HashSet<PhraseKey>,
+    inner: KVDictionary<CDB>,
+    info: DictionaryInfo,
 }
-
-type PhraseKey = (Cow<'static, [u8]>, Cow<'static, str>);
 
 #[derive(Debug, Error)]
 #[error("cdb error")]
@@ -100,10 +35,7 @@ type Error = CdbDictionaryError;
 impl Debug for CdbDictionary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CdbDictionary")
-            .field("base", &"CDB { /* opaque */ }")
-            .field("added", &self.added)
-            .field("updated", &self.updated)
-            .field("graveyard", &self.graveyard)
+            .field("inner", &"CDB { /* opaque */ }")
             .finish()
     }
 }
@@ -121,6 +53,46 @@ impl From<BuildDictionaryError> for CdbDictionaryError {
         CdbDictionaryError {
             source: io::Error::new(io::ErrorKind::Other, value),
         }
+    }
+}
+
+pub(crate) struct OkCDBValueIter<'a>(CDBValueIter<'a>);
+pub(crate) struct OkCDBKeyValueIter<'a>(CDBKeyValueIter<'a>);
+
+impl Iterator for OkCDBValueIter<'_> {
+    type Item = Vec<u8>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(it) = self.0.next() {
+            it.ok()
+        } else {
+            None
+        }
+    }
+}
+
+impl Iterator for OkCDBKeyValueIter<'_> {
+    type Item = (Vec<u8>, Vec<u8>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(it) = self.0.next() {
+            it.ok()
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> KVStore<'a> for CDB {
+    type ValueIter = OkCDBValueIter<'a>;
+    type KeyValueIter = OkCDBKeyValueIter<'a>;
+
+    fn find(&'a self, key: &[u8]) -> Self::ValueIter {
+        OkCDBValueIter(self.find(key))
+    }
+
+    fn iter(&'a self) -> Self::KeyValueIter {
+        OkCDBKeyValueIter(self.iter())
     }
 }
 
@@ -142,53 +114,28 @@ impl CdbDictionary {
         let path = path.as_ref().to_path_buf();
         Ok(CdbDictionary {
             path,
-            base,
-            added: Default::default(),
-            updated: Default::default(),
-            graveyard: Default::default(),
+            inner: KVDictionary::new(base),
+            info: Default::default(),
         })
     }
 }
 
 impl Dictionary for CdbDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllable_bytes = syllables.get_bytes();
-        let base_bytes = self.base.get(&syllable_bytes);
-        let base_phrases = match &base_bytes {
-            Some(record) => PhrasesIter::new(record.as_deref().unwrap_or(&[])),
-            None => PhrasesIter::empty(),
-        };
-        let added_phrases = match self.added.get(&syllable_bytes) {
-            Some(phrases) => phrases.clone().into_iter(),
-            None => vec![].into_iter(),
-        };
-        base_phrases
-            .chain(added_phrases)
-            .filter(|it| {
-                let phrase_key = (syllable_bytes.as_slice().into(), it.as_str().into());
-                !self.graveyard.contains(&phrase_key)
-            })
-            .map(|it| {
-                let phrase_key = (syllable_bytes.as_slice().into(), it.as_str().into());
-                match self.updated.get(&phrase_key) {
-                    Some(value) => Phrase::new(it.as_str(), value.0).with_time(value.1),
-                    None => it,
-                }
-            })
-            .take(first)
-            .collect()
+        self.inner.lookup_first_n_phrases(syllables, first)
     }
 
     fn entries(&self) -> Option<DictEntries> {
-        None
+        self.inner.entries()
     }
 
     fn about(&self) -> DictionaryInfo {
-        todo!()
+        self.info.clone()
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        self.base = CDB::open(&self.path).map_err(Error::from)?;
+        self.inner
+            .reopen(CDB::open(&self.path).map_err(Error::from)?);
         Ok(())
     }
 
@@ -200,57 +147,18 @@ impl Dictionary for CdbDictionary {
             data_buf.write_all(&[phrase.as_str().len() as u8])?;
             data_buf.write_all(phrase.as_str().as_bytes())
         }
-        // FIXME fix in CDB crate to use only PathBuf
         let mut writer =
-            CDBWriter::create(dbg!(&self.path.display().to_string())).map_err(Error::from)?;
-        // FIXME reuse entries()
-        // FIXME fix CDB to provide key iter
-        for entry in self.base.iter() {
-            // FIXME skip info entry
-            let (key, value) = entry.map_err(Error::from)?;
-            let syllable_bytes = key;
-            let base_bytes = value;
-            let base_phrases = PhrasesIter::new(&base_bytes);
-            let added_phrases = match self.added.get(&syllable_bytes) {
-                Some(phrases) => phrases.clone().into_iter(),
-                None => vec![].into_iter(),
-            };
+            CDBWriter::create(&self.path.display().to_string()).map_err(Error::from)?;
+        writer.add(b"INFO", &[]).map_err(Error::from)?;
+        for entry in self.entries().unwrap() {
             let mut data_buf = vec![];
-            for phrase in base_phrases
-                .chain(added_phrases)
-                .filter(|it| {
-                    let phrase_key = (syllable_bytes.as_slice().into(), it.as_str().into());
-                    !self.graveyard.contains(&phrase_key)
-                })
-                .map(|it| {
-                    let phrase_key = (syllable_bytes.as_slice().into(), it.as_str().into());
-                    match self.updated.get(&phrase_key) {
-                        Some(value) => Phrase::new(it.as_str(), value.0).with_time(value.1),
-                        None => it,
-                    }
-                })
-            {
-                write_phrase(&mut data_buf, &phrase).map_err(Error::from)?;
-            }
-            self.added.remove(&syllable_bytes);
+            write_phrase(&mut data_buf, &entry.1).map_err(Error::from)?;
             writer
-                .add(&syllable_bytes, &data_buf)
-                .map_err(Error::from)?;
-        }
-        for (syllable_bytes, phrases) in &self.added {
-            let mut data_buf = vec![];
-            for phrase in phrases {
-                write_phrase(&mut data_buf, &phrase).map_err(Error::from)?;
-            }
-            writer
-                .add(&syllable_bytes, &data_buf)
+                .add(&entry.0.get_bytes(), &data_buf)
                 .map_err(Error::from)?;
         }
         writer.finish().map_err(Error::from)?;
-        self.added.clear();
-        self.updated.clear();
-        self.graveyard.clear();
-        dbg!(self.reopen())
+        self.reopen()
     }
 
     fn add_phrase(
@@ -258,17 +166,7 @@ impl Dictionary for CdbDictionary {
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.get_bytes();
-        let phrase_key = (syllable_bytes.into(), phrase.to_string().into());
-        if self.updated.contains_key(&phrase_key) {
-            return Err(DictionaryUpdateError { source: None });
-        }
-        self.graveyard.remove(&phrase_key);
-        self.added
-            .entry(phrase_key.0.into_owned())
-            .or_default()
-            .push(phrase);
-        Ok(())
+        self.inner.add_phrase(syllables, phrase)
     }
 
     fn update_phrase(
@@ -278,11 +176,7 @@ impl Dictionary for CdbDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.get_bytes();
-        let phrase_key = (syllable_bytes.into(), String::from(phrase).into());
-        self.graveyard.remove(&phrase_key);
-        self.updated.insert(phrase_key, (user_freq, time));
-        Ok(())
+        self.inner.update_phrase(syllables, phrase, user_freq, time)
     }
 
     fn remove_phrase(
@@ -290,23 +184,26 @@ impl Dictionary for CdbDictionary {
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
-        let syllable_bytes = syllables.get_bytes();
-        let phrase_key = (syllable_bytes.into(), phrase_str.to_owned().into());
-        self.graveyard.insert(phrase_key);
-        Ok(())
+        self.inner.remove_phrase(syllables, phrase_str)
+    }
+}
+
+impl Drop for CdbDictionary {
+    fn drop(&mut self) {
+        let _ = self.flush();
     }
 }
 
 #[derive(Debug)]
 pub struct CdbDictionaryBuilder {
-    added: HashMap<Vec<u8>, Vec<Phrase>>,
+    inner: KVDictionary<()>,
     info: DictionaryInfo,
 }
 
 impl CdbDictionaryBuilder {
     pub fn new() -> CdbDictionaryBuilder {
         CdbDictionaryBuilder {
-            added: Default::default(),
+            inner: KVDictionary::<()>::new_in_memory(),
             info: Default::default(),
         }
     }
@@ -330,7 +227,7 @@ impl From<DictionaryUpdateError> for BuildDictionaryError {
 
 impl DictionaryBuilder for CdbDictionaryBuilder {
     fn set_info(&mut self, info: DictionaryInfo) -> Result<(), BuildDictionaryError> {
-        // TODO
+        self.info = info;
         Ok(())
     }
 
@@ -339,21 +236,85 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
         syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
-        self.added
-            .entry(syllables.get_bytes())
-            .or_default()
-            .push(phrase);
+        self.inner.add_phrase(&syllables, phrase)?;
         Ok(())
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
         let mut maker = CDBMake::new(File::create(path)?)?;
-        // FIXME cannot create empty db. Insert info?
         maker.add(b"INFO", &[])?;
         maker.finish()?;
-        let mut dict = CdbDictionary::open(path)?;
-        mem::swap(&mut dict.added, &mut self.added);
+        let cdb = CDB::open(path)?;
+        let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
+        let inner = inner.take(cdb);
+        let mut dict = CdbDictionary {
+            path: path.to_path_buf(),
+            inner,
+            info: self.info.clone(),
+        };
         dict.flush()?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
+
+    use super::{CdbDictionary, Dictionary};
+
+    #[test]
+    fn create_new_dictionary_in_memory_and_query() -> Result<(), Box<dyn Error>> {
+        let tmp_dir = tempfile::tempdir()?;
+        let file_path = tmp_dir.path().join("chewing.cdb");
+        let mut dict = CdbDictionary::open(file_path)?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        assert_eq!(
+            Some(("dict", 1, 2).into()),
+            dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn create_new_dictionary_and_query() -> Result<(), Box<dyn Error>> {
+        let tmp_dir = tempfile::tempdir()?;
+        let file_path = tmp_dir.path().join("chewing.cdb");
+        let mut dict = CdbDictionary::open(file_path)?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        dict.flush()?;
+        assert_eq!(
+            Some(("dict", 1, 2).into()),
+            dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn create_new_dictionary_and_enumerate() -> Result<(), Box<dyn Error>> {
+        let tmp_dir = tempfile::tempdir()?;
+        let file_path = tmp_dir.path().join("chewing.cdb");
+        let mut dict = CdbDictionary::open(file_path)?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        dict.flush()?;
+        assert_eq!(
+            vec![(
+                vec![syl![Z, TONE4], syl![D, I, AN, TONE3]],
+                Phrase::from(("dict", 1, 2))
+            )],
+            dict.entries().unwrap().collect::<Vec<_>>()
+        );
         Ok(())
     }
 }

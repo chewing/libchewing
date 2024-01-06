@@ -1,6 +1,6 @@
 use std::{
     borrow::Cow,
-    fmt::{Display, Write},
+    fmt::{Debug, Display, Write},
     num::NonZeroU16,
     str::FromStr,
 };
@@ -18,7 +18,7 @@ pub struct Syllable {
     value: NonZeroU16,
 }
 
-impl core::fmt::Debug for Syllable {
+impl Debug for Syllable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Syllable")
             .field("value", &self.value)
@@ -279,7 +279,7 @@ impl AsRef<Syllable> for Syllable {
     }
 }
 
-pub trait SyllableSlice {
+pub trait SyllableSlice: Debug {
     fn as_slice(&self) -> Cow<'_, [Syllable]>;
     fn get_bytes(&self) -> Vec<u8> {
         let mut syllables_bytes = vec![];

@@ -64,11 +64,6 @@ fn main() -> Result<()> {
 
     match app.cmd {
         Cmds::Build(ref cmd) => {
-            if cmd.with_hash && cmd.with_rust {
-                return Err(anyhow!(
-                    "--with_hash and --with_rust should not be used together"
-                ));
-            }
             BuildOpts {
                 with_rust: cmd.with_rust,
                 with_hash: cmd.with_hash,

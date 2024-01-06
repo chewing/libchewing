@@ -16,12 +16,15 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 pub use self::cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
 pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
+#[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 
 mod cdb;
+mod kv;
 mod layered;
 mod loader;
+#[cfg(feature = "sqlite")]
 mod sqlite;
 mod trie;
 

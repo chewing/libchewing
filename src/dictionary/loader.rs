@@ -2,7 +2,9 @@ use std::path::{Path, PathBuf};
 
 use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 
-use super::{CdbDictionary, Dictionary, SqliteDictionary, TrieDictionary};
+#[cfg(feature = "sqlite")]
+use super::SqliteDictionary;
+use super::{CdbDictionary, Dictionary, TrieDictionary};
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -27,29 +29,35 @@ impl SystemDictionaryLoader {
 
         let mut tsi_db_path = sys_path.clone();
         tsi_db_path.push("tsi.dat");
-        let tsi_db = if let Ok(db) = SqliteDictionary::open_read_only(&tsi_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = TrieDictionary::open(&tsi_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = CdbDictionary::open(&tsi_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else {
-            return None;
-        };
+        let mut tsi_db = None;
+        #[cfg(feature = "sqlite")]
+        {
+            tsi_db = SqliteDictionary::open_read_only(&tsi_db_path)
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
+        if tsi_db.is_none() {
+            tsi_db = TrieDictionary::open(&tsi_db_path)
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
 
         let mut word_db_path = sys_path;
         word_db_path.push("word.dat");
-        let word_db = if let Ok(db) = SqliteDictionary::open_read_only(&word_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = TrieDictionary::open(&word_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = CdbDictionary::open(&word_db_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else {
-            return None;
-        };
+        let mut word_db = None;
+        #[cfg(feature = "sqlite")]
+        {
+            word_db = SqliteDictionary::open_read_only(&word_db_path)
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
+        if word_db.is_none() {
+            word_db = TrieDictionary::open(&word_db_path)
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
 
-        Some(vec![word_db, tsi_db])
+        Some(vec![word_db.unwrap(), tsi_db.unwrap()])
     }
 }
 
@@ -73,16 +81,19 @@ impl UserDictionaryLoader {
             userphrase_path()?
         };
 
-        let dict = if let Ok(db) = SqliteDictionary::open(&data_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = TrieDictionary::open(&data_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else if let Ok(db) = CdbDictionary::open(&data_path) {
-            Box::new(db) as Box<dyn Dictionary>
-        } else {
-            return None;
-        };
+        let mut dict = None;
+        #[cfg(feature = "sqlite")]
+        {
+            dict = dbg!(SqliteDictionary::open(&data_path))
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
+        if dict.is_none() {
+            dict = CdbDictionary::open(&data_path)
+                .map(|db| Box::new(db) as Box<dyn Dictionary>)
+                .ok();
+        }
 
-        Some(dict)
+        dict
     }
 }

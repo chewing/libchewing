@@ -14,7 +14,7 @@ pub(crate) struct SymbolSelector {
 }
 
 impl SymbolSelector {
-    pub(crate) fn load<P: AsRef<Path>>(path: P) -> Result<SymbolSelector> {
+    pub(crate) fn _load<P: AsRef<Path>>(path: P) -> Result<SymbolSelector> {
         let file = File::open(path)?;
         let reader = BufReader::new(file);
         SymbolSelector::new(reader)
