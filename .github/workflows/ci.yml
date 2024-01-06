@@ -12,6 +12,8 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   CMAKE_GENERATOR: Ninja
+  TMP: ${{ runner.temp }}
+  TMPDIR: ${{ runner.temp }}
 
 jobs:
   build:
