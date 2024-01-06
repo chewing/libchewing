@@ -132,8 +132,7 @@ impl Dictionary for CdbDictionary {
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        self.inner
-            .reopen(CDB::open(&self.path).map_err(Error::from)?);
+        self.inner.set(CDB::open(&self.path).map_err(Error::from)?);
         Ok(())
     }
 
@@ -154,6 +153,7 @@ impl Dictionary for CdbDictionary {
                 .add(&entry.0.get_bytes(), &data_buf)
                 .map_err(Error::from)?;
         }
+        drop(self.inner.take());
         writer.finish().map_err(Error::from)?;
         self.reopen()
     }
@@ -254,7 +254,7 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
     }
 }
 
-#[cfg(all(test, not(target_os = "windows")))]
+#[cfg(test)]
 mod tests {
     use std::error::Error;
 

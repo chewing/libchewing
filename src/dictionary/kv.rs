@@ -32,7 +32,7 @@ pub(crate) trait KVStoreBuilder {
 type PhraseKey = (Cow<'static, [u8]>, Cow<'static, str>);
 
 pub(crate) struct KVDictionary<T> {
-    store: T,
+    store: Option<T>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
 }
@@ -67,33 +67,26 @@ where
 {
     pub(crate) fn new(store: T) -> KVDictionary<T> {
         KVDictionary {
-            store,
+            store: Some(store),
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
         }
     }
 
-    pub(crate) fn new_in_memory() -> KVDictionary<()> {
+    pub(crate) fn new_in_memory() -> KVDictionary<T> {
         KVDictionary {
-            store: (),
+            store: None,
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
         }
     }
 
-    pub(crate) fn take<S>(self, store: S) -> KVDictionary<S>
-    where
-        S: for<'a> KVStore<'a>,
-    {
-        KVDictionary {
-            store,
-            btree: self.btree,
-            graveyard: self.graveyard,
-        }
+    pub(crate) fn take(&mut self) -> Option<T> {
+        self.store.take()
     }
 
-    pub(crate) fn reopen(&mut self, store: T) {
-        self.store = store;
+    pub(crate) fn set(&mut self, store: T) {
+        self.store = Some(store);
     }
 
     pub(crate) fn entries_iter_for<'a>(
@@ -103,35 +96,39 @@ where
         let syllable_key = Cow::from(syllable_bytes);
         let min_key = (syllable_key.clone(), Cow::from(MIN_PHRASE));
         let max_key = (syllable_key.clone(), Cow::from(MAX_PHRASE));
+        let store_iter = self.store.iter().flat_map(move |store| {
+            store
+                .find(&syllable_bytes)
+                .map(|bytes| Phrase::from(PhraseData(&bytes)))
+        });
+        let btree_iter = self
+            .btree
+            .range(min_key..max_key)
+            .map(|(key, value)| Phrase {
+                phrase: key.1.as_ref().to_owned(),
+                freq: value.0,
+                last_used: Some(value.1),
+            });
 
-        self.store
-            .find(&syllable_bytes)
-            .map(|bytes| Phrase::from(PhraseData(&bytes)))
-            .chain(
-                self.btree
-                    .range(min_key..max_key)
-                    .map(|(key, value)| Phrase {
-                        phrase: key.1.as_ref().to_owned(),
-                        freq: value.0,
-                        last_used: Some(value.1),
-                    }),
-            )
-            .filter(move |it| {
-                !self
-                    .graveyard
-                    .contains(&(syllable_key.clone(), Cow::from(it.as_str())))
-            })
+        store_iter.chain(btree_iter).filter(move |it| {
+            !self
+                .graveyard
+                .contains(&(syllable_key.clone(), Cow::from(it.as_str())))
+        })
     }
 
     pub(crate) fn entries_iter(&self) -> impl Iterator<Item = (Vec<u8>, Phrase)> + '_ {
-        let mut store_iter = self
-            .store
-            .iter()
-            .filter(|it| it.0 != b"INFO")
-            .map(|(syllable_bytes, phrase_bytes)| {
-                (syllable_bytes, Phrase::from(PhraseData(&phrase_bytes)))
-            })
-            .peekable();
+        let mut store_iter =
+            self.store
+                .iter()
+                .flat_map(|store| {
+                    store.iter().filter(|it| it.0 != b"INFO").map(
+                        |(syllable_bytes, phrase_bytes)| {
+                            (syllable_bytes, Phrase::from(PhraseData(&phrase_bytes)))
+                        },
+                    )
+                })
+                .peekable();
         let mut btree_iter = self
             .btree
             .iter()
