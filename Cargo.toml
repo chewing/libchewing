@@ -11,7 +11,7 @@ include = ["src/**/*.rs", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
 
 [dependencies]
 bytemuck = { version = "1.14.0", features = ["derive"] }
-cdb = { version = "0.6.0", git = "https://guthub.com/kanru/cdb-rs" }
+cdb = { version = "0.6.0", git = "https://github.com/kanru/cdb-rs" }
 directories = "5.0.0"
 riff = "2.0.0"
 rusqlite = { version = "0.30.0", optional = true }
