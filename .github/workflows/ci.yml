@@ -60,9 +60,6 @@ jobs:
       run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --verbose true
 
     - name: Test
-      env:
-        TMP: ${{ runner.temp }}
-        TMPDIR: ${{ runner.temp }}
       run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
 
   coverage:
@@ -98,9 +95,6 @@ jobs:
       run: cargo xtask build --build-type Debug --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --with-coverage true --verbose true
 
     - name: Test
-      env:
-        TMP: ${{ runner.temp }}
-        TMPDIR: ${{ runner.temp }}
       run: |
         cargo xtask test --build-type Debug
         ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov

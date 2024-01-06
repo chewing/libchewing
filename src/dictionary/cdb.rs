@@ -97,21 +97,19 @@ impl<'a> KVStore<'a> for CDB {
 }
 
 impl CdbDictionary {
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<CdbDictionary, CdbDictionaryError> {
-        match path.as_ref().try_exists() {
+    pub fn open<P: Into<PathBuf>>(path: P) -> Result<CdbDictionary, CdbDictionaryError> {
+        let path = path.into();
+        match path.try_exists() {
             Ok(exists) => {
                 if !exists {
-                    let mut builder = CdbDictionaryBuilder::new();
-                    builder
-                        .set_info(DictionaryInfo::default())
-                        .map_err(Error::from)?;
-                    builder.build(path.as_ref())?;
+                    let mut maker = CDBMake::new(File::create(&path)?)?;
+                    maker.add(b"INFO", &[])?;
+                    maker.finish()?;
                 }
             }
             Err(_) => todo!(),
         }
         let base = CDB::open(&path)?;
-        let path = path.as_ref().to_path_buf();
         Ok(CdbDictionary {
             path,
             inner: KVDictionary::new(base),
@@ -147,8 +145,7 @@ impl Dictionary for CdbDictionary {
             data_buf.write_all(&[phrase.as_str().len() as u8])?;
             data_buf.write_all(phrase.as_str().as_bytes())
         }
-        let mut writer =
-            CDBWriter::create(&self.path.display().to_string()).map_err(Error::from)?;
+        let mut writer = CDBWriter::create(&self.path).map_err(Error::from)?;
         writer.add(b"INFO", &[]).map_err(Error::from)?;
         for entry in self.entries().unwrap() {
             let mut data_buf = vec![];
@@ -241,18 +238,18 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        let mut maker = CDBMake::new(File::create(path)?)?;
-        maker.add(b"INFO", &[])?;
-        maker.finish()?;
-        let cdb = CDB::open(path)?;
-        let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
-        let inner = inner.take(cdb);
-        let mut dict = CdbDictionary {
-            path: path.to_path_buf(),
-            inner,
-            info: self.info.clone(),
-        };
-        dict.flush()?;
+        // let mut maker = CDBMake::new(File::create(path)?)?;
+        // maker.add(b"INFO", &[])?;
+        // maker.finish()?;
+        // let cdb = CDB::open(path)?;
+        // let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
+        // let inner = inner.take(cdb);
+        // let mut dict = CdbDictionary {
+        //     path: path.to_path_buf(),
+        //     inner,
+        //     info: self.info.clone(),
+        // };
+        // dict.flush()?;
         Ok(())
     }
 }
