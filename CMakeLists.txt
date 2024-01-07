@@ -81,7 +81,14 @@ option(USE_VALGRIND "Use valgrind when testing" true)
 
 option(WITH_RUST "Use rust implemented internals (experimental)" false)
 if(WITH_RUST)
-    add_subdirectory(cmake/corrosion)
+    include(FetchContent)
+    FetchContent_Declare(
+        Corrosion
+        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+        GIT_TAG be76480232216a64f65e3b1d9794d68cbac6c690 # v0.4.5
+    )
+    FetchContent_MakeAvailable(Corrosion)
+
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing CRATE_TYPES staticlib FEATURES capi)
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-tools)
     add_compile_definitions(WITH_RUST)

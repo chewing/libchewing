@@ -1,3 +1,0 @@
-[submodule "cmake/corrosion"]
-	path = cmake/corrosion
-	url = https://github.com/corrosion-rs/corrosion.git
