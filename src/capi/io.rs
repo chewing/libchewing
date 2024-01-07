@@ -12,12 +12,9 @@ use std::{
 use tracing::{debug, warn};
 
 use crate::{
-    capi::{
-        public::{
-            ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE,
-            MAX_SELKEY, SYMBOL_MODE,
-        },
-        types::{ChewingContext, SelKeys},
+    capi::public::{
+        ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
+        HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
     },
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
