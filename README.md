@@ -117,6 +117,7 @@ be built.
 + Toolchain / IDE:
    - clang >= 3.2
    - gcc >= 4.6.3
+   - Rust >= 1.70
    - Visual Studio Express 2012
 + Documentation tools:
    - texinfo >= 4.12
@@ -124,29 +125,26 @@ be built.
 
 ## Installation
 
-	# ./configure --prefix=/usr
-	  (If you checkout from GIT, make sure running ./autogen.sh
-	   before this.)
-	# make
-	# make install
+    cmake --preset c99-release
+    cmake --build out/build/c99-release
+    cmake --install out/build/c99-release --prefix /usr
 
 For macOS:
 
-	# brew install libchewing  # latest release version
-	# brew install --HEAD libchewing  # development, git master branch
-
-see "INSTALL" for details.
+    brew install libchewing  # latest release version
+    brew install --HEAD libchewing  # development, git master branch
 
 
 ## Cross-build
 
+Define a [cmake-toolchains][] file to cross-compile.
+
 Example cross-build instructions:
 
-	# CC_FOR_BUILD=gcc ./configure \
-	    --host=arm-none-linux-gnueabi \
-	    --disable-shared --enable-static
-	# make
+    cmake --preset c99-release --toolchain arm-none-linux-gnueabi.cmake
+    cmake --build out/build/c99-release
 
+[cmake-toolchains]: https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
 
 ## Build on Windows with MinGW
 
@@ -160,61 +158,11 @@ In "Select Components" during installing, please select the following items:
 - MinGW Compiler Suite -> C Compiler
 - MSYS Basic System
 
-After installing, execute <MinGW directory>\msys\1.0\msys.bat (default is
+After installing, execute [MinGW directory]\msys\1.0\msys.bat (default is
 C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
 
-If you get the source from the git repository you need additional step
-to make the source buildable; use the following commands to install
-necessary packages.
-
-	- mingw-get install automake
-	- mingw-get install autoconf
-	- mingw-get install libtool
-
-Now you have the build environment for libchewing. However, you need to check
-the line end of source code is LF instead of CR/LF before running autogen.sh.
-The easily way to do this is using git:
-
-	- git config core.autocrlf input
-	- rm -rf *
-	- git reset --hard
-
-Now you can run the following commands in MSYS shell to build libchewing:
-
-If you get the source from the git repository, run:
-
-	- autogen.sh
-
-Then
-
-	- configure
-	- make
-
-If you run testchewing.exe (available after `make check') you will
-find that testchewing.exe cannot print the correct string. This is
-because testchewing.exe prints the UTF-8 string, while Windows cannot
-print it to console.
-
-
-## Build with CMake
-
-libchewing supports cmake (<https://www.cmake.org/>) build system. You can use the
-following command to build with cmake:
-
-	- cmake .
-	- make
-
-cmake is also the preferred way to build libchewing on Windows platform due to
-better Windows integrated. You can use the following command to create Visual
-Studio project in 32-bits Windows platform:
-
-	- cmake . -G "Visual Studio 11"
-
-or the following command to create Visual Studio project in 64-bits Windows
-platform:
-
-	- cmake . -G "Visual Studio 11 Win64" (64-bits Windows)
-
+Now you have the build environment for libchewing. You can follow the installation
+steps to build with cmake.
 
 ## Build on OS X
 
@@ -231,27 +179,9 @@ http://brew.sh
 Once Homebrew is installed, run the following commands to install the tools
 you need:
 
-        # brew install autoconf automake
-        # brew install libtool
-        # brew install cmake
-
-        # brew install texinfo
-
-
-### Autotools (autoconf, automake)
-
-If you get the source from the git repository, run:
-
-        # ./autogen.sh
-
-Because OS X uses an older version of `makeinfo`, you have to set MAKEINFO
-manually to where Homebrew installed makeinfo. For example:
-
-        # ./configure MAKEINFO=/usr/local/Cellar/texinfo/5.2/bin/makeinfo
-
-then
-
-        # make
+    brew install cmake
+    brew install rustup
+    brew install texinfo
 
 
 ### cmake
