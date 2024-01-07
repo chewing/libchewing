@@ -2,15 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [ "master", "staging", "trying" ]
+    branches: ["master", "staging", "trying"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
   merge_group:
     types: [checks_requested]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  RUST_VERSION: "1.70"
   CMAKE_GENERATOR: Ninja
 
 jobs:
@@ -19,87 +18,86 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        with_rust: ['true', 'false']
-        with_hash: ['true', 'false']
-        rust_version: ['1.70']
-        include:
-          - os: ubuntu-latest
-            with_rust: true
-            rust_version: stable
-            with_hash: true
-          - os: ubuntu-latest
-            with_rust: true
-            rust_version: stable
-            with_hash: false
-        exclude:
-          - with_rust: 'false'
-            rust_version: 'stable'
+        preset:
+          - rust-release
+          - rust-with-sqlite-release
+          - c99-release
+          - c99-with-uhash-release
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}, with_rust=${{ matrix.with_rust }}, with_hash=${{ matrix.with_hash }} rust_version=${{ matrix.rust_version }}
+    name: ${{ matrix.os }}, preset=${{ matrix.preset }}
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: 'true'
+      - uses: actions/checkout@v3
+        with:
+          submodules: "true"
 
-    - if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt-get install ninja-build
-    - if: ${{ matrix.os == 'macos-latest' }}
-      run: brew install ninja
-    - if: ${{ matrix.os == 'windows-latest' }}
-      run: choco install ninja
-    - if: ${{ matrix.os == 'windows-latest' }}
-      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+      - if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: sudo apt-get install ninja-build
+      - if: ${{ matrix.os == 'macos-latest' }}
+        run: brew install ninja
+      - if: ${{ matrix.os == 'windows-latest' }}
+        run: choco install ninja
+      - if: ${{ matrix.os == 'windows-latest' }}
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
 
-    - name: Setup rustup
-      run: |
-        rustup default ${{ matrix.rust_version }}
-        rustup update
+      - name: Setup rustup
+        run: |
+          rustup default ${{ env.RUST_VERSION }}
+          rustup update
 
-    - name: Build
-      run: cargo xtask build --build-type ${{env.BUILD_TYPE}} --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --verbose true
+      - name: Build
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build out/build/${{ matrix.preset }} --verbose
+          cmake --install out/build/${{ matrix.preset }} --verbose
 
-    - name: Test
-      run: cargo xtask test --build-type ${{env.BUILD_TYPE}}
+      - name: Test
+        run: |
+          cargo test
+          ctest --test-dir out/build/${{ matrix.preset }} --verbose
 
   coverage:
     strategy:
       matrix:
-        with_rust: ['true', 'false']
-        with_hash: ['true', 'false']
+        preset:
+          - rust-coverage
+          - rust-with-sqlite-coverage
+          - c99-coverage
+          - c99-with-uhash-coverage
     runs-on: ubuntu-latest
-    name: Coverage with_rust=${{ matrix.with_rust }} with_hash=${{ matrix.with_hash }}
+    name: Coverage preset=${{ matrix.preset }}
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: 'true'
+      - uses: actions/checkout@v3
+        with:
+          submodules: "true"
 
-    - run: sudo apt-get install ninja-build
+      - run: sudo apt-get install ninja-build
 
-    - name: Setup rustup
-      run: |
-        rustup default stable
-        rustup update
-        rustup component add llvm-tools
+      - name: Setup rustup
+        run: |
+          rustup default stable
+          rustup update
+          rustup component add llvm-tools
 
-    - name: Setup grcov
-      run: |
-        curl -LO https://github.com/mozilla/grcov/releases/download/v0.8.19/grcov-x86_64-unknown-linux-gnu.tar.bz2
-        echo 098be4d60b8016913542d58456fea6e771890096d1bf86e7f83dac650ba4b58a grcov-x86_64-unknown-linux-gnu.tar.bz2 | sha256sum -c -
-        tar xf grcov-x86_64-unknown-linux-gnu.tar.bz2
+      - name: Setup grcov
+        run: |
+          curl -LO https://github.com/mozilla/grcov/releases/download/v0.8.19/grcov-x86_64-unknown-linux-gnu.tar.bz2
+          echo 098be4d60b8016913542d58456fea6e771890096d1bf86e7f83dac650ba4b58a grcov-x86_64-unknown-linux-gnu.tar.bz2 | sha256sum -c -
+          tar xf grcov-x86_64-unknown-linux-gnu.tar.bz2
 
-    - name: Build
-      env:
-        CC: clang
-      run: cargo xtask build --build-type Debug --with-rust ${{matrix.with_rust}} --with-hash ${{matrix.with_hash}} --with-coverage true --verbose true
+      - name: Build
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build out/build/${{ matrix.preset }} --verbose
 
-    - name: Test
-      run: |
-        cargo xtask test --build-type Debug
-        ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov
+      - name: Test
+        run: |
+          cargo test
+          ctest --test-dir out/build/${{ matrix.preset }} --verbose
+          ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
