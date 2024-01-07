@@ -6,6 +6,18 @@
     },
     "configurePresets": [
         {
+            "name": "coverage-base",
+            "displayName": "Enable Coverage",
+            "description": "Using compilers: C = /usr/bin/clang, CXX = /usr/bin/clang++",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_GCOV": true
+            }
+        },
+        {
             "name": "rust",
             "displayName": "Rust (Debug)",
             "description": "Build libchewing with only rust dependencies",
@@ -27,6 +39,15 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "rust-coverage",
+            "displayName": "Rust (Debug Coverage)",
+            "description": "Build libchewing with only rust dependencies",
+            "inherits": [
+                "rust",
+                "coverage-base"
+            ]
         },
         {
             "name": "rust-with-sqlite",
@@ -52,6 +73,15 @@
             }
         },
         {
+            "name": "rust-with-sqlite-coverage",
+            "displayName": "Rust with sqlite3 (Debug Coverage)",
+            "description": "Build libchewing with rust and sqlite3 user dictionary format",
+            "inherits": [
+                "rust-with-sqlite",
+                "coverage-base"
+            ]
+        },
+        {
             "name": "c99",
             "displayName": "C99 (Debug)",
             "description": "Build libchewing with only C dependencies",
@@ -75,6 +105,15 @@
             }
         },
         {
+            "name": "c99-coverage",
+            "displayName": "C99 (Debug Coverage)",
+            "description": "Build libchewing with only C dependencies",
+            "inherits": [
+                "c99",
+                "coverage-base"
+            ]
+        },
+        {
             "name": "c99-with-uhash",
             "displayName": "C99 with uhash (Debug)",
             "description": "Build libchewing with C and uhash user dictionary format",
@@ -96,6 +135,15 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "c99-with-uhash-coverage",
+            "displayName": "C99 with uhash (Debug Coverage)",
+            "description": "Build libchewing with C and uhash dictionary format",
+            "inherits": [
+                "c99-with-uhash",
+                "coverage-base"
+            ]
         }
     ]
 }
