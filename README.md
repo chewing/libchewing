@@ -35,30 +35,6 @@ libchewing releases can be verified with the following [minisign][] public key
 
 [minisign]: https://jedisct1.github.io/minisign/
 
-## History
-
-libchewing is derived from the original Chewing input method, a xcin module
-focusing on intelligent phonetic (Bopomofo/Zhuyin) processing by Lu-chuan
-Kung (lckung) and Kang-pen Chen (kpchen) sponsored by Tsan-sheng Hsu from
-Academia Sinica during 1999-2001.  However, the original authors of Chewing
-dropped its development, and Chewing was highly coupled with xcin, which
-prevents from comprehensive applications.  There was a similar input method,
-bimsphone, which was bundled in XCIN server. However, it did not provide a
-convenient API for further development, either.
-
-
-## Motivation
-
-Jim Huang, et al. formed the Chewing core team and extended Kung and Chen's
-work since 2002.  The chewing core team renamed the project as "new" chewing
-to differentiate their work from the original.  Nevertheless, the English name
-has remained "chewing", which is identified by various input method framework
-as well.
-
-In 2004, Chewing core team successfully ported the input method to several
-platforms and framework along with community collaboration.
-
-
 ## Development Goal of libchewing
 
 - Split logic and view.
@@ -412,6 +388,20 @@ implemented in file contrib/simple-select.c
 
 [1]: https://en.wikipedia.org/wiki/Bopomofo
 [2]: https://en.wikipedia.org/wiki/Pinyin
+
+
+## History
+
+Libchewing is derived from the original Chewing input method,
+a module of XCIN that focuses on intelligent phonetic (Bopomofo/Zhuyin) processing and was initially intended for use with the X Window System.
+This input method module was developed by Lu-chuan Kung (lckung) and Kang-pen Chen (kpchen),
+and was sponsored by Tsan-sheng Hsu from Academia Sinica between 1999 and 2001.
+However, the original authors eventually ceased the development of Chewing, and its strong coupling with XCIN limited its application in broader contexts.
+Additionally, there was a similar input method, bimsphone, which was included in the XCIN server.
+Like Chewing, bimsphone also lacked a convenient API for further development.
+In 2002, Jim Huang, along with others, formed the Chewing core team and extended the work of Kung and Chen.
+The Chewing core team renamed the project "New Chewing" to differentiate their work from the original.
+Nevertheless, the English name has remained "Chewing," which is recognized by various input method frameworks as well.
 
 
 ## License
