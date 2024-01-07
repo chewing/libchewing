@@ -34,6 +34,10 @@ to have more frequent releases in the following months.
 * Dictionary
   -  Add new syllable ㄒㄩㄢ for 亘 [yan12125] #252 #253
 
+* Removed
+  - Autotools build tools are removed. CMake is the recommended way to build
+    libchewing.
+
 * Bug fixed
   - Fix ChoiceEndChoice expression always true [Billy Su].
   - Fix strncpy warning in hash.c [Bo-Cheng Jhan].
