@@ -42,6 +42,7 @@ include/config.h.in
 include/stamp-h1
 
 # cmake generated files
+/out
 /build
 config.h
 /libchewing.*
