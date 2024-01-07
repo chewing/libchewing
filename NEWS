@@ -1,19 +1,62 @@
-What's New in libchewing GIT
+What's New in libchewing 0.6.0-rc.1 (UNRELEASED)
 ---------------------------------------------------------
 
-* New APIs:
-  - chewing_phone_to_bopomofo [ShengYenPeng]. #166
+This release contains many improvements and bug fixes. It's the first
+release since 2016. We have started a major rewrite in Rust so we expect
+to have more frequent releases in the following months.
 
-* Platform-specific
-  - Install instructions for Mac OS [Chocobo1].
+* Added
+  - New API chewing_phone_to_bopomofo to convert syllable in u16 to bopomofo
+    string [ShengYenPeng]. #166
+  - New API chewing_set_autoLearn and chewing_get_autoLearn can be used to
+    disable and enable new phrase auto learning. [Hiunn-hué] #261
+  - Add default config test for autoLearn option [Billy Su].
+  - Add Android platform support [hiroshiyui]. #408
+  - New chewing Rust crate can be downloaded from
+    [crates.io](https://crates.io/crates/chewing) [Kan-ru Chen]. #423
+  - Add several CMake presets for supported configurations [Kan-ru Chen]. #424
 
-* Bug fixed:
-  - Unable to input some Bopomofos with ET26 layout [Hiunn-hué]. #235
+* Changed
+  - Implement has_userphrase in testhelper with the public
+    chewing_userphrase_lookup API. [ShengYenPeng]. #223
+  - Updated HSU layout's JVC conversion to be more intuitive [Hiunn-hué]. #259
+  - Phrase auto learning now only triggers after committing [Hiunn-hué]. #260
+  - chewing_handle_CtrlNum now handles cursor better and has clearer error
+    message if there is nothing to be added to user phrase. [Hiunn-hué] #277
+  - chewing_handle_ShiftLeft and chewing_handle_ShiftRight now also displays
+    aux message for new user phrases added. [Hiunn-hué] #278
+  - Symbol used for full-width colon changed from ︰ (U+FE30) to ： (U+FF1A)
+    [school510587] #304
+  - Support cross compiling with qemu. [sgn] #333
+  - CMake minimum version changed to 3.21.0
+  - Rewrite chewing internal in Rust [Kan-ru Chen] #347 #378
+
+* Dictionary
+  -  Add new syllable ㄒㄩㄢ for 亘 [yan12125] #252 #253
+
+* Bug fixed
+  - Fix ChoiceEndChoice expression always true [Billy Su].
+  - Fix strncpy warning in hash.c [Bo-Cheng Jhan].
+  - Fix unable to input some Bopomofos with ET26 layout [Hiunn-hué]. #235
+  - Fix double free in userphrase-hash's TerminateUserphrase [cwlin]. #254
+  - Fix hash item offsett calculation in uhash [cwlin]. #255
+  - Fix ChoiceEndChoice expression always true [Billy Su]. #258
+  - Fix clearing bopomofo buffer after switching Chi-Eng mode [Hiunn-hué]. #268
+  - Fix chewing_handle_Space cannot input space with empty buffer [Hiunn-hué]. #274
+  - Fix a strncpy warning and use ARRAY_SIZE [school510587] #296
+  - Enhance chewing.py to support platforms with 64-bit pointer [cheese] #310
+  - Fix init_database to correctly read phrase frequency for sorting [yan12125] #334 #337
+  - Fix installation of data files [yan12125] #350
+  - Fix building shared library on all supported platforms [Kan-ru Chen] #375 #376
+  - Fix dvorak-qwerty symbol mapping [hiroshiyui] #407
   - prevent memory leak in error case of GetDefaultUserPhrasePath [Kuang-che Wu].
   - Fix PinYinData keySeq buffer overflow in PinYinInput() [Kuang-che Wu]. #238
   - Fix trying to allocate buffer of negative size [Kuang-che Wu].
   - Fix access violation due to negative cursor position [Kuang-che Wu].
   - Fix several buffer overflow. [ChangZhuo Chen]. #241 #242
+
+* Platform-specific
+  - Install instructions for Mac OS [Chocobo1].
 
 
 What's New in libchewing 0.5.1 (May 18, 2016)

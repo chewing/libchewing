@@ -29,6 +29,11 @@ as full open source efforts.
    - Coverity Scan: [![Coverity Scan Build Status](https://scan.coverity.com/projects/1273/badge.svg)](https://scan.coverity.com/projects/1273)
    - Codecov: [![codecov](https://codecov.io/gh/chewing/libchewing/graph/badge.svg?token=r1piKsG5uF)](https://codecov.io/gh/chewing/libchewing)
 
+libchewing releases can be verified with the following [minisign][] public key
+
+    RWRzJFnXiLZleAyCIv1talBjyRewelcy9gzYQq9pd3SKSFBPoy57sf5s
+
+[minisign]: https://jedisct1.github.io/minisign/
 
 ## History
 
