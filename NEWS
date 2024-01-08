@@ -60,7 +60,7 @@ to have more frequent releases in the following months.
   - Fix several buffer overflow. [ChangZhuo Chen]. #241 #242
 
 * Platform-specific
-  - Install instructions for Mac OS [Chocobo1].
+  - Install instructions for macOS [Chocobo1].
 
 
 What's New in libchewing 0.5.1 (May 18, 2016)
