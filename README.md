@@ -35,13 +35,6 @@ libchewing releases can be verified with the following [minisign][] public key
 
 [minisign]: https://jedisct1.github.io/minisign/
 
-## Development Goal of libchewing
-
-- Split logic and view.
-- Support multiple operating systems, and input framework.
-- Provide a universal API for input framework and further development.
-
-
 ## Status
 
 
