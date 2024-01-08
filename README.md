@@ -37,26 +37,27 @@ libchewing releases can be verified with the following [minisign][] public key
 
 ## Status
 
-
 ### 1. System bridge integration
 
-Chewing has been adopted by various input frameworks in Unix-like systems and
-even Microsoft Windows.  On these systems, the chewing package is usually
-split into two parts: libchewing, which handles the actual character selection
-logic; and input framework interface for display and preference setting.
+Chewing has been integrated into various input frameworks in Unix-like systems
+and even in Microsoft Windows. On these systems, the Chewing package is
+typically divided into two parts: libchewing, which manages the actual
+character selection logic, and an input framework interface for display and
+preference settings.
 
 + The active integration:
-  - JMCCE
-  - SCIM
+  - [PIME](https://github.com/EasyIME/PIME)
+  - [SCIM](https://github.com/chewing/scim-chewing)
   - standalone Microsoft Windows 32/64-bit (windows-chewing)
   - Text Services Framework for Microsoft Windows
-  - UIM
-  - ibus
-  - UCIMF
-  - mozc
-  - gcin/HIME
-  - fcitx
+  - [ibus](https://github.com/definite/ibus-chewing)
+  - [HIME](https://hime-ime.github.io/)
+  - [fcitx](https://github.com/fcitx/fcitx5-chewing)
 + The inactive one:
+  - mozc
+  - [uim](https://github.com/uim/uim-chewing)
+  - [ucimf](https://github.com/matlinuxer2/ucimf)
+  - JMCCE
   - xcin
   - IIIMF
   - MacOS X (SpaceChewing)
