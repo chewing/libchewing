@@ -8,13 +8,13 @@
 
 # libchewing - The intelligent phonetic input method library
 
-The Chewing (酷音) is an intelligent phonetic (Zhuyin/Bopomofo) input method,
-one of the most popular choices for Traditional Chinese users. Chewing was
-inspired by other proprietary intelligent Zhuyin input methods under Microsoft
-Windows, namely, Wang-Xin by Eten, Microsoft New Zhuyin, and Nature Zhuyin.
-
-The Chewing core team extended their work and actively maintains the project
-as full open source efforts.
+The Chewing (酷音) is an intelligent phonetic input method (Zhuyin/Bopomofo)
+and is one of the most popular choices for Traditional Chinese users. Chewing
+was inspired by other proprietary intelligent Zhuyin input methods on Microsoft
+Windows, namely Wang-Xin by Eten, Microsoft New Zhuyin, and Nature Zhuyin (aka
+Going). The Chewing developer maintains the project as a fully open-source
+effort, positioning it as a leading libre intelligent phonetic solution among
+major operating environments.
 
 + Website: <http://chewing.im/>
 + Issue tracker: <https://github.com/chewing/libchewing/issues>
