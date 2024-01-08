@@ -40,8 +40,8 @@ libchewing releases can be verified with the following [minisign][] public key
 ### 1. System bridge integration
 
 Chewing has been integrated into various input frameworks in Unix-like systems
-and even in Microsoft Windows. On these systems, the Chewing package is
-typically divided into two parts: libchewing, which manages the actual
+and even in Microsoft Windows and Android. On these systems, the Chewing package
+is typically divided into two parts: libchewing, which manages the actual
 character selection logic, and an input framework interface for display and
 preference settings.
 
@@ -53,6 +53,7 @@ preference settings.
   - [ibus](https://github.com/definite/ibus-chewing)
   - [HIME](https://hime-ime.github.io/)
   - [fcitx](https://github.com/fcitx/fcitx5-chewing)
+  - [Guileless Bopomofo](https://github.com/hiroshiyui/GuilelessBopomofo)
 + The inactive one:
   - mozc
   - [uim](https://github.com/uim/uim-chewing)
