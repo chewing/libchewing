@@ -82,20 +82,14 @@ preference settings.
 
 ### 3. External and unmerged projects
 
-libchewing provides straightforward API and design, which enables third-party
-projects to deploy the innovative.  Here are the examples:
-
-  * FreeArray: utilizing libchewing for selecting phrases of Array input
-   method.
-   <https://github.com/shaform/libfreearray>
-   <https://github.com/shaform/ibus-freearray>
-
-  * [CitC](https://code.google.com/p/citc/) (Chewing in the Cloud): extending cloud services for real-time
-   training and phrase selection based on Chewing IM.
-
-  * [KindleChewing: Chewing IM for Kindle DX device](https://github.com/tjwei/KindleChewing)
-
-  * [NTNU-Master Input Method](http://rportal.lib.ntnu.edu.tw/items/42d5cd11-5fab-4d27-9f26-d01b80588a82): A Faster Chinese IM based on windows-chewing
+libchewing provides a straightforward API and design, enabling third-party
+projects to deploy innovative features. Here are some examples:
+* [FreeArray](https://github.com/shaform/libfreearray): utilizing libchewing for
+  selecting phrases of Array input method.
+* [CitC](https://code.google.com/p/citc/) (Chewing in the Cloud): extending cloud
+  services for real-time training and phrase selection based on Chewing IM.
+* [KindleChewing: Chewing IM for Kindle DX device](https://github.com/tjwei/KindleChewing)
+* [NTNU-Master Input Method](http://rportal.lib.ntnu.edu.tw/items/42d5cd11-5fab-4d27-9f26-d01b80588a82): A faster Chinese IM based on windows-chewing
 
 
 ## Minimal Build Tools Requirement
