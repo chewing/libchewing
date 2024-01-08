@@ -302,30 +302,34 @@ simplified example in the file `contrib/simple-select.c`.
 
 ## History
 
-Libchewing is derived from the original Chewing input method,
-a module of XCIN that focuses on intelligent phonetic (Bopomofo/Zhuyin) processing and was initially intended for use with the X Window System.
-This input method module was developed by Lu-chuan Kung (lckung) and Kang-pen Chen (kpchen),
-and was sponsored by Tsan-sheng Hsu from Academia Sinica between 1999 and 2001.
-However, the original authors eventually ceased the development of Chewing, and its strong coupling with XCIN limited its application in broader contexts.
-Additionally, there was a similar input method, bimsphone, which was included in the XCIN server.
-Like Chewing, bimsphone also lacked a convenient API for further development.
-In 2002, Jim Huang, along with others, formed the Chewing core team and extended the work of Kung and Chen.
-The Chewing core team renamed the project "New Chewing" to differentiate their work from the original.
-Nevertheless, the English name has remained "Chewing," which is recognized by various input method frameworks as well.
+Libchewing is derived from the original Chewing input method, a module of XCIN
+that focuses on intelligent phonetic (Bopomofo/Zhuyin) processing and was
+initially intended for use with the X Window System. This input method module
+was developed by Lu-chuan Kung (lckung) and Kang-pen Chen (kpchen), and was
+sponsored by Tsan-sheng Hsu from Academia Sinica between 1999 and 2001.
+
+However, the original authors eventually ceased the development of Chewing, and
+its strong coupling with XCIN limited its application in broader contexts.
+Additionally, there was a similar input method, bimsphone, which was included in
+the XCIN server. Like Chewing, bimsphone also lacked a convenient API for
+further development. In 2002, Jim Huang, along with others, formed the Chewing
+core team and extended the work of Kung and Chen. The Chewing core team renamed
+the project "New Chewing" to differentiate their work from the original.
+Nevertheless, the English name has remained "Chewing," which is recognized by
+various input method frameworks as well.
 
 
 ## License
 
-Except the following source code:
-
-* thirdparty/sqlite-amalgamation/ contains sqlite3 source which is in public
-  domain. See <https://www.sqlite.org/copyright.html> for more information.
-
-* cmake/FindCurses.cmake is modified from CMake source, which is licensed under
-   BSD 3-Clause.
-
 All source code are licensed under GNU LGPL v2.1 (Lesser General Public License
 v2.1). See "COPYING" for details.
+
+Except for the following source code, all other source code is licensed under
+the GNU LGPL v2.1 (Lesser General Public License v2.1). See "COPYING" for details:
+* The directory "thirdparty/sqlite-amalgamation" contains the SQLite3 source,
+  which is in the public domain. For more information, see <https://www.sqlite.org/copyright.html>.
+* The file "cmake/FindCurses.cmake" is modified from the CMake source and is
+  licensed under the BSD 3-Clause license.
 
 
 ## Authors & Contact Information
