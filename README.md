@@ -68,6 +68,7 @@ preference settings.
 
 ### 2. support phonetic keyboard layout
 
+  - DaChen (default)
   - Hsu
   - IBM
   - Gin-Yieh
@@ -181,59 +182,54 @@ then
 
 ## Usage
 
-( modified from <https://code.google.com/p/ibus/wiki/ChewingUserGuide> )
+Chewing enables users to input Chinese by its pronunciation, using either
+[Bopomofo/Zhuyin][1] or [Hanyu pinyin][2]. It also supports Chinese punctuation
+marks, as well as both normal and full-shape numbers and the English alphabet.
 
-Chewing guides the user to input Chinese by its pronunciation, in the form of
-either [Bopomofo/Zhuyin][1] or [Hanyu pinyin][2], as well as Chinese punctuation
-marks and normal and full shape number and English alphabets.
-
-The following sections assume you are using the default configuration, that is,
-with default/DaChen Bopomofo keyboard layout, on an en_US keyboard, and default
-key-binding.
-
+The following sections are based on the assumption that you are using the
+default configuration. This includes the default/DaChen Bopomofo keyboard layout
+on an en\_US keyboard, along with the default key-binding.
 
 ### Glossary
 
-Preedit buffer: The places for storing your typing before sending to the
-applications (such as firefox) you are using.
+Preedit Buffer: This is the area where your typing is stored before being sent
+to the applications (such as Firefox) you are using.
 
-Mode: Mode determines how Chewing reacts on keyboard input.
-
+Mode: This determines how Chewing responds to keyboard input.
 
 ### Editing mode
 
-This mode is for normal Chinese character and punctuation typing. You are more
-likely working on this mode.
+This mode facilitates the typing of normal Chinese characters and punctuation
+and is typically the default working mode.
 
-In this mode, alpha-numberic and punctuation marks are interpreted as either
-Bopomofo symbols or punctuation marks. If the symbols can form Chinese
-characters, it will choose the most suitable character according to the
-context in preedit buffer.
+In this mode, alphanumeric characters and punctuation marks are interpreted as
+Bopomofo symbols or punctuation marks. When these symbols form Chinese
+characters, the system chooses the most appropriate character based on the
+context in the preedit buffer.
 
-It is recommended that you enter the whole Chinese sentences, so Chewing can
-do auto-correction for you.  If you like what you see, you can press Enter to
-commit the characters in preedit buffer.
+Entering complete Chinese sentences is advantageous as it allows the system to
+perform auto-correction. To confirm the output, pressing Enter will commit the
+characters in the preedit buffer.
 
-If something goes wrong, you can select the character by move your cursor
-using {Left} or {Right}, then press {Down} to enter Candidate Selection mode
-to choose words.
+In case of errors, characters can be selected by moving the cursor with {Left}
+or {Right}, followed by pressing {Down} to enter Candidate Selection mode for
+word choice.
 
-To prevent the auto-correction on certain phrase, you may press {Tab} to
-break the auto-correction on the end of the sentence.
+Auto-correction for a specific phrase can be overridden by pressing {Tab} at the
+end of the sentence.
 
-You can also remember the 2,3,4 words phrases by pressing {Ctrl-2}, {Ctrl-3},
-and {Ctrl-4} on the end of the phrase.
+Memorization of 2, 3, or 4-word phrases is possible by pressing {Ctrl-2},
+{Ctrl-3}, or {Ctrl-4} at the phrase's end.
 
-Also note that Shift's behavior changes in this mode. Shift-(alpha number)
-outputs corresponding Full shape Chinese symbols if "Easy symbol input" is
-enabled; Or outputs corresponding number half shape lowercase English
-alphabets if "Easy symbol input" is disabled.
+The behavior of the Shift key changes in this mode. Using Shift with an
+alphanumeric key outputs corresponding full-shape Chinese symbols if "Easy
+Symbol Input" is enabled, or outputs corresponding half-shape lowercase English
+alphabets if "Easy Symbol Input" is disabled.
 
-Talking about inputing Chinese symbols, other then enable "Easy symbol input"
-mode, you can also press {Ctrl-1} or {`} to open up a symbol selection dialog,
-select the category, then use {Down} key to choose the symbols as you would do
-for characters.
-
+For inputting Chinese symbols, aside from enabling "Easy Symbol Input" mode,
+pressing {Ctrl-1} or {`} opens a symbol selection dialog. After selecting the
+category, the {Down} key can be used to choose symbols as one would for
+characters.
 
 	Key binding   API name                   Functionality
 	-----------   --------                   -------------
@@ -251,9 +247,10 @@ for characters.
 
 ### Half/Full Shape sub-mode
 
-This sub-mode is for inputing half shape and full shape characters. Half shape
-characters are essentially normal English characters; while the full shape
-characters are full-width pretty symbols that resemble English characters.
+This sub-mode is for inputting half-shape and full-shape characters. Half-shape
+characters are essentially normal English characters, while full-shape
+characters are stylized symbols that resemble English characters in a larger,
+more prominent format.
 
 	Key binding   API name                   Functionality
 	-----------   --------                   -------------
@@ -271,15 +268,15 @@ This sub-mode is for temporary English inputting.
 
 ### Candidate Selection mode
 
-This mode is for Choosing the candidate. Firstly, the longest phrases that fit
-the pronunciation are shown, then the second shortest, till the single
-characters. Pressing {Down} again to return to the longest phrases.
+This mode is for choosing the candidate. It first displays the longest phrases
+that match the pronunciation, followed by progressively shorter phrases, down
+to single characters. Pressing {Down} cycles back to the longest phrases.
 
-For example, after entering "w91o3g4". Pressing {Down} makes Chewing displays
-3-word candidate "台北市"; pressing {Down} again makes Chewing displays 2-word
-candidate "北市"; pressing {Down} again makes Chewing displays 1-word
-candidates "市","是"; pressing {Down} again makes Chewing displays back the
-3-word candidates "台北市";
+For example, after entering "w91o3g4" and pressing {Down}, Chewing displays
+the 3-word candidate "台北市". Pressing {Down} again shows the 2-word candidate
+"北市". Another press of {Down} brings up 1-word candidates "市" and "是".
+Pressing {Down} once more cycles back to the 3-word candidate "台北市".
+
 
 	Key binding   API name                   Functionality
 	-----------   --------                   -------------
@@ -292,12 +289,12 @@ candidates "市","是"; pressing {Down} again makes Chewing displays back the
 
 ### Bypass mode
 
-This mode is on whenever the preedit buffer is empty. This allows you to use
-movement keys (such as cursor keys and page up/page down) and popular key
-binding (Ctrl-A, Ctrl-S).
+This mode is active whenever the preedit buffer is empty. It enables the use
+of movement keys (such as cursor keys and page up/page down) and popular key
+bindings (such as Ctrl-A, Ctrl-S).
 
-For the brief usage of libchewing APIs, please check the simplified example
-implemented in file contrib/simple-select.c
+For a brief overview of using the libchewing APIs, please refer to the
+simplified example in the file `contrib/simple-select.c`.
 
 [1]: https://en.wikipedia.org/wiki/Bopomofo
 [2]: https://en.wikipedia.org/wiki/Pinyin
