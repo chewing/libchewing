@@ -152,20 +152,15 @@ C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
 Now you have the build environment for libchewing. You can follow the installation
 steps to build with cmake.
 
-## Build on OS X
+## Build on macOS
 
-To build libchewing on OS X, you will need tools listed in the requirement.
-Since OS X does not ship with those tools, building those tools from source
-could be a tricky task.
+To build libchewing on macOS, you will need tools listed in the requirements.
+Since macOS does not ship with these tools, building them from source can be
+a tricky task.
 
-A simple way to install those tools is by using Homebrew, a package manager
-for OS X. You can learn more about Homebrew or see the installation
-instruction from
-
-http://brew.sh
-
-Once Homebrew is installed, run the following commands to install the tools
-you need:
+A simple way to install these tools is through [Homebrew](https://brew.sh/),
+a package manager for macOS. Once Homebrew is installed, run the following
+commands to install the tools you need:
 
     brew install cmake
     brew install rustup
@@ -174,7 +169,7 @@ you need:
 
 ### cmake
 
-Because OS X uses an older version of `makeinfo`, you have to set MAKEINFO
+Because macOS uses an older version of `makeinfo`, you have to set MAKEINFO
 manually to where Homebrew installed makeinfo. For example:
 
         # cmake -DMAKEINFO=/usr/local/Cellar/texinfo/5.2/bin/makeinfo .
