@@ -6,41 +6,52 @@ use crate::{
     editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},
 };
 
-/// Indicates chewing will translate keystrokes to Chinese characters
+/// Indicates chewing will translate keystrokes to Chinese characters.
 pub const CHINESE_MODE: c_int = 1;
-/// Indicates the input mode is translating keystrokes to symbols
+/// Indicates the input mode is translating keystrokes to symbols.
 pub const SYMBOL_MODE: c_int = 0;
-/// Indicates chewing will translate latin and puctuation characters to double-with characters
+/// Indicates chewing will translate latin and puctuation characters to
+/// double-with characters.
 pub const FULLSHAPE_MODE: c_int = 1;
-/// Indicates chewing will not translate latin and puctuation characters
+/// Indicates chewing will not translate latin and puctuation characters.
 pub const HALFSHAPE_MODE: c_int = 0;
-/// Indicates automatic user phrase learning is disabled
+/// Indicates automatic user phrase learning is disabled.
 pub const AUTOLEARN_DISABLED: usize = 1;
-/// Indicates automatic user phrase learning is enabled
+/// Indicates automatic user phrase learning is enabled.
 pub const AUTOLEARN_ENABLED: usize = 0;
+/// The minimal size of pre-edit buffer.
+pub const MIN_CHI_SYMBOL_LEN: usize = 0;
+/// The maximum size of pre-edit buffer.
+pub const MAX_CHI_SYMBOL_LEN: usize = MAX_PHONE_SEQ_LEN - MAX_PHRASE_LEN;
+/// The size of internal buffer for pre-edit buffer.
+pub const MAX_PHONE_SEQ_LEN: usize = 50;
+/// The maximum phrase size.
+pub const MAX_PHRASE_LEN: usize = 11;
 
-/// The number of minimum candidates that are selectable via shortcut keys
+/// The number of minimum candidates that are selectable via shortcut keys.
 pub const MIN_SELKEY: usize = 1;
-/// The number of maximum candidates that are selectable via shortcut keys
+/// The number of maximum candidates that are selectable via shortcut keys.
 pub const MAX_SELKEY: usize = 10;
 
-/// Log level
+/// Log level.
 pub const CHEWING_LOG_VERBOSE: usize = 1;
-/// Log level
+/// Log level.
 pub const CHEWING_LOG_DEBUG: usize = 2;
-/// Log level
+/// Log level.
 pub const CHEWING_LOG_INFO: usize = 3;
-/// Log level
+/// Log level.
 pub const CHEWING_LOG_WARN: usize = 4;
-/// Log level
+/// Log level.
 pub const CHEWING_LOG_ERROR: usize = 5;
 
-/// Use "asdfjkl789" as selection key
+/// Use "asdfjkl789" as selection key.
+#[deprecated]
 pub const HSU_SELKEY_TYPE1: usize = 1;
-/// Use "asdfzxcv89" as selection key
+/// Use "asdfzxcv89" as selection key.
+#[deprecated]
 pub const HSU_SELKEY_TYPE2: usize = 2;
 
-/// Configuration for chewing runtime features
+/// Configuration for chewing runtime features.
 ///
 /// Deprecated, use chewing_set_ series of functions to set parameters instead.
 ///
@@ -69,7 +80,7 @@ pub struct IntervalType {
     pub to: c_int,
 }
 
-/// Keyboard layout index
+/// Keyboard layout index.
 ///
 /// cbindgen:prefix-with-name
 /// cbindgen:enum-trailing-values=[TypeNum]
@@ -91,7 +102,7 @@ pub enum KB {
     Carpalx,
 }
 
-/// Opaque context handle used for chewing APIs
+/// Opaque context handle used for chewing APIs.
 ///
 /// cbindgen:rename-all=None
 pub struct ChewingContext {

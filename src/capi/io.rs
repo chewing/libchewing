@@ -1546,6 +1546,7 @@ pub extern "C" fn chewing_cursor_Current(ctx: *const ChewingContext) -> c_int {
     ctx.editor.cursor() as c_int
 }
 
+#[deprecated(note = "The chewing_cand_TotalPage function could achieve the same effect.")]
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c_int {
