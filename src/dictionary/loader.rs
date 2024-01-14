@@ -78,9 +78,7 @@ impl UserDictionaryLoader {
             userphrase_path()?
         };
 
-        db_loaders
-            .iter()
-            .find_map(|loader| loader.open_read_only(&data_path))
+        db_loaders.iter().find_map(|loader| loader.open(&data_path))
     }
 }
 
@@ -124,9 +122,7 @@ impl DictionaryLoader for LoaderWrapper<TrieDictionary> {
     }
 
     fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        TrieDictionary::open(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
+        self.open(path)
     }
 }
 
@@ -138,8 +134,6 @@ impl DictionaryLoader for LoaderWrapper<CdbDictionary> {
     }
 
     fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        CdbDictionary::open(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
+        self.open(path)
     }
 }
