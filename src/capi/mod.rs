@@ -1,5 +1,6 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(unsafe_code)]
+#![allow(deprecated)]
 
 //! C compatible APIs.
 //!

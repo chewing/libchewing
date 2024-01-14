@@ -1,4 +1,4 @@
-use std::{ffi::c_int, iter::Peekable};
+use std::{ffi::c_int, fmt::Debug, iter::Peekable};
 
 use crate::{
     conversion::{ChewingEngine, Interval},
@@ -58,6 +58,7 @@ pub const HSU_SELKEY_TYPE2: usize = 2;
 /// cbindgen:rename-all=CamelCase
 #[repr(C)]
 #[deprecated]
+#[derive(Debug)]
 pub struct ChewingConfigData {
     pub cand_per_page: c_int,
     pub max_chi_symbol_len: c_int,
@@ -73,6 +74,7 @@ pub struct ChewingConfigData {
 
 /// Specifies the interval of a phrase segment in the pre-editng area
 #[repr(C)]
+#[derive(Debug)]
 pub struct IntervalType {
     /// Starting position of certain interval
     pub from: c_int,
@@ -116,5 +118,21 @@ pub struct ChewingContext {
     pub(crate) sel_keys: SelKeys,
 }
 
+impl Debug for ChewingContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ChewingContext")
+            .field("kb_compat", &self.kb_compat)
+            .field("keyboard", &self.keyboard)
+            .field("editor", &self.editor)
+            .field("kbcompat_iter.is_some()", &self.kbcompat_iter.is_some())
+            .field("cand_iter.is_some()", &self.cand_iter.is_some())
+            .field("interval_iter.is_some()", &self.interval_iter.is_some())
+            .field("userphrase_iter.is_some()", &self.userphrase_iter.is_some())
+            .field("sel_keys", &self.sel_keys)
+            .finish_non_exhaustive()
+    }
+}
+
 #[repr(C)]
+#[derive(Debug)]
 pub(crate) struct SelKeys(pub(crate) [c_int; MAX_SELKEY]);
