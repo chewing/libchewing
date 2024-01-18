@@ -1,7 +1,7 @@
-//! TODO: doc
+//! Abstract input method editors.
 
 mod abbrev;
-pub mod composition_editor;
+mod composition_editor;
 mod estimate;
 pub mod keyboard;
 mod selection;
@@ -13,14 +13,14 @@ use std::{
 };
 
 pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
-pub use syllable::SyllableEditor;
 use tracing::{debug, trace, warn};
 
 use crate::{
     conversion::{
-        full_width_symbol_input, special_symbol_input, ConversionEngine, Interval, Symbol,
+        full_width_symbol_input, special_symbol_input, ChewingEngine, ConversionEngine, Interval,
+        Symbol,
     },
-    dictionary::{Dictionary, LayeredDictionary},
+    dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
 };
@@ -33,7 +33,7 @@ use self::{
         phrase::PhraseSelector,
         symbol::{SpecialSymbolSelector, SymbolSelector},
     },
-    syllable::{KeyBehavior, Standard},
+    syllable::{KeyBehavior, Standard, SyllableEditor},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -107,10 +107,7 @@ pub enum EditorKeyBehavior {
 }
 
 #[derive(Debug)]
-pub struct Editor<C>
-where
-    C: ConversionEngine<LayeredDictionary>,
-{
+pub struct Editor<C> {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
     conv: C,
@@ -124,6 +121,18 @@ where
     nth_conversion: usize,
     commit_buffer: String,
     notice_buffer: String,
+}
+
+impl Editor<ChewingEngine> {
+    pub fn chewing() -> Result<Editor<ChewingEngine>, Box<dyn std::error::Error>> {
+        let system_dict = SystemDictionaryLoader::new().load()?;
+        let user_dict = UserDictionaryLoader::new().load()?;
+        let estimate = LaxUserFreqEstimate::open(user_dict.as_ref())?;
+        let dict = LayeredDictionary::new(system_dict, user_dict);
+        let conversion_engine = ChewingEngine::new();
+        let editor = Editor::new(conversion_engine, dict, estimate);
+        Ok(editor)
+    }
 }
 
 impl<C> Editor<C>

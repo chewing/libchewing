@@ -1,4 +1,4 @@
-//! Dictionaries for looking up phrases.
+//! Systems and user phrase dictionaries.
 
 use std::{
     any::Any,

@@ -1,4 +1,4 @@
-//! TODO: docs
+//! Algorithms to convert syllables to Chinese characters.
 
 mod chewing;
 mod symbol;

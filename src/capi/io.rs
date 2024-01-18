@@ -22,9 +22,10 @@ use crate::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
+            SyllableEditor,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        LaxUserFreqEstimate, SyllableEditor, UserPhraseAddDirection,
+        LaxUserFreqEstimate, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };

@@ -22,7 +22,7 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(path.into());
         self
     }
-    pub fn load(self) -> Option<Vec<Box<dyn Dictionary>>> {
+    pub fn load(self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
         let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
         #[cfg(feature = "sqlite")]
         {
@@ -35,7 +35,8 @@ impl SystemDictionaryLoader {
         } else {
             sys_path_from_env_var()
         };
-        let sys_path = find_path_by_files(&search_path, &["tsi.dat", "word.dat"])?;
+        let sys_path = find_path_by_files(&search_path, &["tsi.dat", "word.dat"])
+            .ok_or("SystemDictionaryNotFound")?;
 
         let tsi_db_path = sys_path.join("tsi.dat");
         let tsi_db = db_loaders
@@ -47,7 +48,7 @@ impl SystemDictionaryLoader {
             .iter()
             .find_map(|loader| loader.open_read_only(&word_db_path));
 
-        Some(vec![word_db.unwrap(), tsi_db.unwrap()])
+        Ok(vec![word_db.unwrap(), tsi_db.unwrap()])
     }
 }
 
@@ -64,7 +65,7 @@ impl UserDictionaryLoader {
         self.data_path = Some(path.as_ref().to_path_buf());
         self
     }
-    pub fn load(self) -> Option<Box<dyn Dictionary>> {
+    pub fn load(self) -> Result<Box<dyn Dictionary>, &'static str> {
         let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
         #[cfg(feature = "sqlite")]
         {
@@ -75,10 +76,13 @@ impl UserDictionaryLoader {
         let data_path = if let Some(data_path) = self.data_path {
             data_path
         } else {
-            userphrase_path()?
+            userphrase_path().ok_or("UserDictionaryNotFound")?
         };
 
-        db_loaders.iter().find_map(|loader| loader.open(&data_path))
+        db_loaders
+            .iter()
+            .find_map(|loader| loader.open(&data_path))
+            .ok_or("ErrorOpenUserDictionary")
     }
 }
 

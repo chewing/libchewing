@@ -50,4 +50,4 @@ panic = "abort"
 
 [package.metadata.docs.rs]
 features = ["capi", "sqlite"]
-rustdoc-args = ["-Zunstable-options", "--sort-modules-by-appearance"]
+# rustdoc-args = ["-Zunstable-options", "--sort-modules-by-appearance"]
