@@ -1,4 +1,4 @@
-//! TODO: docs
+//! Chinese syllables and bopomofo phonetic symbols.
 
 mod bopomofo;
 mod syllable;

@@ -6,7 +6,7 @@ use crate::conversion::{Break, Composition, Glue, Interval, Symbol};
 
 /// TODO
 #[derive(Debug, Default, Clone)]
-pub struct CompositionEditor {
+pub(crate) struct CompositionEditor {
     /// TODO
     cursor: usize,
     cursor_stack: Vec<usize>,

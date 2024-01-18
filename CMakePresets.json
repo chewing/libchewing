@@ -6,6 +6,14 @@
     },
     "configurePresets": [
         {
+            "name": "default",
+            "displayName": "Default (Release)",
+            "description": "Default preset for release build",
+            "inherits": [
+                "c99-release"
+            ]
+        },
+        {
             "name": "coverage-base",
             "displayName": "Enable Coverage",
             "description": "Using compilers: C = /usr/bin/clang, CXX = /usr/bin/clang++",
@@ -89,6 +97,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "BUILD_INFO": true,
                 "WITH_RUST": false,
                 "WITH_SQLITE3": true
             }
@@ -144,6 +153,12 @@
                 "c99-with-uhash",
                 "coverage-base"
             ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
         }
     ]
 }

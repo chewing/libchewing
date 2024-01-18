@@ -12,12 +12,9 @@ use std::{
 use tracing::{debug, warn};
 
 use crate::{
-    capi::{
-        public::{
-            ChewingConfigData, IntervalType, CHINESE_MODE, FULLSHAPE_MODE, HALFSHAPE_MODE,
-            MAX_SELKEY, SYMBOL_MODE,
-        },
-        types::{ChewingContext, SelKeys},
+    capi::public::{
+        ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
+        HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
     },
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
@@ -25,9 +22,10 @@ use crate::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
+            SyllableEditor,
         },
         BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        LaxUserFreqEstimate, SyllableEditor, UserPhraseAddDirection,
+        LaxUserFreqEstimate, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -135,8 +133,8 @@ pub extern "C" fn chewing_new2(
         SystemDictionaryLoader::new().sys_path(search_path).load()
     };
     let dictionaries = match dictionaries {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
     let user_dictionary = if userpath.is_null() {
         UserDictionaryLoader::new().load()
@@ -149,8 +147,8 @@ pub extern "C" fn chewing_new2(
             .load()
     };
     let user_dictionary = match user_dictionary {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
 
     let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
@@ -1549,6 +1547,7 @@ pub extern "C" fn chewing_cursor_Current(ctx: *const ChewingContext) -> c_int {
     ctx.editor.cursor() as c_int
 }
 
+#[deprecated(note = "The chewing_cand_TotalPage function could achieve the same effect.")]
 #[tracing::instrument(skip(ctx), ret)]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c_int {

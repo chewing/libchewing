@@ -640,8 +640,8 @@ This function checks if the candidates selection has finished.
 @section Candidates Behavior
 
 @deftypefun void chewing_set_candPerPage (ChewingContext *@var{ctx}, int @var{n})
-This function sets the candidates per page to @var{n}. If MIN_SELKEY @leq{}
-@var{n} @leq{} @code{MAX_SELKEY} is not true or the number of selection keys is
+This function sets the candidates per page to @var{n}. If MIN_SELKEY <=
+@var{n} <= @code{MAX_SELKEY} is not true or the number of selection keys is
 not enough, the @var{n} will be ignored. The default candidates per page is
 @code{MAX_SELKEY}.
 @end deftypefun
@@ -714,7 +714,7 @@ This function closes the candidate windows. It returns @code{0} when success,
 @deftypefun const char* chewing_cand_string_by_index_static (ChewingContext *@var{ctx}, int
 @var{index})
 This function returns the candidate string by its index. The range of
-@var{index} shall be @code{0} @leq{} @var{index} <
+@var{index} shall be @code{0} <= @var{index} <
 @code{chewing_cand_TotalChoice}. This function returns @code{NULL} when no
 memory.
 
@@ -725,7 +725,7 @@ be freed by the next time be used.
 @deftypefun int chewing_cand_choose_by_index (ChewingContext *@var{ctx}, int
 @var{index})
 This function chooses the candidate by its index. The range of @var{index}
-shall be @code{0} @leq{} @var{index} < @code{chewing_cand_TotalChoice}. This
+shall be @code{0} <= @var{index} < @code{chewing_cand_TotalChoice}. This
 function returns @code{0} when success, @code{-1} otherwise.
 @end deftypefun
 
