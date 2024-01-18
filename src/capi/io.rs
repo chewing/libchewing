@@ -133,8 +133,8 @@ pub extern "C" fn chewing_new2(
         SystemDictionaryLoader::new().sys_path(search_path).load()
     };
     let dictionaries = match dictionaries {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
     let user_dictionary = if userpath.is_null() {
         UserDictionaryLoader::new().load()
@@ -147,8 +147,8 @@ pub extern "C" fn chewing_new2(
             .load()
     };
     let user_dictionary = match user_dictionary {
-        Some(d) => d,
-        None => return null_mut(),
+        Ok(d) => d,
+        Err(_) => return null_mut(),
     };
 
     let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
