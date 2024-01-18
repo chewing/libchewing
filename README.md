@@ -105,19 +105,18 @@ be built.
 + Build tools:
    - cmake >= 3.21.0
 + Toolchain / IDE:
-   - clang >= 3.2
-   - gcc >= 4.6.3
+   - clang >= 3.2 OR gcc >= 4.6.3
    - Rust >= 1.70
-   - Visual Studio Express 2012
+   - Visual Studio Express 2012 for MSVC build
 + Documentation tools:
-   - texinfo >= 4.12
+   - texinfo >= 4.8
 
 
-## Installation
+## Build and Installation
 
-    cmake --preset c99-release
-    cmake --build out/build/c99-release
-    cmake --install out/build/c99-release --prefix /usr
+    cmake --preset default --install-prefix /usr
+    cmake --build --preset default
+    cmake --build --preset default -t install
 
 For macOS:
 
@@ -131,8 +130,8 @@ Define a [cmake-toolchains][] file to cross-compile.
 
 Example cross-build instructions:
 
-    cmake --preset c99-release --toolchain arm-none-linux-gnueabi.cmake
-    cmake --build out/build/c99-release
+    cmake --preset default --toolchain arm-none-linux-gnueabi.cmake
+    cmake --build --preset default
 
 [cmake-toolchains]: https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
 
@@ -166,20 +165,7 @@ commands to install the tools you need:
 
     brew install cmake
     brew install rustup
-    brew install texinfo
-
-
-### cmake
-
-Because macOS uses an older version of `makeinfo`, you have to set MAKEINFO
-manually to where Homebrew installed makeinfo. For example:
-
-        # cmake -DMAKEINFO=/usr/local/Cellar/texinfo/5.2/bin/makeinfo .
-
-then
-
-        # make
-
+    rustup default stable
 
 ## Usage
 
