@@ -91,6 +91,9 @@ jobs:
           cmake --build out/build/${{ matrix.preset }} --verbose
 
       - name: Test
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort
         run: |
           cargo test
           ctest --test-dir out/build/${{ matrix.preset }} --verbose
