@@ -4,7 +4,7 @@
 	     | (__| | | |  __/\ V  V /| | | | | (_| |
 	      \___|_| |_|\___| \_/\_/ |_|_| |_|\__, |
 	                                       |___/
-	               http://chewing.im/
+	               https://chewing.im/
 
 # libchewing - The intelligent phonetic input method library
 
@@ -16,7 +16,7 @@ Going). The Chewing developer maintains the project as a fully open-source
 effort, positioning it as a leading libre intelligent phonetic solution among
 major operating environments.
 
-+ Website: <http://chewing.im/>
++ Website: <https://chewing.im/>
 + Issue tracker: <https://github.com/chewing/libchewing/issues>
 + Mailing lists:
    - Development: <https://groups.google.com/group/chewing-devel>
