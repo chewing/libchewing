@@ -308,11 +308,9 @@ various input method frameworks as well.
 
 ## License
 
-All source code are licensed under GNU LGPL v2.1 (Lesser General Public License
-v2.1). See "COPYING" for details.
-
 Except for the following source code, all other source code is licensed under
-the GNU LGPL v2.1 (Lesser General Public License v2.1). See "COPYING" for details:
+the GNU LGPL v2.1 (Lesser General Public License v2.1), or (at your option) any
+later version. See "COPYING" for details:
 * The directory "thirdparty/sqlite-amalgamation" contains the SQLite3 source,
   which is in the public domain. For more information, see <https://www.sqlite.org/copyright.html>.
 * The file "cmake/FindCurses.cmake" is modified from the CMake source and is
