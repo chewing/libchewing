@@ -664,7 +664,7 @@ int BopomofoRemoveLast(BopomofoData *pBopomofo)
 {
     int i;
 
-    if (pBopomofo->kbtype >= KB_HANYU_PINYIN) {
+    if (BopomofoKbIsPinyin(pBopomofo)) {
         i = strlen(pBopomofo->pinYinData.keySeq);
         pBopomofo->pinYinData.keySeq[i - 1] = '\0';
     } else {
@@ -690,7 +690,7 @@ int BopomofoIsEntering(BopomofoData *pBopomofo)
 {
     int i;
 
-    if (pBopomofo->kbtype >= KB_HANYU_PINYIN) {
+    if (BopomofoKbIsPinyin(pBopomofo)) {
         if (pBopomofo->pinYinData.keySeq[0])
             return 1;
     } else {
