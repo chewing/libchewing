@@ -244,6 +244,14 @@ pub extern "C" fn chewing_set_KBType(ctx: *mut ChewingContext, kbtype: c_int) ->
         KB::ThlPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::thl())),
         KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
         KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+        KB::ColemakDhAnsi => (
+            AnyKeyboardLayout::colemak_dh_ansi(),
+            Box::new(Standard::new()),
+        ),
+        KB::ColemakDhOrth => (
+            AnyKeyboardLayout::colemak_dh_orth(),
+            Box::new(Standard::new()),
+        ),
     };
     ctx.kb_compat = kb_compat;
     ctx.keyboard = keyboard;
