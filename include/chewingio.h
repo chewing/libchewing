@@ -557,6 +557,10 @@ CHEWING_API int chewing_userphrase_get(ChewingContext *ctx,
                                        char *phrase_buf, unsigned int phrase_len,
                                        char *bopomofo_buf, unsigned int bopomofo_len);
 
+CHEWING_API int chewing_userphrase_get_freq(ChewingContext *ctx,
+                                       const char phrase_buf[], const char bopomofo_buf[],
+                                       unsigned int *orig_freq, unsigned int *max_freq, unsigned int *user_freq, unsigned int *time);
+
 CHEWING_API int chewing_userphrase_add(ChewingContext *ctx, const char *phrase_buf, const char *bopomofo_buf);
 
 CHEWING_API int chewing_userphrase_remove(ChewingContext *ctx, const char *phrase_buf, const char *bopomofo_buf);
