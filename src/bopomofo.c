@@ -721,3 +721,15 @@ int BopomofoKbType(BopomofoData *pBopomofo)
 {
     return pBopomofo->kbtype;
 }
+
+int BopomofoKbIsPinyin(BopomofoData *pBopomofo)
+{
+	switch (BopomofoKbType(pBopomofo)) {
+		case KB_HANYU_PINYIN:
+		case KB_THL_PINYIN:
+		case KB_MPS2_PINYIN:
+			return 1;
+		default:
+			return 0;
+	}
+}

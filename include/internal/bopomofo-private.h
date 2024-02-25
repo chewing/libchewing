@@ -52,6 +52,7 @@ int BopomofoKeyseq(BopomofoData *, char key_seq[10]);
 int BopomofoSyllableIndex(BopomofoData *);
 int BopomofoSyllableIndexAlt(BopomofoData *);
 int BopomofoKbType(BopomofoData *);
+int BopomofoKbIsPinyin(BopomofoData *);
 
 /* *INDENT-OFF* */
 #endif
