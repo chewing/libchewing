@@ -74,6 +74,10 @@ pub enum KeyboardLayoutCompat {
     Mps2Pinyin,
     /// TODO: docs
     Carpalx,
+    /// TODO: docs
+    ColemakDhAnsi,
+    /// TODO: docs
+    ColemakDhOrth,
 }
 
 impl FromStr for KeyboardLayoutCompat {
@@ -94,6 +98,8 @@ impl FromStr for KeyboardLayoutCompat {
             "KB_THL_PINYIN" => Self::ThlPinyin,
             "KB_MPS2_PINYIN" => Self::Mps2Pinyin,
             "KB_CARPALX" => Self::Carpalx,
+            "KB_COLEMAK_DH_ANSI" => Self::ColemakDhAnsi,
+            "KB_COLEMAK_DH_ORTH" => Self::ColemakDhOrth,
             _ => todo!("handle error"),
         };
         Ok(layout)
@@ -116,6 +122,8 @@ impl Display for KeyboardLayoutCompat {
             KeyboardLayoutCompat::ThlPinyin => f.write_str("KB_THL_PINYIN"),
             KeyboardLayoutCompat::Mps2Pinyin => f.write_str("KB_MPS2_PINYIN"),
             KeyboardLayoutCompat::Carpalx => f.write_str("KB_CARPALX"),
+            KeyboardLayoutCompat::ColemakDhAnsi => f.write_str("KB_COLEMAK_DH_ANSI"),
+            KeyboardLayoutCompat::ColemakDhOrth => f.write_str("KB_COLEMAK_DH_ORTH"),
         }
     }
 }
@@ -138,6 +146,8 @@ impl TryFrom<u8> for KeyboardLayoutCompat {
             10 => Self::ThlPinyin,
             11 => Self::Mps2Pinyin,
             12 => Self::Carpalx,
+            13 => Self::ColemakDhAnsi,
+            14 => Self::ColemakDhOrth,
             _ => return Err(()),
         })
     }
