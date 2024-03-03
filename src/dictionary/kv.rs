@@ -81,6 +81,14 @@ where
         }
     }
 
+    pub(crate) fn from_raw_parts(store: T, other: KVDictionary<()>) -> KVDictionary<T> {
+        KVDictionary {
+            store: Some(store),
+            btree: other.btree,
+            graveyard: other.graveyard,
+        }
+    }
+
     pub(crate) fn take(&mut self) -> Option<T> {
         self.store.take()
     }

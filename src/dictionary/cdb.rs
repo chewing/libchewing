@@ -238,18 +238,17 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        // let mut maker = CDBMake::new(File::create(path)?)?;
-        // maker.add(b"INFO", &[])?;
-        // maker.finish()?;
-        // let cdb = CDB::open(path)?;
-        // let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
-        // let inner = inner.take(cdb);
-        // let mut dict = CdbDictionary {
-        //     path: path.to_path_buf(),
-        //     inner,
-        //     info: self.info.clone(),
-        // };
-        // dict.flush()?;
+        let mut maker = CDBMake::new(File::create(path)?)?;
+        maker.add(b"INFO", &[])?;
+        maker.finish()?;
+        let cdb = CDB::open(path)?;
+        let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
+        let mut dict = CdbDictionary {
+            path: path.to_path_buf(),
+            inner: KVDictionary::from_raw_parts(cdb, inner),
+            info: self.info.clone(),
+        };
+        dict.flush()?;
         Ok(())
     }
 }
