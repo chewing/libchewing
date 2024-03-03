@@ -16,7 +16,7 @@ set(ALL_TESTCASES
     test-userphrase
     test-utf8
 )
-if (NOT WITH_RUST)
+if(NOT WITH_RUST)
     list(APPEND ALL_TESTCASES
         test-key2pho
         test-mmap

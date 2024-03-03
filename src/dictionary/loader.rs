@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsStr,
     marker::PhantomData,
     path::{Path, PathBuf},
 };
@@ -8,6 +9,12 @@ use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
 use super::{CdbDictionary, Dictionary, TrieDictionary};
+
+const SD_WORD_FILE_NAME: &str = "word.dat";
+const SD_TSI_FILE_NAME: &str = "tsi.dat";
+const UD_UHASH_FILE_NAME: &str = "uhash.dat";
+const UD_SQLITE_FILE_NAME: &str = "chewing.sqlite";
+const UD_CDB_FILE_NAME: &str = "chewing.cdb";
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -35,20 +42,20 @@ impl SystemDictionaryLoader {
         } else {
             sys_path_from_env_var()
         };
-        let sys_path = find_path_by_files(&search_path, &["tsi.dat", "word.dat"])
+        let sys_path = find_path_by_files(&search_path, &[SD_WORD_FILE_NAME, SD_TSI_FILE_NAME])
             .ok_or("SystemDictionaryNotFound")?;
 
-        let tsi_db_path = sys_path.join("tsi.dat");
-        let tsi_db = db_loaders
+        let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
+        let tsi_dict = db_loaders
             .iter()
-            .find_map(|loader| loader.open_read_only(&tsi_db_path));
+            .find_map(|loader| loader.open_read_only(&tsi_dict_path));
 
-        let word_db_path = sys_path.join("word.dat");
-        let word_db = db_loaders
+        let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
+        let word_dict = db_loaders
             .iter()
-            .find_map(|loader| loader.open_read_only(&word_db_path));
+            .find_map(|loader| loader.open_read_only(&word_dict_path));
 
-        Ok(vec![word_db.unwrap(), tsi_db.unwrap()])
+        Ok(vec![word_dict.unwrap(), tsi_dict.unwrap()])
     }
 }
 
@@ -66,23 +73,47 @@ impl UserDictionaryLoader {
         self
     }
     pub fn load(self) -> Result<Box<dyn Dictionary>, &'static str> {
-        let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
+        let data_path = self
+            .data_path
+            .or_else(userphrase_path)
+            .ok_or("UserDictionaryNotFound")?;
+        if data_path.exists() {
+            return guess_format_and_load(data_path);
+        }
+        init_user_dictionary(data_path)
+    }
+}
+
+fn guess_format_and_load(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
+    let metadata = dict_path
+        .metadata()
+        .map_err(|_| "ReadUserDictionaryError")?;
+    if metadata.permissions().readonly() {
+        return Err("ReadonlyUserDictionaryError");
+    }
+
+    init_user_dictionary(dict_path)
+}
+
+fn init_user_dictionary(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
+    let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
+    if ext.eq_ignore_ascii_case("sqlite") {
         #[cfg(feature = "sqlite")]
         {
-            db_loaders.push(LoaderWrapper::<SqliteDictionary>::new());
+            SqliteDictionary::open(dict_path)
+                .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
+                .map_err(|_| "ReadUserDictionaryError")
         }
-        db_loaders.push(LoaderWrapper::<CdbDictionary>::new());
-
-        let data_path = if let Some(data_path) = self.data_path {
-            data_path
-        } else {
-            userphrase_path().ok_or("UserDictionaryNotFound")?
-        };
-
-        db_loaders
-            .iter()
-            .find_map(|loader| loader.open(&data_path))
-            .ok_or("ErrorOpenUserDictionary")
+        #[cfg(not(feature = "sqlite"))]
+        {
+            Err("UnsupportedUserDictionaryFormat")
+        }
+    } else if ext.eq_ignore_ascii_case("cdb") {
+        CdbDictionary::open(dict_path)
+            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
+            .map_err(|_| "ReadUserDictionaryError")
+    } else {
+        Err("UnknownUserDictionaryError")
     }
 }
 
