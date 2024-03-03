@@ -97,7 +97,7 @@ fn guess_format_and_load(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'st
 
 fn init_user_dictionary(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
     let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
-    if ext.eq_ignore_ascii_case("sqlite") {
+    if ext.eq_ignore_ascii_case("sqlite3") {
         #[cfg(feature = "sqlite")]
         {
             SqliteDictionary::open(dict_path)
