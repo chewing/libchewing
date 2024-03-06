@@ -57,3 +57,28 @@ fn explicit_load_chewing_cdb() -> Result<(), Box<dyn Error>> {
     chewing_delete(ctx);
     Ok(())
 }
+
+#[cfg(feature = "sqlite")]
+#[test]
+fn explicit_load_chewing_sqlite3() -> Result<(), Box<dyn Error>> {
+    let syspath = syspath()?;
+    let (tmpdir, userpath) = tempdir_and_file("chewing.sqlite3")?;
+    let chewing_cdb = golden_data_path("golden-chewing.sqlite3");
+    fs::copy(chewing_cdb, tmpdir.path().join("chewing.sqlite3"))?;
+
+    let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
+    assert!(!ctx.is_null());
+
+    chewing_handle_Default(ctx, b'h' as c_int);
+    chewing_handle_Default(ctx, b'k' as c_int);
+    chewing_handle_Default(ctx, b'4' as c_int);
+    chewing_handle_Default(ctx, b'g' as c_int);
+    chewing_handle_Default(ctx, b'4' as c_int);
+
+    let preedit = chewing_buffer_String(ctx);
+    let preedit = unsafe { CStr::from_ptr(preedit) };
+    assert_eq!(preedit, CString::new("策試")?.as_c_str());
+
+    chewing_delete(ctx);
+    Ok(())
+}
