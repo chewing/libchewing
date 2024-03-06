@@ -17,6 +17,7 @@ use super::{
     DictionaryUpdateError, Phrase,
 };
 
+#[derive(Debug)]
 pub struct CdbDictionary {
     path: PathBuf,
     inner: KVDictionary<CDB>,
@@ -31,14 +32,6 @@ pub struct CdbDictionaryError {
 }
 
 type Error = CdbDictionaryError;
-
-impl Debug for CdbDictionary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CdbDictionary")
-            .field("inner", &"CDB { /* opaque */ }")
-            .finish()
-    }
-}
 
 impl From<CdbDictionaryError> for DictionaryUpdateError {
     fn from(value: CdbDictionaryError) -> Self {

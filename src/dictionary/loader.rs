@@ -1,5 +1,7 @@
 use std::{
     ffi::OsStr,
+    fs::File,
+    io::Seek,
     marker::PhantomData,
     path::{Path, PathBuf},
 };
@@ -8,7 +10,7 @@ use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{CdbDictionary, Dictionary, TrieDictionary};
+use super::{uhash, CdbDictionary, Dictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
@@ -78,13 +80,51 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or("UserDictionaryNotFound")?;
         if data_path.exists() {
-            return guess_format_and_load(data_path);
+            return guess_format_and_load(&data_path);
         }
-        init_user_dictionary(data_path)
+        let mut fresh_dict = init_user_dictionary(&data_path)?;
+
+        // FIXME: should use dict.update_phrase to also migrate user_freq
+        let userdata_dir = data_path.parent().expect("path should contain a filename");
+        let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
+        if data_path != cdb_path && cdb_path.exists() {
+            let cdb_dict = CdbDictionary::open(cdb_path).map_err(|_| "ReadUserDictionaryError")?;
+            for (syllables, phrase) in cdb_dict
+                .entries()
+                .expect("CDB dictionary should support entries()")
+            {
+                fresh_dict
+                    .add_phrase(&syllables, phrase)
+                    .map_err(|_| "MigrateUserDictionaryError")?;
+            }
+            fresh_dict
+                .flush()
+                .map_err(|_| "MigrateUserDictionaryError")?;
+        } else {
+            let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
+            if uhash_path.exists() {
+                let mut input = File::open(uhash_path).map_err(|_| "ReadUserDictionaryError")?;
+                if let Ok(phrases) = uhash::try_load_bin(&input).or_else(|_| {
+                    input.rewind()?;
+                    uhash::try_load_text(&input)
+                }) {
+                    for (syllables, phrase) in phrases {
+                        fresh_dict
+                            .add_phrase(&syllables, phrase)
+                            .map_err(|_| "MigrateUserDictionaryError")?;
+                    }
+                    fresh_dict
+                        .flush()
+                        .map_err(|_| "MigrateUserDictionaryError")?;
+                }
+            }
+        }
+
+        Ok(fresh_dict)
     }
 }
 
-fn guess_format_and_load(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
+fn guess_format_and_load(dict_path: &PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
     let metadata = dict_path
         .metadata()
         .map_err(|_| "ReadUserDictionaryError")?;
@@ -92,10 +132,10 @@ fn guess_format_and_load(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'st
         return Err("ReadonlyUserDictionaryError");
     }
 
-    init_user_dictionary(dict_path)
+    init_user_dictionary(&dict_path)
 }
 
-fn init_user_dictionary(dict_path: PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
+fn init_user_dictionary(dict_path: &PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
     let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
     if ext.eq_ignore_ascii_case("sqlite3") {
         #[cfg(feature = "sqlite")]
