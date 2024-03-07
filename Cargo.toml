@@ -43,6 +43,11 @@ tempfile = "3"
 members = ["tools", "xtask"]
 resolver = "2"
 
+[[test]]
+name = "test-user-dictionary"
+path = "tests/test-user-dictionary.rs"
+required-features = ["capi"]
+
 [profile.release]
 lto = true
 debug = true

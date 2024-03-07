@@ -26,17 +26,6 @@ libtool
 /m4/lt*.m4
 include/config.h.in~
 
-# compiling output
-*.dat
-*.exe
-*.la
-*.lo
-*.o
-.deps
-.libs
-
-data/gendata_stamp
-
 include/config.h
 include/config.h.in
 include/stamp-h1

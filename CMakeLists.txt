@@ -161,8 +161,8 @@ set(TOOLS_SRC_DIR ${PROJECT_SOURCE_DIR}/src/tools)
 set(TOOLS_BIN_DIR ${PROJECT_BINARY_DIR}/src/tools)
 set(DATA_SRC_DIR ${PROJECT_SOURCE_DIR}/data)
 set(DATA_BIN_DIR ${PROJECT_BINARY_DIR}/data)
-set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test)
-set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/test)
+set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/tests)
+set(TEST_BIN_DIR ${PROJECT_BINARY_DIR}/tests)
 
 include(GNUInstallDirs)
 
@@ -210,7 +210,7 @@ if(WITH_RUST)
 endif()
 
 add_subdirectory(doc)
-add_subdirectory(test)
+add_subdirectory(tests)
 add_subdirectory(data)
 
 # library

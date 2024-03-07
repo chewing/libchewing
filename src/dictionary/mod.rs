@@ -27,6 +27,7 @@ mod loader;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 mod trie;
+mod uhash;
 
 /// The error type which is returned from updating a dictionary.
 #[derive(Error, Debug)]

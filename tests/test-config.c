@@ -550,7 +550,11 @@ void test_new2_userpath_alternative()
     printf("#\n# %s\n#\n", __func__);
     fprintf(fd, "#\n# %s\n#\n", __func__);
 
+#ifdef WITH_SQLITE
     ctx = chewing_new2(NULL, TEST_HASH_DIR "/test.sqlite3", logger, fd);
+#else
+    ctx = chewing_new2(NULL, TEST_HASH_DIR "/test.cdb", logger, fd);
+#endif
     ok(ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL);
 
     chewing_delete(ctx);

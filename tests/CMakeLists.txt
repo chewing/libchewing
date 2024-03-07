@@ -16,7 +16,7 @@ set(ALL_TESTCASES
     test-userphrase
     test-utf8
 )
-if (NOT WITH_RUST)
+if(NOT WITH_RUST)
     list(APPEND ALL_TESTCASES
         test-key2pho
         test-mmap
@@ -98,3 +98,7 @@ foreach(target ${ALL_STATIC_TEST})
     )
     add_dependencies(check ${target})
 endforeach()
+
+if(WITH_RUST)
+add_test(NAME cargo-test COMMAND cargo test --features capi$<$<BOOL:${WITH_SQLITE3}>:,sqlite>)
+endif()
