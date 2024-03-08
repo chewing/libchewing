@@ -400,10 +400,10 @@ pub trait DictionaryBuilder {
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllables = dbg!(syllables.as_slice().into_owned());
-        let mut phrases = dbg!(self.get(&syllables).cloned().unwrap_or_default());
+        let syllables = syllables.as_slice().into_owned();
+        let mut phrases = self.get(&syllables).cloned().unwrap_or_default();
         phrases.truncate(first);
-        dbg!(phrases)
+        phrases
     }
 
     fn entries(&self) -> Option<DictEntries> {
