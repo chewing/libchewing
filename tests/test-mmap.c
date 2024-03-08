@@ -39,8 +39,7 @@ void test_UnitFromPlatMmap()
     start_testcase(NULL, fd);
 
     idx = plat_mmap_create(&m_mmap, TEST_DATA_DIR PLAT_SEPARATOR "default-test.txt", FLAG_ATTRIBUTE_READ);
-    // On Windows git auto translates LF to CRLF and adds one more byte
-    ok(idx == 28 || idx == 29, "plat_mmap_create");
+    ok(idx == 28, "plat_mmap_create");
     if (idx > 0) {
         csize = idx;
         data_buf = (char *) plat_mmap_set_view(&m_mmap, &offset, &csize);
