@@ -269,3 +269,22 @@ fn env_load_and_migrate_uhash_text_to_cdb() -> Result<(), Box<dyn Error>> {
     chewing_delete(ctx);
     Ok(())
 }
+
+#[test]
+fn env_load_and_create_user_path() -> Result<(), Box<dyn Error>> {
+    use std::ptr::null;
+
+    let syspath = syspath()?;
+    let tmpdir = tempdir()?;
+    let user_path = tmpdir.path().join("chewing");
+
+    let ctx = {
+        let _lock = ENV_LOCK.lock()?;
+        env::set_var("CHEWING_PATH", syspath.to_str()?);
+        env::set_var("CHEWING_USER_PATH", user_path.display().to_string());
+        chewing_new2(null(), null(), None, null_mut())
+    };
+    assert!(!ctx.is_null());
+    chewing_delete(ctx);
+    Ok(())
+}

@@ -1,7 +1,7 @@
 use std::{
     ffi::OsStr,
-    fs::File,
-    io::Seek,
+    fs::{self, File},
+    io::{self, Seek},
     marker::PhantomData,
     path::{Path, PathBuf},
 };
@@ -74,36 +74,40 @@ impl UserDictionaryLoader {
         self.data_path = Some(path.as_ref().to_path_buf());
         self
     }
-    pub fn load(self) -> Result<Box<dyn Dictionary>, &'static str> {
+    pub fn load(self) -> io::Result<Box<dyn Dictionary>> {
         let data_path = self
             .data_path
             .or_else(userphrase_path)
-            .ok_or("UserDictionaryNotFound")?;
+            .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.exists() {
             return guess_format_and_load(&data_path);
+        }
+        let userdata_dir = data_path.parent().expect("path should contain a filename");
+        if !userdata_dir.exists() {
+            fs::create_dir_all(&userdata_dir)?;
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
         // FIXME: should use dict.update_phrase to also migrate user_freq
-        let userdata_dir = data_path.parent().expect("path should contain a filename");
         let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
         if data_path != cdb_path && cdb_path.exists() {
-            let cdb_dict = CdbDictionary::open(cdb_path).map_err(|_| "ReadUserDictionaryError")?;
+            let cdb_dict = CdbDictionary::open(cdb_path)
+                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             for (syllables, phrase) in cdb_dict
                 .entries()
                 .expect("CDB dictionary should support entries()")
             {
                 fresh_dict
                     .add_phrase(&syllables, phrase)
-                    .map_err(|_| "MigrateUserDictionaryError")?;
+                    .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
             fresh_dict
                 .flush()
-                .map_err(|_| "MigrateUserDictionaryError")?;
+                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
         } else {
             let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
             if uhash_path.exists() {
-                let mut input = File::open(uhash_path).map_err(|_| "ReadUserDictionaryError")?;
+                let mut input = File::open(uhash_path)?;
                 if let Ok(phrases) = uhash::try_load_bin(&input).or_else(|_| {
                     input.rewind()?;
                     uhash::try_load_text(&input)
@@ -111,11 +115,11 @@ impl UserDictionaryLoader {
                     for (syllables, phrase) in phrases {
                         fresh_dict
                             .add_phrase(&syllables, phrase)
-                            .map_err(|_| "MigrateUserDictionaryError")?;
+                            .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
                     }
                     fresh_dict
                         .flush()
-                        .map_err(|_| "MigrateUserDictionaryError")?;
+                        .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
                 }
             }
         }
@@ -124,36 +128,34 @@ impl UserDictionaryLoader {
     }
 }
 
-fn guess_format_and_load(dict_path: &PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
-    let metadata = dict_path
-        .metadata()
-        .map_err(|_| "ReadUserDictionaryError")?;
+fn guess_format_and_load(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
+    let metadata = dict_path.metadata()?;
     if metadata.permissions().readonly() {
-        return Err("ReadonlyUserDictionaryError");
+        return Err(io::Error::from(io::ErrorKind::PermissionDenied));
     }
 
     init_user_dictionary(&dict_path)
 }
 
-fn init_user_dictionary(dict_path: &PathBuf) -> Result<Box<dyn Dictionary>, &'static str> {
+fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
     let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
     if ext.eq_ignore_ascii_case("sqlite3") {
         #[cfg(feature = "sqlite")]
         {
             SqliteDictionary::open(dict_path)
                 .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-                .map_err(|_| "ReadUserDictionaryError")
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
         }
         #[cfg(not(feature = "sqlite"))]
         {
-            Err("UnsupportedUserDictionaryFormat")
+            Err(io::Error::from(io::ErrorKind::Unsupported))
         }
     } else if ext.eq_ignore_ascii_case("cdb") {
         CdbDictionary::open(dict_path)
             .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .map_err(|_| "ReadUserDictionaryError")
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
     } else {
-        Err("UnknownUserDictionaryError")
+        Err(io::Error::from(io::ErrorKind::Other))
     }
 }
 
