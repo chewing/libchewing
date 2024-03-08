@@ -30,7 +30,7 @@ set(ALL_TESTTOOLS
     testchewing
 )
 
-if(${CURSES_FOUND})
+if(CURSES_FOUND)
     set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
 endif()
 
@@ -87,7 +87,8 @@ set_target_properties(${ALL_TESTS} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TEST_BIN_DIR}
 )
 
-if (${CURSES_FOUND})
+if (CURSES_FOUND)
+    target_include_directories(genkeystroke PRIVATE ${CURSES_INCLUDE_DIRS})
     target_link_libraries(genkeystroke ${CURSES_LIBRARIES})
 endif()
 
