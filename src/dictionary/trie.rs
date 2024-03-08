@@ -115,6 +115,8 @@ impl<'a> PhraseData<&'a [u8]> {
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// # let tmpdir = tempfile::tempdir()?;
+/// # std::env::set_current_dir(&tmpdir.path())?;
 /// use std::fs::File;
 ///
 /// use chewing::{syl, zhuyin::{Bopomofo, Syllable}};
@@ -403,6 +405,8 @@ impl Dictionary for TrieDictionary {
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// # let tmpdir = tempfile::tempdir()?;
+/// # std::env::set_current_dir(&tmpdir.path())?;
 /// use std::fs::File;
 ///
 /// use chewing::{syl, zhuyin::Bopomofo};
