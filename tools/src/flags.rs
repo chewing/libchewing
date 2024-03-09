@@ -3,7 +3,9 @@ use std::path::PathBuf;
 xflags::xflags! {
     src "src/flags.rs"
 
+    /// Chewing command-line tools.
     cmd chewing-cli {
+        /// Create a new dictionary file suitable for system dictionary.
         cmd init-database {
             /// Choose the underlying database implementation, must be one of 'trie', 'cdb', or 'sqlite'.
             optional -t,--db_type db_type: String
@@ -21,6 +23,13 @@ xflags::xflags! {
             required tsi_src: PathBuf
             /// Path to the output file.
             required output: PathBuf
+        }
+        /// Display information about the dictionary.
+        cmd info {
+            /// Location of the dictionary file.
+            required path: PathBuf
+            /// Output in JSON format.
+            optional -j,--json
         }
     }
 }
@@ -54,6 +63,7 @@ pub struct ChewingCli {
 #[derive(Debug)]
 pub enum ChewingCliCmd {
     InitDatabase(InitDatabase),
+    Info(Info),
 }
 
 #[derive(Debug)]
@@ -67,6 +77,13 @@ pub struct InitDatabase {
     pub license: Option<String>,
     pub version: Option<String>,
     pub keep_word_freq: bool,
+}
+
+#[derive(Debug)]
+pub struct Info {
+    pub path: PathBuf,
+
+    pub json: bool,
 }
 
 impl ChewingCli {
