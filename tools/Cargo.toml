@@ -1,5 +1,5 @@
 [package]
-name = "chewing-tools"
+name = "chewing-cli"
 description = "Tools of the Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
 version = "0.6.0-alpha.1"
@@ -7,9 +7,8 @@ edition = "2021"
 
 [dependencies]
 chewing = { version = "0.6.0-alpha.1", path = "..", features = ["sqlite"] }
-thiserror = "1.0.0"
 anyhow = "1.0.0"
-argh = "0.1.10"
+xflags = "0.3.2"
 
 [target.'cfg(windows)'.dependencies]
 rusqlite = { version = "0.30.0", features = ["bundled"] }

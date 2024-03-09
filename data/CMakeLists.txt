@@ -35,14 +35,14 @@ if(NOT WITH_RUST)
         ${TOOLS_SRC_DIR}/dump_database.c
         $<TARGET_OBJECTS:common>
     )
+    set_target_properties(${ALL_TOOLS} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${TOOLS_BIN_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TOOLS_BIN_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TOOLS_BIN_DIR}
+    )
 endif()
-set_target_properties(${ALL_TOOLS} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TOOLS_BIN_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${TOOLS_BIN_DIR}
-)
 
 # tools command
 file(MAKE_DIRECTORY ${DATA_BIN_DIR})
@@ -53,14 +53,14 @@ if(WITH_RUST)
     add_custom_command(
         OUTPUT
             ${ALL_DATA}
-        COMMAND init_database
+        COMMAND chewing-cli init-database
             -c ${DATA_COPYRIGHT}
             -l ${DATA_LICENSE}
             -r ${DATA_VERSION}
             -t trie
             -n 內建詞庫
             ${DATA_SRC_DIR}/tsi.src tsi.dat
-        COMMAND init_database
+        COMMAND chewing-cli init-database
             -c ${DATA_COPYRIGHT}
             -l ${DATA_LICENSE}
             -r ${DATA_VERSION}
@@ -68,7 +68,7 @@ if(WITH_RUST)
             -n 內建字庫
             ${DATA_SRC_DIR}/word.src word.dat
         DEPENDS
-            ${ALL_TOOLS}
+            chewing-cli
             ${DATA_SRC_DIR}/word.src
             ${DATA_SRC_DIR}/tsi.src
         WORKING_DIRECTORY ${DATA_BIN_DIR}
