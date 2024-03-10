@@ -2,7 +2,7 @@ use std::{
     cmp::min,
     collections::BTreeMap,
     ffi::{c_char, c_int, c_uint, c_ushort, c_void, CStr, CString},
-    iter, mem,
+    mem,
     ptr::{null, null_mut},
     slice, str,
     sync::OnceLock,

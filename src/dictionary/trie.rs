@@ -6,13 +6,12 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
-    iter, mem,
+    iter,
     num::NonZeroUsize,
     path::Path,
     str,
 };
 
-use bytemuck::{bytes_of, cast_slice, from_bytes, pod_read_unaligned, Pod, Zeroable};
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 use thiserror::Error;
 
@@ -37,54 +36,44 @@ const ILIC: ChunkId = ChunkId { value: *b"ILIC" };
 const IREV: ChunkId = ChunkId { value: *b"IREV" };
 const ISFT: ChunkId = ChunkId { value: *b"ISFT" };
 
-#[derive(Pod, Zeroable, Copy, Clone, Debug)]
-#[repr(C)]
-struct TrieNodePod {
-    child_begin_raw: u32,
-    child_len_raw: u16,
-    syllable_raw: u16,
-}
+struct TrieNodeView<'a>(&'a [u8]);
 
-impl TrieNodePod {
-    const SIZE: usize = mem::size_of::<Self>();
+impl TrieNodeView<'_> {
+    const SIZE: usize = 8;
     fn syllable(&self) -> u16 {
-        u16::from_le(self.syllable_raw)
+        u16::from_le_bytes(self.0[6..8].try_into().unwrap())
     }
     fn child_begin(&self) -> usize {
-        u32::from_le(self.child_begin_raw) as usize * Self::SIZE
+        u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize * Self::SIZE
     }
     fn child_end(&self) -> usize {
-        (u32::from_le(self.child_begin_raw) + u16::from_le(self.child_len_raw) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
+            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
             * Self::SIZE
     }
 }
 
-#[derive(Pod, Zeroable, Copy, Clone, Debug)]
-#[repr(C)]
-struct TrieLeafPod {
-    data_begin_raw: u32,
-    data_len_raw: u16,
-    reserved_zero: u16,
-}
+struct TrieLeafView<'a>(&'a [u8]);
 
-impl TrieLeafPod {
-    const SIZE: usize = mem::size_of::<Self>();
+impl TrieLeafView<'_> {
+    const SIZE: usize = 8;
     fn reserved_zero(&self) -> u16 {
-        self.reserved_zero
+        u16::from_le_bytes(self.0[6..8].try_into().unwrap())
     }
     fn data_begin(&self) -> usize {
-        u32::from_le(self.data_begin_raw) as usize
+        u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize
     }
     fn data_end(&self) -> usize {
-        (u32::from_le(self.data_begin_raw) + u16::from_le(self.data_len_raw) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
+            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
     }
 }
 
-struct PhraseData<T>(T);
+struct PhraseData<'a>(&'a [u8]);
 
-impl<'a> PhraseData<&'a [u8]> {
+impl<'a> PhraseData<'a> {
     fn frequency(&self) -> u32 {
-        pod_read_unaligned(&self.0[..4])
+        u32::from_le_bytes(self.0[..4].try_into().unwrap())
     }
     fn phrase_str(&self) -> &'a str {
         let len = self.0[4] as usize;
@@ -328,22 +317,21 @@ impl Iterator for PhrasesIter<'_> {
 
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
+        let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
-            let child_nodes: &[TrieNodePod] =
-                cast_slice(&self.dict[node.child_begin()..node.child_end()]);
-            if let Ok(child) =
-                child_nodes.binary_search_by_key(&syl.to_u16(), TrieNodePod::syllable)
-            {
-                node = &child_nodes[child];
+            let mut child_nodes = self.dict[node.child_begin()..node.child_end()]
+                .chunks_exact(TrieNodeView::SIZE)
+                .map(TrieNodeView);
+            if let Some(n) = child_nodes.find(|n| n.syllable() == syl.to_u16()) {
+                node = n;
                 continue 'next;
             }
             return vec![];
         }
         let leaf_data = &self.dict[node.child_begin()..];
-        let leaf: &TrieLeafPod = from_bytes(&leaf_data[..TrieLeafPod::SIZE]);
+        let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
         if leaf.reserved_zero() != 0 {
             return vec![];
         }
@@ -358,13 +346,13 @@ impl Dictionary for TrieDictionary {
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
-        let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
+        let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         let mut done = false;
         let make_dict_entry =
-            |syllables: &[u16], node: &TrieNodePod| -> (Vec<Syllable>, Vec<Phrase>) {
+            |syllables: &[u16], node: &TrieNodeView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
                 let leaf_data = &self.dict[node.child_begin()..];
-                let leaf: &TrieLeafPod = from_bytes(&leaf_data[..TrieLeafPod::SIZE]);
+                let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
                 debug_assert_eq!(leaf.reserved_zero(), 0);
                 let phrases = PhrasesIter {
                     bytes: &self.data[leaf.data_begin()..leaf.data_end()],
@@ -388,15 +376,15 @@ impl Dictionary for TrieDictionary {
             }
             // descend until find a leaf node which is not also a internal node.
             loop {
-                let child_nodes: &[TrieNodePod] =
-                    cast_slice(&self.dict[node.child_begin()..node.child_end()]);
-                let mut child_iter = child_nodes.into_iter();
+                let mut child_iter = self.dict[node.child_begin()..node.child_end()]
+                    .chunks_exact(TrieNodeView::SIZE)
+                    .map(TrieNodeView);
                 let mut next = child_iter
                     .next()
                     .expect("syllable node should have at least one child node");
                 if next.syllable() == 0 {
                     // found a leaf syllable node
-                    results.push(make_dict_entry(&syllables, node));
+                    results.push(make_dict_entry(&syllables, &node));
                     if let Some(second) = child_iter.next() {
                         next = second;
                     } else {
@@ -885,12 +873,9 @@ impl TrieDictionaryBuilder {
                     let syllable_u16 = node.syllable.map_or(0, |v| v.to_u16());
                     let child_len =
                         node.children.len() + if node.leaf_id.is_some() { 1 } else { 0 };
-                    let trie_node = TrieNodePod {
-                        syllable_raw: syllable_u16.to_le(),
-                        child_begin_raw: (child_begin as u32).to_le(),
-                        child_len_raw: (child_len as u16).to_le(),
-                    };
-                    dict_buf.write_all(bytes_of(&trie_node))?;
+                    dict_buf.write_all(&(child_begin as u32).to_le_bytes())?;
+                    dict_buf.write_all(&(child_len as u16).to_le_bytes())?;
+                    dict_buf.write_all(&syllable_u16.to_le_bytes())?;
                 } else {
                     let data_begin = data_buf.len();
 
@@ -921,12 +906,9 @@ impl TrieDictionaryBuilder {
                     }
 
                     let data_len = data_buf.len() - data_begin;
-                    let trie_leaf = TrieLeafPod {
-                        reserved_zero: 0,
-                        data_begin_raw: (data_begin as u32).to_le(),
-                        data_len_raw: (data_len as u16).to_le(),
-                    };
-                    dict_buf.write_all(bytes_of(&trie_leaf))?;
+                    dict_buf.write_all(&(data_begin as u32).to_le_bytes())?;
+                    dict_buf.write_all(&(data_len as u16).to_le_bytes())?;
+                    dict_buf.write_all(&0u16.to_le_bytes())?;
                 }
 
                 // Sort the children nodes by their syllables. Not really required,

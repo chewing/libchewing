@@ -286,10 +286,10 @@ struct PhraseData<'a>(&'a [u8]);
 
 impl<'a> PhraseData<'a> {
     fn frequency(&self) -> u32 {
-        bytemuck::pod_read_unaligned(&self.0[..4])
+        u32::from_le_bytes(self.0[..4].try_into().unwrap())
     }
     fn last_used(&self) -> u64 {
-        bytemuck::pod_read_unaligned(&self.0[4..12])
+        u64::from_le_bytes(self.0[4..12].try_into().unwrap())
     }
     fn phrase_str(&self) -> &'a str {
         let len = self.0[12] as usize;
