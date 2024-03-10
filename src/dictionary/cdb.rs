@@ -1,6 +1,6 @@
 use std::{
     any::Any,
-    fmt::Debug,
+    fmt::{Debug, Display},
     fs::File,
     io::{self, Write},
     mem,
@@ -8,7 +8,6 @@ use std::{
 };
 
 use cdb2::{CDBKeyValueIter, CDBMake, CDBValueIter, CDBWriter, CDB};
-use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -25,11 +24,21 @@ pub struct CdbDictionary {
     info: DictionaryInfo,
 }
 
-#[derive(Debug, Error)]
-#[error("cdb error")]
+#[derive(Debug)]
 pub struct CdbDictionaryError {
-    #[from]
     source: io::Error,
+}
+
+impl Display for CdbDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "cdb error")
+    }
+}
+
+impl std::error::Error for CdbDictionaryError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.source)
+    }
 }
 
 type Error = CdbDictionaryError;
@@ -47,6 +56,12 @@ impl From<BuildDictionaryError> for CdbDictionaryError {
         CdbDictionaryError {
             source: io::Error::new(io::ErrorKind::Other, value),
         }
+    }
+}
+
+impl From<io::Error> for CdbDictionaryError {
+    fn from(value: io::Error) -> Self {
+        CdbDictionaryError { source: value }
     }
 }
 

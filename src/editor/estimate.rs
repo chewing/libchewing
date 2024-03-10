@@ -1,13 +1,24 @@
-use thiserror::Error;
+use std::{error::Error, fmt::Display};
 
 use crate::dictionary::{Dictionary, Phrase};
 
 /// TODO: doc
 /// TODO: change to enum?
-#[derive(Error, Debug)]
-#[error("update estimate error")]
+#[derive(Debug)]
 pub struct EstimateError {
-    source: Box<dyn std::error::Error>,
+    source: Box<dyn Error>,
+}
+
+impl Display for EstimateError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "update estimate error")
+    }
+}
+
+impl Error for EstimateError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(self.source.as_ref())
+    }
 }
 
 /// TODO: doc

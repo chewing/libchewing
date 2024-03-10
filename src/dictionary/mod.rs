@@ -5,11 +5,10 @@ use std::{
     borrow::Borrow,
     cmp::Ordering,
     collections::HashMap,
+    error::Error,
     fmt::{Debug, Display},
     path::Path,
 };
-
-use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -30,19 +29,31 @@ mod trie;
 mod uhash;
 
 /// The error type which is returned from updating a dictionary.
-#[derive(Error, Debug)]
-#[error("update dictionary failed")]
+#[derive(Debug)]
 pub struct DictionaryUpdateError {
     /// TODO: doc
-    /// TODO: change this to anyhow::Error?
-    #[from]
-    pub source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    pub source: Option<Box<dyn Error + Send + Sync>>,
 }
 
+impl Display for DictionaryUpdateError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "update dictionary failed")
+    }
+}
+
+impl Error for DictionaryUpdateError {}
+
 /// The error type which is returned from building or updating a dictionary.
-#[derive(Error, Debug)]
-#[error("found duplicated phrases")]
+#[derive(Debug)]
 pub struct DuplicatePhraseError;
+
+impl Display for DuplicatePhraseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "found duplicated phrases")
+    }
+}
+
+impl Error for DuplicatePhraseError {}
 
 /// A collection of metadata of a dictionary.
 ///
@@ -367,11 +378,21 @@ pub trait Dictionary: Debug {
 }
 
 /// TODO: doc
-#[derive(Error, Debug)]
-#[error("build dictionary error")]
+#[derive(Debug)]
 pub struct BuildDictionaryError {
-    #[from]
-    source: Box<dyn std::error::Error + Send + Sync>,
+    source: Box<dyn Error + Send + Sync>,
+}
+
+impl Display for BuildDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "build dictionary error")
+    }
+}
+
+impl Error for BuildDictionaryError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(self.source.as_ref())
+    }
 }
 
 impl From<std::io::Error> for BuildDictionaryError {

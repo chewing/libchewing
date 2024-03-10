@@ -1,11 +1,10 @@
 use std::{
     borrow::Cow,
+    error::Error,
     fmt::{Debug, Display, Write},
     num::NonZeroU16,
     str::FromStr,
 };
-
-use thiserror::Error;
 
 use super::{Bopomofo, BopomofoKind, ParseBopomofoError};
 
@@ -422,23 +421,52 @@ impl SyllableBuilder {
 }
 
 /// TODO: docs
-#[derive(Error, Debug)]
-#[error("syllable decode error: {msg}")]
+#[derive(Debug)]
 pub struct DecodeSyllableError {
     msg: String,
-    source: Box<dyn std::error::Error>,
+    source: Box<dyn Error>,
 }
 
-#[derive(Error, Debug)]
-#[error("syllable build error: {msg}")]
+impl Display for DecodeSyllableError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "syllable decode error: {}", self.msg)
+    }
+}
+
+impl Error for DecodeSyllableError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(self.source.as_ref())
+    }
+}
+
+#[derive(Debug)]
 pub struct BuildSyllableError {
     msg: &'static str,
 }
 
-#[derive(Error, Debug)]
-#[error("syllable parse error")]
+impl Display for BuildSyllableError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "syllable build error: {}", self.msg)
+    }
+}
+
+impl Error for BuildSyllableError {}
+
+#[derive(Debug)]
 pub struct ParseSyllableError {
-    source: Box<dyn std::error::Error>,
+    source: Box<dyn Error>,
+}
+
+impl Display for ParseSyllableError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "syllable parse error")
+    }
+}
+
+impl Error for ParseSyllableError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(self.source.as_ref())
+    }
 }
 
 impl From<ParseBopomofoError> for ParseSyllableError {

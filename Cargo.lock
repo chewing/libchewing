@@ -103,7 +103,6 @@ dependencies = [
  "riff",
  "rusqlite",
  "tempfile",
- "thiserror",
 ]
 
 [[package]]

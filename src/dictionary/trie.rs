@@ -2,8 +2,9 @@ use std::{
     any::Any,
     cmp::Ordering,
     collections::VecDeque,
+    error::Error,
     ffi::CString,
-    fmt::Debug,
+    fmt::{Debug, Display},
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
     iter,
@@ -13,7 +14,6 @@ use std::{
 };
 
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
-use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -142,11 +142,18 @@ pub struct TrieDictionary {
     data: Vec<u8>,
 }
 
-#[derive(Debug, Error)]
-#[error("XXX")]
+#[derive(Debug)]
 pub(crate) enum TrieDictionaryError {
     ReadOnly,
 }
+
+impl Display for TrieDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "trie dictionary error")
+    }
+}
+
+impl Error for TrieDictionaryError {}
 
 fn read_only_error() -> DictionaryUpdateError {
     DictionaryUpdateError {
