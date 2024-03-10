@@ -1,4 +1,5 @@
 use std::{
+    any::Any,
     cmp::Ordering,
     collections::VecDeque,
     ffi::CString,
@@ -1148,6 +1149,10 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
         let mut writer = BufWriter::new(database);
         self.write(&mut writer)?;
         Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

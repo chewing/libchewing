@@ -105,5 +105,18 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
         fs::remove_file(path).context("unable to overwrite output")?;
     }
     builder.build(path)?;
+
+    if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieDictionaryBuilder>() {
+        let stats = trie_builder.statistics();
+        eprintln!("== Trie Dictionary Statistics ==");
+        eprintln!("Node count           : {}", stats.node_count);
+        eprintln!("Leaf count           : {}", stats.leaf_count);
+        eprintln!("Phrase count         : {}", stats.phrase_count);
+        eprintln!("Max height           : {}", stats.max_height);
+        eprintln!("Average height       : {}", stats.avg_height);
+        eprintln!("Root branch count    : {}", stats.root_branch_count);
+        eprintln!("Max branch count     : {}", stats.max_branch_count);
+        eprintln!("Average branch count : {}", stats.avg_branch_count);
+    }
     Ok(())
 }

@@ -1,4 +1,4 @@
-use std::{path::Path, str};
+use std::{any::Any, path::Path, str};
 
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
 use thiserror::Error;
@@ -534,6 +534,10 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         })?;
         self.dict.conn.execute("VACUUM INTO ?", [path])?;
         Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

@@ -1,4 +1,5 @@
 use std::{
+    any::Any,
     fmt::Debug,
     fs::File,
     io::{self, Write},
@@ -243,6 +244,10 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
         };
         dict.flush()?;
         Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

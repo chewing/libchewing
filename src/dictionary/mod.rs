@@ -290,7 +290,7 @@ pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a
 /// # Ok(())
 /// # }
 /// ```
-pub trait Dictionary: Any + Debug {
+pub trait Dictionary: Debug {
     /// Returns first N phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
@@ -394,6 +394,7 @@ pub trait DictionaryBuilder {
     ) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
+    fn as_any(&self) -> &dyn Any;
 }
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
