@@ -108,8 +108,9 @@ impl Dictionary for LayeredDictionary {
         phrases
     }
 
-    fn entries(&self) -> Option<DictEntries> {
-        None
+    fn entries(&self) -> DictEntries<'_> {
+        // FIXME
+        Box::new(iter::empty())
     }
 
     fn about(&self) -> DictionaryInfo {

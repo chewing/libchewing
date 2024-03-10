@@ -116,7 +116,7 @@ impl Dictionary for CdbDictionary {
         self.inner.lookup_first_n_phrases(syllables, first)
     }
 
-    fn entries(&self) -> Option<DictEntries> {
+    fn entries(&self) -> DictEntries<'_> {
         self.inner.entries()
     }
 
@@ -139,7 +139,7 @@ impl Dictionary for CdbDictionary {
         }
         let mut writer = CDBWriter::create(&self.path).map_err(Error::from)?;
         writer.add(b"INFO", &[]).map_err(Error::from)?;
-        for entry in self.entries().unwrap() {
+        for entry in self.entries() {
             let mut data_buf = vec![];
             write_phrase(&mut data_buf, &entry.1).map_err(Error::from)?;
             writer
@@ -302,7 +302,7 @@ mod tests {
                 vec![syl![Z, TONE4], syl![D, I, AN, TONE3]],
                 Phrase::from(("dict", 1, 2))
             )],
-            dict.entries().unwrap().collect::<Vec<_>>()
+            dict.entries().collect::<Vec<_>>()
         );
         Ok(())
     }

@@ -730,13 +730,7 @@ pub extern "C" fn chewing_userphrase_enumerate(ctx: *mut ChewingContext) -> c_in
         None => return -1,
     };
 
-    ctx.userphrase_iter = Some(
-        ctx.editor
-            .user_dict()
-            .entries()
-            .unwrap_or(Box::new(iter::empty()))
-            .peekable(),
-    );
+    ctx.userphrase_iter = Some(ctx.editor.user_dict().entries().peekable());
     0
 }
 

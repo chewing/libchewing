@@ -29,15 +29,12 @@ pub struct LaxUserFreqEstimate {
 impl LaxUserFreqEstimate {
     /// TODO: doc
     pub fn open(user_dict: &dyn Dictionary) -> Result<LaxUserFreqEstimate, EstimateError> {
-        if let Some(entries) = user_dict.entries() {
-            let lifetime = entries
-                .map(|it| it.1.last_used().unwrap_or_default())
-                .max()
-                .unwrap_or_default();
-            Ok(LaxUserFreqEstimate { lifetime })
-        } else {
-            Ok(LaxUserFreqEstimate { lifetime: 0 })
-        }
+        let lifetime = user_dict
+            .entries()
+            .map(|it| it.1.last_used().unwrap_or_default())
+            .max()
+            .unwrap_or_default();
+        Ok(LaxUserFreqEstimate { lifetime })
     }
 
     pub fn open_in_memory(initial_lifetime: u64) -> LaxUserFreqEstimate {
