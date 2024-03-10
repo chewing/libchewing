@@ -1476,6 +1476,15 @@ mod tests {
             ],
             ("測試成功", 3).into(),
         )?;
+        builder.insert(
+            &vec![
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+                syl![Bopomofo::SH],
+                syl![Bopomofo::B, Bopomofo::AI, Bopomofo::TONE4],
+            ],
+            ("測試失敗", 3).into(),
+        )?;
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
 
@@ -1504,6 +1513,15 @@ mod tests {
                         syl![Bopomofo::SH, Bopomofo::TONE4]
                     ],
                     Phrase::new("測試", 1)
+                ),
+                (
+                    vec![
+                        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                        syl![Bopomofo::SH, Bopomofo::TONE4],
+                        syl![Bopomofo::SH],
+                        syl![Bopomofo::B, Bopomofo::AI, Bopomofo::TONE4],
+                    ],
+                    Phrase::new("測試失敗", 3)
                 ),
             ],
             dict.entries().collect::<Vec<_>>()
