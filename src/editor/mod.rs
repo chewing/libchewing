@@ -13,7 +13,7 @@ use std::{
 };
 
 pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
-use tracing::{debug, trace, warn};
+use log::{debug, trace, warn};
 
 use crate::{
     conversion::{

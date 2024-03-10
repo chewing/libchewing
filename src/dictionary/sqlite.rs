@@ -1,7 +1,6 @@
-use std::{any::Any, path::Path, str};
+use std::{any::Any, error::Error, fmt::Display, path::Path, str};
 
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
-use thiserror::Error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -11,13 +10,11 @@ use super::{
 };
 
 /// TODO: doc
-#[derive(Debug, Error)]
-#[error("sqlite error")]
+#[derive(Debug)]
 pub enum SqliteDictionaryError {
     /// TODO: doc
     SqliteError {
         /// TODO: doc
-        #[from]
         source: RusqliteError,
     },
     /// TODO: doc
@@ -26,6 +23,20 @@ pub enum SqliteDictionaryError {
         table: String,
     },
     ReadOnly,
+}
+
+impl Display for SqliteDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "sqlite error")
+    }
+}
+
+impl Error for SqliteDictionaryError {}
+
+impl From<RusqliteError> for SqliteDictionaryError {
+    fn from(value: RusqliteError) -> Self {
+        SqliteDictionaryError::SqliteError { source: value }
+    }
 }
 
 /// TODO: doc

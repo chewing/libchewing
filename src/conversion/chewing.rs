@@ -5,7 +5,7 @@ use std::{
     rc::Rc,
 };
 
-use tracing::trace;
+use log::trace;
 
 use crate::dictionary::{Dictionary, Phrase};
 

@@ -1,6 +1,7 @@
-use std::fmt::{Display, Write};
-
-use thiserror::Error;
+use std::{
+    error::Error,
+    fmt::{Display, Write},
+};
 
 /// The category of the phonetic symbols
 ///
@@ -192,12 +193,19 @@ impl Bopomofo {
 
 /// TODO: docs
 /// TODO: refactor to enum?
-#[derive(Error, Debug)]
-#[error("parse bopomofo error: {:?}", kind)]
+#[derive(Debug)]
 pub struct ParseBopomofoError {
     /// TODO: docs
     pub kind: ParseBopomofoErrorKind,
 }
+
+impl Display for ParseBopomofoError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "parse bopomofo error: {:?}", self.kind)
+    }
+}
+
+impl Error for ParseBopomofoError {}
 
 /// TODO: docs
 #[derive(Debug)]

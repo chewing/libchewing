@@ -83,10 +83,10 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
         }
 
         // NB: other integers are also platform dependent
-        let user_freq: i32 = bytemuck::pod_read_unaligned(&buf[0..4]);
-        let recent_time: i32 = bytemuck::pod_read_unaligned(&buf[4..8]);
-        let _max_freq: i32 = bytemuck::pod_read_unaligned(&buf[8..12]);
-        let _orig_freq: i32 = bytemuck::pod_read_unaligned(&buf[12..16]);
+        let user_freq: i32 = i32::from_ne_bytes(buf[0..4].try_into().unwrap());
+        let recent_time: i32 = i32::from_ne_bytes(buf[4..8].try_into().unwrap());
+        let _max_freq: i32 = i32::from_ne_bytes(buf[8..12].try_into().unwrap());
+        let _orig_freq: i32 = i32::from_ne_bytes(buf[12..16].try_into().unwrap());
 
         // Due to a bug in 0.3.5, some userphrase has negative frequency value.
         // In this case, we just skip this record.
@@ -105,7 +105,7 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
         let mut syllables: Vec<Syllable> = Vec::new();
         let mut base = 17;
         for _ in 0..len {
-            let syl_u16: u16 = bytemuck::pod_read_unaligned(&buf[base..base + 2]);
+            let syl_u16 = u16::from_ne_bytes(buf[base..base + 2].try_into().unwrap());
             syllables.push(syl_u16.try_into().or(Err(invalid_data()))?);
             base += 2;
         }
