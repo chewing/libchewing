@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Result};
-use argh::FromArgs;
 use chewing::{
     dictionary::{
         CdbDictionaryBuilder, DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder,
@@ -8,20 +7,36 @@ use chewing::{
     zhuyin::{Bopomofo, Syllable},
 };
 use std::{
+    error::Error,
+    fmt::Display,
     fs::{self, File},
     io::{BufRead, BufReader},
     path::Path,
 };
 
-use thiserror::Error;
+use crate::flags;
 
-#[derive(Error, Debug)]
-#[error("parsing failed at line {line_num}")]
+#[derive(Debug)]
 struct ParseError {
     line_num: usize,
     column: usize,
-    #[source]
     source: anyhow::Error,
+}
+
+impl Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "parsing failed at line:column {}:{}",
+            self.line_num, self.column
+        )
+    }
+}
+
+impl Error for ParseError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(self.source.as_ref())
+    }
 }
 
 trait IntoParseError<T> {
@@ -38,57 +53,19 @@ impl<T> IntoParseError<T> for Result<T> {
     }
 }
 
-#[derive(FromArgs)]
-/// This program creates a new chewing phrase dictionary file.
-pub struct Args {
-    /// choose the underlying database implementation, must be either "trie", "cdb", or "sqlite"
-    #[argh(option, short = 't', default = "String::from(\"trie\")")]
-    pub db_type: String,
-
-    /// name of the phrase dictionary
-    #[argh(option, short = 'n', default = "String::from(\"我的詞庫\")")]
-    pub name: String,
-
-    /// copyright information of the dictionary
-    #[argh(option, short = 'c', default = "String::from(\"Unknown\")")]
-    pub copyright: String,
-
-    /// license information about the dictionary
-    #[argh(option, short = 'l', default = "String::from(\"Unknown\")")]
-    pub license: String,
-
-    /// version information
-    #[argh(option, short = 'r', default = "String::from(\"1.0.0\")")]
-    pub version: String,
-
-    /// keep word frequency
-    #[argh(switch, short = 'k')]
-    pub keep_word_freq: bool,
-
-    /// path to the input tsi file
-    #[argh(positional)]
-    pub tsi_src: String,
-
-    /// path to the output file
-    #[argh(positional)]
-    pub output: String,
-}
-
-fn main() -> Result<()> {
-    let args: Args = argh::from_env();
-
-    let mut builder: Box<dyn DictionaryBuilder> = match args.db_type.as_str() {
+pub fn run(args: flags::InitDatabase) -> Result<()> {
+    let mut builder: Box<dyn DictionaryBuilder> = match args.db_type_or_default().as_str() {
         "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
         "trie" => Box::new(TrieDictionaryBuilder::new()),
         "cdb" => Box::new(CdbDictionaryBuilder::new()),
-        _ => bail!("Unknown database type {}", args.db_type),
+        ty @ _ => bail!("Unknown database type {ty}"),
     };
 
     builder.set_info(DictionaryInfo {
-        name: args.name.to_owned().into(),
-        copyright: args.copyright.to_owned().into(),
-        license: args.license.to_owned().into(),
-        version: args.version.to_owned().into(),
+        name: args.name_or_default().into(),
+        copyright: args.copyright_or_default().into(),
+        license: args.license_or_default().into(),
+        version: args.version_or_default().into(),
         software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")).into(),
     })?;
 
@@ -128,5 +105,18 @@ fn main() -> Result<()> {
         fs::remove_file(path).context("unable to overwrite output")?;
     }
     builder.build(path)?;
+
+    if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieDictionaryBuilder>() {
+        let stats = trie_builder.statistics();
+        eprintln!("== Trie Dictionary Statistics ==");
+        eprintln!("Node count           : {}", stats.node_count);
+        eprintln!("Leaf count           : {}", stats.leaf_count);
+        eprintln!("Phrase count         : {}", stats.phrase_count);
+        eprintln!("Max height           : {}", stats.max_height);
+        eprintln!("Average height       : {}", stats.avg_height);
+        eprintln!("Root branch count    : {}", stats.root_branch_count);
+        eprintln!("Max branch count     : {}", stats.max_branch_count);
+        eprintln!("Average branch count : {}", stats.avg_branch_count);
+    }
     Ok(())
 }

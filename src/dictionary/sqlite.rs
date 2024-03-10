@@ -1,4 +1,4 @@
-use std::{path::Path, str};
+use std::{any::Any, path::Path, str};
 
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
 use thiserror::Error;
@@ -298,7 +298,7 @@ impl Dictionary for SqliteDictionary {
     }
 
     // FIXME too many clone
-    fn entries(&self) -> Option<DictEntries> {
+    fn entries(&self) -> DictEntries<'_> {
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -306,7 +306,7 @@ impl Dictionary for SqliteDictionary {
                 FROM dictionary_v1 LEFT JOIN userphrase_v2 ON userphrase_id = id",
             )
             .expect("SQL error");
-        Some(Box::new(
+        Box::new(
             stmt.query_map([], |row| {
                 let (syllables_bytes, phrase, freq, time): (Vec<u8>, String, _, _) =
                     row.try_into()?;
@@ -329,7 +329,7 @@ impl Dictionary for SqliteDictionary {
             .map(|r| r.unwrap())
             .collect::<Vec<_>>()
             .into_iter(),
-        ))
+        )
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -534,6 +534,10 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         })?;
         self.dict.conn.execute("VACUUM INTO ?", [path])?;
         Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

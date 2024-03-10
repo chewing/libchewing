@@ -93,10 +93,7 @@ impl UserDictionaryLoader {
         if data_path != cdb_path && cdb_path.exists() {
             let cdb_dict = CdbDictionary::open(cdb_path)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
-            for (syllables, phrase) in cdb_dict
-                .entries()
-                .expect("CDB dictionary should support entries()")
-            {
+            for (syllables, phrase) in cdb_dict.entries() {
                 fresh_dict
                     .add_phrase(&syllables, phrase)
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;

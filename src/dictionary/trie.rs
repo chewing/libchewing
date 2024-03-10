@@ -1,11 +1,12 @@
 use std::{
+    any::Any,
     cmp::Ordering,
     collections::VecDeque,
     ffi::CString,
     fmt::Debug,
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
-    mem,
+    iter, mem,
     num::NonZeroUsize,
     path::Path,
     str,
@@ -36,7 +37,7 @@ const ILIC: ChunkId = ChunkId { value: *b"ILIC" };
 const IREV: ChunkId = ChunkId { value: *b"IREV" };
 const ISFT: ChunkId = ChunkId { value: *b"ISFT" };
 
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Debug)]
 #[repr(C)]
 struct TrieNodePod {
     child_begin_raw: u32,
@@ -58,7 +59,7 @@ impl TrieNodePod {
     }
 }
 
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Debug)]
 #[repr(C)]
 struct TrieLeafPod {
     data_begin_raw: u32,
@@ -353,8 +354,83 @@ impl Dictionary for TrieDictionary {
         .collect()
     }
 
-    fn entries(&self) -> Option<DictEntries> {
-        None
+    fn entries(&self) -> DictEntries<'_> {
+        let mut results = Vec::new();
+        let mut stack = Vec::new();
+        let mut syllables = Vec::new();
+        let root: &TrieNodePod = from_bytes(&self.dict[..TrieNodePod::SIZE]);
+        let mut node = root;
+        let mut done = false;
+        let make_dict_entry =
+            |syllables: &[u16], node: &TrieNodePod| -> (Vec<Syllable>, Vec<Phrase>) {
+                let leaf_data = &self.dict[node.child_begin()..];
+                let leaf: &TrieLeafPod = from_bytes(&leaf_data[..TrieLeafPod::SIZE]);
+                debug_assert_eq!(leaf.reserved_zero(), 0);
+                let phrases = PhrasesIter {
+                    bytes: &self.data[leaf.data_begin()..leaf.data_end()],
+                }
+                .collect::<Vec<_>>();
+                (
+                    syllables
+                        .iter()
+                        // FIXME - skip invalid entry?
+                        .map(|&syl_u16| Syllable::try_from(syl_u16).unwrap())
+                        .collect::<Vec<_>>(),
+                    phrases,
+                )
+            };
+        let it = iter::from_fn(move || {
+            if !results.is_empty() {
+                return results.pop();
+            }
+            if done {
+                return None;
+            }
+            // descend until find a leaf node which is not also a internal node.
+            loop {
+                let child_nodes: &[TrieNodePod] =
+                    cast_slice(&self.dict[node.child_begin()..node.child_end()]);
+                let mut child_iter = child_nodes.into_iter();
+                let mut next = child_iter
+                    .next()
+                    .expect("syllable node should have at least one child node");
+                if next.syllable() == 0 {
+                    // found a leaf syllable node
+                    results.push(make_dict_entry(&syllables, node));
+                    if let Some(second) = child_iter.next() {
+                        next = second;
+                    } else {
+                        break;
+                    }
+                }
+                node = next;
+                syllables.push(node.syllable());
+                stack.push(child_iter);
+            }
+            // ascend until we can go down again
+            loop {
+                if let Some(mut child_nodes) = stack.pop() {
+                    syllables.pop();
+                    if let Some(next) = child_nodes.next() {
+                        debug_assert_ne!(next.syllable(), 0);
+                        node = next;
+                        stack.push(child_nodes);
+                        syllables.push(node.syllable());
+                        break;
+                    }
+                } else {
+                    done = true;
+                    break;
+                }
+            }
+            results.pop()
+        });
+        let entries = it.flat_map(|(syllables, phrases)| {
+            phrases
+                .into_iter()
+                .map(move |phrase| (syllables.clone(), phrase))
+        });
+        Box::new(entries)
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -1074,6 +1150,10 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
         self.write(&mut writer)?;
         Ok(())
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl Default for TrieDictionaryBuilder {
@@ -1373,5 +1453,84 @@ mod tests {
         assert_eq!("license", info.license.unwrap());
         assert_eq!("version", info.version.unwrap());
         assert_eq!("software", info.software.unwrap());
+    }
+
+    #[test]
+    fn tree_entries() -> Result<(), Box<dyn std::error::Error>> {
+        let mut builder = TrieDictionaryBuilder::new();
+        builder.insert(
+            &vec![
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+            ],
+            ("測試", 1).into(),
+        )?;
+        builder.insert(
+            &vec![
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+            ],
+            ("策試", 2).into(),
+        )?;
+        builder.insert(
+            &vec![
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+                syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
+                syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+            ],
+            ("測試成功", 3).into(),
+        )?;
+        builder.insert(
+            &vec![
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+                syl![Bopomofo::SH],
+                syl![Bopomofo::B, Bopomofo::AI, Bopomofo::TONE4],
+            ],
+            ("測試失敗", 3).into(),
+        )?;
+        let mut cursor = Cursor::new(vec![]);
+        builder.write(&mut cursor)?;
+
+        let dict = TrieDictionary::new(&mut cursor)?;
+        assert_eq!(
+            vec![
+                (
+                    vec![
+                        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                        syl![Bopomofo::SH, Bopomofo::TONE4],
+                        syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
+                        syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+                    ],
+                    Phrase::new("測試成功", 3)
+                ),
+                (
+                    vec![
+                        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                        syl![Bopomofo::SH, Bopomofo::TONE4]
+                    ],
+                    Phrase::new("策試", 2)
+                ),
+                (
+                    vec![
+                        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                        syl![Bopomofo::SH, Bopomofo::TONE4]
+                    ],
+                    Phrase::new("測試", 1)
+                ),
+                (
+                    vec![
+                        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                        syl![Bopomofo::SH, Bopomofo::TONE4],
+                        syl![Bopomofo::SH],
+                        syl![Bopomofo::B, Bopomofo::AI, Bopomofo::TONE4],
+                    ],
+                    Phrase::new("測試失敗", 3)
+                ),
+            ],
+            dict.entries().collect::<Vec<_>>()
+        );
+        Ok(())
     }
 }

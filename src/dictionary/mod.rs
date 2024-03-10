@@ -259,7 +259,7 @@ impl Display for Phrase {
 pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
 /// TODO: doc
-pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
+pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
 /// An interface for looking up dictionaries.
 ///
@@ -290,7 +290,7 @@ pub type DictEntries = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)>>;
 /// # Ok(())
 /// # }
 /// ```
-pub trait Dictionary: Any + Debug {
+pub trait Dictionary: Debug {
     /// Returns first N phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
@@ -308,9 +308,7 @@ pub trait Dictionary: Any + Debug {
         self.lookup_first_n_phrases(syllables, usize::MAX)
     }
     /// Returns an iterator to all phrases in the dictionary.
-    ///
-    /// Some dictionary backend does not support this operation.
-    fn entries(&self) -> Option<DictEntries>;
+    fn entries(&self) -> DictEntries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
     /// Reopens the dictionary if it was changed by a different process
@@ -396,6 +394,7 @@ pub trait DictionaryBuilder {
     ) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
+    fn as_any(&self) -> &dyn Any;
 }
 
 impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
@@ -406,10 +405,12 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
         phrases
     }
 
-    fn entries(&self) -> Option<DictEntries> {
-        Some(Box::new(self.clone().into_iter().flat_map(|(k, v)| {
-            v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))
-        })))
+    fn entries(&self) -> DictEntries<'_> {
+        Box::new(
+            self.clone()
+                .into_iter()
+                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
+        )
     }
 
     fn about(&self) -> DictionaryInfo {

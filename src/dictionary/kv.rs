@@ -206,13 +206,13 @@ where
         phrases
     }
 
-    pub(crate) fn entries(&self) -> Option<DictEntries> {
-        Some(Box::new(
+    pub(crate) fn entries(&self) -> DictEntries<'_> {
+        Box::new(
             self.entries_iter()
                 .map(|it| (phrase_from_bytes(&it.0), it.1))
                 .collect::<Vec<_>>()
                 .into_iter(),
-        ))
+        )
     }
 
     pub(crate) fn add_phrase(
