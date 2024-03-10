@@ -59,6 +59,9 @@ pub mod setup {
     /// The `chewing_Init` function is no-op now. The return value is always 0.
     pub use super::io::chewing_Init;
 
+    /// This function exists only for backword compatibility.
+    pub use super::io::chewing_Terminate;
+
     /// Creates a new instance of the Chewing IM.
     ///
     /// The return value is a pointer to the new Chewing IM instance.
@@ -455,6 +458,11 @@ pub mod candidates {
     /// The default value is MAX_SELKEY.
     pub use super::io::chewing_set_candPerPage;
 
+    /// Gets the number of candidates returned per page.
+    ///
+    /// The default value is MAX_SELKEY.
+    pub use super::io::chewing_get_candPerPage;
+
     /// Sets the key codes for candidate selection.
     ///
     /// *selkeys* is an ASCII code integer array of length [MAX_SELKEY]. The
@@ -487,6 +495,19 @@ pub mod candidates {
     ///
     /// Returns 0 when success, -1 otherwise.
     pub use super::io::chewing_cand_close;
+
+    /// Returns the candidate string by its index.
+    ///
+    /// The *index* must be between 0 and [chewing_cand_TotalChoice] inclusive.
+    ///
+    /// The returned value is a pointer to a character string. The memory must
+    /// be freed by the caller using function
+    /// [chewing_free][super::setup::chewing_free].
+    ///
+    /// # Failures
+    ///
+    /// This function returns NULL when memory allocation fails.
+    pub use super::io::chewing_cand_string_by_index;
 
     /// Returns the candidate string by its index.
     ///
@@ -904,6 +925,9 @@ pub mod globals {
     ///
     /// The mode argument is 0 for normal mode or other for easy symbol mode.
     pub use super::io::chewing_set_easySymbolInput;
+
+    /// Gets the current normal/easy symbol mode.
+    pub use super::io::chewing_get_easySymbolInput;
 
     /// Sets whether the phrase for candidates selection is before the cursor or
     /// after the cursor.

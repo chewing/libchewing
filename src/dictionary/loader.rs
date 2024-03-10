@@ -15,7 +15,6 @@ use super::{uhash, CdbDictionary, Dictionary, TrieDictionary};
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
-const UD_SQLITE_FILE_NAME: &str = "chewing.sqlite";
 const UD_CDB_FILE_NAME: &str = "chewing.cdb";
 
 #[derive(Debug)]
