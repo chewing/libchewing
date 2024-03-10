@@ -52,11 +52,11 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
 /// The returned value depends on the operating system and is either a
 /// Some, containing a value from the following table, or a None.
 ///
-/// |Platform | Base                                     | Example                                          |
-/// | ------- | ---------------------------------------- | ------------------------------------------------ |
-/// | Linux   | `$XDG_DATA_HOME` or `$HOME`/.local/share | /home/alice/.local/share/chewing                 |
-/// | macOS   | `$HOME`/Library/Application Support      | /Users/Alice/Library/Application Support/chewing |
-/// | Windows | `{FOLDERID_RoamingAppData}`              | C:\Users\Alice\AppData\Roaming\chewing           |
+/// |Platform | Base                                     | Example                                                     |
+/// | ------- | ---------------------------------------- | ------------------------------------------------------------|
+/// | Linux   | `$XDG_DATA_HOME` or `$HOME`/.local/share | /home/alice/.local/share/chewing                            |
+/// | macOS   | `$HOME`/Library/Application Support      | /Users/Alice/Library/Application Support/im.chewing.Chewing |
+/// | Windows | `{FOLDERID_RoamingAppData}`              | C:\Users\Alice\AppData\Roaming\chewing\Chewing\data         |
 ///
 /// Legacy path is automatically detected and used
 ///
@@ -69,7 +69,6 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
 /// Users can set the `CHEWING_USER_PATH` environment variable to
 /// override the default path.
 pub fn data_dir() -> Option<PathBuf> {
-    // TODO per-OS integration test
     if let Ok(path) = env::var("CHEWING_USER_PATH") {
         return Some(path.into());
     }
@@ -78,21 +77,23 @@ pub fn data_dir() -> Option<PathBuf> {
             return Some(path);
         }
     }
-    ProjectDirs::from("im", "chewing", "chewing")
+    ProjectDirs::from("im", "chewing", "Chewing")
         .as_ref()
         .map(ProjectDirs::data_dir)
         .map(Path::to_owned)
 }
 
 fn legacy_data_dir() -> Option<PathBuf> {
-    #[cfg(target_os = "windows")]
-    return BaseDirs::new()
-        .as_ref()
-        .map(BaseDirs::home_dir)
-        .map(|path| path.join("ChewingTextService"));
+    if cfg!(target_os = "windows") {
+        return BaseDirs::new()
+            .as_ref()
+            .map(BaseDirs::home_dir)
+            .map(|path| path.join("ChewingTextService"));
+    }
 
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    return Some("/Library/ChewingOSX".into());
+    if cfg!(any(target_os = "macos", target_os = "ios")) {
+        return Some("/Library/ChewingOSX".into());
+    }
 
     BaseDirs::new()
         .as_ref()
@@ -109,5 +110,20 @@ pub fn userphrase_path() -> Option<PathBuf> {
         data_dir().map(|path| path.join("chewing.sqlite3"))
     } else {
         data_dir().map(|path| path.join("chewing.cdb"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use directories::BaseDirs;
+
+    use super::data_dir;
+
+    #[test]
+    fn resolve_data_dir() {
+        if let Some(_) = BaseDirs::new() {
+            let data_dir = data_dir();
+            assert!(data_dir.is_some());
+        }
     }
 }
