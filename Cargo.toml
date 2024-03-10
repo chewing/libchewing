@@ -34,7 +34,7 @@ sqlite = ["rusqlite"]
 tempfile = "3"
 
 [workspace]
-members = ["tools", "xtask"]
+members = ["tools"]
 resolver = "2"
 
 [[test]]
