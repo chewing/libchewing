@@ -31,12 +31,12 @@ xflags::xflags! {
             /// Output in JSON format.
             optional -j,--json
         }
-        /// Dump the dictionary entries into CSV formatted stream.
+        /// Dump the dictionary entries into tsi.src formatted stream.
         cmd dump {
             /// Location of the dictionary file.
             required path: PathBuf
-            /// Output tsi.src compatiable format.
-            optional --tsi-src
+            /// Output CSV format.
+            optional --csv
         }
     }
 }
@@ -98,7 +98,7 @@ pub struct Info {
 pub struct Dump {
     pub path: PathBuf,
 
-    pub tsi_src: bool,
+    pub csv: bool,
 }
 
 impl ChewingCli {

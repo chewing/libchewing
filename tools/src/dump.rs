@@ -15,10 +15,10 @@ pub fn run(args: flags::Dump) -> Result<()> {
     } else {
         Box::new(TrieDictionary::open(&args.path)?)
     };
-    if args.tsi_src {
-        dump_dict_tsi_src(&dict);
-    } else {
+    if args.csv {
         dump_dict_csv(&dict);
+    } else {
+        dump_dict_tsi_src(&dict);
     }
     Ok(())
 }
