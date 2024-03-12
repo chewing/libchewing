@@ -11,7 +11,7 @@ use std::{
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-use super::{DictEntries, DictionaryUpdateError, Phrase};
+use super::{DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase};
 
 pub(crate) trait KVStore<'a> {
     type ValueIter: Iterator<Item = Vec<u8>>;
@@ -278,6 +278,54 @@ impl KVStore<'_> for () {
 
     fn iter(&self) -> Self::KeyValueIter {
         iter::empty()
+    }
+}
+
+impl Dictionary for KVDictionary<()> {
+    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        KVDictionary::lookup_first_n_phrases(self, syllables, first)
+    }
+
+    fn entries(&self) -> DictEntries<'_> {
+        KVDictionary::entries(self)
+    }
+
+    fn about(&self) -> DictionaryInfo {
+        DictionaryInfo::default()
+    }
+
+    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        Ok(())
+    }
+
+    fn add_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase: Phrase,
+    ) -> Result<(), DictionaryUpdateError> {
+        KVDictionary::add_phrase(self, syllables, phrase)
+    }
+
+    fn update_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase: Phrase,
+        user_freq: u32,
+        time: u64,
+    ) -> Result<(), DictionaryUpdateError> {
+        KVDictionary::update_phrase(self, syllables, phrase, user_freq, time)
+    }
+
+    fn remove_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase_str: &str,
+    ) -> Result<(), DictionaryUpdateError> {
+        KVDictionary::remove_phrase(self, syllables, phrase_str)
     }
 }
 

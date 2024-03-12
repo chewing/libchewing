@@ -10,12 +10,15 @@ use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{uhash, CdbDictionary, Dictionary, TrieDictionary};
+use super::{
+    kv::KVDictionary, uhash, CdbDictionary, CdbDictionaryBuilder, Dictionary, TrieDictionary,
+};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 const UD_CDB_FILE_NAME: &str = "chewing.cdb";
+const UD_MEM_FILE_NAME: &str = ":memory:";
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -78,6 +81,9 @@ impl UserDictionaryLoader {
             .data_path
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
+        if data_path.ends_with(UD_MEM_FILE_NAME) {
+            return Ok(Box::new(KVDictionary::new_in_memory()));
+        }
         if data_path.exists() {
             return guess_format_and_load(&data_path);
         }
