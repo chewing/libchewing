@@ -331,9 +331,10 @@ where
             .iter()
             .find(|p| p.as_str() == phrase)
             .map(|p| p.freq())
-            .unwrap_or(1);
+            .unwrap_or(0);
         let phrase = (phrase, phrase_freq).into();
-        let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap();
+        // FIXME max_freq calculation is different from C implementation
+        let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
         let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
         let time = self.estimate.now().unwrap();
 
@@ -1124,7 +1125,7 @@ impl Selecting {
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Space if editor.options.space_is_select_key => {
-                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
@@ -1272,10 +1273,7 @@ impl Highlighting {
                     Err(_) => Transition::Entering(EditorKeyBehavior::Bell, self.into()),
                 }
             }
-            _ => {
-                todo!();
-                // Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self.into())
-            }
+            _ => Transition::Entering(EditorKeyBehavior::Ignore, self.into()),
         }
     }
 }
