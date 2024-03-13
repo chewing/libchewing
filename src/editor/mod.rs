@@ -1154,6 +1154,9 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             J => {
+                if editor.com.is_empty() {
+                    return Transition::Selecting(EditorKeyBehavior::Ignore, self);
+                }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
                     Selector::Symbol(_) => editor.com.cursor(),
@@ -1177,6 +1180,9 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             K => {
+                if editor.com.is_empty() {
+                    return Transition::Selecting(EditorKeyBehavior::Ignore, self);
+                }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
                     Selector::Symbol(_) => editor.com.cursor(),
