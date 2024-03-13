@@ -1108,6 +1108,10 @@ impl Selecting {
     {
         use KeyCode::*;
 
+        if !ev.modifiers.is_none() {
+            return Transition::Selecting(EditorKeyBehavior::Bell, self);
+        }
+
         match ev.code {
             Backspace => {
                 editor.cancel_selecting();
@@ -1226,10 +1230,7 @@ impl Selecting {
                 // NB: should be Ignore but return Absorb for backward compat
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
-            _ => {
-                warn!("Invalid state transition");
-                Transition::Selecting(EditorKeyBehavior::Bell, self)
-            }
+            _ => Transition::Selecting(EditorKeyBehavior::Bell, self),
         }
     }
 }
