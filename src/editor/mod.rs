@@ -1209,7 +1209,7 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             Right | PageDown => {
-                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
