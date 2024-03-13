@@ -1108,7 +1108,7 @@ impl Selecting {
     {
         use KeyCode::*;
 
-        if !ev.modifiers.is_none() {
+        if ev.modifiers.ctrl || ev.modifiers.shift {
             return Transition::Selecting(EditorKeyBehavior::Bell, self);
         }
 
