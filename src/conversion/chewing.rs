@@ -226,7 +226,7 @@ impl ChewingEngine {
             return vec![prefix.expect("should have prefix")];
         }
         let mut result = vec![];
-        for end in start..=target {
+        for end in (start + 1)..=target {
             let entry = graph.entry((start, end));
             if let Some(phrase) = entry.or_insert_with(|| {
                 self.find_best_phrase(
