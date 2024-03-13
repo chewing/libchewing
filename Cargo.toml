@@ -34,7 +34,8 @@ sqlite = ["rusqlite"]
 tempfile = "3"
 
 [workspace]
-members = ["fuzzer", "tools"]
+members = ["tools"]
+exclude = ["fuzzer"]
 resolver = "2"
 
 [[test]]
