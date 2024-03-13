@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 chewing = { version = "0.6.0-alpha.2", path = "..", features = ["capi"] }
+env_logger = "0.11.3"
 xflags = "0.3.2"

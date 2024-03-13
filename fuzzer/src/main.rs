@@ -68,6 +68,8 @@ impl From<u8> for ChewingHandle {
 }
 
 pub fn main() {
+    env_logger::init();
+
     let flags = xflags::parse_or_exit! {
         /// system library path
         required syspath: String
