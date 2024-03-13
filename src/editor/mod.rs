@@ -1210,7 +1210,7 @@ impl Selecting {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
-                    self.page_no = self.total_page(editor, &editor.dict) - 1;
+                    self.page_no = self.total_page(editor, &editor.dict).saturating_sub(1);
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
