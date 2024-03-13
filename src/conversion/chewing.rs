@@ -5,7 +5,7 @@ use std::{
     rc::Rc,
 };
 
-use log::trace;
+use log::{trace, warn};
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -40,7 +40,18 @@ impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
             composition.buffer.len(),
             None,
         );
+        if paths.is_empty() {
+            warn!(
+                "BUG! find_all_paths returned nothing from {:?}",
+                composition
+            );
+            return vec![];
+        }
         let mut trimmed_paths = self.trim_paths(paths);
+        if trimmed_paths.is_empty() {
+            warn!("BUG! trimmed paths is empty from");
+            return vec![];
+        }
         trimmed_paths.sort();
         trimmed_paths
             .into_iter()
