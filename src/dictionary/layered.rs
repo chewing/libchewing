@@ -4,6 +4,8 @@ use std::{
     iter,
 };
 
+use log::error;
+
 use crate::zhuyin::SyllableSlice;
 
 use super::{DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase};
@@ -92,6 +94,7 @@ impl Dictionary for LayeredDictionary {
             .chain(iter::once(&self.user_dict))
             .for_each(|d| {
                 for phrase in d.lookup_all_phrases(syllables) {
+                    debug_assert!(!phrase.as_str().is_empty());
                     match sort_map.entry(phrase.to_string()) {
                         Entry::Occupied(entry) => {
                             let index = *entry.get();
@@ -133,6 +136,10 @@ impl Dictionary for LayeredDictionary {
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), DictionaryUpdateError> {
+        if phrase.as_str().is_empty() {
+            error!("BUG! added phrase is empty");
+            return Ok(());
+        }
         self.user_dict.add_phrase(syllables, phrase)
     }
 
@@ -143,6 +150,10 @@ impl Dictionary for LayeredDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), DictionaryUpdateError> {
+        if phrase.as_str().is_empty() {
+            error!("BUG! added phrase is empty");
+            return Ok(());
+        }
         self.user_dict
             .update_phrase(syllables, phrase, user_freq, time)
     }

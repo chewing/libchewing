@@ -167,6 +167,7 @@ impl CompositionEditor {
         }
     }
     pub(crate) fn select(&mut self, interval: Interval) {
+        debug_assert!(!interval.phrase.is_empty());
         let mut to_remove = vec![];
         for (i, selection) in self.inner.selections.iter().enumerate() {
             if selection.overlaps(&interval) {

@@ -563,6 +563,7 @@ where
         if self.last_key_behavior() == EditorKeyBehavior::Absorb {
             self.try_auto_commit();
         }
+        trace!("comp: {:?}", &self.com);
         if self.dirty_dict {
             let _ = self.dict.reopen();
             let _ = self.dict.flush();
@@ -1059,6 +1060,7 @@ impl Selecting {
         match self.sel {
             Selector::Phrase(ref sel) => {
                 let candidates = sel.candidates(editor, &editor.dict);
+                debug!("candidates: {:?}", &candidates);
                 match candidates.get(n) {
                     Some(phrase) => {
                         editor.com.select(sel.interval(phrase.into()));
