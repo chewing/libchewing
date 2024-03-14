@@ -30,6 +30,10 @@ use crate::{
     zhuyin::Syllable,
 };
 
+const TRUE: c_int = 1;
+const FALSE: c_int = 0;
+const ERROR: c_int = -1;
+
 enum Owned {
     CString,
     CUShortSlice(usize),
@@ -804,15 +808,11 @@ pub extern "C" fn chewing_userphrase_add(
     }
 
     match unsafe { str_from_ptr_with_nul(phrase_buf) } {
-        Some(phrase) => {
-            // FIXME should be handled by lower level
-            if syllables.len() != phrase.chars().count() {
-                return 0;
-            }
-            ctx.editor.learn_phrase(&syllables, &phrase);
-            1
-        }
-        None => -1,
+        Some(phrase) => match ctx.editor.learn_phrase(&syllables, &phrase) {
+            Ok(_) => TRUE,
+            Err(_) => FALSE,
+        },
+        None => ERROR,
     }
 }
 

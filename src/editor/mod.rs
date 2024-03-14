@@ -320,12 +320,23 @@ where
         }
         result
     }
-    pub fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
+    pub fn learn_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase: &str,
+    ) -> Result<(), String> {
+        if syllables.as_slice().len() != phrase.chars().count() {
+            warn!(
+                "syllables({:?}) and phrase({}) has different length",
+                &syllables, &phrase
+            );
+            return Err("".to_string());
+        }
         let phrases = self.dict.lookup_all_phrases(syllables);
         if phrases.is_empty() {
             // FIXME provide max_freq, orig_freq
             let _ = self.dict.add_phrase(syllables, (phrase, 1).into());
-            return;
+            return Ok(());
         }
         let phrase_freq = phrases
             .iter()
@@ -340,6 +351,7 @@ where
 
         let _ = self.dict.update_phrase(syllables, phrase, user_freq, time);
         self.dirty_dict = true;
+        Ok(())
     }
     pub fn unlearn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
         let _ = self.dict.remove_phrase(syllables, phrase);
