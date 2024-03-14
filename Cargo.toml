@@ -35,6 +35,7 @@ tempfile = "3"
 
 [workspace]
 members = ["tools"]
+exclude = ["fuzzer"]
 resolver = "2"
 
 [[test]]

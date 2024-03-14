@@ -51,6 +51,9 @@ impl SymbolSelector {
     pub(crate) fn select(&mut self, n: usize) -> Option<Symbol> {
         match self.cursor {
             None => {
+                if self.category.len() <= n {
+                    return None;
+                }
                 let cat = &self.category[n];
                 if cat.1 == usize::MAX {
                     self.cursor = None;
@@ -62,13 +65,7 @@ impl SymbolSelector {
             }
             Some(cursor) => {
                 self.cursor = None;
-                Some(
-                    self.table[cursor as usize]
-                        .chars()
-                        .nth(n)
-                        .map(Symbol::Char)
-                        .expect("index should out of boundary"),
-                )
+                self.table[cursor as usize].chars().nth(n).map(Symbol::Char)
             }
         }
     }

@@ -78,7 +78,7 @@ impl CompositionEditor {
     pub(crate) fn pop_front(&mut self, n: usize) {
         assert!(n < self.inner.buffer.len());
         self.inner.buffer.splice(0..n, []);
-        self.cursor -= n;
+        self.cursor = self.cursor.saturating_sub(n);
     }
     pub(crate) fn remove_after_cursor(&mut self) {
         if self.cursor == self.inner.buffer.len() {
@@ -167,6 +167,7 @@ impl CompositionEditor {
         }
     }
     pub(crate) fn select(&mut self, interval: Interval) {
+        debug_assert!(!interval.phrase.is_empty());
         let mut to_remove = vec![];
         for (i, selection) in self.inner.selections.iter().enumerate() {
             if selection.overlaps(&interval) {

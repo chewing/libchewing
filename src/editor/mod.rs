@@ -331,9 +331,10 @@ where
             .iter()
             .find(|p| p.as_str() == phrase)
             .map(|p| p.freq())
-            .unwrap_or(1);
+            .unwrap_or(0);
         let phrase = (phrase, phrase_freq).into();
-        let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap();
+        // FIXME max_freq calculation is different from C implementation
+        let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
         let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
         let time = self.estimate.now().unwrap();
 
@@ -562,6 +563,7 @@ where
         if self.last_key_behavior() == EditorKeyBehavior::Absorb {
             self.try_auto_commit();
         }
+        trace!("comp: {:?}", &self.com);
         if self.dirty_dict {
             let _ = self.dict.reopen();
             let _ = self.dict.flush();
@@ -1058,6 +1060,7 @@ impl Selecting {
         match self.sel {
             Selector::Phrase(ref sel) => {
                 let candidates = sel.candidates(editor, &editor.dict);
+                debug!("candidates: {:?}", &candidates);
                 match candidates.get(n) {
                     Some(phrase) => {
                         editor.com.select(sel.interval(phrase.into()));
@@ -1107,6 +1110,10 @@ impl Selecting {
     {
         use KeyCode::*;
 
+        if ev.modifiers.ctrl || ev.modifiers.shift {
+            return Transition::Selecting(EditorKeyBehavior::Bell, self);
+        }
+
         match ev.code {
             Backspace => {
                 editor.cancel_selecting();
@@ -1124,7 +1131,7 @@ impl Selecting {
                 Transition::Entering(EditorKeyBehavior::Absorb, self.into())
             }
             Space if editor.options.space_is_select_key => {
-                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
@@ -1149,6 +1156,9 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             J => {
+                if editor.com.is_empty() {
+                    return Transition::Selecting(EditorKeyBehavior::Ignore, self);
+                }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
                     Selector::Symbol(_) => editor.com.cursor(),
@@ -1172,6 +1182,9 @@ impl Selecting {
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             K => {
+                if editor.com.is_empty() {
+                    return Transition::Selecting(EditorKeyBehavior::Ignore, self);
+                }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
                     Selector::Symbol(_) => editor.com.cursor(),
@@ -1199,12 +1212,12 @@ impl Selecting {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
-                    self.page_no = self.total_page(editor, &editor.dict) - 1;
+                    self.page_no = self.total_page(editor, &editor.dict).saturating_sub(1);
                 }
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
             Right | PageDown => {
-                if self.page_no < self.total_page(editor, &editor.dict) - 1 {
+                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
@@ -1225,10 +1238,7 @@ impl Selecting {
                 // NB: should be Ignore but return Absorb for backward compat
                 Transition::Selecting(EditorKeyBehavior::Absorb, self)
             }
-            _ => {
-                warn!("Invalid state transition");
-                Transition::Selecting(EditorKeyBehavior::Bell, self)
-            }
+            _ => Transition::Selecting(EditorKeyBehavior::Bell, self),
         }
     }
 }
@@ -1272,10 +1282,7 @@ impl Highlighting {
                     Err(_) => Transition::Entering(EditorKeyBehavior::Bell, self.into()),
                 }
             }
-            _ => {
-                todo!();
-                // Transition::EnteringSyllable(EditorKeyBehavior::Absorb, self.into())
-            }
+            _ => Transition::Entering(EditorKeyBehavior::Ignore, self.into()),
         }
     }
 }
