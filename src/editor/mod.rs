@@ -478,6 +478,28 @@ where
     fn cancel_selecting(&mut self) {
         // pop cursor?
     }
+    pub(crate) fn commit(&mut self) -> Result<(), String> {
+        if !self.is_entering() || self.com.is_empty() {
+            dbg!(self.is_entering(), self.com.is_empty());
+            return Err("error".to_string());
+        }
+        self.commit_buffer.clear();
+        let intervals = self.conversion();
+        debug!("buffer {:?}", self.com);
+        if !self.options.disable_auto_learn_phrase {
+            self.auto_learn(&intervals);
+        }
+        let output = intervals
+            .into_iter()
+            .map(|interval| interval.phrase)
+            .collect::<String>();
+        self.commit_buffer.push_str(&output);
+        self.com.clear();
+        self.nth_conversion = 0;
+        self.state = Transition::Entering(EditorKeyBehavior::Commit, Entering);
+        // FIXME fix selections and breaks
+        Ok(())
+    }
     fn try_auto_commit(&mut self) {
         let len = self.com.len();
         if len <= self.options.auto_commit_threshold {
@@ -808,19 +830,7 @@ impl Entering {
                 Transition::Entering(EditorKeyBehavior::Absorb, self)
             }
             Enter => {
-                editor.commit_buffer.clear();
-                let intervals = editor.conversion();
-                debug!("buffer {:?}", editor.com);
-                if !editor.options.disable_auto_learn_phrase {
-                    editor.auto_learn(&intervals);
-                }
-                let output = intervals
-                    .into_iter()
-                    .map(|interval| interval.phrase)
-                    .collect::<String>();
-                editor.commit_buffer.push_str(&output);
-                editor.com.clear();
-                editor.nth_conversion = 0;
+                editor.commit();
                 Transition::Entering(EditorKeyBehavior::Commit, self)
             }
             Esc => {

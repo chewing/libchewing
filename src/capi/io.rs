@@ -32,6 +32,7 @@ use crate::{
 
 const TRUE: c_int = 1;
 const FALSE: c_int = 0;
+const OK: c_int = 0;
 const ERROR: c_int = -1;
 
 enum Owned {
@@ -982,14 +983,12 @@ pub extern "C" fn chewing_cand_list_prev(ctx: *mut ChewingContext) -> c_int {
 pub extern "C" fn chewing_commit_preedit_buf(ctx: *mut ChewingContext) -> c_int {
     let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
-        None => return -1,
+        None => return ERROR,
     };
 
-    // FIXME
-    if !ctx.editor.is_entering() || ctx.editor.display().is_empty() {
-        -1
-    } else {
-        chewing_handle_Enter(ctx)
+    match ctx.editor.commit() {
+        Ok(_) => OK,
+        Err(_) => ERROR,
     }
 }
 
