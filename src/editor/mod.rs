@@ -353,9 +353,14 @@ where
         self.dirty_dict = true;
         Ok(())
     }
-    pub fn unlearn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) {
+    pub fn unlearn_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase: &str,
+    ) -> Result<(), String> {
         let _ = self.dict.remove_phrase(syllables, phrase);
         self.dirty_dict = true;
+        Ok(())
     }
     pub fn switch_character_form(&mut self) {
         self.options = EditorOptions {

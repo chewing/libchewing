@@ -824,12 +824,12 @@ pub extern "C" fn chewing_userphrase_remove(
 ) -> c_int {
     let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
-        None => return -1,
+        None => return ERROR,
     };
 
-    // FIXME should be handled by lower level
-    if chewing_userphrase_lookup(ctx, phrase_buf, bopomofo_buf) != 1 {
-        return 0;
+    // return FALSE when phrase does not exist is C API only behavior
+    if chewing_userphrase_lookup(ctx, phrase_buf, bopomofo_buf) != TRUE {
+        return FALSE;
     }
 
     let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
@@ -838,14 +838,14 @@ pub extern "C" fn chewing_userphrase_remove(
             .into_iter()
             .map_while(|it| it.parse::<Syllable>().ok())
             .collect::<Vec<_>>(),
-        None => return -1,
+        None => return ERROR,
     };
 
     match unsafe { str_from_ptr_with_nul(phrase_buf) } {
-        Some(phrase) => {
-            ctx.editor.unlearn_phrase(&syllables, &phrase);
-            1
-        }
+        Some(phrase) => match ctx.editor.unlearn_phrase(&syllables, &phrase) {
+            Err(_) => FALSE,
+            Ok(_) => TRUE,
+        },
         None => -1,
     }
 }
