@@ -323,6 +323,14 @@ impl Editor {
             Ok(())
         }
     }
+    pub fn cancel_selecting(&mut self) -> Result<(), ()> {
+        if self.is_selecting() {
+            self.shared.cancel_selecting();
+            self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
+            self.state = Box::new(Entering);
+        }
+        Ok(())
+    }
     pub fn last_key_behavior(&self) -> EditorKeyBehavior {
         self.shared.last_key_behavior
     }
@@ -567,7 +575,7 @@ impl SharedState {
         };
     }
     fn cancel_selecting(&mut self) {
-        // pop cursor?
+        self.com.pop_cursor();
     }
     fn commit(&mut self) -> Result<(), String> {
         self.commit_buffer.clear();
@@ -1185,17 +1193,15 @@ impl State for Selecting {
         match ev.code {
             Backspace => {
                 shared.cancel_selecting();
-                shared.com.pop_cursor();
                 self.start_entering()
             }
             Unknown if ev.modifiers.capslock => {
                 shared.switch_language_mode();
-                shared.com.pop_cursor();
+                shared.cancel_selecting();
                 self.start_entering()
             }
             Up => {
                 shared.cancel_selecting();
-                shared.com.pop_cursor();
                 self.start_entering()
             }
             Space if shared.options.space_is_select_key => {

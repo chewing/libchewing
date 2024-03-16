@@ -1645,8 +1645,15 @@ pub extern "C" fn chewing_cand_open(ctx: *mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_cand_close(ctx: *mut ChewingContext) -> c_int {
-    // FIXME exit selecting mode
-    chewing_handle_Up(ctx)
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return ERROR,
+    };
+
+    match ctx.editor.cancel_selecting() {
+        Ok(_) => OK,
+        Err(_) => ERROR,
+    }
 }
 
 #[no_mangle]
