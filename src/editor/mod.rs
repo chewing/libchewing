@@ -98,7 +98,7 @@ pub trait BasicEditor {
 /// The internal state of the editor.
 trait State: Debug {
     /// Transits the state to next state with the key event.
-    fn next(&mut self, global: &mut SharedState, ev: KeyEvent) -> Transition;
+    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition;
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
@@ -765,36 +765,36 @@ impl Entering {
 }
 
 impl State for Entering {
-    fn next(&mut self, editor: &mut SharedState, ev: KeyEvent) -> Transition {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
         use KeyCode::*;
 
         match ev.code {
             Backspace => {
-                if editor.com.is_empty() {
+                if shared.com.is_empty() {
                     self.spin_ignore()
                 } else {
-                    editor.com.remove_before_cursor();
+                    shared.com.remove_before_cursor();
                     self.spin_absorb()
                 }
             }
             Unknown if ev.modifiers.capslock => {
-                editor.switch_language_mode();
+                shared.switch_language_mode();
                 self.spin_absorb()
             }
             code @ (N0 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) if ev.modifiers.ctrl => {
                 if code == N0 || code == N1 {
-                    return self.start_symbol_input(editor);
+                    return self.start_symbol_input(shared);
                 }
                 let n = code as usize;
-                let result = match editor.options.user_phrase_add_dir {
+                let result = match shared.options.user_phrase_add_dir {
                     UserPhraseAddDirection::Forward => {
-                        editor.learn_phrase_in_range(editor.cursor(), editor.cursor() + n)
+                        shared.learn_phrase_in_range(shared.cursor(), shared.cursor() + n)
                     }
                     UserPhraseAddDirection::Backward => {
-                        if editor.cursor() >= n {
-                            editor.learn_phrase_in_range(editor.cursor() - n, editor.cursor())
+                        if shared.cursor() >= n {
+                            shared.learn_phrase_in_range(shared.cursor() - n, shared.cursor())
                         } else {
-                            editor.notice_buffer = "加詞失敗：字數不符或夾雜符號".to_owned();
+                            shared.notice_buffer = "加詞失敗：字數不符或夾雜符號".to_owned();
                             Err("加詞失敗：字數不符或夾雜符號".to_owned())
                         }
                     }
@@ -804,16 +804,16 @@ impl State for Entering {
                     Err(_) => self.spin_bell(),
                 }
             }
-            Tab if editor.com.is_end_of_buffer() => {
-                editor.nth_conversion += 1;
+            Tab if shared.com.is_end_of_buffer() => {
+                shared.nth_conversion += 1;
                 self.spin_absorb()
             }
             Tab => {
-                let interval_ends: Vec<_> = editor.conversion().iter().map(|it| it.end).collect();
-                if interval_ends.contains(&editor.cursor()) {
-                    editor.com.insert_glue();
+                let interval_ends: Vec<_> = shared.conversion().iter().map(|it| it.end).collect();
+                if interval_ends.contains(&shared.cursor()) {
+                    shared.com.insert_glue();
                 } else {
-                    editor.com.insert_break();
+                    shared.com.insert_break();
                 }
                 self.spin_absorb()
             }
@@ -822,147 +822,147 @@ impl State for Entering {
             //     (EditorKeyBehavior::Absorb, &Entering)
             // }
             Del => {
-                if editor.com.is_end_of_buffer() {
+                if shared.com.is_end_of_buffer() {
                     self.spin_ignore()
                 } else {
-                    editor.com.remove_after_cursor();
+                    shared.com.remove_after_cursor();
                     self.spin_absorb()
                 }
             }
             Home => {
-                editor.com.move_cursor_to_beginning();
+                shared.com.move_cursor_to_beginning();
                 self.spin_absorb()
             }
             Left if ev.modifiers.shift => {
-                if editor.com.is_empty() || editor.cursor() == 0 {
+                if shared.com.is_empty() || shared.cursor() == 0 {
                     return self.spin_ignore();
                 }
-                self.start_highlighting(editor.cursor() - 1)
+                self.start_highlighting(shared.cursor() - 1)
             }
             Right if ev.modifiers.shift => {
-                if editor.com.is_empty() || editor.com.is_end_of_buffer() {
+                if shared.com.is_empty() || shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
-                self.start_highlighting(editor.cursor() + 1)
+                self.start_highlighting(shared.cursor() + 1)
             }
             Left => {
-                editor.com.move_cursor_left();
+                shared.com.move_cursor_left();
                 self.spin_absorb()
             }
             Right => {
-                editor.com.move_cursor_right();
+                shared.com.move_cursor_right();
                 self.spin_absorb()
             }
             Up => self.spin_ignore(),
             Space if ev.modifiers.shift => {
-                editor.options.character_form = match editor.options.character_form {
+                shared.options.character_form = match shared.options.character_form {
                     CharacterForm::Halfwidth => CharacterForm::Fullwidth,
                     CharacterForm::Fullwidth => CharacterForm::Halfwidth,
                 };
                 self.spin_absorb()
             }
-            Space if editor.options.space_is_select_key => {
-                self.start_selecting_or_input_space(editor)
+            Space if shared.options.space_is_select_key => {
+                self.start_selecting_or_input_space(shared)
             }
             Down => {
-                debug!("buffer {:?}", editor.com);
-                self.start_selecting(editor)
+                debug!("buffer {:?}", shared.com);
+                self.start_selecting(shared)
             }
             End | PageUp | PageDown => {
-                editor.com.move_cursor_to_end();
+                shared.com.move_cursor_to_end();
                 self.spin_absorb()
             }
             Enter => {
-                let _ = editor.commit();
+                let _ = shared.commit();
                 self.spin_commit()
             }
             Esc => {
-                if editor.options.esc_clear_all_buffer && !editor.com.is_empty() {
-                    editor.com.clear();
+                if shared.options.esc_clear_all_buffer && !shared.com.is_empty() {
+                    shared.com.clear();
                     self.spin_absorb()
                 } else {
                     self.spin_ignore()
                 }
             }
             _ if ev.modifiers.numlock => {
-                if editor.com.is_empty() {
-                    editor.commit_buffer.clear();
-                    editor.commit_buffer.push(ev.unicode);
+                if shared.com.is_empty() {
+                    shared.commit_buffer.clear();
+                    shared.commit_buffer.push(ev.unicode);
                 } else {
-                    editor.com.push(Symbol::Char(ev.unicode));
+                    shared.com.push(Symbol::Char(ev.unicode));
                 }
                 self.spin_commit()
             }
-            _ => match editor.options.language_mode {
+            _ => match shared.options.language_mode {
                 LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
-                    self.start_symbol_input(editor)
+                    self.start_symbol_input(shared)
                 }
                 LanguageMode::Chinese if ev.code == Space => {
-                    match editor.options.character_form {
+                    match shared.options.character_form {
                         CharacterForm::Halfwidth => {
-                            if editor.com.is_empty() {
-                                editor.commit_buffer.clear();
-                                editor.commit_buffer.push(ev.unicode);
+                            if shared.com.is_empty() {
+                                shared.commit_buffer.clear();
+                                shared.commit_buffer.push(ev.unicode);
                             } else {
-                                editor.com.push(Symbol::Char(ev.unicode));
+                                shared.com.push(Symbol::Char(ev.unicode));
                             }
                         }
                         CharacterForm::Fullwidth => {
                             let char_ = full_width_symbol_input(ev.unicode).unwrap();
-                            if editor.com.is_empty() {
-                                editor.commit_buffer.clear();
-                                editor.commit_buffer.push(char_);
+                            if shared.com.is_empty() {
+                                shared.commit_buffer.clear();
+                                shared.commit_buffer.push(char_);
                             } else {
-                                editor.com.push(Symbol::Char(char_));
+                                shared.com.push(Symbol::Char(char_));
                             }
                         }
                     }
                     self.spin_commit()
                 }
-                LanguageMode::Chinese if editor.options.easy_symbol_input => {
+                LanguageMode::Chinese if shared.options.easy_symbol_input => {
                     // Priortize symbol input
-                    if let Some(expended) = editor.abbr.find_abbrev(ev.unicode) {
+                    if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
                         expended
                             .chars()
-                            .for_each(|ch| editor.com.push(Symbol::Char(ch)));
+                            .for_each(|ch| shared.com.push(Symbol::Char(ch)));
                         return self.spin_absorb();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        editor.com.push(Symbol::Char(symbol));
+                        shared.com.push(Symbol::Char(symbol));
                         return self.spin_absorb();
                     }
-                    if ev.modifiers.is_none() && KeyBehavior::Absorb == editor.syl.key_press(ev) {
+                    if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
                         return self.start_enter_syllable();
                     }
                     self.spin_bell()
                 }
                 LanguageMode::Chinese => {
-                    if ev.modifiers.is_none() && KeyBehavior::Absorb == editor.syl.key_press(ev) {
+                    if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
                         return self.start_enter_syllable();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        editor.com.push(Symbol::Char(symbol));
+                        shared.com.push(Symbol::Char(symbol));
                         return self.spin_absorb();
                     }
                     self.spin_bell()
                 }
                 LanguageMode::English => {
-                    match editor.options.character_form {
+                    match shared.options.character_form {
                         CharacterForm::Halfwidth => {
-                            if editor.com.is_empty() {
-                                editor.commit_buffer.clear();
-                                editor.commit_buffer.push(ev.unicode);
+                            if shared.com.is_empty() {
+                                shared.commit_buffer.clear();
+                                shared.commit_buffer.push(ev.unicode);
                             } else {
-                                editor.com.push(Symbol::Char(ev.unicode));
+                                shared.com.push(Symbol::Char(ev.unicode));
                             }
                         }
                         CharacterForm::Fullwidth => {
                             let char_ = full_width_symbol_input(ev.unicode).unwrap();
-                            if editor.com.is_empty() {
-                                editor.commit_buffer.clear();
-                                editor.commit_buffer.push(char_);
+                            if shared.com.is_empty() {
+                                shared.commit_buffer.clear();
+                                shared.commit_buffer.push(char_);
                             } else {
-                                editor.com.push(Symbol::Char(char_));
+                                shared.com.push(Symbol::Char(char_));
                             }
                         }
                     }
@@ -1000,43 +1000,43 @@ impl EnteringSyllable {
 }
 
 impl State for EnteringSyllable {
-    fn next(&mut self, editor: &mut SharedState, ev: KeyEvent) -> Transition {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
         use KeyCode::*;
 
         match ev.code {
             Backspace => {
-                editor.syl.remove_last();
+                shared.syl.remove_last();
 
-                if !editor.syl.is_empty() {
+                if !shared.syl.is_empty() {
                     self.spin_absorb()
                 } else {
                     self.start_entering()
                 }
             }
             Unknown if ev.modifiers.capslock => {
-                editor.syl.clear();
-                editor.switch_language_mode();
+                shared.syl.clear();
+                shared.switch_language_mode();
                 self.start_entering()
             }
             Esc => {
-                editor.syl.clear();
-                if editor.options.esc_clear_all_buffer {
-                    editor.com.clear();
+                shared.syl.clear();
+                if shared.options.esc_clear_all_buffer {
+                    shared.com.clear();
                 }
                 self.start_entering()
             }
-            _ => match editor.syl.key_press(ev) {
+            _ => match shared.syl.key_press(ev) {
                 KeyBehavior::Absorb => self.spin_absorb(),
                 KeyBehavior::Commit => {
                     // FIXME lookup one?
-                    if editor
+                    if shared
                         .dict
-                        .lookup_first_phrase(&[editor.syl.read()])
+                        .lookup_first_phrase(&[shared.syl.read()])
                         .is_some()
                     {
-                        editor.com.push(Symbol::Syllable(editor.syl.read()));
+                        shared.com.push(Symbol::Syllable(shared.syl.read()));
                     }
-                    editor.syl.clear();
+                    shared.syl.clear();
                     self.start_entering()
                 }
                 _ => self.spin_bell(),
@@ -1175,7 +1175,7 @@ impl Selecting {
 }
 
 impl State for Selecting {
-    fn next(&mut self, editor: &mut SharedState, ev: KeyEvent) -> Transition {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
         use KeyCode::*;
 
         if ev.modifiers.ctrl || ev.modifiers.shift {
@@ -1184,28 +1184,28 @@ impl State for Selecting {
 
         match ev.code {
             Backspace => {
-                editor.cancel_selecting();
-                editor.com.pop_cursor();
+                shared.cancel_selecting();
+                shared.com.pop_cursor();
                 self.start_entering()
             }
             Unknown if ev.modifiers.capslock => {
-                editor.switch_language_mode();
-                editor.com.pop_cursor();
+                shared.switch_language_mode();
+                shared.com.pop_cursor();
                 self.start_entering()
             }
             Up => {
-                editor.cancel_selecting();
-                editor.com.pop_cursor();
+                shared.cancel_selecting();
+                shared.com.pop_cursor();
                 self.start_entering()
             }
-            Space if editor.options.space_is_select_key => {
-                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
+            Space if shared.options.space_is_select_key => {
+                if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
                     match &mut self.sel {
                         Selector::Phrase(sel) => {
-                            sel.next(&editor.dict);
+                            sel.next(&shared.dict);
                         }
                         Selector::Symbol(_sel) => (),
                         Selector::SpecialSymmbol(_sel) => (),
@@ -1216,7 +1216,7 @@ impl State for Selecting {
             Down => {
                 match &mut self.sel {
                     Selector::Phrase(sel) => {
-                        sel.next(&editor.dict);
+                        sel.next(&shared.dict);
                     }
                     Selector::Symbol(_sel) => (),
                     Selector::SpecialSymmbol(_sel) => (),
@@ -1224,22 +1224,22 @@ impl State for Selecting {
                 self.spin_absorb()
             }
             J => {
-                if editor.com.is_empty() {
+                if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
-                    Selector::Symbol(_) => editor.com.cursor(),
-                    Selector::SpecialSymmbol(_) => editor.com.cursor(),
+                    Selector::Symbol(_) => shared.com.cursor(),
+                    Selector::SpecialSymmbol(_) => shared.com.cursor(),
                 };
-                editor.com.move_cursor(begin.saturating_sub(1));
-                match editor.com.symbol().expect("should have symbol") {
+                shared.com.move_cursor(begin.saturating_sub(1));
+                match shared.com.symbol().expect("should have symbol") {
                     Symbol::Syllable(_) => {
                         let mut sel = PhraseSelector::new(
-                            !editor.options.phrase_choice_rearward,
-                            editor.com.inner.clone(),
+                            !shared.options.phrase_choice_rearward,
+                            shared.com.inner.clone(),
                         );
-                        sel.init(editor.cursor(), &editor.dict);
+                        sel.init(shared.cursor(), &shared.dict);
                         self.sel = Selector::Phrase(sel);
                     }
                     sym @ Symbol::Char(_) => {
@@ -1250,23 +1250,23 @@ impl State for Selecting {
                 self.spin_absorb()
             }
             K => {
-                if editor.com.is_empty() {
+                if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
                 let begin = match &self.sel {
                     Selector::Phrase(sel) => sel.begin(),
-                    Selector::Symbol(_) => editor.com.cursor(),
-                    Selector::SpecialSymmbol(_) => editor.com.cursor(),
+                    Selector::Symbol(_) => shared.com.cursor(),
+                    Selector::SpecialSymmbol(_) => shared.com.cursor(),
                 };
-                editor.com.move_cursor(begin.saturating_add(1));
-                editor.com.clamp_cursor();
-                match editor.com.symbol().expect("should have symbol") {
+                shared.com.move_cursor(begin.saturating_add(1));
+                shared.com.clamp_cursor();
+                match shared.com.symbol().expect("should have symbol") {
                     Symbol::Syllable(_) => {
                         let mut sel = PhraseSelector::new(
-                            !editor.options.phrase_choice_rearward,
-                            editor.com.inner.clone(),
+                            !shared.options.phrase_choice_rearward,
+                            shared.com.inner.clone(),
                         );
-                        sel.init(editor.cursor(), &editor.dict);
+                        sel.init(shared.cursor(), &shared.dict);
                         self.sel = Selector::Phrase(sel);
                     }
                     sym @ Symbol::Char(_) => {
@@ -1280,12 +1280,12 @@ impl State for Selecting {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
-                    self.page_no = self.total_page(editor, &editor.dict).saturating_sub(1);
+                    self.page_no = self.total_page(shared, &shared.dict).saturating_sub(1);
                 }
                 self.spin_absorb()
             }
             Right | PageDown => {
-                if self.page_no + 1 < self.total_page(editor, &editor.dict) {
+                if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
                     self.page_no = 0;
@@ -1295,11 +1295,11 @@ impl State for Selecting {
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
                 // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
-                self.select(editor, n)
+                self.select(shared, n)
             }
             Esc => {
-                editor.cancel_selecting();
-                editor.com.pop_cursor();
+                shared.cancel_selecting();
+                shared.com.pop_cursor();
                 self.start_entering()
             }
             Del => {
@@ -1329,12 +1329,12 @@ impl Highlighting {
 }
 
 impl State for Highlighting {
-    fn next(&mut self, editor: &mut SharedState, ev: KeyEvent) -> Transition {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
         use KeyCode::*;
 
         match ev.code {
             Unknown if ev.modifiers.capslock => {
-                editor.switch_language_mode();
+                shared.switch_language_mode();
                 self.start_entering()
             }
             Left if ev.modifiers.shift => {
@@ -1344,16 +1344,16 @@ impl State for Highlighting {
                 self.spin_absorb()
             }
             Right if ev.modifiers.shift => {
-                if self.moving_cursor != editor.com.inner.buffer.len() {
+                if self.moving_cursor != shared.com.inner.buffer.len() {
                     self.moving_cursor += 1;
                 }
                 self.spin_absorb()
             }
             Enter => {
-                let start = min(self.moving_cursor, editor.com.cursor());
-                let end = max(self.moving_cursor, editor.com.cursor());
-                editor.com.move_cursor(self.moving_cursor);
-                let _ = editor.learn_phrase_in_range(start, end);
+                let start = min(self.moving_cursor, shared.com.cursor());
+                let end = max(self.moving_cursor, shared.com.cursor());
+                shared.com.move_cursor(self.moving_cursor);
+                let _ = shared.learn_phrase_in_range(start, end);
                 self.start_entering()
             }
             _ => self.start_entering(),
