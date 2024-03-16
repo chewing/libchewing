@@ -2,7 +2,6 @@ use std::{
     collections::HashMap,
     fmt::{Debug, Display},
     ops::Neg,
-    rc::Rc,
 };
 
 use log::{trace, warn};
@@ -74,11 +73,13 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
     let last = acc.last().expect("acc should have at least one item");
     if com.glues.contains(&Glue(last.end)) {
         let last = acc.pop().expect("acc should have at least one item");
+        let mut phrase = last.phrase.into_string();
+        phrase.push_str(&interval.phrase);
         acc.push(Interval {
             start: last.start,
             end: interval.end,
             is_phrase: true,
-            phrase: last.phrase + &interval.phrase,
+            phrase: phrase.into_boxed_str(),
         })
     } else {
         acc.push(interval);
@@ -138,7 +139,7 @@ impl ChewingEngine {
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
-                    if substring != selection.phrase {
+                    if substring != selection.phrase.as_ref() {
                         continue 'next_phrase;
                     }
                 }
@@ -148,7 +149,6 @@ impl ChewingEngine {
             // then pick the one with highest frequency.
             if best_phrase.is_none() || phrase.freq() > max_freq {
                 max_freq = phrase.freq();
-                // TODO can we allocate less?
                 best_phrase = Some(phrase.into());
             }
         }
@@ -303,13 +303,13 @@ impl ChewingEngine {
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum PossiblePhrase {
     Symbol(Symbol),
-    Phrase(Rc<Phrase>),
+    Phrase(Phrase),
 }
 
 impl PossiblePhrase {
     fn to_string(&self) -> String {
         match self {
-            PossiblePhrase::Symbol(sym) => sym.as_char().to_string(),
+            PossiblePhrase::Symbol(sym) => sym.as_char().into(),
             PossiblePhrase::Phrase(phrase) => phrase.to_string(),
         }
     }
@@ -329,13 +329,22 @@ impl Display for PossiblePhrase {
 
 impl From<Phrase> for PossiblePhrase {
     fn from(value: Phrase) -> Self {
-        PossiblePhrase::Phrase(value.into())
+        PossiblePhrase::Phrase(value)
     }
 }
 
 impl From<Symbol> for PossiblePhrase {
     fn from(value: Symbol) -> Self {
         PossiblePhrase::Symbol(value)
+    }
+}
+
+impl From<PossiblePhrase> for Box<str> {
+    fn from(value: PossiblePhrase) -> Self {
+        match value {
+            PossiblePhrase::Symbol(sym) => sym.as_char().to_string().into_boxed_str(),
+            PossiblePhrase::Phrase(phrase) => phrase.into(),
+        }
     }
 }
 
@@ -364,7 +373,7 @@ impl From<PossibleInterval> for Interval {
                 PossiblePhrase::Symbol(_) => false,
                 PossiblePhrase::Phrase(_) => true,
             },
-            phrase: value.phrase.to_string(),
+            phrase: value.phrase.into(),
         }
     }
 }
@@ -586,19 +595,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".to_string()
+                    phrase: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".to_string()
+                    phrase: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "代表".to_string()
+                    phrase: "代表".into()
                 },
             ],
             engine.convert(&dict, &composition)
@@ -628,31 +637,31 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "國".to_string()
+                    phrase: "國".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "民".to_string()
+                    phrase: "民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".to_string()
+                    phrase: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 5,
                     is_phrase: true,
-                    phrase: "代".to_string()
+                    phrase: "代".into()
                 },
                 Interval {
                     start: 5,
                     end: 6,
                     is_phrase: true,
-                    phrase: "表".to_string()
+                    phrase: "表".into()
                 },
             ],
             engine.convert(&dict, &composition)
@@ -676,7 +685,7 @@ mod tests {
                 start: 4,
                 end: 6,
                 is_phrase: true,
-                phrase: "戴錶".to_string(),
+                phrase: "戴錶".into(),
             }],
             breaks: vec![],
             glues: vec![],
@@ -687,19 +696,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".to_string()
+                    phrase: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".to_string()
+                    phrase: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "戴錶".to_string()
+                    phrase: "戴錶".into()
                 },
             ],
             engine.convert(&dict, &composition)
@@ -720,7 +729,7 @@ mod tests {
                 start: 1,
                 end: 3,
                 is_phrase: true,
-                phrase: "酷音".to_string(),
+                phrase: "酷音".into(),
             }],
             breaks: vec![],
             glues: vec![],
@@ -730,7 +739,7 @@ mod tests {
                 start: 0,
                 end: 3,
                 is_phrase: true,
-                phrase: "新酷音".to_string()
+                phrase: "新酷音".into()
             },],
             engine.convert(&dict, &composition)
         );
@@ -750,13 +759,13 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "代".to_string(),
+                    phrase: "代".into(),
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "錶".to_string(),
+                    phrase: "錶".into(),
                 },
             ],
             breaks: vec![],
@@ -768,13 +777,13 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "代".to_string()
+                    phrase: "代".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "錶".to_string()
+                    phrase: "錶".into()
                 }
             ],
             engine.convert(&dict, &composition)
@@ -802,13 +811,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".to_string()
+                    phrase: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".to_string()
+                    phrase: "一下".into()
                 }
             ],
             engine.convert_next(&dict, &composition, 0)
@@ -819,13 +828,13 @@ mod tests {
                     start: 0,
                     end: 3,
                     is_phrase: true,
-                    phrase: "測試儀".to_string()
+                    phrase: "測試儀".into()
                 },
                 Interval {
                     start: 3,
                     end: 4,
                     is_phrase: true,
-                    phrase: "下".to_string()
+                    phrase: "下".into()
                 }
             ],
             engine.convert_next(&dict, &composition, 1)
@@ -836,13 +845,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".to_string()
+                    phrase: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".to_string()
+                    phrase: "一下".into()
                 }
             ],
             engine.convert_next(&dict, &composition, 2)

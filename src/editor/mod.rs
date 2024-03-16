@@ -519,7 +519,7 @@ impl SharedState {
         }
         let result = self
             .dict
-            .add_phrase(&syllables, (&phrase, 100).into())
+            .add_phrase(&syllables, (phrase.as_ref(), 100).into())
             .map(|_| phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned());
         if result.is_ok() {
@@ -1136,7 +1136,7 @@ impl Selecting {
                 debug!("candidates: {:?}", &candidates);
                 match candidates.get(n) {
                     Some(phrase) => {
-                        editor.com.select(sel.interval(phrase.into()));
+                        editor.com.select(sel.interval(phrase.as_str()));
                         debug!("Auto Shift {}", editor.options.auto_shift_cursor);
                         editor.com.pop_cursor();
                         if editor.options.auto_shift_cursor {

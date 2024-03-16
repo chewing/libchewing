@@ -20,10 +20,10 @@ pub struct Interval {
     pub start: usize,
     /// TODO: doc
     pub end: usize,
-    // TODO doc, fix alignment
+    // TODO doc
     pub is_phrase: bool,
     /// TODO: doc
-    pub phrase: String,
+    pub phrase: Box<str>,
 }
 
 impl Interval {

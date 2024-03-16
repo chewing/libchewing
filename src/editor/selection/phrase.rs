@@ -217,12 +217,12 @@ impl PhraseSelector {
         candidates
     }
 
-    pub(crate) fn interval(&self, phrase: String) -> Interval {
+    pub(crate) fn interval(&self, phrase: impl Into<Box<str>>) -> Interval {
         Interval {
             start: self.begin,
             end: self.end,
             is_phrase: true,
-            phrase,
+            phrase: phrase.into(),
         }
     }
 }
@@ -359,7 +359,7 @@ mod tests {
                 start: 0,
                 end: 1,
                 is_phrase: true,
-                phrase: "冊".to_string(),
+                phrase: "冊".into(),
             }],
             breaks: vec![],
         };

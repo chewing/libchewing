@@ -119,7 +119,7 @@ pub struct DictionaryInfo {
 /// ```
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Phrase {
-    phrase: String,
+    phrase: Box<str>,
     freq: u32,
     last_used: Option<u64>,
 }
@@ -136,7 +136,7 @@ impl Phrase {
     /// ```
     pub fn new<S>(phrase: S, freq: u32) -> Phrase
     where
-        S: Into<String>,
+        S: Into<Box<str>>,
     {
         Phrase {
             phrase: phrase.into(),
@@ -213,19 +213,25 @@ impl AsRef<str> for Phrase {
 
 impl From<Phrase> for String {
     fn from(phrase: Phrase) -> Self {
+        phrase.phrase.into_string()
+    }
+}
+
+impl From<Phrase> for Box<str> {
+    fn from(phrase: Phrase) -> Self {
         phrase.phrase
     }
 }
 
 impl From<Phrase> for (String, u32) {
     fn from(phrase: Phrase) -> Self {
-        (phrase.phrase, phrase.freq)
+        (phrase.phrase.into_string(), phrase.freq)
     }
 }
 
 impl<S> From<(S, u32)> for Phrase
 where
-    S: Into<String>,
+    S: Into<Box<str>>,
 {
     fn from(tuple: (S, u32)) -> Self {
         Phrase::new(tuple.0, tuple.1)
@@ -234,7 +240,7 @@ where
 
 impl<S> From<(S, u32, u64)> for Phrase
 where
-    S: Into<String>,
+    S: Into<Box<str>>,
 {
     fn from(tuple: (S, u32, u64)) -> Self {
         Phrase::new(tuple.0, tuple.1).with_time(tuple.2)

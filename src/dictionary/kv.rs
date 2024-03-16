@@ -113,7 +113,7 @@ where
             .btree
             .range(min_key..max_key)
             .map(|(key, value)| Phrase {
-                phrase: key.1.as_ref().to_owned(),
+                phrase: key.1.clone().into(),
                 freq: value.0,
                 last_used: Some(value.1),
             });
@@ -144,7 +144,7 @@ where
                 (
                     key.0.clone().into_owned(),
                     Phrase {
-                        phrase: key.1.as_ref().to_owned(),
+                        phrase: key.1.clone().into(),
                         freq: value.0,
                         last_used: Some(value.1),
                     },
@@ -229,7 +229,10 @@ where
         }
 
         self.btree.insert(
-            (Cow::from(syllable_bytes), Cow::from(phrase.phrase)),
+            (
+                Cow::from(syllable_bytes),
+                Cow::from(phrase.phrase.into_string()),
+            ),
             (phrase.freq, phrase.last_used.unwrap_or_default()),
         );
 
@@ -245,7 +248,10 @@ where
     ) -> Result<(), DictionaryUpdateError> {
         let syllable_bytes = syllables.get_bytes();
         self.btree.insert(
-            (Cow::from(syllable_bytes), Cow::from(phrase.phrase)),
+            (
+                Cow::from(syllable_bytes),
+                Cow::from(phrase.phrase.into_string()),
+            ),
             (user_freq, time),
         );
 
@@ -352,7 +358,7 @@ impl<'a> PhraseData<'a> {
 impl From<PhraseData<'_>> for Phrase {
     fn from(value: PhraseData<'_>) -> Self {
         Phrase {
-            phrase: value.phrase_str().to_owned(),
+            phrase: value.phrase_str().into(),
             freq: value.frequency(),
             last_used: Some(value.last_used()),
         }

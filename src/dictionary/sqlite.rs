@@ -295,7 +295,7 @@ impl Dictionary for SqliteDictionary {
             )
             .expect("SQL error");
         stmt.query_map([syllables_bytes], |row| {
-            let (phrase, freq, time): (String, _, _) = row.try_into()?;
+            let (phrase, freq, time): (Box<str>, _, _) = row.try_into()?;
             let mut phrase = Phrase::new(phrase, freq);
             if let Some(last_used) = time {
                 phrase = phrase.with_time(last_used);
@@ -319,7 +319,7 @@ impl Dictionary for SqliteDictionary {
             .expect("SQL error");
         Box::new(
             stmt.query_map([], |row| {
-                let (syllables_bytes, phrase, freq, time): (Vec<u8>, String, _, _) =
+                let (syllables_bytes, phrase, freq, time): (Vec<u8>, Box<str>, _, _) =
                     row.try_into()?;
                 let syllables = syllables_bytes
                     .chunks_exact(2)
