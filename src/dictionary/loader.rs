@@ -91,14 +91,15 @@ impl UserDictionaryLoader {
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
-        // FIXME: should use dict.update_phrase to also migrate user_freq
         let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
         if data_path != cdb_path && cdb_path.exists() {
             let cdb_dict = CdbDictionary::open(cdb_path)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             for (syllables, phrase) in cdb_dict.entries() {
+                let freq = phrase.freq();
+                let last_used = phrase.last_used().unwrap_or_default();
                 fresh_dict
-                    .add_phrase(&syllables, phrase)
+                    .update_phrase(&syllables, phrase, freq, last_used)
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
             fresh_dict
@@ -113,8 +114,10 @@ impl UserDictionaryLoader {
                     uhash::try_load_text(&input)
                 }) {
                     for (syllables, phrase) in phrases {
+                        let freq = phrase.freq();
+                        let last_used = phrase.last_used().unwrap_or_default();
                         fresh_dict
-                            .add_phrase(&syllables, phrase)
+                            .update_phrase(&syllables, phrase, freq, last_used)
                             .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
                     }
                     fresh_dict
