@@ -10,9 +10,7 @@ use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{
-    kv::KVDictionary, uhash, CdbDictionary, CdbDictionaryBuilder, Dictionary, TrieDictionary,
-};
+use super::{kv::KVDictionary, uhash, CdbDictionary, Dictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
