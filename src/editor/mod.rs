@@ -674,6 +674,9 @@ impl BasicEditor for Editor {
         let _ = self.shared.estimate.tick();
         // reset?
         self.shared.notice_buffer.clear();
+        if self.shared.last_key_behavior == EditorKeyBehavior::Commit {
+            self.shared.commit_buffer.clear();
+        }
 
         match self.state.next(&mut self.shared, key_event) {
             Transition::ToState(to_state) => {
@@ -1503,6 +1506,21 @@ mod tests {
             // Switch to english mode
             keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
             keyboard.map(KeyCode::X),
+        ];
+
+        let key_behaviors: Vec<_> = keys
+            .iter()
+            .map(|&key| editor.process_keyevent(key))
+            .collect();
+
+        assert_eq!(
+            vec![EditorKeyBehavior::Absorb, EditorKeyBehavior::Commit],
+            key_behaviors
+        );
+        assert!(editor.syllable_buffer().is_empty());
+        assert_eq!("x", editor.display_commit());
+
+        let keys = [
             // Switch to chinese mode
             keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
             keyboard.map(KeyCode::H),
@@ -1518,8 +1536,6 @@ mod tests {
         assert_eq!(
             vec![
                 EditorKeyBehavior::Absorb,
-                EditorKeyBehavior::Commit,
-                EditorKeyBehavior::Absorb,
                 EditorKeyBehavior::Absorb,
                 EditorKeyBehavior::Absorb,
                 EditorKeyBehavior::Absorb,
@@ -1527,7 +1543,6 @@ mod tests {
             key_behaviors
         );
         assert!(editor.syllable_buffer().is_empty());
-        assert_eq!("x", editor.display_commit());
         assert_eq!("冊", editor.display());
     }
 
