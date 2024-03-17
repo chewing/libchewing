@@ -170,7 +170,7 @@ impl CompositionEditor {
         debug_assert!(!interval.phrase.is_empty());
         let mut to_remove = vec![];
         for (i, selection) in self.inner.selections.iter().enumerate() {
-            if selection.overlaps(&interval) {
+            if selection.intersect(&interval) {
                 to_remove.push(i);
             }
         }

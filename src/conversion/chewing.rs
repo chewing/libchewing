@@ -4,7 +4,7 @@ use std::{
     ops::Neg,
 };
 
-use log::{trace, warn};
+use log::{debug, trace, warn};
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -109,6 +109,21 @@ impl ChewingEngine {
             if br.0 > start && br.0 < end {
                 // There exists a break point that forbids connecting these
                 // syllables.
+                debug!(
+                    "best phrase for {:?} is None due to break point {:?}",
+                    symbols, br
+                );
+                return None;
+            }
+        }
+
+        for selection in selections {
+            if selection.intersect_range(start, end) && !selection.is_contained_by(start, end) {
+                // There's a conflicting partial intersecting selection.
+                debug!(
+                    "best phrase for {:?} is None due to selection {:?}",
+                    symbols, selection
+                );
                 return None;
             }
         }
@@ -132,14 +147,16 @@ impl ChewingEngine {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
-            for selection in selections.iter() {
+            for selection in selections {
                 debug_assert!(!selection.phrase.is_empty());
                 if start <= selection.start && end >= selection.end {
                     let offset = selection.start - start;
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
+                    debug!("check {} against selection {}", substring, selection.phrase);
                     if substring != selection.phrase.as_ref() {
+                        debug!("skip {}", substring);
                         continue 'next_phrase;
                     }
                 }
@@ -153,6 +170,7 @@ impl ChewingEngine {
             }
         }
 
+        debug!("best phrace for {:?} is {:?}", symbols, best_phrase);
         best_phrase
     }
     fn find_intervals<D: Dictionary + ?Sized>(

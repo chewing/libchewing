@@ -29,10 +29,19 @@ pub struct Interval {
 impl Interval {
     /// TODO: doc
     pub fn contains(&self, other: &Interval) -> bool {
-        self.start <= other.start && self.end >= other.end
+        self.contains_range(other.start, other.end)
     }
-    pub fn overlaps(&self, other: &Interval) -> bool {
-        max(self.start, other.start) < min(self.end, other.end)
+    fn contains_range(&self, start: usize, end: usize) -> bool {
+        self.start <= start && self.end >= end
+    }
+    fn is_contained_by(&self, start: usize, end: usize) -> bool {
+        start <= self.start && end >= self.end
+    }
+    pub fn intersect(&self, other: &Interval) -> bool {
+        self.intersect_range(other.start, other.end)
+    }
+    fn intersect_range(&self, start: usize, end: usize) -> bool {
+        max(self.start, start) < min(self.end, end)
     }
     /// TODO: doc
     pub fn len(&self) -> usize {
