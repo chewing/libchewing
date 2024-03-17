@@ -30,10 +30,14 @@ use crate::{
     zhuyin::Syllable,
 };
 
+use super::logger::ExternLogger;
+
 const TRUE: c_int = 1;
 const FALSE: c_int = 0;
 const OK: c_int = 0;
 const ERROR: c_int = -1;
+
+static mut LOGGER: ExternLogger = ExternLogger::new();
 
 enum Owned {
     CString,
@@ -117,14 +121,19 @@ pub extern "C" fn chewing_new() -> *mut ChewingContext {
 pub extern "C" fn chewing_new2(
     syspath: *const c_char,
     userpath: *const c_char,
-    _logger: Option<
+    logger: Option<
         unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
     >,
-    _loggerdata: *mut c_void,
+    loggerdata: *mut c_void,
 ) -> *mut ChewingContext {
     unsafe {
         if OWNED.get().is_none() {
             let _ = OWNED.set(BTreeMap::new());
+        }
+    }
+    if let Some(logger) = logger {
+        unsafe {
+            LOGGER.set(Some((logger, loggerdata)));
         }
     }
     let dictionaries = if syspath.is_null() {
@@ -683,10 +692,23 @@ pub extern "C" fn chewing_get_phoneSeqLen(ctx: *const ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_logger(
-    _ctx: *mut ChewingContext,
-    logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
+    ctx: *mut ChewingContext,
+    logger: Option<extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...)>,
     data: *mut c_void,
 ) {
+    match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+    if let Some(logger) = logger {
+        unsafe {
+            let _ = log::set_logger(&LOGGER);
+            log::set_max_level(log::LevelFilter::Trace);
+            LOGGER.set(Some((logger, data)));
+        }
+    } else {
+        log::set_max_level(log::LevelFilter::Off);
+    }
 }
 
 #[no_mangle]
