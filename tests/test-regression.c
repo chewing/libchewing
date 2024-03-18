@@ -161,6 +161,21 @@ void test_forgot_selection()
     chewing_delete(ctx);
 }
 
+void test_move_cursor_backwards()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4<L>hk4g4");
+    ok_preedit_buffer(ctx, "冊測試市");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -184,6 +199,7 @@ int main(int argc, char *argv[])
     test_libchewing_googlecode_issue_472();
     test_libchewing_googlecode_issue_473();
     test_forgot_selection();
+    test_move_cursor_backwards();
 
     fclose(fd);
 

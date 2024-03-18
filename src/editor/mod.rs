@@ -900,7 +900,7 @@ impl State for Entering {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.unicode);
                 } else {
-                    shared.com.push(Symbol::Char(ev.unicode));
+                    shared.com.insert(Symbol::Char(ev.unicode));
                 }
                 self.spin_commit()
             }
@@ -915,7 +915,7 @@ impl State for Entering {
                                 shared.commit_buffer.clear();
                                 shared.commit_buffer.push(ev.unicode);
                             } else {
-                                shared.com.push(Symbol::Char(ev.unicode));
+                                shared.com.insert(Symbol::Char(ev.unicode));
                             }
                         }
                         CharacterForm::Fullwidth => {
@@ -924,7 +924,7 @@ impl State for Entering {
                                 shared.commit_buffer.clear();
                                 shared.commit_buffer.push(char_);
                             } else {
-                                shared.com.push(Symbol::Char(char_));
+                                shared.com.insert(Symbol::Char(char_));
                             }
                         }
                     }
@@ -935,11 +935,11 @@ impl State for Entering {
                     if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
                         expended
                             .chars()
-                            .for_each(|ch| shared.com.push(Symbol::Char(ch)));
+                            .for_each(|ch| shared.com.insert(Symbol::Char(ch)));
                         return self.spin_absorb();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.push(Symbol::Char(symbol));
+                        shared.com.insert(Symbol::Char(symbol));
                         return self.spin_absorb();
                     }
                     if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
@@ -952,7 +952,7 @@ impl State for Entering {
                         return self.start_enter_syllable();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.push(Symbol::Char(symbol));
+                        shared.com.insert(Symbol::Char(symbol));
                         return self.spin_absorb();
                     }
                     self.spin_bell()
@@ -964,7 +964,7 @@ impl State for Entering {
                                 shared.commit_buffer.clear();
                                 shared.commit_buffer.push(ev.unicode);
                             } else {
-                                shared.com.push(Symbol::Char(ev.unicode));
+                                shared.com.insert(Symbol::Char(ev.unicode));
                             }
                         }
                         CharacterForm::Fullwidth => {
@@ -973,7 +973,7 @@ impl State for Entering {
                                 shared.commit_buffer.clear();
                                 shared.commit_buffer.push(char_);
                             } else {
-                                shared.com.push(Symbol::Char(char_));
+                                shared.com.insert(Symbol::Char(char_));
                             }
                         }
                     }
@@ -1039,13 +1039,12 @@ impl State for EnteringSyllable {
             _ => match shared.syl.key_press(ev) {
                 KeyBehavior::Absorb => self.spin_absorb(),
                 KeyBehavior::Commit => {
-                    // FIXME lookup one?
                     if shared
                         .dict
                         .lookup_first_phrase(&[shared.syl.read()])
                         .is_some()
                     {
-                        shared.com.push(Symbol::Syllable(shared.syl.read()));
+                        shared.com.insert(Symbol::Syllable(shared.syl.read()));
                     }
                     shared.syl.clear();
                     self.start_entering()
