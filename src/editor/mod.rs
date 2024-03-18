@@ -592,7 +592,6 @@ impl SharedState {
         self.com.clear();
         self.nth_conversion = 0;
         self.last_key_behavior = EditorKeyBehavior::Commit;
-        // FIXME fix selections and breaks
         Ok(())
     }
     fn try_auto_commit(&mut self) {
@@ -613,7 +612,6 @@ impl SharedState {
         }
         self.com.pop_front(remove);
         self.last_key_behavior = EditorKeyBehavior::Commit;
-        // FIXME fix selections and breaks
     }
     // FIXME assumes intervals covers whole composition buffer
     fn auto_learn(&mut self, intervals: &[Interval]) {

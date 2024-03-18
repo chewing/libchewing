@@ -76,7 +76,7 @@ impl CompositionEditor {
         self.cursor = 0;
     }
     pub(crate) fn pop_front(&mut self, n: usize) {
-        assert!(n < self.inner.buffer.len());
+        assert!(n <= self.inner.buffer.len());
         let mut to_remove = vec![];
         for (i, selection) in self.inner.selections.iter().enumerate() {
             if selection.start < n {
