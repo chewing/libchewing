@@ -543,7 +543,6 @@ impl SharedState {
         }
         let phrases = self.dict.lookup_all_phrases(syllables);
         if phrases.is_empty() {
-            // FIXME provide max_freq, orig_freq
             let _ = self.dict.add_phrase(syllables, (phrase, 1).into());
             return Ok(());
         }
@@ -553,7 +552,7 @@ impl SharedState {
             .map(|p| p.freq())
             .unwrap_or(0);
         let phrase = (phrase, phrase_freq).into();
-        // FIXME max_freq calculation is different from C implementation
+        // TODO: fine tune learning curve
         let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
         let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
         let time = self.estimate.now().unwrap();
