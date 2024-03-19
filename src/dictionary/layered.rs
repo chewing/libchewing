@@ -1,6 +1,6 @@
 use std::{
     cmp,
-    collections::{hash_map::Entry, HashMap},
+    collections::{btree_map::Entry, BTreeMap},
     iter,
 };
 
@@ -86,7 +86,7 @@ impl Dictionary for LayeredDictionary {
     ///       Add phrases <- (phrase, freq)
     /// ```
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let mut sort_map: HashMap<String, usize> = HashMap::new();
+        let mut sort_map: BTreeMap<String, usize> = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
         self.sys_dict

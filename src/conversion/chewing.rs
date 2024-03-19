@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     fmt::{Debug, Display},
     ops::Neg,
 };
@@ -514,7 +514,7 @@ impl Display for PossiblePath {
     }
 }
 
-type Graph<'a> = HashMap<(usize, usize), Option<PossiblePhrase>>;
+type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 
 #[cfg(test)]
 mod tests {
