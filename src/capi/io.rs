@@ -136,16 +136,22 @@ pub extern "C" fn chewing_new2(
             LOGGER.set(Some((logger, loggerdata)));
         }
     }
-    let dictionaries = if syspath.is_null() {
-        SystemDictionaryLoader::new().load()
+    let sys_loader = if syspath.is_null() {
+        SystemDictionaryLoader::new()
     } else {
         let search_path = unsafe { CStr::from_ptr(syspath) }
             .to_str()
             .expect("invalid syspath string");
-        SystemDictionaryLoader::new().sys_path(search_path).load()
+        SystemDictionaryLoader::new().sys_path(search_path)
     };
+    let dictionaries = sys_loader.load();
     let dictionaries = match dictionaries {
         Ok(d) => d,
+        Err(_) => return null_mut(),
+    };
+    let abbrev = sys_loader.load_abbrev();
+    let abbrev = match abbrev {
+        Ok(abbr) => abbr,
         Err(_) => return null_mut(),
     };
     let user_dictionary = if userpath.is_null() {
@@ -173,7 +179,7 @@ pub extern "C" fn chewing_new2(
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
-    let editor = Editor::new(conversion_engine, dict, estimate);
+    let editor = Editor::new(conversion_engine, dict, estimate, abbrev);
     let context = Box::new(ChewingContext {
         kb_compat,
         keyboard,

@@ -6,7 +6,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
+use crate::{
+    editor::abbrev::AbbrevTable,
+    path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
+};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
@@ -17,6 +20,7 @@ const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 const UD_CDB_FILE_NAME: &str = "chewing.cdb";
 const UD_MEM_FILE_NAME: &str = ":memory:";
+const ABBREV_FILE_NAME: &str = "swkb.dat";
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -31,7 +35,7 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(path.into());
         self
     }
-    pub fn load(self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
+    pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
         let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
         #[cfg(feature = "sqlite")]
         {
@@ -39,8 +43,8 @@ impl SystemDictionaryLoader {
         }
         db_loaders.push(LoaderWrapper::<TrieDictionary>::new());
 
-        let search_path = if let Some(sys_path) = self.sys_path {
-            sys_path
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
@@ -58,6 +62,16 @@ impl SystemDictionaryLoader {
             .find_map(|loader| loader.open_read_only(&word_dict_path));
 
         Ok(vec![word_dict.unwrap(), tsi_dict.unwrap()])
+    }
+    pub fn load_abbrev(&self) -> Result<AbbrevTable, &'static str> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
+        let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
+            .ok_or("SystemDictionaryNotFound")?;
+        AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(|_| "error loading abbrev table")
     }
 }
 

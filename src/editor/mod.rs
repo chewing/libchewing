@@ -1,6 +1,6 @@
 //! Abstract input method editors.
 
-mod abbrev;
+pub mod abbrev;
 mod composition_editor;
 mod estimate;
 pub mod keyboard;
@@ -162,7 +162,8 @@ impl Editor {
         let estimate = LaxUserFreqEstimate::open(user_dict.as_ref())?;
         let dict = LayeredDictionary::new(system_dict, user_dict);
         let conversion_engine = ChewingEngine::new();
-        let editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
+        let editor = Editor::new(conversion_engine, dict, estimate, abbrev);
         Ok(editor)
     }
 
@@ -170,6 +171,7 @@ impl Editor {
         conv: ChewingEngine,
         dict: LayeredDictionary,
         estimate: LaxUserFreqEstimate,
+        abbr: AbbrevTable,
     ) -> Editor {
         Editor {
             shared: SharedState {
@@ -177,7 +179,7 @@ impl Editor {
                 syl: Box::new(Standard::new()),
                 conv,
                 dict,
-                abbr: AbbrevTable::new().expect("unable to init abbrev table"),
+                abbr,
                 estimate,
                 options: EditorOptions::default(),
                 last_key_behavior: EditorKeyBehavior::Absorb,
@@ -1382,7 +1384,12 @@ mod tests {
     use crate::{
         conversion::ChewingEngine,
         dictionary::{KVDictionary, LayeredDictionary},
-        editor::{estimate, keyboard::Modifiers, EditorKeyBehavior},
+        editor::{
+            abbrev::{self, AbbrevTable},
+            estimate,
+            keyboard::Modifiers,
+            EditorKeyBehavior,
+        },
         syl,
         zhuyin::Bopomofo,
     };
@@ -1401,7 +1408,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         let ev = keyboard.map(KeyCode::H);
         let key_behavior = editor.process_keyevent(ev);
@@ -1429,7 +1437,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
         let key_behaviors: Vec<_> = keys
@@ -1463,7 +1472,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         let keys = [
             keyboard.map(KeyCode::H),
@@ -1507,7 +1517,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         let keys = [
             // Switch to english mode
@@ -1566,7 +1577,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         let keys = [
             keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
@@ -1605,7 +1617,8 @@ mod tests {
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
-        let mut editor = Editor::new(conversion_engine, dict, estimate);
+        let abbrev = AbbrevTable::new();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
 
         editor.switch_character_form();
 
