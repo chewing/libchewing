@@ -1908,6 +1908,8 @@ pub extern "C" fn chewing_zuin_String(
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Init(data_path: *const c_char, hash_path: *const c_char) -> c_int {
+    let _ = hash_path;
+    let _ = data_path;
     0
 }
 
@@ -1941,7 +1943,9 @@ pub extern "C" fn chewing_Configure(
 
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_set_hsuSelKeyType(_ctx: *mut ChewingContext, mode: c_int) {}
+pub extern "C" fn chewing_set_hsuSelKeyType(_ctx: *mut ChewingContext, mode: c_int) {
+    let _ = mode;
+}
 
 #[no_mangle]
 #[deprecated]

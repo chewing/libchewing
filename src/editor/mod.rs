@@ -533,8 +533,11 @@ impl SharedState {
     fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) -> Result<(), String> {
         if syllables.as_slice().len() != phrase.chars().count() {
             warn!(
-                "syllables({:?}) and phrase({}) has different length",
-                &syllables, &phrase
+                "syllables({:?})[{}] and phrase({})[{}] has different length",
+                &syllables,
+                syllables.as_slice().len(),
+                &phrase,
+                phrase.chars().count()
             );
             return Err("".to_string());
         }
@@ -614,9 +617,12 @@ impl SharedState {
             }
         }
         self.com.pop_front(remove);
+        debug!(
+            "buffer has {} symbols left after auto commit",
+            self.com.len()
+        );
         self.last_key_behavior = EditorKeyBehavior::Commit;
     }
-    // FIXME assumes intervals covers whole composition buffer
     fn auto_learn(&mut self, intervals: &[Interval]) {
         debug!("intervals {:?}", intervals);
         let mut pending = String::new();
@@ -690,6 +696,7 @@ impl BasicEditor for Editor {
         if self.shared.last_key_behavior == EditorKeyBehavior::Absorb {
             self.shared.try_auto_commit();
         }
+        trace!("last_key_behavior = {:?}", self.shared.last_key_behavior);
         trace!("comp: {:?}", &self.shared.com);
         if self.shared.dirty_dict {
             let _ = self.shared.dict.reopen();
@@ -909,28 +916,29 @@ impl State for Entering {
                 LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
                     self.start_symbol_input(shared)
                 }
-                LanguageMode::Chinese if ev.code == Space => {
-                    match shared.options.character_form {
-                        CharacterForm::Halfwidth => {
-                            if shared.com.is_empty() {
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(ev.unicode);
-                            } else {
-                                shared.com.insert(Symbol::Char(ev.unicode));
-                            }
-                        }
-                        CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(ev.unicode).unwrap();
-                            if shared.com.is_empty() {
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(char_);
-                            } else {
-                                shared.com.insert(Symbol::Char(char_));
-                            }
+                LanguageMode::Chinese if ev.code == Space => match shared.options.character_form {
+                    CharacterForm::Halfwidth => {
+                        if shared.com.is_empty() {
+                            shared.commit_buffer.clear();
+                            shared.commit_buffer.push(ev.unicode);
+                            self.spin_commit()
+                        } else {
+                            shared.com.insert(Symbol::Char(ev.unicode));
+                            self.spin_absorb()
                         }
                     }
-                    self.spin_commit()
-                }
+                    CharacterForm::Fullwidth => {
+                        let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                        if shared.com.is_empty() {
+                            shared.commit_buffer.clear();
+                            shared.commit_buffer.push(char_);
+                            self.spin_commit()
+                        } else {
+                            shared.com.insert(Symbol::Char(char_));
+                            self.spin_absorb()
+                        }
+                    }
+                },
                 LanguageMode::Chinese if shared.options.easy_symbol_input => {
                     // Priortize symbol input
                     if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
@@ -958,28 +966,29 @@ impl State for Entering {
                     }
                     self.spin_bell()
                 }
-                LanguageMode::English => {
-                    match shared.options.character_form {
-                        CharacterForm::Halfwidth => {
-                            if shared.com.is_empty() {
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(ev.unicode);
-                            } else {
-                                shared.com.insert(Symbol::Char(ev.unicode));
-                            }
-                        }
-                        CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(ev.unicode).unwrap();
-                            if shared.com.is_empty() {
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(char_);
-                            } else {
-                                shared.com.insert(Symbol::Char(char_));
-                            }
+                LanguageMode::English => match shared.options.character_form {
+                    CharacterForm::Halfwidth => {
+                        if shared.com.is_empty() {
+                            shared.commit_buffer.clear();
+                            shared.commit_buffer.push(ev.unicode);
+                            self.spin_commit()
+                        } else {
+                            shared.com.insert(Symbol::Char(ev.unicode));
+                            self.spin_absorb()
                         }
                     }
-                    self.spin_commit()
-                }
+                    CharacterForm::Fullwidth => {
+                        let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                        if shared.com.is_empty() {
+                            shared.commit_buffer.clear();
+                            shared.commit_buffer.push(char_);
+                            self.spin_commit()
+                        } else {
+                            shared.com.insert(Symbol::Char(char_));
+                            self.spin_absorb()
+                        }
+                    }
+                },
             },
         }
     }
@@ -1299,7 +1308,6 @@ impl State for Selecting {
                 self.spin_absorb()
             }
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
-                // TODO allocate less
                 let n = code.to_digit().unwrap().saturating_sub(1) as usize;
                 self.select(shared, n)
             }
@@ -1494,7 +1502,7 @@ mod tests {
                 EditorKeyBehavior::Absorb,
                 EditorKeyBehavior::Absorb,
                 EditorKeyBehavior::Absorb,
-                EditorKeyBehavior::Commit
+                EditorKeyBehavior::Absorb,
             ],
             key_behaviors
         );
