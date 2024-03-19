@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::{
-    editor::abbrev::AbbrevTable,
+    editor::{abbrev::AbbrevTable, SymbolSelector},
     path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
@@ -21,6 +21,7 @@ const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 const UD_CDB_FILE_NAME: &str = "chewing.cdb";
 const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
+const SYMBOLS_FILE_NAME: &str = "symbols.dat";
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -72,6 +73,17 @@ impl SystemDictionaryLoader {
         let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
             .ok_or("SystemDictionaryNotFound")?;
         AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(|_| "error loading abbrev table")
+    }
+    pub fn load_symbol_selector(&self) -> Result<SymbolSelector, &'static str> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
+        let sys_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
+            .ok_or("SystemDictionaryNotFound")?;
+        SymbolSelector::open(sys_path.join(SYMBOLS_FILE_NAME))
+            .map_err(|_| "error loading abbrev table")
     }
 }
 

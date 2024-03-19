@@ -154,6 +154,11 @@ pub extern "C" fn chewing_new2(
         Ok(abbr) => abbr,
         Err(_) => return null_mut(),
     };
+    let sym_sel = sys_loader.load_symbol_selector();
+    let sym_sel = match sym_sel {
+        Ok(sym_sel) => sym_sel,
+        Err(_) => return null_mut(),
+    };
     let user_dictionary = if userpath.is_null() {
         UserDictionaryLoader::new().load()
     } else {
@@ -179,7 +184,7 @@ pub extern "C" fn chewing_new2(
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
-    let editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+    let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
     let context = Box::new(ChewingContext {
         kb_compat,
         keyboard,

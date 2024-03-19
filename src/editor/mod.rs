@@ -11,9 +11,9 @@ use std::{
     any::{Any, TypeId},
     cmp::{max, min},
     fmt::Debug,
-    io,
 };
 
+pub use self::selection::symbol::SymbolSelector;
 pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, trace, warn};
 
@@ -31,10 +31,7 @@ use self::{
     abbrev::AbbrevTable,
     composition_editor::CompositionEditor,
     keyboard::KeyEvent,
-    selection::{
-        phrase::PhraseSelector,
-        symbol::{SpecialSymbolSelector, SymbolSelector},
-    },
+    selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
     syllable::{KeyBehavior, Standard, SyllableEditor},
 };
 
@@ -145,6 +142,7 @@ pub(crate) struct SharedState {
     conv: ChewingEngine,
     dict: LayeredDictionary,
     abbr: AbbrevTable,
+    sym_sel: SymbolSelector,
     estimate: LaxUserFreqEstimate,
     options: EditorOptions,
     last_key_behavior: EditorKeyBehavior,
@@ -163,7 +161,8 @@ impl Editor {
         let dict = LayeredDictionary::new(system_dict, user_dict);
         let conversion_engine = ChewingEngine::new();
         let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
-        let editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SystemDictionaryLoader::new().load_symbol_selector()?;
+        let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
         Ok(editor)
     }
 
@@ -172,6 +171,7 @@ impl Editor {
         dict: LayeredDictionary,
         estimate: LaxUserFreqEstimate,
         abbr: AbbrevTable,
+        sym_sel: SymbolSelector,
     ) -> Editor {
         Editor {
             shared: SharedState {
@@ -180,6 +180,7 @@ impl Editor {
                 conv,
                 dict,
                 abbr,
+                sym_sel,
                 estimate,
                 options: EditorOptions::default(),
                 last_key_behavior: EditorKeyBehavior::Absorb,
@@ -1079,14 +1080,11 @@ impl Selecting {
             sel: Selector::Phrase(sel),
         }
     }
-    fn new_symbol(_editor: &mut SharedState) -> Self {
-        // FIXME load from data
-        let reader = io::Cursor::new(include_str!("../../data/symbols.dat"));
-        let sel = SymbolSelector::new(reader).expect("parse symbols table");
+    fn new_symbol(editor: &mut SharedState) -> Self {
         Selecting {
             page_no: 0,
             action: SelectingAction::Insert,
-            sel: Selector::Symbol(sel),
+            sel: Selector::Symbol(editor.sym_sel.clone()),
         }
     }
     fn new_special_symbol(editor: &mut SharedState, symbol: Symbol) -> Self {
@@ -1385,10 +1383,7 @@ mod tests {
         conversion::ChewingEngine,
         dictionary::{KVDictionary, LayeredDictionary},
         editor::{
-            abbrev::{self, AbbrevTable},
-            estimate,
-            keyboard::Modifiers,
-            EditorKeyBehavior,
+            abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
         },
         syl,
         zhuyin::Bopomofo,
@@ -1409,7 +1404,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let ev = keyboard.map(KeyCode::H);
         let key_behavior = editor.process_keyevent(ev);
@@ -1438,7 +1434,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
         let key_behaviors: Vec<_> = keys
@@ -1473,7 +1470,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
             keyboard.map(KeyCode::H),
@@ -1518,7 +1516,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
             // Switch to english mode
@@ -1578,7 +1577,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
             keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
@@ -1618,7 +1618,8 @@ mod tests {
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
-        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev);
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         editor.switch_character_form();
 
