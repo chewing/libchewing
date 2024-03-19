@@ -274,6 +274,21 @@ where
     }
 }
 
+impl<T, const N: usize> From<[(Vec<Syllable>, Vec<Phrase>); N]> for KVDictionary<T>
+where
+    T: for<'a> KVStore<'a>,
+{
+    fn from(value: [(Vec<Syllable>, Vec<Phrase>); N]) -> Self {
+        let mut dict = KVDictionary::new_in_memory();
+        for (syllables, phrases) in value {
+            for phrase in phrases {
+                dict.add_phrase(&syllables, phrase).unwrap();
+            }
+        }
+        dict
+    }
+}
+
 impl KVStore<'_> for () {
     type ValueIter = Empty<Vec<u8>>;
     type KeyValueIter = Empty<(Vec<u8>, Vec<u8>)>;

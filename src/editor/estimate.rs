@@ -96,15 +96,13 @@ impl UserFreqEstimate for LaxUserFreqEstimate {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
-    use crate::{dictionary::Phrase, syl, zhuyin::Syllable};
+    use crate::{dictionary::KVDictionary, syl};
 
     use super::LaxUserFreqEstimate;
 
     #[test]
     fn load_from_dictionary() {
-        let user_dict: HashMap<Vec<Syllable>, Vec<Phrase>> = HashMap::from([
+        let user_dict = KVDictionary::from([
             (
                 vec![syl![crate::zhuyin::Bopomofo::A]],
                 vec![

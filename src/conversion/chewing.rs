@@ -518,11 +518,9 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use crate::{
         conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
-        dictionary::{Dictionary, Phrase},
+        dictionary::{Dictionary, KVDictionary, Phrase},
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -530,7 +528,7 @@ mod tests {
     use super::{ChewingEngine, PossibleInterval, PossiblePath};
 
     fn test_dictionary() -> impl Dictionary {
-        HashMap::from([
+        KVDictionary::from([
             (vec![syl![G, U, O, TONE2]], vec![("國", 1).into()]),
             (vec![syl![M, I, EN, TONE2]], vec![("民", 1).into()]),
             (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),

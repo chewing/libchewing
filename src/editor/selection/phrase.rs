@@ -229,10 +229,9 @@ impl PhraseSelector {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use crate::{
         conversion::{Interval, Symbol},
+        dictionary::KVDictionary,
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -250,7 +249,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -269,7 +268,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
     }
 
@@ -284,7 +283,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -303,7 +302,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
     }
 

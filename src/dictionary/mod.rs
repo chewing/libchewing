@@ -19,6 +19,9 @@ pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 
+#[cfg(test)]
+pub(crate) use kv::KVDictionary;
+
 mod cdb;
 mod kv;
 mod layered;
