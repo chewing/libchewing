@@ -8,11 +8,13 @@ use std::{
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
     iter,
+    mem::size_of,
     num::NonZeroUsize,
     path::Path,
-    str,
+    str::{self, Utf8Error},
 };
 
+use log::error;
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
@@ -72,13 +74,16 @@ impl TrieLeafView<'_> {
 struct PhraseData<'a>(&'a [u8]);
 
 impl<'a> PhraseData<'a> {
+    fn is_valid(&self) -> bool {
+        self.0.len() > 4 && self.len() <= self.0.len() && self.phrase_str().is_ok()
+    }
     fn frequency(&self) -> u32 {
         u32::from_le_bytes(self.0[..4].try_into().unwrap())
     }
-    fn phrase_str(&self) -> &'a str {
+    fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
         let len = self.0[4] as usize;
         let data = &self.0[5..];
-        str::from_utf8(&data[..len]).expect("should be utf8 encoded string")
+        str::from_utf8(&data[..len])
     }
     fn len(&self) -> usize {
         5 + self.0[4] as usize
@@ -254,6 +259,9 @@ impl TrieDictionary {
     where
         T: Read + Seek,
     {
+        if fmt_chunk.len() != size_of::<u32>() as u32 {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
         let bytes = fmt_chunk.read_contents(&mut stream)?;
         Ok(u32::from_le_bytes(bytes.try_into().unwrap()))
     }
@@ -314,12 +322,25 @@ impl Iterator for PhrasesIter<'_> {
             return None;
         }
         let phrase_data = PhraseData(self.bytes);
+        if !phrase_data.is_valid() {
+            error!("[!] file corruption detected: malformed phrase data.");
+            return None;
+        }
         self.bytes = &self.bytes[phrase_data.len()..];
         Some(Phrase::new(
-            phrase_data.phrase_str(),
+            phrase_data.phrase_str().unwrap(),
             phrase_data.frequency(),
         ))
     }
+}
+
+macro_rules! bail_if_oob {
+    ($begin:expr, $end:expr, $len:expr) => {
+        if $begin >= $end || $end > $len {
+            error!("[!] file corruption detected: index out of bound.");
+            return vec![];
+        }
+    };
 }
 
 impl Dictionary for TrieDictionary {
@@ -328,6 +349,7 @@ impl Dictionary for TrieDictionary {
         let mut node = root;
         'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
+            bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
             let mut child_nodes = self.dict[node.child_begin()..node.child_end()]
                 .chunks_exact(TrieNodeView::SIZE)
                 .map(TrieNodeView);
@@ -337,11 +359,13 @@ impl Dictionary for TrieDictionary {
             }
             return vec![];
         }
+        bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
         let leaf_data = &self.dict[node.child_begin()..];
         let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
         if leaf.reserved_zero() != 0 {
             return vec![];
         }
+        bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
         PhrasesIter {
             bytes: &self.data[leaf.data_begin()..leaf.data_end()],
         }
