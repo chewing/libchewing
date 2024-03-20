@@ -49,8 +49,8 @@ impl TrieNodeView<'_> {
         u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize * Self::SIZE
     }
     fn child_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
-            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
             * Self::SIZE
     }
 }
@@ -66,8 +66,8 @@ impl TrieLeafView<'_> {
         u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize
     }
     fn data_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
-            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
     }
 }
 
