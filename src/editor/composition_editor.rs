@@ -76,7 +76,34 @@ impl CompositionEditor {
         self.cursor = 0;
     }
     pub(crate) fn pop_front(&mut self, n: usize) {
-        assert!(n < self.inner.buffer.len());
+        assert!(n <= self.inner.buffer.len());
+        let mut to_remove = vec![];
+        for (i, selection) in self.inner.selections.iter().enumerate() {
+            if selection.start < n {
+                to_remove.push(i);
+            }
+        }
+        for &i in &to_remove {
+            self.inner.selections.swap_remove(i);
+        }
+        to_remove.clear();
+        for (i, item) in self.inner.breaks.iter().enumerate() {
+            if item.0 < n {
+                to_remove.push(i);
+            }
+        }
+        for &i in &to_remove {
+            self.inner.breaks.swap_remove(i);
+        }
+        to_remove.clear();
+        for (i, item) in self.inner.glues.iter().enumerate() {
+            if item.0 < n {
+                to_remove.push(i);
+            }
+        }
+        for &i in &to_remove {
+            self.inner.glues.swap_remove(i);
+        }
         self.inner.buffer.splice(0..n, []);
         self.cursor = self.cursor.saturating_sub(n);
     }
@@ -84,14 +111,48 @@ impl CompositionEditor {
         if self.cursor == self.inner.buffer.len() {
             return;
         }
+        self.remove_at(self.cursor);
         self.inner.buffer.remove(self.cursor);
     }
     pub(crate) fn remove_before_cursor(&mut self) {
         if self.cursor == 0 {
             return;
         }
+        self.remove_at(self.cursor - 1);
         self.inner.buffer.remove(self.cursor - 1);
         self.cursor -= 1;
+    }
+    fn remove_at(&mut self, cursor: usize) {
+        let mut to_remove = vec![];
+        for (i, selection) in self.inner.selections.iter_mut().enumerate() {
+            if selection.start < cursor && selection.end > cursor {
+                to_remove.push(i);
+            }
+            if selection.start >= cursor {
+                selection.start -= 1;
+                selection.end -= 1;
+            }
+        }
+        for &i in &to_remove {
+            self.inner.selections.swap_remove(i);
+        }
+        for (i, item) in self.inner.breaks.iter().enumerate() {
+            if item.0 >= cursor {
+                to_remove.push(i);
+            }
+        }
+        for &i in &to_remove {
+            self.inner.breaks.swap_remove(i);
+        }
+
+        for (i, item) in self.inner.glues.iter().enumerate() {
+            if item.0 >= cursor {
+                to_remove.push(i);
+            }
+        }
+        for &i in &to_remove {
+            self.inner.glues.swap_remove(i);
+        }
     }
     pub(crate) fn move_cursor_to_end(&mut self) {
         self.cursor = self.inner.buffer.len();
@@ -105,14 +166,32 @@ impl CompositionEditor {
     pub(crate) fn move_cursor_right(&mut self) {
         self.cursor = min(self.cursor + 1, self.inner.buffer.len());
     }
-    pub(crate) fn push(&mut self, symbol: Symbol) {
-        self.inner.buffer.push(symbol);
-        self.cursor += 1;
-    }
     pub(crate) fn insert(&mut self, s: Symbol) {
+        let mut to_remove = vec![];
+        for (i, selection) in self.inner.selections.iter_mut().enumerate() {
+            if selection.start < self.cursor && selection.end > self.cursor {
+                to_remove.push(i);
+            }
+            if selection.start >= self.cursor {
+                selection.start += 1;
+                selection.end += 1;
+            }
+        }
+        for i in to_remove {
+            self.inner.selections.swap_remove(i);
+        }
+        for item in self.inner.breaks.iter_mut() {
+            if item.0 >= self.cursor {
+                item.0 += 1;
+            }
+        }
+        for item in self.inner.glues.iter_mut() {
+            if item.0 >= self.cursor {
+                item.0 += 1;
+            }
+        }
         self.inner.buffer.insert(self.cursor, s);
         self.cursor += 1;
-        // FIXME shift selections and breaks
     }
     pub(crate) fn insert_glue(&mut self) {
         let break_idx = self
@@ -152,7 +231,6 @@ impl CompositionEditor {
     }
     pub(crate) fn replace(&mut self, s: Symbol) {
         self.inner.buffer[self.cursor] = s;
-        // FIXME shift selections and breaks
     }
     pub(crate) fn symbol_for_select(&self) -> Option<Symbol> {
         let cursor = if self.cursor == self.inner.buffer.len() {
@@ -170,7 +248,7 @@ impl CompositionEditor {
         debug_assert!(!interval.phrase.is_empty());
         let mut to_remove = vec![];
         for (i, selection) in self.inner.selections.iter().enumerate() {
-            if selection.overlaps(&interval) {
+            if selection.intersect(&interval) {
                 to_remove.push(i);
             }
         }

@@ -1,6 +1,6 @@
 use std::{
     cmp,
-    collections::{hash_map::Entry, HashMap},
+    collections::{btree_map::Entry, BTreeMap},
     iter,
 };
 
@@ -86,7 +86,7 @@ impl Dictionary for LayeredDictionary {
     ///       Add phrases <- (phrase, freq)
     /// ```
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let mut sort_map: HashMap<String, usize> = HashMap::new();
+        let mut sort_map: BTreeMap<String, usize> = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
         self.sys_dict
@@ -111,9 +111,16 @@ impl Dictionary for LayeredDictionary {
         phrases
     }
 
+    /// Returns all entries from all dictionaries.
+    ///
+    /// **NOTE**: Duplicate entries are not removed.
     fn entries(&self) -> DictEntries<'_> {
-        // FIXME
-        Box::new(iter::empty())
+        Box::new(
+            self.sys_dict
+                .iter()
+                .chain(iter::once(&self.user_dict))
+                .flat_map(|dict| dict.entries()),
+        )
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -164,5 +171,58 @@ impl Dictionary for LayeredDictionary {
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         self.user_dict.remove_phrase(syllables, phrase_str)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{collections::HashMap, error::Error};
+
+    use crate::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+
+    use super::LayeredDictionary;
+
+    #[test]
+    fn test_entries() -> Result<(), Box<dyn Error>> {
+        let mut sys_dict = Box::new(HashMap::new());
+        let mut user_dict = Box::new(HashMap::new());
+        sys_dict.insert(
+            vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()],
+        );
+        user_dict.insert(
+            vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("策", 100).into(), ("冊", 100).into()],
+        );
+
+        let dict = LayeredDictionary::new(vec![sys_dict], user_dict);
+        assert_eq!(
+            [
+                (
+                    vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                    ("測", 1).into()
+                ),
+                (
+                    vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                    ("冊", 1).into()
+                ),
+                (
+                    vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                    ("側", 1).into()
+                ),
+                (
+                    vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                    ("策", 100).into()
+                ),
+                (
+                    vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                    ("冊", 100).into()
+                ),
+            ]
+            .into_iter()
+            .collect::<Vec<_>>(),
+            dict.entries().collect::<Vec<_>>(),
+        );
+        Ok(())
     }
 }

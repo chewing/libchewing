@@ -6,19 +6,22 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::path::{find_path_by_files, sys_path_from_env_var, userphrase_path};
+use crate::{
+    editor::{abbrev::AbbrevTable, SymbolSelector},
+    path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
+};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{
-    kv::KVDictionary, uhash, CdbDictionary, CdbDictionaryBuilder, Dictionary, TrieDictionary,
-};
+use super::{kv::KVDictionary, uhash, CdbDictionary, Dictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 const UD_CDB_FILE_NAME: &str = "chewing.cdb";
 const UD_MEM_FILE_NAME: &str = ":memory:";
+const ABBREV_FILE_NAME: &str = "swkb.dat";
+const SYMBOLS_FILE_NAME: &str = "symbols.dat";
 
 #[derive(Debug)]
 pub struct SystemDictionaryLoader {
@@ -33,7 +36,7 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(path.into());
         self
     }
-    pub fn load(self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
+    pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
         let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
         #[cfg(feature = "sqlite")]
         {
@@ -41,8 +44,8 @@ impl SystemDictionaryLoader {
         }
         db_loaders.push(LoaderWrapper::<TrieDictionary>::new());
 
-        let search_path = if let Some(sys_path) = self.sys_path {
-            sys_path
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
@@ -60,6 +63,27 @@ impl SystemDictionaryLoader {
             .find_map(|loader| loader.open_read_only(&word_dict_path));
 
         Ok(vec![word_dict.unwrap(), tsi_dict.unwrap()])
+    }
+    pub fn load_abbrev(&self) -> Result<AbbrevTable, &'static str> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
+        let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
+            .ok_or("SystemDictionaryNotFound")?;
+        AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(|_| "error loading abbrev table")
+    }
+    pub fn load_symbol_selector(&self) -> Result<SymbolSelector, &'static str> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
+        let sys_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
+            .ok_or("SystemDictionaryNotFound")?;
+        SymbolSelector::open(sys_path.join(SYMBOLS_FILE_NAME))
+            .map_err(|_| "error loading abbrev table")
     }
 }
 
@@ -93,14 +117,15 @@ impl UserDictionaryLoader {
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
-        // FIXME: should use dict.update_phrase to also migrate user_freq
         let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
         if data_path != cdb_path && cdb_path.exists() {
             let cdb_dict = CdbDictionary::open(cdb_path)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             for (syllables, phrase) in cdb_dict.entries() {
+                let freq = phrase.freq();
+                let last_used = phrase.last_used().unwrap_or_default();
                 fresh_dict
-                    .add_phrase(&syllables, phrase)
+                    .update_phrase(&syllables, phrase, freq, last_used)
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
             fresh_dict
@@ -115,8 +140,10 @@ impl UserDictionaryLoader {
                     uhash::try_load_text(&input)
                 }) {
                     for (syllables, phrase) in phrases {
+                        let freq = phrase.freq();
+                        let last_used = phrase.last_used().unwrap_or_default();
                         fresh_dict
-                            .add_phrase(&syllables, phrase)
+                            .update_phrase(&syllables, phrase, freq, last_used)
                             .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
                     }
                     fresh_dict

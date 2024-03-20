@@ -30,6 +30,15 @@ use crate::{
     zhuyin::Syllable,
 };
 
+use super::logger::ExternLogger;
+
+const TRUE: c_int = 1;
+const FALSE: c_int = 0;
+const OK: c_int = 0;
+const ERROR: c_int = -1;
+
+static mut LOGGER: ExternLogger = ExternLogger::new();
+
 enum Owned {
     CString,
     CUShortSlice(usize),
@@ -112,26 +121,42 @@ pub extern "C" fn chewing_new() -> *mut ChewingContext {
 pub extern "C" fn chewing_new2(
     syspath: *const c_char,
     userpath: *const c_char,
-    _logger: Option<
+    logger: Option<
         unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
     >,
-    _loggerdata: *mut c_void,
+    loggerdata: *mut c_void,
 ) -> *mut ChewingContext {
     unsafe {
         if OWNED.get().is_none() {
             let _ = OWNED.set(BTreeMap::new());
         }
     }
-    let dictionaries = if syspath.is_null() {
-        SystemDictionaryLoader::new().load()
+    if let Some(logger) = logger {
+        unsafe {
+            LOGGER.set(Some((logger, loggerdata)));
+        }
+    }
+    let sys_loader = if syspath.is_null() {
+        SystemDictionaryLoader::new()
     } else {
         let search_path = unsafe { CStr::from_ptr(syspath) }
             .to_str()
             .expect("invalid syspath string");
-        SystemDictionaryLoader::new().sys_path(search_path).load()
+        SystemDictionaryLoader::new().sys_path(search_path)
     };
+    let dictionaries = sys_loader.load();
     let dictionaries = match dictionaries {
         Ok(d) => d,
+        Err(_) => return null_mut(),
+    };
+    let abbrev = sys_loader.load_abbrev();
+    let abbrev = match abbrev {
+        Ok(abbr) => abbr,
+        Err(_) => return null_mut(),
+    };
+    let sym_sel = sys_loader.load_symbol_selector();
+    let sym_sel = match sym_sel {
+        Ok(sym_sel) => sym_sel,
         Err(_) => return null_mut(),
     };
     let user_dictionary = if userpath.is_null() {
@@ -159,7 +184,7 @@ pub extern "C" fn chewing_new2(
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
-    let editor = Editor::new(conversion_engine, dict, estimate);
+    let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
     let context = Box::new(ChewingContext {
         kb_compat,
         keyboard,
@@ -678,10 +703,23 @@ pub extern "C" fn chewing_get_phoneSeqLen(ctx: *const ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_set_logger(
-    _ctx: *mut ChewingContext,
-    logger: extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
+    ctx: *mut ChewingContext,
+    logger: Option<extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...)>,
     data: *mut c_void,
 ) {
+    match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return,
+    };
+    if let Some(logger) = logger {
+        unsafe {
+            let _ = log::set_logger(&LOGGER);
+            log::set_max_level(log::LevelFilter::Trace);
+            LOGGER.set(Some((logger, data)));
+        }
+    } else {
+        log::set_max_level(log::LevelFilter::Off);
+    }
 }
 
 #[no_mangle]
@@ -804,15 +842,11 @@ pub extern "C" fn chewing_userphrase_add(
     }
 
     match unsafe { str_from_ptr_with_nul(phrase_buf) } {
-        Some(phrase) => {
-            // FIXME should be handled by lower level
-            if syllables.len() != phrase.chars().count() {
-                return 0;
-            }
-            ctx.editor.learn_phrase(&syllables, &phrase);
-            1
-        }
-        None => -1,
+        Some(phrase) => match ctx.editor.learn_phrase(&syllables, &phrase) {
+            Ok(_) => TRUE,
+            Err(_) => FALSE,
+        },
+        None => ERROR,
     }
 }
 
@@ -824,12 +858,12 @@ pub extern "C" fn chewing_userphrase_remove(
 ) -> c_int {
     let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
-        None => return -1,
+        None => return ERROR,
     };
 
-    // FIXME should be handled by lower level
-    if chewing_userphrase_lookup(ctx, phrase_buf, bopomofo_buf) != 1 {
-        return 0;
+    // return FALSE when phrase does not exist is C API only behavior
+    if chewing_userphrase_lookup(ctx, phrase_buf, bopomofo_buf) != TRUE {
+        return FALSE;
     }
 
     let syllables = match unsafe { str_from_ptr_with_nul(bopomofo_buf) } {
@@ -838,14 +872,14 @@ pub extern "C" fn chewing_userphrase_remove(
             .into_iter()
             .map_while(|it| it.parse::<Syllable>().ok())
             .collect::<Vec<_>>(),
-        None => return -1,
+        None => return ERROR,
     };
 
     match unsafe { str_from_ptr_with_nul(phrase_buf) } {
-        Some(phrase) => {
-            ctx.editor.unlearn_phrase(&syllables, &phrase);
-            1
-        }
+        Some(phrase) => match ctx.editor.unlearn_phrase(&syllables, &phrase) {
+            Err(_) => FALSE,
+            Ok(_) => TRUE,
+        },
         None => -1,
     }
 }
@@ -982,14 +1016,12 @@ pub extern "C" fn chewing_cand_list_prev(ctx: *mut ChewingContext) -> c_int {
 pub extern "C" fn chewing_commit_preedit_buf(ctx: *mut ChewingContext) -> c_int {
     let ctx = match unsafe { ctx.as_mut() } {
         Some(ctx) => ctx,
-        None => return -1,
+        None => return ERROR,
     };
 
-    // FIXME
-    if !ctx.editor.is_entering() || ctx.editor.display().is_empty() {
-        -1
-    } else {
-        chewing_handle_Enter(ctx)
+    match ctx.editor.commit() {
+        Ok(_) => OK,
+        Err(_) => ERROR,
     }
 }
 
@@ -1646,8 +1678,15 @@ pub extern "C" fn chewing_cand_open(ctx: *mut ChewingContext) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_cand_close(ctx: *mut ChewingContext) -> c_int {
-    // FIXME exit selecting mode
-    chewing_handle_Up(ctx)
+    let ctx = match unsafe { ctx.as_mut() } {
+        Some(ctx) => ctx,
+        None => return ERROR,
+    };
+
+    match ctx.editor.cancel_selecting() {
+        Ok(_) => OK,
+        Err(_) => ERROR,
+    }
 }
 
 #[no_mangle]
@@ -1869,6 +1908,8 @@ pub extern "C" fn chewing_zuin_String(
 #[no_mangle]
 #[deprecated]
 pub extern "C" fn chewing_Init(data_path: *const c_char, hash_path: *const c_char) -> c_int {
+    let _ = hash_path;
+    let _ = data_path;
     0
 }
 
@@ -1902,7 +1943,9 @@ pub extern "C" fn chewing_Configure(
 
 #[no_mangle]
 #[deprecated]
-pub extern "C" fn chewing_set_hsuSelKeyType(_ctx: *mut ChewingContext, mode: c_int) {}
+pub extern "C" fn chewing_set_hsuSelKeyType(_ctx: *mut ChewingContext, mode: c_int) {
+    let _ = mode;
+}
 
 #[no_mangle]
 #[deprecated]

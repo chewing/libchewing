@@ -1,9 +1,9 @@
 use std::cmp::min;
 
 use crate::{
-    conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
+    conversion::{Break, Composition, Interval, Symbol},
     dictionary::{Dictionary, LayeredDictionary},
-    editor::Editor,
+    editor::SharedState,
 };
 
 #[derive(Debug)]
@@ -196,11 +196,7 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates<C: ConversionEngine<LayeredDictionary>>(
-        &self,
-        editor: &Editor<C>,
-        dict: &LayeredDictionary,
-    ) -> Vec<String> {
+    pub(crate) fn candidates(&self, editor: &SharedState, dict: &LayeredDictionary) -> Vec<String> {
         let mut candidates = dict
             .lookup_all_phrases(&&self.buffer[self.begin..self.end])
             .into_iter()
@@ -221,22 +217,21 @@ impl PhraseSelector {
         candidates
     }
 
-    pub(crate) fn interval(&self, phrase: String) -> Interval {
+    pub(crate) fn interval(&self, phrase: impl Into<Box<str>>) -> Interval {
         Interval {
             start: self.begin,
             end: self.end,
             is_phrase: true,
-            phrase,
+            phrase: phrase.into(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use crate::{
         conversion::{Interval, Symbol},
+        dictionary::KVDictionary,
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -254,7 +249,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -273,7 +268,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
     }
 
@@ -288,7 +283,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -307,7 +302,7 @@ mod tests {
             selections: vec![],
             breaks: vec![],
         };
-        let dict = HashMap::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
     }
 
@@ -363,7 +358,7 @@ mod tests {
                 start: 0,
                 end: 1,
                 is_phrase: true,
-                phrase: "冊".to_string(),
+                phrase: "冊".into(),
             }],
             breaks: vec![],
         };

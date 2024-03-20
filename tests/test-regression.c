@@ -141,6 +141,56 @@ void test_libchewing_data_issue_1()
     chewing_delete(ctx);
 }
 
+void test_forgot_selection()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_escCleanAllBuf(ctx, 1);
+
+    type_keystroke_by_string(ctx, "<EE>hk4g4<L><L><D>3<R><R>g4");
+    ok_preedit_buffer(ctx, "策士市");
+
+    type_keystroke_by_string(ctx, "<EE>hk4g4<L><L><D>2<R><R>g4");
+    ok_preedit_buffer(ctx, "策試市");
+
+    chewing_delete(ctx);
+}
+
+void test_move_cursor_backwards()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4<L>hk4g4");
+    ok_preedit_buffer(ctx, "冊測試市");
+
+    chewing_delete(ctx);
+}
+
+void test_insert_symbol_between_selection()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4<L><L><D>3<R>?");
+    ok_preedit_buffer(ctx, "冊？市");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -156,13 +206,15 @@ int main(int argc, char *argv[])
     assert(fd);
     free(logname);
 
-
     test_libchewing_data_issue_1();
     test_libchewing_issue_30();
     test_libchewing_issue_108();
     test_libchewing_issue_194();
     test_libchewing_googlecode_issue_472();
     test_libchewing_googlecode_issue_473();
+    test_forgot_selection();
+    test_move_cursor_backwards();
+    test_insert_symbol_between_selection();
 
     fclose(fd);
 

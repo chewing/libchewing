@@ -12,6 +12,7 @@
 
 mod ffi;
 mod io;
+mod logger;
 mod public;
 
 #[doc(hidden)]

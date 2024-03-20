@@ -6,15 +6,15 @@ use std::{
 
 use crate::conversion::Symbol;
 
-#[derive(Debug, Default)]
-pub(crate) struct SymbolSelector {
+#[derive(Debug, Default, Clone)]
+pub struct SymbolSelector {
     category: Vec<(String, usize)>,
     table: Vec<String>,
     cursor: Option<u8>,
 }
 
 impl SymbolSelector {
-    pub(crate) fn _load<P: AsRef<Path>>(path: P) -> Result<SymbolSelector> {
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<SymbolSelector> {
         let file = File::open(path)?;
         let reader = BufReader::new(file);
         SymbolSelector::new(reader)

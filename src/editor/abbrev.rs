@@ -1,18 +1,24 @@
 use std::{
-    collections::HashMap,
-    io::{self, BufRead},
+    collections::BTreeMap,
+    fs::File,
+    io::{self, BufRead, BufReader},
+    path::Path,
 };
 
 #[derive(Debug)]
-pub(crate) struct AbbrevTable {
-    table: HashMap<char, String>,
+pub struct AbbrevTable {
+    table: BTreeMap<char, String>,
 }
 
 impl AbbrevTable {
-    pub(crate) fn new() -> io::Result<AbbrevTable> {
-        // FIXME load from data
-        let reader = io::Cursor::new(include_str!("../../data/swkb.dat"));
-        let mut table = HashMap::new();
+    pub fn new() -> AbbrevTable {
+        AbbrevTable {
+            table: BTreeMap::default(),
+        }
+    }
+    pub fn open<P: AsRef<Path>>(path: P) -> io::Result<AbbrevTable> {
+        let reader = BufReader::new(File::open(path.as_ref())?);
+        let mut table = BTreeMap::new();
         for line in reader.lines() {
             let line = line?;
             let (abbr, expended) = line
@@ -23,7 +29,7 @@ impl AbbrevTable {
         Ok(AbbrevTable { table })
     }
 
-    pub(crate) fn find_abbrev(&self, ch: char) -> Option<&String> {
+    pub fn find_abbrev(&self, ch: char) -> Option<&String> {
         self.table.get(&ch)
     }
 }
