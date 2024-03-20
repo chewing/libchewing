@@ -28,7 +28,10 @@ pub fn main() -> Result<()> {
         syl![Bopomofo::SH, Bopomofo::TONE4],
     ]);
     for phrase in entries {
-        debug!("[+] found [{:?}]", phrase);
+        debug!("[+] found {:?}", phrase);
+    }
+    for phrase in dict.entries() {
+        debug!("[+] found {:?}", phrase);
     }
 
     Ok(())
