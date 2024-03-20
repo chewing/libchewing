@@ -345,6 +345,7 @@ macro_rules! bail_if_oob {
 
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        bail_if_oob!(0, TrieNodeView::SIZE, self.dict.len());
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         'next: for syl in syllables.as_slice().iter() {
@@ -361,6 +362,7 @@ impl Dictionary for TrieDictionary {
         }
         bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
         let leaf_data = &self.dict[node.child_begin()..];
+        bail_if_oob!(0, TrieLeafView::SIZE, leaf_data.len());
         let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
         if leaf.reserved_zero() != 0 {
             return vec![];
