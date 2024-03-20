@@ -343,6 +343,15 @@ macro_rules! bail_if_oob {
     };
 }
 
+macro_rules! iter_bail_if_oob {
+    ($begin:expr, $end:expr, $len:expr) => {
+        if $begin >= $end || $end > $len {
+            error!("[!] file corruption detected: index out of bound.");
+            return None;
+        }
+    };
+}
+
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         bail_if_oob!(0, TrieNodeView::SIZE, self.dict.len());
@@ -379,13 +388,15 @@ impl Dictionary for TrieDictionary {
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
+        if self.dict.len() < TrieNodeView::SIZE {
+            error!("[!] file corruption detected: index out of bound.");
+            return Box::new(iter::empty());
+        }
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         let mut done = false;
         let make_dict_entry =
-            |syllables: &[u16], node: &TrieNodeView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
-                let leaf_data = &self.dict[node.child_begin()..];
-                let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
+            |syllables: &[u16], leaf: &TrieLeafView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
                 debug_assert_eq!(leaf.reserved_zero(), 0);
                 let phrases = PhrasesIter {
                     bytes: &self.data[leaf.data_begin()..leaf.data_end()],
@@ -409,6 +420,7 @@ impl Dictionary for TrieDictionary {
             }
             // descend until find a leaf node which is not also a internal node.
             loop {
+                iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
                 let mut child_iter = self.dict[node.child_begin()..node.child_end()]
                     .chunks_exact(TrieNodeView::SIZE)
                     .map(TrieNodeView);
@@ -417,7 +429,11 @@ impl Dictionary for TrieDictionary {
                     .expect("syllable node should have at least one child node");
                 if next.syllable() == 0 {
                     // found a leaf syllable node
-                    results.push(make_dict_entry(&syllables, &node));
+                    iter_bail_if_oob!(next.child_begin(), next.child_end(), self.dict.len());
+                    let leaf_data = &self.dict[next.child_begin()..];
+                    let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
+                    iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
+                    results.push(make_dict_entry(&syllables, &leaf));
                     if let Some(second) = child_iter.next() {
                         next = second;
                     } else {
