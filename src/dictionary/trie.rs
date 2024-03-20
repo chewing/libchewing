@@ -252,6 +252,25 @@ impl TrieDictionary {
         let data = data_chunk
             .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting data chunk"))?
             .read_contents(&mut stream)?;
+        let crc32 = Crc32::new();
+        if dict.len() < size_of::<u32>() {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        let dict_len = dict.len() - size_of::<u32>();
+        let crc = u32::from_le_bytes(dict[dict_len..].try_into().unwrap());
+        let check = crc32.check(&dict[..dict_len]);
+        if crc != check {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        if data.len() < size_of::<u32>() {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        let data_len = data.len().saturating_sub(size_of::<u32>());
+        let crc = u32::from_le_bytes(data[data_len..].try_into().unwrap());
+        let check = crc32.check(&data[..data_len]);
+        if crc != check {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
         Ok(TrieDictionary { info, dict, data })
     }
 
@@ -429,8 +448,8 @@ impl Dictionary for TrieDictionary {
                     .expect("syllable node should have at least one child node");
                 if next.syllable() == 0 {
                     // found a leaf syllable node
-                    iter_bail_if_oob!(next.child_begin(), next.child_end(), self.dict.len());
-                    let leaf_data = &self.dict[next.child_begin()..];
+                    iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
+                    let leaf_data = &self.dict[node.child_begin()..];
                     let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
                     iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
                     results.push(make_dict_entry(&syllables, &leaf));
@@ -696,6 +715,8 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ...                                                           ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                             CRC32                             |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
 /// The index chunk contains the trie node records serialized in BFS order. The
@@ -749,6 +770,8 @@ impl Dictionary for TrieDictionary {
 /// |                           Frequency                           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |      Length     |                                           ...
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                             CRC32                             |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
@@ -975,6 +998,12 @@ impl TrieDictionaryBuilder {
             }
         }
 
+        let crc32 = Crc32::new();
+        let check = crc32.check(&dict_buf);
+        dict_buf.write_all(&check.to_le_bytes())?;
+        let check = crc32.check(&data_buf);
+        data_buf.write_all(&check.to_le_bytes())?;
+
         // Wrap the data in a RIFF container
         let contents = ChunkContents::Children(
             RIFF_ID.clone(),
@@ -1193,6 +1222,57 @@ impl Default for TrieDictionaryBuilder {
     }
 }
 
+/// Calculates CRC32 with CRC-32-IEEE 802.3 poly
+struct Crc32 {
+    table: Box<[[u32; 256]; 8]>,
+}
+
+impl Crc32 {
+    fn new() -> Crc32 {
+        let mut table = Box::new([[0u32; 256]; 8]);
+        // CRC-32-IEEE 802.3 poly
+        let poly: u32 = 0xEDB88320;
+        for i in 0..256usize {
+            let mut crc = i as u32;
+            for _ in 0..8 {
+                crc = (crc >> 1) ^ ((crc & 1) * poly);
+            }
+            table[0][i] = crc;
+        }
+        for i in 0..256usize {
+            table[1][i] = (table[0][i] >> 8) ^ table[0][(table[0][i] & 0xff) as usize];
+            table[2][i] = (table[1][i] >> 8) ^ table[0][(table[1][i] & 0xff) as usize];
+            table[3][i] = (table[2][i] >> 8) ^ table[0][(table[2][i] & 0xff) as usize];
+            table[4][i] = (table[3][i] >> 8) ^ table[0][(table[3][i] & 0xff) as usize];
+            table[5][i] = (table[4][i] >> 8) ^ table[0][(table[4][i] & 0xff) as usize];
+            table[6][i] = (table[5][i] >> 8) ^ table[0][(table[5][i] & 0xff) as usize];
+            table[7][i] = (table[6][i] >> 8) ^ table[0][(table[6][i] & 0xff) as usize];
+        }
+        Crc32 { table }
+    }
+    fn check(&self, buf: &[u8]) -> u32 {
+        // Slice-by-8 algorithm
+        !buf.chunks(8).fold(!0u32, |crc, bytes| {
+            if bytes.len() == 8 {
+                let one = u32::from_le_bytes(bytes[0..4].try_into().unwrap()) ^ crc;
+                let two = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+                self.table[0][(two >> 24 & 0xFF) as usize]
+                    ^ self.table[1][(two >> 16 & 0xFF) as usize]
+                    ^ self.table[2][(two >> 8 & 0xFF) as usize]
+                    ^ self.table[3][(two & 0xFF) as usize]
+                    ^ self.table[4][(one >> 24 & 0xFF) as usize]
+                    ^ self.table[5][(one >> 16 & 0xFF) as usize]
+                    ^ self.table[6][(one >> 8 & 0xFF) as usize]
+                    ^ self.table[7][(one & 0xFF) as usize]
+            } else {
+                bytes.iter().fold(crc, |crc, byte| {
+                    (crc >> 8) ^ self.table[0][((crc & 0xFF) ^ *byte as u32) as usize]
+                })
+            }
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{io::Cursor, num::NonZeroUsize};
@@ -1205,7 +1285,7 @@ mod tests {
         zhuyin::Bopomofo,
     };
 
-    use super::{TrieDictionary, TrieDictionaryBuilder};
+    use super::{Crc32, TrieDictionary, TrieDictionaryBuilder};
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {
@@ -1563,5 +1643,15 @@ mod tests {
             dict.entries().collect::<Vec<_>>()
         );
         Ok(())
+    }
+
+    #[test]
+    fn crc32() {
+        let crc32 = Crc32::new();
+        assert_eq!(0x152ddece, crc32.check(b"asd\n"));
+        assert_eq!(
+            0x414fa339,
+            crc32.check(b"The quick brown fox jumps over the lazy dog")
+        );
     }
 }
