@@ -82,3 +82,18 @@ OPTIONS:
     -h, --help
       Prints help information.
 ```
+
+### cdbloader
+
+This fuzzer tries to load input as a CDB dictionary, then query metadata
+and look up phrases.
+
+```
+ARGS:
+    <dict_path>
+      Trie dictionary path
+
+OPTIONS:
+    -h, --help
+      Prints help information.
+```
