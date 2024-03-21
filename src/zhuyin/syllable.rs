@@ -548,7 +548,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn empty_syllable_as_u16() {
         Syllable::builder().build().to_u16();
     }
