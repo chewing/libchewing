@@ -170,10 +170,6 @@ impl Syllable {
     /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// ```
     pub fn to_u16(&self) -> u16 {
-        debug_assert!(
-            !self.is_empty(),
-            "empty syllable cannot be converted to u16"
-        );
         self.value.get()
     }
     /// Returns the `Syllable` encoded in a u16 integer in little-endian bytes.
@@ -247,7 +243,6 @@ impl From<&Syllable> for u16 {
 impl TryFrom<u16> for Syllable {
     type Error = DecodeSyllableError;
 
-    #[allow(clippy::unusual_byte_groupings)]
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         // TODO check invalid value
         Ok(Syllable {
@@ -553,7 +548,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn empty_syllable_as_u16() {
         Syllable::builder().build().to_u16();
     }

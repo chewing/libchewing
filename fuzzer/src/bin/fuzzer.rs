@@ -71,7 +71,7 @@ pub fn main() {
     env_logger::init();
 
     let flags = xflags::parse_or_exit! {
-        /// system library path
+        /// system dictionary path
         required syspath: String
     };
     let syspath = CString::new(flags.syspath).unwrap();

@@ -6,7 +6,7 @@ use std::{
     io,
     iter::{self, Empty},
     path::Path,
-    str,
+    str::{self, Utf8Error},
 };
 
 use crate::zhuyin::{Syllable, SyllableSlice};
@@ -56,7 +56,7 @@ fn phrase_from_bytes(bytes: &[u8]) -> Vec<Syllable> {
             let mut u16_bytes = [0; 2];
             u16_bytes.copy_from_slice(bytes);
             let syl_u16 = u16::from_le_bytes(u16_bytes);
-            Syllable::try_from(syl_u16).unwrap()
+            Syllable::try_from(syl_u16).unwrap_or_default()
         })
         .collect::<Vec<_>>()
 }
@@ -105,9 +105,14 @@ where
         let min_key = (syllable_key.clone(), Cow::from(MIN_PHRASE));
         let max_key = (syllable_key.clone(), Cow::from(MAX_PHRASE));
         let store_iter = self.store.iter().flat_map(move |store| {
-            store
-                .find(&syllable_bytes)
-                .map(|bytes| Phrase::from(PhraseData(&bytes)))
+            store.find(&syllable_bytes).filter_map(|bytes| {
+                let pd = PhraseData(&bytes);
+                if pd.is_valid() {
+                    Some(Phrase::from(pd))
+                } else {
+                    None
+                }
+            })
         });
         let btree_iter = self
             .btree
@@ -126,17 +131,22 @@ where
     }
 
     pub(crate) fn entries_iter(&self) -> impl Iterator<Item = (Vec<u8>, Phrase)> + '_ {
-        let mut store_iter =
-            self.store
-                .iter()
-                .flat_map(|store| {
-                    store.iter().filter(|it| it.0 != b"INFO").map(
-                        |(syllable_bytes, phrase_bytes)| {
-                            (syllable_bytes, Phrase::from(PhraseData(&phrase_bytes)))
-                        },
-                    )
-                })
-                .peekable();
+        let mut store_iter = self
+            .store
+            .iter()
+            .flat_map(|store| {
+                store.iter().filter(|it| it.0 != b"INFO").filter_map(
+                    |(syllable_bytes, phrase_bytes)| {
+                        let pd = PhraseData(&phrase_bytes);
+                        if pd.is_valid() {
+                            Some((syllable_bytes, Phrase::from(pd)))
+                        } else {
+                            None
+                        }
+                    },
+                )
+            })
+            .peekable();
         let mut btree_iter = self
             .btree
             .iter()
@@ -354,18 +364,21 @@ impl Dictionary for KVDictionary<()> {
 struct PhraseData<'a>(&'a [u8]);
 
 impl<'a> PhraseData<'a> {
+    fn is_valid(&self) -> bool {
+        self.0.len() > 12 && self.len() <= self.0.len() && self.phrase_str().is_ok()
+    }
     fn frequency(&self) -> u32 {
         u32::from_le_bytes(self.0[..4].try_into().unwrap())
     }
     fn last_used(&self) -> u64 {
         u64::from_le_bytes(self.0[4..12].try_into().unwrap())
     }
-    fn phrase_str(&self) -> &'a str {
+    fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
         let len = self.0[12] as usize;
         let data = &self.0[13..];
-        str::from_utf8(&data[..len]).expect("should be utf8 encoded string")
+        str::from_utf8(&data[..len])
     }
-    fn _len(&self) -> usize {
+    fn len(&self) -> usize {
         13 + self.0[12] as usize
     }
 }
@@ -373,7 +386,7 @@ impl<'a> PhraseData<'a> {
 impl From<PhraseData<'_>> for Phrase {
     fn from(value: PhraseData<'_>) -> Self {
         Phrase {
-            phrase: value.phrase_str().into(),
+            phrase: value.phrase_str().unwrap().into(),
             freq: value.frequency(),
             last_used: Some(value.last_used()),
         }

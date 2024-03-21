@@ -8,11 +8,13 @@ use std::{
     fs::File,
     io::{self, BufWriter, Read, Seek, Write},
     iter,
+    mem::size_of,
     num::NonZeroUsize,
     path::Path,
-    str,
+    str::{self, Utf8Error},
 };
 
+use log::error;
 use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
@@ -47,8 +49,8 @@ impl TrieNodeView<'_> {
         u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize * Self::SIZE
     }
     fn child_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
-            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
             * Self::SIZE
     }
 }
@@ -64,21 +66,24 @@ impl TrieLeafView<'_> {
         u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize
     }
     fn data_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap())
-            + u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as u32) as usize
+        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
     }
 }
 
 struct PhraseData<'a>(&'a [u8]);
 
 impl<'a> PhraseData<'a> {
+    fn is_valid(&self) -> bool {
+        self.0.len() > 4 && self.len() <= self.0.len() && self.phrase_str().is_ok()
+    }
     fn frequency(&self) -> u32 {
         u32::from_le_bytes(self.0[..4].try_into().unwrap())
     }
-    fn phrase_str(&self) -> &'a str {
+    fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
         let len = self.0[4] as usize;
         let data = &self.0[5..];
-        str::from_utf8(&data[..len]).expect("should be utf8 encoded string")
+        str::from_utf8(&data[..len])
     }
     fn len(&self) -> usize {
         5 + self.0[4] as usize
@@ -247,6 +252,25 @@ impl TrieDictionary {
         let data = data_chunk
             .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting data chunk"))?
             .read_contents(&mut stream)?;
+        let crc32 = Crc32::new();
+        if dict.len() < size_of::<u32>() {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        let dict_len = dict.len() - size_of::<u32>();
+        let crc = u32::from_le_bytes(dict[dict_len..].try_into().unwrap());
+        let check = crc32.check(&dict[..dict_len]);
+        if crc != check {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        if data.len() < size_of::<u32>() {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
+        let data_len = data.len().saturating_sub(size_of::<u32>());
+        let crc = u32::from_le_bytes(data[data_len..].try_into().unwrap());
+        let check = crc32.check(&data[..data_len]);
+        if crc != check {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
         Ok(TrieDictionary { info, dict, data })
     }
 
@@ -254,6 +278,9 @@ impl TrieDictionary {
     where
         T: Read + Seek,
     {
+        if fmt_chunk.len() != size_of::<u32>() as u32 {
+            return Err(io::ErrorKind::InvalidData.into());
+        }
         let bytes = fmt_chunk.read_contents(&mut stream)?;
         Ok(u32::from_le_bytes(bytes.try_into().unwrap()))
     }
@@ -314,20 +341,44 @@ impl Iterator for PhrasesIter<'_> {
             return None;
         }
         let phrase_data = PhraseData(self.bytes);
+        if !phrase_data.is_valid() {
+            error!("[!] file corruption detected: malformed phrase data.");
+            return None;
+        }
         self.bytes = &self.bytes[phrase_data.len()..];
         Some(Phrase::new(
-            phrase_data.phrase_str(),
+            phrase_data.phrase_str().unwrap(),
             phrase_data.frequency(),
         ))
     }
 }
 
+macro_rules! bail_if_oob {
+    ($begin:expr, $end:expr, $len:expr) => {
+        if $begin >= $end || $end > $len {
+            error!("[!] file corruption detected: index out of bound.");
+            return vec![];
+        }
+    };
+}
+
+macro_rules! iter_bail_if_oob {
+    ($begin:expr, $end:expr, $len:expr) => {
+        if $begin >= $end || $end > $len {
+            error!("[!] file corruption detected: index out of bound.");
+            return None;
+        }
+    };
+}
+
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+        bail_if_oob!(0, TrieNodeView::SIZE, self.dict.len());
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
+            bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
             let mut child_nodes = self.dict[node.child_begin()..node.child_end()]
                 .chunks_exact(TrieNodeView::SIZE)
                 .map(TrieNodeView);
@@ -337,11 +388,14 @@ impl Dictionary for TrieDictionary {
             }
             return vec![];
         }
+        bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
         let leaf_data = &self.dict[node.child_begin()..];
+        bail_if_oob!(0, TrieLeafView::SIZE, leaf_data.len());
         let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
         if leaf.reserved_zero() != 0 {
             return vec![];
         }
+        bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
         PhrasesIter {
             bytes: &self.data[leaf.data_begin()..leaf.data_end()],
         }
@@ -353,13 +407,15 @@ impl Dictionary for TrieDictionary {
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
+        if self.dict.len() < TrieNodeView::SIZE {
+            error!("[!] file corruption detected: index out of bound.");
+            return Box::new(iter::empty());
+        }
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
         let mut done = false;
         let make_dict_entry =
-            |syllables: &[u16], node: &TrieNodeView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
-                let leaf_data = &self.dict[node.child_begin()..];
-                let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
+            |syllables: &[u16], leaf: &TrieLeafView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
                 debug_assert_eq!(leaf.reserved_zero(), 0);
                 let phrases = PhrasesIter {
                     bytes: &self.data[leaf.data_begin()..leaf.data_end()],
@@ -383,6 +439,7 @@ impl Dictionary for TrieDictionary {
             }
             // descend until find a leaf node which is not also a internal node.
             loop {
+                iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
                 let mut child_iter = self.dict[node.child_begin()..node.child_end()]
                     .chunks_exact(TrieNodeView::SIZE)
                     .map(TrieNodeView);
@@ -391,7 +448,11 @@ impl Dictionary for TrieDictionary {
                     .expect("syllable node should have at least one child node");
                 if next.syllable() == 0 {
                     // found a leaf syllable node
-                    results.push(make_dict_entry(&syllables, &node));
+                    iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
+                    let leaf_data = &self.dict[node.child_begin()..];
+                    let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
+                    iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
+                    results.push(make_dict_entry(&syllables, &leaf));
                     if let Some(second) = child_iter.next() {
                         next = second;
                     } else {
@@ -654,6 +715,8 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ...                                                           ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                             CRC32                             |
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
 /// The index chunk contains the trie node records serialized in BFS order. The
@@ -707,6 +770,8 @@ impl Dictionary for TrieDictionary {
 /// |                           Frequency                           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |      Length     |                                           ...
+/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// |                             CRC32                             |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
@@ -933,6 +998,12 @@ impl TrieDictionaryBuilder {
             }
         }
 
+        let crc32 = Crc32::new();
+        let check = crc32.check(&dict_buf);
+        dict_buf.write_all(&check.to_le_bytes())?;
+        let check = crc32.check(&data_buf);
+        data_buf.write_all(&check.to_le_bytes())?;
+
         // Wrap the data in a RIFF container
         let contents = ChunkContents::Children(
             RIFF_ID.clone(),
@@ -1151,6 +1222,57 @@ impl Default for TrieDictionaryBuilder {
     }
 }
 
+/// Calculates CRC32 with CRC-32-IEEE 802.3 poly
+struct Crc32 {
+    table: Box<[[u32; 256]; 8]>,
+}
+
+impl Crc32 {
+    fn new() -> Crc32 {
+        let mut table = Box::new([[0u32; 256]; 8]);
+        // CRC-32-IEEE 802.3 poly
+        let poly: u32 = 0xEDB88320;
+        for i in 0..256usize {
+            let mut crc = i as u32;
+            for _ in 0..8 {
+                crc = (crc >> 1) ^ ((crc & 1) * poly);
+            }
+            table[0][i] = crc;
+        }
+        for i in 0..256usize {
+            table[1][i] = (table[0][i] >> 8) ^ table[0][(table[0][i] & 0xFF) as usize];
+            table[2][i] = (table[1][i] >> 8) ^ table[0][(table[1][i] & 0xFF) as usize];
+            table[3][i] = (table[2][i] >> 8) ^ table[0][(table[2][i] & 0xFF) as usize];
+            table[4][i] = (table[3][i] >> 8) ^ table[0][(table[3][i] & 0xFF) as usize];
+            table[5][i] = (table[4][i] >> 8) ^ table[0][(table[4][i] & 0xFF) as usize];
+            table[6][i] = (table[5][i] >> 8) ^ table[0][(table[5][i] & 0xFF) as usize];
+            table[7][i] = (table[6][i] >> 8) ^ table[0][(table[6][i] & 0xFF) as usize];
+        }
+        Crc32 { table }
+    }
+    fn check(&self, buf: &[u8]) -> u32 {
+        // Slice-by-8 algorithm
+        !buf.chunks(8).fold(!0u32, |crc, bytes| {
+            if bytes.len() == 8 {
+                let one = u32::from_le_bytes(bytes[0..4].try_into().unwrap()) ^ crc;
+                let two = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+                self.table[0][(two >> 24 & 0xFF) as usize]
+                    ^ self.table[1][(two >> 16 & 0xFF) as usize]
+                    ^ self.table[2][(two >> 8 & 0xFF) as usize]
+                    ^ self.table[3][(two & 0xFF) as usize]
+                    ^ self.table[4][(one >> 24 & 0xFF) as usize]
+                    ^ self.table[5][(one >> 16 & 0xFF) as usize]
+                    ^ self.table[6][(one >> 8 & 0xFF) as usize]
+                    ^ self.table[7][(one & 0xFF) as usize]
+            } else {
+                bytes.iter().fold(crc, |crc, byte| {
+                    (crc >> 8) ^ self.table[0][((crc & 0xFF) ^ *byte as u32) as usize]
+                })
+            }
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{io::Cursor, num::NonZeroUsize};
@@ -1163,7 +1285,7 @@ mod tests {
         zhuyin::Bopomofo,
     };
 
-    use super::{TrieDictionary, TrieDictionaryBuilder};
+    use super::{Crc32, TrieDictionary, TrieDictionaryBuilder};
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {
@@ -1521,5 +1643,15 @@ mod tests {
             dict.entries().collect::<Vec<_>>()
         );
         Ok(())
+    }
+
+    #[test]
+    fn crc32() {
+        let crc32 = Crc32::new();
+        assert_eq!(0x152ddece, crc32.check(b"asd\n"));
+        assert_eq!(
+            0x414fa339,
+            crc32.check(b"The quick brown fox jumps over the lazy dog")
+        );
     }
 }
