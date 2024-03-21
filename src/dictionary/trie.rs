@@ -1240,13 +1240,13 @@ impl Crc32 {
             table[0][i] = crc;
         }
         for i in 0..256usize {
-            table[1][i] = (table[0][i] >> 8) ^ table[0][(table[0][i] & 0xff) as usize];
-            table[2][i] = (table[1][i] >> 8) ^ table[0][(table[1][i] & 0xff) as usize];
-            table[3][i] = (table[2][i] >> 8) ^ table[0][(table[2][i] & 0xff) as usize];
-            table[4][i] = (table[3][i] >> 8) ^ table[0][(table[3][i] & 0xff) as usize];
-            table[5][i] = (table[4][i] >> 8) ^ table[0][(table[4][i] & 0xff) as usize];
-            table[6][i] = (table[5][i] >> 8) ^ table[0][(table[5][i] & 0xff) as usize];
-            table[7][i] = (table[6][i] >> 8) ^ table[0][(table[6][i] & 0xff) as usize];
+            table[1][i] = (table[0][i] >> 8) ^ table[0][(table[0][i] & 0xFF) as usize];
+            table[2][i] = (table[1][i] >> 8) ^ table[0][(table[1][i] & 0xFF) as usize];
+            table[3][i] = (table[2][i] >> 8) ^ table[0][(table[2][i] & 0xFF) as usize];
+            table[4][i] = (table[3][i] >> 8) ^ table[0][(table[3][i] & 0xFF) as usize];
+            table[5][i] = (table[4][i] >> 8) ^ table[0][(table[4][i] & 0xFF) as usize];
+            table[6][i] = (table[5][i] >> 8) ^ table[0][(table[5][i] & 0xFF) as usize];
+            table[7][i] = (table[6][i] >> 8) ^ table[0][(table[6][i] & 0xFF) as usize];
         }
         Crc32 { table }
     }
