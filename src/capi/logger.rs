@@ -15,16 +15,17 @@ use super::setup::{
 type ExternLoggerFn =
     unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...);
 
-pub(crate) struct ExternLogger {
+pub(crate) struct ChewingLogger {
     logger: Mutex<Option<(ExternLoggerFn, AtomicPtr<c_void>)>>,
 }
 
-impl ExternLogger {
-    pub(crate) const fn new() -> ExternLogger {
-        ExternLogger {
+impl ChewingLogger {
+    pub(crate) const fn new() -> ChewingLogger {
+        ChewingLogger {
             logger: Mutex::new(None),
         }
     }
+    pub(crate) fn init(&self) {}
     pub(crate) fn set(&self, logger: Option<(ExternLoggerFn, *mut c_void)>) {
         if let Ok(mut prev) = self.logger.lock() {
             *prev = logger.map(|(l, d)| (l, d.into()));
@@ -32,14 +33,14 @@ impl ExternLogger {
     }
 }
 
-impl Log for ExternLogger {
+impl Log for ChewingLogger {
     fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
         true
     }
 
     fn log(&self, record: &Record<'_>) {
-        if let Ok(mut logger) = self.logger.lock() {
-            if let Some((logger, logger_data)) = logger.as_mut() {
+        if let Ok(logger) = self.logger.lock() {
+            if let Some((logger, logger_data)) = logger.as_ref() {
                 let fmt = format!(
                     "[{}:{} {}] {}\n",
                     record.file().unwrap_or("unknown"),
@@ -55,6 +56,7 @@ impl Log for ExternLogger {
                         fmt_cstring.as_ptr(),
                     )
                 }
+                return;
             }
         }
     }

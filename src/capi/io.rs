@@ -30,14 +30,14 @@ use crate::{
     zhuyin::Syllable,
 };
 
-use super::logger::ExternLogger;
+use super::logger::ChewingLogger;
 
 const TRUE: c_int = 1;
 const FALSE: c_int = 0;
 const OK: c_int = 0;
 const ERROR: c_int = -1;
 
-static mut LOGGER: ExternLogger = ExternLogger::new();
+static LOGGER: ChewingLogger = ChewingLogger::new();
 
 enum Owned {
     CString,
@@ -131,10 +131,11 @@ pub extern "C" fn chewing_new2(
             let _ = OWNED.set(BTreeMap::new());
         }
     }
+    LOGGER.init();
+    let _ = log::set_logger(&LOGGER);
+    log::set_max_level(log::LevelFilter::Trace);
     if let Some(logger) = logger {
-        unsafe {
-            LOGGER.set(Some((logger, loggerdata)));
-        }
+        LOGGER.set(Some((logger, loggerdata)));
     }
     let sys_loader = if syspath.is_null() {
         SystemDictionaryLoader::new()
@@ -217,6 +218,7 @@ pub extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
                 let _ = OWNED.take();
             }
         }
+        LOGGER.set(None);
         drop(unsafe { Box::from_raw(ctx) })
     }
 }
@@ -712,13 +714,11 @@ pub extern "C" fn chewing_set_logger(
         None => return,
     };
     if let Some(logger) = logger {
-        unsafe {
-            let _ = log::set_logger(&LOGGER);
-            log::set_max_level(log::LevelFilter::Trace);
-            LOGGER.set(Some((logger, data)));
-        }
+        log::set_max_level(log::LevelFilter::Trace);
+        LOGGER.set(Some((logger, data)));
     } else {
         log::set_max_level(log::LevelFilter::Off);
+        LOGGER.set(None);
     }
 }
 

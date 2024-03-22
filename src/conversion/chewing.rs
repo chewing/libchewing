@@ -8,7 +8,7 @@ use log::{debug, trace, warn};
 
 use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Break, Composition, ConversionEngine, Glue, Interval, Symbol};
+use super::{Composition, ConversionEngine, GapKind, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug)]
@@ -16,18 +16,18 @@ pub struct ChewingEngine;
 
 impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
     fn convert(&self, dict: &C, composition: &Composition) -> Vec<Interval> {
-        if composition.buffer.is_empty() {
+        if composition.symbols.is_empty() {
             return vec![];
         }
         let intervals = self.find_intervals(dict, composition);
-        self.find_best_path(composition.buffer.len(), intervals)
+        self.find_best_path(composition.symbols.len(), intervals)
             .into_iter()
             .map(|interval| interval.into())
             .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
     }
 
     fn convert_next(&self, dict: &C, composition: &Composition, next: usize) -> Vec<Interval> {
-        if composition.buffer.is_empty() {
+        if composition.symbols.is_empty() {
             return vec![];
         }
         let mut graph = Graph::default();
@@ -36,7 +36,7 @@ impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
             &mut graph,
             composition,
             0,
-            composition.buffer.len(),
+            composition.symbols.len(),
             None,
         );
         if paths.is_empty() {
@@ -71,7 +71,7 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
         return acc;
     }
     let last = acc.last().expect("acc should have at least one item");
-    if com.glues.contains(&Glue(last.end)) {
+    if let Some(GapKind::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
         let mut phrase = last.phrase.into_string();
         phrase.push_str(&interval.phrase);
@@ -100,28 +100,24 @@ impl ChewingEngine {
         dict: &D,
         start: usize,
         symbols: &[Symbol],
-        selections: &[Interval],
-        breaks: &[Break],
+        com: &Composition,
     ) -> Option<PossiblePhrase> {
         let end = start + symbols.len();
 
-        for br in breaks.iter() {
-            if br.0 > start && br.0 < end {
+        for i in (start..end).into_iter().skip(1) {
+            if let Some(GapKind::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
-                debug!(
-                    "best phrase for {:?} is None due to break point {:?}",
-                    symbols, br
-                );
+                debug!("No best phrase for {:?} due to break point", symbols);
                 return None;
             }
         }
 
-        for selection in selections {
+        for selection in &com.selections {
             if selection.intersect_range(start, end) && !selection.is_contained_by(start, end) {
                 // There's a conflicting partial intersecting selection.
                 debug!(
-                    "best phrase for {:?} is None due to selection {:?}",
+                    "No best phrase for {:?} due to selection {:?}",
                     symbols, selection
                 );
                 return None;
@@ -147,7 +143,7 @@ impl ChewingEngine {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
-            for selection in selections {
+            for selection in &com.selections {
                 debug_assert!(!selection.phrase.is_empty());
                 if start <= selection.start && end >= selection.end {
                     let offset = selection.start - start;
@@ -176,18 +172,14 @@ impl ChewingEngine {
     fn find_intervals<D: Dictionary + ?Sized>(
         &self,
         dict: &D,
-        comp: &Composition,
+        com: &Composition,
     ) -> Vec<PossibleInterval> {
         let mut intervals = vec![];
-        for begin in 0..comp.buffer.len() {
-            for end in begin..=comp.buffer.len() {
-                if let Some(phrase) = self.find_best_phrase(
-                    dict,
-                    begin,
-                    &comp.buffer[begin..end],
-                    &comp.selections,
-                    &comp.breaks,
-                ) {
+        for begin in 0..com.symbols.len() {
+            for end in begin..=com.symbols.len() {
+                if let Some(phrase) =
+                    self.find_best_phrase(dict, begin, &com.symbols[begin..end], &com)
+                {
                     intervals.push(PossibleInterval {
                         start: begin,
                         end,
@@ -258,13 +250,7 @@ impl ChewingEngine {
         for end in (start + 1)..=target {
             let entry = graph.entry((start, end));
             if let Some(phrase) = entry.or_insert_with(|| {
-                self.find_best_phrase(
-                    dict,
-                    start,
-                    &composition.buffer[start..end],
-                    &composition.selections,
-                    &composition.breaks,
-                )
+                self.find_best_phrase(dict, start, &composition.symbols[start..end], &composition)
             }) {
                 let mut prefix = prefix.clone().unwrap_or_default();
                 prefix.intervals.push(PossibleInterval {
@@ -519,7 +505,7 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Break, Composition, ConversionEngine, Interval, Symbol},
+        conversion::{Composition, ConversionEngine, GapKind, Interval, Symbol},
         dictionary::{Dictionary, KVDictionary, Phrase},
         syl,
         zhuyin::Bopomofo::*,
@@ -579,12 +565,7 @@ mod tests {
     fn convert_empty_composition() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![],
-            selections: vec![],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let composition = Composition::new();
         assert_eq!(Vec::<Interval>::new(), engine.convert(&dict, &composition));
     }
 
@@ -592,19 +573,17 @@ mod tests {
     fn convert_simple_chinese_composition() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![G, U, O, TONE2]),
-                Symbol::Syllable(syl![M, I, EN, TONE2]),
-                Symbol::Syllable(syl![D, A, TONE4]),
-                Symbol::Syllable(syl![H, U, EI, TONE4]),
-                Symbol::Syllable(syl![D, AI, TONE4]),
-                Symbol::Syllable(syl![B, I, AU, TONE3]),
-            ],
-            selections: vec![],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![G, U, O, TONE2]),
+            Symbol::new_syl(syl![M, I, EN, TONE2]),
+            Symbol::new_syl(syl![D, A, TONE4]),
+            Symbol::new_syl(syl![H, U, EI, TONE4]),
+            Symbol::new_syl(syl![D, AI, TONE4]),
+            Symbol::new_syl(syl![B, I, AU, TONE3]),
+        ] {
+            composition.push(sym);
+        }
         assert_eq!(
             vec![
                 Interval {
@@ -634,19 +613,19 @@ mod tests {
     fn convert_chinese_composition_with_breaks() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![G, U, O, TONE2]),
-                Symbol::Syllable(syl![M, I, EN, TONE2]),
-                Symbol::Syllable(syl![D, A, TONE4]),
-                Symbol::Syllable(syl![H, U, EI, TONE4]),
-                Symbol::Syllable(syl![D, AI, TONE4]),
-                Symbol::Syllable(syl![B, I, AU, TONE3]),
-            ],
-            selections: vec![],
-            breaks: vec![Break(1), Break(5)],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![G, U, O, TONE2]),
+            Symbol::new_syl(syl![M, I, EN, TONE2]),
+            Symbol::new_syl(syl![D, A, TONE4]),
+            Symbol::new_syl(syl![H, U, EI, TONE4]),
+            Symbol::new_syl(syl![D, AI, TONE4]),
+            Symbol::new_syl(syl![B, I, AU, TONE3]),
+        ] {
+            composition.push(sym);
+        }
+        composition.set_gap(1, GapKind::Break);
+        composition.set_gap(5, GapKind::Break);
         assert_eq!(
             vec![
                 Interval {
@@ -688,24 +667,25 @@ mod tests {
     fn convert_chinese_composition_with_good_selection() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![G, U, O, TONE2]),
-                Symbol::Syllable(syl![M, I, EN, TONE2]),
-                Symbol::Syllable(syl![D, A, TONE4]),
-                Symbol::Syllable(syl![H, U, EI, TONE4]),
-                Symbol::Syllable(syl![D, AI, TONE4]),
-                Symbol::Syllable(syl![B, I, AU, TONE3]),
-            ],
-            selections: vec![Interval {
-                start: 4,
-                end: 6,
-                is_phrase: true,
-                phrase: "戴錶".into(),
-            }],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![G, U, O, TONE2]),
+            Symbol::new_syl(syl![M, I, EN, TONE2]),
+            Symbol::new_syl(syl![D, A, TONE4]),
+            Symbol::new_syl(syl![H, U, EI, TONE4]),
+            Symbol::new_syl(syl![D, AI, TONE4]),
+            Symbol::new_syl(syl![B, I, AU, TONE3]),
+        ] {
+            composition.push(sym);
+        }
+        for interval in [Interval {
+            start: 4,
+            end: 6,
+            is_phrase: true,
+            phrase: "戴錶".into(),
+        }] {
+            composition.push_selection(interval);
+        }
         assert_eq!(
             vec![
                 Interval {
@@ -735,21 +715,22 @@ mod tests {
     fn convert_chinese_composition_with_substring_selection() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![X, I, EN]),
-                Symbol::Syllable(syl![K, U, TONE4]),
-                Symbol::Syllable(syl![I, EN]),
-            ],
-            selections: vec![Interval {
-                start: 1,
-                end: 3,
-                is_phrase: true,
-                phrase: "酷音".into(),
-            }],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![X, I, EN]),
+            Symbol::new_syl(syl![K, U, TONE4]),
+            Symbol::new_syl(syl![I, EN]),
+        ] {
+            composition.push(sym);
+        }
+        for interval in [Interval {
+            start: 1,
+            end: 3,
+            is_phrase: true,
+            phrase: "酷音".into(),
+        }] {
+            composition.push_selection(interval);
+        }
         assert_eq!(
             vec![Interval {
                 start: 0,
@@ -765,28 +746,29 @@ mod tests {
     fn multiple_single_word_selection() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![D, AI, TONE4]),
-                Symbol::Syllable(syl![B, I, AU, TONE3]),
-            ],
-            selections: vec![
-                Interval {
-                    start: 0,
-                    end: 1,
-                    is_phrase: true,
-                    phrase: "代".into(),
-                },
-                Interval {
-                    start: 1,
-                    end: 2,
-                    is_phrase: true,
-                    phrase: "錶".into(),
-                },
-            ],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![D, AI, TONE4]),
+            Symbol::new_syl(syl![B, I, AU, TONE3]),
+        ] {
+            composition.push(sym);
+        }
+        for interval in [
+            Interval {
+                start: 0,
+                end: 1,
+                is_phrase: true,
+                phrase: "代".into(),
+            },
+            Interval {
+                start: 1,
+                end: 2,
+                is_phrase: true,
+                phrase: "錶".into(),
+            },
+        ] {
+            composition.push_selection(interval);
+        }
         assert_eq!(
             vec![
                 Interval {
@@ -810,17 +792,15 @@ mod tests {
     fn convert_cycle_alternatives() {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
-        let composition = Composition {
-            buffer: vec![
-                Symbol::Syllable(syl![C, E, TONE4]),
-                Symbol::Syllable(syl![SH, TONE4]),
-                Symbol::Syllable(syl![I, TONE2]),
-                Symbol::Syllable(syl![X, I, A, TONE4]),
-            ],
-            selections: vec![],
-            breaks: vec![],
-            glues: vec![],
-        };
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::new_syl(syl![SH, TONE4]),
+            Symbol::new_syl(syl![I, TONE2]),
+            Symbol::new_syl(syl![X, I, A, TONE4]),
+        ] {
+            composition.push(sym);
+        }
         assert_eq!(
             vec![
                 Interval {

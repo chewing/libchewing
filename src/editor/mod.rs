@@ -245,7 +245,7 @@ impl Editor {
         self.shared.syl.read()
     }
     pub fn symbols(&self) -> &[Symbol] {
-        &self.shared.com.inner.buffer
+        self.shared.com.symbols()
     }
     pub fn user_dict(&mut self) -> &mut dyn Dictionary {
         self.shared.dict.user_dict()
@@ -470,6 +470,7 @@ impl SharedState {
         self.syl.clear();
         self.commit_buffer.clear();
         self.notice_buffer.clear();
+        self.nth_conversion = 0;
     }
     fn conversion(&self) -> Vec<Interval> {
         if self.nth_conversion == 0 {
@@ -494,10 +495,10 @@ impl SharedState {
         result
     }
     fn learn_phrase_in_range_quiet(&mut self, start: usize, end: usize) -> Result<String, String> {
-        if end > self.com.inner.buffer.len() {
+        if end > self.com.len() {
             return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
-        let syllables = self.com.inner.buffer[start..end].to_vec();
+        let syllables = self.com.symbols()[start..end].to_vec();
         if syllables.iter().any(Symbol::is_char) {
             return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
@@ -615,7 +616,7 @@ impl SharedState {
                 break;
             }
         }
-        self.com.pop_front(remove);
+        self.com.remove_front(remove);
         debug!(
             "buffer has {} symbols left after auto commit",
             self.com.len()
@@ -629,7 +630,7 @@ impl SharedState {
         for interval in intervals {
             if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.phrase) {
                 pending.push_str(&interval.phrase);
-                syllables.extend_from_slice(&self.com.inner.buffer[interval.start..interval.end]);
+                syllables.extend_from_slice(&self.com.symbols()[interval.start..interval.end]);
             } else {
                 if !pending.is_empty() {
                     debug!("autolearn-2 {:?} as {}", &syllables, &pending);
@@ -640,12 +641,12 @@ impl SharedState {
                 if interval.is_phrase {
                     debug!(
                         "autolearn-3 {:?} as {}",
-                        &self.com.inner.buffer[interval.start..interval.end],
+                        &self.com.symbols()[interval.start..interval.end],
                         &interval.phrase
                     );
                     // FIXME avoid copy
                     let _ = self.learn_phrase(
-                        &self.com.inner.buffer[interval.start..interval.end].to_vec(),
+                        &self.com.symbols()[interval.start..interval.end].to_vec(),
                         &interval.phrase,
                     );
                 }
@@ -740,24 +741,26 @@ struct Highlighting {
 impl Entering {
     fn start_selecting(&self, editor: &mut SharedState) -> Transition {
         match editor.com.symbol_for_select() {
-            Some(symbol) => match symbol {
-                Symbol::Syllable(_) => Transition::ToState(Box::new(Selecting::new_phrase(editor))),
-                Symbol::Char(_) => {
+            Some(symbol) => {
+                if symbol.is_syllable() {
+                    Transition::ToState(Box::new(Selecting::new_phrase(editor)))
+                } else {
                     Transition::ToState(Box::new(Selecting::new_special_symbol(editor, symbol)))
                 }
-            },
+            }
             None => self.spin_ignore(),
         }
     }
     fn start_selecting_or_input_space(&self, editor: &mut SharedState) -> Transition {
         debug!("buffer {:?}", editor.com);
         match editor.com.symbol_for_select() {
-            Some(symbol) => match symbol {
-                Symbol::Syllable(_) => Transition::ToState(Box::new(Selecting::new_phrase(editor))),
-                Symbol::Char(_) => {
+            Some(symbol) => {
+                if symbol.is_syllable() {
+                    Transition::ToState(Box::new(Selecting::new_phrase(editor)))
+                } else {
                     Transition::ToState(Box::new(Selecting::new_special_symbol(editor, symbol)))
                 }
-            },
+            }
             None if editor.com.is_empty() => {
                 match editor.options.character_form {
                     CharacterForm::Halfwidth => editor.commit_buffer.push(' '),
@@ -907,7 +910,7 @@ impl State for Entering {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.unicode);
                 } else {
-                    shared.com.insert(Symbol::Char(ev.unicode));
+                    shared.com.insert(Symbol::new_char(ev.unicode));
                 }
                 self.spin_commit()
             }
@@ -922,7 +925,7 @@ impl State for Entering {
                             shared.commit_buffer.push(ev.unicode);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::Char(ev.unicode));
+                            shared.com.insert(Symbol::new_char(ev.unicode));
                             self.spin_absorb()
                         }
                     }
@@ -933,7 +936,7 @@ impl State for Entering {
                             shared.commit_buffer.push(char_);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::Char(char_));
+                            shared.com.insert(Symbol::new_char(char_));
                             self.spin_absorb()
                         }
                     }
@@ -943,11 +946,11 @@ impl State for Entering {
                     if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
                         expended
                             .chars()
-                            .for_each(|ch| shared.com.insert(Symbol::Char(ch)));
+                            .for_each(|ch| shared.com.insert(Symbol::new_char(ch)));
                         return self.spin_absorb();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.insert(Symbol::Char(symbol));
+                        shared.com.insert(Symbol::new_char(symbol));
                         return self.spin_absorb();
                     }
                     if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
@@ -960,7 +963,7 @@ impl State for Entering {
                         return self.start_enter_syllable();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.insert(Symbol::Char(symbol));
+                        shared.com.insert(Symbol::new_char(symbol));
                         return self.spin_absorb();
                     }
                     self.spin_bell()
@@ -972,7 +975,7 @@ impl State for Entering {
                             shared.commit_buffer.push(ev.unicode);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::Char(ev.unicode));
+                            shared.com.insert(Symbol::new_char(ev.unicode));
                             self.spin_absorb()
                         }
                     }
@@ -983,7 +986,7 @@ impl State for Entering {
                             shared.commit_buffer.push(char_);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::Char(char_));
+                            shared.com.insert(Symbol::new_char(char_));
                             self.spin_absorb()
                         }
                     }
@@ -1008,12 +1011,13 @@ impl EnteringSyllable {
     fn start_selecting(&self, editor: &mut SharedState) -> Transition {
         editor.syl.clear();
         match editor.com.symbol_for_select() {
-            Some(symbol) => match symbol {
-                Symbol::Syllable(_) => Transition::ToState(Box::new(Selecting::new_phrase(editor))),
-                Symbol::Char(_) => {
+            Some(symbol) => {
+                if symbol.is_syllable() {
+                    Transition::ToState(Box::new(Selecting::new_phrase(editor)))
+                } else {
                     Transition::ToState(Box::new(Selecting::new_special_symbol(editor, symbol)))
                 }
-            },
+            }
             None => self.spin_ignore(),
         }
     }
@@ -1053,7 +1057,7 @@ impl State for EnteringSyllable {
                         .lookup_first_phrase(&[shared.syl.read()])
                         .is_some()
                     {
-                        shared.com.insert(Symbol::Syllable(shared.syl.read()));
+                        shared.com.insert(Symbol::new_syl(shared.syl.read()));
                     }
                     shared.syl.clear();
                     self.start_entering()
@@ -1078,7 +1082,7 @@ impl Selecting {
 
         let mut sel = PhraseSelector::new(
             !editor.options.phrase_choice_rearward,
-            editor.com.inner.clone(),
+            editor.com.to_composition(),
         );
         sel.init(editor.cursor(), &editor.dict);
 
@@ -1247,19 +1251,17 @@ impl State for Selecting {
                     Selector::SpecialSymmbol(_) => shared.com.cursor(),
                 };
                 shared.com.move_cursor(begin.saturating_sub(1));
-                match shared.com.symbol().expect("should have symbol") {
-                    Symbol::Syllable(_) => {
-                        let mut sel = PhraseSelector::new(
-                            !shared.options.phrase_choice_rearward,
-                            shared.com.inner.clone(),
-                        );
-                        sel.init(shared.cursor(), &shared.dict);
-                        self.sel = Selector::Phrase(sel);
-                    }
-                    sym @ Symbol::Char(_) => {
-                        let sel = SpecialSymbolSelector::new(*sym);
-                        self.sel = Selector::SpecialSymmbol(sel);
-                    }
+                let sym = shared.com.symbol().expect("should have symbol");
+                if sym.is_syllable() {
+                    let mut sel = PhraseSelector::new(
+                        !shared.options.phrase_choice_rearward,
+                        shared.com.to_composition(),
+                    );
+                    sel.init(shared.cursor(), &shared.dict);
+                    self.sel = Selector::Phrase(sel);
+                } else {
+                    let sel = SpecialSymbolSelector::new(sym);
+                    self.sel = Selector::SpecialSymmbol(sel);
                 }
                 self.spin_absorb()
             }
@@ -1274,19 +1276,17 @@ impl State for Selecting {
                 };
                 shared.com.move_cursor(begin.saturating_add(1));
                 shared.com.clamp_cursor();
-                match shared.com.symbol().expect("should have symbol") {
-                    Symbol::Syllable(_) => {
-                        let mut sel = PhraseSelector::new(
-                            !shared.options.phrase_choice_rearward,
-                            shared.com.inner.clone(),
-                        );
-                        sel.init(shared.cursor(), &shared.dict);
-                        self.sel = Selector::Phrase(sel);
-                    }
-                    sym @ Symbol::Char(_) => {
-                        let sel = SpecialSymbolSelector::new(*sym);
-                        self.sel = Selector::SpecialSymmbol(sel);
-                    }
+                let sym = shared.com.symbol().expect("should have symbol");
+                if sym.is_syllable() {
+                    let mut sel = PhraseSelector::new(
+                        !shared.options.phrase_choice_rearward,
+                        shared.com.to_composition(),
+                    );
+                    sel.init(shared.cursor(), &shared.dict);
+                    self.sel = Selector::Phrase(sel);
+                } else {
+                    let sel = SpecialSymbolSelector::new(sym);
+                    self.sel = Selector::SpecialSymmbol(sel);
                 }
                 self.spin_absorb()
             }
@@ -1357,7 +1357,7 @@ impl State for Highlighting {
                 self.spin_absorb()
             }
             Right if ev.modifiers.shift => {
-                if self.moving_cursor != shared.com.inner.buffer.len() {
+                if self.moving_cursor != shared.com.len() {
                     self.moving_cursor += 1;
                 }
                 self.spin_absorb()

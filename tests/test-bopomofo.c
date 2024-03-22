@@ -1335,9 +1335,12 @@ void test_auto_commit_phrase()
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 3);
 
-    type_keystroke_by_string(ctx, "hk4g4hk4g4" /* 測試測試 */ );
-    ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
-    ok_commit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ );
+    type_keystroke_by_string(ctx, "hk4g4<L><T><L><D>1<EN>`31hk4" /* 測試，測 */ );
+    ok_preedit_buffer(ctx, "，冊");
+    ok_commit_buffer(ctx, "測試");
+    type_keystroke_by_string(ctx, "g4" /* 試 */ );
+    ok_preedit_buffer(ctx, "，測試");
+    ok_commit_buffer(ctx, "");
 
     chewing_delete(ctx);
 }
