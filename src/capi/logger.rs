@@ -15,14 +15,21 @@ use super::setup::{
 type ExternLoggerFn =
     unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...);
 
-pub(crate) struct ExternLogger {
+pub(crate) struct ChewingLogger {
+    env_logger: Mutex<Option<env_logger::Logger>>,
     logger: Mutex<Option<(ExternLoggerFn, AtomicPtr<c_void>)>>,
 }
 
-impl ExternLogger {
-    pub(crate) const fn new() -> ExternLogger {
-        ExternLogger {
+impl ChewingLogger {
+    pub(crate) const fn new() -> ChewingLogger {
+        ChewingLogger {
+            env_logger: Mutex::new(None),
             logger: Mutex::new(None),
+        }
+    }
+    pub(crate) fn init(&self) {
+        if let Ok(mut prev) = self.env_logger.lock() {
+            *prev = Some(env_logger::Logger::from_default_env());
         }
     }
     pub(crate) fn set(&self, logger: Option<(ExternLoggerFn, *mut c_void)>) {
@@ -32,16 +39,16 @@ impl ExternLogger {
     }
 }
 
-impl Log for ExternLogger {
+impl Log for ChewingLogger {
     fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
         true
     }
 
     fn log(&self, record: &Record<'_>) {
-        if let Ok(mut logger) = self.logger.lock() {
-            if let Some((logger, logger_data)) = logger.as_mut() {
+        if let Ok(logger) = self.logger.lock() {
+            if let Some((logger, logger_data)) = logger.as_ref() {
                 let fmt = format!(
-                    "[{}:{} {}] {}\n",
+                    "[{}:{} {}] {}",
                     record.file().unwrap_or("unknown"),
                     record.line().unwrap_or_default(),
                     record.module_path().unwrap_or("unknown"),
@@ -52,9 +59,16 @@ impl Log for ExternLogger {
                     logger(
                         logger_data.load(Relaxed),
                         as_chewing_level(record.level()),
+                        b"%s\n\0".as_ptr().cast(),
                         fmt_cstring.as_ptr(),
                     )
                 }
+                return;
+            }
+        }
+        if let Ok(logger) = self.env_logger.lock() {
+            if let Some(el) = logger.as_ref() {
+                el.log(record);
             }
         }
     }

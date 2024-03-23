@@ -12,7 +12,6 @@
 #![deny(unused_lifetimes)]
 #![warn(unused_macro_rules)]
 #![warn(unused_qualifications)]
-#![warn(unused_tuple_struct_fields)]
 #![warn(variant_size_differences)]
 
 //! The Chewing (酷音) intelligent phonetic input method library.

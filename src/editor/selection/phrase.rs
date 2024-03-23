@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    conversion::{Break, Composition, Interval, Symbol},
+    conversion::{Composition, GapKind, Interval},
     dictionary::{Dictionary, LayeredDictionary},
     editor::SharedState,
 };
@@ -12,39 +12,35 @@ pub(crate) struct PhraseSelector {
     end: usize,
     forward_select: bool,
     orig: usize,
-    buffer: Vec<Symbol>,
-    selections: Vec<Interval>,
-    breaks: Vec<Break>,
+    com: Composition,
 }
 
 impl PhraseSelector {
     pub(crate) fn new(forward_select: bool, com: Composition) -> PhraseSelector {
         PhraseSelector {
             begin: 0,
-            end: com.buffer.len(),
+            end: com.len(),
             forward_select,
             orig: 0,
-            buffer: com.buffer,
-            selections: com.selections,
-            breaks: com.breaks,
+            com,
         }
     }
 
     pub(crate) fn init<D: Dictionary>(&mut self, cursor: usize, dict: &D) {
         self.orig = cursor;
         if self.forward_select {
-            self.begin = if cursor == self.buffer.len() {
+            self.begin = if cursor == self.com.len() {
                 cursor - 1
             } else {
                 cursor
             };
             self.end = self.next_break_point(cursor);
         } else {
-            self.end = min(cursor + 1, self.buffer.len());
+            self.end = min(cursor + 1, self.com.len());
             self.begin = self.after_previous_break_point(cursor);
         }
         loop {
-            let syllables = &self.buffer[self.begin..self.end];
+            let syllables = &self.com.symbols()[self.begin..self.end];
             debug_assert!(
                 !syllables.is_empty(),
                 "should not enter here if there's no syllable in range"
@@ -78,7 +74,7 @@ impl PhraseSelector {
                     return None;
                 }
             }
-            let syllables = &self.buffer[begin..end];
+            let syllables = &self.com.symbols()[begin..end];
             if dict.lookup_first_phrase(&syllables).is_some() {
                 return Some((begin, end));
             }
@@ -88,7 +84,7 @@ impl PhraseSelector {
         let (mut begin, mut end) = (self.begin, self.end);
         loop {
             if self.forward_select {
-                if end == self.buffer.len() {
+                if end == self.com.len() {
                     return None;
                 }
                 end += 1;
@@ -104,7 +100,7 @@ impl PhraseSelector {
                     return None;
                 }
             }
-            let syllables = &self.buffer[begin..end];
+            let syllables = &self.com.symbols()[begin..end];
             if dict.lookup_first_phrase(&syllables).is_some() {
                 return Some((begin, end));
             }
@@ -156,7 +152,7 @@ impl PhraseSelector {
                     self.begin = self.after_previous_break_point(self.begin);
                 }
             }
-            let syllables = &self.buffer[self.begin..self.end];
+            let syllables = &self.com.symbols()[self.begin..self.end];
             if dict.lookup_first_phrase(&syllables).is_some() {
                 break;
             }
@@ -165,11 +161,13 @@ impl PhraseSelector {
 
     fn next_break_point(&self, mut cursor: usize) -> usize {
         loop {
-            if self.buffer.len() == cursor {
+            if self.com.len() == cursor {
                 break;
             }
-            if !self.buffer[cursor].is_syllable() {
-                break;
+            if let Some(sym) = self.com.symbol(cursor) {
+                if !sym.is_syllable() {
+                    break;
+                }
             }
             cursor += 1;
         }
@@ -177,19 +175,21 @@ impl PhraseSelector {
     }
 
     fn after_previous_break_point(&self, mut cursor: usize) -> usize {
-        let selection_ends: Vec<_> = self.selections.iter().map(|sel| sel.end).collect();
+        let selection_ends: Vec<_> = self.com.selections().iter().map(|sel| sel.end).collect();
         loop {
             if cursor == 0 {
                 return 0;
             }
-            if selection_ends.binary_search(&cursor).is_ok() {
+            if selection_ends.contains(&cursor) {
                 break;
             }
-            if self.breaks.binary_search(&Break(cursor)).is_ok() {
+            if let Some(GapKind::Break) = self.com.gap(cursor) {
                 break;
             }
-            if !self.buffer[cursor - 1].is_syllable() {
-                break;
+            if let Some(sym) = self.com.symbol(cursor - 1) {
+                if !sym.is_syllable() {
+                    break;
+                }
             }
             cursor -= 1;
         }
@@ -198,14 +198,14 @@ impl PhraseSelector {
 
     pub(crate) fn candidates(&self, editor: &SharedState, dict: &LayeredDictionary) -> Vec<String> {
         let mut candidates = dict
-            .lookup_all_phrases(&&self.buffer[self.begin..self.end])
+            .lookup_all_phrases(&&self.com.symbols()[self.begin..self.end])
             .into_iter()
             .map(|phrase| phrase.into())
             .collect::<Vec<String>>();
         if self.end - self.begin == 1 {
             let alt = editor
                 .syl
-                .alt_syllables(self.buffer[self.begin].as_syllable());
+                .alt_syllables(self.com.symbol(self.begin).unwrap().as_syllable());
             for &syl in alt {
                 candidates.extend(
                     dict.lookup_all_phrases(&[syl])
@@ -230,7 +230,7 @@ impl PhraseSelector {
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Interval, Symbol},
+        conversion::{Composition, Interval, Symbol},
         dictionary::KVDictionary,
         syl,
         zhuyin::Bopomofo::*,
@@ -240,14 +240,16 @@ mod tests {
 
     #[test]
     fn init_when_cursor_end_of_buffer_syllable() {
+        let mut com = Composition::new();
+        for sym in [Symbol::new_syl(syl![C, E, TONE4])] {
+            com.push(sym);
+        }
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
             forward_select: false,
             orig: 0,
-            buffer: vec![Symbol::Syllable(syl![C, E, TONE4])],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
         let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
@@ -259,14 +261,16 @@ mod tests {
     #[test]
     #[should_panic]
     fn init_when_cursor_end_of_buffer_not_syllable() {
+        let mut com = Composition::new();
+        for sym in [Symbol::new_char(',')] {
+            com.push(sym);
+        }
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
             forward_select: false,
             orig: 0,
-            buffer: vec![Symbol::Char(',')],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
         let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
@@ -274,14 +278,16 @@ mod tests {
 
     #[test]
     fn init_forward_select_when_cursor_end_of_buffer_syllable() {
+        let mut com = Composition::new();
+        for sym in [Symbol::new_syl(syl![C, E, TONE4])] {
+            com.push(sym);
+        }
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
             forward_select: true,
             orig: 0,
-            buffer: vec![Symbol::Syllable(syl![C, E, TONE4])],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
         let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
@@ -293,14 +299,16 @@ mod tests {
     #[test]
     #[should_panic]
     fn init_forward_select_when_cursor_end_of_buffer_not_syllable() {
+        let mut com = Composition::new();
+        for sym in [Symbol::new_char(',')] {
+            com.push(sym);
+        }
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
             forward_select: true,
             orig: 0,
-            buffer: vec![Symbol::Char(',')],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
         let dict = KVDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
         sel.init(1, &dict);
@@ -308,17 +316,19 @@ mod tests {
 
     #[test]
     fn should_stop_at_left_boundary() {
+        let mut com = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::new_syl(syl![C, E, TONE4]),
+        ] {
+            com.push(sym);
+        }
         let sel = PhraseSelector {
             begin: 0,
             end: 2,
             forward_select: false,
             orig: 0,
-            buffer: vec![
-                Symbol::Syllable(syl![C, E, TONE4]),
-                Symbol::Syllable(syl![C, E, TONE4]),
-            ],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
 
         assert_eq!(0, sel.after_previous_break_point(0));
@@ -328,14 +338,16 @@ mod tests {
 
     #[test]
     fn should_stop_after_first_non_syllable() {
+        let mut com = Composition::new();
+        for sym in [Symbol::new_char(','), Symbol::new_syl(syl![C, E, TONE4])] {
+            com.push(sym);
+        }
         let sel = PhraseSelector {
             begin: 0,
             end: 2,
             forward_select: false,
             orig: 0,
-            buffer: vec![Symbol::Char(','), Symbol::Syllable(syl![C, E, TONE4])],
-            selections: vec![],
-            breaks: vec![],
+            com,
         };
 
         assert_eq!(0, sel.after_previous_break_point(0));
@@ -345,22 +357,27 @@ mod tests {
 
     #[test]
     fn should_stop_after_first_selection() {
+        let mut com = Composition::new();
+        for sym in [
+            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::new_syl(syl![C, E, TONE4]),
+        ] {
+            com.push(sym);
+        }
+        for interval in [Interval {
+            start: 0,
+            end: 1,
+            is_phrase: true,
+            phrase: "冊".into(),
+        }] {
+            com.push_selection(interval);
+        }
         let sel = PhraseSelector {
             begin: 0,
             end: 2,
             forward_select: false,
             orig: 0,
-            buffer: vec![
-                Symbol::Syllable(syl![C, E, TONE4]),
-                Symbol::Syllable(syl![C, E, TONE4]),
-            ],
-            selections: vec![Interval {
-                start: 0,
-                end: 1,
-                is_phrase: true,
-                phrase: "冊".into(),
-            }],
-            breaks: vec![],
+            com,
         };
 
         assert_eq!(0, sel.after_previous_break_point(0));
