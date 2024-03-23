@@ -42,7 +42,7 @@ impl Log for ChewingLogger {
         if let Ok(logger) = self.logger.lock() {
             if let Some((logger, logger_data)) = logger.as_ref() {
                 let fmt = format!(
-                    "[{}:{} {}] {}\n",
+                    "[{}:{} {}] {}",
                     record.file().unwrap_or("unknown"),
                     record.line().unwrap_or_default(),
                     record.module_path().unwrap_or("unknown"),
@@ -53,6 +53,7 @@ impl Log for ChewingLogger {
                     logger(
                         logger_data.load(Relaxed),
                         as_chewing_level(record.level()),
+                        b"%s\n\0".as_ptr().cast(),
                         fmt_cstring.as_ptr(),
                     )
                 }
