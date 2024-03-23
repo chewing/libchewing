@@ -86,6 +86,7 @@ version = "0.6.0-alpha.2"
 dependencies = [
  "cdb2",
  "directories",
+ "env_logger",
  "log",
  "riff",
  "rusqlite",

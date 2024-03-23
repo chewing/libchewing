@@ -16,16 +16,22 @@ type ExternLoggerFn =
     unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...);
 
 pub(crate) struct ChewingLogger {
+    env_logger: Mutex<Option<env_logger::Logger>>,
     logger: Mutex<Option<(ExternLoggerFn, AtomicPtr<c_void>)>>,
 }
 
 impl ChewingLogger {
     pub(crate) const fn new() -> ChewingLogger {
         ChewingLogger {
+            env_logger: Mutex::new(None),
             logger: Mutex::new(None),
         }
     }
-    pub(crate) fn init(&self) {}
+    pub(crate) fn init(&self) {
+        if let Ok(mut prev) = self.env_logger.lock() {
+            *prev = Some(env_logger::Logger::from_default_env());
+        }
+    }
     pub(crate) fn set(&self, logger: Option<(ExternLoggerFn, *mut c_void)>) {
         if let Ok(mut prev) = self.logger.lock() {
             *prev = logger.map(|(l, d)| (l, d.into()));
@@ -58,6 +64,11 @@ impl Log for ChewingLogger {
                     )
                 }
                 return;
+            }
+        }
+        if let Ok(logger) = self.env_logger.lock() {
+            if let Some(el) = logger.as_ref() {
+                el.log(record);
             }
         }
     }
