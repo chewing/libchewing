@@ -19,17 +19,19 @@ use crate::flags;
 #[derive(Debug)]
 struct ParseError {
     line_num: usize,
-    column: usize,
     source: anyhow::Error,
+}
+
+fn parse_error(line_num: usize) -> ParseError {
+    ParseError {
+        line_num,
+        source: anyhow::anyhow!("Invalid format. Use the --csv flag to enable CSV parsing."),
+    }
 }
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "parsing failed at line:column {}:{}",
-            self.line_num, self.column
-        )
+        write!(f, "Parsing failed at line {}", self.line_num)
     }
 }
 
@@ -40,16 +42,12 @@ impl Error for ParseError {
 }
 
 trait IntoParseError<T> {
-    fn parse_error(self, line_num: usize, column: usize) -> std::result::Result<T, ParseError>;
+    fn parse_error(self, line_num: usize) -> std::result::Result<T, ParseError>;
 }
 
 impl<T> IntoParseError<T> for Result<T> {
-    fn parse_error(self, line_num: usize, column: usize) -> std::result::Result<T, ParseError> {
-        self.map_err(|source| ParseError {
-            line_num,
-            column,
-            source,
-        })
+    fn parse_error(self, line_num: usize) -> std::result::Result<T, ParseError> {
+        self.map_err(|source| ParseError { line_num, source })
     }
 }
 
@@ -71,30 +69,42 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
 
     let tsi = File::open(args.tsi_src)?;
     let reader = BufReader::new(tsi);
+    let delimiter = if args.csv { ',' } else { ' ' };
 
     for (line_num, line) in reader.lines().enumerate() {
+        if args.csv && line_num == 0 {
+            continue;
+        }
+
         let mut syllables = vec![];
         let line = line?;
-        let phrase = line.split_ascii_whitespace().next().unwrap();
+        let phrase = line.split(delimiter).next().ok_or(parse_error(line_num))?;
 
         let freq: u32 = match phrase.chars().count() {
             1 if !args.keep_word_freq => 0,
             _ => line
-                .split_ascii_whitespace()
+                .split(delimiter)
                 .nth(1)
-                .unwrap()
+                .ok_or(parse_error(line_num))?
                 .parse()
-                .context("unable to parse frequency")
-                .parse_error(line_num, 0)?,
+                .context("Unable to parse frequency")
+                .parse_error(line_num)?,
         };
 
-        for syllable_str in line.split_ascii_whitespace().skip(2) {
+        for syllable_str in line.split(delimiter).skip(2) {
             let mut syllable_builder = Syllable::builder();
             if syllable_str.starts_with('#') {
                 break;
             }
             for c in syllable_str.chars() {
-                syllable_builder = syllable_builder.insert(Bopomofo::try_from(c)?)?;
+                syllable_builder = syllable_builder
+                    .insert(
+                        Bopomofo::try_from(c)
+                            .context("parsing bopomofo")
+                            .parse_error(line_num)?,
+                    )
+                    .with_context(|| format!("Parsing syllables {}", syllable_str))
+                    .parse_error(line_num)?;
             }
             syllables.push(syllable_builder.build());
         }

@@ -201,7 +201,7 @@ pub struct ParseBopomofoError {
 
 impl Display for ParseBopomofoError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "parse bopomofo error: {:?}", self.kind)
+        write!(f, "Parse bopomofo error: {:?}", self.kind)
     }
 }
 

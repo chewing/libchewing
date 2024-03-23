@@ -19,6 +19,8 @@ xflags::xflags! {
             optional -r,--version version: String
             /// Keep single word frequency.
             optional -k,--keep_word_freq
+            /// Read the dictionary source as CSV with header.
+            optional --csv
             /// Path to the dictionary source file.
             required tsi_src: PathBuf
             /// Path to the output file.
@@ -85,6 +87,7 @@ pub struct InitDatabase {
     pub license: Option<String>,
     pub version: Option<String>,
     pub keep_word_freq: bool,
+    pub csv: bool,
 }
 
 #[derive(Debug)]

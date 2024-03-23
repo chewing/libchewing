@@ -39,18 +39,17 @@ fn dump_dict_tsi_src(dict: &Box<dyn Dictionary>) {
 }
 
 fn dump_dict_csv(dict: &Box<dyn Dictionary>) {
-    println!("phrase,user_freq,last_used,bopomofo");
+    println!("phrase,user_freq,bopomofo");
     for (syllables, phrase) in dict.entries() {
         println!(
-            "{},{},{},{}",
+            "{},{},{}",
             phrase.to_string(),
             phrase.freq(),
-            phrase.last_used().unwrap_or(0),
             syllables
                 .iter()
                 .map(|syl| syl.to_string())
                 .collect::<Vec<_>>()
-                .join(" ")
+                .join(",")
         )
     }
 }
