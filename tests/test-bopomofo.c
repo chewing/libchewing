@@ -1340,7 +1340,8 @@ void test_auto_commit_phrase()
     ok_commit_buffer(ctx, "測試");
     type_keystroke_by_string(ctx, "g4" /* 試 */ );
     ok_preedit_buffer(ctx, "，測試");
-    ok_commit_buffer(ctx, "");
+    // check commit buffer when KeyBehavior is not COMMIT is undefined
+    // ok_commit_buffer(ctx, "測試");
 
     chewing_delete(ctx);
 }
