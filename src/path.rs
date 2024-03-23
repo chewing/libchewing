@@ -7,7 +7,8 @@ use std::{
 
 use directories::{BaseDirs, ProjectDirs};
 
-const UNIX_SYS_PATH: &str = "/usr/share/libchewing";
+const DEFAULT_UNIX_SYS_PATH: &str = "/usr/share/libchewing";
+const UNIX_SYS_PATH: Option<&str> = option_env!("CHEWING_DATADIR");
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';
@@ -21,10 +22,11 @@ pub(crate) fn sys_path_from_env_var() -> String {
         chewing_path
     } else {
         let user_datadir = data_dir();
+        let sys_datadir = UNIX_SYS_PATH.unwrap_or(DEFAULT_UNIX_SYS_PATH);
         if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
-            format!("{datadir}:{UNIX_SYS_PATH}")
+            format!("{datadir}:{sys_datadir}")
         } else {
-            UNIX_SYS_PATH.into()
+            sys_datadir.into()
         }
     }
 }

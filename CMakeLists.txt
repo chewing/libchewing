@@ -285,6 +285,9 @@ if(NOT WITH_RUST)
 endif()
 
 if(WITH_RUST)
+    corrosion_set_env_vars(chewing
+        CHEWING_DATADIR="${CMAKE_INSTALL_FULL_DATADIR}/libchewing"
+    )
     target_link_libraries(libchewing PRIVATE chewing)
     target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
     if(BUILD_SHARED_LIBS)
