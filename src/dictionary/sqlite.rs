@@ -9,6 +9,9 @@ use super::{
     DictionaryUpdateError, Phrase,
 };
 
+const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
+const USER_VERSION: u32 = 0;
+
 /// TODO: doc
 #[derive(Debug)]
 pub enum SqliteDictionaryError {
@@ -93,6 +96,8 @@ impl SqliteDictionary {
     }
 
     fn initialize_tables(conn: &Connection) -> Result<(), SqliteDictionaryError> {
+        conn.pragma_update(None, "application_id", APPLICATION_ID)?;
+        conn.pragma_update(None, "user_version", USER_VERSION)?;
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
         conn.pragma_update(None, "wal_autocheckpoint", 0)?;
