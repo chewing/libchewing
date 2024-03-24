@@ -57,6 +57,9 @@ endif()
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     target_link_libraries(${target} testhelper)
+    if(WITH_RUST)
+        target_link_libraries(${target} chewing-testhelper)
+    endif(WITH_RUST)
     target_link_libraries(${target} libchewing)
     target_compile_definitions(${target} PRIVATE
         CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"

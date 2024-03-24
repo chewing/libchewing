@@ -103,6 +103,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "chewing-testhelper"
+version = "0.0.0"
+dependencies = [
+ "chewing",
+]
+
+[[package]]
 name = "directories"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,6 +1,6 @@
 use std::ffi::{c_char, CStr};
 
-use crate::zhuyin::Syllable;
+use chewing::zhuyin::Syllable;
 
 #[no_mangle]
 pub unsafe extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {

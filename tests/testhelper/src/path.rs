@@ -6,7 +6,7 @@ use std::{
     path::Path,
 };
 
-use crate::path;
+use chewing::path;
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';

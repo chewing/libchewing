@@ -32,7 +32,7 @@ sqlite = ["dep:rusqlite"]
 tempfile = "3"
 
 [workspace]
-members = ["fuzzer", "tools"]
+members = ["fuzzer", "tests/testhelper", "tools"]
 resolver = "2"
 
 [[test]]
