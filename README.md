@@ -1,3 +1,4 @@
+```
 	           _                   _
 	       ___| |__   _____      _(_)_ __   __ _
 	      / __| '_ \ / _ \ \ /\ / / | '_ \ / _` |
@@ -5,6 +6,7 @@
 	      \___|_| |_|\___| \_/\_/ |_|_| |_|\__, |
 	                                       |___/
 	               https://chewing.im/
+```
 
 # libchewing - The intelligent phonetic input method library
 
@@ -109,22 +111,30 @@ be built.
 + Toolchain / IDE:
    - clang >= 3.2 OR gcc >= 4.6.3
    - Rust >= 1.70
-   - Visual Studio Express 2012 for MSVC build
+   - Build Tools for Visual Studio 2022 for MSVC build
 + Documentation tools:
    - texinfo >= 4.8
 
 
 ## Build and Installation
 
+Use the default preset:
+
     cmake --preset default --install-prefix /usr
     cmake --build --preset default
+    cmake --build --preset default -t test
     cmake --build --preset default -t install
 
-For macOS:
+Build the rust implementation:
 
-    brew install libchewing  # latest release version
-    brew install --HEAD libchewing  # development, git master branch
+    cmake --preset rust-release --install-prefix /usr
+    cmake --build out/build/rust-release
+    cmake --build out/build/rust-release -t test
+    cmake --build out/build/rust-release -t install
 
+Check other supported presets:
+
+    cmake --list-presets
 
 ## Cross-build
 
@@ -152,6 +162,31 @@ In "Select Components" during installing, please select the following items:
 After installing, execute [MinGW directory]\msys\1.0\msys.bat (default is
 C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
 
+## Build on Windows with Build Tools for Visual Studio 2022
+
+To build libchewing on Windows and link to other program build from MSVC, you
+need to use the MSVC toolchain. To install the build environment:
+
+Open admin prompt `cmd.exe`
+
+    winget install Microsoft.VisualStudio.2022.BuildTools
+    winget install Ninja-build.Ninja
+    winget install Kitware.CMake
+    winget install Rustlang.Rustup
+
+
+Optional development tools
+
+    winget install Git.Git
+    winget install VSCodium.VSCodium
+
+Reboot, then open `Visual Studio Installer` and install C/C++ components.
+
+Open `x64 Native Tools Command Prompt for VS 2022`
+
+    rustup default stable
+    cmake -G Ninja --preset rust
+
 Now you have the build environment for libchewing. You can follow the installation
 steps to build with cmake.
 
@@ -168,6 +203,15 @@ commands to install the tools you need:
     brew install cmake
     brew install rustup
     rustup default stable
+
+## Minimum Supported Rust Version
+
+To ensure libchewing can be built on various Linux distributions, we use the
+minimum rust version available from major distributions' next release branch.
+Data source: https://repology.org/project/rust/versions
+
+* Current MSRV: 1.70.0 (Debian unstable)
+
 
 ## Usage
 
