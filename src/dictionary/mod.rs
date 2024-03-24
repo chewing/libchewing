@@ -201,11 +201,7 @@ impl Phrase {
 /// string.
 impl PartialOrd for Phrase {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.freq.partial_cmp(&other.freq) {
-            Some(Ordering::Equal) => {}
-            ord => return ord,
-        }
-        self.phrase.partial_cmp(&other.phrase)
+        Some(self.cmp(other))
     }
 }
 
@@ -213,7 +209,11 @@ impl PartialOrd for Phrase {
 /// string.
 impl Ord for Phrase {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
+        match self.freq.cmp(&other.freq) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+        self.phrase.cmp(&other.phrase)
     }
 }
 
@@ -499,8 +499,8 @@ impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
         let vec = self.entry(syllables).or_default();
         *vec = vec
             .iter()
+            .filter(|&p| p.as_str() != phrase_str)
             .cloned()
-            .filter(|p| p.as_str() != phrase_str)
             .collect::<Vec<_>>();
         Ok(())
     }

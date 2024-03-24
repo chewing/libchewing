@@ -963,7 +963,7 @@ impl TrieDictionaryBuilder {
                             (1, _) | (_, 1) => a.as_str().len().cmp(&b.as_str().len()),
                             _ => {
                                 if a.freq() == b.freq() {
-                                    b.as_str().cmp(&a.as_str())
+                                    b.as_str().cmp(a.as_str())
                                 } else {
                                     b.freq().cmp(&a.freq())
                                 }
@@ -1006,7 +1006,7 @@ impl TrieDictionaryBuilder {
 
         // Wrap the data in a RIFF container
         let contents = ChunkContents::Children(
-            RIFF_ID.clone(),
+            RIFF_ID,
             CHEW,
             vec![
                 ChunkContents::Data(FMT, DICT_FORMAT.to_le_bytes().into()),

@@ -3,7 +3,7 @@ use std::cmp::min;
 use crate::{
     conversion::{Composition, GapKind, Interval},
     dictionary::{Dictionary, LayeredDictionary},
-    editor::SharedState,
+    editor::{EditorError, SharedState},
 };
 
 #[derive(Debug)]
@@ -109,32 +109,32 @@ impl PhraseSelector {
     pub(crate) fn jump_to_next_selection_point<D: Dictionary>(
         &mut self,
         dict: &D,
-    ) -> Result<(), ()> {
+    ) -> Result<(), EditorError> {
         if let Some((begin, end)) = self.next_selection_point(dict) {
             self.begin = begin;
             self.end = end;
             Ok(())
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
     pub(crate) fn jump_to_prev_selection_point<D: Dictionary>(
         &mut self,
         dict: &D,
-    ) -> Result<(), ()> {
+    ) -> Result<(), EditorError> {
         if let Some((begin, end)) = self.prev_selection_point(dict) {
             self.begin = begin;
             self.end = end;
             Ok(())
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
     pub(crate) fn jump_to_first_selection_point<D: Dictionary>(&mut self, dict: &D) {
         self.init(self.orig, dict);
     }
     pub(crate) fn jump_to_last_selection_point<D: Dictionary>(&mut self, dict: &D) {
-        while let Some(_) = self.next_selection_point(dict) {
+        while self.next_selection_point(dict).is_some() {
             let _ = self.jump_to_next_selection_point(dict);
         }
     }

@@ -282,7 +282,7 @@ impl Composition {
         for i in to_remove {
             self.selections.swap_remove(i);
         }
-        for i in (interval.start..interval.end).into_iter().skip(1) {
+        for i in (interval.start..interval.end).skip(1) {
             self.gaps[i] = GapKind::Normal;
         }
         self.selections.push(interval);
