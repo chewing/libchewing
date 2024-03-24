@@ -675,14 +675,12 @@ mod tests {
         ] {
             composition.push(sym);
         }
-        for interval in [Interval {
+        composition.push_selection(Interval {
             start: 4,
             end: 6,
             is_phrase: true,
             phrase: "戴錶".into(),
-        }] {
-            composition.push_selection(interval);
-        }
+        });
         assert_eq!(
             vec![
                 Interval {
@@ -720,14 +718,12 @@ mod tests {
         ] {
             composition.push(sym);
         }
-        for interval in [Interval {
+        composition.push_selection(Interval {
             start: 1,
             end: 3,
             is_phrase: true,
             phrase: "酷音".into(),
-        }] {
-            composition.push_selection(interval);
-        }
+        });
         assert_eq!(
             vec![Interval {
                 start: 0,

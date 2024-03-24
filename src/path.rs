@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn resolve_data_dir() {
-        if let Some(_) = BaseDirs::new() {
+        if BaseDirs::new().is_some() {
             let data_dir = data_dir();
             assert!(data_dir.is_some());
         }
