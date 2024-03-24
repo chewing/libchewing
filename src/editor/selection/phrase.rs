@@ -241,9 +241,7 @@ mod tests {
     #[test]
     fn init_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_syl(syl![C, E, TONE4])] {
-            com.push(sym);
-        }
+        com.push(Symbol::new_syl(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -262,9 +260,7 @@ mod tests {
     #[should_panic]
     fn init_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_char(',')] {
-            com.push(sym);
-        }
+        com.push(Symbol::new_char(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -279,9 +275,7 @@ mod tests {
     #[test]
     fn init_forward_select_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_syl(syl![C, E, TONE4])] {
-            com.push(sym);
-        }
+        com.push(Symbol::new_syl(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -300,9 +294,7 @@ mod tests {
     #[should_panic]
     fn init_forward_select_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_char(',')] {
-            com.push(sym);
-        }
+        com.push(Symbol::new_char(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -364,14 +356,12 @@ mod tests {
         ] {
             com.push(sym);
         }
-        for interval in [Interval {
+        com.push_selection(Interval {
             start: 0,
             end: 1,
             is_phrase: true,
             phrase: "冊".into(),
-        }] {
-            com.push_selection(interval);
-        }
+        });
         let sel = PhraseSelector {
             begin: 0,
             end: 2,

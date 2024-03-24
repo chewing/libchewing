@@ -16,18 +16,18 @@ pub fn run(args: flags::Dump) -> Result<()> {
         Box::new(TrieDictionary::open(&args.path)?)
     };
     if args.csv {
-        dump_dict_csv(&dict);
+        dump_dict_csv(dict.as_ref());
     } else {
-        dump_dict_tsi_src(&dict);
+        dump_dict_tsi_src(dict.as_ref());
     }
     Ok(())
 }
 
-fn dump_dict_tsi_src(dict: &Box<dyn Dictionary>) {
+fn dump_dict_tsi_src(dict: &dyn Dictionary) {
     for (syllables, phrase) in dict.entries() {
         println!(
             "{} {} {}",
-            phrase.to_string(),
+            phrase,
             phrase.freq(),
             syllables
                 .iter()
@@ -38,12 +38,12 @@ fn dump_dict_tsi_src(dict: &Box<dyn Dictionary>) {
     }
 }
 
-fn dump_dict_csv(dict: &Box<dyn Dictionary>) {
+fn dump_dict_csv(dict: &dyn Dictionary) {
     println!("phrase,user_freq,bopomofo");
     for (syllables, phrase) in dict.entries() {
         println!(
             "{},{},{}",
-            phrase.to_string(),
+            phrase,
             phrase.freq(),
             syllables
                 .iter()

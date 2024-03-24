@@ -1291,14 +1291,14 @@ mod tests {
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("測試", 100).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::S, Bopomofo::U, Bopomofo::O, Bopomofo::TONE3],
             ],
@@ -1358,11 +1358,11 @@ mod tests {
     fn tree_lookup_word() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         builder.insert(
-            &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             ("測", 1).into(),
         )?;
         builder.insert(
-            &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             ("冊", 1).into(),
         )?;
         let mut cursor = Cursor::new(vec![]);
@@ -1381,21 +1381,21 @@ mod tests {
     fn tree_lookup_phrase() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("測試", 1).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("策試", 2).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
                 syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
@@ -1440,7 +1440,7 @@ mod tests {
         let mut builder = TrieDictionaryBuilder::new();
         builder
             .insert(
-                &vec![
+                &[
                     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                     syl![Bopomofo::SH, Bopomofo::TONE4],
                 ],
@@ -1449,7 +1449,7 @@ mod tests {
             .expect("Duplicate phrase error");
         builder
             .insert(
-                &vec![
+                &[
                     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                     syl![Bopomofo::SH, Bopomofo::TONE4],
                 ],
@@ -1463,7 +1463,7 @@ mod tests {
         let mut builder = TrieDictionaryBuilder::new();
         for word in ["冊", "策", "測", "側"] {
             builder.insert(
-                &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
                 (word, 0).into(),
             )?;
         }
@@ -1478,7 +1478,7 @@ mod tests {
                 Phrase::new("測", 0),
                 Phrase::new("側", 0),
             ],
-            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
+            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
         );
         Ok(())
     }
@@ -1487,35 +1487,35 @@ mod tests {
     fn stable_phrase_sort_order() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("側室", 318).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("側視", 318).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("策士", 318).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("策試", 318).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
@@ -1533,7 +1533,7 @@ mod tests {
                 Phrase::new("側視", 318),
                 Phrase::new("側室", 318),
             ],
-            dict.lookup_all_phrases(&vec![
+            dict.lookup_all_phrases(&[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
@@ -1570,21 +1570,21 @@ mod tests {
     fn tree_entries() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("測試", 1).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ],
             ("策試", 2).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
                 syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
@@ -1593,7 +1593,7 @@ mod tests {
             ("測試成功", 3).into(),
         )?;
         builder.insert(
-            &vec![
+            &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                 syl![Bopomofo::SH, Bopomofo::TONE4],
                 syl![Bopomofo::SH],

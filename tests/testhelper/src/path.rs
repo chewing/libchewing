@@ -6,7 +6,7 @@ use std::{
     path::Path,
 };
 
-use crate::path;
+use chewing::path;
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';
@@ -14,8 +14,11 @@ const SEARCH_PATH_SEP: char = ';';
 #[cfg(target_family = "unix")]
 const SEARCH_PATH_SEP: char = ':';
 
+/// # Safety
+///
+/// This function should be called with valid pointers.
 #[no_mangle]
-pub extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
+pub unsafe extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
         let path_cstring = CString::new(chewing_path).expect("string should not have internal nul");
@@ -40,6 +43,9 @@ pub extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
     0
 }
 
+/// # Safety
+///
+/// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn find_path_by_files(
     search_path: *const c_char,
@@ -77,7 +83,7 @@ pub unsafe extern "C" fn find_path_by_files(
     -1
 }
 
-fn files_ptr_to_slice(files: *const *const i8) -> Vec<Cow<'static, str>> {
+unsafe fn files_ptr_to_slice(files: *const *const i8) -> Vec<Cow<'static, str>> {
     let len = {
         let mut i = 0;
         while unsafe { !files.add(i).read().is_null() } {

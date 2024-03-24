@@ -116,13 +116,3 @@ _chewing_userphrase_lookup
 _chewing_userphrase_remove
 _chewing_zuin_Check
 _chewing_zuin_String
-_find_path_by_files
-_get_search_path
-_ueBytesFromChar
-_ueConstStrSeek
-_ueStrLen
-_ueStrNBytes
-_ueStrNCpy
-_ueStrSeek
-_ueStrStr
-_UintFromPhone

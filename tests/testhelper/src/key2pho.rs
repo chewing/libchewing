@@ -1,7 +1,10 @@
 use std::ffi::{c_char, CStr};
 
-use crate::zhuyin::Syllable;
+use chewing::zhuyin::Syllable;
 
+/// # Safety
+///
+/// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn UintFromPhone(phone: *const c_char) -> u16 {
     let cstr = unsafe { CStr::from_ptr(phone) };

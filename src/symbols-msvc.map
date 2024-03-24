@@ -117,13 +117,3 @@ EXPORTS
     chewing_userphrase_remove;
     chewing_zuin_Check;
     chewing_zuin_String;
-    find_path_by_files;
-    get_search_path;
-    ueBytesFromChar;
-    ueConstStrSeek;
-    ueStrLen;
-    ueStrNBytes;
-    ueStrNCpy;
-    ueStrSeek;
-    ueStrStr;
-    UintFromPhone;
