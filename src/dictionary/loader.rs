@@ -23,7 +23,7 @@ const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SystemDictionaryLoader {
     sys_path: Option<String>,
 }
@@ -34,7 +34,7 @@ fn load_err(_: impl Error) -> &'static str {
 
 impl SystemDictionaryLoader {
     pub fn new() -> SystemDictionaryLoader {
-        SystemDictionaryLoader { sys_path: None }
+        SystemDictionaryLoader::default()
     }
     pub fn sys_path(mut self, path: impl Into<String>) -> SystemDictionaryLoader {
         self.sys_path = Some(path.into());
@@ -78,14 +78,14 @@ impl SystemDictionaryLoader {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UserDictionaryLoader {
     data_path: Option<PathBuf>,
 }
 
 impl UserDictionaryLoader {
     pub fn new() -> UserDictionaryLoader {
-        UserDictionaryLoader { data_path: None }
+        UserDictionaryLoader::default()
     }
     pub fn userphrase_path(mut self, path: impl AsRef<Path>) -> UserDictionaryLoader {
         self.data_path = Some(path.as_ref().to_path_buf());
@@ -104,7 +104,7 @@ impl UserDictionaryLoader {
         }
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
-            fs::create_dir_all(&userdata_dir)?;
+            fs::create_dir_all(userdata_dir)?;
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
@@ -154,7 +154,7 @@ fn guess_format_and_load(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>>
         return Err(io::Error::from(io::ErrorKind::PermissionDenied));
     }
 
-    init_user_dictionary(&dict_path)
+    init_user_dictionary(dict_path)
 }
 
 fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {

@@ -1,6 +1,6 @@
 use std::{
     collections::BTreeMap,
-    fmt::{Debug, Display},
+    fmt::{Debug, Display, Write},
     ops::Neg,
 };
 
@@ -11,7 +11,7 @@ use crate::dictionary::{Dictionary, Phrase};
 use super::{Composition, ConversionEngine, GapKind, Interval, Symbol};
 
 /// TODO: doc
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ChewingEngine;
 
 impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
@@ -104,7 +104,7 @@ impl ChewingEngine {
     ) -> Option<PossiblePhrase> {
         let end = start + symbols.len();
 
-        for i in (start..end).into_iter().skip(1) {
+        for i in (start..end).skip(1) {
             if let Some(GapKind::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
@@ -178,7 +178,7 @@ impl ChewingEngine {
         for begin in 0..com.symbols.len() {
             for end in begin..=com.symbols.len() {
                 if let Some(phrase) =
-                    self.find_best_phrase(dict, begin, &com.symbols[begin..end], &com)
+                    self.find_best_phrase(dict, begin, &com.symbols[begin..end], com)
                 {
                     intervals.push(PossibleInterval {
                         start: begin,
@@ -238,7 +238,7 @@ impl ChewingEngine {
         &'g self,
         dict: &D,
         graph: &mut Graph<'g>,
-        composition: &Composition,
+        com: &Composition,
         start: usize,
         target: usize,
         prefix: Option<PossiblePath>,
@@ -250,7 +250,7 @@ impl ChewingEngine {
         for end in (start + 1)..=target {
             let entry = graph.entry((start, end));
             if let Some(phrase) = entry.or_insert_with(|| {
-                self.find_best_phrase(dict, start, &composition.symbols[start..end], &composition)
+                self.find_best_phrase(dict, start, &com.symbols[start..end], com)
             }) {
                 let mut prefix = prefix.clone().unwrap_or_default();
                 prefix.intervals.push(PossibleInterval {
@@ -261,7 +261,7 @@ impl ChewingEngine {
                 result.append(&mut self.find_all_paths(
                     dict,
                     graph,
-                    composition,
+                    com,
                     end,
                     target,
                     Some(prefix),
@@ -311,12 +311,6 @@ enum PossiblePhrase {
 }
 
 impl PossiblePhrase {
-    fn to_string(&self) -> String {
-        match self {
-            PossiblePhrase::Symbol(sym) => sym.as_char().into(),
-            PossiblePhrase::Phrase(phrase) => phrase.to_string(),
-        }
-    }
     fn freq(&self) -> u32 {
         match self {
             PossiblePhrase::Symbol(_) => 0,
@@ -327,7 +321,10 @@ impl PossiblePhrase {
 
 impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_string())
+        match self {
+            PossiblePhrase::Symbol(sym) => f.write_char(sym.as_char()),
+            PossiblePhrase::Phrase(phrase) => f.write_str(phrase.as_str()),
+        }
     }
 }
 
@@ -475,7 +472,7 @@ impl PartialEq for PossiblePath {
 
 impl PartialOrd for PossiblePath {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.score().partial_cmp(&other.score())
+        Some(self.cmp(other))
     }
 }
 

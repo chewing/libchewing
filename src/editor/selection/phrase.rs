@@ -134,7 +134,7 @@ impl PhraseSelector {
         self.init(self.orig, dict);
     }
     pub(crate) fn jump_to_last_selection_point<D: Dictionary>(&mut self, dict: &D) {
-        while let Some(_) = self.next_selection_point(dict) {
+        while self.next_selection_point(dict).is_some() {
             let _ = self.jump_to_next_selection_point(dict);
         }
     }

@@ -3,6 +3,7 @@ use std::{
     error::Error,
     fmt::{Debug, Display, Write},
     num::NonZeroU16,
+    ops::Shl,
     str::FromStr,
 };
 
@@ -26,6 +27,7 @@ impl Debug for Syllable {
     }
 }
 
+#[allow(clippy::unusual_byte_groupings)]
 impl Syllable {
     const EMPTY_PATTERN: u16 = 0b1000000_00_0000_000;
     pub const EMPTY: Syllable = Syllable {
@@ -43,7 +45,6 @@ impl Syllable {
         SyllableBuilder::new()
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub const fn initial(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0111111_00_0000_000) >> 9;
         if index == 0 {
@@ -56,7 +57,6 @@ impl Syllable {
         }
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub const fn medial(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0000000_11_0000_000) >> 7;
         if index == 0 {
@@ -69,7 +69,6 @@ impl Syllable {
         }
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub const fn rime(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0000000_00_1111_000) >> 3;
         if index == 0 {
@@ -82,7 +81,6 @@ impl Syllable {
         }
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub const fn tone(&self) -> Option<Bopomofo> {
         let index = self.value.get() & 0b0000000_00_0000_111;
         if index == 0 {
@@ -95,7 +93,6 @@ impl Syllable {
         }
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_initial(&mut self) -> Option<Bopomofo> {
         let ret = self.initial();
         let value = self.value.get() & 0b0000000_11_1111_111;
@@ -106,7 +103,6 @@ impl Syllable {
         ret
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_medial(&mut self) -> Option<Bopomofo> {
         let ret = self.medial();
         let value = self.value.get() & 0b1111111_00_1111_111;
@@ -117,7 +113,6 @@ impl Syllable {
         ret
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_rime(&mut self) -> Option<Bopomofo> {
         let ret = self.rime();
         let value = self.value.get() & 0b1111111_11_0000_111;
@@ -128,7 +123,6 @@ impl Syllable {
         ret
     }
     /// TODO: docs
-    #[allow(clippy::unusual_byte_groupings)]
     pub fn remove_tone(&mut self) -> Option<Bopomofo> {
         let ret = self.tone();
         let value = self.value.get() & 0b1111111_11_1111_000;
@@ -190,10 +184,10 @@ impl Syllable {
     pub fn update(&mut self, bopomofo: Bopomofo) {
         let orig = self.value.get();
         let value = match bopomofo.kind() {
-            BopomofoKind::Initial => (orig & 0b0000000_11_1111_111) | (bopomofo as u16 + 1) << 9,
-            BopomofoKind::Medial => (orig & 0b0111111_00_1111_111) | (bopomofo as u16 - 20) << 7,
-            BopomofoKind::Rime => (orig & 0b0111111_11_0000_111) | (bopomofo as u16 - 23) << 3,
-            BopomofoKind::Tone => (orig & 0b0111111_11_1111_000) | bopomofo as u16 - 36,
+            BopomofoKind::Initial => (orig & 0b0000000_11_1111_111) | (bopomofo as u16 + 1).shl(9),
+            BopomofoKind::Medial => (orig & 0b0111111_00_1111_111) | (bopomofo as u16 - 20).shl(7),
+            BopomofoKind::Rime => (orig & 0b0111111_11_0000_111) | (bopomofo as u16 - 23).shl(3),
+            BopomofoKind::Tone => (orig & 0b0111111_11_1111_000) | (bopomofo as u16 - 36),
         };
         self.value = match NonZeroU16::new(value) {
             Some(v) => v,

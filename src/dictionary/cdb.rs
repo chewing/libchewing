@@ -214,6 +214,12 @@ impl CdbDictionaryBuilder {
     }
 }
 
+impl Default for CdbDictionaryBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl From<CdbDictionaryError> for BuildDictionaryError {
     fn from(value: CdbDictionaryError) -> Self {
         BuildDictionaryError {

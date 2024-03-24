@@ -105,7 +105,7 @@ where
         let min_key = (syllable_key.clone(), Cow::from(MIN_PHRASE));
         let max_key = (syllable_key.clone(), Cow::from(MAX_PHRASE));
         let store_iter = self.store.iter().flat_map(move |store| {
-            store.find(&syllable_bytes).filter_map(|bytes| {
+            store.find(syllable_bytes).filter_map(|bytes| {
                 let pd = PhraseData(&bytes);
                 if pd.is_valid() {
                     Some(Phrase::from(pd))

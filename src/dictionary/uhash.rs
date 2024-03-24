@@ -70,7 +70,7 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
     let mut buf = [0_u8; BIN_FIELD_SIZE];
 
     input.read_exact(&mut buf[0..BIN_HASH_SIG.len()])?;
-    if !buf.starts_with(&BIN_HASH_SIG.as_bytes()) {
+    if !buf.starts_with(BIN_HASH_SIG.as_bytes()) {
         return Err(invalid_data());
     }
     // NB: lifetime size is platform dependent

@@ -5,16 +5,14 @@ use std::{
     path::Path,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AbbrevTable {
     table: BTreeMap<char, String>,
 }
 
 impl AbbrevTable {
     pub fn new() -> AbbrevTable {
-        AbbrevTable {
-            table: BTreeMap::default(),
-        }
+        AbbrevTable::default()
     }
     pub fn open<P: AsRef<Path>>(path: P) -> io::Result<AbbrevTable> {
         let reader = BufReader::new(File::open(path.as_ref())?);

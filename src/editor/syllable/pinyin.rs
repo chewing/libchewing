@@ -10,20 +10,15 @@ use super::{KeyBehavior, SyllableEditor};
 const MAX_PINYIN_LEN: usize = 10;
 
 /// TODO: docs
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum PinyinVariant {
     /// TODO: docs
+    #[default]
     HanyuPinyin,
     /// TODO: docs
     ThlPinyin,
     /// TODO: docs
     Mps2Pinyin,
-}
-
-impl Default for PinyinVariant {
-    fn default() -> PinyinVariant {
-        PinyinVariant::HanyuPinyin
-    }
 }
 
 /// TODO: docs

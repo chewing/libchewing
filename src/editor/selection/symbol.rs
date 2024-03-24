@@ -94,12 +94,10 @@ impl SpecialSymbolSelector {
             .and_then(|cat| cat.chars().nth(n).map(Symbol::new_char))
     }
     fn find_category(&self) -> Option<&str> {
-        for cat in Self::TABLE {
-            if cat.contains(self.symbol.as_char()) {
-                return Some(cat);
-            }
-        }
-        None
+        Self::TABLE
+            .iter()
+            .find(|cat| cat.contains(self.symbol.as_char()))
+            .copied()
     }
     const TABLE: &'static [&'static str; 48] = &[
         "ø",
