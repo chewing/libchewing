@@ -1498,12 +1498,15 @@ pub extern "C" fn chewing_cursor_Current(ctx: *const ChewingContext) -> c_int {
 #[deprecated(note = "The chewing_cand_TotalPage function could achieve the same effect.")]
 #[no_mangle]
 pub extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c_int {
-    let _ctx = match unsafe { ctx.as_ref() } {
+    let ctx = match unsafe { ctx.as_ref() } {
         Some(ctx) => ctx,
         None => return -1,
     };
 
-    todo!()
+    match ctx.editor.total_page() {
+        Ok(_) => FALSE,
+        Err(_) => TRUE,
+    }
 }
 
 #[no_mangle]
