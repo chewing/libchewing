@@ -27,7 +27,7 @@ fn dump_dict_tsi_src(dict: &Box<dyn Dictionary>) {
     for (syllables, phrase) in dict.entries() {
         println!(
             "{} {} {}",
-            phrase.to_string(),
+            phrase,
             phrase.freq(),
             syllables
                 .iter()
@@ -43,7 +43,7 @@ fn dump_dict_csv(dict: &Box<dyn Dictionary>) {
     for (syllables, phrase) in dict.entries() {
         println!(
             "{},{},{}",
-            phrase.to_string(),
+            phrase,
             phrase.freq(),
             syllables
                 .iter()

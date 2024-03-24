@@ -56,7 +56,7 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
         "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
         "trie" => Box::new(TrieDictionaryBuilder::new()),
         "cdb" => Box::new(CdbDictionaryBuilder::new()),
-        ty @ _ => bail!("Unknown database type {ty}"),
+        ty => bail!("Unknown database type {ty}"),
     };
 
     builder.set_info(DictionaryInfo {
