@@ -342,14 +342,14 @@ impl SyllableBuilder {
     ) -> Result<SyllableBuilder, BuildSyllableError> {
         match bopomofo.kind() {
             BopomofoKind::Initial => {
+                if self.value & 0b0111111_00_0000_000 != 0 {
+                    return Err(BuildSyllableError {
+                        msg: "multiple initials",
+                    });
+                }
                 if self.step > 0 {
                     return Err(BuildSyllableError {
                         msg: "bopomofo is in incorrect order",
-                    });
-                }
-                if self.value & 0b0111111_00_0000_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple initial bopomofo",
                     });
                 }
                 self.step = 1;
@@ -357,14 +357,14 @@ impl SyllableBuilder {
                 self.value |= (bopomofo as u16 + 1) << 9;
             }
             BopomofoKind::Medial => {
+                if self.value & 0b0000000_11_0000_000 != 0 {
+                    return Err(BuildSyllableError {
+                        msg: "multiple medials",
+                    });
+                }
                 if self.step > 1 {
                     return Err(BuildSyllableError {
                         msg: "bopomofo is in incorrect order",
-                    });
-                }
-                if self.value & 0b0000000_11_0000_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple medial bopomofo",
                     });
                 }
                 self.step = 2;
@@ -372,14 +372,14 @@ impl SyllableBuilder {
                 self.value |= (bopomofo as u16 - 20) << 7;
             }
             BopomofoKind::Rime => {
+                if self.value & 0b0000000_00_1111_000 != 0 {
+                    return Err(BuildSyllableError {
+                        msg: "multiple rimes",
+                    });
+                }
                 if self.step > 2 {
                     return Err(BuildSyllableError {
                         msg: "bopomofo is in incorrect order",
-                    });
-                }
-                if self.value & 0b0000000_00_1111_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple rime bopomofo",
                     });
                 }
                 self.step = 3;
@@ -387,14 +387,14 @@ impl SyllableBuilder {
                 self.value |= (bopomofo as u16 - 23) << 3;
             }
             BopomofoKind::Tone => {
-                if self.step > 3 {
-                    return Err(BuildSyllableError {
-                        msg: "bopomofo is in incorrect order",
-                    });
-                }
                 if self.value & 0b0000000_00_0000_111 != 0 {
                     return Err(BuildSyllableError {
                         msg: "multiple tone bopomofo",
+                    });
+                }
+                if self.step > 3 {
+                    return Err(BuildSyllableError {
+                        msg: "bopomofo is in incorrect order",
                     });
                 }
                 self.step = 4;
@@ -441,7 +441,7 @@ pub struct BuildSyllableError {
 
 impl Display for BuildSyllableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "syllable build error: {}", self.msg)
+        write!(f, "Syllable build error: {}", self.msg)
     }
 }
 
@@ -454,7 +454,7 @@ pub struct ParseSyllableError {
 
 impl Display for ParseSyllableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "syllable parse error")
+        write!(f, "Syllable parse error")
     }
 }
 
