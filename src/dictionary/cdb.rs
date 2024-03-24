@@ -1,13 +1,13 @@
 use std::{
     any::Any,
     fmt::{Debug, Display},
-    fs::File,
     io::{self, Write},
     mem,
     path::{Path, PathBuf},
+    str,
 };
 
-use cdb2::{CDBKeyValueIter, CDBMake, CDBValueIter, CDBWriter, CDB};
+use cdb2::{CDBKeyValueIter, CDBValueIter, CDBWriter, CDB};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -111,18 +111,19 @@ impl CdbDictionary {
         match path.try_exists() {
             Ok(exists) => {
                 if !exists {
-                    let mut maker = CDBMake::new(File::create(&path)?)?;
-                    maker.add(b"INFO", &[])?;
+                    let mut maker = CDBWriter::create(&path)?;
+                    write_info(&mut maker, &DictionaryInfo::default())?;
                     maker.finish()?;
                 }
             }
             Err(_) => todo!(),
         }
         let base = CDB::open(&path)?;
+        let info = read_info(&base)?;
         Ok(CdbDictionary {
             path,
             inner: KVDictionary::new(base),
-            info: Default::default(),
+            info,
         })
     }
 }
@@ -153,17 +154,15 @@ impl Dictionary for CdbDictionary {
             data_buf.write_all(&[phrase.as_str().len() as u8])?;
             data_buf.write_all(phrase.as_str().as_bytes())
         }
-        let mut writer = CDBWriter::create(&self.path).map_err(Error::from)?;
-        writer.add(b"INFO", &[]).map_err(Error::from)?;
+        let mut writer = CDBWriter::create(&self.path)?;
+        write_info(&mut writer, &self.info)?;
         for entry in self.entries() {
             let mut data_buf = vec![];
-            write_phrase(&mut data_buf, &entry.1).map_err(Error::from)?;
-            writer
-                .add(&entry.0.get_bytes(), &data_buf)
-                .map_err(Error::from)?;
+            write_phrase(&mut data_buf, &entry.1)?;
+            writer.add(&entry.0.get_bytes(), &data_buf)?;
         }
         drop(self.inner.take());
-        writer.finish().map_err(Error::from)?;
+        writer.finish()?;
         self.reopen()
     }
 
@@ -247,8 +246,8 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        let mut maker = CDBMake::new(File::create(path)?)?;
-        maker.add(b"INFO", &[])?;
+        let mut maker = CDBWriter::create(path)?;
+        write_info(&mut maker, &self.info)?;
         maker.finish()?;
         let cdb = CDB::open(path)?;
         let inner = mem::replace(&mut self.inner, KVDictionary::<()>::new_in_memory());
@@ -266,6 +265,48 @@ impl DictionaryBuilder for CdbDictionaryBuilder {
     }
 }
 
+fn bytes_from<'a>(opt: &'a Option<String>, s: &'a str) -> &'a [u8] {
+    opt.as_ref().map(|s| s.as_str()).unwrap_or(s).as_bytes()
+}
+
+fn write_info(maker: &mut CDBWriter, info: &DictionaryInfo) -> Result<(), io::Error> {
+    maker.add(b"INAM", bytes_from(&info.name, "我的詞庫"))?;
+    maker.add(b"ICOP", bytes_from(&info.copyright, "Unknown"))?;
+    maker.add(b"ILIC", bytes_from(&info.license, "Unknown"))?;
+    maker.add(b"IREV", bytes_from(&info.version, "0.0.0"))?;
+    maker.add(
+        b"ISFT",
+        bytes_from(
+            &info.software,
+            &format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
+        ),
+    )?;
+
+    Ok(())
+}
+
+fn optstr_from(reader: &CDB, key: &str) -> Result<Option<String>, CdbDictionaryError> {
+    Ok(reader
+        .get(key.as_bytes())
+        .transpose()?
+        .map(|b| str::from_utf8(&b).unwrap_or("INVALID").to_string()))
+}
+
+fn read_info(reader: &CDB) -> Result<DictionaryInfo, CdbDictionaryError> {
+    let name = optstr_from(reader, "INAM")?;
+    let copyright = optstr_from(reader, "ICOP")?;
+    let license = optstr_from(reader, "ILIC")?;
+    let version = optstr_from(reader, "IREV")?;
+    let software = optstr_from(reader, "ISFT")?;
+    Ok(DictionaryInfo {
+        name,
+        copyright,
+        license,
+        version,
+        software,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use std::error::Error;
@@ -279,10 +320,12 @@ mod tests {
         let tmp_dir = tempfile::tempdir()?;
         let file_path = tmp_dir.path().join("chewing.cdb");
         let mut dict = CdbDictionary::open(file_path)?;
+        let info = dict.about();
         dict.add_phrase(
             &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
             ("dict", 1, 2).into(),
         )?;
+        assert_eq!(Some("Unknown".to_string()), info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
             dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])
@@ -294,12 +337,15 @@ mod tests {
     fn create_new_dictionary_and_query() -> Result<(), Box<dyn Error>> {
         let tmp_dir = tempfile::tempdir()?;
         let file_path = tmp_dir.path().join("chewing.cdb");
-        let mut dict = CdbDictionary::open(file_path)?;
+        let mut dict = CdbDictionary::open(&file_path)?;
         dict.add_phrase(
             &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
             ("dict", 1, 2).into(),
         )?;
         dict.flush()?;
+        let dict = CdbDictionary::open(file_path)?;
+        let info = dict.about();
+        assert_eq!(Some("Unknown".to_string()), info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
             dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])
