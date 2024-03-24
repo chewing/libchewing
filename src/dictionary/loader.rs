@@ -1,8 +1,8 @@
 use std::{
+    error::Error,
     ffi::OsStr,
     fs::{self, File},
     io::{self, Seek},
-    marker::PhantomData,
     path::{Path, PathBuf},
 };
 
@@ -28,6 +28,10 @@ pub struct SystemDictionaryLoader {
     sys_path: Option<String>,
 }
 
+fn load_err(_: impl Error) -> &'static str {
+    "LoadSystemDictionaryError"
+}
+
 impl SystemDictionaryLoader {
     pub fn new() -> SystemDictionaryLoader {
         SystemDictionaryLoader { sys_path: None }
@@ -37,13 +41,6 @@ impl SystemDictionaryLoader {
         self
     }
     pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
-        let mut db_loaders: Vec<Box<dyn DictionaryLoader>> = vec![];
-        #[cfg(feature = "sqlite")]
-        {
-            db_loaders.push(LoaderWrapper::<SqliteDictionary>::new());
-        }
-        db_loaders.push(LoaderWrapper::<TrieDictionary>::new());
-
         let search_path = if let Some(sys_path) = &self.sys_path {
             sys_path.to_owned()
         } else {
@@ -53,16 +50,10 @@ impl SystemDictionaryLoader {
             .ok_or("SystemDictionaryNotFound")?;
 
         let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
-        let tsi_dict = db_loaders
-            .iter()
-            .find_map(|loader| loader.open_read_only(&tsi_dict_path));
-
+        let tsi_dict = TrieDictionary::open(tsi_dict_path).map_err(load_err)?;
         let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
-        let word_dict = db_loaders
-            .iter()
-            .find_map(|loader| loader.open_read_only(&word_dict_path));
-
-        Ok(vec![word_dict.unwrap(), tsi_dict.unwrap()])
+        let word_dict = TrieDictionary::open(word_dict_path).map_err(load_err)?;
+        Ok(vec![Box::new(word_dict), Box::new(tsi_dict)])
     }
     pub fn load_abbrev(&self) -> Result<AbbrevTable, &'static str> {
         let search_path = if let Some(sys_path) = &self.sys_path {
@@ -185,61 +176,5 @@ fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> 
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
     } else {
         Err(io::Error::from(io::ErrorKind::Other))
-    }
-}
-
-trait DictionaryLoader {
-    fn open(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>>;
-    fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>>;
-}
-
-struct LoaderWrapper<T> {
-    _marker: PhantomData<T>,
-}
-
-impl<T> LoaderWrapper<T> {
-    fn new() -> Box<LoaderWrapper<T>> {
-        Box::new(LoaderWrapper {
-            _marker: PhantomData,
-        })
-    }
-}
-
-#[cfg(feature = "sqlite")]
-impl DictionaryLoader for LoaderWrapper<SqliteDictionary> {
-    fn open(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        SqliteDictionary::open(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
-    }
-
-    fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        SqliteDictionary::open_read_only(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
-    }
-}
-
-impl DictionaryLoader for LoaderWrapper<TrieDictionary> {
-    fn open(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        TrieDictionary::open(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
-    }
-
-    fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        self.open(path)
-    }
-}
-
-impl DictionaryLoader for LoaderWrapper<CdbDictionary> {
-    fn open(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        CdbDictionary::open(path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .ok()
-    }
-
-    fn open_read_only(&self, path: &PathBuf) -> Option<Box<dyn Dictionary>> {
-        self.open(path)
     }
 }

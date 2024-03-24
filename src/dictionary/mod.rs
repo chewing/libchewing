@@ -7,6 +7,7 @@ use std::{
     collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
+    io,
     path::Path,
 };
 
@@ -36,6 +37,14 @@ mod uhash;
 pub struct DictionaryUpdateError {
     /// TODO: doc
     pub source: Option<Box<dyn Error + Send + Sync>>,
+}
+
+impl From<io::Error> for DictionaryUpdateError {
+    fn from(value: io::Error) -> Self {
+        DictionaryUpdateError {
+            source: Some(Box::new(value)),
+        }
+    }
 }
 
 impl Display for DictionaryUpdateError {
