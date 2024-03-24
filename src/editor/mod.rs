@@ -10,7 +10,8 @@ pub mod syllable;
 use std::{
     any::{Any, TypeId},
     cmp::{max, min},
-    fmt::Debug,
+    error::Error,
+    fmt::{Debug, Display},
 };
 
 pub use self::selection::symbol::SymbolSelector;
@@ -136,6 +137,17 @@ pub struct Editor {
 }
 
 #[derive(Debug)]
+pub struct EditorError;
+
+impl Display for EditorError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Some error happened")
+    }
+}
+
+impl Error for EditorError {}
+
+#[derive(Debug)]
 pub(crate) struct SharedState {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
@@ -154,7 +166,7 @@ pub(crate) struct SharedState {
 }
 
 impl Editor {
-    pub fn chewing() -> Result<Editor, Box<dyn std::error::Error>> {
+    pub fn chewing() -> Result<Editor, Box<dyn Error>> {
         let system_dict = SystemDictionaryLoader::new().load()?;
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::open(user_dict.as_ref())?;
@@ -265,7 +277,7 @@ impl Editor {
         self.shared.unlearn_phrase(syllables, phrase)
     }
     /// All candidates after current page
-    pub fn paginated_candidates(&self) -> Result<Vec<String>, ()> {
+    pub fn paginated_candidates(&self) -> Result<Vec<String>, EditorError> {
         debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
@@ -275,40 +287,40 @@ impl Editor {
                 .skip(selecting.page_no * self.shared.options.candidates_per_page)
                 .collect())
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
-    pub fn all_candidates(&self) -> Result<Vec<String>, ()> {
+    pub fn all_candidates(&self) -> Result<Vec<String>, EditorError> {
         debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.candidates(&self.shared, &self.shared.dict))
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
-    pub fn current_page_no(&self) -> Result<usize, ()> {
+    pub fn current_page_no(&self) -> Result<usize, EditorError> {
         debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.page_no)
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
-    pub fn total_page(&self) -> Result<usize, ()> {
+    pub fn total_page(&self) -> Result<usize, EditorError> {
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.total_page(&self.shared, &self.shared.dict))
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
-    pub fn select(&mut self, n: usize) -> Result<(), ()> {
+    pub fn select(&mut self, n: usize) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         let selecting = match any.downcast_mut::<Selecting>() {
             Some(selecting) => selecting,
-            None => return Err(()),
+            None => return Err(EditorError),
         };
         match selecting.select(&mut self.shared, n) {
             Transition::ToState(to_state) => {
@@ -321,12 +333,12 @@ impl Editor {
             self.shared.try_auto_commit();
         }
         if self.shared.last_key_behavior == EditorKeyBehavior::Bell {
-            Err(())
+            Err(EditorError)
         } else {
             Ok(())
         }
     }
-    pub fn cancel_selecting(&mut self) -> Result<(), ()> {
+    pub fn cancel_selecting(&mut self) -> Result<(), EditorError> {
         if self.is_selecting() {
             self.shared.cancel_selecting();
             self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
@@ -388,28 +400,28 @@ impl Editor {
             false
         }
     }
-    pub fn jump_to_next_selection_point(&mut self) -> Result<(), ()> {
+    pub fn jump_to_next_selection_point(&mut self) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_next_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => Err(()),
-                Selector::SpecialSymmbol(_) => Err(()),
+                Selector::Symbol(_) => Err(EditorError),
+                Selector::SpecialSymmbol(_) => Err(EditorError),
             }
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
-    pub fn jump_to_prev_selection_point(&mut self) -> Result<(), ()> {
+    pub fn jump_to_prev_selection_point(&mut self) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_prev_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => Err(()),
-                Selector::SpecialSymmbol(_) => Err(()),
+                Selector::Symbol(_) => Err(EditorError),
+                Selector::SpecialSymmbol(_) => Err(EditorError),
             }
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
     pub fn jump_to_first_selection_point(&mut self) {
@@ -436,7 +448,7 @@ impl Editor {
             {}
         }
     }
-    pub fn start_selecting(&mut self) -> Result<(), ()> {
+    pub fn start_selecting(&mut self) -> Result<(), EditorError> {
         let transition = if let Some(s) = self.state.as_any_mut().downcast_mut::<Entering>() {
             s.start_selecting(&mut self.shared)
         } else if let Some(s) = self.state.as_any_mut().downcast_mut::<EnteringSyllable>() {
@@ -455,7 +467,7 @@ impl Editor {
         if self.is_selecting() {
             Ok(())
         } else {
-            Err(())
+            Err(EditorError)
         }
     }
     pub fn notification(&self) -> &str {
