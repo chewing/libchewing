@@ -651,9 +651,8 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// The dictionary format chunk contains the format version number of the
-/// index chunk and the phrases chunk, encoded in an unsigned 32 bits
-/// integer (u32).
+/// The dictionary format chunk contains the format version number of the index
+/// chunk and the phrases chunk, encoded in an unsigned 32 bits integer (u32).
 ///
 /// The currently supported versions are: 0
 ///
@@ -723,7 +722,9 @@ impl Dictionary for TrieDictionary {
 /// first record is the root node, followed by the nodes in the first layer,
 /// followed by the nodes in the second layer, and so on.
 ///
-/// Each node record has fixed size. There are two kinds of nodes.
+/// Each node record has fixed size. The end of the index chunk is a 32-bit CRC
+/// checksum calculated from the payloads. The CRC is specified as the
+/// Castagnoli polynomial (CRC32C) in [RFC 3720][rfc3720] and [RFC 3385][rfc3385].
 ///
 /// Internal node:
 ///
@@ -775,8 +776,8 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// The phrases chunk contains all the phrases strings and their frequency.
-/// Each phrase is written as length prefixed strings.
+/// The phrases chunk contains all the phrases strings and their frequency. Each
+/// phrase is written as length prefixed strings.
 ///
 /// - **Frequency: 32 bits (u32)**
 ///     - The frequency of the phrase. Might be unaligned.
@@ -785,6 +786,12 @@ impl Dictionary for TrieDictionary {
 /// - **Phrase: variable bits**
 ///     - UTF-8 encoded string, not null-terminated.
 ///
+/// The end of the phrases chunk is a 32-bit CRC
+/// checksum calculated from the payloads. The CRC is specified as the
+/// Castagnoli polynomial (CRC32C) in [RFC 3720][rfc3720] and [RFC 3385][rfc3385].
+///
+/// [rfc3720]: https://datatracker.ietf.org/doc/html/rfc3720#section-12.1
+/// [rfc3385]: https://datatracker.ietf.org/doc/html/rfc3385
 /// [WebP]: https://developers.google.com/speed/webp/docs/riff_container
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
 /// [RIFF]: https://en.m.wikipedia.org/wiki/Resource_Interchange_File_Format
@@ -1222,7 +1229,7 @@ impl Default for TrieDictionaryBuilder {
     }
 }
 
-/// Calculates CRC32 with CRC-32-IEEE 802.3 poly
+/// Calculates CRC32 with CRC-32-Castagnoli poly
 struct Crc32 {
     table: Box<[[u32; 256]; 8]>,
 }
@@ -1230,8 +1237,8 @@ struct Crc32 {
 impl Crc32 {
     fn new() -> Crc32 {
         let mut table = Box::new([[0u32; 256]; 8]);
-        // CRC-32-IEEE 802.3 poly
-        let poly: u32 = 0xEDB88320;
+        // CRC-32-Castagnoli poly
+        let poly: u32 = 0x82f63b78;
         for i in 0..256usize {
             let mut crc = i as u32;
             for _ in 0..8 {
@@ -1240,13 +1247,13 @@ impl Crc32 {
             table[0][i] = crc;
         }
         for i in 0..256usize {
-            table[1][i] = (table[0][i] >> 8) ^ table[0][(table[0][i] & 0xFF) as usize];
-            table[2][i] = (table[1][i] >> 8) ^ table[0][(table[1][i] & 0xFF) as usize];
-            table[3][i] = (table[2][i] >> 8) ^ table[0][(table[2][i] & 0xFF) as usize];
-            table[4][i] = (table[3][i] >> 8) ^ table[0][(table[3][i] & 0xFF) as usize];
-            table[5][i] = (table[4][i] >> 8) ^ table[0][(table[4][i] & 0xFF) as usize];
-            table[6][i] = (table[5][i] >> 8) ^ table[0][(table[5][i] & 0xFF) as usize];
-            table[7][i] = (table[6][i] >> 8) ^ table[0][(table[6][i] & 0xFF) as usize];
+            table[1][i] = (table[0][i] >> 8) ^ table[0][table[0][i] as u8 as usize];
+            table[2][i] = (table[1][i] >> 8) ^ table[0][table[1][i] as u8 as usize];
+            table[3][i] = (table[2][i] >> 8) ^ table[0][table[2][i] as u8 as usize];
+            table[4][i] = (table[3][i] >> 8) ^ table[0][table[3][i] as u8 as usize];
+            table[5][i] = (table[4][i] >> 8) ^ table[0][table[4][i] as u8 as usize];
+            table[6][i] = (table[5][i] >> 8) ^ table[0][table[5][i] as u8 as usize];
+            table[7][i] = (table[6][i] >> 8) ^ table[0][table[6][i] as u8 as usize];
         }
         Crc32 { table }
     }
@@ -1256,17 +1263,17 @@ impl Crc32 {
             if bytes.len() == 8 {
                 let one = u32::from_le_bytes(bytes[0..4].try_into().unwrap()) ^ crc;
                 let two = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
-                self.table[0][(two >> 24 & 0xFF) as usize]
-                    ^ self.table[1][(two >> 16 & 0xFF) as usize]
-                    ^ self.table[2][(two >> 8 & 0xFF) as usize]
-                    ^ self.table[3][(two & 0xFF) as usize]
-                    ^ self.table[4][(one >> 24 & 0xFF) as usize]
-                    ^ self.table[5][(one >> 16 & 0xFF) as usize]
-                    ^ self.table[6][(one >> 8 & 0xFF) as usize]
-                    ^ self.table[7][(one & 0xFF) as usize]
+                self.table[0][(two >> 24) as u8 as usize]
+                    ^ self.table[1][(two >> 16) as u8 as usize]
+                    ^ self.table[2][(two >> 8) as u8 as usize]
+                    ^ self.table[3][two as u8 as usize]
+                    ^ self.table[4][(one >> 24) as u8 as usize]
+                    ^ self.table[5][(one >> 16) as u8 as usize]
+                    ^ self.table[6][(one >> 8) as u8 as usize]
+                    ^ self.table[7][one as u8 as usize]
             } else {
                 bytes.iter().fold(crc, |crc, byte| {
-                    (crc >> 8) ^ self.table[0][((crc & 0xFF) ^ *byte as u32) as usize]
+                    (crc >> 8) ^ self.table[0][(crc as u8 as u32 ^ *byte as u32) as usize]
                 })
             }
         })
@@ -1648,10 +1655,11 @@ mod tests {
     #[test]
     fn crc32() {
         let crc32 = Crc32::new();
-        assert_eq!(0x152ddece, crc32.check(b"asd\n"));
+        assert_eq!(0xf0f800c5, crc32.check(b"asd\n"));
         assert_eq!(
-            0x414fa339,
+            0x22620404,
             crc32.check(b"The quick brown fox jumps over the lazy dog")
         );
+        assert_eq!(0x7b98e751, crc32.check(b"Hello world!"));
     }
 }
