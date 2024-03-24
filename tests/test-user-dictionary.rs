@@ -38,7 +38,9 @@ fn tempdir_and_file(filename: &str) -> Result<(TempDir, CString), Box<dyn Error>
     Ok((dir, path))
 }
 
-fn assert_phrase_only_in_user_dictionary(ctx: *mut ChewingContext) -> Result<(), Box<dyn Error>> {
+unsafe fn assert_phrase_only_in_user_dictionary(
+    ctx: *mut ChewingContext,
+) -> Result<(), Box<dyn Error>> {
     assert!(!ctx.is_null());
 
     chewing_handle_Default(ctx, b'h' as c_int);
@@ -61,9 +63,11 @@ fn explicit_load_chewing_cdb() -> Result<(), Box<dyn Error>> {
     let chewing_golden = golden_data_path("chewing.cdb");
     fs::copy(chewing_golden, tmpdir.path().join("chewing.cdb"))?;
 
-    let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -75,9 +79,11 @@ fn explicit_load_chewing_sqlite3() -> Result<(), Box<dyn Error>> {
     let chewing_golden = golden_data_path("golden-chewing.sqlite3");
     fs::copy(chewing_golden, tmpdir.path().join("chewing.sqlite3"))?;
 
-    let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -95,10 +101,12 @@ fn env_load_chewing_sqlite3() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -116,10 +124,12 @@ fn env_load_and_migrate_chewing_sqlite3_v1() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -141,10 +151,12 @@ fn env_load_and_migrate_uhash_le_64() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -162,10 +174,12 @@ fn env_load_and_migrate_uhash_text() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -183,10 +197,12 @@ fn env_load_and_migrate_chewing_cdb() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -198,8 +214,10 @@ fn explicit_load_chewing_sqlite3_should_fail() -> Result<(), Box<dyn Error>> {
     let chewing_golden = golden_data_path("golden-chewing.sqlite3");
     fs::copy(chewing_golden, tmpdir.path().join("chewing.sqlite3"))?;
 
-    let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
-    chewing_delete(ctx);
+    unsafe {
+        let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -217,10 +235,12 @@ fn env_load_chewing_cdb() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -242,10 +262,12 @@ fn env_load_and_migrate_uhash_le_64_to_cdb() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -263,10 +285,12 @@ fn env_load_and_migrate_uhash_text_to_cdb() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", tmpdir.path().display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert_phrase_only_in_user_dictionary(ctx)?;
-    chewing_delete(ctx);
+    unsafe {
+        assert_phrase_only_in_user_dictionary(ctx)?;
+        chewing_delete(ctx);
+    }
     Ok(())
 }
 
@@ -282,9 +306,11 @@ fn env_load_and_create_user_path() -> Result<(), Box<dyn Error>> {
         let _lock = ENV_LOCK.lock()?;
         env::set_var("CHEWING_PATH", syspath.to_str()?);
         env::set_var("CHEWING_USER_PATH", user_path.display().to_string());
-        chewing_new2(null(), null(), None, null_mut())
+        unsafe { chewing_new2(null(), null(), None, null_mut()) }
     };
-    assert!(!ctx.is_null());
-    chewing_delete(ctx);
+    unsafe {
+        assert!(!ctx.is_null());
+        chewing_delete(ctx);
+    }
     Ok(())
 }

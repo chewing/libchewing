@@ -73,101 +73,103 @@ pub fn main() {
     let syspath = CString::new(flags.syspath).unwrap();
 
     afl::fuzz!(|data: &[u8]| {
-        let ctx = chewing_new2(
-            syspath.as_ptr(),
-            b":memory:\0".as_ptr().cast(),
-            None,
-            null_mut(),
-        );
+        unsafe {
+            let ctx = chewing_new2(
+                syspath.as_ptr(),
+                b":memory:\0".as_ptr().cast(),
+                None,
+                null_mut(),
+            );
 
-        let mut ops = data.bytes();
-        while let Some(Ok(op)) = ops.next() {
-            use ChewingHandle::*;
+            let mut ops = data.bytes();
+            while let Some(Ok(op)) = ops.next() {
+                use ChewingHandle::*;
 
-            match ChewingHandle::from(op) {
-                Default => {
-                    if let Some(Ok(key)) = ops.next() {
-                        if key.is_ascii() && !key.is_ascii_control() {
-                            chewing_handle_Default(ctx, key as i32);
+                match ChewingHandle::from(op) {
+                    Default => {
+                        if let Some(Ok(key)) = ops.next() {
+                            if key.is_ascii() && !key.is_ascii_control() {
+                                chewing_handle_Default(ctx, key as i32);
+                            }
                         }
                     }
-                }
-                Backspace => {
-                    chewing_handle_Backspace(ctx);
-                }
-                Capslock => {
-                    chewing_handle_Capslock(ctx);
-                }
-                CtrlNum => {
-                    if let Some(Ok(key)) = ops.next() {
-                        if key.is_ascii_digit() {
-                            chewing_handle_CtrlNum(ctx, key as i32);
+                    Backspace => {
+                        chewing_handle_Backspace(ctx);
+                    }
+                    Capslock => {
+                        chewing_handle_Capslock(ctx);
+                    }
+                    CtrlNum => {
+                        if let Some(Ok(key)) = ops.next() {
+                            if key.is_ascii_digit() {
+                                chewing_handle_CtrlNum(ctx, key as i32);
+                            }
                         }
                     }
-                }
-                Del => {
-                    chewing_handle_Del(ctx);
-                }
-                Enter => {
-                    chewing_handle_Enter(ctx);
-                }
-                Esc => {
-                    chewing_handle_Esc(ctx);
-                }
-                Space => {
-                    chewing_handle_Space(ctx);
-                }
-                Tab => {
-                    chewing_handle_Tab(ctx);
-                }
-                Home => {
-                    chewing_handle_Home(ctx);
-                }
-                End => {
-                    chewing_handle_End(ctx);
-                }
-                Left => {
-                    chewing_handle_Left(ctx);
-                }
-                Right => {
-                    chewing_handle_Right(ctx);
-                }
-                Up => {
-                    chewing_handle_Up(ctx);
-                }
-                Down => {
-                    chewing_handle_Down(ctx);
-                }
-                ShiftLeft => {
-                    chewing_handle_ShiftLeft(ctx);
-                }
-                ShiftRight => {
-                    chewing_handle_ShiftRight(ctx);
-                }
-                ShiftSpace => {
-                    chewing_handle_ShiftSpace(ctx);
-                }
-                PageUp => {
-                    chewing_handle_PageUp(ctx);
-                }
-                PageDown => {
-                    chewing_handle_PageDown(ctx);
-                }
-                DblTab => {
-                    chewing_handle_DblTab(ctx);
-                }
-                Numlock => {
-                    if let Some(Ok(key)) = ops.next() {
-                        if key.is_ascii_digit() {
-                            chewing_handle_Numlock(ctx, key as i32);
+                    Del => {
+                        chewing_handle_Del(ctx);
+                    }
+                    Enter => {
+                        chewing_handle_Enter(ctx);
+                    }
+                    Esc => {
+                        chewing_handle_Esc(ctx);
+                    }
+                    Space => {
+                        chewing_handle_Space(ctx);
+                    }
+                    Tab => {
+                        chewing_handle_Tab(ctx);
+                    }
+                    Home => {
+                        chewing_handle_Home(ctx);
+                    }
+                    End => {
+                        chewing_handle_End(ctx);
+                    }
+                    Left => {
+                        chewing_handle_Left(ctx);
+                    }
+                    Right => {
+                        chewing_handle_Right(ctx);
+                    }
+                    Up => {
+                        chewing_handle_Up(ctx);
+                    }
+                    Down => {
+                        chewing_handle_Down(ctx);
+                    }
+                    ShiftLeft => {
+                        chewing_handle_ShiftLeft(ctx);
+                    }
+                    ShiftRight => {
+                        chewing_handle_ShiftRight(ctx);
+                    }
+                    ShiftSpace => {
+                        chewing_handle_ShiftSpace(ctx);
+                    }
+                    PageUp => {
+                        chewing_handle_PageUp(ctx);
+                    }
+                    PageDown => {
+                        chewing_handle_PageDown(ctx);
+                    }
+                    DblTab => {
+                        chewing_handle_DblTab(ctx);
+                    }
+                    Numlock => {
+                        if let Some(Ok(key)) = ops.next() {
+                            if key.is_ascii_digit() {
+                                chewing_handle_Numlock(ctx, key as i32);
+                            }
                         }
                     }
+                    Quit => {
+                        chewing_delete(ctx);
+                        break;
+                    }
+                    Skip => (),
                 }
-                Quit => {
-                    chewing_delete(ctx);
-                    break;
-                }
-                Skip => (),
             }
         }
     });
