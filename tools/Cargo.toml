@@ -6,9 +6,6 @@ version = "0.6.0-alpha.1"
 edition = "2021"
 
 [dependencies]
-chewing = { version = "0.6.0-alpha.1", path = "..", features = ["sqlite"] }
 anyhow = "1.0.0"
+chewing = { version = "0.6.0-alpha.1", path = "..", features = ["sqlite"] }
 xflags = "0.3.2"
-
-[target.'cfg(windows)'.dependencies]
-rusqlite = { version = "0.30.0", features = ["bundled"] }

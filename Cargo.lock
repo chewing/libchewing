@@ -99,7 +99,6 @@ version = "0.6.0-alpha.1"
 dependencies = [
  "anyhow",
  "chewing",
- "rusqlite",
  "xflags",
 ]
 
