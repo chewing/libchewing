@@ -6,6 +6,7 @@ use std::{
 };
 
 use directories::{BaseDirs, ProjectDirs};
+use log::info;
 
 const DEFAULT_UNIX_SYS_PATH: &str = "/usr/share/libchewing";
 const UNIX_SYS_PATH: Option<&str> = option_env!("CHEWING_DATADIR");
@@ -19,10 +20,12 @@ const SEARCH_PATH_SEP: char = ':';
 pub(crate) fn sys_path_from_env_var() -> String {
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
+        info!("Using CHEWING_PATH {}", chewing_path);
         chewing_path
     } else {
         let user_datadir = data_dir();
         let sys_datadir = UNIX_SYS_PATH.unwrap_or(DEFAULT_UNIX_SYS_PATH);
+        info!("Using CHEWING_PATH {}", sys_datadir);
         if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
             format!("{datadir}:{sys_datadir}")
         } else {
@@ -34,6 +37,7 @@ pub(crate) fn sys_path_from_env_var() -> String {
 pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<PathBuf> {
     for path in search_path.split(SEARCH_PATH_SEP) {
         let prefix = Path::new(path).to_path_buf();
+        info!("Search files {:?} in {}", files, prefix.display());
         if files
             .iter()
             .map(|it| {
@@ -43,6 +47,7 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
             })
             .all(|it| it.exists())
         {
+            info!("Load {:?} from {}", files, prefix.display());
             return Some(prefix);
         }
     }
