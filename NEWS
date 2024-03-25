@@ -1,12 +1,53 @@
-What's New in libchewing next (UNRELEASED)
+What's New in libchewing 0.7.0-rc.1 (Mar 25, 2024)
 ---------------------------------------------------------
 
+This release adds Colemak-DH ANSI/Orth layout support. Most of the other changes
+are related to the stablization of the Rust rewrite. The rewrite has been tested
+intensively with the AFL++ fuzzer so crashes should be unlikely.
+
+The Rust rewrite is ABI compatiable. Currently the most notable difference with
+the C version includes a new portable system dictionary format and two new user
+dictionary format. Users with existing user phrase dictionary will be
+automatically migrated to either new sqlite3 schema or CDB based format
+depending on compile time configuration. Old files will be backed up
+automatically. With these change we will be able to support dictionary sharing
+and loading multiple dictionaries in future releases.
+
+This is the first beta release of the Rust rewrite. Most of the obvious bugs
+have been fixed. Now we invite users to daily drive the beta release in order to
+find more subtle bugs.
+
+* Future roadmap
+  - 0.8.x after bug bashing this version will be the first public release with
+    rust implementation as the default.
+  - 0.9.x will focus on the stablization of the Rust crate API.
+  - 1.0.0 will be the first public release of the Rust API. C implementation
+    will be removed from the repository.
+
 * Added
+  - Added Colemak-DH ANSI/Orth layout support
+  - Supporting migrating user dictionary file to new format. (rust)
+  - Allow creating in memory user dictionary (rust)
+  - New `chewing-cli` tool can be used to create or inspect dictionary files. (rust)
+  - New `chewing-cli` tool can dump dictionary as or import from CSV file. (rust)
+
 * Changed
-* Dictionary
-* Removed
+  - New trie dictionary format now has built-in checksum. (rust)
+
 * Bug fixed
-* Platform-specific
+  - Some unsigned underflow issue found by afl++ (rust)
+  - Skip symbol selection if preedit buffer is empty (rust)
+  - Allow numlock in selection mode (rust)
+  - Avoid infinite recursion (rust)
+
+* Documentation
+  - Added document for fuzzers (rust)
+  - Describe how to compile dictionary files
+  - Update build instruction and Rust MSRV info
+
+* Testing
+  - Added a fuzzer harness with afl++ (rust)
+
 
 What's New in libchewing 0.6.0 (Jan 27, 2024)
 ---------------------------------------------------------
