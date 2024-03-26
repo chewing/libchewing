@@ -1738,9 +1738,10 @@ pub unsafe extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c
         None => return -1,
     };
 
-    match ctx.editor.total_page() {
-        Ok(_) => FALSE,
-        Err(_) => TRUE,
+    if ctx.editor.is_selecting() {
+        TRUE
+    } else {
+        FALSE
     }
 }
 
@@ -1825,6 +1826,10 @@ pub unsafe extern "C" fn chewing_cand_hasNext(ctx: *mut ChewingContext) -> c_int
         Some(ctx) => ctx,
         None => return -1,
     };
+
+    if !ctx.editor.is_selecting() {
+        return FALSE;
+    }
 
     ctx.cand_iter
         .as_mut()
