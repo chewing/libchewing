@@ -778,7 +778,7 @@ impl Entering {
                     CharacterForm::Halfwidth => editor.commit_buffer.push(' '),
                     CharacterForm::Fullwidth => editor.commit_buffer.push('　'),
                 }
-                self.spin_absorb()
+                self.spin_commit()
             }
             None => self.spin_ignore(),
         }
@@ -921,10 +921,11 @@ impl State for Entering {
                 if shared.com.is_empty() {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.unicode);
+                    self.spin_commit()
                 } else {
                     shared.com.insert(Symbol::new_char(ev.unicode));
+                    self.spin_absorb()
                 }
-                self.spin_commit()
             }
             _ => match shared.options.language_mode {
                 LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
