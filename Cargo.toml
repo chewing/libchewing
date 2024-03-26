@@ -3,7 +3,7 @@ name = "chewing"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
 documentation = "https://docs.rs/chewing"
-version = "0.6.0-alpha.2"
+version = "0.7.0-beta.1"
 rust-version = "1.70"
 edition = "2021"
 
@@ -15,10 +15,10 @@ directories = "5.0.0"
 env_logger = { version = "0.10.2", default-features = false, optional = true }
 log = "0.4.21"
 riff = "2.0.0"
-rusqlite = { version = "0.30.0", optional = true }
+rusqlite = { version = "0.31.0", optional = true }
 
 [target.'cfg(windows)'.dependencies]
-rusqlite = { version = "0.30.0", features = ["bundled"], optional = true }
+rusqlite = { version = "0.31.0", features = ["bundled"], optional = true }
 
 [lib]
 crate-type = ["rlib", "staticlib"]

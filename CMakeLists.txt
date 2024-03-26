@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21.0)
-project(libchewing C)
+project(libchewing LANGUAGES C)
 
-set(CMAKE_PROJECT_VERSION 0.6.0)
+set(CMAKE_PROJECT_VERSION 0.7.0-rc.1)
 set(LIBCHEWING_VERSION ${CMAKE_PROJECT_VERSION})
 set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
@@ -288,7 +288,7 @@ endif()
 
 if(WITH_RUST)
     corrosion_set_env_vars(chewing
-        CHEWING_DATADIR="${CMAKE_INSTALL_FULL_DATADIR}/libchewing"
+        CHEWING_DATADIR=${CMAKE_INSTALL_FULL_DATADIR}/libchewing
     )
     target_link_libraries(libchewing PRIVATE chewing)
     target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
