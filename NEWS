@@ -1,21 +1,18 @@
 What's New in libchewing 0.7.0-rc.1 (Mar 25, 2024)
 ---------------------------------------------------------
 
-This release adds Colemak-DH ANSI/Orth layout support. Most of the other changes
-are related to the stablization of the Rust rewrite. The rewrite has been tested
-intensively with the AFL++ fuzzer so crashes should be unlikely.
+This is the first beta release of the Rust rewrite. The library has been tested
+with the AFL++ fuzzer and most of the obvious bugs have been fixed so it should
+not crash for normal use. Now we invite power users to daily drive the beta
+release in order to find more subtle bugs.
 
-The Rust rewrite is ABI compatiable. Currently the most notable difference with
-the C version includes a new portable system dictionary format and two new user
-dictionary format. Users with existing user phrase dictionary will be
-automatically migrated to either new sqlite3 schema or CDB based format
-depending on compile time configuration. Old files will be backed up
+The Rust rewrite is ABI compatiable with previous releases. The most notable
+difference with the C version includes a new portable system dictionary format
+and two new user dictionary format. Users with existing user phrase dictionary
+will be automatically migrated to either a new sqlite3 schema or CDB based
+format depending on compile time configuration. Old files will be backed up
 automatically. With these change we will be able to support dictionary sharing
 and loading multiple dictionaries in future releases.
-
-This is the first beta release of the Rust rewrite. Most of the obvious bugs
-have been fixed. Now we invite users to daily drive the beta release in order to
-find more subtle bugs.
 
 * Future roadmap
   - 0.8.x after bug bashing this version will be the first public release with
