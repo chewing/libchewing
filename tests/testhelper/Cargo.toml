@@ -1,5 +1,5 @@
 [package]
-name = "chewing-testhelper"
+name = "chewing_testhelper"
 version = "0.0.0"
 edition = "2021"
 
