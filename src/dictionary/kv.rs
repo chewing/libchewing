@@ -3,9 +3,7 @@ use std::{
     cmp,
     collections::{btree_map::Entry, BTreeMap, BTreeSet},
     fmt::Debug,
-    io,
     iter::{self, Empty},
-    path::Path,
     str::{self, Utf8Error},
 };
 
@@ -19,14 +17,6 @@ pub(crate) trait KVStore<'a> {
 
     fn find(&'a self, key: &[u8]) -> Self::ValueIter;
     fn iter(&'a self) -> Self::KeyValueIter;
-}
-
-pub(crate) trait KVStoreBuilder {
-    fn create<P: AsRef<Path>>(filename: P) -> io::Result<Self>
-    where
-        Self: Sized;
-    fn add(&mut self, key: &[u8], data: &[u8]) -> io::Result<()>;
-    fn finish(self) -> io::Result<()>;
 }
 
 type PhraseKey = (Cow<'static, [u8]>, Cow<'static, str>);

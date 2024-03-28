@@ -10,7 +10,6 @@
 //! Functions are organized into several modules according to the services
 //! provided by them.
 
-mod ffi;
 mod io;
 mod logger;
 mod public;

@@ -502,7 +502,7 @@ impl SharedState {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
             Ok(phrase) => self.notice_buffer = format!("加入：{}", phrase),
-            Err(msg) => self.notice_buffer = msg.to_owned(),
+            Err(msg) => msg.clone_into(&mut self.notice_buffer),
         }
         result
     }
@@ -827,7 +827,7 @@ impl State for Entering {
                         if shared.cursor() >= n {
                             shared.learn_phrase_in_range(shared.cursor() - n, shared.cursor())
                         } else {
-                            shared.notice_buffer = "加詞失敗：字數不符或夾雜符號".to_owned();
+                            "加詞失敗：字數不符或夾雜符號".clone_into(&mut shared.notice_buffer);
                             Err("加詞失敗：字數不符或夾雜符號".to_owned())
                         }
                     }
