@@ -150,9 +150,7 @@ impl ChewingEngine {
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
-                    debug!("check {} against selection {}", substring, selection.phrase);
                     if substring != selection.phrase.as_ref() {
-                        debug!("skip {}", substring);
                         continue 'next_phrase;
                     }
                 }
