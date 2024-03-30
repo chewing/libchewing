@@ -36,19 +36,19 @@ use self::{
     syllable::{KeyBehavior, Standard, SyllableEditor},
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LanguageMode {
     Chinese,
     English,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CharacterForm {
     Halfwidth,
     Fullwidth,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserPhraseAddDirection {
     Forward,
     Backward,
@@ -894,7 +894,10 @@ impl State for Entering {
                 };
                 self.spin_absorb()
             }
-            Space if shared.options.space_is_select_key => {
+            Space
+                if shared.options.space_is_select_key
+                    && shared.options.language_mode == LanguageMode::Chinese =>
+            {
                 self.start_selecting_or_input_space(shared)
             }
             Down => {

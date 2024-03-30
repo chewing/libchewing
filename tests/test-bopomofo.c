@@ -1224,11 +1224,30 @@ void test_Space_selection_symbol()
     chewing_delete(ctx);
 }
 
+void test_Space_selection_insert_eng_mode()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_spaceAsSelection(ctx, 1);
+
+    type_keystroke_by_string(ctx, "hk4");
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, " j");
+    ok_preedit_buffer(ctx, "冊 j");
+
+    chewing_delete(ctx);
+}
+
 void test_Space()
 {
     test_Space_empty_buffer();
     test_Space_selection_word();
     test_Space_selection_symbol();
+    test_Space_selection_insert_eng_mode();
 }
 
 void test_get_phoneSeq()
