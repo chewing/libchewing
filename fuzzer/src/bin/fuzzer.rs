@@ -35,6 +35,7 @@ enum ChewingHandle {
 
 impl From<u8> for ChewingHandle {
     fn from(value: u8) -> Self {
+        let value = value % 23;
         match value {
             0 => Self::Default,
             1 => Self::Backspace,
