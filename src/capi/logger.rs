@@ -40,8 +40,18 @@ impl ChewingLogger {
 }
 
 impl Log for ChewingLogger {
-    fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
-        true
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
+        if let Ok(logger) = self.logger.lock() {
+            if logger.is_some() && metadata.level() <= Level::Debug {
+                return true;
+            }
+        }
+        if let Ok(logger) = self.env_logger.lock() {
+            if let Some(el) = logger.as_ref() {
+                return el.enabled(metadata);
+            }
+        }
+        false
     }
 
     fn log(&self, record: &Record<'_>) {
