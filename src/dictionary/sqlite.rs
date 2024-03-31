@@ -480,8 +480,8 @@ impl From<RusqliteError> for BuildDictionaryError {
     }
 }
 
-impl From<std::str::Utf8Error> for BuildDictionaryError {
-    fn from(source: std::str::Utf8Error) -> Self {
+impl From<str::Utf8Error> for BuildDictionaryError {
+    fn from(source: str::Utf8Error) -> Self {
         BuildDictionaryError {
             source: Box::new(source),
         }

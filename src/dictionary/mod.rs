@@ -413,8 +413,8 @@ impl Error for BuildDictionaryError {
     }
 }
 
-impl From<std::io::Error> for BuildDictionaryError {
-    fn from(source: std::io::Error) -> Self {
+impl From<io::Error> for BuildDictionaryError {
+    fn from(source: io::Error) -> Self {
         BuildDictionaryError {
             source: Box::new(source),
         }

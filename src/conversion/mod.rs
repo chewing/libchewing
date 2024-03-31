@@ -314,10 +314,10 @@ impl Composition {
             if selection.start <= index {
                 if index < selection.end {
                     to_remove.push(i);
-                } else {
-                    selection.start -= 1;
-                    selection.end -= 1;
                 }
+            } else {
+                selection.start -= 1;
+                selection.end -= 1;
             }
         }
         for i in to_remove {

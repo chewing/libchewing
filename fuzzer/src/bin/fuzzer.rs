@@ -2,6 +2,7 @@ use std::{ffi::CString, io::Read, ptr::null_mut};
 
 use chewing::capi::{
     input::*,
+    output::{chewing_buffer_Len, chewing_commit_Check},
     setup::{chewing_delete, chewing_new2},
 };
 
@@ -34,6 +35,7 @@ enum ChewingHandle {
 
 impl From<u8> for ChewingHandle {
     fn from(value: u8) -> Self {
+        let value = value % 23;
         match value {
             0 => Self::Default,
             1 => Self::Backspace,
@@ -85,6 +87,7 @@ pub fn main() {
             while let Some(Ok(op)) = ops.next() {
                 use ChewingHandle::*;
 
+                let buf_len = chewing_buffer_Len(ctx);
                 match ChewingHandle::from(op) {
                     Default => {
                         if let Some(Ok(key)) = ops.next() {
@@ -169,6 +172,9 @@ pub fn main() {
                         break;
                     }
                     Skip => (),
+                }
+                if chewing_commit_Check(ctx) != 1 {
+                    assert!(buf_len.abs_diff(chewing_buffer_Len(ctx)) < 2);
                 }
             }
         }

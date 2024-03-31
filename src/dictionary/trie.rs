@@ -252,24 +252,28 @@ impl TrieDictionary {
         let data = data_chunk
             .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting data chunk"))?
             .read_contents(&mut stream)?;
-        let crc32 = Crc32::new();
         if dict.len() < size_of::<u32>() {
             return Err(io::ErrorKind::InvalidData.into());
         }
-        let dict_len = dict.len() - size_of::<u32>();
-        let crc = u32::from_le_bytes(dict[dict_len..].try_into().unwrap());
-        let check = crc32.check(&dict[..dict_len]);
-        if crc != check {
-            return Err(io::ErrorKind::InvalidData.into());
-        }
-        if data.len() < size_of::<u32>() {
-            return Err(io::ErrorKind::InvalidData.into());
-        }
-        let data_len = data.len().saturating_sub(size_of::<u32>());
-        let crc = u32::from_le_bytes(data[data_len..].try_into().unwrap());
-        let check = crc32.check(&data[..data_len]);
-        if crc != check {
-            return Err(io::ErrorKind::InvalidData.into());
+        // CRC checks slows down fuzzing considerably
+        #[cfg(not(fuzzing))]
+        {
+            let dict_len = dict.len() - size_of::<u32>();
+            let crc = u32::from_le_bytes(dict[dict_len..].try_into().unwrap());
+            let crc32 = Crc32::new();
+            let check = crc32.check(&dict[..dict_len]);
+            if crc != check {
+                return Err(io::ErrorKind::InvalidData.into());
+            }
+            if data.len() < size_of::<u32>() {
+                return Err(io::ErrorKind::InvalidData.into());
+            }
+            let data_len = data.len().saturating_sub(size_of::<u32>());
+            let crc = u32::from_le_bytes(data[data_len..].try_into().unwrap());
+            let check = crc32.check(&data[..data_len]);
+            if crc != check {
+                return Err(io::ErrorKind::InvalidData.into());
+            }
         }
         Ok(TrieDictionary { info, dict, data })
     }

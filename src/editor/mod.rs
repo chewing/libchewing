@@ -36,19 +36,19 @@ use self::{
     syllable::{KeyBehavior, Standard, SyllableEditor},
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LanguageMode {
     Chinese,
     English,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CharacterForm {
     Halfwidth,
     Fullwidth,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserPhraseAddDirection {
     Forward,
     Backward,
@@ -502,7 +502,7 @@ impl SharedState {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
             Ok(phrase) => self.notice_buffer = format!("加入：{}", phrase),
-            Err(msg) => self.notice_buffer = msg.to_owned(),
+            Err(msg) => msg.clone_into(&mut self.notice_buffer),
         }
         result
     }
@@ -778,7 +778,7 @@ impl Entering {
                     CharacterForm::Halfwidth => editor.commit_buffer.push(' '),
                     CharacterForm::Fullwidth => editor.commit_buffer.push('　'),
                 }
-                self.spin_absorb()
+                self.spin_commit()
             }
             None => self.spin_ignore(),
         }
@@ -827,7 +827,7 @@ impl State for Entering {
                         if shared.cursor() >= n {
                             shared.learn_phrase_in_range(shared.cursor() - n, shared.cursor())
                         } else {
-                            shared.notice_buffer = "加詞失敗：字數不符或夾雜符號".to_owned();
+                            "加詞失敗：字數不符或夾雜符號".clone_into(&mut shared.notice_buffer);
                             Err("加詞失敗：字數不符或夾雜符號".to_owned())
                         }
                     }
@@ -894,7 +894,10 @@ impl State for Entering {
                 };
                 self.spin_absorb()
             }
-            Space if shared.options.space_is_select_key => {
+            Space
+                if shared.options.space_is_select_key
+                    && shared.options.language_mode == LanguageMode::Chinese =>
+            {
                 self.start_selecting_or_input_space(shared)
             }
             Down => {
@@ -921,10 +924,11 @@ impl State for Entering {
                 if shared.com.is_empty() {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.unicode);
+                    self.spin_commit()
                 } else {
                     shared.com.insert(Symbol::new_char(ev.unicode));
+                    self.spin_absorb()
                 }
-                self.spin_commit()
             }
             _ => match shared.options.language_mode {
                 LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {

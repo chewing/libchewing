@@ -1,4 +1,4 @@
-What's New in libchewing 0.7.0-rc.1 (Mar 25, 2024)
+What's New in libchewing 0.7.0-rc.2 (Mar 31, 2024)
 ---------------------------------------------------------
 
 This is the first beta release of the Rust rewrite. The library has been tested
@@ -36,6 +36,10 @@ and loading multiple dictionaries in future releases.
   - Skip symbol selection if preedit buffer is empty (rust)
   - Allow numlock in selection mode (rust)
   - Avoid infinite recursion (rust)
+  - Ensure to return KeyBehavior::Commit when we push to commit buffer
+  - Adjust selection offset after delete symbols
+  - Disable trace logging if no logger is enabled
+  - Should not start selection in English mode
 
 * Documentation
   - Added document for fuzzers (rust)

@@ -4,7 +4,7 @@ use std::{
     ops::Neg,
 };
 
-use log::{debug, trace, warn};
+use log::{debug, log_enabled, trace, warn, Level::Trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -150,9 +150,7 @@ impl ChewingEngine {
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
-                    debug!("check {} against selection {}", substring, selection.phrase);
                     if substring != selection.phrase.as_ref() {
-                        debug!("skip {}", substring);
                         continue 'next_phrase;
                     }
                 }
@@ -277,25 +275,35 @@ impl ChewingEngine {
     fn trim_paths(&self, paths: Vec<PossiblePath>) -> Vec<PossiblePath> {
         let mut trimmed_paths: Vec<PossiblePath> = vec![];
         for candidate in paths.into_iter() {
-            trace!("Trim check {}", candidate);
+            if log_enabled!(Trace) {
+                trace!("Trim check {}", candidate);
+            }
             let mut drop_candidate = false;
             let mut keeper = vec![];
             for p in trimmed_paths.into_iter() {
                 if drop_candidate || p.contains(&candidate) {
                     drop_candidate = true;
-                    trace!("  Keep {}", p);
+                    if log_enabled!(Trace) {
+                        trace!("  Keep {}", p);
+                    }
                     keeper.push(p);
                     continue;
                 }
                 if candidate.contains(&p) {
-                    trace!("  Drop {}", p);
+                    if log_enabled!(Trace) {
+                        trace!("  Drop {}", p);
+                    }
                     continue;
                 }
-                trace!("  Keep {}", p);
+                if log_enabled!(Trace) {
+                    trace!("  Keep {}", p);
+                }
                 keeper.push(p);
             }
             if !drop_candidate {
-                trace!("  Keep {}", candidate);
+                if log_enabled!(Trace) {
+                    trace!("  Keep {}", candidate);
+                }
                 keeper.push(candidate);
             }
             trimmed_paths = keeper;
