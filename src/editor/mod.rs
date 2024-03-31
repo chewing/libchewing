@@ -1162,7 +1162,7 @@ impl Selecting {
             Selector::Phrase(ref sel) => {
                 let candidates = sel.candidates(editor, &editor.dict);
                 debug!("candidates: {:?}", &candidates);
-                match candidates.get(n) {
+                match candidates.get(offset) {
                     Some(phrase) => {
                         editor.com.select(sel.interval(phrase.as_str()));
                         debug!("Auto Shift {}", editor.options.auto_shift_cursor);

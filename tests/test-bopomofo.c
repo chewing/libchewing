@@ -440,6 +440,22 @@ void test_select_candidate_in_middle_reaward()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_second_page()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_candPerPage(ctx, 9);
+    type_keystroke_by_string(ctx, "u4<D><R>4"); /* ㄧˋ */
+    ok_preedit_buffer(ctx, "役");
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -452,6 +468,7 @@ void test_select_candidate()
     test_del_bopomofo_as_mode_switch();
     test_select_candidate_in_middle_no_reaward();
     test_select_candidate_in_middle_reaward();
+    test_select_candidate_second_page();
 }
 
 void test_Esc_not_entering_chewing()
