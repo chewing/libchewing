@@ -12,6 +12,7 @@ use std::{
     num::NonZeroUsize,
     path::Path,
     str,
+    time::SystemTime,
 };
 
 use log::error;
@@ -117,9 +118,8 @@ impl PhraseData<'_> {
         })
     }
     fn is_valid(&self) -> bool {
+        // FIXME
         true
-        // self.0.len() > 4 && self.len() <= self.0.len() && self.phrase_str().is_ok()
-        // self.0.len() == self.tlv_iter().fold(0, |acc, tlv| acc + tlv.0.len())
     }
     fn to_phrase(&self) -> Phrase {
         let mut phrase = "".into();
@@ -141,14 +141,6 @@ impl PhraseData<'_> {
             last_used,
         }
     }
-    // fn frequency(&self) -> u32 {
-    //     u32::from_le_bytes(self.0[..4].try_into().unwrap())
-    // }
-    // fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
-    //     let len = self.0[4] as usize;
-    //     let data = &self.0[5..];
-    //     str::from_utf8(&data[..len])
-    // }
     fn len(&self) -> usize {
         self.tlv_iter().fold(0, |acc, tlv| acc + tlv.size())
     }
@@ -1313,7 +1305,11 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
         let mut tmpname = path.to_path_buf();
-        tmpname.set_extension("tmp");
+        let semi_random = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .map(|du| du.subsec_millis())
+            .unwrap_or_default();
+        tmpname.set_file_name(format!("chewing-{}.dat", semi_random));
         let database = File::create(&tmpname)?;
         let mut writer = BufWriter::new(database);
         self.write(&mut writer)?;
