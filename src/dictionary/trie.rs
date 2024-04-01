@@ -5,7 +5,7 @@ use std::{
     error::Error,
     ffi::CString,
     fmt::{Debug, Display},
-    fs::File,
+    fs::{self, File},
     io::{self, BufWriter, Read, Seek, Write},
     iter,
     mem::size_of,
@@ -1312,9 +1312,13 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        let database = File::create(path)?;
+        let mut tmpname = path.to_path_buf();
+        tmpname.set_extension("tmp");
+        let database = File::create(&tmpname)?;
         let mut writer = BufWriter::new(database);
         self.write(&mut writer)?;
+        writer.flush()?;
+        fs::rename(&tmpname, path)?;
         Ok(())
     }
 
