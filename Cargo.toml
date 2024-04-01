@@ -10,7 +10,6 @@ edition = "2021"
 include = ["src/**/*.rs", "data/*", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
 
 [dependencies]
-cdb2 = "0.7.0"
 directories = "5.0.0"
 env_logger = { version = "0.10.2", default-features = false, optional = true }
 log = "0.4.21"
