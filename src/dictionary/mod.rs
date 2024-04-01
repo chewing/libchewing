@@ -20,10 +20,6 @@ pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryErro
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
 pub(crate) use trie_buf::TrieBufDictionary;
 
-#[cfg(test)]
-pub(crate) use kv::KVDictionary;
-
-mod kv;
 mod layered;
 mod loader;
 #[cfg(feature = "sqlite")]

@@ -1404,7 +1404,7 @@ mod tests {
 
     use crate::{
         conversion::ChewingEngine,
-        dictionary::{KVDictionary, LayeredDictionary},
+        dictionary::{LayeredDictionary, TrieBufDictionary},
         editor::{
             abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
         },
@@ -1421,8 +1421,8 @@ mod tests {
     fn editing_mode_input_bopomofo() {
         let keyboard = Qwerty;
         let dict = LayeredDictionary::new(
-            vec![Box::new(KVDictionary::new_in_memory())],
-            Box::new(KVDictionary::new_in_memory()),
+            vec![Box::new(TrieBufDictionary::new_in_memory())],
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1446,13 +1446,13 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo_commit() {
         let keyboard = Qwerty;
-        let dict = KVDictionary::from([(
+        let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
-            Box::new(KVDictionary::new_in_memory()),
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1482,13 +1482,13 @@ mod tests {
     #[test]
     fn editing_mode_input_chinese_to_english_mode() {
         let keyboard = Qwerty;
-        let dict = KVDictionary::from([(
+        let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
-            Box::new(KVDictionary::new_in_memory()),
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1528,13 +1528,13 @@ mod tests {
     #[test]
     fn editing_mode_input_english_to_chinese_mode() {
         let keyboard = Qwerty;
-        let dict = KVDictionary::from([(
+        let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
-            Box::new(KVDictionary::new_in_memory()),
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1589,13 +1589,13 @@ mod tests {
     #[test]
     fn editing_chinese_mode_input_special_symbol() {
         let keyboard = Qwerty;
-        let dict = KVDictionary::from([(
+        let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100).into()],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
-            Box::new(KVDictionary::new_in_memory()),
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1633,10 +1633,10 @@ mod tests {
     #[test]
     fn editing_mode_input_full_shape_symbol() {
         let keyboard = Qwerty;
-        let dict = KVDictionary::new_in_memory();
+        let dict = TrieBufDictionary::new_in_memory();
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
-            Box::new(KVDictionary::new_in_memory()),
+            Box::new(TrieBufDictionary::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);

@@ -13,7 +13,7 @@ use crate::{
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{kv::KVDictionary, uhash, Dictionary, TrieBufDictionary, TrieDictionary};
+use super::{uhash, Dictionary, TrieBufDictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
@@ -97,7 +97,7 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
-            return Ok(Box::new(KVDictionary::new_in_memory()));
+            return Ok(Box::new(TrieBufDictionary::new_in_memory()));
         }
         if data_path.exists() {
             return guess_format_and_load(&data_path);

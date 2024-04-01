@@ -291,6 +291,18 @@ impl Dictionary for TrieBufDictionary {
     }
 }
 
+impl<const N: usize> From<[(Vec<Syllable>, Vec<Phrase>); N]> for TrieBufDictionary {
+    fn from(value: [(Vec<Syllable>, Vec<Phrase>); N]) -> Self {
+        let mut dict = TrieBufDictionary::new_in_memory();
+        for (syllables, phrases) in value {
+            for phrase in phrases {
+                dict.add_phrase(&syllables, phrase).unwrap();
+            }
+        }
+        dict
+    }
+}
+
 impl Drop for TrieBufDictionary {
     fn drop(&mut self) {
         let _ = self.flush();

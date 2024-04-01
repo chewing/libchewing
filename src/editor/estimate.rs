@@ -96,13 +96,13 @@ impl UserFreqEstimate for LaxUserFreqEstimate {
 
 #[cfg(test)]
 mod tests {
-    use crate::{dictionary::KVDictionary, syl};
+    use crate::{dictionary::TrieBufDictionary, syl};
 
     use super::LaxUserFreqEstimate;
 
     #[test]
     fn load_from_dictionary() {
-        let user_dict = KVDictionary::from([
+        let user_dict = TrieBufDictionary::from([
             (
                 vec![syl![crate::zhuyin::Bopomofo::A]],
                 vec![
