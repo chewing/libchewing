@@ -1,7 +1,5 @@
 use anyhow::Result;
-use chewing::dictionary::{
-    CdbDictionary, Dictionary, DictionaryInfo, SqliteDictionary, TrieDictionary,
-};
+use chewing::dictionary::{Dictionary, DictionaryInfo, SqliteDictionary, TrieDictionary};
 
 use crate::flags;
 
@@ -12,8 +10,6 @@ pub fn run(args: flags::Info) -> Result<()> {
         .ok_or(anyhow::anyhow!("Unknown dictionary format."))?;
     let dict: Box<dyn Dictionary> = if ext.eq_ignore_ascii_case("sqlite3") {
         Box::new(SqliteDictionary::open_read_only(&args.path)?)
-    } else if ext.eq_ignore_ascii_case("cdb") {
-        Box::new(CdbDictionary::open(&args.path)?)
     } else {
         Box::new(TrieDictionary::open(&args.path)?)
     };

@@ -13,12 +13,12 @@ use crate::{
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{kv::KVDictionary, uhash, CdbDictionary, Dictionary, TrieDictionary};
+use super::{kv::KVDictionary, uhash, Dictionary, TrieBufDictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
-const UD_CDB_FILE_NAME: &str = "chewing.cdb";
+const UD_TRIE_FILE_NAME: &str = "chewing.dat";
 const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
@@ -108,11 +108,11 @@ impl UserDictionaryLoader {
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
-        let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
-        if data_path != cdb_path && cdb_path.exists() {
-            let cdb_dict = CdbDictionary::open(cdb_path)
+        let user_dict_path = userdata_dir.join(UD_TRIE_FILE_NAME);
+        if data_path != user_dict_path && user_dict_path.exists() {
+            let trie_dict = TrieBufDictionary::open(user_dict_path)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
-            for (syllables, phrase) in cdb_dict.entries() {
+            for (syllables, phrase) in trie_dict.entries() {
                 let freq = phrase.freq();
                 let last_used = phrase.last_used().unwrap_or_default();
                 fresh_dict
@@ -170,8 +170,8 @@ fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> 
         {
             Err(io::Error::from(io::ErrorKind::Unsupported))
         }
-    } else if ext.eq_ignore_ascii_case("cdb") {
-        CdbDictionary::open(dict_path)
+    } else if ext.eq_ignore_ascii_case("dat") {
+        TrieBufDictionary::open(dict_path)
             .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
     } else {

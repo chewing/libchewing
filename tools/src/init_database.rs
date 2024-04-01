@@ -1,8 +1,7 @@
 use anyhow::{bail, Context, Result};
 use chewing::{
     dictionary::{
-        CdbDictionaryBuilder, DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder,
-        TrieDictionaryBuilder,
+        DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieDictionaryBuilder,
     },
     zhuyin::{Bopomofo, Syllable},
 };
@@ -55,7 +54,6 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
     let mut builder: Box<dyn DictionaryBuilder> = match args.db_type_or_default().as_str() {
         "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
         "trie" => Box::new(TrieDictionaryBuilder::new()),
-        "cdb" => Box::new(CdbDictionaryBuilder::new()),
         ty => bail!("Unknown database type {ty}"),
     };
 

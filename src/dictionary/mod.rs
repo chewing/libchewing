@@ -13,17 +13,16 @@ use std::{
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-pub use self::cdb::{CdbDictionary, CdbDictionaryBuilder, CdbDictionaryError};
 pub use layered::LayeredDictionary;
 pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
+pub(crate) use trie_buf::TrieBufDictionary;
 
 #[cfg(test)]
 pub(crate) use kv::KVDictionary;
 
-mod cdb;
 mod kv;
 mod layered;
 mod loader;

@@ -67,10 +67,6 @@ impl TrieBufDictionary {
         }
     }
 
-    pub(crate) fn set(&mut self, trie: TrieDictionary) {
-        self.trie = Some(trie);
-    }
-
     pub(crate) fn entries_iter_for<'a>(
         &'a self,
         syllables: &'a dyn SyllableSlice,
@@ -252,33 +248,19 @@ impl Dictionary for TrieBufDictionary {
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        *self = TrieBufDictionary::open(&self.path)?;
+        self.trie = Some(TrieDictionary::open(&self.path)?);
         Ok(())
     }
 
     fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        // #[inline(always)]
-        // fn write_phrase(data_buf: &mut Vec<u8>, phrase: &Phrase) -> Result<(), io::Error> {
-        //     data_buf.write_all(&phrase.freq().to_le_bytes())?;
-        //     data_buf.write_all(&phrase.last_used().unwrap_or_default().to_le_bytes())?;
-        //     data_buf.write_all(&[phrase.as_str().len() as u8])?;
-        //     data_buf.write_all(phrase.as_str().as_bytes())
-        // }
-        // let mut writer = CDBWriter::create(&self.path)?;
-        // write_info(&mut writer, &self.info)?;
-        // for entry in self.entries() {
-        //     let mut data_buf = vec![];
-        //     write_phrase(&mut data_buf, &entry.1)?;
-        //     writer.add(&entry.0.get_bytes(), &data_buf)?;
-        // }
-        // drop(self.inner.take());
-        // writer.finish()?;
         let mut builder = TrieDictionaryBuilder::new();
         builder.set_info(self.about())?;
         for (syllables, phrase) in self.entries() {
             builder.insert(&syllables, phrase)?;
         }
         builder.build(&self.path)?;
+        self.btree.clear();
+        self.graveyard.clear();
         self.reopen()
     }
 
@@ -306,6 +288,12 @@ impl Dictionary for TrieBufDictionary {
         phrase_str: &str,
     ) -> Result<(), DictionaryUpdateError> {
         TrieBufDictionary::remove_phrase(self, syllables, phrase_str)
+    }
+}
+
+impl Drop for TrieBufDictionary {
+    fn drop(&mut self) {
+        let _ = self.flush();
     }
 }
 

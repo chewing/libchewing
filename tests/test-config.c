@@ -553,7 +553,7 @@ void test_new2_userpath_alternative()
 #ifdef WITH_SQLITE
     ctx = chewing_new2(NULL, TEST_HASH_DIR "/test.sqlite3", logger, fd);
 #else
-    ctx = chewing_new2(NULL, TEST_HASH_DIR "/test.cdb", logger, fd);
+    ctx = chewing_new2(NULL, TEST_HASH_DIR "/test.dat", logger, fd);
 #endif
     ok(ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL);
 

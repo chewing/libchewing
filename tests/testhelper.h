@@ -20,7 +20,7 @@
 #if WITH_SQLITE3
 #    define DB_NAME	"chewing.sqlite3"
 #else
-#    define DB_NAME	"chewing.cdb"
+#    define DB_NAME	"chewing.dat"
 #endif
 #else
 #include "chewing-utf8-util.h"

@@ -116,7 +116,7 @@ pub fn userphrase_path() -> Option<PathBuf> {
     if cfg!(feature = "sqlite") {
         data_dir().map(|path| path.join("chewing.sqlite3"))
     } else {
-        data_dir().map(|path| path.join("chewing.cdb"))
+        data_dir().map(|path| path.join("chewing.dat"))
     }
 }
 

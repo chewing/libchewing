@@ -11,7 +11,7 @@ use std::{
     mem::size_of,
     num::NonZeroUsize,
     path::Path,
-    str::{self, Utf8Error},
+    str,
 };
 
 use log::error;
@@ -71,23 +71,96 @@ impl TrieLeafView<'_> {
     }
 }
 
+#[derive(Debug)]
+struct Tlv<'a>(&'a [u8]);
+
+impl Tlv<'_> {
+    fn tag(&self) -> PhraseDataTag {
+        match self.0[0] {
+            1 => PhraseDataTag::Freq,
+            2 => PhraseDataTag::Phrase,
+            3 => PhraseDataTag::LastUsed,
+            _ => PhraseDataTag::End,
+        }
+    }
+    fn value(&self) -> &[u8] {
+        if self.tag() == PhraseDataTag::End {
+            return &[];
+        }
+        let end = 2 + self.0[1] as usize;
+        &self.0[2..end]
+    }
+    fn size(&self) -> usize {
+        if self.tag() == PhraseDataTag::End {
+            return 1;
+        }
+        2 + self.0[1] as usize
+    }
+}
+
 struct PhraseData<'a>(&'a [u8]);
 
-impl<'a> PhraseData<'a> {
+impl PhraseData<'_> {
+    fn tlv_iter(&self) -> impl Iterator<Item = Tlv<'_>> {
+        let mut buf = self.0;
+        iter::from_fn(move || {
+            if buf.is_empty() {
+                return None;
+            }
+            let data = buf;
+            if buf.len() < 2 || Tlv(buf).tag() == PhraseDataTag::End {
+                buf = &[];
+            } else {
+                buf = &buf[(2 + data[1] as usize)..];
+            }
+            Some(Tlv(data))
+        })
+    }
     fn is_valid(&self) -> bool {
-        self.0.len() > 4 && self.len() <= self.0.len() && self.phrase_str().is_ok()
+        true
+        // self.0.len() > 4 && self.len() <= self.0.len() && self.phrase_str().is_ok()
+        // self.0.len() == self.tlv_iter().fold(0, |acc, tlv| acc + tlv.0.len())
     }
-    fn frequency(&self) -> u32 {
-        u32::from_le_bytes(self.0[..4].try_into().unwrap())
+    fn to_phrase(&self) -> Phrase {
+        let mut phrase = "".into();
+        let mut freq = 0;
+        let mut last_used: Option<u64> = None;
+        for tlv in self.tlv_iter() {
+            match tlv.tag() {
+                PhraseDataTag::End => (),
+                PhraseDataTag::Freq => freq = u32::from_le_bytes(tlv.value().try_into().unwrap()),
+                PhraseDataTag::Phrase => phrase = str::from_utf8(tlv.value()).unwrap().into(),
+                PhraseDataTag::LastUsed => {
+                    last_used = Some(u64::from_le_bytes(tlv.value().try_into().unwrap()))
+                }
+            }
+        }
+        Phrase {
+            phrase,
+            freq,
+            last_used,
+        }
     }
-    fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
-        let len = self.0[4] as usize;
-        let data = &self.0[5..];
-        str::from_utf8(&data[..len])
-    }
+    // fn frequency(&self) -> u32 {
+    //     u32::from_le_bytes(self.0[..4].try_into().unwrap())
+    // }
+    // fn phrase_str(&self) -> Result<&'a str, Utf8Error> {
+    //     let len = self.0[4] as usize;
+    //     let data = &self.0[5..];
+    //     str::from_utf8(&data[..len])
+    // }
     fn len(&self) -> usize {
-        5 + self.0[4] as usize
+        self.tlv_iter().fold(0, |acc, tlv| acc + tlv.size())
     }
+}
+
+#[derive(PartialEq, Eq)]
+#[repr(u8)]
+enum PhraseDataTag {
+    End = 0,
+    Freq = 1,
+    Phrase = 2,
+    LastUsed = 3,
 }
 
 /// A read-only dictionary using a pre-built [Trie][] index that is both space
@@ -350,10 +423,7 @@ impl Iterator for PhrasesIter<'_> {
             return None;
         }
         self.bytes = &self.bytes[phrase_data.len()..];
-        Some(Phrase::new(
-            phrase_data.phrase_str().unwrap(),
-            phrase_data.frequency(),
-        ))
+        Some(phrase_data.to_phrase())
     }
 }
 
@@ -380,6 +450,10 @@ impl Dictionary for TrieDictionary {
         bail_if_oob!(0, TrieNodeView::SIZE, self.dict.len());
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
+        // empty dictionary
+        if node.child_begin() == node.child_end() {
+            return vec![];
+        }
         'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
             bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
@@ -417,7 +491,10 @@ impl Dictionary for TrieDictionary {
         }
         let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
         let mut node = root;
-        let mut done = false;
+        if node.child_begin() == node.child_end() {
+            return Box::new(iter::empty());
+        }
+
         let make_dict_entry =
             |syllables: &[u16], leaf: &TrieLeafView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
                 debug_assert_eq!(leaf.reserved_zero(), 0);
@@ -434,6 +511,8 @@ impl Dictionary for TrieDictionary {
                     phrases,
                 )
             };
+
+        let mut done = false;
         let it = iter::from_fn(move || {
             if !results.is_empty() {
                 return results.pop();
@@ -768,27 +847,32 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                      ChunkHeader('DATA')                      |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                           Frequency                           |
+/// |       Tag     |     Length    |             Value             |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |      Length     |                 Phrase                      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                           Frequency                           |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |      Length     |                                           ...
+/// |       Tag     |     Length    |             Value           ...
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                             CRC32                             |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
 ///
-/// The phrases chunk contains all the phrases strings and their frequency. Each
-/// phrase is written as length prefixed strings.
+/// The phrases chunk contains all the phrases strings, their frequency, and
+/// other data. Each phrase data contains several tag-length-value encoded
+/// attributes.
 ///
-/// - **Frequency: 32 bits (u32)**
-///     - The frequency of the phrase. Might be unaligned.
+/// - **Tag: 8 bits (u8)**
+///     - Mark the type of the value following the length byte.
 /// - **Length: 8 bits (u8)**
-///     - Each phrase encoded in UTF-8 must not exceed 255 bytes long.
-/// - **Phrase: variable bits**
+///     - Each attribute encoded must not exceed 255 bytes long.
+/// - **Value: variable bits**
+///
+/// Currently defined tags:
+///
+/// - **Frequency(1): 32 bits (u32)**
+///     - The frequency of the phrase. Might be unaligned.
+/// - **Phrase(2): variable bits**
 ///     - UTF-8 encoded string, not null-terminated.
+/// - **Last used(3): 64 bits (u64)**
+///     - The last used timestamp of a user phrase. Might be unaligned.
 ///
 /// The end of the phrases chunk is a 32-bit CRC
 /// checksum calculated from the payloads. The CRC is specified as the
@@ -983,9 +1067,21 @@ impl TrieDictionaryBuilder {
                     });
                     for phrase in phrases {
                         debug_assert!(phrase.as_str().len() <= u8::MAX as usize);
+                        data_buf.write_all(&[PhraseDataTag::Freq as u8, size_of::<u32>() as u8])?;
                         data_buf.write_all(&phrase.freq().to_le_bytes())?;
-                        data_buf.write_all(&[phrase.as_str().len() as u8])?;
+                        data_buf.write_all(&[
+                            PhraseDataTag::Phrase as u8,
+                            phrase.as_str().len() as u8,
+                        ])?;
                         data_buf.write_all(phrase.as_str().as_bytes())?;
+                        if let Some(last_used) = phrase.last_used {
+                            data_buf.write_all(&[
+                                PhraseDataTag::LastUsed as u8,
+                                size_of::<u64>() as u8,
+                            ])?;
+                            data_buf.write_all(&last_used.to_le_bytes())?;
+                        }
+                        data_buf.write_all(&[0_u8])?;
                     }
 
                     let data_len = data_buf.len() - data_begin;
@@ -1296,7 +1392,16 @@ mod tests {
         zhuyin::Bopomofo,
     };
 
-    use super::{Crc32, TrieDictionary, TrieDictionaryBuilder};
+    use super::{Crc32, PhraseData, TrieDictionary, TrieDictionaryBuilder};
+
+    #[test]
+    fn test_tlv_iter() {
+        let buf = &[
+            1, 4, 1, 0, 0, 0, 2, 4, 100, 105, 99, 116, 3, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+        ];
+        let phrase_data = PhraseData(buf);
+        assert_eq!(buf.len(), phrase_data.len());
+    }
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {

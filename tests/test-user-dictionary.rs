@@ -57,11 +57,11 @@ unsafe fn assert_phrase_only_in_user_dictionary(
 }
 
 #[test]
-fn explicit_load_chewing_cdb() -> Result<(), Box<dyn Error>> {
+fn explicit_load_chewing_dat() -> Result<(), Box<dyn Error>> {
     let syspath = syspath()?;
-    let (tmpdir, userpath) = tempdir_and_file("chewing.cdb")?;
-    let chewing_golden = golden_data_path("chewing.cdb");
-    fs::copy(chewing_golden, tmpdir.path().join("chewing.cdb"))?;
+    let (tmpdir, userpath) = tempdir_and_file("chewing.dat")?;
+    let chewing_golden = golden_data_path("chewing.dat");
+    fs::copy(chewing_golden, tmpdir.path().join("chewing.dat"))?;
 
     unsafe {
         let ctx = chewing_new2(syspath.as_ptr(), userpath.as_ptr(), None, null_mut());
@@ -190,8 +190,8 @@ fn env_load_and_migrate_chewing_cdb() -> Result<(), Box<dyn Error>> {
 
     let syspath = syspath()?;
     let (tmpdir, _userpath) = tempdir_and_file("chewing.sqlite3")?;
-    let chewing_golden = golden_data_path("chewing.cdb");
-    fs::copy(chewing_golden, tmpdir.path().join("chewing.cdb"))?;
+    let chewing_golden = golden_data_path("chewing.dat");
+    fs::copy(chewing_golden, tmpdir.path().join("chewing.dat"))?;
 
     let ctx = {
         let _lock = ENV_LOCK.lock()?;
@@ -227,9 +227,9 @@ fn env_load_chewing_cdb() -> Result<(), Box<dyn Error>> {
     use std::ptr::null;
 
     let syspath = syspath()?;
-    let (tmpdir, _userpath) = tempdir_and_file("chewing.cdb")?;
-    let chewing_golden = golden_data_path("chewing.cdb");
-    fs::copy(chewing_golden, tmpdir.path().join("chewing.cdb"))?;
+    let (tmpdir, _userpath) = tempdir_and_file("chewing.dat")?;
+    let chewing_golden = golden_data_path("chewing.dat");
+    fs::copy(chewing_golden, tmpdir.path().join("chewing.dat"))?;
 
     let ctx = {
         let _lock = ENV_LOCK.lock()?;
