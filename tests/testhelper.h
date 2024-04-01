@@ -17,11 +17,7 @@
 #include "chewingio.h"
 
 #ifdef WITH_RUST
-#if WITH_SQLITE3
-#    define DB_NAME	"chewing.sqlite3"
-#else
-#    define DB_NAME	"chewing.dat"
-#endif
+#   define DB_NAME  "chewing.dat"
 #else
 #include "chewing-utf8-util.h"
 #include "plat_path.h"

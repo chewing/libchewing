@@ -18,7 +18,8 @@ use super::{uhash, Dictionary, TrieBufDictionary, TrieDictionary};
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
-const UD_TRIE_FILE_NAME: &str = "chewing.dat";
+// const UD_TRIE_FILE_NAME: &str = "chewing.dat";
+const UD_SQLITE_FILE_NAME: &str = "chewing.sqlite3";
 const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
@@ -108,20 +109,23 @@ impl UserDictionaryLoader {
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
-        let user_dict_path = userdata_dir.join(UD_TRIE_FILE_NAME);
-        if data_path != user_dict_path && user_dict_path.exists() {
-            let trie_dict = TrieBufDictionary::open(user_dict_path)
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
-            for (syllables, phrase) in trie_dict.entries() {
-                let freq = phrase.freq();
-                let last_used = phrase.last_used().unwrap_or_default();
+        let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);
+        if cfg!(feature = "sqlite") && user_dict_path.exists() {
+            #[cfg(feature = "sqlite")]
+            {
+                let trie_dict = SqliteDictionary::open(user_dict_path)
+                    .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                for (syllables, phrase) in trie_dict.entries() {
+                    let freq = phrase.freq();
+                    let last_used = phrase.last_used().unwrap_or_default();
+                    fresh_dict
+                        .update_phrase(&syllables, phrase, freq, last_used)
+                        .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                }
                 fresh_dict
-                    .update_phrase(&syllables, phrase, freq, last_used)
+                    .flush()
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
-            fresh_dict
-                .flush()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
         } else {
             let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
             if uhash_path.exists() {
