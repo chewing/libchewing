@@ -14,6 +14,10 @@ if(UNIX)
     add_compile_definitions(UNDER_POSIX PIC)
 endif()
 
+if(MSVC)
+    set(CMAKE_C_FLAGS "/utf-8 ${CMAKE_C_FLAGS}")
+endif()
+
 include(CheckCCompilerFlag)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
