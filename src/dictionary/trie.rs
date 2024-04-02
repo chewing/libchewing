@@ -1311,9 +1311,10 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
             .unwrap_or_default();
         tmpname.set_file_name(format!("chewing-{}.dat", semi_random));
         let database = File::create(&tmpname)?;
-        let mut writer = BufWriter::new(database);
+        let mut writer = BufWriter::new(&database);
         self.write(&mut writer)?;
         writer.flush()?;
+        database.sync_data()?;
         fs::rename(&tmpname, path)?;
         Ok(())
     }
