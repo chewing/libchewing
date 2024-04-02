@@ -159,7 +159,7 @@ pub(crate) struct SharedState {
     options: EditorOptions,
     last_key_behavior: EditorKeyBehavior,
 
-    dirty_dict: bool,
+    dirty_level: u16,
     nth_conversion: usize,
     commit_buffer: String,
     notice_buffer: String,
@@ -196,7 +196,7 @@ impl Editor {
                 estimate,
                 options: EditorOptions::default(),
                 last_key_behavior: EditorKeyBehavior::Absorb,
-                dirty_dict: false,
+                dirty_level: 0,
                 nth_conversion: 0,
                 commit_buffer: String::new(),
                 notice_buffer: String::new(),
@@ -539,7 +539,7 @@ impl SharedState {
             .map(|_| phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned());
         if result.is_ok() {
-            self.dirty_dict = true;
+            self.dirty_level += 1;
         }
         result
     }
@@ -571,7 +571,7 @@ impl SharedState {
         let time = self.estimate.now().unwrap();
 
         let _ = self.dict.update_phrase(syllables, phrase, user_freq, time);
-        self.dirty_dict = true;
+        self.dirty_level += 1;
         Ok(())
     }
     fn unlearn_phrase(
@@ -580,7 +580,7 @@ impl SharedState {
         phrase: &str,
     ) -> Result<(), String> {
         let _ = self.dict.remove_phrase(syllables, phrase);
-        self.dirty_dict = true;
+        self.dirty_level += 1;
         Ok(())
     }
     fn switch_language_mode(&mut self) {
@@ -710,10 +710,11 @@ impl BasicEditor for Editor {
         }
         trace!("last_key_behavior = {:?}", self.shared.last_key_behavior);
         trace!("comp: {:?}", &self.shared.com);
-        if self.shared.dirty_dict {
+        const DIRTY_THRESHOLD: u16 = 1000;
+        if self.shared.dirty_level > DIRTY_THRESHOLD {
             let _ = self.shared.dict.reopen();
             let _ = self.shared.dict.flush();
-            self.shared.dirty_dict = false;
+            self.shared.dirty_level = 0;
         }
         self.shared.last_key_behavior
     }

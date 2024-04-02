@@ -248,11 +248,16 @@ impl Dictionary for TrieBufDictionary {
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        self.trie = Some(TrieDictionary::open(&self.path)?);
+        if !self.path.as_os_str().is_empty() {
+            self.trie = Some(TrieDictionary::open(&self.path)?);
+        }
         Ok(())
     }
 
     fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+        if self.path.as_os_str().is_empty() {
+            return Ok(());
+        }
         let mut builder = TrieDictionaryBuilder::new();
         builder.set_info(self.about())?;
         for (syllables, phrase) in self.entries() {
