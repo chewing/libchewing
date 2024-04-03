@@ -7,6 +7,8 @@ use std::{
     thread::{self, JoinHandle},
 };
 
+use log::error;
+
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
@@ -248,6 +250,8 @@ impl TrieBufDictionary {
                 self.trie = Some(trie);
                 self.btree.clear();
                 self.graveyard.clear();
+            } else {
+                error!("[!] Failed to write updated user dictionary due to error.");
             }
         }
     }
