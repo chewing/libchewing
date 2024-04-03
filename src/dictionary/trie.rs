@@ -205,7 +205,7 @@ enum PhraseDataTag {
 ///
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
 /// [RIFF]: https://en.m.wikipedia.org/wiki/Resource_Interchange_File_Format
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrieDictionary {
     info: DictionaryInfo,
     dict: Vec<u8>,

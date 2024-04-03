@@ -4,6 +4,7 @@ use std::{
     collections::{btree_map::Entry, BTreeMap, BTreeSet},
     io, iter,
     path::PathBuf,
+    thread::{self, JoinHandle},
 };
 
 use crate::zhuyin::{Syllable, SyllableSlice};
@@ -19,6 +20,8 @@ pub(crate) struct TrieBufDictionary {
     trie: Option<TrieDictionary>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
+    join_handle: Option<JoinHandle<TrieDictionary>>,
+    dirty: bool,
 }
 
 type PhraseKey = (Cow<'static, [Syllable]>, Cow<'static, str>);
@@ -55,6 +58,8 @@ impl TrieBufDictionary {
             trie: Some(trie),
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
+            join_handle: None,
+            dirty: false,
         })
     }
 
@@ -64,6 +69,8 @@ impl TrieBufDictionary {
             trie: None,
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
+            join_handle: None,
+            dirty: false,
         }
     }
 
@@ -188,6 +195,7 @@ impl TrieBufDictionary {
             ),
             (phrase.freq, phrase.last_used.unwrap_or_default()),
         );
+        self.dirty = true;
 
         Ok(())
     }
@@ -206,6 +214,7 @@ impl TrieBufDictionary {
             ),
             (user_freq, time),
         );
+        self.dirty = true;
 
         Ok(())
     }
@@ -220,7 +229,53 @@ impl TrieBufDictionary {
             .remove(&(syllable_slice.clone(), Cow::from(phrase_str.to_owned())));
         self.graveyard
             .insert((syllable_slice, phrase_str.to_owned().into()));
+        self.dirty = true;
+
         Ok(())
+    }
+
+    pub(crate) fn sync(&mut self) {
+        if let Some(join_handle) = self.join_handle.take() {
+            if self.dirty {
+                // Cancel this sync if the dictionary is already dirty.
+                return;
+            }
+            if !join_handle.is_finished() {
+                self.join_handle = Some(join_handle);
+                return;
+            }
+            if let Ok(trie) = join_handle.join() {
+                self.trie = Some(trie);
+                self.btree.clear();
+                self.graveyard.clear();
+            }
+        }
+    }
+
+    pub(crate) fn checkpoint(&mut self) {
+        if self.join_handle.is_some() || self.trie.is_none() || !self.dirty {
+            // Don't need to checkpoint in memory or clean dictionary.
+            // Wait until previous checkpoint result is handled.
+            return;
+        }
+        let snapshot = TrieBufDictionary {
+            path: self.path.clone(),
+            trie: self.trie.clone(),
+            btree: self.btree.clone(),
+            graveyard: self.graveyard.clone(),
+            join_handle: None,
+            dirty: false,
+        };
+        self.join_handle = Some(thread::spawn(move || {
+            let mut builder = TrieDictionaryBuilder::new();
+            builder.set_info(snapshot.about()).unwrap();
+            for (syllables, phrase) in snapshot.entries() {
+                builder.insert(&syllables, phrase).unwrap();
+            }
+            builder.build(&snapshot.path).unwrap();
+            TrieDictionary::open(&snapshot.path).unwrap()
+        }));
+        self.dirty = false;
     }
 }
 
@@ -251,6 +306,7 @@ impl Dictionary for TrieBufDictionary {
         if !self.path.as_os_str().is_empty() {
             self.trie = Some(TrieDictionary::open(&self.path)?);
         }
+        self.sync();
         Ok(())
     }
 
@@ -258,15 +314,8 @@ impl Dictionary for TrieBufDictionary {
         if self.path.as_os_str().is_empty() {
             return Ok(());
         }
-        let mut builder = TrieDictionaryBuilder::new();
-        builder.set_info(self.about())?;
-        for (syllables, phrase) in self.entries() {
-            builder.insert(&syllables, phrase)?;
-        }
-        builder.build(&self.path)?;
-        self.btree.clear();
-        self.graveyard.clear();
-        self.reopen()
+        self.checkpoint();
+        Ok(())
     }
 
     fn add_phrase(
@@ -311,6 +360,9 @@ impl<const N: usize> From<[(Vec<Syllable>, Vec<Phrase>); N]> for TrieBufDictiona
 impl Drop for TrieBufDictionary {
     fn drop(&mut self) {
         let _ = self.flush();
+        if let Some(join_handle) = self.join_handle.take() {
+            let _ = join_handle.join();
+        }
     }
 }
 
@@ -344,12 +396,15 @@ mod tests {
     fn create_new_dictionary_and_query() -> Result<(), Box<dyn Error>> {
         let tmp_dir = tempfile::tempdir()?;
         let file_path = tmp_dir.path().join("user.dat");
-        let mut dict = TrieBufDictionary::open(&file_path)?;
-        dict.add_phrase(
-            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
-            ("dict", 1, 2).into(),
-        )?;
-        dict.flush()?;
+        // Force dict to drop to sync async write
+        {
+            let mut dict = TrieBufDictionary::open(&file_path)?;
+            dict.add_phrase(
+                &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+                ("dict", 1, 2).into(),
+            )?;
+            dict.flush()?;
+        }
         let dict = TrieBufDictionary::open(file_path)?;
         let info = dict.about();
         assert_eq!(Some("Unknown".to_string()), info.copyright);
