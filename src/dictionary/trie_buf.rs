@@ -20,7 +20,7 @@ pub(crate) struct TrieBufDictionary {
     trie: Option<TrieDictionary>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
-    join_handle: Option<JoinHandle<TrieDictionary>>,
+    join_handle: Option<JoinHandle<Result<TrieDictionary, DictionaryUpdateError>>>,
     dirty: bool,
 }
 
@@ -244,7 +244,7 @@ impl TrieBufDictionary {
                 self.join_handle = Some(join_handle);
                 return;
             }
-            if let Ok(trie) = join_handle.join() {
+            if let Ok(Ok(trie)) = join_handle.join() {
                 self.trie = Some(trie);
                 self.btree.clear();
                 self.graveyard.clear();
@@ -268,12 +268,14 @@ impl TrieBufDictionary {
         };
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieDictionaryBuilder::new();
-            builder.set_info(snapshot.about()).unwrap();
+            builder.set_info(snapshot.about())?;
             for (syllables, phrase) in snapshot.entries() {
-                builder.insert(&syllables, phrase).unwrap();
+                builder.insert(&syllables, phrase)?;
             }
-            builder.build(&snapshot.path).unwrap();
-            TrieDictionary::open(&snapshot.path).unwrap()
+            builder.build(&snapshot.path)?;
+            TrieDictionary::open(&snapshot.path).map_err(|err| DictionaryUpdateError {
+                source: Some(Box::new(err)),
+            })
         }));
         self.dirty = false;
     }

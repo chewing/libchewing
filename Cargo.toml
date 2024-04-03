@@ -42,7 +42,7 @@ required-features = ["capi"]
 [profile.release]
 lto = true
 debug = true
-# panic = "abort"
+panic = "abort"
 
 [package.metadata.docs.rs]
 features = ["capi", "sqlite"]
