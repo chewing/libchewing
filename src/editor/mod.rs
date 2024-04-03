@@ -710,7 +710,7 @@ impl BasicEditor for Editor {
         }
         trace!("last_key_behavior = {:?}", self.shared.last_key_behavior);
         trace!("comp: {:?}", &self.shared.com);
-        const DIRTY_THRESHOLD: u16 = 1000;
+        const DIRTY_THRESHOLD: u16 = 0;
         if self.shared.dirty_level > DIRTY_THRESHOLD {
             let _ = self.shared.dict.reopen();
             let _ = self.shared.dict.flush();
