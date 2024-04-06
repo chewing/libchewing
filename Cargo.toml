@@ -44,6 +44,9 @@ lto = true
 debug = true
 panic = "abort"
 
+[package.metadata.vet]
+store = { path = "./vet" }
+
 [package.metadata.docs.rs]
 features = ["capi", "sqlite"]
 # rustdoc-args = ["-Zunstable-options", "--sort-modules-by-appearance"]
