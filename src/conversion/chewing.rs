@@ -158,10 +158,11 @@ impl ChewingEngine {
 
             // If there are phrases that can satisfy all the constraints
             // then pick the one with highest frequency.
-            if best_phrase.is_none() || phrase.freq() > max_freq {
-                max_freq = phrase.freq();
-                best_phrase = Some(phrase.into());
+            if !(phrase.freq() > max_freq || best_phrase.is_none()) {
+                continue;
             }
+            max_freq = phrase.freq();
+            best_phrase = Some(phrase.into());
         }
 
         debug!("best phrace for {:?} is {:?}", symbols, best_phrase);
@@ -511,7 +512,7 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 mod tests {
     use crate::{
         conversion::{Composition, ConversionEngine, GapKind, Interval, Symbol},
-        dictionary::{Dictionary, KVDictionary, Phrase},
+        dictionary::{Dictionary, Phrase, TrieBufDictionary},
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -519,7 +520,7 @@ mod tests {
     use super::{ChewingEngine, PossibleInterval, PossiblePath};
 
     fn test_dictionary() -> impl Dictionary {
-        KVDictionary::from([
+        TrieBufDictionary::from([
             (vec![syl![G, U, O, TONE2]], vec![("國", 1).into()]),
             (vec![syl![M, I, EN, TONE2]], vec![("民", 1).into()]),
             (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),

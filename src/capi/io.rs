@@ -982,7 +982,7 @@ pub unsafe extern "C" fn chewing_userphrase_remove(
             Err(_) => FALSE,
             Ok(_) => TRUE,
         },
-        None => -1,
+        None => ERROR,
     }
 }
 

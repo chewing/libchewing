@@ -13,12 +13,13 @@ use crate::{
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{kv::KVDictionary, uhash, CdbDictionary, Dictionary, TrieDictionary};
+use super::{uhash, Dictionary, TrieBufDictionary, TrieDictionary};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
-const UD_CDB_FILE_NAME: &str = "chewing.cdb";
+// const UD_TRIE_FILE_NAME: &str = "chewing.dat";
+const UD_SQLITE_FILE_NAME: &str = "chewing.sqlite3";
 const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
@@ -97,7 +98,7 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
-            return Ok(Box::new(KVDictionary::new_in_memory()));
+            return Ok(Box::new(TrieBufDictionary::new_in_memory()));
         }
         if data_path.exists() {
             return guess_format_and_load(&data_path);
@@ -108,20 +109,23 @@ impl UserDictionaryLoader {
         }
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
-        let cdb_path = userdata_dir.join(UD_CDB_FILE_NAME);
-        if data_path != cdb_path && cdb_path.exists() {
-            let cdb_dict = CdbDictionary::open(cdb_path)
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
-            for (syllables, phrase) in cdb_dict.entries() {
-                let freq = phrase.freq();
-                let last_used = phrase.last_used().unwrap_or_default();
+        let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);
+        if cfg!(feature = "sqlite") && user_dict_path.exists() {
+            #[cfg(feature = "sqlite")]
+            {
+                let trie_dict = SqliteDictionary::open(user_dict_path)
+                    .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                for (syllables, phrase) in trie_dict.entries() {
+                    let freq = phrase.freq();
+                    let last_used = phrase.last_used().unwrap_or_default();
+                    fresh_dict
+                        .update_phrase(&syllables, phrase, freq, last_used)
+                        .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                }
                 fresh_dict
-                    .update_phrase(&syllables, phrase, freq, last_used)
+                    .flush()
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
-            fresh_dict
-                .flush()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
         } else {
             let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
             if uhash_path.exists() {
@@ -170,8 +174,8 @@ fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> 
         {
             Err(io::Error::from(io::ErrorKind::Unsupported))
         }
-    } else if ext.eq_ignore_ascii_case("cdb") {
-        CdbDictionary::open(dict_path)
+    } else if ext.eq_ignore_ascii_case("dat") {
+        TrieBufDictionary::open(dict_path)
             .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
     } else {

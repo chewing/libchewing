@@ -113,11 +113,7 @@ fn legacy_data_dir() -> Option<PathBuf> {
 /// This function uses the default path from the [`data_dir()`] method
 /// and also respects the `CHEWING_USER_PATH` environment variable.
 pub fn userphrase_path() -> Option<PathBuf> {
-    if cfg!(feature = "sqlite") {
-        data_dir().map(|path| path.join("chewing.sqlite3"))
-    } else {
-        data_dir().map(|path| path.join("chewing.cdb"))
-    }
+    data_dir().map(|path| path.join("chewing.dat"))
 }
 
 #[cfg(test)]

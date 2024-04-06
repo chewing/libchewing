@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21.0)
 project(libchewing LANGUAGES C)
 
-set(CMAKE_PROJECT_VERSION 0.7.0-rc.2)
+set(CMAKE_PROJECT_VERSION 0.7.0~rc.3)
 set(LIBCHEWING_VERSION ${CMAKE_PROJECT_VERSION})
 set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
@@ -12,6 +12,10 @@ enable_testing()
 if(UNIX)
     set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
     add_compile_definitions(UNDER_POSIX PIC)
+endif()
+
+if(MSVC)
+    set(CMAKE_C_FLAGS "/utf-8 ${CMAKE_C_FLAGS}")
 endif()
 
 include(CheckCCompilerFlag)
@@ -336,6 +340,7 @@ install(TARGETS libchewing DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 
 set(CPACK_PACKAGE_CHECKSUM SHA256)
+set(CPACK_PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(CPACK_SOURCE_IGNORE_FILES "/out" "/target" "/\\\\..*")
 set(CPACK_SOURCE_GENERATOR TZST)
 set(CPACK_SOURCE_PACKAGE_FILE_NAME libchewing-${CMAKE_PROJECT_VERSION})

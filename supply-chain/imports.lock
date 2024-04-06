@@ -1,14 +1,6 @@
 
 # cargo-vet imports lock
 
-[[unpublished.chewing]]
-version = "0.7.0-beta.2"
-audited_as = "0.7.0-beta.1"
-
-[[unpublished.chewing-cli]]
-version = "0.7.0-beta.2"
-audited_as = "0.7.0-beta.1"
-
 [[publisher.aho-corasick]]
 version = "1.1.3"
 when = "2024-03-20"
@@ -30,23 +22,16 @@ user-id = 2915
 user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
-[[publisher.cdb2]]
-version = "0.7.1"
-when = "2024-03-21"
-user-id = 7551
-user-login = "kanru"
-user-name = "Kan-Ru Chen"
-
 [[publisher.chewing]]
-version = "0.7.0-beta.1"
-when = "2024-03-26"
+version = "0.7.0-beta.2"
+when = "2024-03-31"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
 
 [[publisher.chewing-cli]]
-version = "0.7.0-beta.1"
-when = "2024-03-26"
+version = "0.7.0-beta.2"
+when = "2024-03-31"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
