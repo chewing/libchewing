@@ -264,11 +264,11 @@ impl SqliteDictionary {
             let key: String = row.get(0)?;
             let value: String = row.get(1)?;
             match key.as_str() {
-                "name" => info.name = Some(value),
-                "copyright" => info.copyright = Some(value),
-                "license" => info.license = Some(value),
-                "version" => info.version = Some(value),
-                "software" => info.software = Some(value),
+                "name" => info.name = value,
+                "copyright" => info.copyright = value,
+                "license" => info.license = value,
+                "version" => info.version = value,
+                "software" => info.software = value,
                 _ => (),
             }
         }
@@ -494,21 +494,11 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         {
             let mut stmt =
                 tx.prepare("INSERT OR REPLACE INTO info_v1 (key, value) VALUES (?, ?)")?;
-            if let Some(name) = info.name {
-                stmt.execute(["name", &name])?;
-            }
-            if let Some(copyright) = info.copyright {
-                stmt.execute(["copyright", &copyright])?;
-            }
-            if let Some(license) = info.license {
-                stmt.execute(["license", &license])?;
-            }
-            if let Some(version) = info.version {
-                stmt.execute(["version", &version])?;
-            }
-            if let Some(software) = info.software {
-                stmt.execute(["software", &software])?;
-            }
+            stmt.execute(["name", &info.name])?;
+            stmt.execute(["copyright", &info.copyright])?;
+            stmt.execute(["license", &info.license])?;
+            stmt.execute(["version", &info.version])?;
+            stmt.execute(["software", &info.software])?;
         }
         tx.commit()?;
         Ok(())

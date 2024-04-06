@@ -75,33 +75,33 @@ impl Error for DuplicatePhraseError {}
 /// # use chewing::dictionary::Dictionary;
 /// # let dictionary = HashMap::new();
 /// let about = dictionary.about();
-/// assert_eq!("libchewing default", about.name.unwrap());
-/// assert_eq!("Copyright (c) 2022 libchewing Core Team", about.copyright.unwrap());
-/// assert_eq!("LGPL-2.1-or-later", about.license.unwrap());
-/// assert_eq!("init_database 0.5.1", about.software.unwrap());
+/// assert_eq!("libchewing default", about.name);
+/// assert_eq!("Copyright (c) 2022 libchewing Core Team", about.copyright);
+/// assert_eq!("LGPL-2.1-or-later", about.license);
+/// assert_eq!("init_database 0.5.1", about.software);
 /// ```
 #[derive(Debug, Clone, Default)]
 pub struct DictionaryInfo {
     /// The name of the dictionary.
-    pub name: Option<String>,
+    pub name: String,
     /// The copyright information of the dictionary.
     ///
     /// It's recommended to include the copyright holders' names and email
     /// addresses, separated by semicolons.
-    pub copyright: Option<String>,
+    pub copyright: String,
     /// The license information of the dictionary.
     ///
     /// It's recommended to use the [SPDX license identifier](https://spdx.org/licenses/).
-    pub license: Option<String>,
+    pub license: String,
     /// The version of the dictionary.
     ///
     /// It's recommended to use the commit hash or revision if the dictionary is
     /// managed in a source control repository.
-    pub version: Option<String>,
+    pub version: String,
     /// The name of the software used to generate the dictionary.
     ///
     /// It's recommended to include the name and the version number.
-    pub software: Option<String>,
+    pub software: String,
 }
 
 /// A type containing a phrase string and its frequency.

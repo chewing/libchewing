@@ -36,15 +36,11 @@ impl TrieBufDictionary {
         let path = path.into();
         if !path.exists() {
             let info = DictionaryInfo {
-                name: Some("我的詞庫".to_string()),
-                copyright: Some("Unknown".to_string()),
-                license: Some("Unknown".to_string()),
-                version: Some("0.0.0".to_string()),
-                software: Some(format!(
-                    "{} {}",
-                    env!("CARGO_PKG_NAME"),
-                    env!("CARGO_PKG_VERSION")
-                )),
+                name: "我的詞庫".to_string(),
+                copyright: "Unknown".to_string(),
+                license: "Unknown".to_string(),
+                version: "0.0.0".to_string(),
+                software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
             };
             let mut builder = TrieDictionaryBuilder::new();
             builder
@@ -390,7 +386,7 @@ mod tests {
             &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
             ("dict", 1, 2).into(),
         )?;
-        assert_eq!(Some("Unknown".to_string()), info.copyright);
+        assert_eq!("Unknown", info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
             dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])
@@ -413,7 +409,7 @@ mod tests {
         }
         let dict = TrieBufDictionary::open(file_path)?;
         let info = dict.about();
-        assert_eq!(Some("Unknown".to_string()), info.copyright);
+        assert_eq!("Unknown", info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
             dict.lookup_first_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]])

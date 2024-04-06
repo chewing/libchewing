@@ -10,10 +10,10 @@ edition = "2021"
 include = ["src/**/*.rs", "data/*", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
 
 [dependencies]
+der = { version = "0.7.9", features = ["std"] }
 directories = "5.0.0"
 env_logger = { version = "0.10.2", default-features = false, optional = true }
 log = "0.4.21"
-riff = "2.0.0"
 rusqlite = { version = ">= 0.28.0", optional = true }
 
 [target.'cfg(windows)'.dependencies]

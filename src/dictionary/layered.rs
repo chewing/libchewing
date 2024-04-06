@@ -125,7 +125,7 @@ impl Dictionary for LayeredDictionary {
 
     fn about(&self) -> DictionaryInfo {
         DictionaryInfo {
-            name: Some("Built-in LayeredDictionary".to_string()),
+            name: "Built-in LayeredDictionary".to_string(),
             ..Default::default()
         }
     }

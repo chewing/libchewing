@@ -3,20 +3,22 @@ use std::{
     cmp::Ordering,
     collections::VecDeque,
     error::Error,
-    ffi::CString,
     fmt::{Debug, Display},
     fs::{self, File},
-    io::{self, BufWriter, Read, Seek, Write},
+    io::{self, BufWriter, Read, Write},
     iter,
-    mem::size_of,
     num::NonZeroUsize,
     path::Path,
     str,
     time::SystemTime,
 };
 
+use der::{
+    asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
+    DecodeValue, Document, Encode, EncodeValue, ErrorKind, FixedTag, Length, Reader, Sequence,
+    SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
+};
 use log::error;
-use riff::{Chunk, ChunkContents, ChunkId, RIFF_ID};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -25,33 +27,21 @@ use super::{
     DictionaryUpdateError, DuplicatePhraseError, Phrase,
 };
 
-const DICT_FORMAT: u32 = 0;
-
-const CHEW: ChunkId = ChunkId { value: *b"CHEW" };
-const FMT: ChunkId = ChunkId { value: *b"fmt " };
-const DICT: ChunkId = ChunkId { value: *b"dict" };
-const DATA: ChunkId = ChunkId { value: *b"data" };
-const LIST: ChunkId = ChunkId { value: *b"LIST" };
-const INFO: ChunkId = ChunkId { value: *b"INFO" };
-const INAM: ChunkId = ChunkId { value: *b"INAM" };
-const ICOP: ChunkId = ChunkId { value: *b"ICOP" };
-const ILIC: ChunkId = ChunkId { value: *b"ILIC" };
-const IREV: ChunkId = ChunkId { value: *b"IREV" };
-const ISFT: ChunkId = ChunkId { value: *b"ISFT" };
+const DICT_FORMAT_VERSION: u8 = 0;
 
 struct TrieNodeView<'a>(&'a [u8]);
 
 impl TrieNodeView<'_> {
     const SIZE: usize = 8;
     fn syllable(&self) -> u16 {
-        u16::from_le_bytes(self.0[6..8].try_into().unwrap())
+        u16::from_be_bytes(self.0[6..8].try_into().unwrap())
     }
     fn child_begin(&self) -> usize {
-        u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize * Self::SIZE
+        u32::from_be_bytes(self.0[..4].try_into().unwrap()) as usize * Self::SIZE
     }
     fn child_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
-            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
+        (u32::from_be_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_be_bytes(self.0[4..6].try_into().unwrap()) as usize)
             * Self::SIZE
     }
 }
@@ -61,111 +51,26 @@ struct TrieLeafView<'a>(&'a [u8]);
 impl TrieLeafView<'_> {
     const SIZE: usize = 8;
     fn reserved_zero(&self) -> u16 {
-        u16::from_le_bytes(self.0[6..8].try_into().unwrap())
+        u16::from_be_bytes(self.0[6..8].try_into().unwrap())
     }
     fn data_begin(&self) -> usize {
-        u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize
+        u32::from_be_bytes(self.0[..4].try_into().unwrap()) as usize
     }
     fn data_end(&self) -> usize {
-        (u32::from_le_bytes(self.0[..4].try_into().unwrap()) as usize)
-            .saturating_add(u16::from_le_bytes(self.0[4..6].try_into().unwrap()) as usize)
+        (u32::from_be_bytes(self.0[..4].try_into().unwrap()) as usize)
+            .saturating_add(u16::from_be_bytes(self.0[4..6].try_into().unwrap()) as usize)
     }
-}
-
-#[derive(Debug)]
-struct Tlv<'a>(&'a [u8]);
-
-impl Tlv<'_> {
-    fn tag(&self) -> PhraseDataTag {
-        match self.0[0] {
-            1 => PhraseDataTag::Freq,
-            2 => PhraseDataTag::Phrase,
-            3 => PhraseDataTag::LastUsed,
-            _ => PhraseDataTag::End,
-        }
-    }
-    fn value(&self) -> &[u8] {
-        if self.tag() == PhraseDataTag::End {
-            return &[];
-        }
-        let end = 2 + self.0[1] as usize;
-        &self.0[2..end]
-    }
-    fn size(&self) -> usize {
-        if self.tag() == PhraseDataTag::End {
-            return 1;
-        }
-        2 + self.0[1] as usize
-    }
-}
-
-struct PhraseData<'a>(&'a [u8]);
-
-impl PhraseData<'_> {
-    fn tlv_iter(&self) -> impl Iterator<Item = Tlv<'_>> {
-        let mut buf = self.0;
-        iter::from_fn(move || {
-            if buf.is_empty() {
-                return None;
-            }
-            let data = buf;
-            if buf.len() < 2 || Tlv(buf).tag() == PhraseDataTag::End {
-                buf = &[];
-            } else {
-                buf = &buf[(2 + data[1] as usize)..];
-            }
-            Some(Tlv(data))
-        })
-    }
-    fn is_valid(&self) -> bool {
-        // FIXME
-        true
-    }
-    fn to_phrase(&self) -> Phrase {
-        let mut phrase = "".into();
-        let mut freq = 0;
-        let mut last_used: Option<u64> = None;
-        for tlv in self.tlv_iter() {
-            match tlv.tag() {
-                PhraseDataTag::End => (),
-                PhraseDataTag::Freq => freq = u32::from_le_bytes(tlv.value().try_into().unwrap()),
-                PhraseDataTag::Phrase => phrase = str::from_utf8(tlv.value()).unwrap().into(),
-                PhraseDataTag::LastUsed => {
-                    last_used = Some(u64::from_le_bytes(tlv.value().try_into().unwrap()))
-                }
-            }
-        }
-        Phrase {
-            phrase,
-            freq,
-            last_used,
-        }
-    }
-    fn len(&self) -> usize {
-        self.tlv_iter().fold(0, |acc, tlv| acc + tlv.size())
-    }
-}
-
-#[derive(PartialEq, Eq)]
-#[repr(u8)]
-enum PhraseDataTag {
-    End = 0,
-    Freq = 1,
-    Phrase = 2,
-    LastUsed = 3,
 }
 
 /// A read-only dictionary using a pre-built [Trie][] index that is both space
 /// efficient and fast to lookup.
 ///
 /// `TrieDictionary`s are used as system dictionaries, or shared dictionaries.
-/// The dictionary file is defined using the platform independent [Resource
-/// Interchange File Format (RIFF)][RIFF], allowing them to be versioned and
-/// shared easily.
+/// The dictionary file is defined using the platform independent [DER][DER]
+/// encoding format, allowing them to be versioned and shared easily.
 ///
 /// `TrieDictionary`s can be created from anything that implements the [`Read`]
-/// and [`Seek`] trait, as long as the underlying data conforms to the file
-/// format spec.
+/// trait, as long as the underlying data conforms to the file format spec.
 ///
 /// A new dictionary can be built using a [`TrieDictionaryBuilder`].
 ///
@@ -204,12 +109,10 @@ enum PhraseDataTag {
 /// ```
 ///
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
-/// [RIFF]: https://en.m.wikipedia.org/wiki/Resource_Interchange_File_Format
+/// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug, Clone)]
 pub struct TrieDictionary {
-    info: DictionaryInfo,
-    dict: Vec<u8>,
-    data: Vec<u8>,
+    der: Document,
 }
 
 #[derive(Debug)]
@@ -229,6 +132,10 @@ fn read_only_error() -> DictionaryUpdateError {
     DictionaryUpdateError {
         source: Some(Box::new(TrieDictionaryError::ReadOnly)),
     }
+}
+
+fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
+    io::Error::new(io::ErrorKind::Other, e)
 }
 
 impl TrieDictionary {
@@ -271,134 +178,26 @@ impl TrieDictionary {
     /// ```
     pub fn new<T>(mut stream: T) -> io::Result<TrieDictionary>
     where
-        T: Read + Seek,
+        T: Read,
     {
-        let root = Chunk::read(&mut stream, 0)?;
-        if root.id() != RIFF_ID {
-            return Err(io::Error::from(io::ErrorKind::InvalidData));
-        }
-        let file_type = root.read_type(&mut stream)?;
-        if file_type != CHEW {
-            return Err(io::Error::from(io::ErrorKind::InvalidData));
-        }
-        let mut fmt_chunk = None;
-        let mut dict_chunk = None;
-        let mut data_chunk = None;
-        let mut info_chunk = None;
-        for chunk in root.iter(&mut stream) {
-            let chunk = chunk?;
-            match chunk.id() {
-                FMT => fmt_chunk = Some(chunk),
-                LIST => info_chunk = Some(chunk),
-                DICT => dict_chunk = Some(chunk),
-                DATA => data_chunk = Some(chunk),
-                _ => (),
-            }
-        }
-        let fmt_version = Self::read_fmt_version(
-            fmt_chunk.ok_or_else(|| {
-                io::Error::new(io::ErrorKind::UnexpectedEof, "expecting fmt chunk")
-            })?,
-            &mut stream,
-        )?;
-        if fmt_version != DICT_FORMAT {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "unsupported file version",
-            ));
-        }
-        let mut info = DictionaryInfo::default();
-        if let Some(chunk) = info_chunk {
-            info = Self::read_dictionary_info(chunk, &mut stream)?;
-        }
-        let dict = dict_chunk
-            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting dict chunk"))?
-            .read_contents(&mut stream)?;
-        let data = data_chunk
-            .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "expecting data chunk"))?
-            .read_contents(&mut stream)?;
-        if dict.len() < size_of::<u32>() {
-            return Err(io::ErrorKind::InvalidData.into());
-        }
-        // CRC checks slows down fuzzing considerably
-        #[cfg(not(fuzzing))]
-        {
-            let dict_len = dict.len() - size_of::<u32>();
-            let crc = u32::from_le_bytes(dict[dict_len..].try_into().unwrap());
-            let crc32 = Crc32::new();
-            let check = crc32.check(&dict[..dict_len]);
-            if crc != check {
-                return Err(io::ErrorKind::InvalidData.into());
-            }
-            if data.len() < size_of::<u32>() {
-                return Err(io::ErrorKind::InvalidData.into());
-            }
-            let data_len = data.len().saturating_sub(size_of::<u32>());
-            let crc = u32::from_le_bytes(data[data_len..].try_into().unwrap());
-            let check = crc32.check(&data[..data_len]);
-            if crc != check {
-                return Err(io::ErrorKind::InvalidData.into());
-            }
-        }
-        Ok(TrieDictionary { info, dict, data })
-    }
-
-    fn read_fmt_version<T>(fmt_chunk: Chunk, mut stream: T) -> io::Result<u32>
-    where
-        T: Read + Seek,
-    {
-        if fmt_chunk.len() != size_of::<u32>() as u32 {
-            return Err(io::ErrorKind::InvalidData.into());
-        }
-        let bytes = fmt_chunk.read_contents(&mut stream)?;
-        Ok(u32::from_le_bytes(bytes.try_into().unwrap()))
-    }
-
-    fn read_dictionary_info<T>(list_chunk: Chunk, mut stream: T) -> io::Result<DictionaryInfo>
-    where
-        T: Read + Seek,
-    {
-        let mut info = DictionaryInfo::default();
-        let chunk_type = list_chunk.read_type(&mut stream)?;
-        if chunk_type != INFO {
-            return Ok(info);
-        }
-
-        let mut chunks = vec![];
-
-        for chunk in list_chunk.iter(&mut stream) {
-            let chunk = chunk?;
-            match chunk.id() {
-                INAM | ICOP | ILIC | IREV | ISFT => chunks.push((chunk.id(), chunk)),
-                _ => (),
-            }
-        }
-
-        for (id, chunk) in chunks {
-            let content = match id {
-                INAM | ICOP | ILIC | IREV | ISFT => Some(
-                    CString::new(chunk.read_contents(&mut stream)?)?
-                        .into_string()
-                        .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?,
-                ),
-                _ => None,
-            };
-            match id {
-                INAM => info.name = content,
-                ICOP => info.copyright = content,
-                ILIC => info.license = content,
-                IREV => info.version = content,
-                ISFT => info.software = content,
-                _ => (),
-            }
-        }
-
-        Ok(info)
+        let mut buf = vec![];
+        stream.read_to_end(&mut buf)?;
+        let trie_dict_doc = Document::try_from(buf).map_err(io_error)?;
+        let _: TrieFileRef<'_> = trie_dict_doc.decode_msg().map_err(io_error)?;
+        Ok(TrieDictionary { der: trie_dict_doc })
     }
 }
 
 struct PhrasesIter<'a> {
-    bytes: &'a [u8],
+    reader: SliceReader<'a>,
+}
+
+impl PhrasesIter<'_> {
+    fn new(bytes: &[u8]) -> PhrasesIter<'_> {
+        PhrasesIter {
+            reader: SliceReader::new(bytes).unwrap(),
+        }
+    }
 }
 
 impl Iterator for PhrasesIter<'_> {
@@ -406,16 +205,10 @@ impl Iterator for PhrasesIter<'_> {
 
     #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.bytes.is_empty() {
+        if self.reader.is_finished() {
             return None;
         }
-        let phrase_data = PhraseData(self.bytes);
-        if !phrase_data.is_valid() {
-            error!("[!] file corruption detected: malformed phrase data.");
-            return None;
-        }
-        self.bytes = &self.bytes[phrase_data.len()..];
-        Some(phrase_data.to_phrase())
+        self.reader.decode().ok()
     }
 }
 
@@ -439,8 +232,11 @@ macro_rules! iter_bail_if_oob {
 
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        bail_if_oob!(0, TrieNodeView::SIZE, self.dict.len());
-        let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
+        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
+        let dict = trie_file.index.as_bytes();
+        let data = trie_file.phrase_seq.der_bytes;
+        bail_if_oob!(0, TrieNodeView::SIZE, dict.len());
+        let root = TrieNodeView(&dict[..TrieNodeView::SIZE]);
         let mut node = root;
         // empty dictionary
         if node.child_begin() == node.child_end() {
@@ -448,8 +244,8 @@ impl Dictionary for TrieDictionary {
         }
         'next: for syl in syllables.as_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
-            bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
-            let mut child_nodes = self.dict[node.child_begin()..node.child_end()]
+            bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+            let mut child_nodes = dict[node.child_begin()..node.child_end()]
                 .chunks_exact(TrieNodeView::SIZE)
                 .map(TrieNodeView);
             if let Some(n) = child_nodes.find(|n| n.syllable() == syl.to_u16()) {
@@ -458,30 +254,31 @@ impl Dictionary for TrieDictionary {
             }
             return vec![];
         }
-        bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
-        let leaf_data = &self.dict[node.child_begin()..];
+        bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+        let leaf_data = &dict[node.child_begin()..];
         bail_if_oob!(0, TrieLeafView::SIZE, leaf_data.len());
         let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
         if leaf.reserved_zero() != 0 {
             return vec![];
         }
-        bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
-        PhrasesIter {
-            bytes: &self.data[leaf.data_begin()..leaf.data_end()],
-        }
-        .take(first)
-        .collect()
+        bail_if_oob!(leaf.data_begin(), leaf.data_end(), data.len());
+        PhrasesIter::new(&data[leaf.data_begin()..leaf.data_end()])
+            .take(first)
+            .collect()
     }
 
     fn entries(&self) -> DictEntries<'_> {
+        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
+        let dict = trie_file.index.as_bytes();
+        let data = trie_file.phrase_seq.der_bytes;
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
-        if self.dict.len() < TrieNodeView::SIZE {
+        if dict.len() < TrieNodeView::SIZE {
             error!("[!] file corruption detected: index out of bound.");
             return Box::new(iter::empty());
         }
-        let root = TrieNodeView(&self.dict[..TrieNodeView::SIZE]);
+        let root = TrieNodeView(&dict[..TrieNodeView::SIZE]);
         let mut node = root;
         if node.child_begin() == node.child_end() {
             return Box::new(iter::empty());
@@ -490,17 +287,13 @@ impl Dictionary for TrieDictionary {
         let make_dict_entry =
             |syllables: &[u16], leaf: &TrieLeafView<'_>| -> (Vec<Syllable>, Vec<Phrase>) {
                 debug_assert_eq!(leaf.reserved_zero(), 0);
-                let phrases = PhrasesIter {
-                    bytes: &self.data[leaf.data_begin()..leaf.data_end()],
-                }
-                .collect::<Vec<_>>();
                 (
                     syllables
                         .iter()
                         // FIXME - skip invalid entry?
                         .map(|&syl_u16| Syllable::try_from(syl_u16).unwrap())
                         .collect::<Vec<_>>(),
-                    phrases,
+                    PhrasesIter::new(&data[leaf.data_begin()..leaf.data_end()]).collect::<Vec<_>>(),
                 )
             };
 
@@ -514,8 +307,8 @@ impl Dictionary for TrieDictionary {
             }
             // descend until find a leaf node which is not also a internal node.
             loop {
-                iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
-                let mut child_iter = self.dict[node.child_begin()..node.child_end()]
+                iter_bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+                let mut child_iter = dict[node.child_begin()..node.child_end()]
                     .chunks_exact(TrieNodeView::SIZE)
                     .map(TrieNodeView);
                 let mut next = child_iter
@@ -523,10 +316,10 @@ impl Dictionary for TrieDictionary {
                     .expect("syllable node should have at least one child node");
                 if next.syllable() == 0 {
                     // found a leaf syllable node
-                    iter_bail_if_oob!(node.child_begin(), node.child_end(), self.dict.len());
-                    let leaf_data = &self.dict[node.child_begin()..];
+                    iter_bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+                    let leaf_data = &dict[node.child_begin()..];
                     let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
-                    iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
+                    // iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
                     results.push(make_dict_entry(&syllables, &leaf));
                     if let Some(second) = child_iter.next() {
                         next = second;
@@ -565,7 +358,8 @@ impl Dictionary for TrieDictionary {
     }
 
     fn about(&self) -> DictionaryInfo {
-        self.info.clone()
+        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
+        trie_file.info.into()
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
@@ -603,6 +397,229 @@ impl Dictionary for TrieDictionary {
     }
 }
 
+fn context_specific<T: EncodeValue + Tagged>(
+    tag_number: u8,
+    value: &T,
+) -> ContextSpecificRef<'_, T> {
+    ContextSpecificRef {
+        tag_number: TagNumber::new(tag_number),
+        tag_mode: TagMode::Implicit,
+        value,
+    }
+}
+
+fn context_specific_opt<T: EncodeValue + Tagged>(
+    tag_number: u8,
+    value: &Option<T>,
+) -> Option<ContextSpecificRef<'_, T>> {
+    value
+        .as_ref()
+        .map(|value| context_specific(tag_number, value))
+}
+
+struct DictionaryInfoRef<'a> {
+    name: Utf8StringRef<'a>,
+    copyright: Utf8StringRef<'a>,
+    license: Utf8StringRef<'a>,
+    version: Utf8StringRef<'a>,
+    software: Utf8StringRef<'a>,
+}
+
+impl From<DictionaryInfoRef<'_>> for DictionaryInfo {
+    fn from(value: DictionaryInfoRef<'_>) -> Self {
+        DictionaryInfo {
+            name: value.name.into(),
+            copyright: value.copyright.into(),
+            license: value.license.into(),
+            version: value.version.into(),
+            software: value.software.into(),
+        }
+    }
+}
+
+impl DictionaryInfoRef<'_> {
+    fn new(info: &DictionaryInfo) -> DictionaryInfoRef<'_> {
+        DictionaryInfoRef {
+            name: Utf8StringRef::new(&info.name).unwrap(),
+            copyright: Utf8StringRef::new(&info.copyright).unwrap(),
+            license: Utf8StringRef::new(&info.license).unwrap(),
+            version: Utf8StringRef::new(&info.version).unwrap(),
+            software: Utf8StringRef::new(&info.software).unwrap(),
+        }
+    }
+}
+
+impl FixedTag for DictionaryInfoRef<'_> {
+    const TAG: Tag = Tag::Sequence;
+}
+
+impl<'a> DecodeValue<'a> for DictionaryInfoRef<'a> {
+    fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
+        reader.read_nested(header.length, |reader| {
+            let name = reader.decode()?;
+            let copyright = reader.decode()?;
+            let license = reader.decode()?;
+            let version = reader.decode()?;
+            let software = reader.decode()?;
+            Ok(DictionaryInfoRef {
+                name,
+                copyright,
+                license,
+                version,
+                software,
+            })
+        })
+    }
+}
+
+impl EncodeValue for DictionaryInfoRef<'_> {
+    fn value_len(&self) -> der::Result<Length> {
+        self.name.encoded_len()?
+            + self.copyright.encoded_len()?
+            + self.license.encoded_len()?
+            + self.version.encoded_len()?
+            + self.software.encoded_len()?
+    }
+
+    fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
+        self.name.encode(encoder)?;
+        self.copyright.encode(encoder)?;
+        self.license.encode(encoder)?;
+        self.version.encode(encoder)?;
+        self.software.encode(encoder)?;
+        Ok(())
+    }
+}
+
+struct TrieFileRef<'a> {
+    info: DictionaryInfoRef<'a>,
+    index: OctetStringRef<'a>,
+    phrase_seq: PhraseSeqRef<'a>,
+}
+
+struct PhraseSeqRef<'a> {
+    der_bytes: &'a [u8],
+}
+
+impl<'a> Sequence<'a> for TrieFileRef<'a> {}
+
+impl<'a> DecodeValue<'a> for TrieFileRef<'a> {
+    fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
+        reader.read_nested(header.length, |reader| {
+            let magic: Utf8StringRef<'_> = reader.decode()?;
+            let version: u8 = reader.decode()?;
+            if magic.as_str() != "CHEW" || version != DICT_FORMAT_VERSION {
+                return Err(ErrorKind::Value { tag: header.tag }.at(reader.position()));
+            }
+            let info = reader.decode()?;
+            let index = reader.decode()?;
+            let phrase_seq = reader.decode()?;
+            Ok(Self {
+                info,
+                index,
+                phrase_seq,
+            })
+        })
+    }
+}
+
+impl EncodeValue for TrieFileRef<'_> {
+    fn value_len(&self) -> der::Result<Length> {
+        Utf8StringRef::new("CHEW")?.encoded_len()?
+            + DICT_FORMAT_VERSION.encoded_len()?
+            + self.info.encoded_len()?
+            + self.index.encoded_len()?
+            + self.phrase_seq.encoded_len()?
+    }
+
+    fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
+        Utf8StringRef::new("CHEW")?.encode(encoder)?;
+        DICT_FORMAT_VERSION.encode(encoder)?;
+        self.info.encode(encoder)?;
+        self.index.encode(encoder)?;
+        self.phrase_seq.encode(encoder)?;
+        Ok(())
+    }
+}
+
+impl FixedTag for Phrase {
+    const TAG: Tag = Tag::Sequence;
+}
+
+impl<'a> DecodeValue<'a> for Phrase {
+    fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
+        reader.read_nested(header.length, |reader| {
+            let phrase: Utf8StringRef<'_> = reader.decode()?;
+            let freq = reader.decode()?;
+            let last_used = reader.context_specific(TagNumber::N0, TagMode::Implicit)?;
+            Ok(Phrase {
+                phrase: String::from(phrase).into_boxed_str(),
+                freq,
+                last_used,
+            })
+        })
+    }
+}
+
+impl EncodeValue for Phrase {
+    fn value_len(&self) -> der::Result<Length> {
+        Utf8StringRef::new(self.as_str())?.encoded_len()?
+            + self.freq.encoded_len()?
+            + context_specific_opt(0, &self.last_used).encoded_len()?
+    }
+
+    fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
+        Utf8StringRef::new(self.as_ref())?.encode(encoder)?;
+        self.freq.encode(encoder)?;
+        context_specific_opt(0, &self.last_used).encode(encoder)?;
+        Ok(())
+    }
+}
+
+impl FixedTag for PhraseSeqRef<'_> {
+    const TAG: Tag = Tag::Sequence;
+}
+
+impl EncodeValue for PhraseSeqRef<'_> {
+    fn value_len(&self) -> der::Result<Length> {
+        self.der_bytes.len().try_into()
+    }
+
+    fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
+        encoder.write(&self.der_bytes)
+    }
+}
+
+impl<'a> DecodeValue<'a> for PhraseSeqRef<'a> {
+    fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
+        reader.read_nested(header.length, |reader| {
+            let der_bytes = reader.read_slice(header.length)?;
+            Ok(Self { der_bytes })
+        })
+    }
+}
+
+#[derive(Default)]
+struct VecWriter {
+    buf: Vec<u8>,
+}
+
+impl VecWriter {
+    fn new() -> VecWriter {
+        VecWriter::default()
+    }
+    fn len(&self) -> usize {
+        self.buf.len()
+    }
+}
+
+impl Writer for VecWriter {
+    fn write(&mut self, slice: &[u8]) -> der::Result<()> {
+        self.buf.write_all(slice)?;
+        Ok(())
+    }
+}
+
 /// A builder to create a dictionary that can be loaded by the
 /// [`TrieDictionary`].
 ///
@@ -630,144 +647,76 @@ impl Dictionary for TrieDictionary {
 /// # }
 /// ```
 ///
-/// # RIFF File Format
+/// # File Format
 ///
-/// The dictionary file is defined using the platform independent [Resource
-/// Interchange File Format (RIFF)][RIFF], allowing them to be versioned and
-/// shared easily. The text describing the RIFF format in this document is
-/// adopted from the [WebP Container Specification][WebP].
+/// The dictionary file is defined using the platform independent [DER][DER]
+/// encoding format, allowing them to be versioned and shared easily. All
+/// integers are encoded in big endian.
 ///
-/// The basic element of a RIFF file is a chunk. It consists of:
 ///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                         Chunk FourCC                          |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                          Chunk Size                           |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                         Chunk Payload                         |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/// <details>
+/// <summary>TrieDictionary ASN.1 module definition</summary>
+///
+/// ```asn
+/// TrieDictionary DEFINITIONS ::=
+/// BEGIN
+///   Document ::= SEQUENCE
+///   {
+///     magic      UTF8String ("CHEW"),
+///     version    Version (v1),
+///     info       Info,
+///     index      Index,
+///     phraseSeq  SEQUENCE OF Phrase,
+///     ...
+///   }
+///   Info     ::= SEQUENCE
+///   {
+///     name        UTF8String,
+///     copyright   UTF8String,
+///     license     UTF8String,
+///     version     UTF8String,
+///     software    UTF8String,
+///     ...
+///   }
+///   Index    ::= OCTET STRING
+///   Phrase   ::= SEQUENCE
+///   {
+///     phrase     UTF8String,
+///     freq       INTEGER (0..65535),
+///     lastUsed   [0] IMPLICIT Uint64 OPTIONAL,
+///     ...
+///   }
+///   Version  ::= INTEGER { v1(0) }
+///   Uint64   ::= INTEGER (0..18446744073709551615)
+/// END
 /// ```
-///
-/// - **Chunk FourCC: 32 bits**
-///     - ASCII four-character code used for chunk identification.
-/// - **Chunk Size: 32 bits (u32)**
-///     - The size of the chunk not including this field, the chunk identifier
-///       or padding.
-/// - **Chunk Payload: Chunk Size bytes**
-///     - The data payload. If Chunk Size is odd, a single padding byte -- that
-///       SHOULD be 0 -- is added.
-/// - **ChunkHeader('ABCD')**
-///     - This is used to describe the FourCC and Chunk Size header of
-///       individual chunks, where 'ABCD' is the FourCC for the chunk. This
-///       element's size is 8 bytes.
-///
-/// All integers are little endian.
+/// </details>
 ///
 /// ## File Header
 ///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |      'R'      |      'I'      |      'F'      |      'F'      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                           File Size                           |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |      'C'      |      'H'      |      'E'      |      'W'      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ```
+/// A TrieDictionary file MUST begin with a SEQUENCE tag byte (0x30), followed
+/// by a variable length integer that encodes the size of the remaining
+/// document. Then there MUST be a Utf8String ("CHEW") and an INTEGER (0) that
+/// indicates the version of the dictionary format. The file SHOULD NOT contain
+/// any trailing data.
 ///
-/// - **'RIFF': 32 bits**
-///     - The ASCII characters 'R' 'I' 'F' 'F'.
-/// - **File Size: 32 bits (u32)**
-///     - The size of the file in bytes starting at offset 8. The maximum value
-///       of this field is 2^32 minus 10 bytes and thus the size of the whole
-///       file is at most 4GiB minus 2 bytes.
-/// - **'CHEW': 32 bits**
-///     - The ASCII characters 'C' 'H' 'E' 'W'.
+/// ### Info object
 ///
-/// A TrieDictionary file MUST begin with a RIFF header with the FourCC 'CHEW'.
-/// The file size in the header is the total size of the chunks that follow plus
-/// 4 bytes for the 'CHEW' FourCC. The file SHOULD NOT contain anything after
-/// it. As the size of any chunk is even, the size given by the RIFF header is
-/// also even. The contents of individual chunks will be described in the
-/// following sections.
+/// The info object contains information about the name, copyright, license of
+/// the file, and other similar text.
 ///
-/// ## File Layout
+/// ### Index object
+///
+/// The index object contains the trie node records serialized in BFS order. The
+/// first record is the root node, followed by the nodes in the first layer,
+/// followed by the nodes in the second layer, and so on.
+///
+/// <details>
+/// <summary>Index OCTET STRING layout</summary>
 ///
 /// ```text
 ///  0                   1                   2                   3
 ///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |              Dictionary file header (12 bytes)                |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |            Dictionary format chunk                            |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                         Info chunk                            |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                        Index chunk                            |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                      Phrases chunk                            |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ```
-///
-/// ### Dictionary format chunk:
-///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                      ChunkHeader('fmt ')                      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                    Dictionary format version                  |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ```
-///
-/// The dictionary format chunk contains the format version number of the index
-/// chunk and the phrases chunk, encoded in an unsigned 32 bits integer (u32).
-///
-/// The currently supported versions are: 0
-///
-/// ### Info chunk:
-///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                      ChunkHeader('LIST')                      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |      'I'      |      'N'      |      'F'      |      'O'      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                         Sub chunk header                      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                         Sub chunk payload                     |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                              ....                             |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ```
-///
-/// The `LIST` chunk and the list type `INFO` is a standard RIFF chunk. The list
-/// contains information about the copyright, author, engineer of the file, and
-/// other similar text. Each sub-chunk's data is a null-terminated string.
-///
-/// Info data chunks recognized by this library:
-///
-/// - **INAM**: The name of the file
-/// - **ICOP**: Copyright information about the file
-/// - **ILIC**: License information about the file
-/// - **IREV**: The version of the file
-/// - **ISFT**: The name of the software package used to create the file
-///
-/// ### Index chunk:
-///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                      ChunkHeader('DICT')                      |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |                          Child Begin                          |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -787,21 +736,12 @@ impl Dictionary for TrieDictionary {
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// |            Data Len           |            Reserved           |
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ...                                                           ...
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                             CRC32                             |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 /// ```
+/// </details>
 ///
-/// The index chunk contains the trie node records serialized in BFS order. The
-/// first record is the root node, followed by the nodes in the first layer,
-/// followed by the nodes in the second layer, and so on.
+/// Each node record has fixed size.
 ///
-/// Each node record has fixed size. The end of the index chunk is a 32-bit CRC
-/// checksum calculated from the payloads. The CRC is specified as the
-/// Castagnoli polynomial (CRC32C) in [RFC 3720][rfc3720] and [RFC 3385][rfc3385].
-///
-/// Internal node:
+/// **Internal node:**
 ///
 /// ```text
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -816,7 +756,7 @@ impl Dictionary for TrieDictionary {
 /// - **SyllableU16: 16 bits (u16)**
 ///     - The [`Syllable`] encoded as an u16 integer.
 ///
-/// Leaf node:
+/// **Leaf node:**
 ///
 /// ```text
 /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -831,50 +771,22 @@ impl Dictionary for TrieDictionary {
 /// - **Reserved: 16 bits (u16)**
 ///     - Must be all zeros, indicating a leaf node.
 ///
-/// ### Phrases chunk:
+/// ### PhraseSeq object
 ///
-/// ```text
-///  0                   1                   2                   3
-///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                      ChunkHeader('DATA')                      |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |       Tag     |     Length    |             Value             |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |       Tag     |     Length    |             Value           ...
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// |                             CRC32                             |
-/// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/// ```
+/// The phraseSeq object contains all the phrases strings, their frequency, and
+/// other data. Each phrase data contains several attributes.
 ///
-/// The phrases chunk contains all the phrases strings, their frequency, and
-/// other data. Each phrase data contains several tag-length-value encoded
-/// attributes.
+/// Currently defined attributes:
 ///
-/// - **Tag: 8 bits (u8)**
-///     - Mark the type of the value following the length byte.
-/// - **Length: 8 bits (u8)**
-///     - Each attribute encoded must not exceed 255 bytes long.
-/// - **Value: variable bits**
-///
-/// Currently defined tags:
-///
-/// - **Frequency(1): 32 bits (u32)**
-///     - The frequency of the phrase. Might be unaligned.
-/// - **Phrase(2): variable bits**
+/// - **Phrase: variable length**
 ///     - UTF-8 encoded string, not null-terminated.
-/// - **Last used(3): 64 bits (u64)**
-///     - The last used timestamp of a user phrase. Might be unaligned.
+/// - **Frequency: 32 bits (u32)**
+///     - The frequency of the phrase.
+/// - **Last used: 64 bits (u64) optional**
+///     - The last used timestamp of a user phrase.
 ///
-/// The end of the phrases chunk is a 32-bit CRC
-/// checksum calculated from the payloads. The CRC is specified as the
-/// Castagnoli polynomial (CRC32C) in [RFC 3720][rfc3720] and [RFC 3385][rfc3385].
-///
-/// [rfc3720]: https://datatracker.ietf.org/doc/html/rfc3720#section-12.1
-/// [rfc3385]: https://datatracker.ietf.org/doc/html/rfc3385
-/// [WebP]: https://developers.google.com/speed/webp/docs/riff_container
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
-/// [RIFF]: https://en.m.wikipedia.org/wiki/Resource_Interchange_File_Format
+/// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug)]
 pub struct TrieDictionaryBuilder {
     // The builder uses an arena to allocate nodes and reference each node with
@@ -1005,13 +917,13 @@ impl TrieDictionaryBuilder {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn write<T>(&self, mut writer: T) -> io::Result<u64>
+    pub fn write<T>(&self, mut writer: T) -> io::Result<usize>
     where
-        T: Write + Seek,
+        T: Write,
     {
         const ROOT_ID: usize = 0;
         let mut dict_buf = Vec::new();
-        let mut data_buf = Vec::new();
+        let mut data_buf = VecWriter::new();
         let mut queue = VecDeque::new();
 
         // The root node's child index starts from 1 (0 is the root).
@@ -1023,6 +935,7 @@ impl TrieDictionaryBuilder {
             // Insert nodes layer by layer.
             let layer_nodes_count = queue.len();
             for _ in 0..layer_nodes_count {
+                // OK to unwrap, we always have at least one queued item.
                 let id = queue.pop_front().unwrap();
                 let node = &self.arena[id];
 
@@ -1032,12 +945,10 @@ impl TrieDictionaryBuilder {
                     let syllable_u16 = node.syllable.map_or(0, |v| v.to_u16());
                     let child_len =
                         node.children.len() + if node.leaf_id.is_some() { 1 } else { 0 };
-                    dict_buf.write_all(&(child_begin as u32).to_le_bytes())?;
-                    dict_buf.write_all(&(child_len as u16).to_le_bytes())?;
-                    dict_buf.write_all(&syllable_u16.to_le_bytes())?;
+                    dict_buf.write_all(&(child_begin as u32).to_be_bytes())?;
+                    dict_buf.write_all(&(child_len as u16).to_be_bytes())?;
+                    dict_buf.write_all(&syllable_u16.to_be_bytes())?;
                 } else {
-                    let data_begin = data_buf.len();
-
                     let mut phrases = node.phrases.clone();
                     phrases.sort_by(|a, b| {
                         // Don't sort single word leaves.
@@ -1057,29 +968,16 @@ impl TrieDictionaryBuilder {
                             }
                         }
                     });
+                    let data_begin = data_buf.len();
+
                     for phrase in phrases {
-                        debug_assert!(phrase.as_str().len() <= u8::MAX as usize);
-                        data_buf.write_all(&[PhraseDataTag::Freq as u8, size_of::<u32>() as u8])?;
-                        data_buf.write_all(&phrase.freq().to_le_bytes())?;
-                        data_buf.write_all(&[
-                            PhraseDataTag::Phrase as u8,
-                            phrase.as_str().len() as u8,
-                        ])?;
-                        data_buf.write_all(phrase.as_str().as_bytes())?;
-                        if let Some(last_used) = phrase.last_used {
-                            data_buf.write_all(&[
-                                PhraseDataTag::LastUsed as u8,
-                                size_of::<u64>() as u8,
-                            ])?;
-                            data_buf.write_all(&last_used.to_le_bytes())?;
-                        }
-                        data_buf.write_all(&[0_u8])?;
+                        phrase.encode(&mut data_buf).map_err(io_error)?;
                     }
 
                     let data_len = data_buf.len() - data_begin;
-                    dict_buf.write_all(&(data_begin as u32).to_le_bytes())?;
-                    dict_buf.write_all(&(data_len as u16).to_le_bytes())?;
-                    dict_buf.write_all(&0u16.to_le_bytes())?;
+                    dict_buf.write_all(&(data_begin as u32).to_be_bytes())?;
+                    dict_buf.write_all(&(data_len as u16).to_be_bytes())?;
+                    dict_buf.write_all(&0u16.to_be_bytes())?;
                 }
 
                 // Sort the children nodes by their syllables. Not really required,
@@ -1097,60 +995,17 @@ impl TrieDictionaryBuilder {
             }
         }
 
-        let crc32 = Crc32::new();
-        let check = crc32.check(&dict_buf);
-        dict_buf.write_all(&check.to_le_bytes())?;
-        let check = crc32.check(&data_buf);
-        data_buf.write_all(&check.to_le_bytes())?;
+        let trie_dict_ref = TrieFileRef {
+            info: DictionaryInfoRef::new(&self.info),
+            index: OctetStringRef::new(&dict_buf).map_err(io_error)?,
+            phrase_seq: PhraseSeqRef {
+                der_bytes: &data_buf.buf,
+            },
+        };
 
-        // Wrap the data in a RIFF container
-        let contents = ChunkContents::Children(
-            RIFF_ID,
-            CHEW,
-            vec![
-                ChunkContents::Data(FMT, DICT_FORMAT.to_le_bytes().into()),
-                ChunkContents::Children(LIST, INFO, self.info_chunks()?),
-                ChunkContents::Data(DICT, dict_buf),
-                ChunkContents::Data(DATA, data_buf),
-            ],
-        );
-
-        contents.write(&mut writer)
-    }
-
-    fn info_chunks(&self) -> Result<Vec<ChunkContents>, io::Error> {
-        let mut info_chunks = vec![];
-        if let Some(name) = &self.info.name {
-            info_chunks.push(ChunkContents::Data(
-                INAM,
-                CString::new(name.as_bytes())?.into_bytes(),
-            ))
-        }
-        if let Some(copyright) = &self.info.copyright {
-            info_chunks.push(ChunkContents::Data(
-                ICOP,
-                CString::new(copyright.as_bytes())?.into_bytes(),
-            ))
-        }
-        if let Some(license) = &self.info.license {
-            info_chunks.push(ChunkContents::Data(
-                ILIC,
-                CString::new(license.as_bytes())?.into_bytes(),
-            ))
-        }
-        if let Some(version) = &self.info.version {
-            info_chunks.push(ChunkContents::Data(
-                IREV,
-                CString::new(version.as_bytes())?.into_bytes(),
-            ))
-        }
-        if let Some(software) = &self.info.software {
-            info_chunks.push(ChunkContents::Data(
-                ISFT,
-                CString::new(software.as_bytes())?.into_bytes(),
-            ))
-        }
-        Ok(info_chunks)
+        let document = Document::encode_msg(&trie_dict_ref).map_err(io_error)?;
+        writer.write_all(document.as_bytes())?;
+        Ok(document.as_bytes().len())
     }
 
     /// Calculates the statistics of the dictionary.
@@ -1213,6 +1068,7 @@ impl TrieDictionaryBuilder {
 
             max_height += 1;
             for _ in 0..layer_nodes_count {
+                // OK to unwrap. We always have at least one queued item.
                 let id = queue.pop_front().unwrap();
                 let node = &self.arena[id];
 
@@ -1330,60 +1186,12 @@ impl Default for TrieDictionaryBuilder {
     }
 }
 
-/// Calculates CRC32 with CRC-32-Castagnoli poly
-struct Crc32 {
-    table: Box<[[u32; 256]; 8]>,
-}
-
-impl Crc32 {
-    fn new() -> Crc32 {
-        let mut table = Box::new([[0u32; 256]; 8]);
-        // CRC-32-Castagnoli poly
-        let poly: u32 = 0x82f63b78;
-        for i in 0..256usize {
-            let mut crc = i as u32;
-            for _ in 0..8 {
-                crc = (crc >> 1) ^ ((crc & 1) * poly);
-            }
-            table[0][i] = crc;
-        }
-        for i in 0..256usize {
-            table[1][i] = (table[0][i] >> 8) ^ table[0][table[0][i] as u8 as usize];
-            table[2][i] = (table[1][i] >> 8) ^ table[0][table[1][i] as u8 as usize];
-            table[3][i] = (table[2][i] >> 8) ^ table[0][table[2][i] as u8 as usize];
-            table[4][i] = (table[3][i] >> 8) ^ table[0][table[3][i] as u8 as usize];
-            table[5][i] = (table[4][i] >> 8) ^ table[0][table[4][i] as u8 as usize];
-            table[6][i] = (table[5][i] >> 8) ^ table[0][table[5][i] as u8 as usize];
-            table[7][i] = (table[6][i] >> 8) ^ table[0][table[6][i] as u8 as usize];
-        }
-        Crc32 { table }
-    }
-    fn check(&self, buf: &[u8]) -> u32 {
-        // Slice-by-8 algorithm
-        !buf.chunks(8).fold(!0u32, |crc, bytes| {
-            if bytes.len() == 8 {
-                let one = u32::from_le_bytes(bytes[0..4].try_into().unwrap()) ^ crc;
-                let two = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
-                self.table[0][(two >> 24) as u8 as usize]
-                    ^ self.table[1][(two >> 16) as u8 as usize]
-                    ^ self.table[2][(two >> 8) as u8 as usize]
-                    ^ self.table[3][two as u8 as usize]
-                    ^ self.table[4][(one >> 24) as u8 as usize]
-                    ^ self.table[5][(one >> 16) as u8 as usize]
-                    ^ self.table[6][(one >> 8) as u8 as usize]
-                    ^ self.table[7][one as u8 as usize]
-            } else {
-                bytes.iter().fold(crc, |crc, byte| {
-                    (crc >> 8) ^ self.table[0][(crc as u8 as u32 ^ *byte as u32) as usize]
-                })
-            }
-        })
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use std::{io::Cursor, num::NonZeroUsize};
+    use std::{
+        io::{Cursor, Seek},
+        num::NonZeroUsize,
+    };
 
     use crate::{
         dictionary::{
@@ -1393,16 +1201,7 @@ mod tests {
         zhuyin::Bopomofo,
     };
 
-    use super::{Crc32, PhraseData, TrieDictionary, TrieDictionaryBuilder};
-
-    #[test]
-    fn test_tlv_iter() {
-        let buf = &[
-            1, 4, 1, 0, 0, 0, 2, 4, 100, 105, 99, 116, 3, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0,
-        ];
-        let phrase_data = PhraseData(buf);
-        assert_eq!(buf.len(), phrase_data.len());
-    }
+    use super::{TrieDictionary, TrieDictionaryBuilder};
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {
@@ -1484,7 +1283,7 @@ mod tests {
         )?;
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
-
+        cursor.rewind()?;
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
@@ -1522,7 +1321,7 @@ mod tests {
         )?;
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
-
+        cursor.rewind()?;
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
@@ -1586,7 +1385,7 @@ mod tests {
         }
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
-
+        cursor.rewind()?;
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![
@@ -1640,7 +1439,7 @@ mod tests {
         )?;
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
-
+        cursor.rewind()?;
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![
@@ -1659,28 +1458,29 @@ mod tests {
     }
 
     #[test]
-    fn tree_builder_write_read_metadata() {
+    fn tree_builder_write_read_metadata() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieDictionaryBuilder::new();
         let info = DictionaryInfo {
-            name: Some("name".into()),
-            copyright: Some("copyright".into()),
-            license: Some("license".into()),
-            version: Some("version".into()),
-            software: Some("software".into()),
+            name: "name".into(),
+            copyright: "copyright".into(),
+            license: "license".into(),
+            version: "version".into(),
+            software: "software".into(),
         };
-        builder.set_info(info).unwrap();
+        builder.set_info(info)?;
 
         let mut cursor = Cursor::new(vec![]);
-        builder.write(&mut cursor).unwrap();
-
-        let dict = TrieDictionary::new(&mut cursor).unwrap();
+        builder.write(&mut cursor)?;
+        cursor.rewind()?;
+        let dict = TrieDictionary::new(&mut cursor)?;
         let info = dict.about();
 
-        assert_eq!("name", info.name.unwrap());
-        assert_eq!("copyright", info.copyright.unwrap());
-        assert_eq!("license", info.license.unwrap());
-        assert_eq!("version", info.version.unwrap());
-        assert_eq!("software", info.software.unwrap());
+        assert_eq!("name", info.name);
+        assert_eq!("copyright", info.copyright);
+        assert_eq!("license", info.license);
+        assert_eq!("version", info.version);
+        assert_eq!("software", info.software);
+        Ok(())
     }
 
     #[test]
@@ -1720,7 +1520,7 @@ mod tests {
         )?;
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
-
+        cursor.rewind()?;
         let dict = TrieDictionary::new(&mut cursor)?;
         assert_eq!(
             vec![
@@ -1760,16 +1560,5 @@ mod tests {
             dict.entries().collect::<Vec<_>>()
         );
         Ok(())
-    }
-
-    #[test]
-    fn crc32() {
-        let crc32 = Crc32::new();
-        assert_eq!(0xf0f800c5, crc32.check(b"asd\n"));
-        assert_eq!(
-            0x22620404,
-            crc32.check(b"The quick brown fox jumps over the lazy dog")
-        );
-        assert_eq!(0x7b98e751, crc32.check(b"Hello world!"));
     }
 }
