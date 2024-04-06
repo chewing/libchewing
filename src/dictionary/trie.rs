@@ -319,7 +319,7 @@ impl Dictionary for TrieDictionary {
                     iter_bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
                     let leaf_data = &dict[node.child_begin()..];
                     let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
-                    // iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
+                    iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), data.len());
                     results.push(make_dict_entry(&syllables, &leaf));
                     if let Some(second) = child_iter.next() {
                         next = second;
