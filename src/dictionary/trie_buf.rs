@@ -232,24 +232,31 @@ impl TrieBufDictionary {
         Ok(())
     }
 
-    pub(crate) fn sync(&mut self) {
+    pub(crate) fn sync(&mut self) -> Result<(), DictionaryUpdateError> {
         if let Some(join_handle) = self.join_handle.take() {
-            if self.dirty {
-                // Cancel this sync if the dictionary is already dirty.
-                return;
-            }
             if !join_handle.is_finished() {
+                // Wait until previous sync is finished.
                 self.join_handle = Some(join_handle);
-                return;
+                return Ok(());
             }
             if let Ok(Ok(trie)) = join_handle.join() {
+                if self.dirty {
+                    // Cancel this sync if the dictionary is already dirty.
+                    return Ok(());
+                }
                 self.trie = Some(trie);
                 self.btree.clear();
                 self.graveyard.clear();
             } else {
                 error!("[!] Failed to write updated user dictionary due to error.");
             }
+        } else {
+            // TODO: reduce reading
+            if !self.path.as_os_str().is_empty() {
+                self.trie = Some(TrieDictionary::open(&self.path)?);
+            }
         }
+        Ok(())
     }
 
     pub(crate) fn checkpoint(&mut self) {
@@ -305,10 +312,7 @@ impl Dictionary for TrieBufDictionary {
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        if !self.path.as_os_str().is_empty() {
-            self.trie = Some(TrieDictionary::open(&self.path)?);
-        }
-        self.sync();
+        self.sync()?;
         Ok(())
     }
 
