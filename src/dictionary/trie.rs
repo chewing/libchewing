@@ -319,7 +319,7 @@ impl Dictionary for TrieDictionary {
                     iter_bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
                     let leaf_data = &dict[node.child_begin()..];
                     let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
-                    // iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), self.data.len());
+                    iter_bail_if_oob!(leaf.data_begin(), leaf.data_end(), data.len());
                     results.push(make_dict_entry(&syllables, &leaf));
                     if let Some(second) = child_iter.next() {
                         next = second;
@@ -1161,11 +1161,11 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
         let mut tmpname = path.to_path_buf();
-        let semi_random = SystemTime::now()
+        let pseudo_random = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
-            .map(|du| du.subsec_millis())
+            .map(|du| du.subsec_micros())
             .unwrap_or_default();
-        tmpname.set_file_name(format!("chewing-{}.dat", semi_random));
+        tmpname.set_file_name(format!("chewing-{}.dat", pseudo_random));
         let database = File::create(&tmpname)?;
         let mut writer = BufWriter::new(&database);
         self.write(&mut writer)?;

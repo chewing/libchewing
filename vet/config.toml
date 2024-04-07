@@ -37,10 +37,6 @@ criteria = "safe-to-deploy"
 version = "0.2.16"
 criteria = "safe-to-deploy"
 
-[[exemptions.bitflags]]
-version = "1.3.2"
-criteria = "safe-to-deploy"
-
 [[exemptions.directories]]
 version = "5.0.1"
 criteria = "safe-to-deploy"
@@ -109,16 +105,8 @@ criteria = "safe-to-deploy"
 version = "0.3.30"
 criteria = "safe-to-deploy"
 
-[[exemptions.redox_syscall]]
-version = "0.4.1"
-criteria = "safe-to-deploy"
-
 [[exemptions.redox_users]]
 version = "0.4.4"
-criteria = "safe-to-deploy"
-
-[[exemptions.riff]]
-version = "2.0.0"
 criteria = "safe-to-deploy"
 
 [[exemptions.rusqlite]]

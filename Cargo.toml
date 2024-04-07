@@ -3,7 +3,7 @@ name = "chewing"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
 documentation = "https://docs.rs/chewing"
-version = "0.7.0-beta.2"
+version = "0.7.0-beta.3"
 rust-version = "1.70"
 edition = "2021"
 
@@ -43,6 +43,9 @@ required-features = ["capi"]
 lto = true
 debug = true
 panic = "abort"
+
+[package.metadata.vet]
+store = { path = "./vet" }
 
 [package.metadata.docs.rs]
 features = ["capi", "sqlite"]
