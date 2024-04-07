@@ -84,7 +84,7 @@ endif()
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
-option(WITH_RUST "Use rust implemented internals (experimental)" false)
+option(WITH_RUST "Use rust implemented internals" true)
 if(WITH_RUST)
     include(FetchContent)
     FetchContent_Declare(
