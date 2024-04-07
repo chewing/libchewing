@@ -1,4 +1,4 @@
-What's New in libchewing 0.7.0-rc.2 (Mar 31, 2024)
+What's New in libchewing 0.7.0 (Apr 7, 2024)
 ---------------------------------------------------------
 
 This is the first beta release of the Rust rewrite. The library has been tested
@@ -7,10 +7,9 @@ not crash for normal use. Now we invite power users to daily drive the beta
 release in order to find more subtle bugs.
 
 The Rust rewrite is ABI compatiable with previous releases. The most notable
-difference with the C version includes a new portable system dictionary format
-and two new user dictionary format. Users with existing user phrase dictionary
-will be automatically migrated to either a new sqlite3 schema or CDB based
-format depending on compile time configuration. Old files will be backed up
+difference with the C version includes a new portable dictionary format that can
+be used both as system dictionary and user dictionary. Users with existing user
+phrase dictionary will be automatically migrated. Old files will be backed up
 automatically. With these change we will be able to support dictionary sharing
 and loading multiple dictionaries in future releases.
 
@@ -23,23 +22,27 @@ and loading multiple dictionaries in future releases.
 
 * Added
   - Added Colemak-DH ANSI/Orth layout support
+  - Replace bespoke RIFF+TLV file format with standard DER format (rust)
   - Supporting migrating user dictionary file to new format. (rust)
   - Allow creating in memory user dictionary (rust)
   - New `chewing-cli` tool can be used to create or inspect dictionary files. (rust)
   - New `chewing-cli` tool can dump dictionary as or import from CSV file. (rust)
+  - Audit dependencies using cargo-vet (rust)
 
 * Changed
-  - New trie dictionary format now has built-in checksum. (rust)
+  - Buffer user dictionary changes and flush in background without blocking main
+    thread (rust)
 
 * Bug fixed
   - Some unsigned underflow issue found by afl++ (rust)
   - Skip symbol selection if preedit buffer is empty (rust)
   - Allow numlock in selection mode (rust)
   - Avoid infinite recursion (rust)
-  - Ensure to return KeyBehavior::Commit when we push to commit buffer
-  - Adjust selection offset after delete symbols
-  - Disable trace logging if no logger is enabled
-  - Should not start selection in English mode
+  - Ensure to return KeyBehavior::Commit when we push to commit buffer (rust)
+  - Adjust selection offset after delete symbols (rust)
+  - Disable trace logging if no logger is enabled (rust)
+  - Should not start selection in English mode (rust)
+  - Use offset to select from paginated phrase list (rust)
 
 * Documentation
   - Added document for fuzzers (rust)

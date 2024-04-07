@@ -2,10 +2,10 @@
 name = "chewing-cli"
 description = "Tools of the Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
-version = "0.7.0-beta.2"
+version = "0.7.0-beta.3"
 edition = "2021"
 
 [dependencies]
 anyhow = "1.0.0"
-chewing = { version = "0.7.0-beta.2", path = "..", features = ["sqlite"] }
+chewing = { version = "0.7.0-beta.3", path = "..", features = ["sqlite"] }
 xflags = "0.3.2"
