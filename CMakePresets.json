@@ -10,7 +10,7 @@
             "displayName": "Default (Release)",
             "description": "Default preset for release build",
             "inherits": [
-                "c99-release"
+                "rust-with-sqlite-release"
             ]
         },
         {

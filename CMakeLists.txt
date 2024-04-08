@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21.0)
 project(libchewing LANGUAGES C)
 
-set(CMAKE_PROJECT_VERSION 0.7.0)
+set(CMAKE_PROJECT_VERSION 0.8.0-alpha.1)
 set(LIBCHEWING_VERSION ${CMAKE_PROJECT_VERSION})
 set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
@@ -84,7 +84,7 @@ endif()
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
-option(WITH_RUST "Use rust implemented internals (experimental)" false)
+option(WITH_RUST "Use rust implemented internals" true)
 if(WITH_RUST)
     include(FetchContent)
     FetchContent_Declare(
