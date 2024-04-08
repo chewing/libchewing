@@ -1,3 +1,10 @@
+What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
+---------------------------------------------------------
+
+* Changed
+  - CMake default preset switched to build with rust.
+
+
 What's New in libchewing 0.7.0 (Apr 7, 2024)
 ---------------------------------------------------------
 
