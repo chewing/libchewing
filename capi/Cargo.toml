@@ -1,0 +1,21 @@
+[package]
+name = "chewing_capi"
+description = "The Chewing (酷音) intelligent Zhuyin input method."
+license = "LGPL-2.1-or-later"
+version = "0.8.0-alpha.1"
+rust-version = "1.70"
+edition = "2021"
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+chewing = { version = "0.8.0-alpha.1", path = ".." }
+env_logger = { version = "0.10.2", default-features = false }
+log = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[features]
+sqlite = ["chewing/sqlite"]

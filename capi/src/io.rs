@@ -9,13 +9,7 @@ use std::{
     u8,
 };
 
-use log::{debug, warn};
-
-use crate::{
-    capi::public::{
-        ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
-        HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
-    },
+use chewing::{
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
@@ -28,6 +22,12 @@ use crate::{
         LaxUserFreqEstimate, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
+};
+use log::{debug, warn};
+
+use crate::public::{
+    ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
+    HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
 };
 
 use super::logger::ChewingLogger;

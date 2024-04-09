@@ -1,6 +1,6 @@
 use std::{ffi::c_int, fmt::Debug, iter::Peekable};
 
-use crate::{
+use chewing::{
     conversion::Interval,
     dictionary::DictEntries,
     editor::{keyboard::AnyKeyboardLayout, syllable::KeyboardLayoutCompat, Editor},

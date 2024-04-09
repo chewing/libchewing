@@ -71,7 +71,6 @@ version = "0.8.0-alpha.1"
 dependencies = [
  "der",
  "directories",
- "env_logger",
  "log",
  "rusqlite",
  "tempfile",
@@ -84,6 +83,16 @@ dependencies = [
  "anyhow",
  "chewing",
  "xflags",
+]
+
+[[package]]
+name = "chewing_capi"
+version = "0.8.0-alpha.1"
+dependencies = [
+ "chewing",
+ "env_logger",
+ "log",
+ "tempfile",
 ]
 
 [[package]]
@@ -169,7 +178,7 @@ name = "fuzzer"
 version = "0.0.0"
 dependencies = [
  "afl",
- "chewing",
+ "chewing_capi",
  "env_logger",
  "log",
  "xflags",

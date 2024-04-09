@@ -47,7 +47,7 @@ criteria = "safe-to-deploy"
 
 [[exemptions.env_logger]]
 version = "0.10.2"
-criteria = "safe-to-deploy"
+criteria = "safe-to-run"
 
 [[exemptions.errno]]
 version = "0.3.8"
@@ -75,7 +75,7 @@ criteria = "safe-to-deploy"
 
 [[exemptions.hermit-abi]]
 version = "0.3.9"
-criteria = "safe-to-deploy"
+criteria = "safe-to-run"
 
 [[exemptions.home]]
 version = "0.5.9"
@@ -83,7 +83,7 @@ criteria = "safe-to-run"
 
 [[exemptions.humantime]]
 version = "2.1.0"
-criteria = "safe-to-deploy"
+criteria = "safe-to-run"
 
 [[exemptions.libredox]]
 version = "0.0.1"
@@ -125,17 +125,13 @@ criteria = "safe-to-deploy"
 version = "0.11.0+wasi-snapshot-preview1"
 criteria = "safe-to-deploy"
 
-[[exemptions.winapi]]
-version = "0.3.9"
-criteria = "safe-to-deploy"
-
 [[exemptions.winapi-i686-pc-windows-gnu]]
 version = "0.4.0"
-criteria = "safe-to-deploy"
+criteria = "safe-to-run"
 
 [[exemptions.winapi-x86_64-pc-windows-gnu]]
 version = "0.4.0"
-criteria = "safe-to-deploy"
+criteria = "safe-to-run"
 
 [[exemptions.xdg]]
 version = "2.5.2"

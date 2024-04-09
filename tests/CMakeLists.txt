@@ -104,5 +104,6 @@ foreach(target ${ALL_STATIC_TEST})
 endforeach()
 
 if(WITH_RUST)
-add_test(NAME cargo-test COMMAND cargo test --features capi$<$<BOOL:${WITH_SQLITE3}>:,sqlite>)
+add_test(NAME cargo-test-lib COMMAND cargo test --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
+add_test(NAME cargo-test-capi COMMAND cargo test -p chewing_capi --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
 endif()

@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 afl = "0.15.4"
-chewing = { version = "0.8.0-alpha.1", path = "..", features = ["capi"] }
+chewing_capi = { version = "0.8.0-alpha.1", path = "../capi" }
 log = "0.4.21"
 env_logger = "0.10.0"
 xflags = "0.3.2"
