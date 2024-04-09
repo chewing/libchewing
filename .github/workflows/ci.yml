@@ -95,7 +95,7 @@ jobs:
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
           ctest --test-dir out/build/${{ matrix.preset }} --verbose
-          ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov
+          ./grcov . -s . -b . --llvm  -t lcov -o coverage.lcov
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
