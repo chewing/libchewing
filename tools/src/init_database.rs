@@ -58,11 +58,11 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
     };
 
     builder.set_info(DictionaryInfo {
-        name: args.name_or_default().into(),
-        copyright: args.copyright_or_default().into(),
-        license: args.license_or_default().into(),
-        version: args.version_or_default().into(),
-        software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")).into(),
+        name: args.name_or_default(),
+        copyright: args.copyright_or_default(),
+        license: args.license_or_default(),
+        version: args.version_or_default(),
+        software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
     })?;
 
     let tsi = File::open(args.tsi_src)?;

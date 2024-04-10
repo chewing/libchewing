@@ -586,7 +586,7 @@ impl EncodeValue for PhraseSeqRef<'_> {
     }
 
     fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
-        encoder.write(&self.der_bytes)
+        encoder.write(self.der_bytes)
     }
 }
 
