@@ -178,6 +178,7 @@ name = "fuzzer"
 version = "0.0.0"
 dependencies = [
  "afl",
+ "chewing",
  "chewing_capi",
  "env_logger",
  "log",
