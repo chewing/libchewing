@@ -85,6 +85,9 @@ jobs:
           tar xf grcov-x86_64-unknown-linux-gnu.tar.bz2
 
       - name: Build
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
           cmake --preset ${{ matrix.preset }}
           cmake --build out/build/${{ matrix.preset }} --verbose
