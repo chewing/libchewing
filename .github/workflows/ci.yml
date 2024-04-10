@@ -85,6 +85,9 @@ jobs:
           tar xf grcov-x86_64-unknown-linux-gnu.tar.bz2
 
       - name: Build
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
           cmake --preset ${{ matrix.preset }}
           cmake --build out/build/${{ matrix.preset }} --verbose
@@ -95,10 +98,10 @@ jobs:
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
           ctest --test-dir out/build/${{ matrix.preset }} --verbose
-          ./grcov . -s . -b . --keep-only 'src/*' --llvm  -t lcov -o coverage.lcov
+          ./grcov . -s . -b . --keep-only 'src/*' --keep-only 'capi/src/*' --llvm  -t lcov -o coverage.lcov
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 

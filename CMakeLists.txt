@@ -94,17 +94,17 @@ if(WITH_RUST)
     )
     FetchContent_MakeAvailable(Corrosion)
 
-    corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing CRATE_TYPES staticlib FEATURES capi)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
     add_compile_definitions(WITH_RUST)
     if(WITH_SQLITE3)
-        corrosion_set_features(chewing FEATURES sqlite)
+        corrosion_set_features(chewing_capi FEATURES sqlite)
         corrosion_set_features(chewing_testhelper FEATURES sqlite)
     endif()
     if(ENABLE_GCOV)
-        corrosion_set_env_vars(chewing CARGO_INCREMENTAL=0)
-        corrosion_add_target_local_rustflags(chewing -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort)
+        corrosion_set_env_vars(chewing_capi CARGO_INCREMENTAL=0)
+        corrosion_add_target_local_rustflags(chewing_capi -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort)
     endif()
 endif()
 
@@ -290,11 +290,11 @@ if(NOT WITH_RUST)
 endif()
 
 if(WITH_RUST)
-    corrosion_set_env_vars(chewing
+    corrosion_set_env_vars(chewing_capi
         CHEWING_DATADIR=${CMAKE_INSTALL_FULL_DATADIR}/libchewing
     )
-    target_link_libraries(libchewing PRIVATE chewing)
-    target_link_libraries(chewing INTERFACE ${SQLite3_LIBRARIES})
+    target_link_libraries(libchewing PRIVATE chewing_capi)
+    target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
     if(BUILD_SHARED_LIBS)
         if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
             target_link_options(libchewing

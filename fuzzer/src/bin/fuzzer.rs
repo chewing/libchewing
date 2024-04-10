@@ -1,6 +1,6 @@
 use std::{ffi::CString, io::Read, ptr::null_mut};
 
-use chewing::capi::{
+use chewing_capi::{
     input::*,
     output::{chewing_buffer_Len, chewing_commit_Check},
     setup::{chewing_delete, chewing_new2},

@@ -170,7 +170,7 @@ impl TrieBufDictionary {
     }
 
     pub(crate) fn entries(&self) -> DictEntries<'_> {
-        Box::new(self.entries_iter().into_iter())
+        Box::new(self.entries_iter())
     }
 
     pub(crate) fn add_phrase(

@@ -9,11 +9,11 @@ use std::path::PathBuf;
 use std::ptr::null_mut;
 use std::sync::Mutex;
 
-use chewing::capi::input::chewing_handle_Default;
-use chewing::capi::output::chewing_buffer_String;
-use chewing::capi::setup::chewing_delete;
-use chewing::capi::setup::chewing_new2;
-use chewing::capi::setup::ChewingContext;
+use chewing_capi::input::chewing_handle_Default;
+use chewing_capi::output::chewing_buffer_String;
+use chewing_capi::setup::chewing_delete;
+use chewing_capi::setup::chewing_new2;
+use chewing_capi::setup::ChewingContext;
 use tempfile::tempdir;
 use tempfile::TempDir;
 
@@ -21,13 +21,14 @@ static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 fn golden_data_path(filename: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../")
         .join("tests/data")
         .join(filename)
 }
 
 fn syspath() -> Result<CString, Box<dyn Error>> {
     Ok(CString::new(format!(
-        "{}/tests/data",
+        "{}/../tests/data",
         env!("CARGO_MANIFEST_DIR")
     ))?)
 }

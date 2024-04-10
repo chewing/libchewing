@@ -6,16 +6,9 @@ use std::{
     ptr::{null, null_mut},
     slice, str,
     sync::OnceLock,
-    u8,
 };
 
-use log::{debug, warn};
-
-use crate::{
-    capi::public::{
-        ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
-        HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
-    },
+use chewing::{
     conversion::{ChewingEngine, Interval, Symbol},
     dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
@@ -28,6 +21,12 @@ use crate::{
         LaxUserFreqEstimate, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
+};
+use log::{debug, warn};
+
+use crate::public::{
+    ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
+    HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
 };
 
 use super::logger::ChewingLogger;
@@ -104,7 +103,7 @@ unsafe fn slice_from_ptr_with_nul<'a>(ptr: *const c_char) -> Option<&'a [c_char]
 
 unsafe fn str_from_ptr_with_nul<'a>(ptr: *const c_char) -> Option<&'a str> {
     unsafe { slice_from_ptr_with_nul(ptr) }
-        .and_then(|data| str::from_utf8(unsafe { mem::transmute(data) }).ok())
+        .and_then(|data| str::from_utf8(unsafe { mem::transmute::<&[i8], &[u8]>(data) }).ok())
 }
 
 #[no_mangle]

@@ -1,8 +1,8 @@
 [package]
 name = "chewing"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
-license = "LGPL-2.1-or-later"
 documentation = "https://docs.rs/chewing"
+license = "LGPL-2.1-or-later"
 version = "0.8.0-alpha.1"
 rust-version = "1.70"
 edition = "2021"
@@ -12,41 +12,30 @@ include = ["src/**/*.rs", "data/*", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
 [dependencies]
 der = { version = "0.7.9", features = ["std"] }
 directories = "5.0.0"
-env_logger = { version = "0.10.2", default-features = false, optional = true }
-log = "0.4.21"
+log = { workspace = true }
 rusqlite = { version = ">= 0.28.0", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 rusqlite = { version = ">= 0.28.0", features = ["bundled"], optional = true }
 
-[lib]
-crate-type = ["rlib", "staticlib"]
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [features]
 default = []
-capi = ["dep:env_logger"]
 sqlite = ["dep:rusqlite"]
 
-[dev-dependencies]
-tempfile = "3"
-
 [workspace]
-members = ["fuzzer", "tests/testhelper", "tools"]
+members = ["capi", "fuzzer", "tests/testhelper", "tools"]
 resolver = "2"
 
-[[test]]
-name = "test-user-dictionary"
-path = "tests/test-user-dictionary.rs"
-required-features = ["capi"]
-
-[profile.release]
-lto = true
-debug = true
-panic = "abort"
+[workspace.dependencies]
+log = "0.4.21"
+tempfile = "3.10.1"
 
 [package.metadata.vet]
 store = { path = "./vet" }
 
 [package.metadata.docs.rs]
-features = ["capi", "sqlite"]
+features = ["sqlite"]
 # rustdoc-args = ["-Zunstable-options", "--sort-modules-by-appearance"]
