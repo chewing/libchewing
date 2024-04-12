@@ -191,6 +191,21 @@ void test_insert_symbol_between_selection()
     chewing_delete(ctx);
 }
 
+void test_empty_prefix_in_conversion_search()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4hk4g4<T><T><B><B><B><B><E>");
+    ok_preedit_buffer(ctx, "");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -215,6 +230,7 @@ int main(int argc, char *argv[])
     test_forgot_selection();
     test_move_cursor_backwards();
     test_insert_symbol_between_selection();
+    test_empty_prefix_in_conversion_search();
 
     fclose(fd);
 

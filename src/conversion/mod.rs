@@ -336,10 +336,12 @@ impl Composition {
     }
 }
 
-/// TODO: doc
-pub trait ConversionEngine<C: ?Sized> {
-    /// TODO: doc, combine convert_next as an Iterator
-    fn convert(&self, context: &C, composition: &Composition) -> Vec<Interval>;
-    /// TODO: doc
-    fn convert_next(&self, context: &C, composition: &Composition, next: usize) -> Vec<Interval>;
-}
+// /// TODO: doc
+// pub trait ConversionEngine<C: ?Sized> {
+//     /// TODO: doc, combine convert_next as an Iterator
+//     fn convert(
+//         &self,
+//         context: &C,
+//         composition: &Composition,
+//     ) -> impl Iterator<Item = Vec<Interval>>;
+// }
