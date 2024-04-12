@@ -19,7 +19,7 @@ impl SymbolSelector {
         let reader = BufReader::new(file);
         SymbolSelector::new(reader)
     }
-    pub(crate) fn new<R: BufRead>(reader: R) -> Result<SymbolSelector> {
+    fn new<R: BufRead>(reader: R) -> Result<SymbolSelector> {
         let mut category = Vec::new();
         let mut table = Vec::new();
         for line in reader.lines() {
