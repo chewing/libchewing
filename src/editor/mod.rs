@@ -19,10 +19,7 @@ pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, trace, warn};
 
 use crate::{
-    conversion::{
-        full_width_symbol_input, special_symbol_input, ChewingEngine, ConversionEngine, Interval,
-        Symbol,
-    },
+    conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
     dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
@@ -485,12 +482,11 @@ impl SharedState {
         self.nth_conversion = 0;
     }
     fn conversion(&self) -> Vec<Interval> {
-        if self.nth_conversion == 0 {
-            self.conv.convert(&self.dict, self.com.as_ref())
-        } else {
-            self.conv
-                .convert_next(&self.dict, self.com.as_ref(), self.nth_conversion)
-        }
+        self.conv
+            .convert(&self.dict, self.com.as_ref())
+            .cycle()
+            .nth(self.nth_conversion)
+            .unwrap()
     }
     fn intervals(&self) -> impl Iterator<Item = Interval> {
         self.conversion().into_iter()

@@ -1,67 +1,70 @@
 use std::{
     collections::BTreeMap,
     fmt::{Debug, Display, Write},
+    iter,
     ops::Neg,
 };
 
-use log::{debug, log_enabled, trace, warn, Level::Trace};
+use log::{debug, log_enabled, trace, Level::Trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Composition, ConversionEngine, GapKind, Interval, Symbol};
+use super::{Composition, GapKind, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug, Default)]
 pub struct ChewingEngine;
 
-impl<C: Dictionary + ?Sized> ConversionEngine<C> for ChewingEngine {
-    fn convert(&self, dict: &C, composition: &Composition) -> Vec<Interval> {
-        if composition.symbols.is_empty() {
-            return vec![];
-        }
-        let intervals = self.find_intervals(dict, composition);
-        self.find_best_path(composition.symbols.len(), intervals)
-            .into_iter()
-            .map(|interval| interval.into())
-            .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+impl ChewingEngine {
+    /// TODO: doc
+    pub fn new() -> ChewingEngine {
+        ChewingEngine
     }
-
-    fn convert_next(&self, dict: &C, composition: &Composition, next: usize) -> Vec<Interval> {
-        if composition.symbols.is_empty() {
-            return vec![];
-        }
-        let mut graph = Graph::default();
-        let paths = self.find_all_paths(
-            dict,
-            &mut graph,
-            composition,
-            0,
-            composition.symbols.len(),
-            None,
-        );
-        if paths.is_empty() {
-            warn!(
-                "BUG! find_all_paths returned nothing from {:?}",
-                composition
+    pub fn convert<'a>(
+        &'a self,
+        dict: &'a dyn Dictionary,
+        composition: &'a Composition,
+    ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
+        let fast_dp = iter::once_with(|| {
+            if composition.is_empty() {
+                return vec![];
+            }
+            let intervals = self.find_intervals(dict, composition);
+            self.find_best_path(composition.symbols.len(), intervals)
+                .into_iter()
+                .map(|interval| interval.into())
+                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+        });
+        let slow_search = iter::once_with(move || {
+            if composition.is_empty() {
+                return vec![];
+            }
+            let mut graph = Graph::default();
+            let paths = self.find_all_paths(
+                dict,
+                &mut graph,
+                composition,
+                0,
+                composition.symbols.len(),
+                None,
             );
-            return vec![];
-        }
-        let mut trimmed_paths = self.trim_paths(paths);
-        if trimmed_paths.is_empty() {
-            warn!("BUG! trimmed paths is empty from");
-            return vec![];
-        }
-        trimmed_paths.sort();
-        trimmed_paths
-            .into_iter()
-            .rev()
-            .cycle()
-            .nth(next)
-            .map(|p| p.intervals)
-            .expect("should have path")
-            .into_iter()
-            .map(|it| it.into())
-            .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+            debug_assert!(!paths.is_empty());
+
+            let mut trimmed_paths = self.trim_paths(paths);
+            debug_assert!(!trimmed_paths.is_empty());
+
+            trimmed_paths.sort_by(|a, b| b.cmp(a));
+            trimmed_paths
+        })
+        .flatten()
+        .skip(1)
+        .map(|p| {
+            p.intervals
+                .into_iter()
+                .map(|it| it.into())
+                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+        });
+        fast_dp.chain(slow_search)
     }
 }
 
@@ -85,13 +88,6 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
         acc.push(interval);
     }
     acc
-}
-
-impl ChewingEngine {
-    /// TODO: doc
-    pub fn new() -> ChewingEngine {
-        ChewingEngine
-    }
 }
 
 impl ChewingEngine {
@@ -511,7 +507,7 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Composition, ConversionEngine, GapKind, Interval, Symbol},
+        conversion::{Composition, GapKind, Interval, Symbol},
         dictionary::{Dictionary, Phrase, TrieBufDictionary},
         syl,
         zhuyin::Bopomofo::*,
@@ -572,7 +568,10 @@ mod tests {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
         let composition = Composition::new();
-        assert_eq!(Vec::<Interval>::new(), engine.convert(&dict, &composition));
+        assert_eq!(
+            Some(Vec::<Interval>::new()),
+            engine.convert(&dict, &composition).next()
+        );
     }
 
     #[test]
@@ -591,7 +590,7 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 2,
@@ -610,8 +609,8 @@ mod tests {
                     is_phrase: true,
                     phrase: "代表".into()
                 },
-            ],
-            engine.convert(&dict, &composition)
+            ]),
+            engine.convert(&dict, &composition).next()
         );
     }
 
@@ -633,7 +632,7 @@ mod tests {
         composition.set_gap(1, GapKind::Break);
         composition.set_gap(5, GapKind::Break);
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 1,
@@ -664,8 +663,8 @@ mod tests {
                     is_phrase: true,
                     phrase: "表".into()
                 },
-            ],
-            engine.convert(&dict, &composition)
+            ]),
+            engine.convert(&dict, &composition).next()
         );
     }
 
@@ -691,7 +690,7 @@ mod tests {
             phrase: "戴錶".into(),
         });
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 2,
@@ -710,8 +709,8 @@ mod tests {
                     is_phrase: true,
                     phrase: "戴錶".into()
                 },
-            ],
-            engine.convert(&dict, &composition)
+            ]),
+            engine.convert(&dict, &composition).next()
         );
     }
 
@@ -734,13 +733,13 @@ mod tests {
             phrase: "酷音".into(),
         });
         assert_eq!(
-            vec![Interval {
+            Some(vec![Interval {
                 start: 0,
                 end: 3,
                 is_phrase: true,
                 phrase: "新酷音".into()
-            },],
-            engine.convert(&dict, &composition)
+            },]),
+            engine.convert(&dict, &composition).next()
         );
     }
 
@@ -772,7 +771,7 @@ mod tests {
             composition.push_selection(interval);
         }
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 1,
@@ -785,8 +784,8 @@ mod tests {
                     is_phrase: true,
                     phrase: "錶".into()
                 }
-            ],
-            engine.convert(&dict, &composition)
+            ]),
+            engine.convert(&dict, &composition).next()
         );
     }
 
@@ -804,7 +803,7 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 2,
@@ -817,11 +816,11 @@ mod tests {
                     is_phrase: true,
                     phrase: "一下".into()
                 }
-            ],
-            engine.convert_next(&dict, &composition, 0)
+            ]),
+            engine.convert(&dict, &composition).next()
         );
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 3,
@@ -834,11 +833,11 @@ mod tests {
                     is_phrase: true,
                     phrase: "下".into()
                 }
-            ],
-            engine.convert_next(&dict, &composition, 1)
+            ]),
+            engine.convert(&dict, &composition).nth(1)
         );
         assert_eq!(
-            vec![
+            Some(vec![
                 Interval {
                     start: 0,
                     end: 2,
@@ -851,8 +850,8 @@ mod tests {
                     is_phrase: true,
                     phrase: "一下".into()
                 }
-            ],
-            engine.convert_next(&dict, &composition, 2)
+            ]),
+            engine.convert(&dict, &composition).cycle().nth(2)
         );
     }
 
