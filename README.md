@@ -121,16 +121,16 @@ be built.
 Use the default preset:
 
     cmake --preset default --install-prefix /usr
-    cmake --build --preset default
-    cmake --build --preset default -t test
-    cmake --build --preset default -t install
+    cmake --build build
+    cmake --build build -t test
+    cmake --build build -t install
 
 Build the rust implementation:
 
     cmake --preset rust-release --install-prefix /usr
-    cmake --build out/build/rust-release
-    cmake --build out/build/rust-release -t test
-    cmake --build out/build/rust-release -t install
+    cmake --build build
+    cmake --build build -t test
+    cmake --build build -t install
 
 Check other supported presets:
 
@@ -143,7 +143,7 @@ Define a [cmake-toolchains][] file to cross-compile.
 Example cross-build instructions:
 
     cmake --preset default --toolchain arm-none-linux-gnueabi.cmake
-    cmake --build --preset default
+    cmake --build build
 
 [cmake-toolchains]: https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
 

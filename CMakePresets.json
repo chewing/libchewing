@@ -6,6 +6,13 @@
     },
     "configurePresets": [
         {
+            "name": "build-base",
+            "displayName": "Build Environment",
+            "description": "Set build folders and other common variables",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build"
+        },
+        {
             "name": "default",
             "displayName": "Default (Release)",
             "description": "Default preset for release build",
@@ -29,13 +36,14 @@
             "name": "rust",
             "displayName": "Rust (Debug)",
             "description": "Build libchewing with only rust dependencies",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "WITH_RUST": true,
                 "WITH_SQLITE3": false
-            }
+            },
+            "inherits": [
+                "build-base"
+            ]
         },
         {
             "name": "rust-release",
@@ -61,10 +69,11 @@
             "name": "rust-with-sqlite",
             "displayName": "Rust with sqlite3 (Debug)",
             "description": "Build libchewing with rust and sqlite3 user dictionary format",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "inherits": [
+                "rust"
+            ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "WITH_RUST": true,
                 "WITH_SQLITE3": true
             }
@@ -93,14 +102,15 @@
             "name": "c99",
             "displayName": "C99 (Debug)",
             "description": "Build libchewing with only C dependencies",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "BUILD_INFO": true,
                 "WITH_RUST": false,
                 "WITH_SQLITE3": true
-            }
+            },
+            "inherits": [
+                "build-base"
+            ]
         },
         {
             "name": "c99-release",
@@ -126,10 +136,11 @@
             "name": "c99-with-uhash",
             "displayName": "C99 with uhash (Debug)",
             "description": "Build libchewing with C and uhash user dictionary format",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "inherits": [
+                "c99"
+            ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "WITH_RUST": false,
                 "WITH_SQLITE3": false
             }

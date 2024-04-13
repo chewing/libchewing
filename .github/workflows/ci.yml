@@ -47,12 +47,12 @@ jobs:
       - name: Build
         run: |
           cmake --preset ${{ matrix.preset }}
-          cmake --build out/build/${{ matrix.preset }} --verbose
-          cmake --install out/build/${{ matrix.preset }} --verbose
+          cmake --build build
+          cmake --install build --prefix install
 
       - name: Test
         run: |
-          ctest --test-dir out/build/${{ matrix.preset }} --verbose
+          ctest --test-dir build --output-on-failure
 
   coverage:
     strategy:
@@ -90,14 +90,14 @@ jobs:
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
           cmake --preset ${{ matrix.preset }}
-          cmake --build out/build/${{ matrix.preset }} --verbose
+          cmake --build build
 
       - name: Test
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
-          ctest --test-dir out/build/${{ matrix.preset }} --verbose
+          ctest --test-dir build --output-on-failure
           ./grcov . -s . -b . --keep-only 'src/*' --keep-only 'capi/src/*' --llvm  -t lcov -o coverage.lcov
 
       - name: Upload coverage reports to Codecov
