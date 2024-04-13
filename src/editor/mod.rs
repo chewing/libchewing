@@ -355,6 +355,9 @@ impl Editor {
     pub fn intervals(&self) -> impl Iterator<Item = Interval> {
         self.shared.intervals()
     }
+    pub fn len(&self) -> usize {
+        self.shared.com.len()
+    }
     /// TODO: doc, rename this to `render`?
     pub fn display(&self) -> String {
         self.shared

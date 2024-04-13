@@ -1677,7 +1677,7 @@ pub unsafe extern "C" fn chewing_buffer_Len(ctx: *const ChewingContext) -> c_int
         None => return -1,
     };
 
-    ctx.editor.display().chars().count() as c_int
+    ctx.editor.len() as c_int
 }
 
 /// # Safety
