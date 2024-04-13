@@ -14,7 +14,7 @@ use std::{
 };
 
 use der::{
-    asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
+    asn1::{ContextSpecificRef, OctetString, Utf8StringRef},
     DecodeValue, Document, Encode, EncodeValue, ErrorKind, FixedTag, Length, Reader, Sequence,
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
 };
@@ -112,7 +112,9 @@ impl TrieLeafView<'_> {
 /// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug, Clone)]
 pub struct TrieDictionary {
-    der: Document,
+    info: DictionaryInfo,
+    index: OctetString,
+    phrase_seq: PhraseSeq,
 }
 
 #[derive(Debug)]
@@ -182,9 +184,8 @@ impl TrieDictionary {
     {
         let mut buf = vec![];
         stream.read_to_end(&mut buf)?;
-        let trie_dict_doc = Document::try_from(buf).map_err(io_error)?;
-        let _: TrieFileRef<'_> = trie_dict_doc.decode_msg().map_err(io_error)?;
-        Ok(TrieDictionary { der: trie_dict_doc })
+        let trie_doc = Document::try_from(buf).map_err(io_error)?;
+        trie_doc.decode_msg().map_err(io_error)
     }
 }
 
@@ -232,9 +233,8 @@ macro_rules! iter_bail_if_oob {
 
 impl Dictionary for TrieDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        let dict = trie_file.index.as_bytes();
-        let data = trie_file.phrase_seq.der_bytes;
+        let dict = self.index.as_bytes();
+        let data = &self.phrase_seq.der_bytes;
         bail_if_oob!(0, TrieNodeView::SIZE, dict.len());
         let root = TrieNodeView(&dict[..TrieNodeView::SIZE]);
         let mut node = root;
@@ -268,9 +268,8 @@ impl Dictionary for TrieDictionary {
     }
 
     fn entries(&self) -> DictEntries<'_> {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        let dict = trie_file.index.as_bytes();
-        let data = trie_file.phrase_seq.der_bytes;
+        let dict = self.index.as_bytes();
+        let data = &self.phrase_seq.der_bytes;
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
@@ -358,8 +357,7 @@ impl Dictionary for TrieDictionary {
     }
 
     fn about(&self) -> DictionaryInfo {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        trie_file.info.into()
+        self.info.clone()
     }
 
     fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
@@ -417,43 +415,11 @@ fn context_specific_opt<T: EncodeValue + Tagged>(
         .map(|value| context_specific(tag_number, value))
 }
 
-struct DictionaryInfoRef<'a> {
-    name: Utf8StringRef<'a>,
-    copyright: Utf8StringRef<'a>,
-    license: Utf8StringRef<'a>,
-    version: Utf8StringRef<'a>,
-    software: Utf8StringRef<'a>,
-}
-
-impl From<DictionaryInfoRef<'_>> for DictionaryInfo {
-    fn from(value: DictionaryInfoRef<'_>) -> Self {
-        DictionaryInfo {
-            name: value.name.into(),
-            copyright: value.copyright.into(),
-            license: value.license.into(),
-            version: value.version.into(),
-            software: value.software.into(),
-        }
-    }
-}
-
-impl DictionaryInfoRef<'_> {
-    fn new(info: &DictionaryInfo) -> DictionaryInfoRef<'_> {
-        DictionaryInfoRef {
-            name: Utf8StringRef::new(&info.name).unwrap(),
-            copyright: Utf8StringRef::new(&info.copyright).unwrap(),
-            license: Utf8StringRef::new(&info.license).unwrap(),
-            version: Utf8StringRef::new(&info.version).unwrap(),
-            software: Utf8StringRef::new(&info.software).unwrap(),
-        }
-    }
-}
-
-impl FixedTag for DictionaryInfoRef<'_> {
+impl FixedTag for DictionaryInfo {
     const TAG: Tag = Tag::Sequence;
 }
 
-impl<'a> DecodeValue<'a> for DictionaryInfoRef<'a> {
+impl<'a> DecodeValue<'a> for DictionaryInfo {
     fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
         reader.read_nested(header.length, |reader| {
             let name = reader.decode()?;
@@ -461,7 +427,7 @@ impl<'a> DecodeValue<'a> for DictionaryInfoRef<'a> {
             let license = reader.decode()?;
             let version = reader.decode()?;
             let software = reader.decode()?;
-            Ok(DictionaryInfoRef {
+            Ok(DictionaryInfo {
                 name,
                 copyright,
                 license,
@@ -472,7 +438,7 @@ impl<'a> DecodeValue<'a> for DictionaryInfoRef<'a> {
     }
 }
 
-impl EncodeValue for DictionaryInfoRef<'_> {
+impl EncodeValue for DictionaryInfo {
     fn value_len(&self) -> der::Result<Length> {
         self.name.encoded_len()?
             + self.copyright.encoded_len()?
@@ -491,19 +457,14 @@ impl EncodeValue for DictionaryInfoRef<'_> {
     }
 }
 
-struct TrieFileRef<'a> {
-    info: DictionaryInfoRef<'a>,
-    index: OctetStringRef<'a>,
-    phrase_seq: PhraseSeqRef<'a>,
+#[derive(Debug, Clone)]
+struct PhraseSeq {
+    der_bytes: Box<[u8]>,
 }
 
-struct PhraseSeqRef<'a> {
-    der_bytes: &'a [u8],
-}
+impl Sequence<'_> for TrieDictionary {}
 
-impl<'a> Sequence<'a> for TrieFileRef<'a> {}
-
-impl<'a> DecodeValue<'a> for TrieFileRef<'a> {
+impl<'a> DecodeValue<'a> for TrieDictionary {
     fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
         reader.read_nested(header.length, |reader| {
             let magic: Utf8StringRef<'_> = reader.decode()?;
@@ -523,7 +484,7 @@ impl<'a> DecodeValue<'a> for TrieFileRef<'a> {
     }
 }
 
-impl EncodeValue for TrieFileRef<'_> {
+impl EncodeValue for TrieDictionary {
     fn value_len(&self) -> der::Result<Length> {
         Utf8StringRef::new("CHEW")?.encoded_len()?
             + DICT_FORMAT_VERSION.encoded_len()?
@@ -576,24 +537,24 @@ impl EncodeValue for Phrase {
     }
 }
 
-impl FixedTag for PhraseSeqRef<'_> {
+impl FixedTag for PhraseSeq {
     const TAG: Tag = Tag::Sequence;
 }
 
-impl EncodeValue for PhraseSeqRef<'_> {
+impl EncodeValue for PhraseSeq {
     fn value_len(&self) -> der::Result<Length> {
         self.der_bytes.len().try_into()
     }
 
     fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
-        encoder.write(self.der_bytes)
+        encoder.write(self.der_bytes.as_ref())
     }
 }
 
-impl<'a> DecodeValue<'a> for PhraseSeqRef<'a> {
+impl<'a> DecodeValue<'a> for PhraseSeq {
     fn decode_value<R: Reader<'a>>(reader: &mut R, header: der::Header) -> der::Result<Self> {
         reader.read_nested(header.length, |reader| {
-            let der_bytes = reader.read_slice(header.length)?;
+            let der_bytes = reader.read_vec(header.length)?.into_boxed_slice();
             Ok(Self { der_bytes })
         })
     }
@@ -995,11 +956,11 @@ impl TrieDictionaryBuilder {
             }
         }
 
-        let trie_dict_ref = TrieFileRef {
-            info: DictionaryInfoRef::new(&self.info),
-            index: OctetStringRef::new(&dict_buf).map_err(io_error)?,
-            phrase_seq: PhraseSeqRef {
-                der_bytes: &data_buf.buf,
+        let trie_dict_ref = TrieDictionary {
+            info: self.info.clone(),
+            index: OctetString::new(dict_buf).map_err(io_error)?,
+            phrase_seq: PhraseSeq {
+                der_bytes: data_buf.buf.into_boxed_slice(),
             },
         };
 

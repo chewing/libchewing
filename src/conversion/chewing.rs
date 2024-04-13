@@ -5,7 +5,7 @@ use std::{
     ops::Neg,
 };
 
-use log::{debug, log_enabled, trace, warn, Level::Trace};
+use log::{debug, log_enabled, trace, Level::Trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
