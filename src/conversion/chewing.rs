@@ -23,31 +23,24 @@ impl ChewingEngine {
     pub fn convert<'a>(
         &'a self,
         dict: &'a dyn Dictionary,
-        composition: &'a Composition,
+        comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
         let fast_dp = iter::once_with(|| {
-            if composition.is_empty() {
+            if comp.is_empty() {
                 return vec![];
             }
-            let intervals = self.find_intervals(dict, composition);
-            self.find_best_path(composition.symbols.len(), intervals)
+            let intervals = self.find_intervals(dict, comp);
+            self.find_best_path(comp.symbols.len(), intervals)
                 .into_iter()
                 .map(|interval| interval.into())
-                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         });
         let slow_search = iter::once_with(move || {
-            if composition.is_empty() {
+            if comp.is_empty() {
                 return vec![];
             }
             let mut graph = Graph::default();
-            let paths = self.find_all_paths(
-                dict,
-                &mut graph,
-                composition,
-                0,
-                composition.symbols.len(),
-                None,
-            );
+            let paths = self.find_all_paths(dict, &mut graph, comp, 0, comp.len(), None);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -62,7 +55,7 @@ impl ChewingEngine {
             p.intervals
                 .into_iter()
                 .map(|it| it.into())
-                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         });
         fast_dp.chain(slow_search)
     }
