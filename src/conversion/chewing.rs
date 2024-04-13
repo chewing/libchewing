@@ -48,18 +48,11 @@ impl ChewingEngine {
                 composition.symbols.len(),
                 None,
             );
-            if paths.is_empty() {
-                warn!(
-                    "BUG! find_all_paths returned nothing from {:?}",
-                    composition
-                );
-                return vec![];
-            }
+            debug_assert!(!paths.is_empty());
+
             let mut trimmed_paths = self.trim_paths(paths);
-            if trimmed_paths.is_empty() {
-                warn!("BUG! trimmed paths is empty from");
-                return vec![];
-            }
+            debug_assert!(!trimmed_paths.is_empty());
+
             trimmed_paths.sort_by(|a, b| b.cmp(a));
             trimmed_paths
         })
