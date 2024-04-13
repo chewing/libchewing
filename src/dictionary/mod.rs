@@ -4,7 +4,6 @@ use std::{
     any::Any,
     borrow::Borrow,
     cmp::Ordering,
-    collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
     io,
@@ -18,7 +17,7 @@ pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
-pub(crate) use trie_buf::TrieBufDictionary;
+pub use trie_buf::TrieBufDictionary;
 
 mod layered;
 mod loader;
@@ -71,9 +70,8 @@ impl Error for DuplicatePhraseError {}
 /// # Examples
 ///
 /// ```no_run
-/// # use std::collections::HashMap;
-/// # use chewing::dictionary::Dictionary;
-/// # let dictionary = HashMap::new();
+/// # use chewing::dictionary::{Dictionary, TrieBufDictionary};
+/// # let dictionary = TrieBufDictionary::new_in_memory();
 /// let about = dictionary.about();
 /// assert_eq!("libchewing default", about.name);
 /// assert_eq!("Copyright (c) 2022 libchewing Core Team", about.copyright);
@@ -266,11 +264,9 @@ impl Display for Phrase {
 /// # Examples
 ///
 /// ```
-/// use std::collections::HashMap;
+/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
 ///
-/// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
-///
-/// let dict = HashMap::from([
+/// let dict = TrieBufDictionary::from([
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100).into()]),
 /// ]);
 ///
@@ -294,16 +290,12 @@ pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a
 ///
 /// # Examples
 ///
-/// The std [`HashMap`] implements the `Dictionary` trait so it can be used in
-/// tests.
-///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::collections::HashMap;
 ///
-/// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
 ///
-/// let mut dict = HashMap::new();
+/// let mut dict = TrieBufDictionary::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
 /// for phrase in dict.lookup_all_phrases(
@@ -353,16 +345,12 @@ pub trait Dictionary: Debug {
     ///
     /// # Examples
     ///
-    /// The std [`HashMap`] implements the `DictionaryMut` trait so it can be used in
-    /// tests.
-    ///
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// use std::collections::HashMap;
     ///
-    /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+    /// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
     ///
-    /// let mut dict = HashMap::new();
+    /// let mut dict = TrieBufDictionary::new_in_memory();
     /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
     /// # Ok(())
     /// # }
@@ -430,115 +418,4 @@ pub trait DictionaryBuilder {
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
     fn as_any(&self) -> &dyn Any;
-}
-
-impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllables = syllables.as_slice().into_owned();
-        let mut phrases = self.get(&syllables).cloned().unwrap_or_default();
-        phrases.truncate(first);
-        phrases
-    }
-
-    fn entries(&self) -> DictEntries<'_> {
-        Box::new(
-            self.clone()
-                .into_iter()
-                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
-        )
-    }
-
-    fn about(&self) -> DictionaryInfo {
-        Default::default()
-    }
-
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn add_phrase(
-        &mut self,
-        syllables: &dyn SyllableSlice,
-        phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables.as_slice().into_owned();
-        let vec = self.entry(syllables).or_default();
-        if vec.iter().any(|it| it.as_str() == phrase.as_str()) {
-            return Err(DictionaryUpdateError {
-                source: Some(Box::new(DuplicatePhraseError)),
-            });
-        }
-        vec.push(phrase);
-        Ok(())
-    }
-
-    fn update_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-        _user_freq: u32,
-        _time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn remove_phrase(
-        &mut self,
-        syllables: &dyn SyllableSlice,
-        phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables.as_slice().into_owned();
-        let vec = self.entry(syllables).or_default();
-        *vec = vec
-            .iter()
-            .filter(|&p| p.as_str() != phrase_str)
-            .cloned()
-            .collect::<Vec<_>>();
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::collections::HashMap;
-
-    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
-
-    use super::Dictionary;
-
-    #[test]
-    fn hashmap_lookup_first_one() {
-        let dict = HashMap::from([(
-            vec![syl![C, E, TONE4], syl![SH, TONE4]],
-            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
-        )]);
-
-        assert_eq!(
-            "測試",
-            dict.lookup_first_phrase(&[syl![C, E, TONE4], syl![SH, TONE4]])
-                .unwrap()
-                .as_str()
-        )
-    }
-
-    #[test]
-    fn hashmap_lookup_all() {
-        let dict = HashMap::from([(
-            vec![syl![C, E, TONE4], syl![SH, TONE4]],
-            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
-        )]);
-
-        assert_eq!(
-            vec![
-                Phrase::new("測試", 1),
-                Phrase::new("策試", 1),
-                Phrase::new("策士", 1)
-            ],
-            dict.lookup_all_phrases(&[syl![C, E, TONE4], syl![SH, TONE4]])
-        )
-    }
 }

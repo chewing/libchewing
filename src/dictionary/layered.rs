@@ -15,28 +15,25 @@ use super::{DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phra
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::collections::HashMap;
 ///
-/// use chewing::{dictionary::{LayeredDictionary, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{LayeredDictionary, TrieBufDictionary, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
 ///
-/// let mut sys_dict = Box::new(HashMap::new());
-/// let mut user_dict = Box::new(HashMap::new());
-/// sys_dict.insert(
+/// let sys_dict = TrieBufDictionary::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
-/// );
-/// user_dict.insert(
+/// )]);
+/// let user_dict = TrieBufDictionary::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("策", 100).into(), ("冊", 100).into()]
-/// );
+/// )]);
 ///
-/// let dict = LayeredDictionary::new(vec![sys_dict], user_dict);
+/// let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));
 /// assert_eq!(
 ///     [
-///         ("測", 1).into(),
-///         ("冊", 100).into(),
-///         ("側", 1).into(),
-///         ("策", 100).into(),
+///         ("側", 1, 0).into(),
+///         ("冊", 100, 0).into(),
+///         ("測", 1, 0).into(),
+///         ("策", 100, 0).into(),
 ///     ]
 ///     .into_iter()
 ///     .collect::<Vec<Phrase>>(),
@@ -176,47 +173,49 @@ impl Dictionary for LayeredDictionary {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, error::Error};
+    use std::error::Error;
 
-    use crate::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+    use crate::{
+        dictionary::{Dictionary, TrieBufDictionary},
+        syl,
+        zhuyin::Bopomofo,
+    };
 
     use super::LayeredDictionary;
 
     #[test]
     fn test_entries() -> Result<(), Box<dyn Error>> {
-        let mut sys_dict = Box::new(HashMap::new());
-        let mut user_dict = Box::new(HashMap::new());
-        sys_dict.insert(
+        let sys_dict = TrieBufDictionary::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()],
-        );
-        user_dict.insert(
+        )]);
+        let user_dict = TrieBufDictionary::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("策", 100).into(), ("冊", 100).into()],
-        );
+        )]);
 
-        let dict = LayeredDictionary::new(vec![sys_dict], user_dict);
+        let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));
         assert_eq!(
             [
                 (
                     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-                    ("測", 1).into()
+                    ("側", 1, 0).into()
                 ),
                 (
                     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-                    ("冊", 1).into()
+                    ("冊", 1, 0).into()
                 ),
                 (
                     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-                    ("側", 1).into()
+                    ("測", 1, 0).into()
                 ),
                 (
                     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-                    ("策", 100).into()
+                    ("冊", 100, 0).into()
                 ),
                 (
                     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-                    ("冊", 100).into()
+                    ("策", 100, 0).into()
                 ),
             ]
             .into_iter()

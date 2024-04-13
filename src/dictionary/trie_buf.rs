@@ -17,7 +17,7 @@ use super::{
 };
 
 #[derive(Debug)]
-pub(crate) struct TrieBufDictionary {
+pub struct TrieBufDictionary {
     path: PathBuf,
     trie: Option<TrieDictionary>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
@@ -32,7 +32,7 @@ const MIN_PHRASE: &str = "";
 const MAX_PHRASE: &str = "\u{10FFFF}";
 
 impl TrieBufDictionary {
-    pub(crate) fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBufDictionary> {
+    pub fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBufDictionary> {
         let path = path.into();
         if !path.exists() {
             let info = DictionaryInfo {
@@ -61,7 +61,7 @@ impl TrieBufDictionary {
         })
     }
 
-    pub(crate) fn new_in_memory() -> TrieBufDictionary {
+    pub fn new_in_memory() -> TrieBufDictionary {
         TrieBufDictionary {
             path: PathBuf::new(),
             trie: None,
