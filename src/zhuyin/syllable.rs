@@ -50,10 +50,7 @@ impl Syllable {
         if index == 0 {
             None
         } else {
-            match Bopomofo::from_initial(index) {
-                Ok(v) => Some(v),
-                Err(_) => panic!(),
-            }
+            Bopomofo::from_initial(index - 1)
         }
     }
     /// TODO: docs
@@ -62,10 +59,7 @@ impl Syllable {
         if index == 0 {
             None
         } else {
-            match Bopomofo::from_medial(index) {
-                Ok(v) => Some(v),
-                Err(_) => panic!(),
-            }
+            Bopomofo::from_medial(index - 1)
         }
     }
     /// TODO: docs
@@ -74,10 +68,7 @@ impl Syllable {
         if index == 0 {
             None
         } else {
-            match Bopomofo::from_rime(index) {
-                Ok(v) => Some(v),
-                Err(_) => panic!(),
-            }
+            Bopomofo::from_rime(index - 1)
         }
     }
     /// TODO: docs
@@ -86,10 +77,7 @@ impl Syllable {
         if index == 0 {
             None
         } else {
-            match Bopomofo::from_tone(index) {
-                Ok(v) => Some(v),
-                Err(_) => panic!(),
-            }
+            Bopomofo::from_tone(index - 1)
         }
     }
     /// TODO: docs
@@ -184,15 +172,12 @@ impl Syllable {
     pub fn update(&mut self, bopomofo: Bopomofo) {
         let orig = self.value.get();
         let value = match bopomofo.kind() {
-            BopomofoKind::Initial => (orig & 0b0000000_11_1111_111) | (bopomofo as u16 + 1).shl(9),
-            BopomofoKind::Medial => (orig & 0b0111111_00_1111_111) | (bopomofo as u16 - 20).shl(7),
-            BopomofoKind::Rime => (orig & 0b0111111_11_0000_111) | (bopomofo as u16 - 23).shl(3),
-            BopomofoKind::Tone => (orig & 0b0111111_11_1111_000) | (bopomofo as u16 - 36),
+            BopomofoKind::Initial => (orig & 0b0000000_11_1111_111) | bopomofo.index().shl(9),
+            BopomofoKind::Medial => (orig & 0b0111111_00_1111_111) | bopomofo.index().shl(7),
+            BopomofoKind::Rime => (orig & 0b0111111_11_0000_111) | bopomofo.index().shl(3),
+            BopomofoKind::Tone => (orig & 0b0111111_11_1111_000) | bopomofo.index(),
         };
-        self.value = match NonZeroU16::new(value) {
-            Some(v) => v,
-            None => unreachable!(),
-        };
+        self.value = NonZeroU16::new(value).unwrap();
     }
     /// TODO: docs
     pub fn pop(&mut self) -> Option<Bopomofo> {
