@@ -165,7 +165,7 @@ impl Syllable {
     /// |   Initial   | M | Rime  |Tone |
     /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// ```
-    pub fn to_le_bytes(&self) -> [u8; 2] {
+    fn to_le_bytes(&self) -> [u8; 2] {
         self.to_u16().to_le_bytes()
     }
     /// TODO: docs
@@ -225,10 +225,7 @@ impl TryFrom<u16> for Syllable {
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         // TODO check invalid value
         Ok(Syllable {
-            value: NonZeroU16::try_from(value).map_err(|err| DecodeSyllableError {
-                msg: String::from("invalid raw value"),
-                source: Box::new(err),
-            })?,
+            value: NonZeroU16::try_from(value).map_err(|_| DecodeSyllableError)?,
         })
     }
 }
@@ -322,14 +319,10 @@ impl SyllableBuilder {
         match bopomofo.kind() {
             BopomofoKind::Initial => {
                 if self.value & 0b0111111_00_0000_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple initials",
-                    });
+                    return Err(BuildSyllableError::multiple_initials());
                 }
                 if self.step > 0 {
-                    return Err(BuildSyllableError {
-                        msg: "bopomofo is in incorrect order",
-                    });
+                    return Err(BuildSyllableError::incorrect_order());
                 }
                 self.step = 1;
                 self.value &= 0b0000000_11_1111_111;
@@ -337,14 +330,10 @@ impl SyllableBuilder {
             }
             BopomofoKind::Medial => {
                 if self.value & 0b0000000_11_0000_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple medials",
-                    });
+                    return Err(BuildSyllableError::multiple_medials());
                 }
                 if self.step > 1 {
-                    return Err(BuildSyllableError {
-                        msg: "bopomofo is in incorrect order",
-                    });
+                    return Err(BuildSyllableError::incorrect_order());
                 }
                 self.step = 2;
                 self.value &= 0b0111111_00_1111_111;
@@ -352,14 +341,10 @@ impl SyllableBuilder {
             }
             BopomofoKind::Rime => {
                 if self.value & 0b0000000_00_1111_000 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple rimes",
-                    });
+                    return Err(BuildSyllableError::multiple_rimes());
                 }
                 if self.step > 2 {
-                    return Err(BuildSyllableError {
-                        msg: "bopomofo is in incorrect order",
-                    });
+                    return Err(BuildSyllableError::incorrect_order());
                 }
                 self.step = 3;
                 self.value &= 0b0111111_11_0000_111;
@@ -367,14 +352,10 @@ impl SyllableBuilder {
             }
             BopomofoKind::Tone => {
                 if self.value & 0b0000000_00_0000_111 != 0 {
-                    return Err(BuildSyllableError {
-                        msg: "multiple tone bopomofo",
-                    });
+                    return Err(BuildSyllableError::multiple_tones());
                 }
                 if self.step > 3 {
-                    return Err(BuildSyllableError {
-                        msg: "bopomofo is in incorrect order",
-                    });
+                    return Err(BuildSyllableError::incorrect_order());
                 }
                 self.step = 4;
                 self.value &= 0b0111111_11_1111_000;
@@ -395,32 +376,65 @@ impl SyllableBuilder {
 }
 
 /// TODO: docs
-#[derive(Debug)]
-pub struct DecodeSyllableError {
-    msg: String,
-    source: Box<dyn Error>,
-}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DecodeSyllableError;
 
 impl Display for DecodeSyllableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "syllable decode error: {}", self.msg)
+        write!(f, "syllable decode error")
     }
 }
 
-impl Error for DecodeSyllableError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(self.source.as_ref())
-    }
+impl Error for DecodeSyllableError {}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SyllableErrorKind {
+    MultipleInitials,
+    MultipleMedials,
+    MultipleRimes,
+    MultipleTones,
+    IncorrectOrder,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BuildSyllableError {
-    msg: &'static str,
+    kind: SyllableErrorKind,
+}
+
+impl BuildSyllableError {
+    pub const fn multiple_initials() -> BuildSyllableError {
+        Self {
+            kind: SyllableErrorKind::MultipleInitials,
+        }
+    }
+    pub const fn multiple_medials() -> BuildSyllableError {
+        Self {
+            kind: SyllableErrorKind::MultipleMedials,
+        }
+    }
+    pub const fn multiple_rimes() -> BuildSyllableError {
+        Self {
+            kind: SyllableErrorKind::MultipleRimes,
+        }
+    }
+    pub const fn multiple_tones() -> BuildSyllableError {
+        Self {
+            kind: SyllableErrorKind::MultipleTones,
+        }
+    }
+    pub const fn incorrect_order() -> BuildSyllableError {
+        Self {
+            kind: SyllableErrorKind::IncorrectOrder,
+        }
+    }
+    pub fn kind(&self) -> &SyllableErrorKind {
+        &self.kind
+    }
 }
 
 impl Display for BuildSyllableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Syllable build error: {}", self.msg)
+        write!(f, "Syllable build error: {:?}", self.kind)
     }
 }
 

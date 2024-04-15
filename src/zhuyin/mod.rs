@@ -4,4 +4,7 @@ mod bopomofo;
 mod syllable;
 
 pub use bopomofo::{Bopomofo, BopomofoErrorKind, BopomofoKind, ParseBopomofoError};
-pub use syllable::{DecodeSyllableError, Syllable, SyllableBuilder, SyllableSlice};
+pub use syllable::{
+    BuildSyllableError, DecodeSyllableError, Syllable, SyllableBuilder, SyllableErrorKind,
+    SyllableSlice,
+};
