@@ -126,19 +126,19 @@ impl Syllable {
     }
     /// TODO: docs
     pub fn has_initial(&self) -> bool {
-        self.value.get() & 0b0111111_00_0000_000 != 0
+        self.initial().is_some()
     }
     /// TODO: docs
     pub fn has_medial(&self) -> bool {
-        self.value.get() & 0b0000000_11_0000_000 != 0
+        self.medial().is_some()
     }
     /// TODO: docs
     pub fn has_rime(&self) -> bool {
-        self.value.get() & 0b0000000_00_1111_000 != 0
+        self.rime().is_some()
     }
     /// TODO: docs
     pub fn has_tone(&self) -> bool {
-        self.value.get() & 0b0000000_00_0000_111 != 0
+        self.tone().is_some()
     }
     /// Returns the `Syllable` encoded in a u16 integer.
     ///
@@ -388,12 +388,14 @@ impl Display for DecodeSyllableError {
 impl Error for DecodeSyllableError {}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum SyllableErrorKind {
     MultipleInitials,
     MultipleMedials,
     MultipleRimes,
     MultipleTones,
     IncorrectOrder,
+    InvalidBopomofo,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -402,27 +404,27 @@ pub struct BuildSyllableError {
 }
 
 impl BuildSyllableError {
-    pub const fn multiple_initials() -> BuildSyllableError {
+    const fn multiple_initials() -> BuildSyllableError {
         Self {
             kind: SyllableErrorKind::MultipleInitials,
         }
     }
-    pub const fn multiple_medials() -> BuildSyllableError {
+    const fn multiple_medials() -> BuildSyllableError {
         Self {
             kind: SyllableErrorKind::MultipleMedials,
         }
     }
-    pub const fn multiple_rimes() -> BuildSyllableError {
+    const fn multiple_rimes() -> BuildSyllableError {
         Self {
             kind: SyllableErrorKind::MultipleRimes,
         }
     }
-    pub const fn multiple_tones() -> BuildSyllableError {
+    const fn multiple_tones() -> BuildSyllableError {
         Self {
             kind: SyllableErrorKind::MultipleTones,
         }
     }
-    pub const fn incorrect_order() -> BuildSyllableError {
+    const fn incorrect_order() -> BuildSyllableError {
         Self {
             kind: SyllableErrorKind::IncorrectOrder,
         }
@@ -440,9 +442,15 @@ impl Display for BuildSyllableError {
 
 impl Error for BuildSyllableError {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseSyllableError {
-    source: Box<dyn Error>,
+    kind: SyllableErrorKind,
+}
+
+impl ParseSyllableError {
+    pub fn kind(&self) -> &SyllableErrorKind {
+        &self.kind
+    }
 }
 
 impl Display for ParseSyllableError {
@@ -451,25 +459,19 @@ impl Display for ParseSyllableError {
     }
 }
 
-impl Error for ParseSyllableError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(self.source.as_ref())
-    }
-}
+impl Error for ParseSyllableError {}
 
 impl From<ParseBopomofoError> for ParseSyllableError {
-    fn from(value: ParseBopomofoError) -> Self {
+    fn from(_: ParseBopomofoError) -> Self {
         ParseSyllableError {
-            source: value.into(),
+            kind: SyllableErrorKind::InvalidBopomofo,
         }
     }
 }
 
 impl From<BuildSyllableError> for ParseSyllableError {
     fn from(value: BuildSyllableError) -> Self {
-        ParseSyllableError {
-            source: value.into(),
-        }
+        ParseSyllableError { kind: value.kind }
     }
 }
 
