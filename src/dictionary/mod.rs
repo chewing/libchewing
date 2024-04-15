@@ -50,18 +50,6 @@ impl Display for DictionaryUpdateError {
 
 impl Error for DictionaryUpdateError {}
 
-/// The error type which is returned from building or updating a dictionary.
-#[derive(Debug)]
-pub struct DuplicatePhraseError;
-
-impl Display for DuplicatePhraseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "found duplicated phrases")
-    }
-}
-
-impl Error for DuplicatePhraseError {}
-
 /// A collection of metadata of a dictionary.
 ///
 /// The dictionary version and copyright information can be used in

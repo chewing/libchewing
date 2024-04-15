@@ -24,7 +24,7 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, DuplicatePhraseError, Phrase,
+    DictionaryUpdateError, Phrase,
 };
 
 const DICT_FORMAT_VERSION: u8 = 0;
@@ -1151,9 +1151,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
             .iter()
             .any(|it| it.as_str() == phrase.as_str())
         {
-            return Err(BuildDictionaryError {
-                source: Box::new(DuplicatePhraseError),
-            });
+            return Err(BuildDictionaryError { source: "".into() });
         }
         self.arena[leaf_id].phrases.push(phrase);
         Ok(())
