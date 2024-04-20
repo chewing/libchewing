@@ -151,7 +151,7 @@ impl Syllable {
     /// |   Initial   | M | Rime  |Tone |
     /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// ```
-    pub fn to_u16(&self) -> u16 {
+    pub fn to_u16(self) -> u16 {
         self.value.get()
     }
     /// Returns the `Syllable` encoded in a u16 integer in little-endian bytes.
@@ -165,7 +165,7 @@ impl Syllable {
     /// |   Initial   | M | Rime  |Tone |
     /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// ```
-    fn to_le_bytes(&self) -> [u8; 2] {
+    fn to_le_bytes(self) -> [u8; 2] {
         self.to_u16().to_le_bytes()
     }
     /// TODO: docs

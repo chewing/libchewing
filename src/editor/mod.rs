@@ -360,6 +360,9 @@ impl Editor {
     pub fn len(&self) -> usize {
         self.shared.com.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.shared.com.is_empty()
+    }
     /// TODO: doc, rename this to `render`?
     pub fn display(&self) -> String {
         self.shared
