@@ -15,7 +15,7 @@ use std::{
 };
 
 pub use self::selection::symbol::SymbolSelector;
-pub use estimate::{EstimateError, LaxUserFreqEstimate, UserFreqEstimate};
+pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, trace, warn};
 
 use crate::{
@@ -168,7 +168,7 @@ impl Editor {
     pub fn chewing() -> Result<Editor, Box<dyn Error>> {
         let system_dict = SystemDictionaryLoader::new().load()?;
         let user_dict = UserDictionaryLoader::new().load()?;
-        let estimate = LaxUserFreqEstimate::open(user_dict.as_ref())?;
+        let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
         let dict = Layered::new(system_dict, user_dict);
         let conversion_engine = ChewingEngine::new();
         let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
@@ -572,7 +572,7 @@ impl SharedState {
         // TODO: fine tune learning curve
         let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
         let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
-        let time = self.estimate.now().unwrap();
+        let time = self.estimate.now();
 
         let _ = self.dict.update_phrase(syllables, phrase, user_freq, time);
         self.dirty_level += 1;
@@ -694,7 +694,7 @@ fn is_break_word(word: &str) -> bool {
 impl BasicEditor for Editor {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
         trace!("process_keyevent: {}", &key_event);
-        let _ = self.shared.estimate.tick();
+        self.shared.estimate.tick();
         // reset?
         self.shared.notice_buffer.clear();
         if self.shared.last_key_behavior == EditorKeyBehavior::Commit {
@@ -1430,7 +1430,7 @@ mod tests {
             Box::new(TrieBuf::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -1457,7 +1457,7 @@ mod tests {
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -1490,7 +1490,7 @@ mod tests {
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -1533,7 +1533,7 @@ mod tests {
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -1591,7 +1591,7 @@ mod tests {
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -1629,7 +1629,7 @@ mod tests {
         let dict = TrieBuf::new_in_memory();
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
-        let estimate = LaxUserFreqEstimate::open_in_memory(0);
+        let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);

@@ -172,11 +172,7 @@ pub unsafe extern "C" fn chewing_new2(
         Err(_) => return null_mut(),
     };
 
-    let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
-    let estimate = match estimate {
-        Ok(d) => d,
-        Err(_) => return null_mut(),
-    };
+    let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
     let dict = Layered::new(dictionaries, user_dictionary);
     let conversion_engine = ChewingEngine::new();
