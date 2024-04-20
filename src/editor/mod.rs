@@ -1,9 +1,9 @@
 //! Abstract input method editors.
 
 mod abbrev;
-pub mod keyboard;
 mod composition_editor;
 mod estimate;
+pub mod keyboard;
 mod selection;
 pub mod zhuyin_layout;
 
@@ -28,8 +28,8 @@ use crate::{
 };
 
 use self::{
-    keyboard::KeyEvent,
     composition_editor::CompositionEditor,
+    keyboard::KeyEvent,
     selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
     zhuyin_layout::{KeyBehavior, Standard, SyllableEditor},
 };
@@ -134,12 +134,18 @@ pub struct Editor {
     state: Box<dyn State>,
 }
 
-#[derive(Debug)]
-pub struct EditorError;
+/// All different errors that may happen when changing editor state.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum EditorError {
+    /// Requested invalid state change.
+    InvalidState,
+    /// Requested state change was not possible.
+    Impossible,
+}
 
 impl Display for EditorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Some error happened")
+        write!(f, "Editor cannot perform requested action.")
     }
 }
 
@@ -285,7 +291,7 @@ impl Editor {
                 .skip(selecting.page_no * self.shared.options.candidates_per_page)
                 .collect())
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn all_candidates(&self) -> Result<Vec<String>, EditorError> {
@@ -294,7 +300,7 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.candidates(&self.shared, &self.shared.dict))
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn current_page_no(&self) -> Result<usize, EditorError> {
@@ -303,7 +309,7 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.page_no)
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn total_page(&self) -> Result<usize, EditorError> {
@@ -311,14 +317,14 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.total_page(&self.shared, &self.shared.dict))
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn select(&mut self, n: usize) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         let selecting = match any.downcast_mut::<Selecting>() {
             Some(selecting) => selecting,
-            None => return Err(EditorError),
+            None => return Err(EditorError::InvalidState),
         };
         match selecting.select(&mut self.shared, n) {
             Transition::ToState(to_state) => {
@@ -331,7 +337,7 @@ impl Editor {
             self.shared.try_auto_commit();
         }
         if self.shared.last_key_behavior == EditorKeyBehavior::Bell {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         } else {
             Ok(())
         }
@@ -341,8 +347,10 @@ impl Editor {
             self.shared.cancel_selecting();
             self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
             self.state = Box::new(Entering);
+            Ok(())
+        } else {
+            Err(EditorError::InvalidState)
         }
-        Ok(())
     }
     pub fn last_key_behavior(&self) -> EditorKeyBehavior {
         self.shared.last_key_behavior
@@ -374,11 +382,12 @@ impl Editor {
     pub fn display_commit(&self) -> &str {
         &self.shared.commit_buffer
     }
-    pub fn commit(&mut self) -> Result<(), String> {
+    pub fn commit(&mut self) -> Result<(), EditorError> {
         if !self.is_entering() || self.shared.com.is_empty() {
-            return Err("error".to_string());
+            return Err(EditorError::InvalidState);
         }
-        self.shared.commit()
+        self.shared.commit();
+        Ok(())
     }
     pub fn has_next_selection_point(&self) -> bool {
         let any = self.state.as_any();
@@ -409,11 +418,10 @@ impl Editor {
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_next_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => Err(EditorError),
-                Selector::SpecialSymmbol(_) => Err(EditorError),
+                _ => Err(EditorError::InvalidState),
             }
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn jump_to_prev_selection_point(&mut self) -> Result<(), EditorError> {
@@ -421,35 +429,38 @@ impl Editor {
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_prev_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => Err(EditorError),
-                Selector::SpecialSymmbol(_) => Err(EditorError),
+                _ => Err(EditorError::InvalidState),
             }
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
-    pub fn jump_to_first_selection_point(&mut self) {
+    pub fn jump_to_first_selection_point(&mut self) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
-                Selector::Phrase(s) => s.jump_to_first_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => {}
-                Selector::SpecialSymmbol(_) => {}
+                Selector::Phrase(s) => {
+                    s.jump_to_first_selection_point(&self.shared.dict);
+                    Ok(())
+                }
+                _ => Err(EditorError::InvalidState),
             }
         } else {
-            {}
+            Err(EditorError::InvalidState)
         }
     }
-    pub fn jump_to_last_selection_point(&mut self) {
+    pub fn jump_to_last_selection_point(&mut self) -> Result<(), EditorError> {
         let any = self.state.as_any_mut();
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
-                Selector::Phrase(s) => s.jump_to_last_selection_point(&self.shared.dict),
-                Selector::Symbol(_) => {}
-                Selector::SpecialSymmbol(_) => {}
+                Selector::Phrase(s) => {
+                    s.jump_to_last_selection_point(&self.shared.dict);
+                    Ok(())
+                }
+                _ => Err(EditorError::InvalidState),
             }
         } else {
-            {}
+            Err(EditorError::InvalidState)
         }
     }
     pub fn start_selecting(&mut self) -> Result<(), EditorError> {
@@ -471,7 +482,7 @@ impl Editor {
         if self.is_selecting() {
             Ok(())
         } else {
-            Err(EditorError)
+            Err(EditorError::InvalidState)
         }
     }
     pub fn notification(&self) -> &str {
@@ -598,7 +609,7 @@ impl SharedState {
     fn cancel_selecting(&mut self) {
         self.com.pop_cursor();
     }
-    fn commit(&mut self) -> Result<(), String> {
+    fn commit(&mut self) {
         self.commit_buffer.clear();
         let intervals = self.conversion();
         debug!("buffer {:?}", self.com);
@@ -613,7 +624,6 @@ impl SharedState {
         self.com.clear();
         self.nth_conversion = 0;
         self.last_key_behavior = EditorKeyBehavior::Commit;
-        Ok(())
     }
     fn try_auto_commit(&mut self) {
         let len = self.com.len();
@@ -913,7 +923,7 @@ impl State for Entering {
                 self.spin_absorb()
             }
             Enter => {
-                let _ = shared.commit();
+                shared.commit();
                 self.spin_commit()
             }
             Esc => {
@@ -1410,7 +1420,7 @@ mod tests {
         conversion::ChewingEngine,
         dictionary::{Layered, TrieBuf},
         editor::{
-            abbrev::AbbrevTable, keyboard::Modifiers, estimate, EditorKeyBehavior, SymbolSelector,
+            abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
         },
         syl,
         zhuyin::Bopomofo,

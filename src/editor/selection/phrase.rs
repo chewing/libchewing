@@ -115,7 +115,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError)
+            Err(EditorError::Impossible)
         }
     }
     pub(crate) fn jump_to_prev_selection_point<D: Dictionary>(
@@ -127,7 +127,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError)
+            Err(EditorError::Impossible)
         }
     }
     pub(crate) fn jump_to_first_selection_point<D: Dictionary>(&mut self, dict: &D) {

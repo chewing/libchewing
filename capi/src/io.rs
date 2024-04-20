@@ -1031,7 +1031,7 @@ pub unsafe extern "C" fn chewing_cand_list_first(ctx: *mut ChewingContext) -> c_
         return -1;
     }
 
-    ctx.editor.jump_to_first_selection_point();
+    let _ = ctx.editor.jump_to_first_selection_point();
     0
 }
 
@@ -1049,7 +1049,7 @@ pub unsafe extern "C" fn chewing_cand_list_last(ctx: *mut ChewingContext) -> c_i
         return -1;
     }
 
-    ctx.editor.jump_to_last_selection_point();
+    let _ = ctx.editor.jump_to_last_selection_point();
     0
 }
 
@@ -1962,7 +1962,8 @@ pub unsafe extern "C" fn chewing_cand_close(ctx: *mut ChewingContext) -> c_int {
 
     match ctx.editor.cancel_selecting() {
         Ok(_) => OK,
-        Err(_) => ERROR,
+        // For backward compatible reason this method never errors
+        Err(_) => OK,
     }
 }
 
