@@ -12,12 +12,12 @@ use std::{
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-pub use layered::LayeredDictionary;
+pub use layered::Layered;
 pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
-pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
-pub use trie_buf::TrieBufDictionary;
+pub use trie::{Trie, TrieBuilder, TrieStatistics};
+pub use trie_buf::TrieBuf;
 
 mod layered;
 mod loader;
@@ -58,8 +58,8 @@ impl Error for UpdateDictionaryError {}
 /// # Examples
 ///
 /// ```no_run
-/// # use chewing::dictionary::{Dictionary, TrieBufDictionary};
-/// # let dictionary = TrieBufDictionary::new_in_memory();
+/// # use chewing::dictionary::{Dictionary, TrieBuf};
+/// # let dictionary = TrieBuf::new_in_memory();
 /// let about = dictionary.about();
 /// assert_eq!("libchewing default", about.name);
 /// assert_eq!("Copyright (c) 2022 libchewing Core Team", about.copyright);
@@ -252,9 +252,9 @@ impl Display for Phrase {
 /// # Examples
 ///
 /// ```
-/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
-/// let dict = TrieBufDictionary::from([
+/// let dict = TrieBuf::from([
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
@@ -272,9 +272,9 @@ pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 /// # Examples
 ///
 /// ```
-/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
-/// let dict = TrieBufDictionary::from([
+/// let dict = TrieBuf::from([
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
@@ -297,9 +297,9 @@ pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
-/// let mut dict = TrieBufDictionary::new_in_memory();
+/// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
 /// for phrase in dict.lookup_all_phrases(
@@ -352,9 +352,9 @@ pub trait Dictionary: Debug {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
+    /// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
     ///
-    /// let mut dict = TrieBufDictionary::new_in_memory();
+    /// let mut dict = TrieBuf::new_in_memory();
     /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
     /// # Ok(())
     /// # }

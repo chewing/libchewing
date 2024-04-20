@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     conversion::{Composition, GapKind, Interval},
-    dictionary::{Dictionary, LayeredDictionary},
+    dictionary::{Dictionary, Layered},
     editor::{EditorError, SharedState},
 };
 
@@ -196,7 +196,7 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates(&self, editor: &SharedState, dict: &LayeredDictionary) -> Vec<String> {
+    pub(crate) fn candidates(&self, editor: &SharedState, dict: &Layered) -> Vec<String> {
         let mut candidates = dict
             .lookup_all_phrases(&&self.com.symbols()[self.begin..self.end])
             .into_iter()
@@ -231,7 +231,7 @@ impl PhraseSelector {
 mod tests {
     use crate::{
         conversion::{Composition, Interval, Symbol},
-        dictionary::TrieBufDictionary,
+        dictionary::TrieBuf,
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -249,7 +249,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -268,7 +268,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 
@@ -283,7 +283,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -302,7 +302,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 

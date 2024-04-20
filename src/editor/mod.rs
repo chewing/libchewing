@@ -20,7 +20,7 @@ use log::{debug, trace, warn};
 
 use crate::{
     conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
-    dictionary::{Dictionary, LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{Dictionary, Layered, SystemDictionaryLoader, UserDictionaryLoader},
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
 };
@@ -149,7 +149,7 @@ pub(crate) struct SharedState {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
     conv: ChewingEngine,
-    dict: LayeredDictionary,
+    dict: Layered,
     abbr: AbbrevTable,
     sym_sel: SymbolSelector,
     estimate: LaxUserFreqEstimate,
@@ -167,7 +167,7 @@ impl Editor {
         let system_dict = SystemDictionaryLoader::new().load()?;
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::open(user_dict.as_ref())?;
-        let dict = LayeredDictionary::new(system_dict, user_dict);
+        let dict = Layered::new(system_dict, user_dict);
         let conversion_engine = ChewingEngine::new();
         let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
         let sym_sel = SystemDictionaryLoader::new().load_symbol_selector()?;
@@ -177,7 +177,7 @@ impl Editor {
 
     pub fn new(
         conv: ChewingEngine,
-        dict: LayeredDictionary,
+        dict: Layered,
         estimate: LaxUserFreqEstimate,
         abbr: AbbrevTable,
         sym_sel: SymbolSelector,
@@ -1133,14 +1133,14 @@ impl Selecting {
             }
         }
     }
-    fn candidates(&self, editor: &SharedState, dict: &LayeredDictionary) -> Vec<String> {
+    fn candidates(&self, editor: &SharedState, dict: &Layered) -> Vec<String> {
         match &self.sel {
             Selector::Phrase(sel) => sel.candidates(editor, dict),
             Selector::Symbol(sel) => sel.menu(),
             Selector::SpecialSymmbol(sel) => sel.menu(),
         }
     }
-    fn total_page(&self, editor: &SharedState, dict: &LayeredDictionary) -> usize {
+    fn total_page(&self, editor: &SharedState, dict: &Layered) -> usize {
         // MSRV: stable after rust 1.73
         fn div_ceil(lhs: usize, rhs: usize) -> usize {
             let d = lhs / rhs;
@@ -1404,7 +1404,7 @@ mod tests {
 
     use crate::{
         conversion::ChewingEngine,
-        dictionary::{LayeredDictionary, TrieBufDictionary},
+        dictionary::{Layered, TrieBuf},
         editor::{
             abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
         },
@@ -1420,9 +1420,9 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo() {
         let keyboard = Qwerty;
-        let dict = LayeredDictionary::new(
-            vec![Box::new(TrieBufDictionary::new_in_memory())],
-            Box::new(TrieBufDictionary::new_in_memory()),
+        let dict = Layered::new(
+            vec![Box::new(TrieBuf::new_in_memory())],
+            Box::new(TrieBuf::new_in_memory()),
         );
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
@@ -1446,14 +1446,11 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo_commit() {
         let keyboard = Qwerty;
-        let dict = TrieBufDictionary::from([(
+        let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = LayeredDictionary::new(
-            vec![Box::new(dict)],
-            Box::new(TrieBufDictionary::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
@@ -1482,14 +1479,11 @@ mod tests {
     #[test]
     fn editing_mode_input_chinese_to_english_mode() {
         let keyboard = Qwerty;
-        let dict = TrieBufDictionary::from([(
+        let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = LayeredDictionary::new(
-            vec![Box::new(dict)],
-            Box::new(TrieBufDictionary::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
@@ -1528,14 +1522,11 @@ mod tests {
     #[test]
     fn editing_mode_input_english_to_chinese_mode() {
         let keyboard = Qwerty;
-        let dict = TrieBufDictionary::from([(
+        let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = LayeredDictionary::new(
-            vec![Box::new(dict)],
-            Box::new(TrieBufDictionary::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
@@ -1589,14 +1580,11 @@ mod tests {
     #[test]
     fn editing_chinese_mode_input_special_symbol() {
         let keyboard = Qwerty;
-        let dict = TrieBufDictionary::from([(
+        let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = LayeredDictionary::new(
-            vec![Box::new(dict)],
-            Box::new(TrieBufDictionary::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();
@@ -1633,11 +1621,8 @@ mod tests {
     #[test]
     fn editing_mode_input_full_shape_symbol() {
         let keyboard = Qwerty;
-        let dict = TrieBufDictionary::new_in_memory();
-        let dict = LayeredDictionary::new(
-            vec![Box::new(dict)],
-            Box::new(TrieBufDictionary::new_in_memory()),
-        );
+        let dict = TrieBuf::new_in_memory();
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = ChewingEngine::new();
         let estimate = LaxUserFreqEstimate::open_in_memory(0);
         let abbrev = AbbrevTable::new();

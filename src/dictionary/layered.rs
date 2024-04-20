@@ -16,18 +16,18 @@ use super::{Dictionary, DictionaryInfo, Entries, Phrase, UpdateDictionaryError};
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{LayeredDictionary, TrieBufDictionary, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Layered, TrieBuf, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
 ///
-/// let sys_dict = TrieBufDictionary::from([(
+/// let sys_dict = TrieBuf::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("測", 1), ("冊", 1), ("側", 1)]
 /// )]);
-/// let user_dict = TrieBufDictionary::from([(
+/// let user_dict = TrieBuf::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
 ///     vec![("策", 100), ("冊", 100)]
 /// )]);
 ///
-/// let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));
+/// let dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
 /// assert_eq!(
 ///     [
 ///         ("側", 1, 0).into(),
@@ -45,18 +45,15 @@ use super::{Dictionary, DictionaryInfo, Entries, Phrase, UpdateDictionaryError};
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct LayeredDictionary {
+pub struct Layered {
     sys_dict: Vec<Box<dyn Dictionary>>,
     user_dict: Box<dyn Dictionary>,
 }
 
-impl LayeredDictionary {
-    /// Creates a new `LayeredDictionary` with the list of dictionaries.
-    pub fn new(
-        sys_dict: Vec<Box<dyn Dictionary>>,
-        user_dict: Box<dyn Dictionary>,
-    ) -> LayeredDictionary {
-        LayeredDictionary {
+impl Layered {
+    /// Creates a new `Layered` with the list of dictionaries.
+    pub fn new(sys_dict: Vec<Box<dyn Dictionary>>, user_dict: Box<dyn Dictionary>) -> Layered {
+        Layered {
             sys_dict,
             user_dict,
         }
@@ -66,7 +63,7 @@ impl LayeredDictionary {
     }
 }
 
-impl Dictionary for LayeredDictionary {
+impl Dictionary for Layered {
     /// Lookup phrases from all underlying dictionaries.
     ///
     /// Phrases are ordered by their first apperance in the underlying dictionaries.
@@ -122,7 +119,7 @@ impl Dictionary for LayeredDictionary {
 
     fn about(&self) -> DictionaryInfo {
         DictionaryInfo {
-            name: "Built-in LayeredDictionary".to_string(),
+            name: "Built-in Layered".to_string(),
             ..Default::default()
         }
     }
@@ -176,25 +173,25 @@ mod tests {
     use std::error::Error;
 
     use crate::{
-        dictionary::{Dictionary, TrieBufDictionary},
+        dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo,
     };
 
-    use super::LayeredDictionary;
+    use super::Layered;
 
     #[test]
     fn test_entries() -> Result<(), Box<dyn Error>> {
-        let sys_dict = TrieBufDictionary::from([(
+        let sys_dict = TrieBuf::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("測", 1), ("冊", 1), ("側", 1)],
         )]);
-        let user_dict = TrieBufDictionary::from([(
+        let user_dict = TrieBuf::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("策", 100), ("冊", 100)],
         )]);
 
-        let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));
+        let dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
         assert_eq!(
             [
                 (

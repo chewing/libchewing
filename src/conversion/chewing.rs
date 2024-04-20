@@ -501,7 +501,7 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 mod tests {
     use crate::{
         conversion::{Composition, GapKind, Interval, Symbol},
-        dictionary::{Dictionary, Phrase, TrieBufDictionary},
+        dictionary::{Dictionary, Phrase, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -509,7 +509,7 @@ mod tests {
     use super::{ChewingEngine, PossibleInterval, PossiblePath};
 
     fn test_dictionary() -> impl Dictionary {
-        TrieBufDictionary::from([
+        TrieBuf::from([
             (vec![syl![G, U, O, TONE2]], vec![("國", 1)]),
             (vec![syl![M, I, EN, TONE2]], vec![("民", 1)]),
             (vec![syl![D, A, TONE4]], vec![("大", 1)]),

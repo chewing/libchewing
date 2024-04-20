@@ -13,7 +13,7 @@ use crate::{
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{uhash, Dictionary, TrieBufDictionary, TrieDictionary};
+use super::{uhash, Dictionary, Trie, TrieBuf};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";
@@ -51,9 +51,9 @@ impl SystemDictionaryLoader {
             .ok_or("SystemDictionaryNotFound")?;
 
         let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
-        let tsi_dict = TrieDictionary::open(tsi_dict_path).map_err(load_err)?;
+        let tsi_dict = Trie::open(tsi_dict_path).map_err(load_err)?;
         let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
-        let word_dict = TrieDictionary::open(word_dict_path).map_err(load_err)?;
+        let word_dict = Trie::open(word_dict_path).map_err(load_err)?;
         Ok(vec![Box::new(word_dict), Box::new(tsi_dict)])
     }
     pub fn load_abbrev(&self) -> Result<AbbrevTable, &'static str> {
@@ -98,7 +98,7 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
-            return Ok(Box::new(TrieBufDictionary::new_in_memory()));
+            return Ok(Box::new(TrieBuf::new_in_memory()));
         }
         if data_path.exists() {
             return guess_format_and_load(&data_path);
@@ -175,7 +175,7 @@ fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> 
             Err(io::Error::from(io::ErrorKind::Unsupported))
         }
     } else if ext.eq_ignore_ascii_case("dat") {
-        TrieBufDictionary::open(dict_path)
+        TrieBuf::open(dict_path)
             .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
     } else {

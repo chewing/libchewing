@@ -10,7 +10,7 @@ use std::{
 
 use chewing::{
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{Layered, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         syllable::{
@@ -178,7 +178,7 @@ pub unsafe extern "C" fn chewing_new2(
         Err(_) => return null_mut(),
     };
 
-    let dict = LayeredDictionary::new(dictionaries, user_dictionary);
+    let dict = Layered::new(dictionaries, user_dictionary);
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);

@@ -1,8 +1,6 @@
 use anyhow::{bail, Context, Result};
 use chewing::{
-    dictionary::{
-        DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieDictionaryBuilder,
-    },
+    dictionary::{DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieBuilder},
     zhuyin::{Bopomofo, Syllable},
 };
 use std::{
@@ -53,7 +51,7 @@ impl<T> IntoParseError<T> for Result<T> {
 pub fn run(args: flags::InitDatabase) -> Result<()> {
     let mut builder: Box<dyn DictionaryBuilder> = match args.db_type_or_default().as_str() {
         "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
-        "trie" => Box::new(TrieDictionaryBuilder::new()),
+        "trie" => Box::new(TrieBuilder::new()),
         ty => bail!("Unknown database type {ty}"),
     };
 
@@ -114,7 +112,7 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
     }
     builder.build(path)?;
 
-    if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieDictionaryBuilder>() {
+    if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieBuilder>() {
         let stats = trie_builder.statistics();
         eprintln!("== Trie Dictionary Statistics ==");
         eprintln!("Node count           : {}", stats.node_count);
