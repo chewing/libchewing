@@ -241,7 +241,7 @@ mod tests {
     #[test]
     fn init_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_syl(syl![C, E, TONE4]));
+        com.push(Symbol::from(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -260,7 +260,7 @@ mod tests {
     #[should_panic]
     fn init_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_char(','));
+        com.push(Symbol::from(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -275,7 +275,7 @@ mod tests {
     #[test]
     fn init_forward_select_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_syl(syl![C, E, TONE4]));
+        com.push(Symbol::from(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -294,7 +294,7 @@ mod tests {
     #[should_panic]
     fn init_forward_select_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_char(','));
+        com.push(Symbol::from(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -310,8 +310,8 @@ mod tests {
     fn should_stop_at_left_boundary() {
         let mut com = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
         ] {
             com.push(sym);
         }
@@ -331,7 +331,7 @@ mod tests {
     #[test]
     fn should_stop_after_first_non_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_char(','), Symbol::new_syl(syl![C, E, TONE4])] {
+        for sym in [Symbol::from(','), Symbol::from(syl![C, E, TONE4])] {
             com.push(sym);
         }
         let sel = PhraseSelector {
@@ -351,8 +351,8 @@ mod tests {
     fn should_stop_after_first_selection() {
         let mut com = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
         ] {
             com.push(sym);
         }

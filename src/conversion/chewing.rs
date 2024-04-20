@@ -567,12 +567,12 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -607,12 +607,12 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -661,12 +661,12 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -707,9 +707,9 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![X, I, EN]),
-            Symbol::new_syl(syl![K, U, TONE4]),
-            Symbol::new_syl(syl![I, EN]),
+            Symbol::from(syl![X, I, EN]),
+            Symbol::from(syl![K, U, TONE4]),
+            Symbol::from(syl![I, EN]),
         ] {
             composition.push(sym);
         }
@@ -736,8 +736,8 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -782,10 +782,10 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![SH, TONE4]),
-            Symbol::new_syl(syl![I, TONE2]),
-            Symbol::new_syl(syl![X, I, A, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![SH, TONE4]),
+            Symbol::from(syl![I, TONE2]),
+            Symbol::from(syl![X, I, A, TONE4]),
         ] {
             composition.push(sym);
         }

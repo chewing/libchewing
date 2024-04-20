@@ -931,7 +931,7 @@ impl State for Entering {
                     shared.commit_buffer.push(ev.unicode);
                     self.spin_commit()
                 } else {
-                    shared.com.insert(Symbol::new_char(ev.unicode));
+                    shared.com.insert(Symbol::from(ev.unicode));
                     self.spin_absorb()
                 }
             }
@@ -946,7 +946,7 @@ impl State for Entering {
                             shared.commit_buffer.push(ev.unicode);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::new_char(ev.unicode));
+                            shared.com.insert(Symbol::from(ev.unicode));
                             self.spin_absorb()
                         }
                     }
@@ -957,7 +957,7 @@ impl State for Entering {
                             shared.commit_buffer.push(char_);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::new_char(char_));
+                            shared.com.insert(Symbol::from(char_));
                             self.spin_absorb()
                         }
                     }
@@ -967,11 +967,11 @@ impl State for Entering {
                     if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
                         expended
                             .chars()
-                            .for_each(|ch| shared.com.insert(Symbol::new_char(ch)));
+                            .for_each(|ch| shared.com.insert(Symbol::from(ch)));
                         return self.spin_absorb();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.insert(Symbol::new_char(symbol));
+                        shared.com.insert(Symbol::from(symbol));
                         return self.spin_absorb();
                     }
                     if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
@@ -984,7 +984,7 @@ impl State for Entering {
                         return self.start_enter_syllable();
                     }
                     if let Some(symbol) = special_symbol_input(ev.unicode) {
-                        shared.com.insert(Symbol::new_char(symbol));
+                        shared.com.insert(Symbol::from(symbol));
                         return self.spin_absorb();
                     }
                     self.spin_bell()
@@ -996,7 +996,7 @@ impl State for Entering {
                             shared.commit_buffer.push(ev.unicode);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::new_char(ev.unicode));
+                            shared.com.insert(Symbol::from(ev.unicode));
                             self.spin_absorb()
                         }
                     }
@@ -1007,7 +1007,7 @@ impl State for Entering {
                             shared.commit_buffer.push(char_);
                             self.spin_commit()
                         } else {
-                            shared.com.insert(Symbol::new_char(char_));
+                            shared.com.insert(Symbol::from(char_));
                             self.spin_absorb()
                         }
                     }
@@ -1078,7 +1078,7 @@ impl State for EnteringSyllable {
                         .lookup_first_phrase(&[shared.syl.read()])
                         .is_some()
                     {
-                        shared.com.insert(Symbol::new_syl(shared.syl.read()));
+                        shared.com.insert(Symbol::from(shared.syl.read()));
                     }
                     shared.syl.clear();
                     self.start_entering()

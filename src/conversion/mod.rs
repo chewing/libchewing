@@ -96,21 +96,21 @@ impl Debug for Symbol {
 }
 
 impl Symbol {
-    pub fn new_syl(sym: Syllable) -> Symbol {
-        Symbol {
-            kind: SymbolKind::Syllable(sym),
-        }
-    }
-    pub fn new_char(sym: char) -> Symbol {
-        Symbol {
-            kind: SymbolKind::Char(sym),
-        }
-    }
     pub fn is_syllable(&self) -> bool {
-        match self.kind {
-            SymbolKind::Syllable(_) => true,
-            SymbolKind::Char(_) => false,
-        }
+        matches!(
+            self,
+            Symbol {
+                kind: SymbolKind::Syllable(_)
+            }
+        )
+    }
+    pub fn is_char(&self) -> bool {
+        matches!(
+            self,
+            Symbol {
+                kind: SymbolKind::Char(_)
+            }
+        )
     }
     // FIXME return Result<Syllable>
     pub fn as_syllable(&self) -> Syllable {
@@ -119,17 +119,27 @@ impl Symbol {
             SymbolKind::Char(_) => panic!(),
         }
     }
-    pub fn is_char(&self) -> bool {
-        match self.kind {
-            SymbolKind::Syllable(_) => false,
-            SymbolKind::Char(_) => true,
-        }
-    }
     // FIXME return Result<char>
     pub fn as_char(&self) -> char {
         match self.kind {
             SymbolKind::Syllable(_) => panic!(),
             SymbolKind::Char(c) => c,
+        }
+    }
+}
+
+impl From<Syllable> for Symbol {
+    fn from(value: Syllable) -> Self {
+        Symbol {
+            kind: SymbolKind::Syllable(value),
+        }
+    }
+}
+
+impl From<char> for Symbol {
+    fn from(value: char) -> Self {
+        Symbol {
+            kind: SymbolKind::Char(value),
         }
     }
 }

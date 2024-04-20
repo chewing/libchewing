@@ -57,7 +57,7 @@ impl SymbolSelector {
                 let cat = &self.category[n];
                 if cat.1 == usize::MAX {
                     self.cursor = None;
-                    Some(Symbol::new_char(cat.0.chars().next().unwrap()))
+                    Some(Symbol::from(cat.0.chars().next().unwrap()))
                 } else {
                     self.cursor = Some(cat.1 as u8);
                     None
@@ -65,10 +65,7 @@ impl SymbolSelector {
             }
             Some(cursor) => {
                 self.cursor = None;
-                self.table[cursor as usize]
-                    .chars()
-                    .nth(n)
-                    .map(Symbol::new_char)
+                self.table[cursor as usize].chars().nth(n).map(Symbol::from)
             }
         }
     }
@@ -91,7 +88,7 @@ impl SpecialSymbolSelector {
     }
     pub(crate) fn select(&self, n: usize) -> Option<Symbol> {
         self.find_category()
-            .and_then(|cat| cat.chars().nth(n).map(Symbol::new_char))
+            .and_then(|cat| cat.chars().nth(n).map(Symbol::from))
     }
     fn find_category(&self) -> Option<&str> {
         Self::TABLE
@@ -165,7 +162,7 @@ mod tests {
         let mut sel = SymbolSelector::new(reader).expect("should parse");
 
         assert_eq!(vec!["…", "※", "常用符號"], sel.menu());
-        assert_eq!(Symbol::new_char('…'), sel.select(0).unwrap());
+        assert_eq!(Symbol::from('…'), sel.select(0).unwrap());
     }
 
     #[test]
@@ -176,6 +173,6 @@ mod tests {
         assert_eq!(vec!["…", "※", "常用符號"], sel.menu());
         assert_eq!(None, sel.select(2));
         assert_eq!(vec!["，", "、", "。"], sel.menu());
-        assert_eq!(Symbol::new_char('，'), sel.select(0).unwrap());
+        assert_eq!(Symbol::from('，'), sel.select(0).unwrap());
     }
 }
