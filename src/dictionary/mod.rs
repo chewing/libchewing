@@ -432,3 +432,15 @@ pub trait DictionaryBuilder {
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
     fn as_any(&self) -> &dyn Any;
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::dictionary::{Dictionary, DictionaryBuilder, DictionaryMut};
+
+    #[test]
+    fn ensure_object_safe() {
+        const _: Option<&dyn Dictionary> = None;
+        const _: Option<&dyn DictionaryMut> = None;
+        const _: Option<&dyn DictionaryBuilder> = None;
+    }
+}
