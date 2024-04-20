@@ -31,7 +31,7 @@ mod uhash;
 #[derive(Debug)]
 pub struct UpdateDictionaryError {
     /// TODO: doc
-    pub source: Option<Box<dyn Error + Send + Sync>>,
+    source: Option<Box<dyn Error + Send + Sync>>,
 }
 
 impl From<io::Error> for UpdateDictionaryError {
@@ -48,7 +48,11 @@ impl Display for UpdateDictionaryError {
     }
 }
 
-impl Error for UpdateDictionaryError {}
+impl Error for UpdateDictionaryError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source.as_ref().map(|err| err.as_ref() as &dyn Error)
+    }
+}
 
 /// A collection of metadata of a dictionary.
 ///
