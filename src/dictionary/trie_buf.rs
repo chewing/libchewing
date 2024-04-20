@@ -12,7 +12,7 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase,
     TrieDictionary, TrieDictionaryBuilder, UpdateDictionaryError,
 };
 
@@ -169,7 +169,7 @@ impl TrieBufDictionary {
         phrases
     }
 
-    pub(crate) fn entries(&self) -> DictEntries<'_> {
+    pub(crate) fn entries(&self) -> Entries<'_> {
         Box::new(self.entries_iter())
     }
 
@@ -301,7 +301,7 @@ impl Dictionary for TrieBufDictionary {
         TrieBufDictionary::lookup_first_n_phrases(self, syllables, first)
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         TrieBufDictionary::entries(self)
     }
 

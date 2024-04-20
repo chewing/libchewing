@@ -5,7 +5,7 @@ use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalEx
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase,
     UpdateDictionaryError,
 };
 
@@ -314,7 +314,7 @@ impl Dictionary for SqliteDictionary {
     }
 
     // FIXME too many clone
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         let mut stmt = self
             .conn
             .prepare_cached(

@@ -23,7 +23,7 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntriees, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase,
     UpdateDictionaryError,
 };
 
@@ -267,7 +267,7 @@ impl Dictionary for TrieDictionary {
             .collect()
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
         let dict = trie_file.index.as_bytes();
         let data = trie_file.phrase_seq.der_bytes;

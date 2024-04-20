@@ -247,7 +247,7 @@ impl Display for Phrase {
     }
 }
 
-/// A generic iterator over the phrases and their frequency in a dictionary.
+/// A boxed iterator over the phrases and their frequency in a dictionary.
 ///
 /// # Examples
 ///
@@ -267,8 +267,7 @@ impl Display for Phrase {
 /// ```
 pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
-/// TODO: doc
-pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
+pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
 /// An interface for looking up dictionaries.
 ///
@@ -313,7 +312,7 @@ pub trait Dictionary: Debug {
         self.lookup_first_n_phrases(syllables, usize::MAX)
     }
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries<'_>;
+    fn entries(&self) -> Entries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
     /// Reopens the dictionary if it was changed by a different process

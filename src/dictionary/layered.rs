@@ -8,7 +8,7 @@ use log::error;
 
 use crate::zhuyin::SyllableSlice;
 
-use super::{DictEntries, Dictionary, DictionaryInfo, Phrase, UpdateDictionaryError};
+use super::{Dictionary, DictionaryInfo, Entries, Phrase, UpdateDictionaryError};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -111,7 +111,7 @@ impl Dictionary for LayeredDictionary {
     /// Returns all entries from all dictionaries.
     ///
     /// **NOTE**: Duplicate entries are not removed.
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         Box::new(
             self.sys_dict
                 .iter()
