@@ -14,6 +14,7 @@ const USER_VERSION: u32 = 0;
 
 /// TODO: doc
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum SqliteDictionaryError {
     /// TODO: doc
     SqliteError {
