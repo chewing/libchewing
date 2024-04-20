@@ -846,9 +846,6 @@ impl TrieBuilder {
     /// Writes the dictionary to an output stream and returns the number of
     /// bytes written.
     ///
-    /// This method creates the sub-chunks containing the index, phrases, and
-    /// metadata, then wraps them in a RIFF container.
-    ///
     /// # Examples
     ///
     /// ```
