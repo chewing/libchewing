@@ -13,7 +13,7 @@ use chewing::{
     dictionary::{Layered, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::{
+        zhuyin_layout::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
         },

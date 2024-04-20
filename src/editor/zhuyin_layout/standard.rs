@@ -123,7 +123,7 @@ impl SyllableEditor for Standard {
 mod test {
     use crate::editor::{
         keyboard::{KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::{KeyBehavior, SyllableEditor},
+        zhuyin_layout::{KeyBehavior, SyllableEditor},
     };
 
     use super::Standard;

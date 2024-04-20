@@ -1,11 +1,11 @@
 //! Abstract input method editors.
 
 mod abbrev;
+pub mod keyboard;
 mod composition_editor;
 mod estimate;
-pub mod keyboard;
 mod selection;
-pub mod syllable;
+pub mod zhuyin_layout;
 
 use std::{
     any::{Any, TypeId},
@@ -14,8 +14,7 @@ use std::{
     fmt::{Debug, Display},
 };
 
-pub use self::abbrev::AbbrevTable;
-pub use self::selection::symbol::SymbolSelector;
+pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, trace, warn};
 
@@ -29,10 +28,10 @@ use crate::{
 };
 
 use self::{
-    composition_editor::CompositionEditor,
     keyboard::KeyEvent,
+    composition_editor::CompositionEditor,
     selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
-    syllable::{KeyBehavior, Standard, SyllableEditor},
+    zhuyin_layout::{KeyBehavior, Standard, SyllableEditor},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1411,7 +1410,7 @@ mod tests {
         conversion::ChewingEngine,
         dictionary::{Layered, TrieBuf},
         editor::{
-            abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
+            abbrev::AbbrevTable, keyboard::Modifiers, estimate, EditorKeyBehavior, SymbolSelector,
         },
         syl,
         zhuyin::Bopomofo,
