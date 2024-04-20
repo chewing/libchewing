@@ -195,10 +195,15 @@ impl DictionaryMut for Layered {
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
+    use std::{
+        error::Error,
+        io::{Cursor, Seek},
+    };
 
     use crate::{
-        dictionary::{Dictionary, TrieBuf},
+        dictionary::{
+            Dictionary, DictionaryBuilder, DictionaryMut, Phrase, Trie, TrieBuf, TrieBuilder,
+        },
         syl,
         zhuyin::Bopomofo,
     };
@@ -244,6 +249,95 @@ mod tests {
             .collect::<Vec<_>>(),
             dict.entries().collect::<Vec<_>>(),
         );
+        Ok(())
+    }
+
+    #[test]
+    fn test_lookup() -> Result<(), Box<dyn Error>> {
+        let sys_dict = TrieBuf::from([(
+            vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("測", 1), ("冊", 1), ("側", 1)],
+        )]);
+        let user_dict = TrieBuf::from([(
+            vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("策", 100), ("冊", 100)],
+        )]);
+
+        let dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
+        assert_eq!(
+            Some(("側", 1, 0).into()),
+            dict.lookup_first_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+        );
+        assert_eq!(
+            [
+                ("側", 1, 0).into(),
+                ("冊", 100, 0).into(),
+                ("測", 1, 0).into(),
+                ("策", 100, 0).into(),
+            ]
+            .into_iter()
+            .collect::<Vec<Phrase>>(),
+            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_readonly_user_dict() -> Result<(), Box<dyn Error>> {
+        let sys_dict = TrieBuf::from([(
+            vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("測", 1), ("冊", 1), ("側", 1)],
+        )]);
+        let mut builder = TrieBuilder::new();
+        builder.insert(
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            ("策", 100, 0).into(),
+        )?;
+        builder.insert(
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            ("冊", 100, 0).into(),
+        )?;
+        let mut cursor = Cursor::new(vec![]);
+        builder.write(&mut cursor)?;
+        cursor.rewind()?;
+        let user_dict = Trie::new(&mut cursor)?;
+
+        let mut dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
+        assert_eq!(
+            Some(("側", 1, 0).into()),
+            dict.lookup_first_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+        );
+        assert_eq!(
+            [
+                ("側", 1, 0).into(),
+                ("冊", 100, 0).into(),
+                ("測", 1, 0).into(),
+                ("策", 100, 0).into(),
+            ]
+            .into_iter()
+            .collect::<Vec<Phrase>>(),
+            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+        );
+        let _ = dict.about();
+        assert!(dict.reopen().is_ok());
+        assert!(dict.flush().is_ok());
+        assert!(dict
+            .add_phrase(
+                &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                ("冊", 100).into()
+            )
+            .is_ok());
+        assert!(dict
+            .update_phrase(
+                &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                ("冊", 100).into(),
+                0,
+                0,
+            )
+            .is_ok());
+        assert!(dict
+            .remove_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], "冊")
+            .is_ok());
         Ok(())
     }
 }
