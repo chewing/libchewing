@@ -29,26 +29,26 @@ mod uhash;
 
 /// The error type which is returned from updating a dictionary.
 #[derive(Debug)]
-pub struct DictionaryUpdateError {
+pub struct UpdateDictionaryError {
     /// TODO: doc
     pub source: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl From<io::Error> for DictionaryUpdateError {
+impl From<io::Error> for UpdateDictionaryError {
     fn from(value: io::Error) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(Box::new(value)),
         }
     }
 }
 
-impl Display for DictionaryUpdateError {
+impl Display for UpdateDictionaryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "update dictionary failed")
     }
 }
 
-impl Error for DictionaryUpdateError {}
+impl Error for UpdateDictionaryError {}
 
 /// A collection of metadata of a dictionary.
 ///
@@ -320,12 +320,12 @@ pub trait Dictionary: Debug {
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError>;
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError>;
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError>;
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError>;
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -348,7 +348,7 @@ pub trait Dictionary: Debug {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 
     /// TODO: doc
     fn update_phrase(
@@ -357,14 +357,14 @@ pub trait Dictionary: Debug {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 
     /// TODO: doc
     fn remove_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 }
 
 /// TODO: doc

@@ -23,8 +23,8 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase,
+    BuildDictionaryError, DictEntriees, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    UpdateDictionaryError,
 };
 
 const DICT_FORMAT_VERSION: u8 = 0;
@@ -128,8 +128,8 @@ impl Display for TrieDictionaryError {
 
 impl Error for TrieDictionaryError {}
 
-fn read_only_error() -> DictionaryUpdateError {
-    DictionaryUpdateError {
+fn read_only_error() -> UpdateDictionaryError {
+    UpdateDictionaryError {
         source: Some(Box::new(TrieDictionaryError::ReadOnly)),
     }
 }
@@ -362,11 +362,11 @@ impl Dictionary for TrieDictionary {
         trie_file.info.into()
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
 
@@ -374,7 +374,7 @@ impl Dictionary for TrieDictionary {
         &mut self,
         _syllables: &dyn SyllableSlice,
         _phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         Err(read_only_error())
     }
 
@@ -384,7 +384,7 @@ impl Dictionary for TrieDictionary {
         _phrase: Phrase,
         _user_freq: u32,
         _time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         Err(read_only_error())
     }
 
@@ -392,7 +392,7 @@ impl Dictionary for TrieDictionary {
         &mut self,
         _syllables: &dyn SyllableSlice,
         _phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         Err(read_only_error())
     }
 }

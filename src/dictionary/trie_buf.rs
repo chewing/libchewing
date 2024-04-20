@@ -12,8 +12,8 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase, TrieDictionary, TrieDictionaryBuilder,
+    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    TrieDictionary, TrieDictionaryBuilder, UpdateDictionaryError,
 };
 
 #[derive(Debug)]
@@ -22,7 +22,7 @@ pub struct TrieBufDictionary {
     trie: Option<TrieDictionary>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
-    join_handle: Option<JoinHandle<Result<TrieDictionary, DictionaryUpdateError>>>,
+    join_handle: Option<JoinHandle<Result<TrieDictionary, UpdateDictionaryError>>>,
     dirty: bool,
 }
 
@@ -177,13 +177,13 @@ impl TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         let syllable_slice = syllables.as_slice();
         if self
             .entries_iter_for(&syllable_slice.as_ref())
             .any(|ph| ph.as_str() == phrase.as_str())
         {
-            return Err(DictionaryUpdateError { source: None });
+            return Err(UpdateDictionaryError { source: None });
         }
 
         self.btree.insert(
@@ -204,7 +204,7 @@ impl TrieBufDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         self.btree.insert(
             (
                 Cow::from(syllables.as_slice().into_owned()),
@@ -221,7 +221,7 @@ impl TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         let syllable_slice = Cow::from(syllables.as_slice().into_owned());
         self.btree
             .remove(&(syllable_slice.clone(), Cow::from(phrase_str.to_owned())));
@@ -232,7 +232,7 @@ impl TrieBufDictionary {
         Ok(())
     }
 
-    pub(crate) fn sync(&mut self) -> Result<(), DictionaryUpdateError> {
+    pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
         if let Some(join_handle) = self.join_handle.take() {
             if !join_handle.is_finished() {
                 // Wait until previous sync is finished.
@@ -280,7 +280,7 @@ impl TrieBufDictionary {
                 builder.insert(&syllables, phrase)?;
             }
             builder.build(&snapshot.path)?;
-            TrieDictionary::open(&snapshot.path).map_err(|err| DictionaryUpdateError {
+            TrieDictionary::open(&snapshot.path).map_err(|err| UpdateDictionaryError {
                 source: Some(Box::new(err)),
             })
         }));
@@ -288,9 +288,9 @@ impl TrieBufDictionary {
     }
 }
 
-impl From<BuildDictionaryError> for DictionaryUpdateError {
+impl From<BuildDictionaryError> for UpdateDictionaryError {
     fn from(value: BuildDictionaryError) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(Box::new(value)),
         }
     }
@@ -311,12 +311,12 @@ impl Dictionary for TrieBufDictionary {
             .map_or(DictionaryInfo::default(), |trie| trie.about())
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.sync()?;
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         if self.path.as_os_str().is_empty() {
             return Ok(());
         }
@@ -328,7 +328,7 @@ impl Dictionary for TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         TrieBufDictionary::add_phrase(self, syllables, phrase)
     }
 
@@ -338,7 +338,7 @@ impl Dictionary for TrieBufDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         TrieBufDictionary::update_phrase(self, syllables, phrase, user_freq, time)
     }
 

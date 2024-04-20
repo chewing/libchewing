@@ -8,7 +8,7 @@ use log::error;
 
 use crate::zhuyin::SyllableSlice;
 
-use super::{DictEntries, Dictionary, DictionaryInfo, DictionaryUpdateError, Phrase};
+use super::{DictEntries, Dictionary, DictionaryInfo, Phrase, UpdateDictionaryError};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -127,11 +127,11 @@ impl Dictionary for LayeredDictionary {
         }
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.user_dict.reopen()
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         self.user_dict.flush()
     }
 
@@ -139,7 +139,7 @@ impl Dictionary for LayeredDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if phrase.as_str().is_empty() {
             error!("BUG! added phrase is empty");
             return Ok(());
@@ -153,7 +153,7 @@ impl Dictionary for LayeredDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if phrase.as_str().is_empty() {
             error!("BUG! added phrase is empty");
             return Ok(());
@@ -166,7 +166,7 @@ impl Dictionary for LayeredDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         self.user_dict.remove_phrase(syllables, phrase_str)
     }
 }

@@ -5,8 +5,8 @@ use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalEx
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase,
+    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+    UpdateDictionaryError,
 };
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
@@ -276,9 +276,9 @@ impl SqliteDictionary {
     }
 }
 
-impl From<RusqliteError> for DictionaryUpdateError {
+impl From<RusqliteError> for UpdateDictionaryError {
     fn from(source: RusqliteError) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(source.into()),
         }
     }
@@ -352,11 +352,11 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
         Ok(())
     }
@@ -365,9 +365,9 @@ impl Dictionary for SqliteDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if self.read_only {
-            return Err(DictionaryUpdateError {
+            return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
@@ -389,9 +389,9 @@ impl Dictionary for SqliteDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if self.read_only {
-            return Err(DictionaryUpdateError {
+            return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
@@ -441,7 +441,7 @@ impl Dictionary for SqliteDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         let syllables_bytes = syllables.get_bytes();
         let mut stmt = self
             .conn
