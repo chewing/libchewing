@@ -205,7 +205,7 @@ impl PhraseSelector {
         if self.end - self.begin == 1 {
             let alt = editor
                 .syl
-                .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable());
+                .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable().unwrap());
             for &syl in alt {
                 candidates.extend(
                     dict.lookup_all_phrases(&[syl])

@@ -101,18 +101,16 @@ impl Symbol {
     pub fn is_char(&self) -> bool {
         matches!(self, Symbol::Char(_))
     }
-    // FIXME return Result<Syllable>
-    pub fn to_syllable(self) -> Syllable {
+    pub fn to_syllable(self) -> Option<Syllable> {
         match self {
-            Symbol::Syllable(syllable) => syllable,
-            Symbol::Char(_) => panic!(),
+            Symbol::Syllable(syllable) => Some(syllable),
+            Symbol::Char(_) => None,
         }
     }
-    // FIXME return Result<char>
-    pub fn to_char(self) -> char {
+    pub fn to_char(self) -> Option<char> {
         match self {
-            Symbol::Syllable(_) => panic!(),
-            Symbol::Char(c) => c,
+            Symbol::Syllable(_) => None,
+            Symbol::Char(c) => Some(c),
         }
     }
 }

@@ -120,7 +120,7 @@ impl ChewingEngine {
         let syllables = symbols
             .iter()
             .take_while(|symbol| symbol.is_syllable())
-            .map(|symbol| symbol.to_syllable())
+            .map(|symbol| symbol.to_syllable().unwrap())
             .collect::<Vec<_>>();
         if syllables.len() != symbols.len() {
             return None;
@@ -320,7 +320,7 @@ impl PossiblePhrase {
 impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char()),
+            PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char().unwrap()),
             PossiblePhrase::Phrase(phrase) => f.write_str(phrase.as_str()),
         }
     }
@@ -341,7 +341,7 @@ impl From<Symbol> for PossiblePhrase {
 impl From<PossiblePhrase> for Box<str> {
     fn from(value: PossiblePhrase) -> Self {
         match value {
-            PossiblePhrase::Symbol(sym) => sym.to_char().to_string().into_boxed_str(),
+            PossiblePhrase::Symbol(sym) => sym.to_char().unwrap().to_string().into_boxed_str(),
             PossiblePhrase::Phrase(phrase) => phrase.into(),
         }
     }
