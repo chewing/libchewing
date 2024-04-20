@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    conversion::{Composition, GapKind, Interval},
+    conversion::{Composition, Gap, Interval},
     dictionary::{Dictionary, Layered},
     editor::{EditorError, SharedState},
 };
@@ -183,7 +183,7 @@ impl PhraseSelector {
             if selection_ends.contains(&cursor) {
                 break;
             }
-            if let Some(GapKind::Break) = self.com.gap(cursor) {
+            if let Some(Gap::Break) = self.com.gap(cursor) {
                 break;
             }
             if let Some(sym) = self.com.symbol(cursor - 1) {
@@ -205,7 +205,7 @@ impl PhraseSelector {
         if self.end - self.begin == 1 {
             let alt = editor
                 .syl
-                .alt_syllables(self.com.symbol(self.begin).unwrap().as_syllable());
+                .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable());
             for &syl in alt {
                 candidates.extend(
                     dict.lookup_all_phrases(&[syl])

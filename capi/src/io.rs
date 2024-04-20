@@ -763,7 +763,7 @@ pub unsafe extern "C" fn chewing_get_phoneSeq(ctx: *const ChewingContext) -> *mu
         .iter()
         .cloned()
         .filter(Symbol::is_syllable)
-        .map(|sym| sym.as_syllable().to_u16())
+        .map(|sym| sym.to_syllable().to_u16())
         .collect();
     let len = syllables.len();
     let ptr = Box::into_raw(syllables.into_boxed_slice());

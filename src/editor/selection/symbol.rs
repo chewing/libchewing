@@ -93,7 +93,7 @@ impl SpecialSymbolSelector {
     fn find_category(&self) -> Option<&str> {
         Self::TABLE
             .iter()
-            .find(|cat| cat.contains(self.symbol.as_char()))
+            .find(|cat| cat.contains(self.symbol.to_char()))
             .copied()
     }
     const TABLE: &'static [&'static str; 48] = &[

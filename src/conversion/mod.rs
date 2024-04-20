@@ -63,93 +63,78 @@ impl Interval {
     }
 }
 
+/// Represents the gap between symbols.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Gap {
+    /// Beginning of Buffer.
+    Begin,
+    /// Explicitly marked break point.
+    Break,
+    /// Explicitly marked connection point.
+    Glue,
+    /// Normal, default, gap.
+    Normal,
+}
+
 /// A smallest unit of input in the pre-edit buffer.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
-pub enum SymbolKind {
+#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
+pub enum Symbol {
     /// Chinese syllable
     Syllable(Syllable),
     /// Any direct character
     Char(char),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum GapKind {
-    // Beginning of Buffer.
-    BOB,
-    Break,
-    Glue,
-    Normal,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Symbol {
-    kind: SymbolKind,
-}
-
 impl Debug for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.kind {
-            SymbolKind::Syllable(syl) => f.debug_tuple("S").field(&syl.to_string()).finish(),
-            SymbolKind::Char(ch) => f.debug_tuple("C").field(&ch).finish(),
+        match self {
+            Symbol::Syllable(syl) => f.debug_tuple("S").field(&syl.to_string()).finish(),
+            Symbol::Char(ch) => f.debug_tuple("C").field(&ch).finish(),
         }
     }
 }
 
 impl Symbol {
     pub fn is_syllable(&self) -> bool {
-        matches!(
-            self,
-            Symbol {
-                kind: SymbolKind::Syllable(_)
-            }
-        )
+        matches!(self, Symbol::Syllable(_))
     }
     pub fn is_char(&self) -> bool {
-        matches!(
-            self,
-            Symbol {
-                kind: SymbolKind::Char(_)
-            }
-        )
+        matches!(self, Symbol::Char(_))
     }
     // FIXME return Result<Syllable>
-    pub fn as_syllable(&self) -> Syllable {
-        match self.kind {
-            SymbolKind::Syllable(syllable) => syllable,
-            SymbolKind::Char(_) => panic!(),
+    pub fn to_syllable(self) -> Syllable {
+        match self {
+            Symbol::Syllable(syllable) => syllable,
+            Symbol::Char(_) => panic!(),
         }
     }
     // FIXME return Result<char>
-    pub fn as_char(&self) -> char {
-        match self.kind {
-            SymbolKind::Syllable(_) => panic!(),
-            SymbolKind::Char(c) => c,
+    pub fn to_char(self) -> char {
+        match self {
+            Symbol::Syllable(_) => panic!(),
+            Symbol::Char(c) => c,
         }
     }
 }
 
 impl From<Syllable> for Symbol {
     fn from(value: Syllable) -> Self {
-        Symbol {
-            kind: SymbolKind::Syllable(value),
-        }
+        Symbol::Syllable(value)
     }
 }
 
 impl From<char> for Symbol {
     fn from(value: char) -> Self {
-        Symbol {
-            kind: SymbolKind::Char(value),
-        }
+        Symbol::Char(value)
     }
 }
 
 impl SyllableSlice for &[Symbol] {
     fn as_slice(&self) -> Cow<'static, [Syllable]> {
         self.iter()
-            .map_while(|sym| match sym.kind {
-                SymbolKind::Syllable(syl) => Some(syl),
-                SymbolKind::Char(_) => None,
+            .map_while(|&sym| match sym {
+                Symbol::Syllable(syl) => Some(syl),
+                Symbol::Char(_) => None,
             })
             .collect::<Vec<_>>()
             .into()
@@ -159,9 +144,9 @@ impl SyllableSlice for &[Symbol] {
 impl SyllableSlice for Vec<Symbol> {
     fn as_slice(&self) -> Cow<'static, [Syllable]> {
         self.iter()
-            .map_while(|sym| match sym.kind {
-                SymbolKind::Syllable(syl) => Some(syl),
-                SymbolKind::Char(_) => None,
+            .map_while(|&sym| match sym {
+                Symbol::Syllable(syl) => Some(syl),
+                Symbol::Char(_) => None,
             })
             .collect::<Vec<_>>()
             .into()
@@ -173,7 +158,7 @@ impl SyllableSlice for Vec<Symbol> {
 pub struct Composition {
     /// TODO: doc
     symbols: Vec<Symbol>,
-    gaps: Vec<GapKind>,
+    gaps: Vec<Gap>,
     /// TODO: doc
     selections: Vec<Interval>,
 }
@@ -220,25 +205,25 @@ impl Composition {
     pub fn selections(&self) -> &[Interval] {
         &self.selections
     }
-    pub fn gap(&self, index: usize) -> Option<GapKind> {
+    pub fn gap(&self, index: usize) -> Option<Gap> {
         if index >= self.len() {
             return None;
         }
         Some(self.gaps[index])
     }
-    pub fn gap_after(&self, index: usize) -> Option<GapKind> {
+    pub fn gap_after(&self, index: usize) -> Option<Gap> {
         if index + 1 >= self.len() {
             return None;
         }
         Some(self.gaps[index + 1])
     }
-    pub fn set_gap(&mut self, index: usize, gap: GapKind) {
+    pub fn set_gap(&mut self, index: usize, gap: Gap) {
         assert!(index < self.len());
-        assert_ne!(gap, GapKind::BOB);
+        assert_ne!(gap, Gap::Begin);
         if index == 0 {
             return;
         }
-        if gap == GapKind::Break {
+        if gap == Gap::Break {
             let mut to_remove = vec![];
             for (i, selection) in self.selections.iter_mut().enumerate() {
                 if selection.start < index && index < selection.end {
@@ -271,15 +256,15 @@ impl Composition {
         }
         self.symbols.insert(index, sym);
         if !self.gaps.is_empty() && index != self.gaps.len() {
-            self.gaps[index] = GapKind::Normal;
+            self.gaps[index] = Gap::Normal;
         }
-        self.gaps.insert(index, GapKind::Normal);
-        self.gaps[0] = GapKind::BOB;
+        self.gaps.insert(index, Gap::Normal);
+        self.gaps[0] = Gap::Begin;
     }
     pub fn replace(&mut self, index: usize, sym: Symbol) {
         assert!(index < self.len());
         self.symbols[index] = sym;
-        self.set_gap(index, GapKind::Normal);
+        self.set_gap(index, Gap::Normal);
     }
     pub fn push_selection(&mut self, interval: Interval) {
         assert!(interval.end <= self.len());
@@ -293,7 +278,7 @@ impl Composition {
             self.selections.swap_remove(i);
         }
         for i in (interval.start..interval.end).skip(1) {
-            self.gaps[i] = GapKind::Normal;
+            self.gaps[i] = Gap::Normal;
         }
         self.selections.push(interval);
     }
@@ -314,7 +299,7 @@ impl Composition {
         self.symbols.drain(0..n);
         self.gaps.drain(0..n);
         if !self.gaps.is_empty() {
-            self.gaps[0] = GapKind::BOB;
+            self.gaps[0] = Gap::Begin;
         }
     }
     pub fn remove(&mut self, index: usize) {
@@ -336,7 +321,7 @@ impl Composition {
         self.symbols.remove(index);
         self.gaps.remove(index);
         if !self.gaps.is_empty() {
-            self.gaps[0] = GapKind::BOB;
+            self.gaps[0] = Gap::Begin;
         }
     }
     pub fn clear(&mut self) {

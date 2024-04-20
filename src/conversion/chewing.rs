@@ -9,7 +9,7 @@ use log::{debug, log_enabled, trace, Level::Trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Composition, GapKind, Interval, Symbol};
+use super::{Composition, Gap, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug, Default)]
@@ -67,7 +67,7 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
         return acc;
     }
     let last = acc.last().expect("acc should have at least one item");
-    if let Some(GapKind::Glue) = com.gap(last.end) {
+    if let Some(Gap::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
         let mut phrase = last.str.into_string();
         phrase.push_str(&interval.str);
@@ -94,7 +94,7 @@ impl ChewingEngine {
         let end = start + symbols.len();
 
         for i in (start..end).skip(1) {
-            if let Some(GapKind::Break) = com.gap(i) {
+            if let Some(Gap::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
                 debug!("No best phrase for {:?} due to break point", symbols);
@@ -120,7 +120,7 @@ impl ChewingEngine {
         let syllables = symbols
             .iter()
             .take_while(|symbol| symbol.is_syllable())
-            .map(|symbol| symbol.as_syllable())
+            .map(|symbol| symbol.to_syllable())
             .collect::<Vec<_>>();
         if syllables.len() != symbols.len() {
             return None;
@@ -320,7 +320,7 @@ impl PossiblePhrase {
 impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PossiblePhrase::Symbol(sym) => f.write_char(sym.as_char()),
+            PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char()),
             PossiblePhrase::Phrase(phrase) => f.write_str(phrase.as_str()),
         }
     }
@@ -341,7 +341,7 @@ impl From<Symbol> for PossiblePhrase {
 impl From<PossiblePhrase> for Box<str> {
     fn from(value: PossiblePhrase) -> Self {
         match value {
-            PossiblePhrase::Symbol(sym) => sym.as_char().to_string().into_boxed_str(),
+            PossiblePhrase::Symbol(sym) => sym.to_char().to_string().into_boxed_str(),
             PossiblePhrase::Phrase(phrase) => phrase.into(),
         }
     }
@@ -500,7 +500,7 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Composition, GapKind, Interval, Symbol},
+        conversion::{Composition, Gap, Interval, Symbol},
         dictionary::{Dictionary, Phrase, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -616,8 +616,8 @@ mod tests {
         ] {
             composition.push(sym);
         }
-        composition.set_gap(1, GapKind::Break);
-        composition.set_gap(5, GapKind::Break);
+        composition.set_gap(1, Gap::Break);
+        composition.set_gap(5, Gap::Break);
         assert_eq!(
             Some(vec![
                 Interval {
