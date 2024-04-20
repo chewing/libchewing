@@ -368,7 +368,7 @@ impl Editor {
         self.shared
             .conversion()
             .into_iter()
-            .map(|interval| interval.phrase)
+            .map(|interval| interval.str)
             .collect::<String>()
     }
     // TODO: decide the return type
@@ -522,7 +522,7 @@ impl SharedState {
         let phrase = self
             .conversion()
             .into_iter()
-            .map(|interval| interval.phrase)
+            .map(|interval| interval.str)
             .collect::<String>()
             .chars()
             .skip(start)
@@ -608,7 +608,7 @@ impl SharedState {
         }
         let output = intervals
             .into_iter()
-            .map(|interval| interval.phrase)
+            .map(|interval| interval.str)
             .collect::<String>();
         self.commit_buffer.push_str(&output);
         self.com.clear();
@@ -626,7 +626,7 @@ impl SharedState {
         let mut remove = 0;
         self.commit_buffer.clear();
         for it in intervals {
-            self.commit_buffer.push_str(&it.phrase);
+            self.commit_buffer.push_str(&it.str);
             remove += it.len();
             if len - remove <= self.options.auto_commit_threshold {
                 break;
@@ -644,8 +644,8 @@ impl SharedState {
         let mut pending = String::new();
         let mut syllables = Vec::new();
         for interval in intervals {
-            if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.phrase) {
-                pending.push_str(&interval.phrase);
+            if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.str) {
+                pending.push_str(&interval.str);
                 syllables.extend_from_slice(&self.com.symbols()[interval.start..interval.end]);
             } else {
                 if !pending.is_empty() {
@@ -658,12 +658,12 @@ impl SharedState {
                     debug!(
                         "autolearn-3 {:?} as {}",
                         &self.com.symbols()[interval.start..interval.end],
-                        &interval.phrase
+                        &interval.str
                     );
                     // FIXME avoid copy
                     let _ = self.learn_phrase(
                         &self.com.symbols()[interval.start..interval.end].to_vec(),
-                        &interval.phrase,
+                        &interval.str,
                     );
                 }
             }

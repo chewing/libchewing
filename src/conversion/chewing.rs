@@ -69,13 +69,13 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
     let last = acc.last().expect("acc should have at least one item");
     if let Some(GapKind::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
-        let mut phrase = last.phrase.into_string();
-        phrase.push_str(&interval.phrase);
+        let mut phrase = last.str.into_string();
+        phrase.push_str(&interval.str);
         acc.push(Interval {
             start: last.start,
             end: interval.end,
             is_phrase: true,
-            phrase: phrase.into_boxed_str(),
+            str: phrase.into_boxed_str(),
         })
     } else {
         acc.push(interval);
@@ -133,13 +133,13 @@ impl ChewingEngine {
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
             for selection in &com.selections {
-                debug_assert!(!selection.phrase.is_empty());
+                debug_assert!(!selection.str.is_empty());
                 if start <= selection.start && end >= selection.end {
                     let offset = selection.start - start;
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
-                    if substring != selection.phrase.as_ref() {
+                    if substring != selection.str.as_ref() {
                         continue 'next_phrase;
                     }
                 }
@@ -372,7 +372,7 @@ impl From<PossibleInterval> for Interval {
                 PossiblePhrase::Symbol(_) => false,
                 PossiblePhrase::Phrase(_) => true,
             },
-            phrase: value.phrase.into(),
+            str: value.phrase.into(),
         }
     }
 }
@@ -582,19 +582,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".into()
+                    str: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "代表".into()
+                    str: "代表".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -624,31 +624,31 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "國".into()
+                    str: "國".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "民".into()
+                    str: "民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 5,
                     is_phrase: true,
-                    phrase: "代".into()
+                    str: "代".into()
                 },
                 Interval {
                     start: 5,
                     end: 6,
                     is_phrase: true,
-                    phrase: "表".into()
+                    str: "表".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -674,7 +674,7 @@ mod tests {
             start: 4,
             end: 6,
             is_phrase: true,
-            phrase: "戴錶".into(),
+            str: "戴錶".into(),
         });
         assert_eq!(
             Some(vec![
@@ -682,19 +682,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".into()
+                    str: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "戴錶".into()
+                    str: "戴錶".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -717,14 +717,14 @@ mod tests {
             start: 1,
             end: 3,
             is_phrase: true,
-            phrase: "酷音".into(),
+            str: "酷音".into(),
         });
         assert_eq!(
             Some(vec![Interval {
                 start: 0,
                 end: 3,
                 is_phrase: true,
-                phrase: "新酷音".into()
+                str: "新酷音".into()
             },]),
             engine.convert(&dict, &composition).next()
         );
@@ -746,13 +746,13 @@ mod tests {
                 start: 0,
                 end: 1,
                 is_phrase: true,
-                phrase: "代".into(),
+                str: "代".into(),
             },
             Interval {
                 start: 1,
                 end: 2,
                 is_phrase: true,
-                phrase: "錶".into(),
+                str: "錶".into(),
             },
         ] {
             composition.push_selection(interval);
@@ -763,13 +763,13 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "代".into()
+                    str: "代".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "錶".into()
+                    str: "錶".into()
                 }
             ]),
             engine.convert(&dict, &composition).next()
@@ -795,13 +795,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".into()
+                    str: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".into()
+                    str: "一下".into()
                 }
             ]),
             engine.convert(&dict, &composition).next()
@@ -812,13 +812,13 @@ mod tests {
                     start: 0,
                     end: 3,
                     is_phrase: true,
-                    phrase: "測試儀".into()
+                    str: "測試儀".into()
                 },
                 Interval {
                     start: 3,
                     end: 4,
                     is_phrase: true,
-                    phrase: "下".into()
+                    str: "下".into()
                 }
             ]),
             engine.convert(&dict, &composition).nth(1)
@@ -829,13 +829,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".into()
+                    str: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".into()
+                    str: "一下".into()
                 }
             ]),
             engine.convert(&dict, &composition).cycle().nth(2)

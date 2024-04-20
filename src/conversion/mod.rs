@@ -24,14 +24,14 @@ pub struct Interval {
     // TODO doc
     pub is_phrase: bool,
     /// TODO: doc
-    pub phrase: Box<str>,
+    pub str: Box<str>,
 }
 
 impl Debug for Interval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("I")
             .field(&(self.start..self.end))
-            .field(&self.phrase)
+            .field(&self.str)
             .finish()
     }
 }

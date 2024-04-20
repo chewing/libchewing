@@ -134,7 +134,7 @@ impl CompositionEditor {
         self.inner.symbol(cursor)
     }
     pub(crate) fn select(&mut self, interval: Interval) {
-        assert!(!interval.phrase.is_empty());
+        assert!(!interval.str.is_empty());
         self.inner.push_selection(interval);
     }
 }

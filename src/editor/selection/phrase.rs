@@ -222,7 +222,7 @@ impl PhraseSelector {
             start: self.begin,
             end: self.end,
             is_phrase: true,
-            phrase: phrase.into(),
+            str: phrase.into(),
         }
     }
 }
@@ -360,7 +360,7 @@ mod tests {
             start: 0,
             end: 1,
             is_phrase: true,
-            phrase: "冊".into(),
+            str: "冊".into(),
         });
         let sel = PhraseSelector {
             begin: 0,
