@@ -249,7 +249,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -268,7 +268,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 
@@ -283,7 +283,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -302,7 +302,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 

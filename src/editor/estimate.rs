@@ -105,21 +105,11 @@ mod tests {
         let user_dict = TrieBufDictionary::from([
             (
                 vec![syl![crate::zhuyin::Bopomofo::A]],
-                vec![
-                    ("A", 1, 1).into(),
-                    ("B", 1, 2).into(),
-                    ("C", 1, 99).into(),
-                    ("D", 1, 3).into(),
-                ],
+                vec![("A", 1, 1), ("B", 1, 2), ("C", 1, 99), ("D", 1, 3)],
             ),
             (
                 vec![syl![crate::zhuyin::Bopomofo::I]],
-                vec![
-                    ("I", 1, 5).into(),
-                    ("J", 1, 100).into(),
-                    ("K", 1, 4).into(),
-                    ("L", 1, 3).into(),
-                ],
+                vec![("I", 1, 5), ("J", 1, 100), ("K", 1, 4), ("L", 1, 3)],
             ),
         ]);
         let estimate = LaxUserFreqEstimate::open(&user_dict).unwrap();

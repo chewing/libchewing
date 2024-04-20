@@ -510,49 +510,43 @@ mod tests {
 
     fn test_dictionary() -> impl Dictionary {
         TrieBufDictionary::from([
-            (vec![syl![G, U, O, TONE2]], vec![("國", 1).into()]),
-            (vec![syl![M, I, EN, TONE2]], vec![("民", 1).into()]),
-            (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),
-            (vec![syl![H, U, EI, TONE4]], vec![("會", 1).into()]),
-            (vec![syl![D, AI, TONE4]], vec![("代", 1).into()]),
-            (
-                vec![syl![B, I, AU, TONE3]],
-                vec![("表", 1).into(), ("錶", 1).into()],
-            ),
+            (vec![syl![G, U, O, TONE2]], vec![("國", 1)]),
+            (vec![syl![M, I, EN, TONE2]], vec![("民", 1)]),
+            (vec![syl![D, A, TONE4]], vec![("大", 1)]),
+            (vec![syl![H, U, EI, TONE4]], vec![("會", 1)]),
+            (vec![syl![D, AI, TONE4]], vec![("代", 1)]),
+            (vec![syl![B, I, AU, TONE3]], vec![("表", 1), ("錶", 1)]),
             (
                 vec![syl![G, U, O, TONE2], syl![M, I, EN, TONE2]],
-                vec![("國民", 200).into()],
+                vec![("國民", 200)],
             ),
             (
                 vec![syl![D, A, TONE4], syl![H, U, EI, TONE4]],
-                vec![("大會", 200).into()],
+                vec![("大會", 200)],
             ),
             (
                 vec![syl![D, AI, TONE4], syl![B, I, AU, TONE3]],
-                vec![("代表", 200).into(), ("戴錶", 100).into()],
+                vec![("代表", 200), ("戴錶", 100)],
             ),
-            (vec![syl![X, I, EN]], vec![("心", 1).into()]),
-            (
-                vec![syl![K, U, TONE4], syl![I, EN]],
-                vec![("庫音", 300).into()],
-            ),
+            (vec![syl![X, I, EN]], vec![("心", 1)]),
+            (vec![syl![K, U, TONE4], syl![I, EN]], vec![("庫音", 300)]),
             (
                 vec![syl![X, I, EN], syl![K, U, TONE4], syl![I, EN]],
-                vec![("新酷音", 200).into()],
+                vec![("新酷音", 200)],
             ),
             (
                 vec![syl![C, E, TONE4], syl![SH, TONE4], syl![I, TONE2]],
-                vec![("測試儀", 42).into()],
+                vec![("測試儀", 42)],
             ),
             (
                 vec![syl![C, E, TONE4], syl![SH, TONE4]],
-                vec![("測試", 9318).into()],
+                vec![("測試", 9318)],
             ),
             (
                 vec![syl![I, TONE2], syl![X, I, A, TONE4]],
-                vec![("一下", 10576).into()],
+                vec![("一下", 10576)],
             ),
-            (vec![syl![X, I, A, TONE4]], vec![("下", 10576).into()]),
+            (vec![syl![X, I, A, TONE4]], vec![("下", 10576)]),
         ])
     }
 

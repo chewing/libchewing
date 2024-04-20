@@ -346,17 +346,17 @@ impl Dictionary for TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         TrieBufDictionary::remove_phrase(self, syllables, phrase_str)
     }
 }
 
-impl<const N: usize> From<[(Vec<Syllable>, Vec<Phrase>); N]> for TrieBufDictionary {
-    fn from(value: [(Vec<Syllable>, Vec<Phrase>); N]) -> Self {
+impl<P: Into<Phrase>, const N: usize> From<[(Vec<Syllable>, Vec<P>); N]> for TrieBufDictionary {
+    fn from(value: [(Vec<Syllable>, Vec<P>); N]) -> Self {
         let mut dict = TrieBufDictionary::new_in_memory();
         for (syllables, phrases) in value {
             for phrase in phrases {
-                dict.add_phrase(&syllables, phrase).unwrap();
+                dict.add_phrase(&syllables, phrase.into()).unwrap();
             }
         }
         dict

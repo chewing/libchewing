@@ -1448,7 +1448,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("冊", 100).into()],
+            vec![("冊", 100)],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
@@ -1484,7 +1484,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("冊", 100).into()],
+            vec![("冊", 100)],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
@@ -1530,7 +1530,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("冊", 100).into()],
+            vec![("冊", 100)],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],
@@ -1591,7 +1591,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = TrieBufDictionary::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("冊", 100).into()],
+            vec![("冊", 100)],
         )]);
         let dict = LayeredDictionary::new(
             vec![Box::new(dict)],

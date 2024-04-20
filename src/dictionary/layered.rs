@@ -20,11 +20,11 @@ use super::{Dictionary, DictionaryInfo, Entries, Phrase, UpdateDictionaryError};
 ///
 /// let sys_dict = TrieBufDictionary::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-///     vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()]
+///     vec![("測", 1), ("冊", 1), ("側", 1)]
 /// )]);
 /// let user_dict = TrieBufDictionary::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-///     vec![("策", 100).into(), ("冊", 100).into()]
+///     vec![("策", 100), ("冊", 100)]
 /// )]);
 ///
 /// let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));
@@ -187,11 +187,11 @@ mod tests {
     fn test_entries() -> Result<(), Box<dyn Error>> {
         let sys_dict = TrieBufDictionary::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("測", 1).into(), ("冊", 1).into(), ("側", 1).into()],
+            vec![("測", 1), ("冊", 1), ("側", 1)],
         )]);
         let user_dict = TrieBufDictionary::from([(
             vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
-            vec![("策", 100).into(), ("冊", 100).into()],
+            vec![("策", 100), ("冊", 100)],
         )]);
 
         let dict = LayeredDictionary::new(vec![Box::new(sys_dict)], Box::new(user_dict));

@@ -255,7 +255,7 @@ impl Display for Phrase {
 /// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
 ///
 /// let dict = TrieBufDictionary::from([
-///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100).into()]),
+///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
 /// for phrase in dict.lookup_all_phrases(
@@ -267,6 +267,23 @@ impl Display for Phrase {
 /// ```
 pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
+/// A boxed iterator over all the entries in a dictionary.
+///
+/// # Examples
+///
+/// ```
+/// use chewing::{dictionary::{Dictionary, TrieBufDictionary}, syl, zhuyin::Bopomofo};
+///
+/// let dict = TrieBufDictionary::from([
+///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
+/// ]);
+///
+/// for (syllables, phrase) in dict.entries() {
+///     for bopomofos in syllables {
+///         println!("{bopomofos} -> {phrase}");
+///     }
+/// }
+/// ```
 pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
 /// An interface for looking up dictionaries.
