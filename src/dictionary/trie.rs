@@ -3,13 +3,12 @@ use std::{
     cmp::Ordering,
     collections::VecDeque,
     error::Error,
-    fmt::{Debug, Display},
+    fmt::Debug,
     fs::{self, File},
     io::{self, BufWriter, Read, Write},
     iter,
     num::NonZeroUsize,
     path::Path,
-    str,
     time::SystemTime,
 };
 
@@ -22,10 +21,7 @@ use log::error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase,
-    UpdateDictionaryError,
-};
+use super::{BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase};
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -110,25 +106,6 @@ impl TrieLeafView<'_> {
 #[derive(Debug, Clone)]
 pub struct Trie {
     der: Document,
-}
-
-#[derive(Debug)]
-pub(crate) enum TrieError {
-    ReadOnly,
-}
-
-impl Display for TrieError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "trie dictionary error")
-    }
-}
-
-impl Error for TrieError {}
-
-fn read_only_error() -> UpdateDictionaryError {
-    UpdateDictionaryError {
-        source: Some(Box::new(TrieError::ReadOnly)),
-    }
 }
 
 fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
@@ -362,38 +339,8 @@ impl Dictionary for Trie {
         trie_file.info.into()
     }
 
-    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
-        Ok(())
-    }
-
-    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
-        Ok(())
-    }
-
-    fn add_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-    ) -> Result<(), UpdateDictionaryError> {
-        Err(read_only_error())
-    }
-
-    fn update_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-        _user_freq: u32,
-        _time: u64,
-    ) -> Result<(), UpdateDictionaryError> {
-        Err(read_only_error())
-    }
-
-    fn remove_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase_str: &str,
-    ) -> Result<(), UpdateDictionaryError> {
-        Err(read_only_error())
+    fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
+        None
     }
 }
 

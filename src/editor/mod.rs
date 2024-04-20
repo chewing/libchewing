@@ -20,7 +20,9 @@ use log::{debug, trace, warn};
 
 use crate::{
     conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
-    dictionary::{Dictionary, Layered, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{
+        Dictionary, DictionaryMut, Layered, SystemDictionaryLoader, UserDictionaryLoader,
+    },
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
 };

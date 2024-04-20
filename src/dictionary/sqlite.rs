@@ -5,8 +5,8 @@ use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalEx
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase,
-    UpdateDictionaryError,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
+    Phrase, UpdateDictionaryError,
 };
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
@@ -352,6 +352,12 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Some(self)
+    }
+}
+
+impl DictionaryMut for SqliteDictionary {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
@@ -555,7 +561,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use crate::{
-        dictionary::{Dictionary, Phrase},
+        dictionary::{Dictionary, DictionaryMut, Phrase},
         syl,
         zhuyin::Bopomofo,
     };

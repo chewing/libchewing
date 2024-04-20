@@ -12,8 +12,8 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase, Trie,
-    TrieBuilder, UpdateDictionaryError,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
+    Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 
 #[derive(Debug)]
@@ -311,6 +311,12 @@ impl Dictionary for TrieBuf {
             .map_or(DictionaryInfo::default(), |trie| trie.about())
     }
 
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Some(self)
+    }
+}
+
+impl DictionaryMut for TrieBuf {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.sync()?;
         Ok(())
@@ -376,7 +382,11 @@ impl Drop for TrieBuf {
 mod tests {
     use std::error::Error;
 
-    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
+    use crate::{
+        dictionary::{DictionaryMut, Phrase},
+        syl,
+        zhuyin::Bopomofo::*,
+    };
 
     use super::{Dictionary, TrieBuf};
 

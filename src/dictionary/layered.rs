@@ -8,7 +8,7 @@ use log::error;
 
 use crate::zhuyin::SyllableSlice;
 
-use super::{Dictionary, DictionaryInfo, Entries, Phrase, UpdateDictionaryError};
+use super::{Dictionary, DictionaryInfo, DictionaryMut, Entries, Phrase, UpdateDictionaryError};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -124,12 +124,26 @@ impl Dictionary for Layered {
         }
     }
 
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
+        self.user_dict.as_dict_mut()
+    }
+}
+
+impl DictionaryMut for Layered {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
-        self.user_dict.reopen()
+        if let Some(writer) = self.user_dict.as_dict_mut() {
+            writer.reopen()
+        } else {
+            Ok(())
+        }
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
-        self.user_dict.flush()
+        if let Some(writer) = self.user_dict.as_dict_mut() {
+            writer.flush()
+        } else {
+            Ok(())
+        }
     }
 
     fn add_phrase(
@@ -141,7 +155,11 @@ impl Dictionary for Layered {
             error!("BUG! added phrase is empty");
             return Ok(());
         }
-        self.user_dict.add_phrase(syllables, phrase)
+        if let Some(writer) = self.user_dict.as_dict_mut() {
+            writer.add_phrase(syllables, phrase)
+        } else {
+            Ok(())
+        }
     }
 
     fn update_phrase(
@@ -155,8 +173,11 @@ impl Dictionary for Layered {
             error!("BUG! added phrase is empty");
             return Ok(());
         }
-        self.user_dict
-            .update_phrase(syllables, phrase, user_freq, time)
+        if let Some(writer) = self.user_dict.as_dict_mut() {
+            writer.update_phrase(syllables, phrase, user_freq, time)
+        } else {
+            Ok(())
+        }
     }
 
     fn remove_phrase(
@@ -164,7 +185,11 @@ impl Dictionary for Layered {
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        self.user_dict.remove_phrase(syllables, phrase_str)
+        if let Some(writer) = self.user_dict.as_dict_mut() {
+            writer.remove_phrase(syllables, phrase_str)
+        } else {
+            Ok(())
+        }
     }
 }
 

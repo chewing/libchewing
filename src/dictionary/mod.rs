@@ -297,7 +297,7 @@ pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
 /// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
@@ -332,6 +332,11 @@ pub trait Dictionary: Debug {
     fn entries(&self) -> Entries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
+}
+
+/// An interface for updating dictionaries.
+pub trait DictionaryMut: Debug {
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
@@ -352,7 +357,7 @@ pub trait Dictionary: Debug {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
+    /// use chewing::{dictionary::{DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
     ///
     /// let mut dict = TrieBuf::new_in_memory();
     /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
