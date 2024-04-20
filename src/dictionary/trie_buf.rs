@@ -76,7 +76,7 @@ impl TrieBuf {
         &'a self,
         syllables: &'a dyn SyllableSlice,
     ) -> impl Iterator<Item = Phrase> + 'a {
-        let syllable_key = Cow::from(syllables.as_slice().into_owned());
+        let syllable_key = Cow::from(syllables.to_slice().into_owned());
         let min_key = (syllable_key.clone(), Cow::from(MIN_PHRASE));
         let max_key = (syllable_key.clone(), Cow::from(MAX_PHRASE));
         let store_iter = self
@@ -178,7 +178,7 @@ impl TrieBuf {
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
-        let syllable_slice = syllables.as_slice();
+        let syllable_slice = syllables.to_slice();
         if self
             .entries_iter_for(&syllable_slice.as_ref())
             .any(|ph| ph.as_str() == phrase.as_str())
@@ -207,7 +207,7 @@ impl TrieBuf {
     ) -> Result<(), UpdateDictionaryError> {
         self.btree.insert(
             (
-                Cow::from(syllables.as_slice().into_owned()),
+                Cow::from(syllables.to_slice().into_owned()),
                 Cow::from(phrase.phrase.into_string()),
             ),
             (user_freq, time),
@@ -222,7 +222,7 @@ impl TrieBuf {
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        let syllable_slice = Cow::from(syllables.as_slice().into_owned());
+        let syllable_slice = Cow::from(syllables.to_slice().into_owned());
         self.btree
             .remove(&(syllable_slice.clone(), Cow::from(phrase_str.to_owned())));
         self.graveyard

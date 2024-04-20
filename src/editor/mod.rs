@@ -548,11 +548,11 @@ impl SharedState {
         result
     }
     fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) -> Result<(), String> {
-        if syllables.as_slice().len() != phrase.chars().count() {
+        if syllables.to_slice().len() != phrase.chars().count() {
             warn!(
                 "syllables({:?})[{}] and phrase({})[{}] has different length",
                 &syllables,
-                syllables.as_slice().len(),
+                syllables.to_slice().len(),
                 &phrase,
                 phrase.chars().count()
             );

@@ -219,7 +219,7 @@ impl Dictionary for Trie {
         if node.child_begin() == node.child_end() {
             return vec![];
         }
-        'next: for syl in syllables.as_slice().iter() {
+        'next: for syl in syllables.to_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
             bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
             let mut child_nodes = dict[node.child_begin()..node.child_end()]

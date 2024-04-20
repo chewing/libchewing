@@ -30,7 +30,7 @@ impl Debug for Syllable {
 #[allow(clippy::unusual_byte_groupings)]
 impl Syllable {
     const EMPTY_PATTERN: u16 = 0b1000000_00_0000_000;
-    pub const EMPTY: Syllable = Syllable {
+    const EMPTY: Syllable = Syllable {
         value: match NonZeroU16::new(Self::EMPTY_PATTERN) {
             Some(v) => v,
             None => unreachable!(),
@@ -250,10 +250,10 @@ impl AsRef<Syllable> for Syllable {
 }
 
 pub trait SyllableSlice: Debug {
-    fn as_slice(&self) -> Cow<'_, [Syllable]>;
-    fn get_bytes(&self) -> Vec<u8> {
+    fn to_slice(&self) -> Cow<'_, [Syllable]>;
+    fn to_bytes(&self) -> Vec<u8> {
         let mut syllables_bytes = vec![];
-        self.as_slice()
+        self.to_slice()
             .iter()
             .for_each(|syl| syllables_bytes.extend_from_slice(&syl.as_ref().to_le_bytes()));
         syllables_bytes
@@ -261,19 +261,19 @@ pub trait SyllableSlice: Debug {
 }
 
 impl SyllableSlice for &[Syllable] {
-    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+    fn to_slice(&self) -> Cow<'_, [Syllable]> {
         Cow::Borrowed(*self)
     }
 }
 
 impl SyllableSlice for Vec<Syllable> {
-    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+    fn to_slice(&self) -> Cow<'_, [Syllable]> {
         Cow::Borrowed(self)
     }
 }
 
 impl<const N: usize> SyllableSlice for [Syllable; N] {
-    fn as_slice(&self) -> Cow<'_, [Syllable]> {
+    fn to_slice(&self) -> Cow<'_, [Syllable]> {
         Cow::Borrowed(self)
     }
 }

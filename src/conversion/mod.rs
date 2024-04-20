@@ -130,7 +130,7 @@ impl From<char> for Symbol {
 }
 
 impl SyllableSlice for &[Symbol] {
-    fn as_slice(&self) -> Cow<'static, [Syllable]> {
+    fn to_slice(&self) -> Cow<'static, [Syllable]> {
         self.iter()
             .map_while(|&sym| match sym {
                 Symbol::Syllable(syl) => Some(syl),
@@ -142,7 +142,7 @@ impl SyllableSlice for &[Symbol] {
 }
 
 impl SyllableSlice for Vec<Symbol> {
-    fn as_slice(&self) -> Cow<'static, [Syllable]> {
+    fn to_slice(&self) -> Cow<'static, [Syllable]> {
         self.iter()
             .map_while(|&sym| match sym {
                 Symbol::Syllable(syl) => Some(syl),

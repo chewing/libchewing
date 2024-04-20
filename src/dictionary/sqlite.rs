@@ -286,7 +286,7 @@ impl From<RusqliteError> for UpdateDictionaryError {
 
 impl Dictionary for SqliteDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -377,7 +377,7 @@ impl DictionaryMut for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -401,7 +401,7 @@ impl DictionaryMut for SqliteDictionary {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let tx = self.conn.transaction()?;
         {
             let mut stmt = tx.prepare_cached(
@@ -448,7 +448,7 @@ impl DictionaryMut for SqliteDictionary {
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
             .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")?;
@@ -521,7 +521,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         } else {
             0
         };
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self.dict.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
