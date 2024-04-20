@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::{
-    editor::{abbrev::AbbrevTable, SymbolSelector},
+    editor::{AbbrevTable, SymbolSelector},
     path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 

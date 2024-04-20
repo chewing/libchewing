@@ -1,6 +1,6 @@
 //! Abstract input method editors.
 
-pub mod abbrev;
+mod abbrev;
 mod composition_editor;
 mod estimate;
 pub mod keyboard;
@@ -14,6 +14,7 @@ use std::{
     fmt::{Debug, Display},
 };
 
+pub use self::abbrev::AbbrevTable;
 pub use self::selection::symbol::SymbolSelector;
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, trace, warn};
@@ -28,7 +29,6 @@ use crate::{
 };
 
 use self::{
-    abbrev::AbbrevTable,
     composition_editor::CompositionEditor,
     keyboard::KeyEvent,
     selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
