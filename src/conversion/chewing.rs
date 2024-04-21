@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet, VecDeque},
     fmt::{Debug, Display, Write},
     iter,
     ops::Neg,
@@ -16,6 +16,7 @@ use super::{Composition, Gap, Interval, Symbol};
 pub struct ChewingEngine;
 
 impl ChewingEngine {
+    const MAX_OUT_PATHS: usize = 100;
     /// TODO: doc
     pub fn new() -> ChewingEngine {
         ChewingEngine
@@ -39,8 +40,8 @@ impl ChewingEngine {
             if comp.is_empty() {
                 return vec![];
             }
-            let mut graph = Graph::default();
-            let paths = self.find_all_paths(dict, &mut graph, comp, 0, comp.len(), None);
+            let intervals = self.find_intervals(dict, comp);
+            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -222,41 +223,99 @@ impl ChewingEngine {
             .intervals
     }
 
-    fn find_all_paths<'g, D: Dictionary + ?Sized>(
-        &'g self,
-        dict: &D,
-        graph: &mut Graph<'g>,
-        com: &Composition,
-        start: usize,
-        target: usize,
-        prefix: Option<PossiblePath>,
+    /// Find K possible best alternative paths.
+    ///
+    /// This method is modified from [Yen's algorithm][1] to run on a single
+    /// source and single sink DAG.
+    ///
+    /// [1]: https://en.wikipedia.org/wiki/Yen%27s_algorithm
+    fn find_k_paths(
+        &self,
+        k: usize,
+        end: usize,
+        intervals: Vec<PossibleInterval>,
     ) -> Vec<PossiblePath> {
-        if start == target {
-            return vec![prefix.expect("should have prefix")];
+        let mut ksp = Vec::with_capacity(k);
+        let mut candidates = vec![];
+        let mut graph = Graph::new();
+        for edge in intervals.into_iter() {
+            let values = graph.entry(edge.start).or_insert(vec![]);
+            values.push(edge);
         }
-        let mut result = vec![];
-        for end in (start + 1)..=target {
-            let entry = graph.entry((start, end));
-            if let Some(phrase) = entry.or_insert_with(|| {
-                self.find_best_phrase(dict, start, &com.symbols[start..end], com)
-            }) {
-                let mut prefix = prefix.clone().unwrap_or_default();
-                prefix.intervals.push(PossibleInterval {
-                    start,
-                    end,
-                    phrase: phrase.clone(),
-                });
-                result.append(&mut self.find_all_paths(
-                    dict,
-                    graph,
-                    com,
-                    end,
-                    target,
-                    Some(prefix),
-                ));
+        ksp.push(
+            self.shortest_path(&graph, &BTreeSet::new(), 0, end)
+                .unwrap(),
+        );
+
+        for kth in 1..k {
+            let prev = kth - 1;
+            for i in 0..ksp[prev].len() {
+                let mut removed_edges = BTreeSet::new();
+                let spur_node = &ksp[prev][i].start;
+                let root_path = &ksp[prev][0..i];
+
+                for p in &ksp {
+                    if root_path.len() < p.len() && root_path == &p[0..i] {
+                        removed_edges.insert((p[i].start, p[i].end));
+                    }
+                }
+
+                if let Some(spur_path) = self.shortest_path(&graph, &removed_edges, *spur_node, end)
+                {
+                    let mut total_path = root_path.to_vec();
+                    total_path.extend(spur_path);
+                    if !ksp.contains(&total_path) {
+                        candidates.push(total_path);
+                    }
+                }
+            }
+            if candidates.is_empty() {
+                break;
+            }
+            candidates.sort_unstable_by_key(|k| k.len());
+            ksp.push(candidates.swap_remove(0));
+        }
+        ksp.into_iter()
+            .map(|intervals| PossiblePath { intervals })
+            .collect()
+    }
+
+    fn shortest_path(
+        &self,
+        graph: &Graph,
+        removed_edges: &BTreeSet<(usize, usize)>,
+        source: usize,
+        sink: usize,
+    ) -> Option<Vec<PossibleInterval>> {
+        let mut parent = BTreeMap::new();
+        let mut queue = VecDeque::new();
+        queue.push_back(source);
+        'bfs: while !queue.is_empty() {
+            let node = queue.pop_front().unwrap();
+            if let Some(next_edges) = graph.get(&node) {
+                for edge in next_edges {
+                    if removed_edges.contains(&(edge.start, edge.end)) {
+                        continue;
+                    }
+                    if !parent.contains_key(&edge.end) {
+                        parent.insert(edge.end, edge);
+                        queue.push_back(edge.end);
+                    }
+                    if edge.end == sink {
+                        break 'bfs;
+                    }
+                }
             }
         }
-        result
+        let mut path = vec![];
+        let mut node = sink;
+        while node != source {
+            let &interval = parent.get(&node)?;
+            node = interval.start;
+            path.push(interval.clone());
+        }
+        path.reverse();
+        Some(path)
     }
 
     /// Trim some paths that were part of other paths
@@ -495,7 +554,7 @@ impl Display for PossiblePath {
     }
 }
 
-type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
+type Graph = BTreeMap<usize, Vec<PossibleInterval>>;
 
 #[cfg(test)]
 mod tests {
@@ -547,6 +606,8 @@ mod tests {
                 vec![("一下", 10576)],
             ),
             (vec![syl![X, I, A, TONE4]], vec![("下", 10576)]),
+            (vec![syl![H, A]], vec![("哈", 1)]),
+            (vec![syl![H, A], syl![H, A]], vec![("哈哈", 1)]),
         ])
     }
 
@@ -839,6 +900,28 @@ mod tests {
                 }
             ]),
             engine.convert(&dict, &composition).cycle().nth(2)
+        );
+    }
+
+    #[test]
+    fn convert_pathological_case() {
+        let dict = test_dictionary();
+        let engine = ChewingEngine::new();
+        let mut composition = Composition::new();
+        for _ in 0..40 {
+            composition.push(Symbol::from(syl![H, A]));
+        }
+        assert_eq!(
+            20,
+            engine.convert(&dict, &composition).nth(0).unwrap().len()
+        );
+        assert_eq!(
+            21,
+            engine.convert(&dict, &composition).nth(1).unwrap().len()
+        );
+        assert_eq!(
+            21,
+            engine.convert(&dict, &composition).nth(2).unwrap().len()
         );
     }
 
