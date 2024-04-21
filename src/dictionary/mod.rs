@@ -13,7 +13,7 @@ use std::{
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 pub use layered::Layered;
-pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
+pub use loader::{LoadDictionaryError, SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{Trie, TrieBuilder, TrieStatistics};
@@ -32,6 +32,12 @@ mod uhash;
 pub struct UpdateDictionaryError {
     /// TODO: doc
     source: Option<Box<dyn Error + Send + Sync>>,
+}
+
+impl UpdateDictionaryError {
+    pub(crate) fn new() -> UpdateDictionaryError {
+        UpdateDictionaryError { source: None }
+    }
 }
 
 impl From<io::Error> for UpdateDictionaryError {

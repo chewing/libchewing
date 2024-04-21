@@ -1,6 +1,7 @@
 use std::{
     error::Error,
     ffi::OsStr,
+    fmt::Display,
     fs::{self, File},
     io::{self, Seek},
     path::{Path, PathBuf},
@@ -29,8 +30,25 @@ pub struct SystemDictionaryLoader {
     sys_path: Option<String>,
 }
 
-fn load_err(_: impl Error) -> &'static str {
-    "LoadSystemDictionaryError"
+/// Errors during loading system or user dictionaries.
+#[derive(Debug)]
+pub enum LoadDictionaryError {
+    /// Cannot find any system or user dictionary.
+    NotFound,
+    /// IO Error.
+    IoError(io::Error),
+}
+
+impl Display for LoadDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Unable to load system dictionary: {:?}", self)
+    }
+}
+
+impl Error for LoadDictionaryError {}
+
+fn io_err(err: io::Error) -> LoadDictionaryError {
+    LoadDictionaryError::IoError(err)
 }
 
 impl SystemDictionaryLoader {
@@ -41,41 +59,40 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(path.into());
         self
     }
-    pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, &'static str> {
+    pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
         let search_path = if let Some(sys_path) = &self.sys_path {
             sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
         let sys_path = find_path_by_files(&search_path, &[SD_WORD_FILE_NAME, SD_TSI_FILE_NAME])
-            .ok_or("SystemDictionaryNotFound")?;
+            .ok_or(LoadDictionaryError::NotFound)?;
 
         let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
-        let tsi_dict = Trie::open(tsi_dict_path).map_err(load_err)?;
+        let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
         let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
-        let word_dict = Trie::open(word_dict_path).map_err(load_err)?;
+        let word_dict = Trie::open(word_dict_path).map_err(io_err)?;
         Ok(vec![Box::new(word_dict), Box::new(tsi_dict)])
     }
-    pub fn load_abbrev(&self) -> Result<AbbrevTable, &'static str> {
+    pub fn load_abbrev(&self) -> Result<AbbrevTable, LoadDictionaryError> {
         let search_path = if let Some(sys_path) = &self.sys_path {
             sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
         let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
-            .ok_or("SystemDictionaryNotFound")?;
-        AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(|_| "error loading abbrev table")
+            .ok_or(LoadDictionaryError::NotFound)?;
+        AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(io_err)
     }
-    pub fn load_symbol_selector(&self) -> Result<SymbolSelector, &'static str> {
+    pub fn load_symbol_selector(&self) -> Result<SymbolSelector, LoadDictionaryError> {
         let search_path = if let Some(sys_path) = &self.sys_path {
             sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
         let sys_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
-            .ok_or("SystemDictionaryNotFound")?;
-        SymbolSelector::open(sys_path.join(SYMBOLS_FILE_NAME))
-            .map_err(|_| "error loading abbrev table")
+            .ok_or(LoadDictionaryError::NotFound)?;
+        SymbolSelector::open(sys_path.join(SYMBOLS_FILE_NAME)).map_err(io_err)
     }
 }
 

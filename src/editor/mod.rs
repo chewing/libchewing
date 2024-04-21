@@ -21,7 +21,8 @@ use log::{debug, trace, warn};
 use crate::{
     conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
     dictionary::{
-        Dictionary, DictionaryMut, Layered, SystemDictionaryLoader, UserDictionaryLoader,
+        Dictionary, DictionaryMut, Layered, SystemDictionaryLoader, UpdateDictionaryError,
+        UserDictionaryLoader,
     },
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
@@ -139,6 +140,8 @@ pub struct Editor {
 pub enum EditorError {
     /// Requested invalid state change.
     InvalidState,
+    /// Requested invalid input.
+    InvalidInput,
     /// Requested state change was not possible.
     Impossible,
 }
@@ -270,14 +273,14 @@ impl Editor {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: &str,
-    ) -> Result<(), String> {
+    ) -> Result<(), UpdateDictionaryError> {
         self.shared.learn_phrase(syllables, phrase)
     }
     pub fn unlearn_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: &str,
-    ) -> Result<(), String> {
+    ) -> Result<(), UpdateDictionaryError> {
         self.shared.unlearn_phrase(syllables, phrase)
     }
     /// All candidates after current page
@@ -512,14 +515,24 @@ impl SharedState {
     fn cursor(&self) -> usize {
         self.com.cursor()
     }
-    fn learn_phrase_in_range(&mut self, start: usize, end: usize) -> Result<String, String> {
+    fn learn_phrase_in_range_notify(
+        &mut self,
+        start: usize,
+        end: usize,
+    ) -> Result<(), UpdateDictionaryError> {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
-            Ok(phrase) => self.notice_buffer = format!("加入：{}", phrase),
-            Err(msg) => msg.clone_into(&mut self.notice_buffer),
+            Ok(phrase) => {
+                self.notice_buffer = format!("加入：{}", phrase);
+                Ok(())
+            }
+            Err(msg) => {
+                msg.clone_into(&mut self.notice_buffer);
+                Err(UpdateDictionaryError::new())
+            }
         }
-        result
     }
+    // FIXME enhance user visible reporting
     fn learn_phrase_in_range_quiet(&mut self, start: usize, end: usize) -> Result<String, String> {
         if end > self.com.len() {
             return Err("加詞失敗：字數不符或夾雜符號".to_owned());
@@ -557,7 +570,11 @@ impl SharedState {
         }
         result
     }
-    fn learn_phrase(&mut self, syllables: &dyn SyllableSlice, phrase: &str) -> Result<(), String> {
+    fn learn_phrase(
+        &mut self,
+        syllables: &dyn SyllableSlice,
+        phrase: &str,
+    ) -> Result<(), UpdateDictionaryError> {
         if syllables.to_slice().len() != phrase.chars().count() {
             warn!(
                 "syllables({:?})[{}] and phrase({})[{}] has different length",
@@ -566,11 +583,11 @@ impl SharedState {
                 &phrase,
                 phrase.chars().count()
             );
-            return Err("".to_string());
+            return Err(UpdateDictionaryError::new());
         }
         let phrases = self.dict.lookup_all_phrases(syllables);
         if phrases.is_empty() {
-            let _ = self.dict.add_phrase(syllables, (phrase, 1).into());
+            self.dict.add_phrase(syllables, (phrase, 1).into())?;
             return Ok(());
         }
         let phrase_freq = phrases
@@ -592,7 +609,7 @@ impl SharedState {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: &str,
-    ) -> Result<(), String> {
+    ) -> Result<(), UpdateDictionaryError> {
         let _ = self.dict.remove_phrase(syllables, phrase);
         self.dirty_level += 1;
         Ok(())
@@ -835,14 +852,15 @@ impl State for Entering {
                 let n = code as usize;
                 let result = match shared.options.user_phrase_add_dir {
                     UserPhraseAddDirection::Forward => {
-                        shared.learn_phrase_in_range(shared.cursor(), shared.cursor() + n)
+                        shared.learn_phrase_in_range_notify(shared.cursor(), shared.cursor() + n)
                     }
                     UserPhraseAddDirection::Backward => {
                         if shared.cursor() >= n {
-                            shared.learn_phrase_in_range(shared.cursor() - n, shared.cursor())
+                            shared
+                                .learn_phrase_in_range_notify(shared.cursor() - n, shared.cursor())
                         } else {
                             "加詞失敗：字數不符或夾雜符號".clone_into(&mut shared.notice_buffer);
-                            Err("加詞失敗：字數不符或夾雜符號".to_owned())
+                            return self.spin_bell();
                         }
                     }
                 };
@@ -1396,7 +1414,7 @@ impl State for Highlighting {
                 let start = min(self.moving_cursor, shared.com.cursor());
                 let end = max(self.moving_cursor, shared.com.cursor());
                 shared.com.move_cursor(self.moving_cursor);
-                let _ = shared.learn_phrase_in_range(start, end);
+                let _ = shared.learn_phrase_in_range_notify(start, end);
                 self.start_entering()
             }
             _ => self.start_entering(),
