@@ -1,32 +1,11 @@
-use std::{error::Error, fmt::Display};
-
 use crate::dictionary::{Dictionary, Phrase};
-
-/// TODO: doc
-/// TODO: change to enum?
-#[derive(Debug)]
-pub struct EstimateError {
-    source: Box<dyn Error>,
-}
-
-impl Display for EstimateError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "update estimate error")
-    }
-}
-
-impl Error for EstimateError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(self.source.as_ref())
-    }
-}
 
 /// TODO: doc
 pub trait UserFreqEstimate {
     /// TODO: doc
-    fn tick(&mut self) -> Result<(), EstimateError>;
+    fn tick(&mut self);
     /// TODO: doc
-    fn now(&self) -> Result<u64, EstimateError>;
+    fn now(&self) -> u64;
     /// TODO: doc
     fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32;
 }
@@ -39,16 +18,16 @@ pub struct LaxUserFreqEstimate {
 
 impl LaxUserFreqEstimate {
     /// TODO: doc
-    pub fn open(user_dict: &dyn Dictionary) -> Result<LaxUserFreqEstimate, EstimateError> {
+    pub fn max_from(user_dict: &dyn Dictionary) -> LaxUserFreqEstimate {
         let lifetime = user_dict
             .entries()
             .map(|it| it.1.last_used().unwrap_or_default())
             .max()
             .unwrap_or_default();
-        Ok(LaxUserFreqEstimate { lifetime })
+        LaxUserFreqEstimate { lifetime }
     }
 
-    pub fn open_in_memory(initial_lifetime: u64) -> LaxUserFreqEstimate {
+    pub fn new(initial_lifetime: u64) -> LaxUserFreqEstimate {
         LaxUserFreqEstimate {
             lifetime: initial_lifetime,
         }
@@ -61,13 +40,12 @@ const LONG_DECREASE_FREQ: u32 = 10;
 const MAX_USER_FREQ: u32 = 99999999;
 
 impl UserFreqEstimate for LaxUserFreqEstimate {
-    fn tick(&mut self) -> Result<(), EstimateError> {
+    fn tick(&mut self) {
         self.lifetime += 1;
-        Ok(())
     }
 
-    fn now(&self) -> Result<u64, EstimateError> {
-        Ok(self.lifetime)
+    fn now(&self) -> u64 {
+        self.lifetime
     }
 
     fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32 {
@@ -96,33 +74,23 @@ impl UserFreqEstimate for LaxUserFreqEstimate {
 
 #[cfg(test)]
 mod tests {
-    use crate::{dictionary::TrieBufDictionary, syl};
+    use crate::{dictionary::TrieBuf, syl};
 
     use super::LaxUserFreqEstimate;
 
     #[test]
     fn load_from_dictionary() {
-        let user_dict = TrieBufDictionary::from([
+        let user_dict = TrieBuf::from([
             (
                 vec![syl![crate::zhuyin::Bopomofo::A]],
-                vec![
-                    ("A", 1, 1).into(),
-                    ("B", 1, 2).into(),
-                    ("C", 1, 99).into(),
-                    ("D", 1, 3).into(),
-                ],
+                vec![("A", 1, 1), ("B", 1, 2), ("C", 1, 99), ("D", 1, 3)],
             ),
             (
                 vec![syl![crate::zhuyin::Bopomofo::I]],
-                vec![
-                    ("I", 1, 5).into(),
-                    ("J", 1, 100).into(),
-                    ("K", 1, 4).into(),
-                    ("L", 1, 3).into(),
-                ],
+                vec![("I", 1, 5), ("J", 1, 100), ("K", 1, 4), ("L", 1, 3)],
             ),
         ]);
-        let estimate = LaxUserFreqEstimate::open(&user_dict).unwrap();
+        let estimate = LaxUserFreqEstimate::max_from(&user_dict);
 
         assert_eq!(100, estimate.lifetime);
     }

@@ -12,17 +12,17 @@ use log::error;
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase, TrieDictionary, TrieDictionaryBuilder,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
+    Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 
 #[derive(Debug)]
-pub(crate) struct TrieBufDictionary {
+pub struct TrieBuf {
     path: PathBuf,
-    trie: Option<TrieDictionary>,
+    trie: Option<Trie>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
-    join_handle: Option<JoinHandle<Result<TrieDictionary, DictionaryUpdateError>>>,
+    join_handle: Option<JoinHandle<Result<Trie, UpdateDictionaryError>>>,
     dirty: bool,
 }
 
@@ -31,8 +31,8 @@ type PhraseKey = (Cow<'static, [Syllable]>, Cow<'static, str>);
 const MIN_PHRASE: &str = "";
 const MAX_PHRASE: &str = "\u{10FFFF}";
 
-impl TrieBufDictionary {
-    pub(crate) fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBufDictionary> {
+impl TrieBuf {
+    pub fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBuf> {
         let path = path.into();
         if !path.exists() {
             let info = DictionaryInfo {
@@ -42,7 +42,7 @@ impl TrieBufDictionary {
                 version: "0.0.0".to_string(),
                 software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
             };
-            let mut builder = TrieDictionaryBuilder::new();
+            let mut builder = TrieBuilder::new();
             builder
                 .set_info(info)
                 .map_err(|_| io::Error::from(io::ErrorKind::Other))?;
@@ -50,8 +50,8 @@ impl TrieBufDictionary {
                 .build(&path)
                 .map_err(|_| io::Error::from(io::ErrorKind::Other))?;
         }
-        let trie = TrieDictionary::open(&path)?;
-        Ok(TrieBufDictionary {
+        let trie = Trie::open(&path)?;
+        Ok(TrieBuf {
             path,
             trie: Some(trie),
             btree: BTreeMap::new(),
@@ -61,8 +61,8 @@ impl TrieBufDictionary {
         })
     }
 
-    pub(crate) fn new_in_memory() -> TrieBufDictionary {
-        TrieBufDictionary {
+    pub fn new_in_memory() -> TrieBuf {
+        TrieBuf {
             path: PathBuf::new(),
             trie: None,
             btree: BTreeMap::new(),
@@ -76,7 +76,7 @@ impl TrieBufDictionary {
         &'a self,
         syllables: &'a dyn SyllableSlice,
     ) -> impl Iterator<Item = Phrase> + 'a {
-        let syllable_key = Cow::from(syllables.as_slice().into_owned());
+        let syllable_key = Cow::from(syllables.to_slice().into_owned());
         let min_key = (syllable_key.clone(), Cow::from(MIN_PHRASE));
         let max_key = (syllable_key.clone(), Cow::from(MAX_PHRASE));
         let store_iter = self
@@ -169,7 +169,7 @@ impl TrieBufDictionary {
         phrases
     }
 
-    pub(crate) fn entries(&self) -> DictEntries<'_> {
+    pub(crate) fn entries(&self) -> Entries<'_> {
         Box::new(self.entries_iter())
     }
 
@@ -177,13 +177,13 @@ impl TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllable_slice = syllables.as_slice();
+    ) -> Result<(), UpdateDictionaryError> {
+        let syllable_slice = syllables.to_slice();
         if self
             .entries_iter_for(&syllable_slice.as_ref())
             .any(|ph| ph.as_str() == phrase.as_str())
         {
-            return Err(DictionaryUpdateError { source: None });
+            return Err(UpdateDictionaryError { source: None });
         }
 
         self.btree.insert(
@@ -204,10 +204,10 @@ impl TrieBufDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         self.btree.insert(
             (
-                Cow::from(syllables.as_slice().into_owned()),
+                Cow::from(syllables.to_slice().into_owned()),
                 Cow::from(phrase.phrase.into_string()),
             ),
             (user_freq, time),
@@ -221,8 +221,8 @@ impl TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllable_slice = Cow::from(syllables.as_slice().into_owned());
+    ) -> Result<(), UpdateDictionaryError> {
+        let syllable_slice = Cow::from(syllables.to_slice().into_owned());
         self.btree
             .remove(&(syllable_slice.clone(), Cow::from(phrase_str.to_owned())));
         self.graveyard
@@ -232,7 +232,7 @@ impl TrieBufDictionary {
         Ok(())
     }
 
-    pub(crate) fn sync(&mut self) -> Result<(), DictionaryUpdateError> {
+    pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
         if let Some(join_handle) = self.join_handle.take() {
             if !join_handle.is_finished() {
                 // Wait until previous sync is finished.
@@ -253,7 +253,7 @@ impl TrieBufDictionary {
         } else {
             // TODO: reduce reading
             if !self.path.as_os_str().is_empty() {
-                self.trie = Some(TrieDictionary::open(&self.path)?);
+                self.trie = Some(Trie::open(&self.path)?);
             }
         }
         Ok(())
@@ -265,7 +265,7 @@ impl TrieBufDictionary {
             // Wait until previous checkpoint result is handled.
             return;
         }
-        let snapshot = TrieBufDictionary {
+        let snapshot = TrieBuf {
             path: self.path.clone(),
             trie: self.trie.clone(),
             btree: self.btree.clone(),
@@ -274,13 +274,13 @@ impl TrieBufDictionary {
             dirty: false,
         };
         self.join_handle = Some(thread::spawn(move || {
-            let mut builder = TrieDictionaryBuilder::new();
+            let mut builder = TrieBuilder::new();
             builder.set_info(snapshot.about())?;
             for (syllables, phrase) in snapshot.entries() {
                 builder.insert(&syllables, phrase)?;
             }
             builder.build(&snapshot.path)?;
-            TrieDictionary::open(&snapshot.path).map_err(|err| DictionaryUpdateError {
+            Trie::open(&snapshot.path).map_err(|err| UpdateDictionaryError {
                 source: Some(Box::new(err)),
             })
         }));
@@ -288,21 +288,21 @@ impl TrieBufDictionary {
     }
 }
 
-impl From<BuildDictionaryError> for DictionaryUpdateError {
+impl From<BuildDictionaryError> for UpdateDictionaryError {
     fn from(value: BuildDictionaryError) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(Box::new(value)),
         }
     }
 }
 
-impl Dictionary for TrieBufDictionary {
+impl Dictionary for TrieBuf {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        TrieBufDictionary::lookup_first_n_phrases(self, syllables, first)
+        TrieBuf::lookup_first_n_phrases(self, syllables, first)
     }
 
-    fn entries(&self) -> DictEntries<'_> {
-        TrieBufDictionary::entries(self)
+    fn entries(&self) -> Entries<'_> {
+        TrieBuf::entries(self)
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -311,12 +311,18 @@ impl Dictionary for TrieBufDictionary {
             .map_or(DictionaryInfo::default(), |trie| trie.about())
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Some(self)
+    }
+}
+
+impl DictionaryMut for TrieBuf {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.sync()?;
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         if self.path.as_os_str().is_empty() {
             return Ok(());
         }
@@ -328,8 +334,8 @@ impl Dictionary for TrieBufDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        TrieBufDictionary::add_phrase(self, syllables, phrase)
+    ) -> Result<(), UpdateDictionaryError> {
+        TrieBuf::add_phrase(self, syllables, phrase)
     }
 
     fn update_phrase(
@@ -338,32 +344,32 @@ impl Dictionary for TrieBufDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        TrieBufDictionary::update_phrase(self, syllables, phrase, user_freq, time)
+    ) -> Result<(), UpdateDictionaryError> {
+        TrieBuf::update_phrase(self, syllables, phrase, user_freq, time)
     }
 
     fn remove_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        TrieBufDictionary::remove_phrase(self, syllables, phrase_str)
+    ) -> Result<(), UpdateDictionaryError> {
+        TrieBuf::remove_phrase(self, syllables, phrase_str)
     }
 }
 
-impl<const N: usize> From<[(Vec<Syllable>, Vec<Phrase>); N]> for TrieBufDictionary {
-    fn from(value: [(Vec<Syllable>, Vec<Phrase>); N]) -> Self {
-        let mut dict = TrieBufDictionary::new_in_memory();
+impl<P: Into<Phrase>, const N: usize> From<[(Vec<Syllable>, Vec<P>); N]> for TrieBuf {
+    fn from(value: [(Vec<Syllable>, Vec<P>); N]) -> Self {
+        let mut dict = TrieBuf::new_in_memory();
         for (syllables, phrases) in value {
             for phrase in phrases {
-                dict.add_phrase(&syllables, phrase).unwrap();
+                dict.add_phrase(&syllables, phrase.into()).unwrap();
             }
         }
         dict
     }
 }
 
-impl Drop for TrieBufDictionary {
+impl Drop for TrieBuf {
     fn drop(&mut self) {
         let _ = self.flush();
         if let Some(join_handle) = self.join_handle.take() {
@@ -376,15 +382,19 @@ impl Drop for TrieBufDictionary {
 mod tests {
     use std::error::Error;
 
-    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
+    use crate::{
+        dictionary::{DictionaryMut, Phrase},
+        syl,
+        zhuyin::Bopomofo::*,
+    };
 
-    use super::{Dictionary, TrieBufDictionary};
+    use super::{Dictionary, TrieBuf};
 
     #[test]
     fn create_new_dictionary_in_memory_and_query() -> Result<(), Box<dyn Error>> {
         let tmp_dir = tempfile::tempdir()?;
         let file_path = tmp_dir.path().join("user.dat");
-        let mut dict = TrieBufDictionary::open(file_path)?;
+        let mut dict = TrieBuf::open(file_path)?;
         let info = dict.about();
         dict.add_phrase(
             &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
@@ -404,14 +414,14 @@ mod tests {
         let file_path = tmp_dir.path().join("user.dat");
         // Force dict to drop to sync async write
         {
-            let mut dict = TrieBufDictionary::open(&file_path)?;
+            let mut dict = TrieBuf::open(&file_path)?;
             dict.add_phrase(
                 &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
                 ("dict", 1, 2).into(),
             )?;
             dict.flush()?;
         }
-        let dict = TrieBufDictionary::open(file_path)?;
+        let dict = TrieBuf::open(file_path)?;
         let info = dict.about();
         assert_eq!("Unknown", info.copyright);
         assert_eq!(
@@ -425,7 +435,7 @@ mod tests {
     fn create_new_dictionary_and_enumerate() -> Result<(), Box<dyn Error>> {
         let tmp_dir = tempfile::tempdir()?;
         let file_path = tmp_dir.path().join("user.dat");
-        let mut dict = TrieBufDictionary::open(file_path)?;
+        let mut dict = TrieBuf::open(file_path)?;
         dict.add_phrase(
             &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
             ("dict", 1, 2).into(),

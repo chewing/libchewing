@@ -1,8 +1,17 @@
 What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
 ---------------------------------------------------------
 
+* Added
+  - Reintroduce DictionaryMut as a separate trait.
+
 * Changed
   - CMake default preset switched to build with rust.
+  - Improved TrieBufDictionary::from ergonomics.
+  - Rename DictEntries to Entries.
+  - Ensure all fallible API returns Error.
+
+* Removed
+  - HashMap implemented Dictionary was removed.
 
 
 What's New in libchewing 0.7.0 (Apr 7, 2024)

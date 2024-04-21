@@ -9,7 +9,7 @@ use log::{debug, log_enabled, trace, Level::Trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
-use super::{Composition, GapKind, Interval, Symbol};
+use super::{Composition, Gap, Interval, Symbol};
 
 /// TODO: doc
 #[derive(Debug, Default)]
@@ -23,31 +23,24 @@ impl ChewingEngine {
     pub fn convert<'a>(
         &'a self,
         dict: &'a dyn Dictionary,
-        composition: &'a Composition,
+        comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
         let fast_dp = iter::once_with(|| {
-            if composition.is_empty() {
+            if comp.is_empty() {
                 return vec![];
             }
-            let intervals = self.find_intervals(dict, composition);
-            self.find_best_path(composition.symbols.len(), intervals)
+            let intervals = self.find_intervals(dict, comp);
+            self.find_best_path(comp.symbols.len(), intervals)
                 .into_iter()
                 .map(|interval| interval.into())
-                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         });
         let slow_search = iter::once_with(move || {
-            if composition.is_empty() {
+            if comp.is_empty() {
                 return vec![];
             }
             let mut graph = Graph::default();
-            let paths = self.find_all_paths(
-                dict,
-                &mut graph,
-                composition,
-                0,
-                composition.symbols.len(),
-                None,
-            );
+            let paths = self.find_all_paths(dict, &mut graph, comp, 0, comp.len(), None);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -62,7 +55,7 @@ impl ChewingEngine {
             p.intervals
                 .into_iter()
                 .map(|it| it.into())
-                .fold(vec![], |acc, interval| glue_fn(composition, acc, interval))
+                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         });
         fast_dp.chain(slow_search)
     }
@@ -74,15 +67,15 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
         return acc;
     }
     let last = acc.last().expect("acc should have at least one item");
-    if let Some(GapKind::Glue) = com.gap(last.end) {
+    if let Some(Gap::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
-        let mut phrase = last.phrase.into_string();
-        phrase.push_str(&interval.phrase);
+        let mut phrase = last.str.into_string();
+        phrase.push_str(&interval.str);
         acc.push(Interval {
             start: last.start,
             end: interval.end,
             is_phrase: true,
-            phrase: phrase.into_boxed_str(),
+            str: phrase.into_boxed_str(),
         })
     } else {
         acc.push(interval);
@@ -101,7 +94,7 @@ impl ChewingEngine {
         let end = start + symbols.len();
 
         for i in (start..end).skip(1) {
-            if let Some(GapKind::Break) = com.gap(i) {
+            if let Some(Gap::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
                 debug!("No best phrase for {:?} due to break point", symbols);
@@ -127,7 +120,7 @@ impl ChewingEngine {
         let syllables = symbols
             .iter()
             .take_while(|symbol| symbol.is_syllable())
-            .map(|symbol| symbol.as_syllable())
+            .map(|symbol| symbol.to_syllable().unwrap())
             .collect::<Vec<_>>();
         if syllables.len() != symbols.len() {
             return None;
@@ -140,13 +133,13 @@ impl ChewingEngine {
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
             for selection in &com.selections {
-                debug_assert!(!selection.phrase.is_empty());
+                debug_assert!(!selection.str.is_empty());
                 if start <= selection.start && end >= selection.end {
                     let offset = selection.start - start;
                     let len = selection.end - selection.start;
                     let substring: String =
                         phrase.as_str().chars().skip(offset).take(len).collect();
-                    if substring != selection.phrase.as_ref() {
+                    if substring != selection.str.as_ref() {
                         continue 'next_phrase;
                     }
                 }
@@ -327,7 +320,7 @@ impl PossiblePhrase {
 impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PossiblePhrase::Symbol(sym) => f.write_char(sym.as_char()),
+            PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char().unwrap()),
             PossiblePhrase::Phrase(phrase) => f.write_str(phrase.as_str()),
         }
     }
@@ -348,7 +341,7 @@ impl From<Symbol> for PossiblePhrase {
 impl From<PossiblePhrase> for Box<str> {
     fn from(value: PossiblePhrase) -> Self {
         match value {
-            PossiblePhrase::Symbol(sym) => sym.as_char().to_string().into_boxed_str(),
+            PossiblePhrase::Symbol(sym) => sym.to_char().unwrap().to_string().into_boxed_str(),
             PossiblePhrase::Phrase(phrase) => phrase.into(),
         }
     }
@@ -379,7 +372,7 @@ impl From<PossibleInterval> for Interval {
                 PossiblePhrase::Symbol(_) => false,
                 PossiblePhrase::Phrase(_) => true,
             },
-            phrase: value.phrase.into(),
+            str: value.phrase.into(),
         }
     }
 }
@@ -507,8 +500,8 @@ type Graph<'a> = BTreeMap<(usize, usize), Option<PossiblePhrase>>;
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Composition, GapKind, Interval, Symbol},
-        dictionary::{Dictionary, Phrase, TrieBufDictionary},
+        conversion::{Composition, Gap, Interval, Symbol},
+        dictionary::{Dictionary, Phrase, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -516,50 +509,44 @@ mod tests {
     use super::{ChewingEngine, PossibleInterval, PossiblePath};
 
     fn test_dictionary() -> impl Dictionary {
-        TrieBufDictionary::from([
-            (vec![syl![G, U, O, TONE2]], vec![("國", 1).into()]),
-            (vec![syl![M, I, EN, TONE2]], vec![("民", 1).into()]),
-            (vec![syl![D, A, TONE4]], vec![("大", 1).into()]),
-            (vec![syl![H, U, EI, TONE4]], vec![("會", 1).into()]),
-            (vec![syl![D, AI, TONE4]], vec![("代", 1).into()]),
-            (
-                vec![syl![B, I, AU, TONE3]],
-                vec![("表", 1).into(), ("錶", 1).into()],
-            ),
+        TrieBuf::from([
+            (vec![syl![G, U, O, TONE2]], vec![("國", 1)]),
+            (vec![syl![M, I, EN, TONE2]], vec![("民", 1)]),
+            (vec![syl![D, A, TONE4]], vec![("大", 1)]),
+            (vec![syl![H, U, EI, TONE4]], vec![("會", 1)]),
+            (vec![syl![D, AI, TONE4]], vec![("代", 1)]),
+            (vec![syl![B, I, AU, TONE3]], vec![("表", 1), ("錶", 1)]),
             (
                 vec![syl![G, U, O, TONE2], syl![M, I, EN, TONE2]],
-                vec![("國民", 200).into()],
+                vec![("國民", 200)],
             ),
             (
                 vec![syl![D, A, TONE4], syl![H, U, EI, TONE4]],
-                vec![("大會", 200).into()],
+                vec![("大會", 200)],
             ),
             (
                 vec![syl![D, AI, TONE4], syl![B, I, AU, TONE3]],
-                vec![("代表", 200).into(), ("戴錶", 100).into()],
+                vec![("代表", 200), ("戴錶", 100)],
             ),
-            (vec![syl![X, I, EN]], vec![("心", 1).into()]),
-            (
-                vec![syl![K, U, TONE4], syl![I, EN]],
-                vec![("庫音", 300).into()],
-            ),
+            (vec![syl![X, I, EN]], vec![("心", 1)]),
+            (vec![syl![K, U, TONE4], syl![I, EN]], vec![("庫音", 300)]),
             (
                 vec![syl![X, I, EN], syl![K, U, TONE4], syl![I, EN]],
-                vec![("新酷音", 200).into()],
+                vec![("新酷音", 200)],
             ),
             (
                 vec![syl![C, E, TONE4], syl![SH, TONE4], syl![I, TONE2]],
-                vec![("測試儀", 42).into()],
+                vec![("測試儀", 42)],
             ),
             (
                 vec![syl![C, E, TONE4], syl![SH, TONE4]],
-                vec![("測試", 9318).into()],
+                vec![("測試", 9318)],
             ),
             (
                 vec![syl![I, TONE2], syl![X, I, A, TONE4]],
-                vec![("一下", 10576).into()],
+                vec![("一下", 10576)],
             ),
-            (vec![syl![X, I, A, TONE4]], vec![("下", 10576).into()]),
+            (vec![syl![X, I, A, TONE4]], vec![("下", 10576)]),
         ])
     }
 
@@ -580,12 +567,12 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -595,19 +582,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".into()
+                    str: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "代表".into()
+                    str: "代表".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -620,48 +607,48 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
-        composition.set_gap(1, GapKind::Break);
-        composition.set_gap(5, GapKind::Break);
+        composition.set_gap(1, Gap::Break);
+        composition.set_gap(5, Gap::Break);
         assert_eq!(
             Some(vec![
                 Interval {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "國".into()
+                    str: "國".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "民".into()
+                    str: "民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 5,
                     is_phrase: true,
-                    phrase: "代".into()
+                    str: "代".into()
                 },
                 Interval {
                     start: 5,
                     end: 6,
                     is_phrase: true,
-                    phrase: "表".into()
+                    str: "表".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -674,12 +661,12 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![G, U, O, TONE2]),
-            Symbol::new_syl(syl![M, I, EN, TONE2]),
-            Symbol::new_syl(syl![D, A, TONE4]),
-            Symbol::new_syl(syl![H, U, EI, TONE4]),
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![G, U, O, TONE2]),
+            Symbol::from(syl![M, I, EN, TONE2]),
+            Symbol::from(syl![D, A, TONE4]),
+            Symbol::from(syl![H, U, EI, TONE4]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -687,7 +674,7 @@ mod tests {
             start: 4,
             end: 6,
             is_phrase: true,
-            phrase: "戴錶".into(),
+            str: "戴錶".into(),
         });
         assert_eq!(
             Some(vec![
@@ -695,19 +682,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "國民".into()
+                    str: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "大會".into()
+                    str: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    phrase: "戴錶".into()
+                    str: "戴錶".into()
                 },
             ]),
             engine.convert(&dict, &composition).next()
@@ -720,9 +707,9 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![X, I, EN]),
-            Symbol::new_syl(syl![K, U, TONE4]),
-            Symbol::new_syl(syl![I, EN]),
+            Symbol::from(syl![X, I, EN]),
+            Symbol::from(syl![K, U, TONE4]),
+            Symbol::from(syl![I, EN]),
         ] {
             composition.push(sym);
         }
@@ -730,14 +717,14 @@ mod tests {
             start: 1,
             end: 3,
             is_phrase: true,
-            phrase: "酷音".into(),
+            str: "酷音".into(),
         });
         assert_eq!(
             Some(vec![Interval {
                 start: 0,
                 end: 3,
                 is_phrase: true,
-                phrase: "新酷音".into()
+                str: "新酷音".into()
             },]),
             engine.convert(&dict, &composition).next()
         );
@@ -749,8 +736,8 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![D, AI, TONE4]),
-            Symbol::new_syl(syl![B, I, AU, TONE3]),
+            Symbol::from(syl![D, AI, TONE4]),
+            Symbol::from(syl![B, I, AU, TONE3]),
         ] {
             composition.push(sym);
         }
@@ -759,13 +746,13 @@ mod tests {
                 start: 0,
                 end: 1,
                 is_phrase: true,
-                phrase: "代".into(),
+                str: "代".into(),
             },
             Interval {
                 start: 1,
                 end: 2,
                 is_phrase: true,
-                phrase: "錶".into(),
+                str: "錶".into(),
             },
         ] {
             composition.push_selection(interval);
@@ -776,13 +763,13 @@ mod tests {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    phrase: "代".into()
+                    str: "代".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    phrase: "錶".into()
+                    str: "錶".into()
                 }
             ]),
             engine.convert(&dict, &composition).next()
@@ -795,10 +782,10 @@ mod tests {
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![SH, TONE4]),
-            Symbol::new_syl(syl![I, TONE2]),
-            Symbol::new_syl(syl![X, I, A, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![SH, TONE4]),
+            Symbol::from(syl![I, TONE2]),
+            Symbol::from(syl![X, I, A, TONE4]),
         ] {
             composition.push(sym);
         }
@@ -808,13 +795,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".into()
+                    str: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".into()
+                    str: "一下".into()
                 }
             ]),
             engine.convert(&dict, &composition).next()
@@ -825,13 +812,13 @@ mod tests {
                     start: 0,
                     end: 3,
                     is_phrase: true,
-                    phrase: "測試儀".into()
+                    str: "測試儀".into()
                 },
                 Interval {
                     start: 3,
                     end: 4,
                     is_phrase: true,
-                    phrase: "下".into()
+                    str: "下".into()
                 }
             ]),
             engine.convert(&dict, &composition).nth(1)
@@ -842,13 +829,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    phrase: "測試".into()
+                    str: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    phrase: "一下".into()
+                    str: "一下".into()
                 }
             ]),
             engine.convert(&dict, &composition).cycle().nth(2)

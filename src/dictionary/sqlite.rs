@@ -5,8 +5,8 @@ use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalEx
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, Phrase,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
+    Phrase, UpdateDictionaryError,
 };
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
@@ -14,6 +14,7 @@ const USER_VERSION: u32 = 0;
 
 /// TODO: doc
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum SqliteDictionaryError {
     /// TODO: doc
     SqliteError {
@@ -276,9 +277,9 @@ impl SqliteDictionary {
     }
 }
 
-impl From<RusqliteError> for DictionaryUpdateError {
+impl From<RusqliteError> for UpdateDictionaryError {
     fn from(source: RusqliteError) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(source.into()),
         }
     }
@@ -286,7 +287,7 @@ impl From<RusqliteError> for DictionaryUpdateError {
 
 impl Dictionary for SqliteDictionary {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -314,7 +315,7 @@ impl Dictionary for SqliteDictionary {
     }
 
     // FIXME too many clone
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         let mut stmt = self
             .conn
             .prepare_cached(
@@ -352,11 +353,17 @@ impl Dictionary for SqliteDictionary {
         self.info.clone()
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
+        Some(self)
+    }
+}
+
+impl DictionaryMut for SqliteDictionary {
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
         self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
         Ok(())
     }
@@ -365,13 +372,13 @@ impl Dictionary for SqliteDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if self.read_only {
-            return Err(DictionaryUpdateError {
+            return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -389,13 +396,13 @@ impl Dictionary for SqliteDictionary {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
+    ) -> Result<(), UpdateDictionaryError> {
         if self.read_only {
-            return Err(DictionaryUpdateError {
+            return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
         }
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let tx = self.conn.transaction()?;
         {
             let mut stmt = tx.prepare_cached(
@@ -441,8 +448,8 @@ impl Dictionary for SqliteDictionary {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllables_bytes = syllables.get_bytes();
+    ) -> Result<(), UpdateDictionaryError> {
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
             .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")?;
@@ -515,7 +522,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         } else {
             0
         };
-        let syllables_bytes = syllables.get_bytes();
+        let syllables_bytes = syllables.to_bytes();
         let mut stmt = self.dict.conn.prepare_cached(
             "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
@@ -555,7 +562,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use crate::{
-        dictionary::{Dictionary, Phrase},
+        dictionary::{Dictionary, DictionaryMut, Phrase},
         syl,
         zhuyin::Bopomofo,
     };

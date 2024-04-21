@@ -4,7 +4,6 @@ use std::{
     any::Any,
     borrow::Borrow,
     cmp::Ordering,
-    collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
     io,
@@ -13,12 +12,12 @@ use std::{
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-pub use layered::LayeredDictionary;
-pub use loader::{SystemDictionaryLoader, UserDictionaryLoader};
+pub use layered::Layered;
+pub use loader::{LoadDictionaryError, SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
-pub use trie::{TrieDictionary, TrieDictionaryBuilder, TrieDictionaryStatistics};
-pub(crate) use trie_buf::TrieBufDictionary;
+pub use trie::{Trie, TrieBuilder, TrieStatistics};
+pub use trie_buf::TrieBuf;
 
 mod layered;
 mod loader;
@@ -30,38 +29,36 @@ mod uhash;
 
 /// The error type which is returned from updating a dictionary.
 #[derive(Debug)]
-pub struct DictionaryUpdateError {
+pub struct UpdateDictionaryError {
     /// TODO: doc
-    pub source: Option<Box<dyn Error + Send + Sync>>,
+    source: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl From<io::Error> for DictionaryUpdateError {
+impl UpdateDictionaryError {
+    pub(crate) fn new() -> UpdateDictionaryError {
+        UpdateDictionaryError { source: None }
+    }
+}
+
+impl From<io::Error> for UpdateDictionaryError {
     fn from(value: io::Error) -> Self {
-        DictionaryUpdateError {
+        UpdateDictionaryError {
             source: Some(Box::new(value)),
         }
     }
 }
 
-impl Display for DictionaryUpdateError {
+impl Display for UpdateDictionaryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "update dictionary failed")
     }
 }
 
-impl Error for DictionaryUpdateError {}
-
-/// The error type which is returned from building or updating a dictionary.
-#[derive(Debug)]
-pub struct DuplicatePhraseError;
-
-impl Display for DuplicatePhraseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "found duplicated phrases")
+impl Error for UpdateDictionaryError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source.as_ref().map(|err| err.as_ref() as &dyn Error)
     }
 }
-
-impl Error for DuplicatePhraseError {}
 
 /// A collection of metadata of a dictionary.
 ///
@@ -71,9 +68,8 @@ impl Error for DuplicatePhraseError {}
 /// # Examples
 ///
 /// ```no_run
-/// # use std::collections::HashMap;
-/// # use chewing::dictionary::Dictionary;
-/// # let dictionary = HashMap::new();
+/// # use chewing::dictionary::{Dictionary, TrieBuf};
+/// # let dictionary = TrieBuf::new_in_memory();
 /// let about = dictionary.about();
 /// assert_eq!("libchewing default", about.name);
 /// assert_eq!("Copyright (c) 2022 libchewing Core Team", about.copyright);
@@ -261,17 +257,15 @@ impl Display for Phrase {
     }
 }
 
-/// A generic iterator over the phrases and their frequency in a dictionary.
+/// A boxed iterator over the phrases and their frequency in a dictionary.
 ///
 /// # Examples
 ///
 /// ```
-/// use std::collections::HashMap;
+/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
-/// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
-///
-/// let dict = HashMap::from([
-///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100).into()]),
+/// let dict = TrieBuf::from([
+///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
 /// for phrase in dict.lookup_all_phrases(
@@ -283,8 +277,24 @@ impl Display for Phrase {
 /// ```
 pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 
-/// TODO: doc
-pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
+/// A boxed iterator over all the entries in a dictionary.
+///
+/// # Examples
+///
+/// ```
+/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
+///
+/// let dict = TrieBuf::from([
+///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
+/// ]);
+///
+/// for (syllables, phrase) in dict.entries() {
+///     for bopomofos in syllables {
+///         println!("{bopomofos} -> {phrase}");
+///     }
+/// }
+/// ```
+pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
 /// An interface for looking up dictionaries.
 ///
@@ -294,16 +304,12 @@ pub type DictEntries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a
 ///
 /// # Examples
 ///
-/// The std [`HashMap`] implements the `Dictionary` trait so it can be used in
-/// tests.
-///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// use std::collections::HashMap;
 ///
-/// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
-/// let mut dict = HashMap::new();
+/// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
 /// for phrase in dict.lookup_all_phrases(
@@ -333,19 +339,24 @@ pub trait Dictionary: Debug {
         self.lookup_first_n_phrases(syllables, usize::MAX)
     }
     /// Returns an iterator to all phrases in the dictionary.
-    fn entries(&self) -> DictEntries<'_>;
+    fn entries(&self) -> Entries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
+    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
+}
+
+/// An interface for updating dictionaries.
+pub trait DictionaryMut: Debug {
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError>;
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError>;
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError>;
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError>;
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -353,16 +364,12 @@ pub trait Dictionary: Debug {
     ///
     /// # Examples
     ///
-    /// The std [`HashMap`] implements the `DictionaryMut` trait so it can be used in
-    /// tests.
-    ///
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// use std::collections::HashMap;
     ///
-    /// use chewing::{dictionary::Dictionary, syl, zhuyin::Bopomofo};
+    /// use chewing::{dictionary::{DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
     ///
-    /// let mut dict = HashMap::new();
+    /// let mut dict = TrieBuf::new_in_memory();
     /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
     /// # Ok(())
     /// # }
@@ -372,7 +379,7 @@ pub trait Dictionary: Debug {
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 
     /// TODO: doc
     fn update_phrase(
@@ -381,14 +388,14 @@ pub trait Dictionary: Debug {
         phrase: Phrase,
         user_freq: u32,
         time: u64,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 
     /// TODO: doc
     fn remove_phrase(
         &mut self,
         syllables: &dyn SyllableSlice,
         phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError>;
+    ) -> Result<(), UpdateDictionaryError>;
 }
 
 /// TODO: doc
@@ -432,113 +439,14 @@ pub trait DictionaryBuilder {
     fn as_any(&self) -> &dyn Any;
 }
 
-impl Dictionary for HashMap<Vec<Syllable>, Vec<Phrase>> {
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let syllables = syllables.as_slice().into_owned();
-        let mut phrases = self.get(&syllables).cloned().unwrap_or_default();
-        phrases.truncate(first);
-        phrases
-    }
-
-    fn entries(&self) -> DictEntries<'_> {
-        Box::new(
-            self.clone()
-                .into_iter()
-                .flat_map(|(k, v)| v.into_iter().map(move |phrase| (k.clone(), phrase.clone()))),
-        )
-    }
-
-    fn about(&self) -> DictionaryInfo {
-        Default::default()
-    }
-
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn add_phrase(
-        &mut self,
-        syllables: &dyn SyllableSlice,
-        phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables.as_slice().into_owned();
-        let vec = self.entry(syllables).or_default();
-        if vec.iter().any(|it| it.as_str() == phrase.as_str()) {
-            return Err(DictionaryUpdateError {
-                source: Some(Box::new(DuplicatePhraseError)),
-            });
-        }
-        vec.push(phrase);
-        Ok(())
-    }
-
-    fn update_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-        _user_freq: u32,
-        _time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn remove_phrase(
-        &mut self,
-        syllables: &dyn SyllableSlice,
-        phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        let syllables = syllables.as_slice().into_owned();
-        let vec = self.entry(syllables).or_default();
-        *vec = vec
-            .iter()
-            .filter(|&p| p.as_str() != phrase_str)
-            .cloned()
-            .collect::<Vec<_>>();
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
-    use crate::{dictionary::Phrase, syl, zhuyin::Bopomofo::*};
-
-    use super::Dictionary;
+    use crate::dictionary::{Dictionary, DictionaryBuilder, DictionaryMut};
 
     #[test]
-    fn hashmap_lookup_first_one() {
-        let dict = HashMap::from([(
-            vec![syl![C, E, TONE4], syl![SH, TONE4]],
-            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
-        )]);
-
-        assert_eq!(
-            "測試",
-            dict.lookup_first_phrase(&[syl![C, E, TONE4], syl![SH, TONE4]])
-                .unwrap()
-                .as_str()
-        )
-    }
-
-    #[test]
-    fn hashmap_lookup_all() {
-        let dict = HashMap::from([(
-            vec![syl![C, E, TONE4], syl![SH, TONE4]],
-            vec![("測試", 1).into(), ("策試", 1).into(), ("策士", 1).into()],
-        )]);
-
-        assert_eq!(
-            vec![
-                Phrase::new("測試", 1),
-                Phrase::new("策試", 1),
-                Phrase::new("策士", 1)
-            ],
-            dict.lookup_all_phrases(&[syl![C, E, TONE4], syl![SH, TONE4]])
-        )
+    fn ensure_object_safe() {
+        const _: Option<&dyn Dictionary> = None;
+        const _: Option<&dyn DictionaryMut> = None;
+        const _: Option<&dyn DictionaryBuilder> = None;
     }
 }

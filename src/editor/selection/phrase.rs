@@ -1,8 +1,8 @@
 use std::cmp::min;
 
 use crate::{
-    conversion::{Composition, GapKind, Interval},
-    dictionary::{Dictionary, LayeredDictionary},
+    conversion::{Composition, Gap, Interval},
+    dictionary::{Dictionary, Layered},
     editor::{EditorError, SharedState},
 };
 
@@ -115,7 +115,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError)
+            Err(EditorError::Impossible)
         }
     }
     pub(crate) fn jump_to_prev_selection_point<D: Dictionary>(
@@ -127,7 +127,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError)
+            Err(EditorError::Impossible)
         }
     }
     pub(crate) fn jump_to_first_selection_point<D: Dictionary>(&mut self, dict: &D) {
@@ -183,7 +183,7 @@ impl PhraseSelector {
             if selection_ends.contains(&cursor) {
                 break;
             }
-            if let Some(GapKind::Break) = self.com.gap(cursor) {
+            if let Some(Gap::Break) = self.com.gap(cursor) {
                 break;
             }
             if let Some(sym) = self.com.symbol(cursor - 1) {
@@ -196,7 +196,7 @@ impl PhraseSelector {
         cursor
     }
 
-    pub(crate) fn candidates(&self, editor: &SharedState, dict: &LayeredDictionary) -> Vec<String> {
+    pub(crate) fn candidates(&self, editor: &SharedState, dict: &Layered) -> Vec<String> {
         let mut candidates = dict
             .lookup_all_phrases(&&self.com.symbols()[self.begin..self.end])
             .into_iter()
@@ -205,7 +205,7 @@ impl PhraseSelector {
         if self.end - self.begin == 1 {
             let alt = editor
                 .syl
-                .alt_syllables(self.com.symbol(self.begin).unwrap().as_syllable());
+                .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable().unwrap());
             for &syl in alt {
                 candidates.extend(
                     dict.lookup_all_phrases(&[syl])
@@ -222,7 +222,7 @@ impl PhraseSelector {
             start: self.begin,
             end: self.end,
             is_phrase: true,
-            phrase: phrase.into(),
+            str: phrase.into(),
         }
     }
 }
@@ -231,7 +231,7 @@ impl PhraseSelector {
 mod tests {
     use crate::{
         conversion::{Composition, Interval, Symbol},
-        dictionary::TrieBufDictionary,
+        dictionary::TrieBuf,
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -241,7 +241,7 @@ mod tests {
     #[test]
     fn init_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_syl(syl![C, E, TONE4]));
+        com.push(Symbol::from(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -249,7 +249,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -260,7 +260,7 @@ mod tests {
     #[should_panic]
     fn init_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_char(','));
+        com.push(Symbol::from(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -268,14 +268,14 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 
     #[test]
     fn init_forward_select_when_cursor_end_of_buffer_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_syl(syl![C, E, TONE4]));
+        com.push(Symbol::from(syl![C, E, TONE4]));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -283,7 +283,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
 
         assert_eq!(0, sel.begin);
@@ -294,7 +294,7 @@ mod tests {
     #[should_panic]
     fn init_forward_select_when_cursor_end_of_buffer_not_syllable() {
         let mut com = Composition::new();
-        com.push(Symbol::new_char(','));
+        com.push(Symbol::from(','));
         let mut sel = PhraseSelector {
             begin: 0,
             end: 1,
@@ -302,7 +302,7 @@ mod tests {
             orig: 0,
             com,
         };
-        let dict = TrieBufDictionary::from([(vec![syl![C, E, TONE4]], vec![("測", 100).into()])]);
+        let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
         sel.init(1, &dict);
     }
 
@@ -310,8 +310,8 @@ mod tests {
     fn should_stop_at_left_boundary() {
         let mut com = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
         ] {
             com.push(sym);
         }
@@ -331,7 +331,7 @@ mod tests {
     #[test]
     fn should_stop_after_first_non_syllable() {
         let mut com = Composition::new();
-        for sym in [Symbol::new_char(','), Symbol::new_syl(syl![C, E, TONE4])] {
+        for sym in [Symbol::from(','), Symbol::from(syl![C, E, TONE4])] {
             com.push(sym);
         }
         let sel = PhraseSelector {
@@ -351,8 +351,8 @@ mod tests {
     fn should_stop_after_first_selection() {
         let mut com = Composition::new();
         for sym in [
-            Symbol::new_syl(syl![C, E, TONE4]),
-            Symbol::new_syl(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![C, E, TONE4]),
         ] {
             com.push(sym);
         }
@@ -360,7 +360,7 @@ mod tests {
             start: 0,
             end: 1,
             is_phrase: true,
-            phrase: "冊".into(),
+            str: "冊".into(),
         });
         let sel = PhraseSelector {
             begin: 0,

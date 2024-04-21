@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chewing::dictionary::{Dictionary, DictionaryInfo, SqliteDictionary, TrieDictionary};
+use chewing::dictionary::{Dictionary, DictionaryInfo, SqliteDictionary, Trie};
 
 use crate::flags;
 
@@ -11,7 +11,7 @@ pub fn run(args: flags::Info) -> Result<()> {
     let dict: Box<dyn Dictionary> = if ext.eq_ignore_ascii_case("sqlite3") {
         Box::new(SqliteDictionary::open_read_only(&args.path)?)
     } else {
-        Box::new(TrieDictionary::open(&args.path)?)
+        Box::new(Trie::open(&args.path)?)
     };
     let info = dict.about();
     if args.json {

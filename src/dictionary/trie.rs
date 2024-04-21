@@ -3,13 +3,12 @@ use std::{
     cmp::Ordering,
     collections::VecDeque,
     error::Error,
-    fmt::{Debug, Display},
+    fmt::Debug,
     fs::{self, File},
     io::{self, BufWriter, Read, Write},
     iter,
     num::NonZeroUsize,
     path::Path,
-    str,
     time::SystemTime,
 };
 
@@ -22,10 +21,7 @@ use log::error;
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-use super::{
-    BuildDictionaryError, DictEntries, Dictionary, DictionaryBuilder, DictionaryInfo,
-    DictionaryUpdateError, DuplicatePhraseError, Phrase,
-};
+use super::{BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase};
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -65,18 +61,15 @@ impl TrieLeafView<'_> {
 /// A read-only dictionary using a pre-built [Trie][] index that is both space
 /// efficient and fast to lookup.
 ///
-/// `TrieDictionary`s are used as system dictionaries, or shared dictionaries.
-/// The dictionary file is defined using the platform independent [DER][DER]
+/// `Trie`s can be used as system dictionaries or shared dictionaries.
+/// The file format is defined using the platform independent [DER][DER]
 /// encoding format, allowing them to be versioned and shared easily.
 ///
-/// `TrieDictionary`s can be created from anything that implements the [`Read`]
-/// trait, as long as the underlying data conforms to the file format spec.
-///
-/// A new dictionary can be built using a [`TrieDictionaryBuilder`].
+/// A new dictionary can be built using a [`TrieBuilder`].
 ///
 /// # Examples
 ///
-/// We may want to read a dictionary from a [File][`std::fs::File`]:
+/// Read a dictionary from a [File][`std::fs::File`]:
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -85,23 +78,23 @@ impl TrieLeafView<'_> {
 /// use std::fs::File;
 ///
 /// use chewing::{syl, zhuyin::{Bopomofo, Syllable}};
-/// # use chewing::dictionary::{DictionaryBuilder, TrieDictionaryBuilder};
-/// use chewing::dictionary::{Dictionary, TrieDictionary};
+/// # use chewing::dictionary::{DictionaryBuilder, TrieBuilder};
+/// use chewing::dictionary::{Dictionary, Trie};
 /// # let mut tempfile = File::create("dict.dat")?;
-/// # let mut builder = TrieDictionaryBuilder::new();
+/// # let mut builder = TrieBuilder::new();
 /// # builder.insert(&[
 /// #     syl![Bopomofo::Z, Bopomofo::TONE4],
-/// #     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN]
+/// #     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN, Bopomofo::TONE3]
 /// # ], ("字典", 0).into());
 /// # builder.write(&mut tempfile)?;
 ///
 /// let mut file = File::open("dict.dat")?;
-/// let dict = TrieDictionary::new(&mut file)?;
+/// let dict = Trie::new(&mut file)?;
 ///
 /// // Find the phrase ㄗˋㄉ一ㄢˇ (dictionary)
 /// let mut phrase = dict.lookup_first_phrase(&[
 ///     syl![Bopomofo::Z, Bopomofo::TONE4],
-///     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN]
+///     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN, Bopomofo::TONE3]
 /// ]);
 /// assert_eq!("字典", phrase.unwrap().as_str());
 /// # Ok(())
@@ -111,57 +104,41 @@ impl TrieLeafView<'_> {
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
 /// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug, Clone)]
-pub struct TrieDictionary {
+pub struct Trie {
     der: Document,
-}
-
-#[derive(Debug)]
-pub(crate) enum TrieDictionaryError {
-    ReadOnly,
-}
-
-impl Display for TrieDictionaryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "trie dictionary error")
-    }
-}
-
-impl Error for TrieDictionaryError {}
-
-fn read_only_error() -> DictionaryUpdateError {
-    DictionaryUpdateError {
-        source: Some(Box::new(TrieDictionaryError::ReadOnly)),
-    }
 }
 
 fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
     io::Error::new(io::ErrorKind::Other, e)
 }
 
-impl TrieDictionary {
-    /// Creates a new `TrieDictionary` instance from a file.
+impl Trie {
+    /// Creates a new `Trie` instance from a file.
     ///
-    /// The data in the file must conform to the dictionary format spec. See
-    /// [`TrieDictionaryBuilder`] on how to build a dictionary.
+    /// The data in the file must conform to the dictionary format spec.
+    ///
+    /// See [`TrieBuilder`] on how to build a dictionary.
     ///
     /// # Examples
     ///
     /// ```no_run
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// use chewing::dictionary::TrieDictionary;
+    /// use chewing::dictionary::Trie;
     ///
-    /// let dict = TrieDictionary::open("dict.dat")?;
+    /// let dict = Trie::open("dict.dat")?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn open<P: AsRef<Path>>(path: P) -> io::Result<TrieDictionary> {
+    pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Trie> {
         let mut file = File::open(path)?;
-        TrieDictionary::new(&mut file)
+        Trie::new(&mut file)
     }
-    /// Creates a new `TrieDictionary` instance from a input stream.
+    /// Creates a new `Trie` instance from a input stream.
     ///
     /// The underlying data of the input stream must conform to the dictionary
-    /// format spec. See [`TrieDictionaryBuilder`] on how to build a dictionary.
+    /// format spec.
+    ///
+    /// See [`TrieBuilder`] on how to build a dictionary.
     ///
     /// # Examples
     ///
@@ -169,14 +146,14 @@ impl TrieDictionary {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// use std::fs::File;
     ///
-    /// use chewing::dictionary::TrieDictionary;
+    /// use chewing::dictionary::Trie;
     ///
     /// let mut file = File::open("dict.dat")?;
-    /// let dict = TrieDictionary::new(&mut file)?;
+    /// let dict = Trie::new(&mut file)?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new<T>(mut stream: T) -> io::Result<TrieDictionary>
+    pub fn new<T>(mut stream: T) -> io::Result<Trie>
     where
         T: Read,
     {
@@ -184,7 +161,7 @@ impl TrieDictionary {
         stream.read_to_end(&mut buf)?;
         let trie_dict_doc = Document::try_from(buf).map_err(io_error)?;
         let _: TrieFileRef<'_> = trie_dict_doc.decode_msg().map_err(io_error)?;
-        Ok(TrieDictionary { der: trie_dict_doc })
+        Ok(Trie { der: trie_dict_doc })
     }
 }
 
@@ -230,7 +207,7 @@ macro_rules! iter_bail_if_oob {
     };
 }
 
-impl Dictionary for TrieDictionary {
+impl Dictionary for Trie {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
         let dict = trie_file.index.as_bytes();
@@ -242,7 +219,7 @@ impl Dictionary for TrieDictionary {
         if node.child_begin() == node.child_end() {
             return vec![];
         }
-        'next: for syl in syllables.as_slice().iter() {
+        'next: for syl in syllables.to_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
             bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
             let mut child_nodes = dict[node.child_begin()..node.child_end()]
@@ -267,7 +244,7 @@ impl Dictionary for TrieDictionary {
             .collect()
     }
 
-    fn entries(&self) -> DictEntries<'_> {
+    fn entries(&self) -> Entries<'_> {
         let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
         let dict = trie_file.index.as_bytes();
         let data = trie_file.phrase_seq.der_bytes;
@@ -362,38 +339,8 @@ impl Dictionary for TrieDictionary {
         trie_file.info.into()
     }
 
-    fn reopen(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn flush(&mut self) -> Result<(), DictionaryUpdateError> {
-        Ok(())
-    }
-
-    fn add_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-    ) -> Result<(), DictionaryUpdateError> {
-        Err(read_only_error())
-    }
-
-    fn update_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase: Phrase,
-        _user_freq: u32,
-        _time: u64,
-    ) -> Result<(), DictionaryUpdateError> {
-        Err(read_only_error())
-    }
-
-    fn remove_phrase(
-        &mut self,
-        _syllables: &dyn SyllableSlice,
-        _phrase_str: &str,
-    ) -> Result<(), DictionaryUpdateError> {
-        Err(read_only_error())
+    fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
+        None
     }
 }
 
@@ -620,12 +567,12 @@ impl Writer for VecWriter {
     }
 }
 
-/// A builder to create a dictionary that can be loaded by the
-/// [`TrieDictionary`].
+/// A builder to create a dictionary that can be loaded as a [`Trie`]
+/// dictionary.
 ///
 /// # Examples
 ///
-/// We may want to create a dictionary [File][`std::fs::File`]:
+/// Create a new dictionary:
 ///
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -634,10 +581,10 @@ impl Writer for VecWriter {
 /// use std::fs::File;
 ///
 /// use chewing::{syl, zhuyin::Bopomofo};
-/// use chewing::dictionary::{DictionaryBuilder, TrieDictionaryBuilder};
+/// use chewing::dictionary::{DictionaryBuilder, TrieBuilder};
 ///
 /// let mut file = File::create("dict.dat")?;
-/// let mut builder = TrieDictionaryBuilder::new();
+/// let mut builder = TrieBuilder::new();
 /// builder.insert(&[
 ///     syl![Bopomofo::Z, Bopomofo::TONE4],
 ///     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN]
@@ -655,10 +602,10 @@ impl Writer for VecWriter {
 ///
 ///
 /// <details>
-/// <summary>TrieDictionary ASN.1 module definition</summary>
+/// <summary>Trie ASN.1 module definition</summary>
 ///
 /// ```asn
-/// TrieDictionary DEFINITIONS ::=
+/// Trie DEFINITIONS ::=
 /// BEGIN
 ///   Document ::= SEQUENCE
 ///   {
@@ -694,7 +641,7 @@ impl Writer for VecWriter {
 ///
 /// ## File Header
 ///
-/// A TrieDictionary file MUST begin with a SEQUENCE tag byte (0x30), followed
+/// A Trie file MUST begin with a SEQUENCE tag byte (0x30), followed
 /// by a variable length integer that encodes the size of the remaining
 /// document. Then there MUST be a Utf8String ("CHEW") and an INTEGER (0) that
 /// indicates the version of the dictionary format. The file SHOULD NOT contain
@@ -788,7 +735,7 @@ impl Writer for VecWriter {
 /// [Trie]: https://en.m.wikipedia.org/wiki/Trie
 /// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug)]
-pub struct TrieDictionaryBuilder {
+pub struct TrieBuilder {
     // The builder uses an arena to allocate nodes and reference each node with
     // node index.
     arena: Vec<TrieBuilderNode>,
@@ -806,7 +753,7 @@ struct TrieBuilderNode {
 
 /// A container for trie dictionary statistics.
 #[derive(Debug)]
-pub struct TrieDictionaryStatistics {
+pub struct TrieStatistics {
     /// The number of nodes in the dictionary.
     pub node_count: usize,
     /// The number of leaf nodes (phrases with same syllables).
@@ -825,8 +772,8 @@ pub struct TrieDictionaryStatistics {
     pub avg_branch_count: usize,
 }
 
-impl TrieDictionaryBuilder {
-    /// Creates a new `TrieDictionaryBuilder`.
+impl TrieBuilder {
+    /// Creates a new `TrieBuilder`.
     ///
     /// The builder is initialized with a empty root node. Use the [`insert`][Self::insert]
     /// method to add more entries to the dictionary.
@@ -834,13 +781,13 @@ impl TrieDictionaryBuilder {
     /// # Examples
     ///
     /// ```
-    /// use chewing::dictionary::TrieDictionaryBuilder;
+    /// use chewing::dictionary::TrieBuilder;
     ///
-    /// let mut builder = TrieDictionaryBuilder::new();
+    /// let mut builder = TrieBuilder::new();
     /// ```
-    pub fn new() -> TrieDictionaryBuilder {
+    pub fn new() -> TrieBuilder {
         let root = TrieBuilderNode::default();
-        TrieDictionaryBuilder {
+        TrieBuilder {
             arena: vec![root],
             info: Default::default(),
         }
@@ -899,19 +846,16 @@ impl TrieDictionaryBuilder {
     /// Writes the dictionary to an output stream and returns the number of
     /// bytes written.
     ///
-    /// This method creates the sub-chunks containing the index, phrases, and
-    /// metadata, then wraps them in a RIFF container.
-    ///
     /// # Examples
     ///
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// use std::io::Cursor;
     ///
-    /// use chewing::dictionary::TrieDictionaryBuilder;
+    /// use chewing::dictionary::TrieBuilder;
     ///
     /// let mut writer = Cursor::new(vec![]);
-    /// let mut builder = TrieDictionaryBuilder::new();
+    /// let mut builder = TrieBuilder::new();
     ///
     /// builder.write(&mut writer)?;
     /// # Ok(())
@@ -1014,9 +958,9 @@ impl TrieDictionaryBuilder {
     ///
     /// ```
     /// use chewing::{syl, zhuyin::Bopomofo};
-    /// use chewing::dictionary::{DictionaryBuilder, TrieDictionaryBuilder};
+    /// use chewing::dictionary::{DictionaryBuilder, TrieBuilder};
     ///
-    /// let mut builder = TrieDictionaryBuilder::new();
+    /// let mut builder = TrieBuilder::new();
     /// builder.insert(&[
     ///     syl![Bopomofo::G, Bopomofo::U, Bopomofo::O, Bopomofo::TONE2],
     /// ], ("國", 0).into());
@@ -1049,7 +993,7 @@ impl TrieDictionaryBuilder {
     /// assert_eq!(1, stats.max_branch_count);
     /// assert_eq!(0, stats.avg_branch_count);
     /// ```
-    pub fn statistics(&self) -> TrieDictionaryStatistics {
+    pub fn statistics(&self) -> TrieStatistics {
         let mut node_count = 0;
         let mut leaf_count = 0;
         let mut phrase_count = 0;
@@ -1103,7 +1047,7 @@ impl TrieDictionaryBuilder {
             }
         }
 
-        TrieDictionaryStatistics {
+        TrieStatistics {
             node_count,
             leaf_count,
             phrase_count,
@@ -1116,7 +1060,7 @@ impl TrieDictionaryBuilder {
     }
 }
 
-impl DictionaryBuilder for TrieDictionaryBuilder {
+impl DictionaryBuilder for TrieBuilder {
     fn set_info(&mut self, info: DictionaryInfo) -> Result<(), BuildDictionaryError> {
         self.info = info;
         Ok(())
@@ -1131,9 +1075,9 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
     ///
     /// ```
     /// use chewing::{syl, zhuyin::Bopomofo};
-    /// use chewing::dictionary::{DictionaryBuilder, TrieDictionaryBuilder};
+    /// use chewing::dictionary::{DictionaryBuilder, TrieBuilder};
     ///
-    /// let mut builder = TrieDictionaryBuilder::new();
+    /// let mut builder = TrieBuilder::new();
     ///
     /// builder.insert(&[
     ///     syl![Bopomofo::Z, Bopomofo::TONE4],
@@ -1151,9 +1095,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
             .iter()
             .any(|it| it.as_str() == phrase.as_str())
         {
-            return Err(BuildDictionaryError {
-                source: Box::new(DuplicatePhraseError),
-            });
+            return Err(BuildDictionaryError { source: "".into() });
         }
         self.arena[leaf_id].phrases.push(phrase);
         Ok(())
@@ -1180,7 +1122,7 @@ impl DictionaryBuilder for TrieDictionaryBuilder {
     }
 }
 
-impl Default for TrieDictionaryBuilder {
+impl Default for TrieBuilder {
     fn default() -> Self {
         Self::new()
     }
@@ -1201,11 +1143,11 @@ mod tests {
         zhuyin::Bopomofo,
     };
 
-    use super::{TrieDictionary, TrieDictionaryBuilder};
+    use super::{Trie, TrieBuilder};
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder.insert(
             &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
@@ -1272,7 +1214,7 @@ mod tests {
 
     #[test]
     fn tree_lookup_word() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder.insert(
             &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             ("測", 1).into(),
@@ -1284,7 +1226,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
             dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]])
@@ -1295,7 +1237,7 @@ mod tests {
 
     #[test]
     fn tree_lookup_phrase() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder.insert(
             &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
@@ -1322,7 +1264,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
             dict.lookup_all_phrases(&[
@@ -1353,7 +1295,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn tree_builder_duplicate_phrase_error() {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder
             .insert(
                 &[
@@ -1376,7 +1318,7 @@ mod tests {
 
     #[test]
     fn stable_word_sort_order() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         for word in ["冊", "策", "測", "側"] {
             builder.insert(
                 &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
@@ -1386,7 +1328,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![
                 Phrase::new("冊", 0),
@@ -1401,7 +1343,7 @@ mod tests {
 
     #[test]
     fn stable_phrase_sort_order() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder.insert(
             &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
@@ -1440,7 +1382,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![
                 Phrase::new("測試", 9318),
@@ -1459,7 +1401,7 @@ mod tests {
 
     #[test]
     fn tree_builder_write_read_metadata() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         let info = DictionaryInfo {
             name: "name".into(),
             copyright: "copyright".into(),
@@ -1472,7 +1414,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         let info = dict.about();
 
         assert_eq!("name", info.name);
@@ -1485,7 +1427,7 @@ mod tests {
 
     #[test]
     fn tree_entries() -> Result<(), Box<dyn std::error::Error>> {
-        let mut builder = TrieDictionaryBuilder::new();
+        let mut builder = TrieBuilder::new();
         builder.insert(
             &[
                 syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
@@ -1521,7 +1463,7 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieDictionary::new(&mut cursor)?;
+        let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![
                 (

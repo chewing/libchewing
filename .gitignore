@@ -141,3 +141,7 @@ contrib/test.sqlite3
 
 # clangd
 /.cache/clangd
+
+# fuzzer
+/fuzzer/in
+/fuzzer/out

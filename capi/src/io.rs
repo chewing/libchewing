@@ -10,10 +10,10 @@ use std::{
 
 use chewing::{
     conversion::{ChewingEngine, Interval, Symbol},
-    dictionary::{LayeredDictionary, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{Layered, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::{
+        zhuyin_layout::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
         },
@@ -172,13 +172,9 @@ pub unsafe extern "C" fn chewing_new2(
         Err(_) => return null_mut(),
     };
 
-    let estimate = LaxUserFreqEstimate::open(user_dictionary.as_ref());
-    let estimate = match estimate {
-        Ok(d) => d,
-        Err(_) => return null_mut(),
-    };
+    let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
-    let dict = LayeredDictionary::new(dictionaries, user_dictionary);
+    let dict = Layered::new(dictionaries, user_dictionary);
     let conversion_engine = ChewingEngine::new();
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
@@ -763,7 +759,7 @@ pub unsafe extern "C" fn chewing_get_phoneSeq(ctx: *const ChewingContext) -> *mu
         .iter()
         .cloned()
         .filter(Symbol::is_syllable)
-        .map(|sym| sym.as_syllable().to_u16())
+        .map(|sym| sym.to_syllable().unwrap().to_u16())
         .collect();
     let len = syllables.len();
     let ptr = Box::into_raw(syllables.into_boxed_slice());
@@ -1035,7 +1031,7 @@ pub unsafe extern "C" fn chewing_cand_list_first(ctx: *mut ChewingContext) -> c_
         return -1;
     }
 
-    ctx.editor.jump_to_first_selection_point();
+    let _ = ctx.editor.jump_to_first_selection_point();
     0
 }
 
@@ -1053,7 +1049,7 @@ pub unsafe extern "C" fn chewing_cand_list_last(ctx: *mut ChewingContext) -> c_i
         return -1;
     }
 
-    ctx.editor.jump_to_last_selection_point();
+    let _ = ctx.editor.jump_to_last_selection_point();
     0
 }
 
@@ -1677,7 +1673,7 @@ pub unsafe extern "C" fn chewing_buffer_Len(ctx: *const ChewingContext) -> c_int
         None => return -1,
     };
 
-    ctx.editor.display().chars().count() as c_int
+    ctx.editor.len() as c_int
 }
 
 /// # Safety
@@ -1966,7 +1962,8 @@ pub unsafe extern "C" fn chewing_cand_close(ctx: *mut ChewingContext) -> c_int {
 
     match ctx.editor.cancel_selecting() {
         Ok(_) => OK,
-        Err(_) => ERROR,
+        // For backward compatible reason this method never errors
+        Err(_) => OK,
     }
 }
 

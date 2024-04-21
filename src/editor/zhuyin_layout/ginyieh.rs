@@ -1,4 +1,4 @@
-//! ET41 keyboard layout
+//! GinYieh keyboard layout
 //!
 //! Another commonly used keyboard layout on older IBM PC.
 
@@ -11,69 +11,68 @@ use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug)]
-pub struct Et {
+pub struct GinYieh {
     syllable: Syllable,
 }
 
-impl Et {
+impl GinYieh {
     /// TODO: docs
-    pub fn new() -> Et {
-        Et {
+    pub fn new() -> GinYieh {
+        GinYieh {
             syllable: Syllable::new(),
         }
     }
 }
 
-impl Default for Et {
+impl Default for GinYieh {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl SyllableEditor for Et {
+impl SyllableEditor for GinYieh {
     fn key_press(&mut self, key: KeyEvent) -> KeyBehavior {
         let bopomofo = match key.index {
             KeyIndex::K1 => Bopomofo::TONE5,
-            KeyIndex::K2 => Bopomofo::TONE2,
-            KeyIndex::K3 => Bopomofo::TONE3,
-            KeyIndex::K4 => Bopomofo::TONE4,
-            KeyIndex::K7 => Bopomofo::Q,
-            KeyIndex::K8 => Bopomofo::AN,
-            KeyIndex::K9 => Bopomofo::EN,
-            KeyIndex::K10 => Bopomofo::ANG,
-            KeyIndex::K11 => Bopomofo::ENG,
+            KeyIndex::K2 => Bopomofo::B,
+            KeyIndex::K3 => Bopomofo::D,
+            KeyIndex::K6 => Bopomofo::ZH,
+            KeyIndex::K8 => Bopomofo::A,
+            KeyIndex::K9 => Bopomofo::AI,
+            KeyIndex::K10 => Bopomofo::AN,
+            KeyIndex::K11 => Bopomofo::I,
             KeyIndex::K12 => Bopomofo::ER,
-            KeyIndex::K15 => Bopomofo::EI,
-            KeyIndex::K16 => Bopomofo::EH,
-            KeyIndex::K17 => Bopomofo::I,
-            KeyIndex::K18 => Bopomofo::E,
-            KeyIndex::K19 => Bopomofo::T,
-            KeyIndex::K20 => Bopomofo::OU,
-            KeyIndex::K21 => Bopomofo::IU,
-            KeyIndex::K22 => Bopomofo::AI,
-            KeyIndex::K23 => Bopomofo::O,
-            KeyIndex::K24 => Bopomofo::P,
-            KeyIndex::K27 => Bopomofo::A,
-            KeyIndex::K28 => Bopomofo::S,
-            KeyIndex::K29 => Bopomofo::D,
-            KeyIndex::K30 => Bopomofo::F,
-            KeyIndex::K31 => Bopomofo::J,
-            KeyIndex::K32 => Bopomofo::H,
-            KeyIndex::K33 => Bopomofo::R,
-            KeyIndex::K34 => Bopomofo::K,
-            KeyIndex::K35 => Bopomofo::L,
-            KeyIndex::K36 => Bopomofo::Z,
-            KeyIndex::K37 => Bopomofo::C,
-            KeyIndex::K38 => Bopomofo::AU,
-            KeyIndex::K39 => Bopomofo::U,
-            KeyIndex::K40 => Bopomofo::X,
-            KeyIndex::K41 => Bopomofo::G,
-            KeyIndex::K42 => Bopomofo::B,
-            KeyIndex::K43 => Bopomofo::N,
-            KeyIndex::K44 => Bopomofo::M,
-            KeyIndex::K45 => Bopomofo::ZH,
-            KeyIndex::K46 => Bopomofo::CH,
-            KeyIndex::K47 => Bopomofo::SH,
+            KeyIndex::K15 => Bopomofo::TONE2,
+            KeyIndex::K16 => Bopomofo::P,
+            KeyIndex::K17 => Bopomofo::T,
+            KeyIndex::K18 => Bopomofo::G,
+            KeyIndex::K19 => Bopomofo::J,
+            KeyIndex::K20 => Bopomofo::CH,
+            KeyIndex::K21 => Bopomofo::Z,
+            KeyIndex::K22 => Bopomofo::O,
+            KeyIndex::K23 => Bopomofo::EI,
+            KeyIndex::K24 => Bopomofo::EN,
+            KeyIndex::K27 => Bopomofo::TONE3,
+            KeyIndex::K28 => Bopomofo::M,
+            KeyIndex::K29 => Bopomofo::N,
+            KeyIndex::K30 => Bopomofo::K,
+            KeyIndex::K31 => Bopomofo::Q,
+            KeyIndex::K32 => Bopomofo::SH,
+            KeyIndex::K33 => Bopomofo::C,
+            KeyIndex::K34 => Bopomofo::E,
+            KeyIndex::K35 => Bopomofo::OU,
+            KeyIndex::K36 => Bopomofo::ANG,
+            KeyIndex::K37 => Bopomofo::IU,
+            KeyIndex::K38 => Bopomofo::TONE4,
+            KeyIndex::K39 => Bopomofo::F,
+            KeyIndex::K40 => Bopomofo::L,
+            KeyIndex::K41 => Bopomofo::H,
+            KeyIndex::K42 => Bopomofo::X,
+            KeyIndex::K43 => Bopomofo::R,
+            KeyIndex::K44 => Bopomofo::S,
+            KeyIndex::K45 => Bopomofo::EH,
+            KeyIndex::K46 => Bopomofo::OU,
+            KeyIndex::K47 => Bopomofo::ENG,
             KeyIndex::K48 => Bopomofo::TONE1,
             _ => return KeyBehavior::KeyError,
         };
@@ -122,14 +121,14 @@ impl SyllableEditor for Et {
 mod test {
     use crate::editor::{
         keyboard::{KeyCode, KeyboardLayout, Modifiers, Qwerty},
-        syllable::{KeyBehavior, SyllableEditor},
+        zhuyin_layout::{KeyBehavior, SyllableEditor},
     };
 
-    use super::Et;
+    use super::GinYieh;
 
     #[test]
     fn space() {
-        let mut editor = Et::new();
+        let mut editor = GinYieh::new();
         let keyboard = Qwerty;
         let behavior =
             editor.key_press(keyboard.map_with_mod(KeyCode::Space, Modifiers::default()));

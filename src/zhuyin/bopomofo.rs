@@ -1,6 +1,7 @@
 use std::{
     error::Error,
     fmt::{Display, Write},
+    str::FromStr,
 };
 
 /// The category of the phonetic symbols
@@ -12,15 +13,15 @@ use std::{
 /// 2. Medial glides: ㄧㄨㄩ
 /// 3. Rimes: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
 /// 4. Tonal marks: ˙ˊˇˋ
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BopomofoKind {
-    /// TODO: docs
-    Initial = 0,
-    /// TODO: docs
+    /// Initial sounds: ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ
+    Initial,
+    /// Medial glides: ㄧㄨㄩ
     Medial,
-    /// TODO: docs
+    /// Rimes: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
     Rime,
-    /// TODO: docs
+    /// Tonal marks: ˙ˊˇˋ
     Tone,
 }
 
@@ -32,7 +33,7 @@ pub enum BopomofoKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Bopomofo {
     /// ㄅ
-    B = 0,
+    B,
     /// ㄆ
     P,
     /// ㄇ
@@ -138,65 +139,118 @@ impl Bopomofo {
         }
     }
     /// TODO: docs
-    pub const fn from_initial(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
-        if index < 1 || (index - 1) as usize >= INITIAL_MAP.len() {
-            return Err(ParseBopomofoError {
-                kind: ParseBopomofoErrorKind::IndexOutOfRange,
-            });
+    pub(super) const fn from_initial(index: u16) -> Option<Bopomofo> {
+        if index as usize >= INITIAL_MAP.len() {
+            return None;
         }
-        Ok(INITIAL_MAP[(index - 1) as usize])
+        Some(INITIAL_MAP[index as usize])
     }
     /// TODO: docs
-    pub const fn from_medial(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
-        if index < 1 || (index - 1) as usize >= MEDIAL_MAP.len() {
-            return Err(ParseBopomofoError {
-                kind: ParseBopomofoErrorKind::IndexOutOfRange,
-            });
+    pub(super) const fn from_medial(index: u16) -> Option<Bopomofo> {
+        if index as usize >= MEDIAL_MAP.len() {
+            return None;
         }
-        Ok(MEDIAL_MAP[(index - 1) as usize])
+        Some(MEDIAL_MAP[index as usize])
     }
     /// TODO: docs
-    pub const fn from_rime(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
-        if index < 1 || (index - 1) as usize >= RIME_MAP.len() {
-            return Err(ParseBopomofoError {
-                kind: ParseBopomofoErrorKind::IndexOutOfRange,
-            });
+    pub(super) const fn from_rime(index: u16) -> Option<Bopomofo> {
+        if index as usize >= RIME_MAP.len() {
+            return None;
         }
-        Ok(RIME_MAP[(index - 1) as usize])
+        Some(RIME_MAP[index as usize])
     }
     /// TODO: docs
-    pub const fn from_tone(index: u16) -> Result<Bopomofo, ParseBopomofoError> {
-        if index < 1 || (index - 1) as usize >= TONE_MAP.len() {
-            return Err(ParseBopomofoError {
-                kind: ParseBopomofoErrorKind::IndexOutOfRange,
-            });
+    pub(super) const fn from_tone(index: u16) -> Option<Bopomofo> {
+        if index as usize >= TONE_MAP.len() {
+            return None;
         }
-        Ok(TONE_MAP[(index - 1) as usize])
+        Some(TONE_MAP[index as usize])
     }
-    /// TODO: docs
-    pub fn initial_index(&self) -> u16 {
-        (INITIAL_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
-    }
-    /// TODO: docs
-    pub fn medial_index(&self) -> u16 {
-        (MEDIAL_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
-    }
-    /// TODO: docs
-    pub fn rime_index(&self) -> u16 {
-        (RIME_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
-    }
-    /// TODO: docs
-    pub fn tone_index(&self) -> u16 {
-        (TONE_MAP.iter().position(|b| b == self).unwrap() + 1) as u16
+    pub(super) const fn index(&self) -> u16 {
+        match self {
+            B | I | A | TONE5 => 1,
+            P | U | O | TONE2 => 2,
+            M | IU | E | TONE3 => 3,
+            F | EH | TONE4 => 4,
+            D | AI | TONE1 => 5,
+            T | EI => 6,
+            N | AU => 7,
+            L | OU => 8,
+            G | AN => 9,
+            K | EN => 10,
+            H | ANG => 11,
+            J | ENG => 12,
+            Q | ER => 13,
+            X => 14,
+            ZH => 15,
+            CH => 16,
+            SH => 17,
+            R => 18,
+            Z => 19,
+            C => 20,
+            S => 21,
+        }
     }
 }
 
-/// TODO: docs
-/// TODO: refactor to enum?
-#[derive(Debug)]
+/// Enum to store the various types of errors that can cause parsing a bopomofo
+/// symbol to fail.
+///
+/// # Example
+///
+/// ```
+/// # use std::str::FromStr;
+/// # use chewing::zhuyin::Bopomofo;
+/// if let Err(e) = Bopomofo::from_str("a12") {
+///     println!("Failed conversion to bopomofo: {e}");
+/// }
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum BopomofoErrorKind {
+    /// Value being parsed is empty.
+    Empty,
+    /// Contains an invalid symbol.
+    InvalidSymbol,
+}
+
+/// An error which can be returned when parsing an bopomofo symbol.
+///
+/// # Potential causes
+///
+/// Among other causes, `ParseBopomofoError` can be thrown because of leading or trailing whitespace
+/// in the string e.g., when it is obtained from the standard input.
+/// Using the [`str::trim()`] method ensures that no whitespace remains before parsing.
+///
+/// # Example
+///
+/// ```
+/// # use std::str::FromStr;
+/// # use chewing::zhuyin::Bopomofo;
+/// if let Err(e) = Bopomofo::from_str("a12") {
+///     println!("Failed conversion to bopomofo: {e}");
+/// }
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseBopomofoError {
-    /// TODO: docs
-    pub kind: ParseBopomofoErrorKind,
+    kind: BopomofoErrorKind,
+}
+
+impl ParseBopomofoError {
+    fn empty() -> ParseBopomofoError {
+        Self {
+            kind: BopomofoErrorKind::Empty,
+        }
+    }
+    fn invalid_symbol() -> ParseBopomofoError {
+        Self {
+            kind: BopomofoErrorKind::InvalidSymbol,
+        }
+    }
+    /// Outputs the detailed cause of parsing an bopomofo failing.
+    pub fn kind(&self) -> &BopomofoErrorKind {
+        &self.kind
+    }
 }
 
 impl Display for ParseBopomofoError {
@@ -207,18 +261,24 @@ impl Display for ParseBopomofoError {
 
 impl Error for ParseBopomofoError {}
 
-/// TODO: docs
-#[derive(Debug)]
-pub enum ParseBopomofoErrorKind {
-    /// TODO: docs
-    UnknownSymbol,
-    /// TODO: docs
-    IndexOutOfRange,
-}
-
 impl Display for Bopomofo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_char((*self).into())
+    }
+}
+
+impl FromStr for Bopomofo {
+    type Err = ParseBopomofoError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Err(ParseBopomofoError::empty());
+        }
+        if s.chars().count() != 1 {
+            return Err(ParseBopomofoError::invalid_symbol());
+        }
+
+        s.chars().next().unwrap().try_into()
     }
 }
 
@@ -318,9 +378,45 @@ impl TryFrom<char> for Bopomofo {
             'ˊ' => Ok(TONE2),
             'ˇ' => Ok(TONE3),
             'ˋ' => Ok(TONE4),
-            _ => Err(ParseBopomofoError {
-                kind: ParseBopomofoErrorKind::UnknownSymbol,
-            }),
+            _ => Err(ParseBopomofoError::invalid_symbol()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::zhuyin::{BopomofoErrorKind, ParseBopomofoError};
+
+    use super::Bopomofo;
+
+    #[test]
+    fn parse() {
+        assert_eq!(Ok(Bopomofo::B), "ㄅ".parse())
+    }
+
+    #[test]
+    fn parse_empty() {
+        assert_eq!(Err(ParseBopomofoError::empty()), "".parse::<Bopomofo>());
+        assert_eq!(
+            &BopomofoErrorKind::Empty,
+            ParseBopomofoError::empty().kind()
+        );
+    }
+
+    #[test]
+    fn parse_invalid() {
+        assert_eq!(
+            Err(ParseBopomofoError::invalid_symbol()),
+            "abc".parse::<Bopomofo>()
+        );
+        assert_eq!(
+            &BopomofoErrorKind::InvalidSymbol,
+            ParseBopomofoError::invalid_symbol().kind()
+        );
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(Bopomofo::B.to_string(), "ㄅ")
     }
 }

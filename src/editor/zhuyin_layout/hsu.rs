@@ -279,7 +279,7 @@ mod test {
     use crate::{
         editor::{
             keyboard::{KeyCode, KeyboardLayout, Qwerty},
-            syllable::SyllableEditor,
+            zhuyin_layout::SyllableEditor,
         },
         zhuyin::Bopomofo,
     };

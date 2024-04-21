@@ -4,7 +4,7 @@ use std::cmp::min;
 
 use log::warn;
 
-use crate::conversion::{Composition, GapKind, Interval, Symbol};
+use crate::conversion::{Composition, Gap, Interval, Symbol};
 
 /// TODO
 #[derive(Debug, Default, Clone)]
@@ -113,14 +113,14 @@ impl CompositionEditor {
             warn!("cannot set glue at the end of buffer");
             return;
         }
-        self.inner.set_gap(self.cursor, GapKind::Glue);
+        self.inner.set_gap(self.cursor, Gap::Glue);
     }
     pub(crate) fn insert_break(&mut self) {
         if self.is_end_of_buffer() {
             warn!("cannot set break at the end of buffer");
             return;
         }
-        self.inner.set_gap(self.cursor, GapKind::Break);
+        self.inner.set_gap(self.cursor, Gap::Break);
     }
     pub(crate) fn replace(&mut self, sym: Symbol) {
         self.inner.replace(self.cursor, sym);
@@ -134,7 +134,7 @@ impl CompositionEditor {
         self.inner.symbol(cursor)
     }
     pub(crate) fn select(&mut self, interval: Interval) {
-        assert!(!interval.phrase.is_empty());
+        assert!(!interval.str.is_empty());
         self.inner.push_selection(interval);
     }
 }

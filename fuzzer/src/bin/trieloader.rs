@@ -1,7 +1,7 @@
 use std::{io::Result, path::PathBuf};
 
 use chewing::{
-    dictionary::{Dictionary, TrieDictionary},
+    dictionary::{Dictionary, Trie},
     syl,
     zhuyin::Bopomofo,
 };
@@ -16,7 +16,7 @@ pub fn main() -> Result<()> {
     };
 
     info!("[*] try to load the dictionary...");
-    let dict = TrieDictionary::open(flags.dict_path)?;
+    let dict = Trie::open(flags.dict_path)?;
 
     info!("[*] try to read the metadata...");
     let info = dict.about();
