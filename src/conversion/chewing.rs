@@ -287,7 +287,7 @@ impl ChewingEngine {
         source: usize,
         sink: usize,
     ) -> Option<Vec<PossibleInterval>> {
-        let mut parent = BTreeMap::new();
+        let mut parent = vec![None; sink + 1];
         let mut queue = VecDeque::new();
         queue.push_back(source);
         'bfs: while !queue.is_empty() {
@@ -297,8 +297,8 @@ impl ChewingEngine {
                     if removed_edges.contains(&(edge.start, edge.end)) {
                         continue;
                     }
-                    if !parent.contains_key(&edge.end) {
-                        parent.insert(edge.end, edge);
+                    if parent[edge.end].is_none() {
+                        parent[edge.end] = Some(edge);
                         queue.push_back(edge.end);
                     }
                     if edge.end == sink {
@@ -310,7 +310,7 @@ impl ChewingEngine {
         let mut path = vec![];
         let mut node = sink;
         while node != source {
-            let &interval = parent.get(&node)?;
+            let interval = parent[node]?;
             node = interval.start;
             path.push(interval.clone());
         }
@@ -908,19 +908,19 @@ mod tests {
         let dict = test_dictionary();
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
-        for _ in 0..40 {
+        for _ in 0..80 {
             composition.push(Symbol::from(syl![H, A]));
         }
         assert_eq!(
-            20,
+            40,
             engine.convert(&dict, &composition).nth(0).unwrap().len()
         );
         assert_eq!(
-            21,
+            41,
             engine.convert(&dict, &composition).nth(1).unwrap().len()
         );
         assert_eq!(
-            21,
+            41,
             engine.convert(&dict, &composition).nth(2).unwrap().len()
         );
     }
