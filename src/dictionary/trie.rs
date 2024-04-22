@@ -105,7 +105,9 @@ impl TrieLeafView<'_> {
 /// [DER]: https://en.m.wikipedia.org/wiki/X.690#DER_encoding
 #[derive(Debug, Clone)]
 pub struct Trie {
-    der: Document,
+    info: DictionaryInfo,
+    index: Box<[u8]>,
+    phrase_seq: Box<[u8]>,
 }
 
 fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
@@ -160,8 +162,15 @@ impl Trie {
         let mut buf = vec![];
         stream.read_to_end(&mut buf)?;
         let trie_dict_doc = Document::try_from(buf).map_err(io_error)?;
-        let _: TrieFileRef<'_> = trie_dict_doc.decode_msg().map_err(io_error)?;
-        Ok(Trie { der: trie_dict_doc })
+        let trie_ref: TrieFileRef<'_> = trie_dict_doc.decode_msg().map_err(io_error)?;
+        let info = trie_ref.info.into();
+        let index = trie_ref.index.as_bytes().into();
+        let phrase_seq = trie_ref.phrase_seq.der_bytes.into();
+        Ok(Trie {
+            info,
+            index,
+            phrase_seq,
+        })
     }
 }
 
@@ -209,9 +218,8 @@ macro_rules! iter_bail_if_oob {
 
 impl Dictionary for Trie {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        let dict = trie_file.index.as_bytes();
-        let data = trie_file.phrase_seq.der_bytes;
+        let dict = self.index.as_ref();
+        let data = self.phrase_seq.as_ref();
         bail_if_oob!(0, TrieNodeView::SIZE, dict.len());
         let root = TrieNodeView(&dict[..TrieNodeView::SIZE]);
         let mut node = root;
@@ -245,9 +253,8 @@ impl Dictionary for Trie {
     }
 
     fn entries(&self) -> Entries<'_> {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        let dict = trie_file.index.as_bytes();
-        let data = trie_file.phrase_seq.der_bytes;
+        let dict = self.index.as_ref();
+        let data = self.phrase_seq.as_ref();
         let mut results = Vec::new();
         let mut stack = Vec::new();
         let mut syllables = Vec::new();
@@ -335,8 +342,7 @@ impl Dictionary for Trie {
     }
 
     fn about(&self) -> DictionaryInfo {
-        let trie_file: TrieFileRef<'_> = self.der.decode_msg().expect("trie dictionary corrupted");
-        trie_file.info.into()
+        self.info.clone()
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
