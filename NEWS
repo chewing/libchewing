@@ -9,6 +9,8 @@ What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
   - Improved TrieBufDictionary::from ergonomics.
   - Rename DictEntries to Entries.
   - Ensure all fallible API returns Error.
+  - Improved algorithm so using Tab key to find alternative phrasing is more
+    responsive.
 
 * Removed
   - HashMap implemented Dictionary was removed.
