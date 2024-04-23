@@ -91,6 +91,7 @@ if(WITH_RUST)
         Corrosion
         GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
         GIT_TAG be76480232216a64f65e3b1d9794d68cbac6c690 # v0.4.5
+        FIND_PACKAGE_ARGS
     )
     FetchContent_MakeAvailable(Corrosion)
 
