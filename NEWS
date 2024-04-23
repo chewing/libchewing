@@ -6,6 +6,7 @@ What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
 
 * Changed
   - CMake default preset switched to build with rust.
+  - CMake minimum required version bumped to 3.24.0.
   - Improved TrieBufDictionary::from ergonomics.
   - Rename DictEntries to Entries.
   - Ensure all fallible API returns Error.
