@@ -22,6 +22,16 @@ user-id = 7551 # Kan-Ru Chen (kanru)
 start = "2024-03-26"
 end = "2025-03-30"
 
+[[audits.allocator-api2]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.2.16 -> 0.2.18"
+
+[[audits.cc]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "1.0.90 -> 1.0.95"
+
 [[audits.der]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
@@ -42,10 +52,20 @@ who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "0.4.20 -> 0.4.21"
 
+[[audits.proc-macro2]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "1.0.80 -> 1.0.81"
+
 [[audits.redox_users]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "0.4.4 -> 0.4.5"
+
+[[audits.windows_i686_gnullvm]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-run"
+version = "0.52.5"
 
 [[audits.xflags]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
@@ -64,7 +84,7 @@ version = "1.7.0"
 
 [[trusted.aho-corasick]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-03-28"
 end = "2025-03-30"
 
@@ -106,25 +126,25 @@ end = "2025-03-30"
 
 [[trusted.memchr]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-07-07"
 end = "2025-03-30"
 
 [[trusted.regex]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-02-27"
 end = "2025-03-30"
 
 [[trusted.regex-automata]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-02-25"
 end = "2025-03-30"
 
 [[trusted.regex-syntax]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-03-30"
 end = "2025-03-30"
 
@@ -148,7 +168,7 @@ end = "2025-03-30"
 
 [[trusted.termcolor]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2019-06-04"
 end = "2025-03-30"
 
@@ -166,7 +186,7 @@ end = "2025-03-30"
 
 [[trusted.winapi-util]]
 criteria = "safe-to-deploy"
-user-id = 189 # Andrew Gallant (BurntSushi)
+user-id = 189
 start = "2020-01-11"
 end = "2025-03-30"
 

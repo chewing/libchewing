@@ -9,16 +9,9 @@ audited_as = "0.7.0-beta.3"
 version = "0.8.0-alpha.1"
 audited_as = "0.7.0-beta.3"
 
-[[publisher.aho-corasick]]
-version = "1.1.3"
-when = "2024-03-20"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
 [[publisher.anyhow]]
-version = "1.0.81"
-when = "2024-03-12"
+version = "1.0.82"
+when = "2024-04-10"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
@@ -51,13 +44,6 @@ user-id = 2915
 user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
-[[publisher.is-terminal]]
-version = "0.4.12"
-when = "2024-02-09"
-user-id = 6825
-user-login = "sunfishcode"
-user-name = "Dan Gohman"
-
 [[publisher.libc]]
 version = "0.2.153"
 when = "2024-01-31"
@@ -72,37 +58,9 @@ user-id = 6825
 user-login = "sunfishcode"
 user-name = "Dan Gohman"
 
-[[publisher.memchr]]
-version = "2.7.2"
-when = "2024-03-27"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
-[[publisher.regex]]
-version = "1.10.4"
-when = "2024-03-23"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
-[[publisher.regex-automata]]
-version = "0.4.6"
-when = "2024-03-04"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
-[[publisher.regex-syntax]]
-version = "0.8.3"
-when = "2024-03-26"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
 [[publisher.rustix]]
-version = "0.38.32"
-when = "2024-03-19"
+version = "0.38.34"
+when = "2024-04-22"
 user-id = 6825
 user-login = "sunfishcode"
 user-name = "Dan Gohman"
@@ -115,39 +73,25 @@ user-login = "mbrubeck"
 user-name = "Matt Brubeck"
 
 [[publisher.syn]]
-version = "2.0.58"
-when = "2024-04-03"
+version = "2.0.60"
+when = "2024-04-17"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
 
-[[publisher.termcolor]]
-version = "1.4.1"
-when = "2024-01-10"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
-
 [[publisher.thiserror]]
-version = "1.0.58"
-when = "2024-03-12"
+version = "1.0.59"
+when = "2024-04-20"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
 
 [[publisher.thiserror-impl]]
-version = "1.0.58"
-when = "2024-03-12"
+version = "1.0.59"
+when = "2024-04-20"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
-
-[[publisher.winapi-util]]
-version = "0.1.6"
-when = "2023-09-20"
-user-id = 189
-user-login = "BurntSushi"
-user-name = "Andrew Gallant"
 
 [[publisher.windows-sys]]
 version = "0.48.0"
@@ -171,8 +115,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows-targets]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -185,8 +129,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_aarch64_gnullvm]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -199,8 +143,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_aarch64_msvc]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -213,8 +157,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_i686_gnu]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -227,8 +171,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_i686_msvc]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -241,8 +185,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_x86_64_gnu]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -255,8 +199,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_x86_64_gnullvm]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -269,8 +213,8 @@ user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
 [[publisher.windows_x86_64_msvc]]
-version = "0.52.4"
-when = "2024-02-28"
+version = "0.52.5"
+when = "2024-04-12"
 user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
@@ -304,6 +248,18 @@ criteria = "safe-to-deploy"
 version = "1.0.0"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
+[[audits.google.audits.errno]]
+who = "Ying Hsu <yinghsu@chromium.org>"
+criteria = "safe-to-run"
+version = "0.3.8"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.fastrand]]
+who = "Ying Hsu <yinghsu@chromium.org>"
+criteria = "safe-to-run"
+version = "2.0.2"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
 [[audits.google.audits.proc-macro2]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
 criteria = "safe-to-deploy"
@@ -322,6 +278,12 @@ criteria = "safe-to-deploy"
 delta = "1.0.78 -> 1.0.79"
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
+[[audits.google.audits.proc-macro2]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.79 -> 1.0.80"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.quote]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
 criteria = "safe-to-deploy"
@@ -332,39 +294,17 @@ Grepped for \"unsafe\", \"crypt\", \"cipher\", \"fs\", \"net\" - there were no h
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
-[[audits.google.audits.rustc_version]]
-who = "danakj@chromium.org"
-criteria = "safe-to-run"
-version = "0.4.0"
-notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
-"""
+[[audits.google.audits.quote]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.35 -> 1.0.36"
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
-[[audits.google.audits.semver]]
-who = "danakj@chromium.org"
+[[audits.google.audits.tempfile]]
+who = "Ying Hsu <yinghsu@chromium.org>"
 criteria = "safe-to-run"
-version = "1.0.20"
-notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
-"""
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
-
-[[audits.google.audits.semver]]
-who = "Lukasz Anforowicz <lukasza@chromium.org>"
-criteria = "safe-to-run"
-delta = "1.0.20 -> 1.0.21"
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
-
-[[audits.google.audits.semver]]
-who = "Lukasz Anforowicz <lukasza@chromium.org>"
-criteria = "safe-to-run"
-delta = "1.0.21 -> 1.0.22"
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+version = "3.10.1"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
 [[audits.google.audits.unicode-ident]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
@@ -388,18 +328,10 @@ criteria = "safe-to-deploy"
 version = "0.9.4"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
-[[audits.google.audits.winapi]]
-who = "danakj@chromium.org"
-criteria = "safe-to-run"
-version = "0.3.9"
-notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
-"""
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
-
-[audits.isrg.audits]
+[[audits.isrg.audits.getrandom]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.12 -> 0.2.14"
 
 [[audits.mozilla.audits.log]]
 who = "Mike Hommey <mh+mozilla@glandium.org>"

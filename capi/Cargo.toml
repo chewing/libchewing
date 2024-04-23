@@ -11,7 +11,7 @@ crate-type = ["rlib", "staticlib"]
 
 [dependencies]
 chewing = { version = "0.8.0-alpha.1", path = ".." }
-env_logger = { version = "0.10.2", default-features = false }
+env_logger = { version = ">= 0.10.2", default-features = false }
 log = { workspace = true }
 
 [dev-dependencies]

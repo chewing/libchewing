@@ -25,10 +25,6 @@ criteria = "safe-to-run"
 [policy.fuzzer]
 criteria = "safe-to-run"
 
-[[exemptions.afl]]
-version = "0.15.4"
-criteria = "safe-to-run"
-
 [[exemptions.ahash]]
 version = "0.8.11"
 criteria = "safe-to-deploy"
@@ -49,10 +45,6 @@ criteria = "safe-to-deploy"
 version = "0.10.2"
 criteria = "safe-to-run"
 
-[[exemptions.errno]]
-version = "0.3.8"
-criteria = "safe-to-run"
-
 [[exemptions.fallible-iterator]]
 version = "0.3.0"
 criteria = "safe-to-deploy"
@@ -61,10 +53,6 @@ criteria = "safe-to-deploy"
 version = "0.1.9"
 criteria = "safe-to-deploy"
 
-[[exemptions.fastrand]]
-version = "2.0.2"
-criteria = "safe-to-run"
-
 [[exemptions.getrandom]]
 version = "0.2.12"
 criteria = "safe-to-deploy"
@@ -72,18 +60,6 @@ criteria = "safe-to-deploy"
 [[exemptions.hashlink]]
 version = "0.9.0"
 criteria = "safe-to-deploy"
-
-[[exemptions.hermit-abi]]
-version = "0.3.9"
-criteria = "safe-to-run"
-
-[[exemptions.home]]
-version = "0.5.9"
-criteria = "safe-to-run"
-
-[[exemptions.humantime]]
-version = "2.1.0"
-criteria = "safe-to-run"
 
 [[exemptions.libredox]]
 version = "0.0.1"
@@ -113,10 +89,6 @@ criteria = "safe-to-deploy"
 version = "0.31.0"
 criteria = "safe-to-deploy"
 
-[[exemptions.tempfile]]
-version = "3.10.1"
-criteria = "safe-to-run"
-
 [[exemptions.vcpkg]]
 version = "0.2.15"
 criteria = "safe-to-deploy"
@@ -124,18 +96,6 @@ criteria = "safe-to-deploy"
 [[exemptions.wasi]]
 version = "0.11.0+wasi-snapshot-preview1"
 criteria = "safe-to-deploy"
-
-[[exemptions.winapi-i686-pc-windows-gnu]]
-version = "0.4.0"
-criteria = "safe-to-run"
-
-[[exemptions.winapi-x86_64-pc-windows-gnu]]
-version = "0.4.0"
-criteria = "safe-to-run"
-
-[[exemptions.xdg]]
-version = "2.5.2"
-criteria = "safe-to-run"
 
 [[exemptions.zerocopy]]
 version = "0.7.32"
