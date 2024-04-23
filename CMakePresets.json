@@ -38,6 +38,7 @@
             "description": "Build libchewing with only rust dependencies",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_INFO": true,
                 "WITH_RUST": true,
                 "WITH_SQLITE3": false
             },

@@ -9,5 +9,5 @@ edition = "2021"
 chewing = { version = "0.8.0-alpha.1", path = ".." }
 chewing_capi = { version = "0.8.0-alpha.1", path = "../capi" }
 log = "0.4.21"
-env_logger = "0.10.0"
+env_logger = { version = ">= 0.10.2", default-features = false }
 xflags = "0.3.2"
