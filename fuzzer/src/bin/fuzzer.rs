@@ -5,8 +5,25 @@ use std::{
 };
 
 use chewing_capi::{
+    candidates::{
+        chewing_cand_Enumerate, chewing_cand_String, chewing_cand_String_static,
+        chewing_cand_TotalPage, chewing_cand_hasNext,
+    },
     input::*,
-    setup::{chewing_delete, chewing_new2},
+    modes::{
+        chewing_get_ChiEngMode, chewing_get_ShapeMode, chewing_set_ChiEngMode,
+        chewing_set_ShapeMode,
+    },
+    output::{
+        chewing_aux_Check, chewing_aux_Length, chewing_aux_String, chewing_aux_String_static,
+        chewing_bopomofo_Check, chewing_bopomofo_String_static, chewing_buffer_Check,
+        chewing_buffer_Len, chewing_buffer_String, chewing_buffer_String_static,
+        chewing_commit_Check, chewing_commit_String, chewing_commit_String_static,
+        chewing_cursor_Current, chewing_get_phoneSeq, chewing_get_phoneSeqLen,
+        chewing_interval_Enumerate, chewing_interval_Get, chewing_interval_hasNext,
+        chewing_keystroke_CheckAbsorb, chewing_keystroke_CheckIgnore, IntervalType,
+    },
+    setup::{chewing_Reset, chewing_delete, chewing_free, chewing_new2},
 };
 
 enum ChewingHandle {
@@ -32,13 +49,16 @@ enum ChewingHandle {
     PageDown,
     DblTab,
     Numlock,
+    Reset,
+    ChiEngMode,
+    ShapeMode,
     Quit,
     Skip,
 }
 
 impl From<u8> for ChewingHandle {
     fn from(value: u8) -> Self {
-        let value = value % 23;
+        let value = value % 26;
         match value {
             0 => Self::Default,
             1 => Self::Backspace,
@@ -62,7 +82,10 @@ impl From<u8> for ChewingHandle {
             19 => Self::PageDown,
             20 => Self::DblTab,
             21 => Self::Numlock,
-            22 => Self::Quit,
+            22 => Self::Reset,
+            23 => Self::ChiEngMode,
+            24 => Self::ShapeMode,
+            25 => Self::Quit,
             _ => Self::Skip,
         }
     }
@@ -168,12 +191,61 @@ pub fn main() {
                         }
                     }
                 }
+                Reset => {
+                    chewing_Reset(ctx);
+                }
+                ChiEngMode => {
+                    if let Some(Ok(key)) = ops.next() {
+                        chewing_set_ChiEngMode(ctx, (key % 2) as i32);
+                    }
+                }
+                ShapeMode => {
+                    if let Some(Ok(key)) = ops.next() {
+                        chewing_set_ShapeMode(ctx, (key % 2) as i32);
+                    }
+                }
                 Quit => {
                     chewing_delete(ctx);
                     break;
                 }
                 Skip => (),
             }
+            chewing_get_ChiEngMode(ctx);
+            chewing_get_ShapeMode(ctx);
+            if chewing_aux_Check(ctx) == 1 {
+                chewing_aux_Length(ctx);
+                chewing_aux_String_static(ctx);
+                chewing_free(chewing_aux_String(ctx).cast());
+            }
+            if chewing_bopomofo_Check(ctx) == 1 {
+                chewing_bopomofo_String_static(ctx);
+            }
+            if chewing_buffer_Check(ctx) == 1 {
+                chewing_buffer_Len(ctx);
+                chewing_buffer_String_static(ctx);
+                chewing_free(chewing_buffer_String(ctx).cast());
+                let mut it = IntervalType { from: 0, to: 0 };
+                chewing_interval_Enumerate(ctx);
+                while chewing_interval_hasNext(ctx) == 1 {
+                    chewing_interval_Get(ctx, std::ptr::addr_of_mut!(it));
+                }
+            }
+            if chewing_cand_TotalPage(ctx) != 0 {
+                chewing_cand_Enumerate(ctx);
+                while chewing_cand_hasNext(ctx) == 1 {
+                    chewing_cand_String_static(ctx);
+                    chewing_free(chewing_cand_String(ctx).cast());
+                }
+            }
+            if chewing_commit_Check(ctx) == 1 {
+                chewing_commit_String_static(ctx);
+                chewing_free(chewing_commit_String(ctx).cast());
+            }
+            chewing_cursor_Current(ctx);
+            chewing_get_phoneSeqLen(ctx);
+            chewing_free(chewing_get_phoneSeq(ctx).cast());
+            chewing_keystroke_CheckAbsorb(ctx);
+            chewing_keystroke_CheckIgnore(ctx);
         }
     }
 }
