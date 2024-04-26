@@ -2,6 +2,8 @@ What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
 ---------------------------------------------------------
 
 * Added
+  - A new command line tool `chewing-cli` is included in this release. It can
+    create or inspect dictionary files.
   - Reintroduce DictionaryMut as a separate trait.
 
 * Changed
