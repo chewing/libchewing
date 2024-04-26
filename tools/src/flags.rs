@@ -3,41 +3,45 @@ use std::path::PathBuf;
 xflags::xflags! {
     src "src/flags.rs"
 
-    /// Chewing command-line tools.
+    /// Chewing command-line tools
     cmd chewing-cli {
-        /// Create a new dictionary file suitable for system dictionary.
-        cmd init-database {
-            /// Choose the underlying database implementation, must be one of 'trie', 'cdb', or 'sqlite'.
+        default cmd app {
+            /// Output version information and exit
+            optional --version
+        }
+        /// Create a new dictionary file suitable for system dictionary
+        cmd init-database init {
+            /// Choose the underlying database implementation, must be one of 'trie', 'cdb', or 'sqlite'
             optional -t,--db_type db_type: String
-            /// Name of the phrase dictionary.
+            /// Name of the phrase dictionary
             optional -n,--name name: String
-            /// Copyright information of the dictionary.
+            /// Copyright information of the dictionary
             optional -c,--copyright copyright: String
-            /// License information of the dictionary.
+            /// License information of the dictionary
             optional -l,--license license: String
-            /// Version of the dictionary.
+            /// Version of the dictionary
             optional -r,--version version: String
-            /// Keep single word frequency.
+            /// Keep single word frequency
             optional -k,--keep_word_freq
-            /// Read the dictionary source as CSV with header.
+            /// Read the dictionary source as CSV with header
             optional --csv
-            /// Path to the dictionary source file.
+            /// Path to the dictionary source file
             required tsi_src: PathBuf
-            /// Path to the output file.
+            /// Path to the output file
             required output: PathBuf
         }
-        /// Display information about the dictionary.
+        /// Display information about the dictionary
         cmd info {
-            /// Location of the dictionary file.
+            /// Location of the dictionary file
             required path: PathBuf
-            /// Output in JSON format.
+            /// Output in JSON format
             optional -j,--json
         }
-        /// Dump the dictionary entries into tsi.src formatted stream.
+        /// Dump the dictionary entries into tsi.src formatted stream
         cmd dump {
-            /// Location of the dictionary file.
+            /// Location of the dictionary file
             required path: PathBuf
-            /// Output CSV format.
+            /// Output CSV format
             optional --csv
         }
     }
@@ -71,9 +75,15 @@ pub struct ChewingCli {
 
 #[derive(Debug)]
 pub enum ChewingCliCmd {
+    App(App),
     InitDatabase(InitDatabase),
     Info(Info),
     Dump(Dump),
+}
+
+#[derive(Debug)]
+pub struct App {
+    pub version: bool,
 }
 
 #[derive(Debug)]

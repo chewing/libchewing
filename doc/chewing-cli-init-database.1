@@ -1,0 +1,37 @@
+.TH CHEWING-CLI-INIT-DATABASE "1" "April 2024" "chewing-cli init-database 0.8.0" "User Commands"
+.SH NAME
+chewing-cli init-database \- manual page for chewing-cli init-database 0.8.0
+.SH SYNOPSIS
+.B chewing-cli init-database
+\fI\,<tsi_src> <output> \/\fR[\fI\,-t <db_type>\/\fR] [\fI\,-n <name>\/\fR] [\fI\,-c <copyright>\/\fR] [\fI\,-l <license>\/\fR] [\fI\,-r <version>\/\fR] [\fI\,-k\/\fR] [\fI\,--csv\/\fR]
+.SH DESCRIPTION
+Create a new dictionary file suitable for system dictionary
+.SS "Arguments:"
+.TP
+<tsi_src>
+Path to the dictionary source file
+.TP
+<output>
+Path to the output file
+.SH OPTIONS
+.TP
+\fB\-t\fR, \fB\-\-db_type\fR <db_type>
+Choose the underlying database implementation, must be one of 'trie', 'cdb', or 'sqlite'
+.TP
+\fB\-n\fR, \fB\-\-name\fR <name>
+Name of the phrase dictionary
+.TP
+\fB\-c\fR, \fB\-\-copyright\fR <copyright>
+Copyright information of the dictionary
+.TP
+\fB\-l\fR, \fB\-\-license\fR <license>
+License information of the dictionary
+.TP
+\fB\-r\fR, \fB\-\-version\fR <version>
+Version of the dictionary
+.TP
+\fB\-k\fR, \fB\-\-keep_word_freq\fR
+Keep single word frequency
+.TP
+\fB\-\-csv\fR
+Read the dictionary source as CSV with header
