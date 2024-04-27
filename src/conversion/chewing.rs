@@ -239,7 +239,7 @@ impl ChewingEngine {
         let mut candidates = vec![];
         let mut graph = Graph::new();
         for edge in intervals.into_iter() {
-            let values = graph.entry(edge.start).or_insert(vec![]);
+            let values = graph.entry(edge.start).or_default();
             values.push(edge);
         }
         ksp.push(
