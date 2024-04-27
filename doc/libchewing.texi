@@ -304,11 +304,9 @@ is @code{0} on success and @code{-1} on failure.
 @c TODO: Sort functions by name and key type.
 
 @deftypefun int chewing_handle_Default (ChewingContext *@var{ctx}, int @var{key})
-This function handles the default key @var{key}.
+This function handles all @var{key}s that do not have dedicated methods.
 
-The value of of @var{key} should be in the range between
-@acronym{ASCII} character code from @code{a} to @code{z} and from
-@code{0} to @code{9}.
+The value of of @var{key} can be any printable @acronym{ASCII} characters.
 @end deftypefun
 
 @deftypefun int chewing_handle_Backspace (ChewingContext *@var{ctx})

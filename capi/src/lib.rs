@@ -2,9 +2,10 @@
 #![allow(unsafe_code)]
 #![allow(deprecated)]
 
-//! C compatible APIs.
+//! C compatible APIs for libchewing.
 //!
-//! All items in this module are available via the C header file `<chewing.h>`.
+//! All items are available via the C header file `<chewing.h>`.
+//!
 //! Function symbols are exposed from the libchewing shared library.
 //!
 //! Functions are organized into several modules according to the services
@@ -16,8 +17,9 @@ mod public;
 
 /// Initializes chewing context and environment settings.
 ///
-/// Most of the Chewing IM APIs require a [ChewingContext]. To create a
-/// ChewingContext you must use the [chewing_new] function.
+/// Most of the Chewing IM APIs require a
+/// [ChewingContext][setup::ChewingContext]. To create a ChewingContext you must
+/// use the [chewing_new][setup::chewing_new] function.
 ///
 /// # Examples
 ///
@@ -158,6 +160,8 @@ pub mod setup {
 /// success and -1 on failure.
 pub mod input {
     /// Handles all keys that do not have dedicated methods.
+    ///
+    /// The value of of key can be any printable ASCII characters.
     pub use super::io::chewing_handle_Default;
 
     /// Handles the Backspace key.

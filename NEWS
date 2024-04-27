@@ -18,6 +18,9 @@ What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
 * Removed
   - HashMap implemented Dictionary was removed.
 
+* Documentation
+  - Clarify the accepted value of `chewing_handle_Default` method.
+
 
 What's New in libchewing 0.7.0 (Apr 7, 2024)
 ---------------------------------------------------------
