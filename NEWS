@@ -14,6 +14,7 @@ What's New in libchewing 0.8.0-alpha.1 (UNRELEASED)
   - Ensure all fallible API returns Error.
   - Improved algorithm so using Tab key to find alternative phrasing is more
     responsive.
+  - Easy symbol input now accepts arbitrary long "symbols". (rust)
 
 * Removed
   - HashMap implemented Dictionary was removed.
