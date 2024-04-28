@@ -16,7 +16,7 @@ assignees: ''
 - [ ] Prepare pre-release/release tarball
   ```sh
   cmake --preset rust
-  cmake --build out/build/rust -t package_source
+  cmake --build build -t package_source
   ```
   - [ ] Verify the content of the tarball
 - [ ] Git tag and sign tag
