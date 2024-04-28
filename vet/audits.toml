@@ -37,6 +37,11 @@ who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 version = "0.7.9"
 
+[[audits.fastrand]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-run"
+delta = "2.0.2 -> 2.1.0"
+
 [[audits.getrandom]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"

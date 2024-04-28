@@ -5,8 +5,16 @@
 version = "0.8.0-alpha.1"
 audited_as = "0.7.0-beta.3"
 
+[[unpublished.chewing]]
+version = "0.8.0-beta.1"
+audited_as = "0.7.0-beta.3"
+
 [[unpublished.chewing-cli]]
 version = "0.8.0-alpha.1"
+audited_as = "0.7.0-beta.3"
+
+[[unpublished.chewing-cli]]
+version = "0.8.0-beta.1"
 audited_as = "0.7.0-beta.3"
 
 [[publisher.anyhow]]
