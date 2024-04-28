@@ -338,7 +338,7 @@ void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, cons
 
     if (cand_len != 0) {
         internal_ok(file, line, chewing_cand_TotalPage(ctx) > 0, __func__, "shall have non-zero cand pages");
-        internal_ok(file, line, chewing_cand_CheckDone(ctx) == 1, __func__, "shall have non-zero candidates");
+        internal_ok(file, line, chewing_cand_CheckDone(ctx) == 0, __func__, "shall have zero candidates");
     }
 
     chewing_cand_Enumerate(ctx);

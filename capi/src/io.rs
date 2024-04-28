@@ -1513,9 +1513,9 @@ pub unsafe extern "C" fn chewing_cand_CheckDone(ctx: *const ChewingContext) -> c
     let ctx = as_ref_or_return!(ctx, ERROR);
 
     if ctx.editor.is_selecting() {
-        TRUE
-    } else {
         FALSE
+    } else {
+        TRUE
     }
 }
 
