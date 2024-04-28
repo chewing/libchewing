@@ -2,7 +2,7 @@ use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     fmt::{Debug, Display, Write},
     iter,
-    ops::Neg,
+    ops::{Mul, Neg},
 };
 
 use log::{debug, log_enabled, trace, Level::Trace};
@@ -43,6 +43,7 @@ impl ChewingEngine {
             }
             let intervals = self.find_intervals(dict, comp);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
+            debug!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -448,7 +449,17 @@ struct PossiblePath {
 impl Debug for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PossiblePath")
-            .field("score()", &self.score())
+            .field("rule_largest_sum()", &self.rule_largest_sum().mul(1000))
+            .field(
+                "rule_largest_avgwordlen()",
+                &self.rule_largest_avgwordlen().mul(1000),
+            )
+            .field(
+                "rule_smallest_lenvariance()",
+                &self.rule_smallest_lenvariance().mul(100),
+            )
+            .field("rule_largest_freqsum()", &self.rule_largest_freqsum())
+            .field("total_score()", &self.score())
             .field("intervals", &self.intervals)
             .finish()
     }
