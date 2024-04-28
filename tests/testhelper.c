@@ -336,6 +336,11 @@ void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, cons
 
     assert(ctx);
 
+    if (cand_len != 0) {
+        internal_ok(file, line, chewing_cand_TotalPage(ctx) > 0, __func__, "shall have non-zero cand pages");
+        internal_ok(file, line, chewing_cand_CheckDone(ctx) == 1, __func__, "shall have non-zero candidates");
+    }
+
     chewing_cand_Enumerate(ctx);
     for (i = 0; i < cand_len; ++i) {
         internal_ok(file, line, chewing_cand_hasNext(ctx), __func__, "shall has next candidate");
