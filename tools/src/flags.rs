@@ -23,6 +23,8 @@ xflags::xflags! {
             optional -r,--version version: String
             /// Keep single word frequency
             optional -k,--keep_word_freq
+            /// Skip invalid lines
+            optional -s,--skip_invalid
             /// Read the dictionary source as CSV with header
             optional --csv
             /// Path to the dictionary source file
@@ -97,6 +99,7 @@ pub struct InitDatabase {
     pub license: Option<String>,
     pub version: Option<String>,
     pub keep_word_freq: bool,
+    pub skip_invalid: bool,
     pub csv: bool,
 }
 

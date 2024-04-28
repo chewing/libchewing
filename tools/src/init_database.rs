@@ -66,45 +66,25 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
     let tsi = File::open(args.tsi_src)?;
     let reader = BufReader::new(tsi);
     let delimiter = if args.csv { ',' } else { ' ' };
+    let mut errors = vec![];
 
     for (line_num, line) in reader.lines().enumerate() {
         if args.csv && line_num == 0 {
             continue;
         }
-
-        let mut syllables = vec![];
         let line = line?;
-        let phrase = line.split(delimiter).next().ok_or(parse_error(line_num))?;
-
-        let freq: u32 = match phrase.chars().count() {
-            1 if !args.keep_word_freq => 0,
-            _ => line
-                .split(delimiter)
-                .nth(1)
-                .ok_or(parse_error(line_num))?
-                .parse()
-                .context("Unable to parse frequency")
-                .parse_error(line_num)?,
+        match parse_line(line_num, delimiter, &line, args.keep_word_freq) {
+            Ok((syllables, phrase, freq)) => builder.insert(&syllables, (phrase, freq).into())?,
+            Err(error) => errors.push(error),
         };
-
-        for syllable_str in line.split(delimiter).skip(2) {
-            let mut syllable_builder = Syllable::builder();
-            if syllable_str.starts_with('#') {
-                break;
-            }
-            for c in syllable_str.chars() {
-                syllable_builder = syllable_builder
-                    .insert(
-                        Bopomofo::try_from(c)
-                            .context("parsing bopomofo")
-                            .parse_error(line_num)?,
-                    )
-                    .with_context(|| format!("Parsing syllables {}", syllable_str))
-                    .parse_error(line_num)?;
-            }
-            syllables.push(syllable_builder.build());
+    }
+    if !errors.is_empty() {
+        for err in errors {
+            eprintln!("{}", err);
         }
-        builder.insert(&syllables, (phrase, freq).into())?;
+        if !args.skip_invalid {
+            std::process::exit(1)
+        }
     }
     let path: &Path = args.output.as_ref();
     if path.exists() {
@@ -125,4 +105,45 @@ pub fn run(args: flags::InitDatabase) -> Result<()> {
         eprintln!("Average branch count : {}", stats.avg_branch_count);
     }
     Ok(())
+}
+
+fn parse_line(
+    line_num: usize,
+    delimiter: char,
+    line: &str,
+    keep_word_freq: bool,
+) -> Result<(Vec<Syllable>, &str, u32)> {
+    let phrase = line.split(delimiter).next().ok_or(parse_error(line_num))?;
+
+    let freq: u32 = match phrase.chars().count() {
+        1 if !keep_word_freq => 0,
+        _ => line
+            .split(delimiter)
+            .nth(1)
+            .ok_or(parse_error(line_num))?
+            .parse()
+            .context("Unable to parse frequency")
+            .parse_error(line_num)?,
+    };
+
+    let mut syllables = vec![];
+    for syllable_str in line.split(delimiter).skip(2) {
+        let mut syllable_builder = Syllable::builder();
+        if syllable_str.starts_with('#') {
+            break;
+        }
+        for c in syllable_str.chars() {
+            syllable_builder = syllable_builder
+                .insert(
+                    Bopomofo::try_from(c)
+                        .context("parsing bopomofo")
+                        .parse_error(line_num)?,
+                )
+                .with_context(|| format!("Parsing syllables {}", syllable_str))
+                .parse_error(line_num)?;
+        }
+        syllables.push(syllable_builder.build());
+    }
+
+    Ok((syllables, phrase, freq))
 }
