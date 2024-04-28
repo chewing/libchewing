@@ -26,16 +26,17 @@ impl ChewingEngine {
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        let fast_dp = iter::once_with(|| {
+        let fast_dp = 'ret: {
             if comp.is_empty() {
-                return vec![];
+                break 'ret vec![];
             }
             let intervals = self.find_intervals(dict, comp);
             self.find_best_path(comp.symbols.len(), intervals)
                 .into_iter()
                 .map(|interval| interval.into())
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
-        });
+        };
+        let fast_dp_clone = fast_dp.clone();
         let slow_search = iter::once_with(move || {
             if comp.is_empty() {
                 return vec![];
@@ -51,14 +52,17 @@ impl ChewingEngine {
             trimmed_paths
         })
         .flatten()
-        .skip(1)
         .map(|p| {
             p.intervals
                 .into_iter()
                 .map(|it| it.into())
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
-        });
-        fast_dp.chain(slow_search)
+        })
+        // XXX the first result of the slow path should match the fast path.
+        // However the trim path algorithm might remove the first result.
+        .skip_while(move |res| res == &fast_dp);
+
+        iter::once(fast_dp_clone).chain(slow_search)
     }
 }
 
