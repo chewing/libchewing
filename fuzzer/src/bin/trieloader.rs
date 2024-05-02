@@ -1,4 +1,4 @@
-use std::{io::Result, path::PathBuf};
+use std::{env, io::Result};
 
 use chewing::{
     dictionary::{Dictionary, Trie},
@@ -10,13 +10,12 @@ use log::{debug, info};
 pub fn main() -> Result<()> {
     env_logger::init();
 
-    let flags = xflags::parse_or_exit! {
-        /// Trie dictionary path
-        required dict_path: PathBuf
-    };
+    let dict_path = env::args()
+        .nth(1)
+        .expect("The required argument dictionary path <PATH> is not provided.");
 
     info!("[*] try to load the dictionary...");
-    let dict = Trie::open(flags.dict_path)?;
+    let dict = Trie::open(dict_path)?;
 
     info!("[*] try to read the metadata...");
     let info = dict.about();

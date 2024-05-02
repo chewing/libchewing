@@ -1,4 +1,5 @@
 use std::{
+    env,
     ffi::CString,
     io::{stdin, Read},
     ptr::null_mut,
@@ -94,11 +95,10 @@ impl From<u8> for ChewingHandle {
 pub fn main() {
     env_logger::init();
 
-    let flags = xflags::parse_or_exit! {
-        /// system dictionary path
-        required syspath: String
-    };
-    let syspath = CString::new(flags.syspath).unwrap();
+    let syspath = env::args()
+        .nth(1)
+        .expect("The required argument system dictionary path <PATH> is not provided.");
+    let syspath = CString::new(syspath).unwrap();
 
     unsafe {
         let ctx = chewing_new2(
