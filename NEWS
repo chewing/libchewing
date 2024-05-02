@@ -16,6 +16,9 @@ What's New in libchewing 0.8.0-rc.1 (UNRELEASED)
     responsive.
   - Easy symbol input now accepts arbitrary long "symbols". (rust)
 
+* Buf fixed
+  - chewing_cand_CheckDone result was reversed in capi (introduced in v0.7.0)
+
 * Removed
   - HashMap implemented Dictionary was removed.
 
