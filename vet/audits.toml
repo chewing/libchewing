@@ -32,6 +32,11 @@ who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "1.0.90 -> 1.0.95"
 
+[[audits.cc]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "1.0.95 -> 1.0.96"
+
 [[audits.der]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"

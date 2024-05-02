@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chewing = { version = "0.8.0-beta.1", path = ".." }
-chewing_capi = { version = "0.8.0-beta.1", path = "../capi" }
+chewing = { version = "0.8.0-beta.2", path = ".." }
+chewing_capi = { version = "0.8.0-beta.2", path = "../capi" }
 log = "0.4.21"
 env_logger = { version = ">= 0.10.2", default-features = false }
 xflags = "0.3.2"

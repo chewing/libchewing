@@ -2,19 +2,11 @@
 # cargo-vet imports lock
 
 [[unpublished.chewing]]
-version = "0.8.0-alpha.1"
-audited_as = "0.7.0-beta.3"
-
-[[unpublished.chewing]]
-version = "0.8.0-beta.1"
-audited_as = "0.7.0-beta.3"
+version = "0.8.0-beta.2"
+audited_as = "0.8.0-beta.1"
 
 [[unpublished.chewing-cli]]
-version = "0.8.0-alpha.1"
-audited_as = "0.7.0-beta.3"
-
-[[unpublished.chewing-cli]]
-version = "0.8.0-beta.1"
+version = "0.8.0-beta.2"
 audited_as = "0.7.0-beta.3"
 
 [[publisher.anyhow]]
@@ -32,8 +24,8 @@ user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
 [[publisher.chewing]]
-version = "0.7.0-beta.3"
-when = "2024-04-07"
+version = "0.8.0-beta.1"
+when = "2024-04-28"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
@@ -46,15 +38,15 @@ user-login = "kanru"
 user-name = "Kan-Ru Chen"
 
 [[publisher.hashbrown]]
-version = "0.14.3"
-when = "2023-11-26"
+version = "0.14.5"
+when = "2024-04-28"
 user-id = 2915
 user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
 [[publisher.libc]]
-version = "0.2.153"
-when = "2024-01-31"
+version = "0.2.154"
+when = "2024-04-29"
 user-id = 51017
 user-login = "JohnTitor"
 user-name = "Yuki Okushi"
