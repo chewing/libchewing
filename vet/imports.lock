@@ -1,13 +1,40 @@
 
 # cargo-vet imports lock
 
-[[unpublished.chewing]]
-version = "0.8.0-beta.2"
-audited_as = "0.8.0-beta.1"
+[[publisher.anstream]]
+version = "0.6.13"
+when = "2024-02-27"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
 
-[[unpublished.chewing-cli]]
-version = "0.8.0-beta.2"
-audited_as = "0.7.0-beta.3"
+[[publisher.anstyle]]
+version = "1.0.6"
+when = "2024-02-05"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.anstyle-parse]]
+version = "0.2.3"
+when = "2023-12-04"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.anstyle-query]]
+version = "1.0.2"
+when = "2023-12-08"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.anstyle-wincon]]
+version = "3.0.2"
+when = "2023-12-04"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
 
 [[publisher.anyhow]]
 version = "1.0.82"
@@ -24,18 +51,60 @@ user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
 [[publisher.chewing]]
-version = "0.8.0-beta.1"
-when = "2024-04-28"
+version = "0.8.0-beta.2"
+when = "2024-05-02"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
 
 [[publisher.chewing-cli]]
-version = "0.7.0-beta.3"
-when = "2024-04-07"
+version = "0.8.0-beta.2"
+when = "2024-05-02"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
+
+[[publisher.clap]]
+version = "4.4.18"
+when = "2024-01-16"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.clap_builder]]
+version = "4.4.18"
+when = "2024-01-16"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.clap_derive]]
+version = "4.4.7"
+when = "2023-10-24"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.clap_lex]]
+version = "0.6.0"
+when = "2023-10-24"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.colorchoice]]
+version = "1.0.0"
+when = "2023-04-13"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
+[[publisher.env_logger]]
+version = "0.10.2"
+when = "2024-01-18"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
 
 [[publisher.hashbrown]]
 version = "0.14.5"
@@ -163,6 +232,13 @@ user-id = 64539
 user-login = "kennykerr"
 user-name = "Kenny Kerr"
 
+[[publisher.windows_i686_gnullvm]]
+version = "0.52.5"
+when = "2024-04-12"
+user-id = 64539
+user-login = "kennykerr"
+user-name = "Kenny Kerr"
+
 [[publisher.windows_i686_msvc]]
 version = "0.48.5"
 when = "2023-08-18"
@@ -260,6 +336,19 @@ criteria = "safe-to-run"
 version = "2.0.2"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
+[[audits.google.audits.heck]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+version = "0.4.1"
+notes = """
+Grepped for `-i cipher`, `-i crypto`, `'\bfs\b'``, `'\bnet\b'``, `'\bunsafe\b'``
+and there were no hits.
+
+`heck` (version `0.3.3`) has been added to Chromium in
+https://source.chromium.org/chromium/chromium/src/+/28841c33c77833cc30b286f9ae24c97e7a8f4057
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.proc-macro2]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
 criteria = "safe-to-deploy"
@@ -300,6 +389,17 @@ criteria = "safe-to-deploy"
 delta = "1.0.35 -> 1.0.36"
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
+[[audits.google.audits.strsim]]
+who = "danakj@chromium.org"
+criteria = "safe-to-deploy"
+version = "0.10.0"
+notes = """
+Reviewed in https://crrev.com/c/5171063
+
+Previously reviewed during security review and the audit is grandparented in.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.tempfile]]
 who = "Ying Hsu <yinghsu@chromium.org>"
 criteria = "safe-to-run"
@@ -321,6 +421,13 @@ the unsafe review CL at https://crrev.com/c/5350386.
 This crate has been added to Chromium in https://crrev.com/c/3891618.
 '''
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.utf8parse]]
+who = "David Koloski <dkoloski@google.com>"
+criteria = "safe-to-deploy"
+version = "0.2.1"
+notes = "Reviewed on https://fxrev.dev/904811"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
 
 [[audits.google.audits.version_check]]
 who = "George Burgess IV <gbiv@google.com>"

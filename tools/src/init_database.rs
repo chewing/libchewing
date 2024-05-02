@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use chewing::{
     dictionary::{DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieBuilder},
     zhuyin::{Bopomofo, Syllable},
@@ -48,18 +48,17 @@ impl<T> IntoParseError<T> for Result<T> {
     }
 }
 
-pub fn run(args: flags::InitDatabase) -> Result<()> {
-    let mut builder: Box<dyn DictionaryBuilder> = match args.db_type_or_default().as_str() {
-        "sqlite" => Box::new(SqliteDictionaryBuilder::new()),
-        "trie" => Box::new(TrieBuilder::new()),
-        ty => bail!("Unknown database type {ty}"),
+pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
+    let mut builder: Box<dyn DictionaryBuilder> = match args.db_type {
+        flags::DbType::Sqlite => Box::new(SqliteDictionaryBuilder::new()),
+        flags::DbType::Trie => Box::new(TrieBuilder::new()),
     };
 
     builder.set_info(DictionaryInfo {
-        name: args.name_or_default(),
-        copyright: args.copyright_or_default(),
-        license: args.license_or_default(),
-        version: args.version_or_default(),
+        name: args.name,
+        copyright: args.copyright,
+        license: args.license,
+        version: args.version,
         software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
     })?;
 
