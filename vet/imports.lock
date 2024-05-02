@@ -92,6 +92,13 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.clap_mangen]]
+version = "0.2.20"
+when = "2024-02-08"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
 [[publisher.colorchoice]]
 version = "1.0.0"
 when = "2023-04-13"
@@ -126,6 +133,13 @@ when = "2024-01-16"
 user-id = 6825
 user-login = "sunfishcode"
 user-name = "Dan Gohman"
+
+[[publisher.roff]]
+version = "0.2.1"
+when = "2021-12-23"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
 
 [[publisher.rustix]]
 version = "0.38.34"

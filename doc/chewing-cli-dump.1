@@ -1,16 +1,19 @@
-.TH CHEWING-CLI-DUMP "1" "April 2024" "chewing-cli dump 0.8.0" "User Commands"
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH chewing-cli-dump 1  "dump " 
 .SH NAME
-chewing-cli dump \- manual page for chewing-cli dump 0.8.0
+chewing\-cli\-dump \- Dump the dictionary entries into tsi.src formatted stream
 .SH SYNOPSIS
-.B chewing-cli dump
-\fI\,<path> \/\fR[\fI\,--csv\/\fR]
+\fBchewing\-cli dump\fR [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIPATH\fR> 
 .SH DESCRIPTION
 Dump the dictionary entries into tsi.src formatted stream
-.SS "Arguments:"
-.TP
-<path>
-Location of the dictionary file
 .SH OPTIONS
 .TP
 \fB\-\-csv\fR
 Output CSV format
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+<\fIPATH\fR>
+Location of the dictionary file

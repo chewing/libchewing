@@ -1,40 +1,47 @@
-.TH CHEWING-CLI-INIT-DATABASE "1" "April 2024" "chewing-cli init-database 0.8.0" "User Commands"
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH chewing-cli-init-database 1  "init-database " 
 .SH NAME
-chewing-cli init-database \- manual page for chewing-cli init-database 0.8.0
+chewing\-cli\-init\-database \- Create a new dictionary file
 .SH SYNOPSIS
-.B chewing-cli init-database
-\fI\,<tsi_src> <output> \/\fR[\fI\,-t <db_type>\/\fR] [\fI\,-n <name>\/\fR] [\fI\,-c <copyright>\/\fR] [\fI\,-l <license>\/\fR] [\fI\,-r <version>\/\fR] [\fI\,-k\/\fR] [\fI\,--csv\/\fR]
+\fBchewing\-cli init\-database\fR [\fB\-t\fR|\fB\-\-db\-type\fR] [\fB\-n\fR|\fB\-\-name\fR] [\fB\-c\fR|\fB\-\-copyright\fR] [\fB\-l\fR|\fB\-\-license\fR] [\fB\-r\fR|\fB\-\-version\fR] [\fB\-k\fR|\fB\-\-keep\-word\-freq\fR] [\fB\-s\fR|\fB\-\-skip\-invalid\fR] [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fITSI_SRC\fR> <\fIOUTPUT\fR> 
 .SH DESCRIPTION
-Create a new dictionary file suitable for system dictionary
-.SS "Arguments:"
-.TP
-<tsi_src>
-Path to the dictionary source file
-.TP
-<output>
-Path to the output file
+Create a new dictionary file
 .SH OPTIONS
 .TP
-\fB\-t\fR, \fB\-\-db_type\fR <db_type>
-Choose the underlying database implementation, must be one of 'trie', 'cdb', or 'sqlite'
+\fB\-t\fR, \fB\-\-db\-type\fR=\fIDB_TYPE\fR [default: trie]
+Choose the underlying database implementation
+.br
+
+.br
+[\fIpossible values: \fRtrie, sqlite]
 .TP
-\fB\-n\fR, \fB\-\-name\fR <name>
+\fB\-n\fR, \fB\-\-name\fR=\fINAME\fR [default: 我的詞庫]
 Name of the phrase dictionary
 .TP
-\fB\-c\fR, \fB\-\-copyright\fR <copyright>
+\fB\-c\fR, \fB\-\-copyright\fR=\fICOPYRIGHT\fR [default: Unknown]
 Copyright information of the dictionary
 .TP
-\fB\-l\fR, \fB\-\-license\fR <license>
+\fB\-l\fR, \fB\-\-license\fR=\fILICENSE\fR [default: Unknown]
 License information of the dictionary
 .TP
-\fB\-r\fR, \fB\-\-version\fR <version>
+\fB\-r\fR, \fB\-\-version\fR=\fIVERSION\fR [default: 1.0.0]
 Version of the dictionary
 .TP
-\fB\-k\fR, \fB\-\-keep_word_freq\fR
+\fB\-k\fR, \fB\-\-keep\-word\-freq\fR
 Keep single word frequency
 .TP
-\fB\-s\fR, \fB\-\-skip_invalid\fR
+\fB\-s\fR, \fB\-\-skip\-invalid\fR
 Skip invalid lines
 .TP
 \fB\-\-csv\fR
 Read the dictionary source as CSV with header
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+<\fITSI_SRC\fR>
+Path to the dictionary source file
+.TP
+<\fIOUTPUT\fR>
+Path to the output file
