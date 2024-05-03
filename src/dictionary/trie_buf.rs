@@ -2,7 +2,7 @@ use std::{
     borrow::Cow,
     cmp,
     collections::{btree_map::Entry, BTreeMap, BTreeSet},
-    io, iter,
+    io,
     path::PathBuf,
     thread::{self, JoinHandle},
 };
@@ -100,8 +100,8 @@ impl TrieBuf {
     }
 
     pub(crate) fn entries_iter(&self) -> impl Iterator<Item = (Vec<Syllable>, Phrase)> + '_ {
-        let mut trie_iter = self.trie.iter().flat_map(|trie| trie.entries()).peekable();
-        let mut btree_iter = self
+        let trie_iter = self.trie.iter().flat_map(|trie| trie.entries()).peekable();
+        let btree_iter = self
             .btree
             .iter()
             .map(|(key, value)| {
@@ -115,30 +115,7 @@ impl TrieBuf {
                 )
             })
             .peekable();
-        iter::from_fn(move || {
-            let a = trie_iter.peek();
-            let b = btree_iter.peek();
-            match (a, b) {
-                (None, Some(_)) => btree_iter.next(),
-                (Some(_), None) => trie_iter.next(),
-                (Some(x), Some(y)) => match (&x.0, x.1.as_str()).cmp(&(&y.0, y.1.as_str())) {
-                    cmp::Ordering::Less => trie_iter.next(),
-                    cmp::Ordering::Equal => match x.1.freq.cmp(&y.1.freq) {
-                        cmp::Ordering::Less | cmp::Ordering::Equal => {
-                            let _ = trie_iter.next();
-                            btree_iter.next()
-                        }
-                        cmp::Ordering::Greater => {
-                            let _ = btree_iter.next();
-                            trie_iter.next()
-                        }
-                    },
-                    cmp::Ordering::Greater => btree_iter.next(),
-                },
-                (None, None) => None,
-            }
-        })
-        .filter(|it| {
+        trie_iter.chain(btree_iter).filter(|it| {
             !self
                 .graveyard
                 .contains(&(Cow::from(it.0.as_slice()), Cow::from(it.1.as_str())))
