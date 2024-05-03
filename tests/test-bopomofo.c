@@ -2033,6 +2033,38 @@ void test_chewing_phone_to_bopomofo()
     ok(len == -1, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, -1);
 }
 
+void test_static_buffer_reuse()
+{
+    ChewingContext *ctx;
+    const char *buf[6];
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4ggg");
+    ok_preedit_buffer(ctx, "測試");
+    chewing_cand_Enumerate(ctx);
+    chewing_kbtype_Enumerate(ctx);
+
+    buf[0] = chewing_commit_String_static(ctx);
+    buf[1] = chewing_buffer_String_static(ctx);
+    buf[2] = chewing_bopomofo_String_static(ctx);
+    buf[3] = chewing_cand_String_static(ctx);
+    buf[4] = chewing_aux_String_static(ctx);
+    buf[5] = chewing_kbtype_String_static(ctx);
+
+    for (int i = 0; i < 6; ++i) {
+        for (int j = 0; j < 6; ++j) {
+            if (i == j) continue;
+            ok(buf[i] != buf[j], "static buf[%d] != buf[%d]", i, j);
+        }
+    }
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -2079,6 +2111,8 @@ int main(int argc, char *argv[])
     test_KB();
 
     test_chewing_phone_to_bopomofo();
+
+    test_static_buffer_reuse();
 
     fclose(fd);
 

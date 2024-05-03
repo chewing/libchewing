@@ -24,6 +24,8 @@ What's New in libchewing 0.8.0-rc.2 (UNRELEASED)
     (introduced in v0.7.0)
   - chewing_bopomofo_String_static did not return key sequence for pinyin input
     mode. (introduced in v0.6.0)
+  - Different chewing_*_static() functions were using one shared global buffer.
+    (introduced in v0.6.0)
 
 * Removed
   - HashMap implemented Dictionary was removed.

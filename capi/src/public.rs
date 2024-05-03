@@ -116,6 +116,12 @@ pub struct ChewingContext {
     pub(crate) interval_iter: Option<Peekable<Box<dyn Iterator<Item = Interval>>>>,
     pub(crate) userphrase_iter: Option<Peekable<Entries<'static>>>,
     pub(crate) sel_keys: SelKeys,
+    pub(crate) commit_buf: [u8; 256],
+    pub(crate) preedit_buf: [u8; 256],
+    pub(crate) bopomofo_buf: [u8; 16],
+    pub(crate) cand_buf: [u8; 256],
+    pub(crate) aux_buf: [u8; 256],
+    pub(crate) kbtype_buf: [u8; 32],
 }
 
 impl Debug for ChewingContext {

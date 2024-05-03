@@ -61,16 +61,13 @@ fn owned_into_raw<T>(owned: Owned, ptr: *mut T) -> *mut T {
     }
 }
 
-static mut GLOBAL_STRING_BUFFER: [u8; 256] = [0; 256];
 static mut EMPTY_STRING_BUFFER: [u8; 1] = [0; 1];
 
-fn global_cstr(buffer: &str) -> *const c_char {
-    unsafe {
-        let n = min(GLOBAL_STRING_BUFFER.len(), buffer.len());
-        GLOBAL_STRING_BUFFER.fill(0);
-        GLOBAL_STRING_BUFFER[..n].copy_from_slice(&buffer.as_bytes()[..n]);
-        GLOBAL_STRING_BUFFER.as_ptr().cast()
-    }
+fn copy_cstr(buf: &mut [u8], buffer: &str) -> *const c_char {
+    let n = min(buf.len(), buffer.len());
+    buf.fill(0);
+    buf[..n].copy_from_slice(&buffer.as_bytes()[..n]);
+    buf.as_ptr().cast()
 }
 
 fn global_empty_cstr() -> *mut c_char {
@@ -188,6 +185,12 @@ pub unsafe extern "C" fn chewing_new2(
             b'9' as i32,
             b'0' as i32,
         ]),
+        commit_buf: [0; 256],
+        preedit_buf: [0; 256],
+        bopomofo_buf: [0; 16],
+        cand_buf: [0; 256],
+        aux_buf: [0; 256],
+        kbtype_buf: [0; 32],
     });
     Box::into_raw(context)
 }
@@ -228,13 +231,13 @@ pub unsafe extern "C" fn chewing_free(ptr: *mut c_void) {
 }
 
 macro_rules! as_mut_or_return {
-    ($ctx:ident) => {
+    ($ctx:expr) => {
         match unsafe { $ctx.as_mut() } {
             Some(ctx) => ctx,
             None => return,
         }
     };
-    ($ctx:ident, $ret:expr) => {
+    ($ctx:expr, $ret:expr) => {
         match unsafe { $ctx.as_mut() } {
             Some(ctx) => ctx,
             None => return $ret,
@@ -243,7 +246,7 @@ macro_rules! as_mut_or_return {
 }
 
 macro_rules! as_ref_or_return {
-    ($ctx:ident, $ret:expr) => {
+    ($ctx:expr, $ret:expr) => {
         match unsafe { $ctx.as_ref() } {
             Some(ctx) => ctx,
             None => return $ret,
@@ -1417,9 +1420,9 @@ pub unsafe extern "C" fn chewing_commit_String(ctx: *const ChewingContext) -> *m
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_commit_String_static(ctx: *const ChewingContext) -> *const c_char {
-    let ctx = as_ref_or_return!(ctx, global_empty_cstr());
-    let buffer = ctx.editor.display_commit();
-    global_cstr(buffer)
+    let ctx = as_mut_or_return!(ctx.cast_mut(), global_empty_cstr());
+
+    copy_cstr(&mut ctx.commit_buf, ctx.editor.display_commit())
 }
 
 /// # Safety
@@ -1445,10 +1448,9 @@ pub unsafe extern "C" fn chewing_buffer_String(ctx: *const ChewingContext) -> *m
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_buffer_String_static(ctx: *const ChewingContext) -> *const c_char {
-    let ctx = as_ref_or_return!(ctx, global_empty_cstr());
+    let ctx = as_mut_or_return!(ctx.cast_mut(), global_empty_cstr());
 
-    let buffer = ctx.editor.display();
-    global_cstr(&buffer)
+    copy_cstr(&mut ctx.preedit_buf, &ctx.editor.display())
 }
 
 /// # Safety
@@ -1478,10 +1480,9 @@ pub unsafe extern "C" fn chewing_buffer_Len(ctx: *const ChewingContext) -> c_int
 pub unsafe extern "C" fn chewing_bopomofo_String_static(
     ctx: *const ChewingContext,
 ) -> *const c_char {
-    let ctx = as_ref_or_return!(ctx, global_empty_cstr());
+    let ctx = as_mut_or_return!(ctx.cast_mut(), global_empty_cstr());
 
-    let syllable = ctx.editor.syllable_buffer_display();
-    global_cstr(&syllable)
+    copy_cstr(&mut ctx.bopomofo_buf, &ctx.editor.syllable_buffer_display())
 }
 
 /// # Safety
@@ -1623,7 +1624,7 @@ pub unsafe extern "C" fn chewing_cand_String_static(ctx: *mut ChewingContext) ->
     let ctx = as_mut_or_return!(ctx, global_empty_cstr());
 
     match ctx.cand_iter.as_mut().and_then(|it| it.next()) {
-        Some(phrase) => global_cstr(&phrase),
+        Some(phrase) => copy_cstr(&mut ctx.cand_buf, &phrase),
         None => global_empty_cstr(),
     }
 }
@@ -1664,7 +1665,7 @@ pub unsafe extern "C" fn chewing_cand_string_by_index_static(
 
     if let Ok(phrases) = ctx.editor.all_candidates() {
         if let Some(phrase) = phrases.get(index as usize) {
-            return global_cstr(phrase);
+            return copy_cstr(&mut ctx.cand_buf, phrase);
         }
     }
     global_empty_cstr()
@@ -1802,9 +1803,9 @@ pub unsafe extern "C" fn chewing_aux_String(ctx: *const ChewingContext) -> *mut 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_aux_String_static(ctx: *const ChewingContext) -> *const c_char {
-    let ctx = as_ref_or_return!(ctx, global_empty_cstr());
+    let ctx = as_mut_or_return!(ctx.cast_mut(), global_empty_cstr());
 
-    global_cstr(ctx.editor.notification())
+    copy_cstr(&mut ctx.aux_buf, &ctx.editor.notification())
 }
 
 /// # Safety
@@ -1900,7 +1901,7 @@ pub unsafe extern "C" fn chewing_kbtype_String_static(ctx: *mut ChewingContext) 
     let ctx = as_mut_or_return!(ctx, global_empty_cstr());
 
     match ctx.kbcompat_iter.as_mut().and_then(|it| it.next()) {
-        Some(kb_compat) => global_cstr(&kb_compat.to_string()),
+        Some(kb_compat) => copy_cstr(&mut ctx.kbtype_buf, &kb_compat.to_string()),
         None => global_empty_cstr(),
     }
 }
