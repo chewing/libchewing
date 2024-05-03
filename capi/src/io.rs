@@ -1480,7 +1480,7 @@ pub unsafe extern "C" fn chewing_bopomofo_String_static(
 ) -> *const c_char {
     let ctx = as_ref_or_return!(ctx, global_empty_cstr());
 
-    let syllable = ctx.editor.syllable_buffer().to_string();
+    let syllable = ctx.editor.syllable_buffer_display();
     global_cstr(&syllable)
 }
 
@@ -1928,7 +1928,7 @@ pub unsafe extern "C" fn chewing_zuin_String(
         owned_into_raw(Owned::CString, CString::default().into_raw())
     );
 
-    let syllable = ctx.editor.syllable_buffer().to_string();
+    let syllable = ctx.editor.syllable_buffer_display();
     unsafe {
         *zuin_count = syllable.chars().count() as c_int;
     }

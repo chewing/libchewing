@@ -1839,6 +1839,12 @@ void test_KB_HANYU()
 
     chewing_set_KBType(ctx, KB_HANYU_PINYIN);
 
+    type_keystroke_by_string(ctx, "xin");
+    ok_bopomofo_buffer(ctx, "xin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
+
     type_keystroke_by_string(ctx, "xin ku4yin zhen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
@@ -1862,6 +1868,12 @@ void test_KB_THL()
 
     chewing_set_KBType(ctx, KB_THL_PINYIN);
 
+    type_keystroke_by_string(ctx, "sin");
+    ok_bopomofo_buffer(ctx, "sin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
+
     type_keystroke_by_string(ctx, "sin ku4yin jhen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
@@ -1884,6 +1896,12 @@ void test_KB_MPS2()
     start_testcase(ctx, fd);
 
     chewing_set_KBType(ctx, KB_MPS2_PINYIN);
+
+    type_keystroke_by_string(ctx, "shin");
+    ok_bopomofo_buffer(ctx, "shin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
 
     type_keystroke_by_string(ctx, "shin ku4in jen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"

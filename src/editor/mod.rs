@@ -263,6 +263,12 @@ impl Editor {
     pub fn syllable_buffer(&self) -> Syllable {
         self.shared.syl.read()
     }
+    pub fn syllable_buffer_display(&self) -> String {
+        self.shared
+            .syl
+            .key_seq()
+            .unwrap_or_else(|| self.shared.syl.read().to_string())
+    }
     pub fn symbols(&self) -> &[Symbol] {
         self.shared.com.symbols()
     }
