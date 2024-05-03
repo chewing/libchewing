@@ -86,6 +86,7 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
+          source "$HOME/.cargo/env"
           cmake --preset ${{ matrix.preset }}
           cmake --build build
 
@@ -94,6 +95,7 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
+          source "$HOME/.cargo/env"
           ctest --test-dir build --output-on-failure
           ./grcov . -s . -b . --keep-only 'src/*' --keep-only 'capi/src/*' --llvm  -t lcov -o coverage.lcov
 
