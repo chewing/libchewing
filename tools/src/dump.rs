@@ -3,7 +3,7 @@ use chewing::dictionary::{Dictionary, SqliteDictionary, Trie};
 
 use crate::flags;
 
-pub fn run(args: flags::Dump) -> Result<()> {
+pub(crate) fn run(args: flags::Dump) -> Result<()> {
     let ext = args
         .path
         .extension()

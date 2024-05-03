@@ -27,8 +27,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "true"
 
       - if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install ninja-build
@@ -63,19 +61,18 @@ jobs:
           - c99-coverage
           - c99-with-uhash-coverage
     runs-on: ubuntu-latest
+    container: fedora:latest
     name: Coverage preset=${{ matrix.preset }}
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: "true"
+      - run: sudo dnf -y install clang cmake ninja-build sqlite-devel llvm rustup bzip2 git
 
-      - run: sudo apt-get install ninja-build
+      - uses: actions/checkout@v3
 
       - name: Setup rustup
         run: |
-          rustup default stable
-          rustup update
+          rustup-init -y
+          source "$HOME/.cargo/env"
           rustup component add llvm-tools
 
       - name: Setup grcov
@@ -89,6 +86,7 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
+          source "$HOME/.cargo/env"
           cmake --preset ${{ matrix.preset }}
           cmake --build build
 
@@ -97,6 +95,7 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off
         run: |
+          source "$HOME/.cargo/env"
           ctest --test-dir build --output-on-failure
           ./grcov . -s . -b . --keep-only 'src/*' --keep-only 'capi/src/*' --llvm  -t lcov -o coverage.lcov
 

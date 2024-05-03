@@ -41,10 +41,6 @@ criteria = "safe-to-deploy"
 version = "0.4.1"
 criteria = "safe-to-deploy"
 
-[[exemptions.env_logger]]
-version = "0.10.2"
-criteria = "safe-to-run"
-
 [[exemptions.fallible-iterator]]
 version = "0.3.0"
 criteria = "safe-to-deploy"

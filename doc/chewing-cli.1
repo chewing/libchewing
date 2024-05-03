@@ -1,28 +1,28 @@
-.TH CHEWING-CLI "1" "April 2024" "chewing-cli 0.8.0" "User Commands"
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH chewing-cli 1  "chewing-cli 0.8.0-beta.2" 
 .SH NAME
-chewing-cli \- manual page for chewing-cli 0.8.0
+chewing\-cli \- Tools of the Chewing (酷音) intelligent Zhuyin input method.
 .SH SYNOPSIS
-.B chewing-cli
-[\fI\,-h\/\fR] [\fI\,--version\/\fR] \fI\,<COMMAND>\/\fR
+\fBchewing\-cli\fR [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fIsubcommands\fR>
 .SH DESCRIPTION
-Chewing command\-line tools
+Tools of the Chewing (酷音) intelligent Zhuyin input method.
 .SH OPTIONS
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-Prints help
+Print help
 .TP
-\fB\-\-version\fR
-Output version information and exit
-.SH COMMANDS
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.SH SUBCOMMANDS
 .TP
-init\-database
-Create a new dictionary file suitable for system dictionary
+chewing\-cli\-init\-database(1)
+Create a new dictionary file
 .TP
-info
+chewing\-cli\-info(1)
 Display information about the dictionary
 .TP
-dump
+chewing\-cli\-dump(1)
 Dump the dictionary entries into tsi.src formatted stream
-.TP
-help
-Print this message or the help of the given subcommand(s)
+.SH VERSION
+v0.8.0\-beta.2

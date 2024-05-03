@@ -122,8 +122,6 @@ typedef enum KB {
   KB_TYPE_NUM,
 } KB;
 
-typedef struct ChewingContext ChewingContext;
-
 typedef struct IntervalType {
   /**
    * Starting position of certain interval
