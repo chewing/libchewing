@@ -1818,7 +1818,7 @@ pub unsafe extern "C" fn chewing_aux_String(ctx: *const ChewingContext) -> *mut 
 pub unsafe extern "C" fn chewing_aux_String_static(ctx: *const ChewingContext) -> *const c_char {
     let ctx = as_mut_or_return!(ctx.cast_mut(), global_empty_cstr());
 
-    copy_cstr(&mut ctx.aux_buf, &ctx.editor.notification())
+    copy_cstr(&mut ctx.aux_buf, ctx.editor.notification())
 }
 
 /// # Safety
