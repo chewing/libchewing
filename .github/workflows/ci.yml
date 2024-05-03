@@ -65,9 +65,9 @@ jobs:
     name: Coverage preset=${{ matrix.preset }}
 
     steps:
-      - uses: actions/checkout@v3
+      - run: sudo dnf -y install clang cmake ninja-build llvm rustup bzip2 git
 
-      - run: sudo dnf -y install clang cmake llvm rustup bzip2 git
+      - uses: actions/checkout@v3
 
       - name: Setup rustup
         run: |
