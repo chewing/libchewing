@@ -206,6 +206,51 @@ void test_empty_prefix_in_conversion_search()
     chewing_delete(ctx);
 }
 
+void test_empty_preedit_ignore_arrow_key()
+{
+    ChewingContext *ctx;
+    int ret;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "<L>");
+    ret = chewing_keystroke_CheckIgnore(ctx);
+    ok(ret == 1, "Left key should be ignored");
+    ret = chewing_keystroke_CheckAbsorb(ctx);
+    ok(ret == 0, "Left key should not be absorbed");
+    ret = chewing_commit_Check(ctx);
+    ok(ret == 0, "Left key should not trigger commit");
+
+    type_keystroke_by_string(ctx, "<R>");
+    ret = chewing_keystroke_CheckIgnore(ctx);
+    ok(ret == 1, "Right key should be ignored");
+    ret = chewing_keystroke_CheckAbsorb(ctx);
+    ok(ret == 0, "Right key should not be absorbed");
+    ret = chewing_commit_Check(ctx);
+    ok(ret == 0, "Right key should not trigger commit");
+
+    type_keystroke_by_string(ctx, "<D>");
+    ret = chewing_keystroke_CheckIgnore(ctx);
+    ok(ret == 1, "Down key should be ignored");
+    ret = chewing_keystroke_CheckAbsorb(ctx);
+    ok(ret == 0, "Down key should not be absorbed");
+    ret = chewing_commit_Check(ctx);
+    ok(ret == 0, "Down key should not trigger commit");
+
+    type_keystroke_by_string(ctx, "<U>");
+    ret = chewing_keystroke_CheckIgnore(ctx);
+    ok(ret == 1, "Up key should be ignored");
+    ret = chewing_keystroke_CheckAbsorb(ctx);
+    ok(ret == 0, "Up key should not be absorbed");
+    ret = chewing_commit_Check(ctx);
+    ok(ret == 0, "Up key should not trigger commit");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -231,6 +276,7 @@ int main(int argc, char *argv[])
     test_move_cursor_backwards();
     test_insert_symbol_between_selection();
     test_empty_prefix_in_conversion_search();
+    test_empty_preedit_ignore_arrow_key();
 
     fclose(fd);
 

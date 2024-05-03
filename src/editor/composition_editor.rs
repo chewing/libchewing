@@ -71,6 +71,9 @@ impl CompositionEditor {
     pub(crate) fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
+    pub(crate) fn is_beginning_of_buffer(&self) -> bool {
+        0 == self.cursor
+    }
     pub(crate) fn is_end_of_buffer(&self) -> bool {
         self.inner.len() == self.cursor
     }
