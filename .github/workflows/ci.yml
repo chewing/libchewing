@@ -27,8 +27,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "true"
 
       - if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install ninja-build
@@ -68,8 +66,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "true"
 
       - run: sudo dnf -y install clang cmake llvm rustup bzip2 git
 
