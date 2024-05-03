@@ -63,6 +63,7 @@ jobs:
           - c99-coverage
           - c99-with-uhash-coverage
     runs-on: ubuntu-latest
+    container: fedora:latest
     name: Coverage preset=${{ matrix.preset }}
 
     steps:
@@ -70,12 +71,12 @@ jobs:
         with:
           submodules: "true"
 
-      - run: sudo apt-get install ninja-build
+      - run: sudo dnf -y install clang cmake llvm rustup bzip2 git
 
       - name: Setup rustup
         run: |
-          rustup default stable
-          rustup update
+          rustup-init -y
+          source "$HOME/.cargo/env"
           rustup component add llvm-tools
 
       - name: Setup grcov
