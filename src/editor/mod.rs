@@ -291,7 +291,6 @@ impl Editor {
     }
     /// All candidates after current page
     pub fn paginated_candidates(&self) -> Result<Vec<String>, EditorError> {
-        debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting
@@ -304,7 +303,6 @@ impl Editor {
         }
     }
     pub fn all_candidates(&self) -> Result<Vec<String>, EditorError> {
-        debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.candidates(&self.shared, &self.shared.dict))
@@ -313,7 +311,6 @@ impl Editor {
         }
     }
     pub fn current_page_no(&self) -> Result<usize, EditorError> {
-        debug!("state {:?}", self.state);
         let any = self.state.as_any();
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.page_no)
@@ -725,7 +722,7 @@ fn is_break_word(word: &str) -> bool {
 
 impl BasicEditor for Editor {
     fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
-        trace!("process_keyevent: {}", &key_event);
+        debug!("process_keyevent: {}", &key_event);
         self.shared.estimate.tick();
         // reset?
         self.shared.notice_buffer.clear();

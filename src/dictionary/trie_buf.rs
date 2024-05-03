@@ -7,7 +7,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use log::error;
+use log::{error, info};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -233,26 +233,34 @@ impl TrieBuf {
     }
 
     pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
+        info!("Synchronize dictionary from disk...");
         if let Some(join_handle) = self.join_handle.take() {
             if !join_handle.is_finished() {
-                // Wait until previous sync is finished.
+                info!("Aborted. Wait until previous sync is finished.");
                 self.join_handle = Some(join_handle);
                 return Ok(());
             }
-            if let Ok(Ok(trie)) = join_handle.join() {
-                if self.dirty {
-                    // Cancel this sync if the dictionary is already dirty.
-                    return Ok(());
+            match join_handle.join() {
+                Ok(Ok(trie)) => {
+                    if self.dirty {
+                        info!("Aborted. The in memory dictionary is already dirty.");
+                        return Ok(());
+                    }
+                    self.trie = Some(trie);
+                    self.btree.clear();
+                    self.graveyard.clear();
                 }
-                self.trie = Some(trie);
-                self.btree.clear();
-                self.graveyard.clear();
-            } else {
-                error!("[!] Failed to write updated user dictionary due to error.");
+                Ok(Err(e)) => {
+                    error!("Failed to flush dictionary due to error: {e}");
+                }
+                Err(_) => {
+                    error!("Failed to join thread.");
+                }
             }
         } else {
             // TODO: reduce reading
             if !self.path.as_os_str().is_empty() {
+                info!("Reloading...");
                 self.trie = Some(Trie::open(&self.path)?);
             }
         }
@@ -260,9 +268,13 @@ impl TrieBuf {
     }
 
     pub(crate) fn checkpoint(&mut self) {
-        if self.join_handle.is_some() || self.trie.is_none() || !self.dirty {
-            // Don't need to checkpoint in memory or clean dictionary.
-            // Wait until previous checkpoint result is handled.
+        info!("Check pointing...");
+        if self.join_handle.is_some() {
+            info!("Aborted. Wait until previous checkpoint result is handled.");
+            return;
+        }
+        if self.trie.is_none() || !self.dirty {
+            info!("Aborted. Don't need to checkpoint in memory or clean dictionary.");
             return;
         }
         let snapshot = TrieBuf {
@@ -275,14 +287,18 @@ impl TrieBuf {
         };
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieBuilder::new();
+            info!("Saving snapshot...");
             builder.set_info(snapshot.about())?;
             for (syllables, phrase) in snapshot.entries() {
                 builder.insert(&syllables, phrase)?;
             }
+            info!("Flushing snapshot...");
             builder.build(&snapshot.path)?;
-            Trie::open(&snapshot.path).map_err(|err| UpdateDictionaryError {
+            let trie = Trie::open(&snapshot.path).map_err(|err| UpdateDictionaryError {
                 source: Some(Box::new(err)),
-            })
+            });
+            info!("    Done");
+            trie
         }));
         self.dirty = false;
     }
@@ -371,6 +387,7 @@ impl<P: Into<Phrase>, const N: usize> From<[(Vec<Syllable>, Vec<P>); N]> for Tri
 
 impl Drop for TrieBuf {
     fn drop(&mut self) {
+        let _ = self.sync();
         let _ = self.flush();
         if let Some(join_handle) = self.join_handle.take() {
             let _ = join_handle.join();

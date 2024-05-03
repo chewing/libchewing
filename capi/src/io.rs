@@ -22,7 +22,7 @@ use chewing::{
     },
     zhuyin::Syllable,
 };
-use log::{debug, warn};
+use log::{debug, error, info, warn};
 
 use crate::public::{
     ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
@@ -131,17 +131,26 @@ pub unsafe extern "C" fn chewing_new2(
     let dictionaries = sys_loader.load();
     let dictionaries = match dictionaries {
         Ok(d) => d,
-        Err(_) => return null_mut(),
+        Err(e) => {
+            error!("Failed to load system dict: {e}");
+            return null_mut();
+        }
     };
     let abbrev = sys_loader.load_abbrev();
     let abbrev = match abbrev {
         Ok(abbr) => abbr,
-        Err(_) => return null_mut(),
+        Err(e) => {
+            error!("Failed to load abbrev table: {e}");
+            return null_mut();
+        }
     };
     let sym_sel = sys_loader.load_symbol_selector();
     let sym_sel = match sym_sel {
         Ok(sym_sel) => sym_sel,
-        Err(_) => return null_mut(),
+        Err(e) => {
+            error!("Failed to load symbol table: {e}");
+            return null_mut();
+        }
     };
     let user_dictionary = if userpath.is_null() {
         UserDictionaryLoader::new().load()
@@ -155,7 +164,10 @@ pub unsafe extern "C" fn chewing_new2(
     };
     let user_dictionary = match user_dictionary {
         Ok(d) => d,
-        Err(_) => return null_mut(),
+        Err(e) => {
+            error!("Failed to load user dict: {e}");
+            return null_mut();
+        }
     };
 
     let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
@@ -192,6 +204,7 @@ pub unsafe extern "C" fn chewing_new2(
         aux_buf: [0; 256],
         kbtype_buf: [0; 32],
     });
+    info!("Initialized");
     Box::into_raw(context)
 }
 
