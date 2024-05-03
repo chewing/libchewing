@@ -6,7 +6,7 @@ use std::{
 };
 
 use directories::{BaseDirs, ProjectDirs};
-use log::info;
+use log::{info, warn};
 
 const DEFAULT_UNIX_SYS_PATH: &str = "/usr/share/libchewing";
 const UNIX_SYS_PATH: Option<&str> = option_env!("CHEWING_DATADIR");
@@ -20,17 +20,18 @@ const SEARCH_PATH_SEP: char = ':';
 pub(crate) fn sys_path_from_env_var() -> String {
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
-        info!("Using CHEWING_PATH {}", chewing_path);
+        info!("Using syspath from env CHEWING_PATH: {}", chewing_path);
         chewing_path
     } else {
         let user_datadir = data_dir();
         let sys_datadir = UNIX_SYS_PATH.unwrap_or(DEFAULT_UNIX_SYS_PATH);
-        info!("Using CHEWING_PATH {}", sys_datadir);
-        if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
+        let chewing_path = if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
             format!("{datadir}:{sys_datadir}")
         } else {
             sys_datadir.into()
-        }
+        };
+        info!("Using default syspath: {}", chewing_path);
+        chewing_path
     }
 }
 
@@ -47,7 +48,7 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
             })
             .all(|it| it.exists())
         {
-            info!("Load {:?} from {}", files, prefix.display());
+            info!("Found {:?} in {}", files, prefix.display());
             return Some(prefix);
         }
     }
@@ -77,17 +78,25 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
 /// override the default path.
 pub fn data_dir() -> Option<PathBuf> {
     if let Ok(path) = env::var("CHEWING_USER_PATH") {
+        info!("Using userpath from env CHEWING_USER_PATH: {}", path);
         return Some(path.into());
     }
     if let Some(path) = legacy_data_dir() {
         if path.exists() && path.is_dir() {
+            info!("Using legacy userpath: {}", path.display());
             return Some(path);
         }
     }
-    ProjectDirs::from("im", "chewing", "Chewing")
+    let data_dir = ProjectDirs::from("im", "chewing", "Chewing")
         .as_ref()
         .map(ProjectDirs::data_dir)
-        .map(Path::to_owned)
+        .map(Path::to_owned);
+    if let Some(path) = &data_dir {
+        info!("Using default userpath: {}", path.display());
+    } else {
+        warn!("No valid home directory path could be retrieved from the operating system.");
+    }
+    data_dir
 }
 
 fn legacy_data_dir() -> Option<PathBuf> {

@@ -7,6 +7,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use log::info;
+
 use crate::{
     editor::{AbbrevTable, SymbolSelector},
     path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
@@ -69,9 +71,13 @@ impl SystemDictionaryLoader {
             .ok_or(LoadDictionaryError::NotFound)?;
 
         let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
+        info!("Loading {SD_TSI_FILE_NAME}");
         let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
+
         let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
+        info!("Loading {SD_WORD_FILE_NAME}");
         let word_dict = Trie::open(word_dict_path).map_err(io_err)?;
+
         Ok(vec![Box::new(word_dict), Box::new(tsi_dict)])
     }
     pub fn load_abbrev(&self) -> Result<AbbrevTable, LoadDictionaryError> {
@@ -82,7 +88,9 @@ impl SystemDictionaryLoader {
         };
         let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
             .ok_or(LoadDictionaryError::NotFound)?;
-        AbbrevTable::open(sys_path.join(ABBREV_FILE_NAME)).map_err(io_err)
+        let abbrev_path = sys_path.join(ABBREV_FILE_NAME);
+        info!("Loading {ABBREV_FILE_NAME}");
+        AbbrevTable::open(abbrev_path).map_err(io_err)
     }
     pub fn load_symbol_selector(&self) -> Result<SymbolSelector, LoadDictionaryError> {
         let search_path = if let Some(sys_path) = &self.sys_path {
@@ -92,7 +100,9 @@ impl SystemDictionaryLoader {
         };
         let sys_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
             .ok_or(LoadDictionaryError::NotFound)?;
-        SymbolSelector::open(sys_path.join(SYMBOLS_FILE_NAME)).map_err(io_err)
+        let symbol_path = sys_path.join(SYMBOLS_FILE_NAME);
+        info!("Loading {SYMBOLS_FILE_NAME}");
+        SymbolSelector::open(symbol_path).map_err(io_err)
     }
 }
 
@@ -115,15 +125,19 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
+            info!("Use in memory trie dictionary");
             return Ok(Box::new(TrieBuf::new_in_memory()));
         }
         if data_path.exists() {
+            info!("Loading {}", data_path.display());
             return guess_format_and_load(&data_path);
         }
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
+            info!("Creating userdata_dir: {}", userdata_dir.display());
             fs::create_dir_all(userdata_dir)?;
         }
+        info!("Loading {}", data_path.display());
         let mut fresh_dict = init_user_dictionary(&data_path)?;
 
         let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);

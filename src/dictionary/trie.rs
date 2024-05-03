@@ -1074,8 +1074,8 @@ impl DictionaryBuilder for TrieBuilder {
 
     /// Inserts a new entry to the dictionary.
     ///
-    /// A DuplicatePhraseError is returned if a phrase is already present with
-    /// the same syllables.
+    /// If there exists an entry with same syllables and phrase then the entry
+    /// is updated to the new value.
     ///
     /// # Examples
     ///
@@ -1096,14 +1096,15 @@ impl DictionaryBuilder for TrieBuilder {
         phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
         let leaf_id = self.find_or_insert_internal(syllables);
-        if self.arena[leaf_id]
+        if let Some(it) = self.arena[leaf_id]
             .phrases
-            .iter()
-            .any(|it| it.as_str() == phrase.as_str())
+            .iter_mut()
+            .find(|it| it.as_str() == phrase.as_str())
         {
-            return Err(BuildDictionaryError { source: "".into() });
+            *it = phrase;
+        } else {
+            self.arena[leaf_id].phrases.push(phrase);
         }
-        self.arena[leaf_id].phrases.push(phrase);
         Ok(())
     }
 
@@ -1299,8 +1300,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    fn tree_builder_duplicate_phrase_error() {
+    fn tree_builder_duplicate_phrase() {
         let mut builder = TrieBuilder::new();
         builder
             .insert(
@@ -1310,7 +1310,7 @@ mod tests {
                 ],
                 ("測試", 1).into(),
             )
-            .expect("Duplicate phrase error");
+            .expect("no error");
         builder
             .insert(
                 &[
@@ -1319,7 +1319,7 @@ mod tests {
                 ],
                 ("測試", 2).into(),
             )
-            .expect("Duplicate phrase error");
+            .expect("no error");
     }
 
     #[test]
