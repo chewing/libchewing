@@ -8,6 +8,7 @@ set(LIBCHEWING_BINARY_VERSION 1.0.0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_testing()
+set(CTEST_PARALLEL_LEVEL 1)
 
 if(UNIX)
     set(CMAKE_C_FLAGS "-g -O2 -Wall -fPIC ${CMAKE_C_FLAGS}")
