@@ -456,6 +456,29 @@ void test_select_candidate_second_page()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_second_page_rewind()
+{
+    ChewingContext *ctx;
+
+    static const char *CAND[] = {
+        "紛紛",
+        "分分"
+    };
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_candPerPage(ctx, 9);
+    chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    type_keystroke_by_string(ctx, "zp zp <D><D><R><D>"); /* ㄈㄣ ㄈㄣ */
+    ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -469,6 +492,7 @@ void test_select_candidate()
     test_select_candidate_in_middle_no_reaward();
     test_select_candidate_in_middle_reaward();
     test_select_candidate_second_page();
+    test_select_candidate_second_page_rewind();
 }
 
 void test_Esc_not_entering_chewing()
@@ -1815,6 +1839,12 @@ void test_KB_HANYU()
 
     chewing_set_KBType(ctx, KB_HANYU_PINYIN);
 
+    type_keystroke_by_string(ctx, "xin");
+    ok_bopomofo_buffer(ctx, "xin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
+
     type_keystroke_by_string(ctx, "xin ku4yin zhen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
@@ -1838,6 +1868,12 @@ void test_KB_THL()
 
     chewing_set_KBType(ctx, KB_THL_PINYIN);
 
+    type_keystroke_by_string(ctx, "sin");
+    ok_bopomofo_buffer(ctx, "sin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
+
     type_keystroke_by_string(ctx, "sin ku4yin jhen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
                       /* 新酷音真的很棒 */ );
@@ -1860,6 +1896,12 @@ void test_KB_MPS2()
     start_testcase(ctx, fd);
 
     chewing_set_KBType(ctx, KB_MPS2_PINYIN);
+
+    type_keystroke_by_string(ctx, "shin");
+    ok_bopomofo_buffer(ctx, "shin");
+
+    type_keystroke_by_string(ctx, "<EE>");
+    ok_bopomofo_buffer(ctx, "");
 
     type_keystroke_by_string(ctx, "shin ku4in jen de5hen3bang4");
     ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
@@ -1991,6 +2033,38 @@ void test_chewing_phone_to_bopomofo()
     ok(len == -1, "chewing_phone_to_bopomofo returns `%d' shall be `%d'", len, -1);
 }
 
+void test_static_buffer_reuse()
+{
+    ChewingContext *ctx;
+    const char *buf[6];
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4ggg");
+    ok_preedit_buffer(ctx, "測試");
+    chewing_cand_Enumerate(ctx);
+    chewing_kbtype_Enumerate(ctx);
+
+    buf[0] = chewing_commit_String_static(ctx);
+    buf[1] = chewing_buffer_String_static(ctx);
+    buf[2] = chewing_bopomofo_String_static(ctx);
+    buf[3] = chewing_cand_String_static(ctx);
+    buf[4] = chewing_aux_String_static(ctx);
+    buf[5] = chewing_kbtype_String_static(ctx);
+
+    for (int i = 0; i < 6; ++i) {
+        for (int j = 0; j < 6; ++j) {
+            if (i == j) continue;
+            ok(buf[i] != buf[j], "static buf[%d] != buf[%d]", i, j);
+        }
+    }
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -2037,6 +2111,8 @@ int main(int argc, char *argv[])
     test_KB();
 
     test_chewing_phone_to_bopomofo();
+
+    test_static_buffer_reuse();
 
     fclose(fd);
 

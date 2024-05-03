@@ -263,6 +263,12 @@ impl Editor {
     pub fn syllable_buffer(&self) -> Syllable {
         self.shared.syl.read()
     }
+    pub fn syllable_buffer_display(&self) -> String {
+        self.shared
+            .syl
+            .key_seq()
+            .unwrap_or_else(|| self.shared.syl.read().to_string())
+    }
     pub fn symbols(&self) -> &[Symbol] {
         self.shared.com.symbols()
     }
@@ -910,6 +916,8 @@ impl State for Entering {
                 }
                 self.start_highlighting(shared.cursor() + 1)
             }
+            Left if shared.com.is_beginning_of_buffer() => self.spin_ignore(),
+            Right if shared.com.is_end_of_buffer() => self.spin_ignore(),
             Left => {
                 shared.com.move_cursor_left();
                 self.spin_absorb()
@@ -1283,6 +1291,7 @@ impl State for Selecting {
                 match &mut self.sel {
                     Selector::Phrase(sel) => {
                         sel.next(&shared.dict);
+                        self.page_no = 0;
                     }
                     Selector::Symbol(_sel) => (),
                     Selector::SpecialSymmbol(_sel) => (),

@@ -18,6 +18,14 @@ What's New in libchewing 0.8.0-rc.2 (UNRELEASED)
 
 * Buf fixed
   - chewing_cand_CheckDone result was reversed in capi (introduced in v0.7.0)
+  - Correctly ignore instead of absorb keys when the pre-edit buffer is empty.
+    (introduced in v0.6.0)
+  - Reset pagination page number when searching for next candidate range.
+    (introduced in v0.7.0)
+  - chewing_bopomofo_String_static did not return key sequence for pinyin input
+    mode. (introduced in v0.6.0)
+  - Different chewing_*_static() functions were using one shared global buffer.
+    (introduced in v0.6.0)
 
 * Removed
   - HashMap implemented Dictionary was removed.
