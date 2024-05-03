@@ -1285,6 +1285,7 @@ impl State for Selecting {
                 match &mut self.sel {
                     Selector::Phrase(sel) => {
                         sel.next(&shared.dict);
+                        self.page_no = 0;
                     }
                     Selector::Symbol(_sel) => (),
                     Selector::SpecialSymmbol(_sel) => (),

@@ -456,6 +456,29 @@ void test_select_candidate_second_page()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_second_page_rewind()
+{
+    ChewingContext *ctx;
+
+    static const char *CAND[] = {
+        "紛紛",
+        "分分"
+    };
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_candPerPage(ctx, 9);
+    chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    type_keystroke_by_string(ctx, "zp zp <D><D><R><D>"); /* ㄈㄣ ㄈㄣ */
+    ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -469,6 +492,7 @@ void test_select_candidate()
     test_select_candidate_in_middle_no_reaward();
     test_select_candidate_in_middle_reaward();
     test_select_candidate_second_page();
+    test_select_candidate_second_page_rewind();
 }
 
 void test_Esc_not_entering_chewing()
