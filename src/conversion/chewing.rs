@@ -5,7 +5,7 @@ use std::{
     ops::{Mul, Neg},
 };
 
-use log::{debug, log_enabled, trace, Level::Trace};
+use log::{debug, trace};
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -160,7 +160,7 @@ impl ChewingEngine {
             best_phrase = Some(phrase.into());
         }
 
-        debug!("best phrace for {:?} is {:?}", symbols, best_phrase);
+        trace!("best phrace for {:?} is {:?}", symbols, best_phrase);
         best_phrase
     }
     fn find_intervals<D: Dictionary + ?Sized>(
@@ -329,35 +329,25 @@ impl ChewingEngine {
     fn trim_paths(&self, paths: Vec<PossiblePath>) -> Vec<PossiblePath> {
         let mut trimmed_paths: Vec<PossiblePath> = vec![];
         for candidate in paths.into_iter() {
-            if log_enabled!(Trace) {
-                trace!("Trim check {}", candidate);
-            }
+            trace!("Trim check {}", candidate);
             let mut drop_candidate = false;
             let mut keeper = vec![];
             for p in trimmed_paths.into_iter() {
                 if drop_candidate || p.contains(&candidate) {
                     drop_candidate = true;
-                    if log_enabled!(Trace) {
-                        trace!("  Keep {}", p);
-                    }
+                    trace!("  Keep {}", p);
                     keeper.push(p);
                     continue;
                 }
                 if candidate.contains(&p) {
-                    if log_enabled!(Trace) {
-                        trace!("  Drop {}", p);
-                    }
+                    trace!("  Drop {}", p);
                     continue;
                 }
-                if log_enabled!(Trace) {
-                    trace!("  Keep {}", p);
-                }
+                trace!("  Keep {}", p);
                 keeper.push(p);
             }
             if !drop_candidate {
-                if log_enabled!(Trace) {
-                    trace!("  Keep {}", candidate);
-                }
+                trace!("  Keep {}", candidate);
                 keeper.push(candidate);
             }
             trimmed_paths = keeper;
