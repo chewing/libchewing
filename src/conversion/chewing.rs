@@ -5,7 +5,7 @@ use std::{
     ops::{Mul, Neg},
 };
 
-use log::{debug, trace};
+use log::trace;
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -103,7 +103,7 @@ impl ChewingEngine {
             if let Some(Gap::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
-                debug!("No best phrase for {:?} due to break point", symbols);
+                trace!("No best phrase for {:?} due to break point", symbols);
                 return None;
             }
         }
@@ -111,9 +111,10 @@ impl ChewingEngine {
         for selection in &com.selections {
             if selection.intersect_range(start, end) && !selection.is_contained_by(start, end) {
                 // There's a conflicting partial intersecting selection.
-                debug!(
+                trace!(
                     "No best phrase for {:?} due to selection {:?}",
-                    symbols, selection
+                    symbols,
+                    selection
                 );
                 return None;
             }
