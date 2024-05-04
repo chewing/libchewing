@@ -5,7 +5,7 @@ use std::{
     ops::{Mul, Neg},
 };
 
-use log::{debug, log_enabled, trace, Level::Trace};
+use log::trace;
 
 use crate::dictionary::{Dictionary, Phrase};
 
@@ -43,7 +43,7 @@ impl ChewingEngine {
             }
             let intervals = self.find_intervals(dict, comp);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
-            debug!("paths: {:#?}", paths);
+            trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -103,7 +103,7 @@ impl ChewingEngine {
             if let Some(Gap::Break) = com.gap(i) {
                 // There exists a break point that forbids connecting these
                 // syllables.
-                debug!("No best phrase for {:?} due to break point", symbols);
+                trace!("No best phrase for {:?} due to break point", symbols);
                 return None;
             }
         }
@@ -111,9 +111,10 @@ impl ChewingEngine {
         for selection in &com.selections {
             if selection.intersect_range(start, end) && !selection.is_contained_by(start, end) {
                 // There's a conflicting partial intersecting selection.
-                debug!(
+                trace!(
                     "No best phrase for {:?} due to selection {:?}",
-                    symbols, selection
+                    symbols,
+                    selection
                 );
                 return None;
             }
@@ -160,7 +161,7 @@ impl ChewingEngine {
             best_phrase = Some(phrase.into());
         }
 
-        debug!("best phrace for {:?} is {:?}", symbols, best_phrase);
+        trace!("best phrace for {:?} is {:?}", symbols, best_phrase);
         best_phrase
     }
     fn find_intervals<D: Dictionary + ?Sized>(
@@ -329,35 +330,25 @@ impl ChewingEngine {
     fn trim_paths(&self, paths: Vec<PossiblePath>) -> Vec<PossiblePath> {
         let mut trimmed_paths: Vec<PossiblePath> = vec![];
         for candidate in paths.into_iter() {
-            if log_enabled!(Trace) {
-                trace!("Trim check {}", candidate);
-            }
+            trace!("Trim check {}", candidate);
             let mut drop_candidate = false;
             let mut keeper = vec![];
             for p in trimmed_paths.into_iter() {
                 if drop_candidate || p.contains(&candidate) {
                     drop_candidate = true;
-                    if log_enabled!(Trace) {
-                        trace!("  Keep {}", p);
-                    }
+                    trace!("  Keep {}", p);
                     keeper.push(p);
                     continue;
                 }
                 if candidate.contains(&p) {
-                    if log_enabled!(Trace) {
-                        trace!("  Drop {}", p);
-                    }
+                    trace!("  Drop {}", p);
                     continue;
                 }
-                if log_enabled!(Trace) {
-                    trace!("  Keep {}", p);
-                }
+                trace!("  Keep {}", p);
                 keeper.push(p);
             }
             if !drop_candidate {
-                if log_enabled!(Trace) {
-                    trace!("  Keep {}", candidate);
-                }
+                trace!("  Keep {}", candidate);
                 keeper.push(candidate);
             }
             trimmed_paths = keeper;
@@ -411,11 +402,20 @@ impl From<PossiblePhrase> for Box<str> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 struct PossibleInterval {
     start: usize,
     end: usize,
     phrase: PossiblePhrase,
+}
+
+impl Debug for PossibleInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("I")
+            .field(&(self.start..self.end))
+            .field(&self.phrase)
+            .finish()
+    }
 }
 
 impl PossibleInterval {
