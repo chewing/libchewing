@@ -204,8 +204,9 @@ pub unsafe extern "C" fn chewing_new2(
         aux_buf: [0; 256],
         kbtype_buf: [0; 32],
     });
-    info!("Initialized");
-    Box::into_raw(context)
+    let ptr = Box::into_raw(context);
+    info!("Initialized context {ptr:?}");
+    ptr
 }
 
 /// # Safety
@@ -220,6 +221,7 @@ pub unsafe extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
             }
         }
         LOGGER.set(None);
+        info!("Destroying context {ctx:?}");
         drop(unsafe { Box::from_raw(ctx) })
     }
 }
