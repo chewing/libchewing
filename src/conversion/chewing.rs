@@ -43,7 +43,7 @@ impl ChewingEngine {
             }
             let intervals = self.find_intervals(dict, comp);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
-            debug!("paths: {:#?}", paths);
+            trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
@@ -401,11 +401,20 @@ impl From<PossiblePhrase> for Box<str> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 struct PossibleInterval {
     start: usize,
     end: usize,
     phrase: PossiblePhrase,
+}
+
+impl Debug for PossibleInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("I")
+            .field(&(self.start..self.end))
+            .field(&self.phrase)
+            .finish()
+    }
 }
 
 impl PossibleInterval {
