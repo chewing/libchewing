@@ -1475,7 +1475,7 @@ pub unsafe extern "C" fn chewing_buffer_String_static(ctx: *const ChewingContext
 pub unsafe extern "C" fn chewing_buffer_Check(ctx: *const ChewingContext) -> c_int {
     let ctx = as_ref_or_return!(ctx, ERROR);
 
-    !ctx.editor.display().is_empty() as c_int
+    !ctx.editor.is_empty() as c_int
 }
 
 /// # Safety

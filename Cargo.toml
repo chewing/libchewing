@@ -33,6 +33,11 @@ resolver = "2"
 log = "0.4.21"
 tempfile = "3.10.1"
 
+[profile.release]
+panic = "abort"
+codegen-units = 1
+debug = true
+
 [package.metadata.vet]
 store = { path = "./vet" }
 
