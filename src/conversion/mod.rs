@@ -228,7 +228,7 @@ impl Composition {
                     to_remove.push(i);
                 }
             }
-            for i in to_remove {
+            for i in to_remove.into_iter().rev() {
                 self.selections.swap_remove(i);
             }
         }
@@ -249,7 +249,7 @@ impl Composition {
                 selection.end += 1;
             }
         }
-        for i in to_remove {
+        for i in to_remove.into_iter().rev() {
             self.selections.swap_remove(i);
         }
         self.symbols.insert(index, sym);
@@ -272,7 +272,7 @@ impl Composition {
                 to_remove.push(i);
             }
         }
-        for i in to_remove {
+        for i in to_remove.into_iter().rev() {
             self.selections.swap_remove(i);
         }
         for i in (interval.start..interval.end).skip(1) {
@@ -291,7 +291,7 @@ impl Composition {
                 selection.end -= n;
             }
         }
-        for i in to_remove {
+        for i in to_remove.into_iter().rev() {
             self.selections.swap_remove(i);
         }
         self.symbols.drain(0..n);
@@ -313,7 +313,7 @@ impl Composition {
                 selection.end -= 1;
             }
         }
-        for i in to_remove {
+        for i in to_remove.into_iter().rev() {
             self.selections.swap_remove(i);
         }
         self.symbols.remove(index);
