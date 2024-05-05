@@ -28,6 +28,8 @@ What's New in libchewing 0.8.0-rc.2 (UNRELEASED)
     (introduced in v0.6.0)
   - Special symbol selection missed a couple symbols that was in C version.
     (introduced in v0.7.0)
+  - Panics when a new selection replaces more than one existing selections.
+    (introduced in v0.7.0)
 
 * Removed
   - HashMap implemented Dictionary was removed.
