@@ -1,6 +1,7 @@
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     fmt::{Debug, Display, Write},
+    iter,
     ops::{Mul, Neg},
 };
 
@@ -25,9 +26,20 @@ impl ChewingEngine {
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        let paths = 'ret: {
+        let fast_dp = 'ret: {
             if comp.is_empty() {
-                break 'ret vec![PossiblePath::default()];
+                break 'ret vec![];
+            }
+            let intervals = self.find_intervals(dict, comp);
+            self.find_best_path(comp.symbols.len(), intervals)
+                .into_iter()
+                .map(|interval| interval.into())
+                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
+        };
+        let fast_dp_clone = fast_dp.clone();
+        let slow_search = iter::once_with(move || {
+            if comp.is_empty() {
+                return vec![];
             }
             let intervals = self.find_intervals(dict, comp);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
@@ -39,13 +51,19 @@ impl ChewingEngine {
 
             trimmed_paths.sort_by(|a, b| b.cmp(a));
             trimmed_paths
-        };
-        paths.into_iter().map(|p| {
+        })
+        .flatten()
+        .map(|p| {
             p.intervals
                 .into_iter()
                 .map(|it| it.into())
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         })
+        // XXX the first result of the slow path should match the fast path.
+        // However the trim path algorithm might remove the first result.
+        .skip_while(move |res| res == &fast_dp);
+
+        iter::once(fast_dp_clone).chain(slow_search)
     }
 }
 
@@ -166,6 +184,49 @@ impl ChewingEngine {
             }
         }
         intervals
+    }
+    /// Calculate the best path with dynamic programming.
+    ///
+    /// Assume P(x,y) is the highest score phrasing result from x to y. The
+    /// following is formula for P(x,y):
+    ///
+    /// P(x,y) = MAX( P(x,y-1)+P(y-1,y), P(x,y-2)+P(y-2,y), ... )
+    ///
+    /// While P(x,y-1) is stored in highest_score array, and P(y-1,y) is
+    /// interval end at y. In this formula, x is always 0.
+    ///
+    /// The format of highest_score array is described as following:
+    ///
+    /// highest_score[0] = P(0,0)
+    /// highest_score[1] = P(0,1)
+    /// ...
+    /// highest_score[y-1] = P(0,y-1)
+    fn find_best_path(
+        &self,
+        len: usize,
+        mut intervals: Vec<PossibleInterval>,
+    ) -> Vec<PossibleInterval> {
+        let mut highest_score = vec![PossiblePath::default(); len + 1];
+
+        // The interval shall be sorted by the increase order of end.
+        intervals.sort_by(|a, b| a.end.cmp(&b.end));
+
+        for interval in intervals.into_iter() {
+            let start = interval.start;
+            let end = interval.end;
+
+            let mut candidate_path = highest_score[start].clone();
+            candidate_path.intervals.push(interval);
+
+            if highest_score[end].score() < candidate_path.score() {
+                highest_score[end] = candidate_path;
+            }
+        }
+
+        highest_score
+            .pop()
+            .expect("highest_score has at least one element")
+            .intervals
     }
 
     /// Find K possible best alternative paths.
