@@ -1,7 +1,6 @@
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     fmt::{Debug, Display, Write},
-    iter,
     ops::{Mul, Neg},
 };
 
@@ -26,9 +25,9 @@ impl ChewingEngine {
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        iter::once_with(move || {
+        let paths = 'ret: {
             if comp.is_empty() {
-                return vec![PossiblePath::default()];
+                break 'ret vec![PossiblePath::default()];
             }
             let intervals = self.find_intervals(dict, comp);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
@@ -40,9 +39,8 @@ impl ChewingEngine {
 
             trimmed_paths.sort_by(|a, b| b.cmp(a));
             trimmed_paths
-        })
-        .flatten()
-        .map(|p| {
+        };
+        paths.into_iter().map(|p| {
             p.intervals
                 .into_iter()
                 .map(|it| it.into())
