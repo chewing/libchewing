@@ -37,20 +37,25 @@ impl ChewingEngine {
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         };
         let fast_dp_clone = fast_dp.clone();
+        let mut cached_paths = None;
         let slow_search = iter::once_with(move || {
             if comp.is_empty() {
                 return vec![];
             }
-            let intervals = self.find_intervals(dict, comp);
-            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
-            trace!("paths: {:#?}", paths);
-            debug_assert!(!paths.is_empty());
+            cached_paths
+                .get_or_insert_with(|| {
+                    let intervals = self.find_intervals(dict, comp);
+                    let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
+                    trace!("paths: {:#?}", paths);
+                    debug_assert!(!paths.is_empty());
 
-            let mut trimmed_paths = self.trim_paths(paths);
-            debug_assert!(!trimmed_paths.is_empty());
+                    let mut trimmed_paths = self.trim_paths(paths);
+                    debug_assert!(!trimmed_paths.is_empty());
 
-            trimmed_paths.sort_by(|a, b| b.cmp(a));
-            trimmed_paths
+                    trimmed_paths.sort_by(|a, b| b.cmp(a));
+                    trimmed_paths
+                })
+                .to_vec()
         })
         .flatten()
         .map(|p| {

@@ -506,11 +506,15 @@ impl SharedState {
         self.nth_conversion = 0;
     }
     fn conversion(&self) -> Vec<Interval> {
-        self.conv
-            .convert(&self.dict, self.com.as_ref())
-            .cycle()
-            .nth(self.nth_conversion)
-            .unwrap()
+        if self.nth_conversion > 0 {
+            let paths: Vec<_> = self.conv.convert(&self.dict, self.com.as_ref()).collect();
+            paths[self.nth_conversion % paths.len()].clone()
+        } else {
+            self.conv
+                .convert(&self.dict, self.com.as_ref())
+                .next()
+                .unwrap()
+        }
     }
     fn intervals(&self) -> impl Iterator<Item = Interval> {
         self.conversion().into_iter()
