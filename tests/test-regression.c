@@ -251,6 +251,21 @@ void test_empty_preedit_ignore_arrow_key()
     chewing_delete(ctx);
 }
 
+void test_crash_found_by_fuzzing_20240505_0()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "93<D>093<D>0<H><D>2");
+    ok_preedit_buffer(ctx, "靄靄");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -277,6 +292,7 @@ int main(int argc, char *argv[])
     test_insert_symbol_between_selection();
     test_empty_prefix_in_conversion_search();
     test_empty_preedit_ignore_arrow_key();
+    test_crash_found_by_fuzzing_20240505_0();
 
     fclose(fd);
 

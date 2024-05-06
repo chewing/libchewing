@@ -83,7 +83,7 @@ impl CompositionEditor {
     }
     pub(crate) fn remove_front(&mut self, n: usize) {
         self.inner.remove_front(n);
-        self.cursor -= n;
+        self.cursor = self.cursor.saturating_sub(n);
     }
     pub(crate) fn remove_after_cursor(&mut self) {
         self.inner.remove(self.cursor);
