@@ -166,6 +166,16 @@ impl ChewingEngine {
             best_phrase = Some(phrase.into());
         }
 
+        if best_phrase.is_none() {
+            // try to find if there's a forced selection
+            for selection in &com.selections {
+                if start == selection.start && end == selection.end {
+                    best_phrase = Some(Phrase::new(selection.str.clone(), 0).into());
+                    break;
+                }
+            }
+        }
+
         trace!("best phrace for {:?} is {:?}", symbols, best_phrase);
         best_phrase
     }

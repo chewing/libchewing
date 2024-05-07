@@ -16,7 +16,7 @@ use std::{
 
 pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
-use log::{debug, trace, warn};
+use log::{debug, info, trace, warn};
 
 use crate::{
     conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
@@ -214,6 +214,7 @@ impl Editor {
 
     pub fn set_syllable_editor(&mut self, syl: Box<dyn SyllableEditor>) {
         self.shared.syl = syl;
+        info!("Set syllable editor: {:?}", self.shared.syl);
     }
     pub fn clear(&mut self) {
         self.state = Box::new(Entering);

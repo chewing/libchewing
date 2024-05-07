@@ -1597,6 +1597,27 @@ void test_KB_HSU_choice_append()
     chewing_delete(ctx);
 }
 
+void test_KB_HSU_choice_append_select()
+{
+    ChewingContext *ctx;
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_KBType(ctx, KB_HSU);
+
+    type_keystroke_by_string(ctx, "k <D>4");
+    ok_preedit_buffer(ctx, "ㄎ");
+
+    type_keystroke_by_string(ctx, "<T><D>4");
+    ok_preedit_buffer(ctx, "ㄎ");
+
+    type_keystroke_by_string(ctx, "<E>");
+    ok_commit_buffer(ctx, "ㄎ");
+
+    chewing_delete(ctx);
+}
+
 void test_KB_HSU_JVC()
 {
     static const struct {
@@ -1610,6 +1631,8 @@ void test_KB_HSU_JVC()
     };
 
     ChewingContext *ctx;
+    clean_userphrase();
+
     ctx = chewing_new();
     start_testcase(ctx, fd);
     chewing_set_KBType(ctx, KB_HSU);
@@ -1641,6 +1664,7 @@ void test_KB_HSU_JVC()
 void test_KB_ET26()
 {
     ChewingContext *ctx;
+    clean_userphrase();
 
     ctx = chewing_new();
     start_testcase(ctx, fd);
@@ -1728,6 +1752,7 @@ void test_KB_ET26_choice_append()
     ChewingContext *ctx;
     int totalChoice;
     const char *cand;
+    clean_userphrase();
 
     ctx = chewing_new();
     start_testcase(ctx, fd);
@@ -1954,6 +1979,7 @@ void test_KB()
 {
     test_KB_HSU();
     test_KB_HSU_choice_append();
+    test_KB_HSU_choice_append_select();
     test_KB_HSU_JVC();
     test_KB_ET26();
     test_KB_ET26_choice_append();
