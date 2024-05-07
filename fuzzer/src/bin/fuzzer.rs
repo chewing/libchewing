@@ -310,7 +310,6 @@ pub fn main() -> Result<()> {
                     chewing_free(chewing_cand_String(ctx).cast());
                 }
             }
-            chewing_interval_Enumerate(ctx);
             if chewing_commit_Check(ctx) == 1 {
                 chewing_commit_String_static(ctx);
                 chewing_free(chewing_commit_String(ctx).cast());
