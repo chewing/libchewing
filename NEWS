@@ -9,6 +9,9 @@ What's New in libchewing 0.8.0-rc.2 (UNRELEASED)
 * Changed
   - CMake default preset switched to build with rust.
   - CMake minimum required version bumped to 3.24.0.
+  - System dictionary and user dictionary file now uses platform standard paths.
+    See https://docs.rs/chewing/latest/chewing/path/fn.data_dir.html for
+    details.
   - Improved TrieBufDictionary::from ergonomics.
   - Rename DictEntries to Entries.
   - Ensure all fallible API returns Error.
