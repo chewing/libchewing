@@ -18,6 +18,7 @@ What's New in libchewing 0.8.0-rc.2 (UNRELEASED)
   - Improved algorithm so using Tab key to find alternative phrasing is more
     responsive.
   - Easy symbol input now accepts arbitrary long "symbols". (rust)
+  - Removed duplicated symbols "●" and "○" from symbols input.
 
 * Buf fixed
   - chewing_cand_CheckDone result was reversed in capi (introduced in v0.7.0)
