@@ -1,16 +1,22 @@
 use std::{
     env,
     ffi::CString,
-    io::{stdin, Read},
+    io::{stdin, Read, Result},
     ptr::null_mut,
 };
 
 use chewing_capi::{
     candidates::{
         chewing_cand_Enumerate, chewing_cand_String, chewing_cand_String_static,
-        chewing_cand_TotalPage, chewing_cand_hasNext,
+        chewing_cand_TotalPage, chewing_cand_hasNext, chewing_set_candPerPage,
+    },
+    globals::{
+        chewing_set_addPhraseDirection, chewing_set_autoLearn, chewing_set_autoShiftCur,
+        chewing_set_easySymbolInput, chewing_set_escCleanAllBuf, chewing_set_maxChiSymbolLen,
+        chewing_set_phraseChoiceRearward, chewing_set_spaceAsSelection,
     },
     input::*,
+    layout::chewing_set_KBType,
     modes::{
         chewing_get_ChiEngMode, chewing_get_ShapeMode, chewing_set_ChiEngMode,
         chewing_set_ShapeMode,
@@ -53,14 +59,11 @@ enum ChewingHandle {
     Reset,
     ChiEngMode,
     ShapeMode,
-    Quit,
-    Skip,
 }
 
 impl From<u8> for ChewingHandle {
     fn from(value: u8) -> Self {
-        let value = value % 26;
-        match value {
+        match value % 25 {
             0 => Self::Default,
             1 => Self::Backspace,
             2 => Self::Capslock,
@@ -86,13 +89,12 @@ impl From<u8> for ChewingHandle {
             22 => Self::Reset,
             23 => Self::ChiEngMode,
             24 => Self::ShapeMode,
-            25 => Self::Quit,
-            _ => Self::Skip,
+            _ => unreachable!(),
         }
     }
 }
 
-pub fn main() {
+pub fn main() -> Result<()> {
     env_logger::init();
 
     let syspath = env::args()
@@ -109,6 +111,82 @@ pub fn main() {
         );
 
         let mut ops = stdin().bytes();
+
+        // Take first few bytes as mode settings
+        chewing_set_KBType(ctx, ops.next().transpose()?.unwrap_or_default().into());
+        chewing_set_candPerPage(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(5, 10)
+                .into(),
+        );
+        chewing_set_maxChiSymbolLen(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 39)
+                .into(),
+        );
+        chewing_set_addPhraseDirection(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_spaceAsSelection(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_escCleanAllBuf(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_autoShiftCur(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_easySymbolInput(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_phraseChoiceRearward(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_set_autoLearn(
+            ctx,
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+
         while let Some(Ok(op)) = ops.next() {
             use ChewingHandle::*;
 
@@ -204,11 +282,6 @@ pub fn main() {
                         chewing_set_ShapeMode(ctx, (key % 2) as i32);
                     }
                 }
-                Quit => {
-                    chewing_delete(ctx);
-                    break;
-                }
-                Skip => (),
             }
             chewing_get_ChiEngMode(ctx);
             chewing_get_ShapeMode(ctx);
@@ -247,5 +320,9 @@ pub fn main() {
             chewing_keystroke_CheckAbsorb(ctx);
             chewing_keystroke_CheckIgnore(ctx);
         }
+
+        chewing_delete(ctx);
     }
+
+    Ok(())
 }
