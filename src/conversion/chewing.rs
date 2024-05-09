@@ -108,18 +108,13 @@ impl ChewingEngine {
             return Some(symbols[0].into());
         }
 
-        let syllables = symbols
-            .iter()
-            .take_while(|symbol| symbol.is_syllable())
-            .map(|symbol| symbol.to_syllable().unwrap())
-            .collect::<Vec<_>>();
-        if syllables.len() != symbols.len() {
+        if symbols.iter().any(|sym| sym.is_char()) {
             return None;
         }
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in dict.lookup_all_phrases(&syllables) {
+        'next_phrase: for phrase in dict.lookup_all_phrases(&symbols) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
