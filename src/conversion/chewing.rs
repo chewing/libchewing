@@ -26,36 +26,20 @@ impl ChewingEngine {
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        let fast_dp = 'ret: {
+        iter::once_with(move || {
             if comp.is_empty() {
-                break 'ret vec![];
+                return vec![PossiblePath::default()];
             }
             let intervals = self.find_intervals(dict, comp);
-            self.find_best_path(comp.symbols.len(), intervals)
-                .into_iter()
-                .map(|interval| interval.into())
-                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
-        };
-        let fast_dp_clone = fast_dp.clone();
-        let mut cached_paths = None;
-        let slow_search = iter::once_with(move || {
-            if comp.is_empty() {
-                return vec![];
-            }
-            cached_paths
-                .get_or_insert_with(|| {
-                    let intervals = self.find_intervals(dict, comp);
-                    let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
-                    trace!("paths: {:#?}", paths);
-                    debug_assert!(!paths.is_empty());
+            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
+            trace!("paths: {:#?}", paths);
+            debug_assert!(!paths.is_empty());
 
-                    let mut trimmed_paths = self.trim_paths(paths);
-                    debug_assert!(!trimmed_paths.is_empty());
+            let mut trimmed_paths = self.trim_paths(paths);
+            debug_assert!(!trimmed_paths.is_empty());
 
-                    trimmed_paths.sort_by(|a, b| b.cmp(a));
-                    trimmed_paths
-                })
-                .to_vec()
+            trimmed_paths.sort_by(|a, b| b.cmp(a));
+            trimmed_paths
         })
         .flatten()
         .map(|p| {
@@ -64,11 +48,6 @@ impl ChewingEngine {
                 .map(|it| it.into())
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         })
-        // XXX the first result of the slow path should match the fast path.
-        // However the trim path algorithm might remove the first result.
-        .skip_while(move |res| res == &fast_dp);
-
-        iter::once(fast_dp_clone).chain(slow_search)
     }
 }
 
