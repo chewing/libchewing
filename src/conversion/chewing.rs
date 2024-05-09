@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, BTreeSet, VecDeque},
+    collections::VecDeque,
     fmt::{Debug, Display, Write},
     iter,
     ops::{Mul, Neg},
@@ -232,35 +232,32 @@ impl ChewingEngine {
     fn find_k_paths(
         &self,
         k: usize,
-        end: usize,
+        len: usize,
         intervals: Vec<PossibleInterval>,
     ) -> Vec<PossiblePath> {
         let mut ksp = Vec::with_capacity(k);
         let mut candidates = vec![];
-        let mut graph = Graph::new();
+        let mut graph = vec![vec![]; len];
+        let mut removed_edges = vec![false; len * len];
+
         for edge in intervals.into_iter() {
-            let values = graph.entry(edge.start).or_default();
-            values.push(edge);
+            graph[edge.start].push(edge);
         }
-        ksp.push(
-            self.shortest_path(&graph, &BTreeSet::new(), 0, end)
-                .unwrap(),
-        );
+        ksp.push(self.shortest_path(&graph, &removed_edges, 0, len).unwrap());
 
         for kth in 1..k {
             let prev = kth - 1;
             for i in 0..ksp[prev].len() {
-                let mut removed_edges = BTreeSet::new();
                 let spur_node = &ksp[prev][i].start;
                 let root_path = &ksp[prev][0..i];
 
                 for p in &ksp {
-                    if root_path.len() < p.len() && root_path == &p[0..i] {
-                        removed_edges.insert((p[i].start, p[i].end));
+                    if i < p.len() {
+                        removed_edges[p[i].start * len + p[i].end - 1] = true;
                     }
                 }
 
-                if let Some(spur_path) = self.shortest_path(&graph, &removed_edges, *spur_node, end)
+                if let Some(spur_path) = self.shortest_path(&graph, &removed_edges, *spur_node, len)
                 {
                     let mut total_path = root_path.to_vec();
                     total_path.extend(spur_path);
@@ -282,33 +279,33 @@ impl ChewingEngine {
 
     fn shortest_path(
         &self,
-        graph: &Graph,
-        removed_edges: &BTreeSet<(usize, usize)>,
+        graph: &[Vec<PossibleInterval>],
+        removed_edges: &[bool],
         source: usize,
-        sink: usize,
+        len: usize,
     ) -> Option<Vec<PossibleInterval>> {
-        let mut parent = vec![None; sink + 1];
+        let mut parent = vec![None; len + 1];
         let mut queue = VecDeque::new();
         queue.push_back(source);
         'bfs: while !queue.is_empty() {
             let node = queue.pop_front().unwrap();
-            if let Some(next_edges) = graph.get(&node) {
+            if let Some(next_edges) = graph.get(node) {
                 for edge in next_edges {
-                    if removed_edges.contains(&(edge.start, edge.end)) {
+                    if removed_edges[edge.start * len + edge.end - 1] {
                         continue;
                     }
                     if parent[edge.end].is_none() {
                         parent[edge.end] = Some(edge);
                         queue.push_back(edge.end);
                     }
-                    if edge.end == sink {
+                    if edge.end == len {
                         break 'bfs;
                     }
                 }
             }
         }
         let mut path = vec![];
-        let mut node = sink;
+        let mut node = len;
         while node != source {
             let interval = parent[node]?;
             node = interval.start;
@@ -562,8 +559,6 @@ impl Display for PossiblePath {
         Ok(())
     }
 }
-
-type Graph = BTreeMap<usize, Vec<PossibleInterval>>;
 
 #[cfg(test)]
 mod tests {
