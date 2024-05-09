@@ -179,49 +179,6 @@ impl ChewingEngine {
         }
         intervals
     }
-    /// Calculate the best path with dynamic programming.
-    ///
-    /// Assume P(x,y) is the highest score phrasing result from x to y. The
-    /// following is formula for P(x,y):
-    ///
-    /// P(x,y) = MAX( P(x,y-1)+P(y-1,y), P(x,y-2)+P(y-2,y), ... )
-    ///
-    /// While P(x,y-1) is stored in highest_score array, and P(y-1,y) is
-    /// interval end at y. In this formula, x is always 0.
-    ///
-    /// The format of highest_score array is described as following:
-    ///
-    /// highest_score[0] = P(0,0)
-    /// highest_score[1] = P(0,1)
-    /// ...
-    /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(
-        &self,
-        len: usize,
-        mut intervals: Vec<PossibleInterval>,
-    ) -> Vec<PossibleInterval> {
-        let mut highest_score = vec![PossiblePath::default(); len + 1];
-
-        // The interval shall be sorted by the increase order of end.
-        intervals.sort_by(|a, b| a.end.cmp(&b.end));
-
-        for interval in intervals.into_iter() {
-            let start = interval.start;
-            let end = interval.end;
-
-            let mut candidate_path = highest_score[start].clone();
-            candidate_path.intervals.push(interval);
-
-            if highest_score[end].score() < candidate_path.score() {
-                highest_score[end] = candidate_path;
-            }
-        }
-
-        highest_score
-            .pop()
-            .expect("highest_score has at least one element")
-            .intervals
-    }
 
     /// Find K possible best alternative paths.
     ///
