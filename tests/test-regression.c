@@ -206,8 +206,25 @@ void test_empty_prefix_in_conversion_search()
     chewing_delete(ctx);
 }
 
-void test_empty_preedit_ignore_arrow_key()
+void test_empty_preedit_ignore_certain_keys()
 {
+    static const char *const KEYS[] = {
+        "<EE>",
+        "<E>",
+        "<DC>",
+        "<B>",
+        "<T>",
+        "<TT>",
+        "<L>",
+        "<R>",
+        "<D>",
+        "<U>",
+        "<H>",
+        "<EN>",
+        "<PU>",
+        "<PD>"
+    };
+
     ChewingContext *ctx;
     int ret;
 
@@ -216,37 +233,15 @@ void test_empty_preedit_ignore_arrow_key()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
-    type_keystroke_by_string(ctx, "<L>");
-    ret = chewing_keystroke_CheckIgnore(ctx);
-    ok(ret == 1, "Left key should be ignored");
-    ret = chewing_keystroke_CheckAbsorb(ctx);
-    ok(ret == 0, "Left key should not be absorbed");
-    ret = chewing_commit_Check(ctx);
-    ok(ret == 0, "Left key should not trigger commit");
-
-    type_keystroke_by_string(ctx, "<R>");
-    ret = chewing_keystroke_CheckIgnore(ctx);
-    ok(ret == 1, "Right key should be ignored");
-    ret = chewing_keystroke_CheckAbsorb(ctx);
-    ok(ret == 0, "Right key should not be absorbed");
-    ret = chewing_commit_Check(ctx);
-    ok(ret == 0, "Right key should not trigger commit");
-
-    type_keystroke_by_string(ctx, "<D>");
-    ret = chewing_keystroke_CheckIgnore(ctx);
-    ok(ret == 1, "Down key should be ignored");
-    ret = chewing_keystroke_CheckAbsorb(ctx);
-    ok(ret == 0, "Down key should not be absorbed");
-    ret = chewing_commit_Check(ctx);
-    ok(ret == 0, "Down key should not trigger commit");
-
-    type_keystroke_by_string(ctx, "<U>");
-    ret = chewing_keystroke_CheckIgnore(ctx);
-    ok(ret == 1, "Up key should be ignored");
-    ret = chewing_keystroke_CheckAbsorb(ctx);
-    ok(ret == 0, "Up key should not be absorbed");
-    ret = chewing_commit_Check(ctx);
-    ok(ret == 0, "Up key should not trigger commit");
+    for (int i = 0; i < ARRAY_SIZE(KEYS); ++i) {
+        type_keystroke_by_string(ctx, KEYS[i]);
+        ret = chewing_keystroke_CheckIgnore(ctx);
+        ok(ret == 1, "%s key should be ignored", KEYS[i]);
+        ret = chewing_keystroke_CheckAbsorb(ctx);
+        ok(ret == 0, "%s key should not be absorbed", KEYS[i]);
+        ret = chewing_commit_Check(ctx);
+        ok(ret == 0, "%s key should not trigger commit", KEYS[i]);
+    }
 
     chewing_delete(ctx);
 }
@@ -291,7 +286,7 @@ int main(int argc, char *argv[])
     test_move_cursor_backwards();
     test_insert_symbol_between_selection();
     test_empty_prefix_in_conversion_search();
-    test_empty_preedit_ignore_arrow_key();
+    test_empty_preedit_ignore_certain_keys();
     test_crash_found_by_fuzzing_20240505_0();
 
     fclose(fd);

@@ -877,6 +877,11 @@ impl State for Entering {
                     Err(_) => self.spin_bell(),
                 }
             }
+            Enter | Esc | Tab | Home | End | Left | Right | Up | Down | PageUp | PageDown
+                if shared.com.is_empty() =>
+            {
+                self.spin_ignore()
+            }
             Tab if shared.com.is_end_of_buffer() => {
                 shared.nth_conversion += 1;
                 self.spin_absorb()
@@ -907,19 +912,17 @@ impl State for Entering {
                 self.spin_absorb()
             }
             Left if ev.modifiers.shift => {
-                if shared.com.is_empty() || shared.cursor() == 0 {
+                if shared.com.is_beginning_of_buffer() {
                     return self.spin_ignore();
                 }
                 self.start_highlighting(shared.cursor() - 1)
             }
             Right if ev.modifiers.shift => {
-                if shared.com.is_empty() || shared.com.is_end_of_buffer() {
+                if shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
                 self.start_highlighting(shared.cursor() + 1)
             }
-            Left if shared.com.is_beginning_of_buffer() => self.spin_ignore(),
-            Right if shared.com.is_end_of_buffer() => self.spin_ignore(),
             Left => {
                 shared.com.move_cursor_left();
                 self.spin_absorb()
@@ -1029,6 +1032,7 @@ impl State for Entering {
                 LanguageMode::English => match shared.options.character_form {
                     CharacterForm::Halfwidth => {
                         if shared.com.is_empty() {
+                            // FIXME we should ignore these keys if pre-edit is empty
                             shared.commit_buffer.clear();
                             shared.commit_buffer.push(ev.unicode);
                             self.spin_commit()
