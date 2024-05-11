@@ -611,37 +611,7 @@ impl Writer for VecWriter {
 /// <summary>Trie ASN.1 module definition</summary>
 ///
 /// ```asn
-/// Trie DEFINITIONS ::=
-/// BEGIN
-///   Document ::= SEQUENCE
-///   {
-///     magic      UTF8String ("CHEW"),
-///     version    Version (v1),
-///     info       Info,
-///     index      Index,
-///     phraseSeq  SEQUENCE OF Phrase,
-///     ...
-///   }
-///   Info     ::= SEQUENCE
-///   {
-///     name        UTF8String,
-///     copyright   UTF8String,
-///     license     UTF8String,
-///     version     UTF8String,
-///     software    UTF8String,
-///     ...
-///   }
-///   Index    ::= OCTET STRING
-///   Phrase   ::= SEQUENCE
-///   {
-///     phrase     UTF8String,
-///     freq       INTEGER (0..65535),
-///     lastUsed   [0] IMPLICIT Uint64 OPTIONAL,
-///     ...
-///   }
-///   Version  ::= INTEGER { v1(0) }
-///   Uint64   ::= INTEGER (0..18446744073709551615)
-/// END
+#[doc = include_str!("trie.asn1")]
 /// ```
 /// </details>
 ///
