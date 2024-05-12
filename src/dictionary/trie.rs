@@ -8,7 +8,7 @@ use std::{
     io::{self, BufWriter, Read, Write},
     iter,
     num::NonZeroUsize,
-    path::Path,
+    path::{Path, PathBuf},
     time::SystemTime,
 };
 
@@ -106,6 +106,7 @@ impl TrieLeafView<'_> {
 #[derive(Debug, Clone)]
 pub struct Trie {
     info: DictionaryInfo,
+    path: Option<PathBuf>,
     index: Box<[u8]>,
     phrase_seq: Box<[u8]>,
 }
@@ -132,8 +133,11 @@ impl Trie {
     /// # }
     /// ```
     pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Trie> {
-        let mut file = File::open(path)?;
-        Trie::new(&mut file)
+        let path = path.as_ref().to_path_buf();
+        let mut file = File::open(&path)?;
+        let mut trie = Trie::new(&mut file)?;
+        trie.path = Some(path);
+        Ok(trie)
     }
     /// Creates a new `Trie` instance from a input stream.
     ///
@@ -168,6 +172,7 @@ impl Trie {
         let phrase_seq = trie_ref.phrase_seq.der_bytes.into();
         Ok(Trie {
             info,
+            path: None,
             index,
             phrase_seq,
         })
@@ -343,6 +348,10 @@ impl Dictionary for Trie {
 
     fn about(&self) -> DictionaryInfo {
         self.info.clone()
+    }
+
+    fn path(&self) -> Option<&Path> {
+        self.path.as_ref().map(|p| p as &Path)
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {

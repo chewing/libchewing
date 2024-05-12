@@ -342,6 +342,8 @@ pub trait Dictionary: Debug {
     fn entries(&self) -> Entries<'_>;
     /// Returns information about the dictionary instance.
     fn about(&self) -> DictionaryInfo;
+    /// Returns the dictionary file path if it's backed by a file.
+    fn path(&self) -> Option<&Path>;
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
 }
 

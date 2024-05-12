@@ -1,4 +1,10 @@
-use std::{any::Any, error::Error, fmt::Display, path::Path, str};
+use std::{
+    any::Any,
+    error::Error,
+    fmt::Display,
+    path::{Path, PathBuf},
+    str,
+};
 
 use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
 
@@ -47,6 +53,7 @@ impl From<RusqliteError> for SqliteDictionaryError {
 #[derive(Debug)]
 pub struct SqliteDictionary {
     conn: Connection,
+    path: Option<PathBuf>,
     info: DictionaryInfo,
     read_only: bool,
 }
@@ -54,7 +61,8 @@ pub struct SqliteDictionary {
 impl SqliteDictionary {
     /// TODO: doc
     pub fn open<P: AsRef<Path>>(path: P) -> Result<SqliteDictionary, SqliteDictionaryError> {
-        let mut conn = Connection::open(path)?;
+        let path = path.as_ref().to_path_buf();
+        let mut conn = Connection::open(&path)?;
         Self::initialize_tables(&conn)?;
         Self::migrate_from_userphrase_v1(&mut conn)?;
         Self::ensure_tables(&conn)?;
@@ -62,6 +70,7 @@ impl SqliteDictionary {
 
         Ok(SqliteDictionary {
             conn,
+            path: Some(path),
             info,
             read_only: false,
         })
@@ -71,12 +80,14 @@ impl SqliteDictionary {
     pub fn open_read_only<P: AsRef<Path>>(
         path: P,
     ) -> Result<SqliteDictionary, SqliteDictionaryError> {
-        let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+        let path = path.as_ref().to_path_buf();
+        let conn = Connection::open_with_flags(&path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
         Self::ensure_tables(&conn)?;
         let info = Self::read_info_v1(&conn)?;
 
         Ok(SqliteDictionary {
             conn,
+            path: Some(path),
             info,
             read_only: true,
         })
@@ -91,6 +102,7 @@ impl SqliteDictionary {
 
         Ok(SqliteDictionary {
             conn,
+            path: None,
             info,
             read_only: false,
         })
@@ -351,6 +363,10 @@ impl Dictionary for SqliteDictionary {
 
     fn about(&self) -> DictionaryInfo {
         self.info.clone()
+    }
+
+    fn path(&self) -> Option<&Path> {
+        self.path.as_ref().map(|p| p as &Path)
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {

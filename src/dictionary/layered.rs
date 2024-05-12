@@ -124,6 +124,10 @@ impl Dictionary for Layered {
         }
     }
 
+    fn path(&self) -> Option<&std::path::Path> {
+        None
+    }
+
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
         self.user_dict.as_dict_mut()
     }

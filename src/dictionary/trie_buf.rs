@@ -3,7 +3,7 @@ use std::{
     cmp,
     collections::{btree_map::Entry, BTreeMap, BTreeSet},
     io,
-    path::PathBuf,
+    path::{Path, PathBuf},
     thread::{self, JoinHandle},
 };
 
@@ -18,7 +18,6 @@ use super::{
 
 #[derive(Debug)]
 pub struct TrieBuf {
-    path: PathBuf,
     trie: Option<Trie>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
@@ -52,7 +51,6 @@ impl TrieBuf {
         }
         let trie = Trie::open(&path)?;
         Ok(TrieBuf {
-            path,
             trie: Some(trie),
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
@@ -63,7 +61,6 @@ impl TrieBuf {
 
     pub fn new_in_memory() -> TrieBuf {
         TrieBuf {
-            path: PathBuf::new(),
             trie: None,
             btree: BTreeMap::new(),
             graveyard: BTreeSet::new(),
@@ -236,9 +233,9 @@ impl TrieBuf {
             }
         } else {
             // TODO: reduce reading
-            if !self.path.as_os_str().is_empty() {
+            if self.path().is_some() {
                 info!("Reloading...");
-                self.trie = Some(Trie::open(&self.path)?);
+                self.trie = Some(Trie::open(self.path().unwrap())?);
             }
         }
         Ok(())
@@ -250,12 +247,11 @@ impl TrieBuf {
             info!("Aborted. Wait until previous checkpoint result is handled.");
             return;
         }
-        if self.trie.is_none() || !self.dirty {
+        if self.trie.is_none() || self.trie.as_ref().unwrap().path().is_none() || !self.dirty {
             info!("Aborted. Don't need to checkpoint in memory or clean dictionary.");
             return;
         }
         let snapshot = TrieBuf {
-            path: self.path.clone(),
             trie: self.trie.clone(),
             btree: self.btree.clone(),
             graveyard: self.graveyard.clone(),
@@ -270,8 +266,8 @@ impl TrieBuf {
                 builder.insert(&syllables, phrase)?;
             }
             info!("Flushing snapshot...");
-            builder.build(&snapshot.path)?;
-            let trie = Trie::open(&snapshot.path).map_err(|err| UpdateDictionaryError {
+            builder.build(snapshot.path().unwrap())?;
+            let trie = Trie::open(snapshot.path().unwrap()).map_err(|err| UpdateDictionaryError {
                 source: Some(Box::new(err)),
             });
             info!("    Done");
@@ -304,6 +300,10 @@ impl Dictionary for TrieBuf {
             .map_or(DictionaryInfo::default(), |trie| trie.about())
     }
 
+    fn path(&self) -> Option<&Path> {
+        self.trie.as_ref()?.path()
+    }
+
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
         Some(self)
     }
@@ -316,9 +316,6 @@ impl DictionaryMut for TrieBuf {
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
-        if self.path.as_os_str().is_empty() {
-            return Ok(());
-        }
         self.checkpoint();
         Ok(())
     }

@@ -54,7 +54,14 @@ pub(crate) struct InitDatabase {
 #[derive(Args)]
 pub(crate) struct Info {
     /// Location of the dictionary file
-    pub(crate) path: PathBuf,
+    #[arg(short, long, required_unless_present_any(["user", "system"]))]
+    pub(crate) path: Option<PathBuf>,
+    /// Display information of detected user dictionary
+    #[arg(short, long)]
+    pub(crate) user: bool,
+    /// Display information of detected system dictionary
+    #[arg(short, long)]
+    pub(crate) system: bool,
     /// Output in JSON format
     #[arg(short, long)]
     pub(crate) json: bool,
