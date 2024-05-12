@@ -16,6 +16,7 @@ pub(crate) enum ChewingCliCmd {
     InitDatabase(InitDatabase),
     /// Display information about the dictionary
     Info(Info),
+    /// Dump the dictionary entries into tsi.src formatted stream
     Dump(Dump),
 }
 
@@ -67,11 +68,14 @@ pub(crate) struct Info {
     pub(crate) json: bool,
 }
 
-/// Dump the dictionary entries into tsi.src formatted stream
 #[derive(Args)]
 pub(crate) struct Dump {
     /// Location of the dictionary file
     pub(crate) path: PathBuf,
+    /// Location of the output file
+    ///
+    /// If OUTPUT equals to `-` then standard output will be used.
+    pub(crate) output: Option<PathBuf>,
     /// Output CSV format
     #[arg(long)]
     pub(crate) csv: bool,

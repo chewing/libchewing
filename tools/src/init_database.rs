@@ -28,7 +28,7 @@ fn parse_error(line_num: usize) -> ParseError {
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Parsing failed at line {}", self.line_num)
+        write!(f, "Parsing failed at line {}", self.line_num + 1)
     }
 }
 
@@ -126,23 +126,60 @@ fn parse_line(
     };
 
     let mut syllables = vec![];
-    for syllable_str in line.split(delimiter).skip(2) {
-        let mut syllable_builder = Syllable::builder();
-        if syllable_str.starts_with('#') {
-            break;
+    for syllables_field in line.splitn(3, delimiter).skip(2) {
+        for syllable_str in syllables_field.split_whitespace() {
+            if syllable_str.is_empty() {
+                continue;
+            }
+            let mut syllable_builder = Syllable::builder();
+            if syllable_str.starts_with('#') {
+                break;
+            }
+            for c in syllable_str.chars() {
+                syllable_builder = syllable_builder
+                    .insert(
+                        Bopomofo::try_from(c)
+                            .context("parsing bopomofo")
+                            .parse_error(line_num)?,
+                    )
+                    .with_context(|| format!("Parsing syllables {}", syllable_str))
+                    .parse_error(line_num)?;
+            }
+            syllables.push(syllable_builder.build());
         }
-        for c in syllable_str.chars() {
-            syllable_builder = syllable_builder
-                .insert(
-                    Bopomofo::try_from(c)
-                        .context("parsing bopomofo")
-                        .parse_error(line_num)?,
-                )
-                .with_context(|| format!("Parsing syllables {}", syllable_str))
-                .parse_error(line_num)?;
-        }
-        syllables.push(syllable_builder.build());
     }
 
     Ok((syllables, phrase, freq))
+}
+
+#[cfg(test)]
+mod tests {
+    use chewing::syl;
+    use chewing::zhuyin::Bopomofo::*;
+
+    use super::parse_line;
+
+    #[test]
+    fn parse_ssv() {
+        let line = "鑰匙 668 ㄧㄠˋ ㄔˊ # not official";
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
+            assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
+            assert_eq!("鑰匙", phrase);
+            assert_eq!(668, freq);
+        } else {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn parse_csv() {
+        let line = "鑰匙,668,ㄧㄠˋ ㄔˊ # not official";
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
+            assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
+            assert_eq!("鑰匙", phrase);
+            assert_eq!(668, freq);
+        } else {
+            panic!()
+        }
+    }
 }

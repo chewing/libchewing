@@ -1,3 +1,9 @@
+use std::{
+    fs::File,
+    io::{stdout, BufWriter, Write},
+    path::PathBuf,
+};
+
 use anyhow::Result;
 use chewing::dictionary::{Dictionary, SqliteDictionary, Trie};
 
@@ -13,17 +19,28 @@ pub(crate) fn run(args: flags::Dump) -> Result<()> {
     } else {
         Box::new(Trie::open(&args.path)?)
     };
-    if args.csv {
-        dump_dict_csv(dict.as_ref());
+    let sink: Box<dyn Write> = if let Some(output) = args.output {
+        if output == PathBuf::from("-") {
+            Box::new(stdout())
+        } else {
+            Box::new(File::create(output)?)
+        }
     } else {
-        dump_dict_tsi_src(dict.as_ref());
+        Box::new(stdout())
+    };
+    let sink = BufWriter::new(sink);
+    if args.csv {
+        dump_dict_csv(sink, dict.as_ref())?;
+    } else {
+        dump_dict_tsi_src(sink, dict.as_ref())?;
     }
     Ok(())
 }
 
-fn dump_dict_tsi_src(dict: &dyn Dictionary) {
+fn dump_dict_tsi_src(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary) -> Result<()> {
     for (syllables, phrase) in dict.entries() {
-        println!(
+        writeln!(
+            sink,
             "{} {} {}",
             phrase,
             phrase.freq(),
@@ -32,14 +49,16 @@ fn dump_dict_tsi_src(dict: &dyn Dictionary) {
                 .map(|syl| syl.to_string())
                 .collect::<Vec<_>>()
                 .join(" ")
-        )
+        )?;
     }
+    Ok(())
 }
 
-fn dump_dict_csv(dict: &dyn Dictionary) {
-    println!("phrase,user_freq,bopomofo");
+fn dump_dict_csv(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary) -> Result<()> {
+    writeln!(sink, "詞(phrase),詞頻(freq),注音(bopomofo)")?;
     for (syllables, phrase) in dict.entries() {
-        println!(
+        writeln!(
+            sink,
             "{},{},{}",
             phrase,
             phrase.freq(),
@@ -47,7 +66,8 @@ fn dump_dict_csv(dict: &dyn Dictionary) {
                 .iter()
                 .map(|syl| syl.to_string())
                 .collect::<Vec<_>>()
-                .join(",")
-        )
+                .join("　")
+        )?;
     }
+    Ok(())
 }
