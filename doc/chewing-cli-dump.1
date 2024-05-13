@@ -4,7 +4,7 @@
 .SH NAME
 chewing\-cli\-dump \- Dump the dictionary entries into tsi.src formatted stream
 .SH SYNOPSIS
-\fBchewing\-cli dump\fR [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIPATH\fR> 
+\fBchewing\-cli dump\fR [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIPATH\fR> [\fIOUTPUT\fR] 
 .SH DESCRIPTION
 Dump the dictionary entries into tsi.src formatted stream
 .SH OPTIONS
@@ -13,7 +13,12 @@ Dump the dictionary entries into tsi.src formatted stream
 Output CSV format
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-Print help
+Print help (see a summary with \*(Aq\-h\*(Aq)
 .TP
 <\fIPATH\fR>
 Location of the dictionary file
+.TP
+[\fIOUTPUT\fR]
+Location of the output file
+
+If OUTPUT equals to `\-` then standard output will be used.
