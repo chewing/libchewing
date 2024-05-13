@@ -370,7 +370,11 @@ impl Dictionary for SqliteDictionary {
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Some(self)
+        if !self.read_only {
+            Some(self)
+        } else {
+            None
+        }
     }
 }
 
@@ -575,10 +579,12 @@ mod tests {
     use std::error::Error;
 
     use rusqlite::{params, Connection};
-    use tempfile::NamedTempFile;
+    use tempfile::{tempdir, NamedTempFile};
 
     use crate::{
-        dictionary::{Dictionary, DictionaryMut, Phrase},
+        dictionary::{
+            Dictionary, DictionaryBuilder, DictionaryMut, Phrase, SqliteDictionaryBuilder,
+        },
         syl,
         zhuyin::Bopomofo,
     };
@@ -635,6 +641,19 @@ mod tests {
                 syl![Bopomofo::SH, Bopomofo::TONE4],
             ])
         );
+    }
+
+    #[test]
+    fn open_read_only() {
+        let temp_dir = tempdir().expect("Unable to create tempdir");
+        let temp_path = temp_dir.path().join("readonly.sqlite3");
+        let mut builder = SqliteDictionaryBuilder::new();
+        builder.build(&temp_path).expect("Build failure");
+
+        let mut dict =
+            SqliteDictionary::open_read_only(&temp_path).expect("Unable to open database");
+        assert_eq!(temp_path.to_path_buf(), dict.path().unwrap());
+        assert!(dict.as_dict_mut().is_none());
     }
 
     #[test]
