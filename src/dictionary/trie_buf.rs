@@ -30,6 +30,10 @@ type PhraseKey = (Cow<'static, [Syllable]>, Cow<'static, str>);
 const MIN_PHRASE: &str = "";
 const MAX_PHRASE: &str = "\u{10FFFF}";
 
+fn software_version() -> String {
+    format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+}
+
 impl TrieBuf {
     pub fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBuf> {
         let path = path.into();
@@ -39,7 +43,7 @@ impl TrieBuf {
                 copyright: "Unknown".to_string(),
                 license: "Unknown".to_string(),
                 version: "0.0.0".to_string(),
-                software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
+                software: software_version(),
             };
             let mut builder = TrieBuilder::new();
             builder
@@ -261,7 +265,10 @@ impl TrieBuf {
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieBuilder::new();
             info!("Saving snapshot...");
-            builder.set_info(snapshot.about())?;
+            builder.set_info(DictionaryInfo {
+                software: software_version(),
+                ..snapshot.about()
+            })?;
             for (syllables, phrase) in snapshot.entries() {
                 builder.insert(&syllables, phrase)?;
             }
