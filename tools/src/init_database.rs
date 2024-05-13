@@ -112,7 +112,11 @@ fn parse_line(
     line: &str,
     keep_word_freq: bool,
 ) -> Result<(Vec<Syllable>, &str, u32)> {
-    let phrase = line.split(delimiter).next().ok_or(parse_error(line_num))?;
+    let phrase = line
+        .split(delimiter)
+        .next()
+        .ok_or(parse_error(line_num))?
+        .trim_matches('"');
 
     let freq: u32 = match phrase.chars().count() {
         1 if !keep_word_freq => 0,
@@ -120,6 +124,7 @@ fn parse_line(
             .split(delimiter)
             .nth(1)
             .ok_or(parse_error(line_num))?
+            .trim_matches('"')
             .parse()
             .context("Unable to parse frequency")
             .parse_error(line_num)?,
@@ -127,6 +132,7 @@ fn parse_line(
 
     let mut syllables = vec![];
     for syllables_field in line.splitn(3, delimiter).skip(2) {
+        let syllables_field = syllables_field.trim_matches('"');
         for syllable_str in syllables_field.split_whitespace() {
             if syllable_str.is_empty() {
                 continue;
@@ -174,6 +180,18 @@ mod tests {
     #[test]
     fn parse_csv() {
         let line = "鑰匙,668,ㄧㄠˋ ㄔˊ # not official";
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
+            assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
+            assert_eq!("鑰匙", phrase);
+            assert_eq!(668, freq);
+        } else {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn parse_csv_quoted() {
+        let line = "\"鑰匙\",668,\"ㄧㄠˋ ㄔˊ # not official\"";
         if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
