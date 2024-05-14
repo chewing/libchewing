@@ -1,0 +1,34 @@
+Trie { iso(1) identified-organization(3) dod(6) internet(1)
+private(4) enterprise(1) chewing(61744) dictionary(1) trie(1) }
+
+DEFINITIONS ::=
+BEGIN
+  Document ::= SEQUENCE
+  {
+    magic      UTF8String ("CHEW"),
+    version    Version (v1),
+    info       Info,
+    index      Index,
+    phraseSeq  SEQUENCE OF Phrase,
+    ...
+  }
+  Info ::= SEQUENCE
+  {
+    name        UTF8String,
+    copyright   UTF8String,
+    license     UTF8String,
+    version     UTF8String,
+    software    UTF8String,
+    ...
+  }
+  Index ::= OCTET STRING
+  Phrase ::= SEQUENCE
+  {
+    phrase     UTF8String,
+    freq       INTEGER (0..65535),
+    lastUsed   [0] IMPLICIT Uint64 OPTIONAL,
+    ...
+  }
+  Version ::= INTEGER { v1(0) }
+  Uint64 ::= INTEGER (0..18446744073709551615)
+END

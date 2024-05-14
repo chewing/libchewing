@@ -37,10 +37,25 @@ who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "1.0.95 -> 1.0.96"
 
+[[audits.cc]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "1.0.96 -> 1.0.97"
+
 [[audits.der]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 version = "0.7.9"
+
+[[audits.der]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.7.9 -> 0.7.7"
+
+[[audits.fallible-iterator]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.3.0 -> 0.2.0"
 
 [[audits.fastrand]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
@@ -51,6 +66,11 @@ delta = "2.0.2 -> 2.1.0"
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "0.2.12 -> 0.2.13"
+
+[[audits.hashlink]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.9.0 -> 0.8.4"
 
 [[audits.libredox]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
@@ -67,10 +87,20 @@ who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "1.0.80 -> 1.0.81"
 
+[[audits.proc-macro2]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "1.0.81 -> 1.0.82"
+
 [[audits.redox_users]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 delta = "0.4.4 -> 0.4.5"
+
+[[audits.rusqlite]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.31.0 -> 0.29.0"
 
 [[audits.windows_i686_gnullvm]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
@@ -86,6 +116,16 @@ version = "0.3.2"
 who = "Kan-Ru Chen <kanru@kanru.info>"
 criteria = "safe-to-deploy"
 version = "0.3.2"
+
+[[audits.zerocopy]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.7.32 -> 0.7.34"
+
+[[audits.zerocopy-derive]]
+who = "Kan-Ru Chen <kanru@kanru.info>"
+criteria = "safe-to-deploy"
+delta = "0.7.32 -> 0.7.34"
 
 [[audits.zeroize]]
 who = "Kan-Ru Chen <kanru@kanru.info>"
@@ -182,6 +222,12 @@ user-id = 6743 # Ed Page (epage)
 start = "2022-11-24"
 end = "2025-05-02"
 
+[[trusted.errno]]
+criteria = "safe-to-deploy"
+user-id = 6825 # Dan Gohman (sunfishcode)
+start = "2023-08-29"
+end = "2025-05-13"
+
 [[trusted.hashbrown]]
 criteria = "safe-to-deploy"
 user-id = 2915 # Amanieu d'Antras (Amanieu)
@@ -194,11 +240,23 @@ user-id = 6825 # Dan Gohman (sunfishcode)
 start = "2022-01-22"
 end = "2025-03-30"
 
+[[trusted.is_terminal_polyfill]]
+criteria = "safe-to-deploy"
+user-id = 6743 # Ed Page (epage)
+start = "2024-05-02"
+end = "2025-05-13"
+
 [[trusted.libc]]
 criteria = "safe-to-deploy"
 user-id = 51017 # Yuki Okushi (JohnTitor)
 start = "2020-03-17"
 end = "2025-03-30"
+
+[[trusted.libsqlite3-sys]]
+criteria = "safe-to-deploy"
+user-id = 5062 # gwenn (gwenn)
+start = "2019-03-10"
+end = "2025-05-13"
 
 [[trusted.linux-raw-sys]]
 criteria = "safe-to-deploy"

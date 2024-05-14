@@ -1,5 +1,18 @@
-What's New in libchewing 0.8.0-rc.4 (UNRELEASED)
+What's New in libchewing 0.8.0 (May 14, 2024)
 ---------------------------------------------------------
+
+**BREAKING CHANGE**
+
+New dictionary format is not compatible with old tools. Existing user dictionary
+will be automatically backed up and migrated however old tools might not be able
+to manipulate the dictionary directly.
+
+The `chewing-editor` program can still be used to edit user dictionaries. In
+this release we also introduced a new `chewing-cli` tool to inspect/dump/build
+user dictionaries. See `chewing-cli(1)` for more details.
+
+This version also closed/fixed many issues. Find the complete list of closed
+issues here: https://github.com/chewing/libchewing/milestone/7?closed=1
 
 * Added
   - A new command line tool `chewing-cli` is included in this release. It can

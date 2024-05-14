@@ -4,16 +4,22 @@
 .SH NAME
 chewing\-cli\-info \- Display information about the dictionary
 .SH SYNOPSIS
-\fBchewing\-cli info\fR [\fB\-j\fR|\fB\-\-json\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIPATH\fR> 
+\fBchewing\-cli info\fR [\fB\-p\fR|\fB\-\-path\fR] [\fB\-u\fR|\fB\-\-user\fR] [\fB\-s\fR|\fB\-\-system\fR] [\fB\-j\fR|\fB\-\-json\fR] [\fB\-h\fR|\fB\-\-help\fR] 
 .SH DESCRIPTION
 Display information about the dictionary
 .SH OPTIONS
+.TP
+\fB\-p\fR, \fB\-\-path\fR=\fIPATH\fR
+Location of the dictionary file
+.TP
+\fB\-u\fR, \fB\-\-user\fR
+Display information of detected user dictionary
+.TP
+\fB\-s\fR, \fB\-\-system\fR
+Display information of detected system dictionary
 .TP
 \fB\-j\fR, \fB\-\-json\fR
 Output in JSON format
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 Print help
-.TP
-<\fIPATH\fR>
-Location of the dictionary file

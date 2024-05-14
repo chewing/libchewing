@@ -2,51 +2,51 @@
 # cargo-vet imports lock
 
 [[unpublished.chewing]]
-version = "0.8.0-beta.4"
-audited_as = "0.8.0-beta.3"
+version = "0.8.0"
+audited_as = "0.8.0-beta.4"
 
 [[unpublished.chewing-cli]]
-version = "0.8.0-beta.4"
-audited_as = "0.8.0-beta.3"
+version = "0.8.0"
+audited_as = "0.8.0-beta.4"
 
 [[publisher.anstream]]
-version = "0.6.13"
-when = "2024-02-27"
+version = "0.6.14"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.anstyle]]
-version = "1.0.6"
-when = "2024-02-05"
+version = "1.0.7"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.anstyle-parse]]
-version = "0.2.3"
-when = "2023-12-04"
+version = "0.2.4"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.anstyle-query]]
-version = "1.0.2"
-when = "2023-12-08"
+version = "1.0.3"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.anstyle-wincon]]
-version = "3.0.2"
-when = "2023-12-04"
+version = "3.0.3"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.anyhow]]
-version = "1.0.82"
-when = "2024-04-10"
+version = "1.0.83"
+when = "2024-05-06"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
@@ -59,15 +59,15 @@ user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
 [[publisher.chewing]]
-version = "0.8.0-beta.3"
-when = "2024-05-03"
+version = "0.8.0-beta.4"
+when = "2024-05-08"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
 
 [[publisher.chewing-cli]]
-version = "0.8.0-beta.3"
-when = "2024-05-03"
+version = "0.8.0-beta.4"
+when = "2024-05-08"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
@@ -108,8 +108,8 @@ user-login = "epage"
 user-name = "Ed Page"
 
 [[publisher.colorchoice]]
-version = "1.0.0"
-when = "2023-04-13"
+version = "1.0.1"
+when = "2024-05-02"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
@@ -121,6 +121,13 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.errno]]
+version = "0.3.9"
+when = "2024-05-08"
+user-id = 6825
+user-login = "sunfishcode"
+user-name = "Dan Gohman"
+
 [[publisher.hashbrown]]
 version = "0.14.5"
 when = "2024-04-28"
@@ -128,12 +135,26 @@ user-id = 2915
 user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
+[[publisher.is_terminal_polyfill]]
+version = "1.70.0"
+when = "2024-05-02"
+user-id = 6743
+user-login = "epage"
+user-name = "Ed Page"
+
 [[publisher.libc]]
 version = "0.2.154"
 when = "2024-04-29"
 user-id = 51017
 user-login = "JohnTitor"
 user-name = "Yuki Okushi"
+
+[[publisher.libsqlite3-sys]]
+version = "0.26.0"
+when = "2023-03-26"
+user-id = 5062
+user-login = "gwenn"
+user-name = "gwenn"
 
 [[publisher.linux-raw-sys]]
 version = "0.4.13"
@@ -164,22 +185,22 @@ user-login = "mbrubeck"
 user-name = "Matt Brubeck"
 
 [[publisher.syn]]
-version = "2.0.60"
-when = "2024-04-17"
+version = "2.0.63"
+when = "2024-05-11"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
 
 [[publisher.thiserror]]
-version = "1.0.59"
-when = "2024-04-20"
+version = "1.0.60"
+when = "2024-05-07"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
 
 [[publisher.thiserror-impl]]
-version = "1.0.59"
-when = "2024-04-20"
+version = "1.0.60"
+when = "2024-05-07"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
@@ -346,12 +367,6 @@ criteria = "safe-to-deploy"
 version = "1.0.0"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
-[[audits.google.audits.errno]]
-who = "Ying Hsu <yinghsu@chromium.org>"
-criteria = "safe-to-run"
-version = "0.3.8"
-aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
-
 [[audits.google.audits.fastrand]]
 who = "Ying Hsu <yinghsu@chromium.org>"
 criteria = "safe-to-run"
@@ -461,6 +476,11 @@ aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust
 who = "David Cook <dcook@divviup.org>"
 criteria = "safe-to-deploy"
 delta = "0.2.12 -> 0.2.14"
+
+[[audits.isrg.audits.getrandom]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.14 -> 0.2.15"
 
 [[audits.mozilla.audits.log]]
 who = "Mike Hommey <mh+mozilla@glandium.org>"

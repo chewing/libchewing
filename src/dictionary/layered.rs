@@ -124,6 +124,10 @@ impl Dictionary for Layered {
         }
     }
 
+    fn path(&self) -> Option<&std::path::Path> {
+        None
+    }
+
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
         self.user_dict.as_dict_mut()
     }
@@ -319,6 +323,7 @@ mod tests {
             dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
         );
         let _ = dict.about();
+        assert!(dict.as_dict_mut().is_none());
         assert!(dict.reopen().is_ok());
         assert!(dict.flush().is_ok());
         assert!(dict
