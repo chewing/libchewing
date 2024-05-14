@@ -7,7 +7,15 @@ version = "0.8.0"
 rust-version = "1.70"
 edition = "2021"
 
-include = ["src/**/*.rs", "data/*", "Cargo.toml", "AUTHORS", "COPYING", "NEWS"]
+include = [
+    "src/**/*.rs",
+    "src/**/*.asn1",
+    "data/*",
+    "Cargo.toml",
+    "AUTHORS",
+    "COPYING",
+    "NEWS",
+]
 
 [dependencies]
 der = { version = "0.7.7", features = ["std"] }
