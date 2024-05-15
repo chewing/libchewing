@@ -83,7 +83,7 @@ pub unsafe extern "C" fn find_path_by_files(
     -1
 }
 
-unsafe fn files_ptr_to_slice(files: *const *const i8) -> Vec<Cow<'static, str>> {
+unsafe fn files_ptr_to_slice(files: *const *const c_char) -> Vec<Cow<'static, str>> {
     let len = {
         let mut i = 0;
         while unsafe { !files.add(i).read().is_null() } {
