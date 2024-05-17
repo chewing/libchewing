@@ -307,67 +307,27 @@ CHEWING_API ChewingContext *chewing_new()
 CHEWING_API int chewing_Reset(ChewingContext *ctx)
 {
     ChewingData *pgdata;
-    ChewingStaticData staticData;
-    ChewingConfigData old_config;
-    void (*logger) (void *data, int level, const char *fmt, ...);
-    void *loggerData;
-#ifdef WITH_RUST
-    const void *dict;
-    void *ce;
-    void *ue;
-#endif
+    ChewingData data;
 
     if (!ctx) {
         return -1;
     }
+
     pgdata = ctx->data;
 
     LOG_API("");
 
     /* Backup old config and restore it after clearing pgdata structure. */
-    old_config = pgdata->config;
-    staticData = pgdata->staticData;
-    logger = pgdata->logger;
-    loggerData = pgdata->loggerData;
-#ifdef WITH_RUST
-    dict = pgdata->dict;
-    ce = pgdata->ce;
-    ue = pgdata->ue;
-    if (pgdata->bopomofoData.editorWithKeymap != 0) {
-        FreePhoneticEditor(pgdata->bopomofoData.editorWithKeymap);
-    }
-#endif
+    data = *pgdata;
+
     memset(pgdata, 0, sizeof(ChewingData));
-    pgdata->config = old_config;
-    pgdata->staticData = staticData;
-    pgdata->logger = logger;
-    pgdata->loggerData = loggerData;
-
-#ifdef WITH_RUST
-    pgdata->dict = dict;
-    pgdata->ce = ce;
-    pgdata->ue = ue;
-    chewing_set_KBType(ctx, KB_DEFAULT);
-#else
-    /* bopomofoData */
-    memset(&(pgdata->bopomofoData), 0, sizeof(BopomofoData));
-#endif
-
-    /* choiceInfo */
-    memset(&(pgdata->choiceInfo), 0, sizeof(ChoiceInfo));
-
-    pgdata->chiSymbolCursor = 0;
-    pgdata->chiSymbolBufLen = 0;
-    pgdata->nPhoneSeq = 0;
-    memset(pgdata->bUserArrCnnct, 0, sizeof(int) * (MAX_PHONE_SEQ_LEN + 1));
-    memset(pgdata->bUserArrBrkpt, 0, sizeof(int) * (MAX_PHONE_SEQ_LEN + 1));
+    pgdata->config = data.config;
+    pgdata->staticData = data.staticData;
+    pgdata->logger = data.logger;
+    pgdata->loggerData = data.loggerData;
     pgdata->bChiSym = CHINESE_MODE;
     pgdata->bFullShape = HALFSHAPE_MODE;
-    pgdata->bSelect = 0;
-    pgdata->nSelect = 0;
     pgdata->pointStart = -1;
-    pgdata->pointEnd = 0;
-    pgdata->phrOut.nNumCut = 0;
     return 0;
 }
 
