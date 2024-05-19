@@ -1,3 +1,0 @@
-[submodule "fuzzer/corpus"]
-	path = fuzzer/corpus
-	url = https://github.com/chewing/fuzzing-corpus.git
