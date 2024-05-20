@@ -48,12 +48,13 @@ character selection logic, and an input framework interface for display and
 preference settings.
 
 + The active integration:
+  - [Windows TSF](https://github.com/chewing/windows-chewing-tsf)
   - [PIME](https://github.com/EasyIME/PIME)
-  - [ibus](https://github.com/definite/ibus-chewing)
+  - [ibus](https://github.com/chewing/ibus-chewing)
   - [HIME](https://hime-ime.github.io/)
   - [fcitx](https://github.com/fcitx/fcitx5-chewing)
   - [Guileless Bopomofo](https://github.com/hiroshiyui/GuilelessBopomofo)
-+ The inactive one: [SCIM](https://github.com/chewing/scim-chewing), standalone Microsoft Windows 32/64-bit (windows-chewing), mozc, [uim](https://github.com/uim/uim-chewing), [ucimf](https://github.com/matlinuxer2/ucimf), JMCCE, xcin, IIIMF, standalone MacOS X (SpaceChewing), Sun's Java Desktop System Input Method Framework, OpenVanilla Input Method Framework (previous than version 1.0), and OXIM.
++ The inactive one: [SCIM](https://github.com/chewing/scim-chewing), standalone Microsoft Windows 32/64-bit ([windows-chewing](https://github.com/chewing/windows-chewing)), mozc, [uim](https://github.com/uim/uim-chewing), [ucimf](https://github.com/matlinuxer2/ucimf), JMCCE, xcin, IIIMF, standalone MacOS X (SpaceChewing), Sun's Java Desktop System Input Method Framework, OpenVanilla Input Method Framework (previous than version 1.0), and OXIM.
 
 
 ### 2. support phonetic keyboard layout
