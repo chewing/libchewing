@@ -86,7 +86,9 @@ projects to deploy innovative features. Here are some examples:
 * [NTNU-Master Input Method](http://rportal.lib.ntnu.edu.tw/items/42d5cd11-5fab-4d27-9f26-d01b80588a82): A faster Chinese IM based on windows-chewing
 
 
-## Minimal Build Tools Requirement
+## Build and Installation
+
+### Prerequisites
 
 The following tools are used to build libchewing. Not all tools are necessary
 during building. For example, if the compiler you used is clang, gcc & Visual
@@ -104,7 +106,7 @@ be built.
    - texinfo >= 4.8
 
 
-## Build and Installation
+### Build via CMake
 
 Use the default preset:
 
@@ -124,9 +126,9 @@ Check other supported presets:
 
     cmake --list-presets
 
-## Cross-build
+### Cross-build
 
-Define a [cmake-toolchains][] file to cross-compile.
+Define a [cmake-toolchains][https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html] file to cross-compile.
 
 Example cross-build instructions:
 
@@ -135,7 +137,7 @@ Example cross-build instructions:
 
 [cmake-toolchains]: https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
 
-## Build on Windows with Build Tools for Visual Studio 2022
+### Build on Windows with Build Tools for Visual Studio 2022
 
 To build libchewing on Windows and link to other program build from MSVC, you
 need to use the MSVC toolchain. To install the build environment:
@@ -163,7 +165,7 @@ Open `x64 Native Tools Command Prompt for VS 2022`
 Now you have the build environment for libchewing. You can follow the installation
 steps to build with cmake.
 
-## Build on macOS
+### Build on macOS
 
 To build libchewing on macOS, you will need tools listed in the requirements.
 Since macOS does not ship with these tools, building them from source can be
@@ -177,7 +179,7 @@ commands to install the tools you need:
     brew install rustup
     rustup default stable
 
-## Minimum Supported Rust Version
+### Minimum Supported Rust Version
 
 To ensure libchewing can be built on various Linux distributions, we use the
 minimum rust version available from major distributions' next release branch.
