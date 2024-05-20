@@ -128,7 +128,7 @@ Check other supported presets:
 
 ### Cross-build
 
-Define a [cmake-toolchains][https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html] file to cross-compile.
+Define a [cmake-toolchains][] file to cross-compile.
 
 Example cross-build instructions:
 
