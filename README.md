@@ -135,21 +135,6 @@ Example cross-build instructions:
 
 [cmake-toolchains]: https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
 
-## Build on Windows with MinGW
-
-To build libchewing on Windows, you need to setup MinGW and MSYS in your
-system. The installer of MinGW and MSYS is in the following link:
-
-<https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/>
-
-In "Select Components" during installing, please select the following items:
-
-- MinGW Compiler Suite -> C Compiler
-- MSYS Basic System
-
-After installing, execute [MinGW directory]\msys\1.0\msys.bat (default is
-C:\MinGW\msys\1.0\msys.bat) to enter MSYS shell.
-
 ## Build on Windows with Build Tools for Visual Studio 2022
 
 To build libchewing on Windows and link to other program build from MSVC, you
