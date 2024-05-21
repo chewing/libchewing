@@ -6,6 +6,7 @@ What's New in libchewing 0.8.2 (May 21, 2024)
     (introduced in v0.8.0)
   - Wrong symbol map location when building as a CMake submodule.
 
+
 What's New in libchewing 0.8.1 (May 15, 2024)
 ---------------------------------------------------------
 
