@@ -30,7 +30,7 @@ jobs:
     name: ${{ matrix.os }}, preset=${{ matrix.preset }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install ninja-build
@@ -61,7 +61,7 @@ jobs:
     name: Aarch64 cross-compile smoke test
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup rustup
         run: |
           rustup default ${{ env.RUST_VERSION }}
@@ -88,7 +88,7 @@ jobs:
     steps:
       - run: sudo dnf -y install clang cmake ninja-build sqlite-devel llvm rustup bzip2 git
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup rustup
         run: |
