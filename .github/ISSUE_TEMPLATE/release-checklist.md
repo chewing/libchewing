@@ -22,4 +22,5 @@ assignees: ''
 - [ ] Git tag and sign tag
 - [ ] cargo publish
 - [ ] Tag new release on GitHub
+- [ ] Update website
 - [ ] Send announcement

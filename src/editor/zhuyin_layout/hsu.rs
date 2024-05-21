@@ -110,8 +110,9 @@ impl SyllableEditor for Hsu {
 
             // fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ
             match (self.syllable.initial(), self.syllable.medial()) {
-                (Some(Bopomofo::G), Some(Bopomofo::I)) | (Some(Bopomofo::J), Some(Bopomofo::I)) => {
-                    self.syllable.update(Bopomofo::IU);
+                (Some(Bopomofo::G), Some(Bopomofo::I))
+                | (Some(Bopomofo::G), Some(Bopomofo::IU)) => {
+                    self.syllable.update(Bopomofo::J);
                 }
                 _ => (),
             }
