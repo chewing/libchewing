@@ -1,8 +1,17 @@
+What's New in libchewing 0.8.2 (May 21, 2024)
+---------------------------------------------------------
+
+* Bug fixed
+  - Wrong Hsu (許氏) keyboard fuzz conversion (ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ)
+    (introduced in v0.8.0)
+
+
 What's New in libchewing 0.8.1 (May 15, 2024)
 ---------------------------------------------------------
 
 * Bug fixed
   - Fail to build on aarch64 due to type mismatch. (introduced in v0.8.0)
+
 
 What's New in libchewing 0.8.0 (May 14, 2024)
 ---------------------------------------------------------

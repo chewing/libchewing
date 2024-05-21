@@ -1543,6 +1543,22 @@ void test_KB_HSU()
     ok_preedit_buffer(ctx, "\xE7\x88\xBE" /* 爾 */);
     chewing_clean_preedit_buf(ctx);
 
+    type_keystroke_by_string(ctx, "g");
+    ok_bopomofo_buffer(ctx, "ㄍ");
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "ㄍㄧ");
+    type_keystroke_by_string(ctx, " ");
+    ok_preedit_buffer(ctx, "機");  /* convert "ㄍㄧ" to "ㄐㄧ" */
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "g");
+    ok_bopomofo_buffer(ctx, "ㄍ");
+    type_keystroke_by_string(ctx, "u");
+    ok_bopomofo_buffer(ctx, "ㄍㄩ");
+    type_keystroke_by_string(ctx, " ");
+    ok_preedit_buffer(ctx, "居");  /* convert "ㄍㄩ" to "ㄐㄩ" */
+    chewing_clean_preedit_buf(ctx);
+
     chewing_delete(ctx);
 }
 
