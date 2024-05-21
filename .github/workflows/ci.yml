@@ -2,9 +2,13 @@ name: CI
 
 on:
   push:
-    branches: ["master", "staging", "trying"]
+    branches:
+      - "master"
+      - "release/*"
   pull_request:
-    branches: ["master"]
+    branches:
+      - "master"
+      - "release/*"
   merge_group:
     types: [checks_requested]
 
