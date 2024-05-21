@@ -314,8 +314,7 @@ if(WITH_RUST)
             )
         elseif(MSVC)
             target_link_options(libchewing
-                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/src/symbols-msvc.def
-                PRIVATE /MACHINE:X64)
+                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/src/symbols-msvc.def)
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
