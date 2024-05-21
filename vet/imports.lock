@@ -2,12 +2,12 @@
 # cargo-vet imports lock
 
 [[unpublished.chewing]]
-version = "0.8.1"
-audited_as = "0.8.0"
+version = "0.8.2"
+audited_as = "0.8.1"
 
 [[unpublished.chewing-cli]]
-version = "0.8.1"
-audited_as = "0.8.0"
+version = "0.8.2"
+audited_as = "0.8.1"
 
 [[publisher.anstream]]
 version = "0.6.14"
@@ -59,15 +59,15 @@ user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
 
 [[publisher.chewing]]
-version = "0.8.0"
-when = "2024-05-14"
+version = "0.8.1"
+when = "2024-05-15"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
 
 [[publisher.chewing-cli]]
-version = "0.8.0"
-when = "2024-05-14"
+version = "0.8.1"
+when = "2024-05-15"
 user-id = 7551
 user-login = "kanru"
 user-name = "Kan-Ru Chen"
