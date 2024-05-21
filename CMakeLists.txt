@@ -314,9 +314,8 @@ if(WITH_RUST)
             )
         elseif(MSVC)
             target_link_options(libchewing
-                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/src/symbols-msvc.map
-                PRIVATE /MACHINE:X64)
-            set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/src/symbols-msvc.def)
+            set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
         endif()
     endif()
 elseif(WITH_SQLITE3)
