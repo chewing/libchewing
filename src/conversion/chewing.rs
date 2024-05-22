@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, BTreeSet, VecDeque},
+    collections::VecDeque,
     fmt::{Debug, Display, Write},
     iter,
     ops::{Mul, Neg},
@@ -26,36 +26,20 @@ impl ChewingEngine {
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
     ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        let fast_dp = 'ret: {
+        iter::once_with(move || {
             if comp.is_empty() {
-                break 'ret vec![];
+                return vec![PossiblePath::default()];
             }
             let intervals = self.find_intervals(dict, comp);
-            self.find_best_path(comp.symbols.len(), intervals)
-                .into_iter()
-                .map(|interval| interval.into())
-                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
-        };
-        let fast_dp_clone = fast_dp.clone();
-        let mut cached_paths = None;
-        let slow_search = iter::once_with(move || {
-            if comp.is_empty() {
-                return vec![];
-            }
-            cached_paths
-                .get_or_insert_with(|| {
-                    let intervals = self.find_intervals(dict, comp);
-                    let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
-                    trace!("paths: {:#?}", paths);
-                    debug_assert!(!paths.is_empty());
+            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
+            trace!("paths: {:#?}", paths);
+            debug_assert!(!paths.is_empty());
 
-                    let mut trimmed_paths = self.trim_paths(paths);
-                    debug_assert!(!trimmed_paths.is_empty());
+            let mut trimmed_paths = self.trim_paths(paths);
+            debug_assert!(!trimmed_paths.is_empty());
 
-                    trimmed_paths.sort_by(|a, b| b.cmp(a));
-                    trimmed_paths
-                })
-                .to_vec()
+            trimmed_paths.sort_by(|a, b| b.cmp(a));
+            trimmed_paths
         })
         .flatten()
         .map(|p| {
@@ -64,11 +48,6 @@ impl ChewingEngine {
                 .map(|it| it.into())
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         })
-        // XXX the first result of the slow path should match the fast path.
-        // However the trim path algorithm might remove the first result.
-        .skip_while(move |res| res == &fast_dp);
-
-        iter::once(fast_dp_clone).chain(slow_search)
     }
 }
 
@@ -129,18 +108,13 @@ impl ChewingEngine {
             return Some(symbols[0].into());
         }
 
-        let syllables = symbols
-            .iter()
-            .take_while(|symbol| symbol.is_syllable())
-            .map(|symbol| symbol.to_syllable().unwrap())
-            .collect::<Vec<_>>();
-        if syllables.len() != symbols.len() {
+        if symbols.iter().any(|sym| sym.is_char()) {
             return None;
         }
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in dict.lookup_all_phrases(&syllables) {
+        'next_phrase: for phrase in dict.lookup_all_phrases(&symbols) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.
@@ -200,49 +174,6 @@ impl ChewingEngine {
         }
         intervals
     }
-    /// Calculate the best path with dynamic programming.
-    ///
-    /// Assume P(x,y) is the highest score phrasing result from x to y. The
-    /// following is formula for P(x,y):
-    ///
-    /// P(x,y) = MAX( P(x,y-1)+P(y-1,y), P(x,y-2)+P(y-2,y), ... )
-    ///
-    /// While P(x,y-1) is stored in highest_score array, and P(y-1,y) is
-    /// interval end at y. In this formula, x is always 0.
-    ///
-    /// The format of highest_score array is described as following:
-    ///
-    /// highest_score[0] = P(0,0)
-    /// highest_score[1] = P(0,1)
-    /// ...
-    /// highest_score[y-1] = P(0,y-1)
-    fn find_best_path(
-        &self,
-        len: usize,
-        mut intervals: Vec<PossibleInterval>,
-    ) -> Vec<PossibleInterval> {
-        let mut highest_score = vec![PossiblePath::default(); len + 1];
-
-        // The interval shall be sorted by the increase order of end.
-        intervals.sort_by(|a, b| a.end.cmp(&b.end));
-
-        for interval in intervals.into_iter() {
-            let start = interval.start;
-            let end = interval.end;
-
-            let mut candidate_path = highest_score[start].clone();
-            candidate_path.intervals.push(interval);
-
-            if highest_score[end].score() < candidate_path.score() {
-                highest_score[end] = candidate_path;
-            }
-        }
-
-        highest_score
-            .pop()
-            .expect("highest_score has at least one element")
-            .intervals
-    }
 
     /// Find K possible best alternative paths.
     ///
@@ -253,35 +184,32 @@ impl ChewingEngine {
     fn find_k_paths(
         &self,
         k: usize,
-        end: usize,
+        len: usize,
         intervals: Vec<PossibleInterval>,
     ) -> Vec<PossiblePath> {
         let mut ksp = Vec::with_capacity(k);
         let mut candidates = vec![];
-        let mut graph = Graph::new();
+        let mut graph = vec![vec![]; len];
+        let mut removed_edges = vec![false; len * len];
+
         for edge in intervals.into_iter() {
-            let values = graph.entry(edge.start).or_default();
-            values.push(edge);
+            graph[edge.start].push(edge);
         }
-        ksp.push(
-            self.shortest_path(&graph, &BTreeSet::new(), 0, end)
-                .unwrap(),
-        );
+        ksp.push(self.shortest_path(&graph, &removed_edges, 0, len).unwrap());
 
         for kth in 1..k {
             let prev = kth - 1;
             for i in 0..ksp[prev].len() {
-                let mut removed_edges = BTreeSet::new();
                 let spur_node = &ksp[prev][i].start;
                 let root_path = &ksp[prev][0..i];
 
                 for p in &ksp {
-                    if root_path.len() < p.len() && root_path == &p[0..i] {
-                        removed_edges.insert((p[i].start, p[i].end));
+                    if i < p.len() {
+                        removed_edges[p[i].start * len + p[i].end - 1] = true;
                     }
                 }
 
-                if let Some(spur_path) = self.shortest_path(&graph, &removed_edges, *spur_node, end)
+                if let Some(spur_path) = self.shortest_path(&graph, &removed_edges, *spur_node, len)
                 {
                     let mut total_path = root_path.to_vec();
                     total_path.extend(spur_path);
@@ -303,33 +231,33 @@ impl ChewingEngine {
 
     fn shortest_path(
         &self,
-        graph: &Graph,
-        removed_edges: &BTreeSet<(usize, usize)>,
+        graph: &[Vec<PossibleInterval>],
+        removed_edges: &[bool],
         source: usize,
-        sink: usize,
+        len: usize,
     ) -> Option<Vec<PossibleInterval>> {
-        let mut parent = vec![None; sink + 1];
+        let mut parent = vec![None; len + 1];
         let mut queue = VecDeque::new();
         queue.push_back(source);
         'bfs: while !queue.is_empty() {
             let node = queue.pop_front().unwrap();
-            if let Some(next_edges) = graph.get(&node) {
+            if let Some(next_edges) = graph.get(node) {
                 for edge in next_edges {
-                    if removed_edges.contains(&(edge.start, edge.end)) {
+                    if removed_edges[edge.start * len + edge.end - 1] {
                         continue;
                     }
                     if parent[edge.end].is_none() {
                         parent[edge.end] = Some(edge);
                         queue.push_back(edge.end);
                     }
-                    if edge.end == sink {
+                    if edge.end == len {
                         break 'bfs;
                     }
                 }
             }
         }
         let mut path = vec![];
-        let mut node = sink;
+        let mut node = len;
         while node != source {
             let interval = parent[node]?;
             node = interval.start;
@@ -583,8 +511,6 @@ impl Display for PossiblePath {
         Ok(())
     }
 }
-
-type Graph = BTreeMap<usize, Vec<PossibleInterval>>;
 
 #[cfg(test)]
 mod tests {
