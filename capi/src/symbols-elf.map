@@ -1,4 +1,4 @@
-{
+CHEWING_0.5 {
     global:
         chewing_aux_Check;
         chewing_aux_Length;
