@@ -237,6 +237,11 @@ set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
 target_compile_definitions(libchewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
+target_include_directories(libchewing
+    PUBLIC
+        $<BUILD_INTERFACE:${INC_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/chewing>
+)
 if(NOT WITH_RUST)
     target_sources(common PRIVATE
         ${SRC_DIR}/porting_layer/include/plat_mmap.h
@@ -342,11 +347,35 @@ endif()
 install(FILES ${ALL_INC} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chewing)
 install(FILES ${PROJECT_BINARY_DIR}/chewing.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-install(TARGETS libchewing DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS libchewing
+    EXPORT libchewingTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(WITH_RUST)
     install(IMPORTED_RUNTIME_ARTIFACTS chewing-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
+# generate CMake Config files
+include(CMakePackageConfigHelpers)
+set(CONFIG_PACKAGE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Chewing")
+configure_package_config_file(ChewingConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfig.cmake"
+    INSTALL_DESTINATION ${CONFIG_PACKAGE_DIR})
+write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ChewingConfigVersion.cmake"
+    VERSION ${LIBCHEWING_VERSION}
+    COMPATIBILITY SameMajorVersion)
+export(EXPORT libchewingTargets
+    NAMESPACE Chewing::
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/ChewingTargets.cmake")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfig.cmake"
+              "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfigVersion.cmake"
+    DESTINATION ${CONFIG_PACKAGE_DIR})
+install(EXPORT libchewingTargets
+    FILE ChewingTargets.cmake
+    NAMESPACE Chewing::
+	DESTINATION ${CONFIG_PACKAGE_DIR})
 
 set(CPACK_PACKAGE_CHECKSUM SHA256)
 set(CPACK_PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
