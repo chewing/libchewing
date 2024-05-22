@@ -300,7 +300,7 @@ if(WITH_RUST)
     if(BUILD_SHARED_LIBS)
         if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
             target_link_options(libchewing
-                PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/src/symbols-elf.map
+                PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
                 PRIVATE LINKER:--gc-sections
                 PRIVATE LINKER:-u,chewing_new
                 PRIVATE LINKER:-u,ueStrLen
@@ -309,12 +309,12 @@ if(WITH_RUST)
             )
         elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
             target_link_options(libchewing
-                PRIVATE LINKER:-exported_symbols_list,${PROJECT_SOURCE_DIR}/src/symbols-mach_o.map
+                PRIVATE LINKER:-exported_symbols_list,${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
                 PRIVATE LINKER:-dead_strip
             )
         elseif(MSVC)
             target_link_options(libchewing
-                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/src/symbols-msvc.def)
+                PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def)
             set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
         endif()
     endif()
