@@ -246,6 +246,9 @@ impl Editor {
         self.shared.options
     }
     pub fn set_editor_options(&mut self, options: EditorOptions) {
+        if self.shared.options.language_mode != options.language_mode {
+            self.shared.syl.clear();
+        }
         self.shared.options = options;
     }
     pub fn switch_character_form(&mut self) {
