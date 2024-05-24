@@ -2,7 +2,7 @@
  * plat_mmap_windows.c
  *
  * Copyright (c) 2005, 2006, 2010, 2012-2014
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.

@@ -6,7 +6,7 @@
  *      All rights reserved.
  *
  * Copyright (c) 2004, 2005, 2006, 2010
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.

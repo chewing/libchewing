@@ -2,7 +2,7 @@
  * plat_path.h
  *
  * Copyright (c) 2012
- *	libchewing Core Team. See ChangeLog for details.
+ *	libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
