@@ -87,14 +87,17 @@ option(USE_VALGRIND "Use valgrind when testing" true)
 
 option(WITH_RUST "Use rust implemented internals" true)
 if(WITH_RUST)
-    include(FetchContent)
-    FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-        GIT_TAG be76480232216a64f65e3b1d9794d68cbac6c690 # v0.4.5
-        FIND_PACKAGE_ARGS
-    )
-    FetchContent_MakeAvailable(Corrosion)
+    find_package(Corrosion QUIET)
+    if(NOT Corrosion_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            Corrosion
+            GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+            GIT_TAG be76480232216a64f65e3b1d9794d68cbac6c690 # v0.4.5
+            FIND_PACKAGE_ARGS
+        )
+        FetchContent_MakeAvailable(Corrosion)
+    endif()
 
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
     corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
