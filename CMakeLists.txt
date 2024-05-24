@@ -7,7 +7,7 @@ set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-enable_testing()
+include(CTest)
 set(CTEST_PARALLEL_LEVEL 1)
 
 if(UNIX)
@@ -214,8 +214,10 @@ if(WITH_RUST)
 endif()
 
 add_subdirectory(doc)
-add_subdirectory(tests)
 add_subdirectory(data)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 # library
 add_library(common OBJECT
