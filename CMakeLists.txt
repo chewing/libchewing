@@ -7,6 +7,12 @@ set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+option(BUILD_TESTS "Build and run tests." ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+endif()
+
 enable_testing()
 set(CTEST_PARALLEL_LEVEL 1)
 
