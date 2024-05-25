@@ -1,3 +1,16 @@
+What's New in libchewing 0.8.3 (May 25, 2024)
+---------------------------------------------------------
+
+* Changed
+  - Simplified build options on the Windows platform.
+  - Enabled CTest BUILD_TESTING option to disable tests.
+  - Default uses system Corrosion if available.
+
+* Bug fixed
+  - Fix more wrong Hsu (許氏) keyboard fuzz conversion (ㄍㄧ to ㄐㄧ and ㄍㄩ to
+    ㄐㄩ) (introduced in v0.8.0)
+
+
 What's New in libchewing 0.8.2 (May 21, 2024)
 ---------------------------------------------------------
 
