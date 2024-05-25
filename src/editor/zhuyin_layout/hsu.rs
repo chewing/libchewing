@@ -140,7 +140,13 @@ impl SyllableEditor for Hsu {
                 KeyCode::B => Bopomofo::B,
                 KeyCode::C => Bopomofo::SH,
                 KeyCode::D => Bopomofo::D,
-                KeyCode::E => Bopomofo::I,
+                KeyCode::E => {
+                    if self.syllable.has_medial() {
+                        Bopomofo::EH
+                    } else {
+                        Bopomofo::I
+                    }
+                }
                 KeyCode::F => Bopomofo::F,
                 KeyCode::G => {
                     if self.has_initial_or_medial() {
@@ -203,8 +209,9 @@ impl SyllableEditor for Hsu {
 
             // fuzzy ㄍㄧ to ㄐㄧ and ㄍㄩ to ㄐㄩ
             match (self.syllable.initial(), self.syllable.medial()) {
-                (Some(Bopomofo::G), Some(Bopomofo::I)) | (Some(Bopomofo::J), Some(Bopomofo::I)) => {
-                    self.syllable.update(Bopomofo::IU);
+                (Some(Bopomofo::G), Some(Bopomofo::I))
+                | (Some(Bopomofo::G), Some(Bopomofo::IU)) => {
+                    self.syllable.update(Bopomofo::J);
                 }
                 _ => (),
             }
@@ -244,6 +251,7 @@ impl SyllableEditor for Hsu {
             }
 
             self.syllable.update(bopomofo);
+
             KeyBehavior::Absorb
         }
     }
