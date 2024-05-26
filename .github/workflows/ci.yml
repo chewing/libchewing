@@ -24,8 +24,6 @@ jobs:
         preset:
           - rust-release
           - rust-with-sqlite-release
-          - c99-release
-          - c99-with-uhash-release
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}, preset=${{ matrix.preset }}
 
@@ -79,8 +77,6 @@ jobs:
         preset:
           - rust-coverage
           - rust-with-sqlite-coverage
-          - c99-coverage
-          - c99-with-uhash-coverage
     runs-on: ubuntu-latest
     container: fedora:latest
     name: Coverage preset=${{ matrix.preset }}

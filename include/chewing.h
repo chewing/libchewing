@@ -44,13 +44,12 @@ extern "C" {
  * specific functionality.
  */
 
-#ifdef WITH_RUST
-#   include "chewing_rs.h"
-#else
-#   include "global.h"
-#endif
-#include "chewingio.h"
-#include "mod_aux.h"
+#define KEYSTROKE_IGNORE 1
+#define KEYSTROKE_COMMIT 2
+#define KEYSTROKE_BELL 4
+#define KEYSTROKE_ABSORB 8
+
+#include "chewing_rs.h"
 
 /* backward compatibility */
 #include "chewing-compat.h"

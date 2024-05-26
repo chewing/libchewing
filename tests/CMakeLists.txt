@@ -14,14 +14,7 @@ set(ALL_TESTCASES
     test-struct-size
     test-symbol
     test-userphrase
-    test-utf8
 )
-if(NOT WITH_RUST)
-    list(APPEND ALL_TESTCASES
-        test-key2pho
-        test-mmap
-    )
-endif()
 set(ALL_TESTTOOLS
     performance
     randkeystroke
@@ -57,9 +50,7 @@ endif()
 foreach(target ${ALL_TESTS})
     add_executable(${target} ${TEST_SRC_DIR}/${target}.c)
     target_link_libraries(${target} testhelper)
-    if(WITH_RUST)
-        target_link_libraries(${target} chewing_testhelper)
-    endif(WITH_RUST)
+    target_link_libraries(${target} chewing_testhelper)
     target_link_libraries(${target} libchewing)
     target_compile_definitions(${target} PRIVATE
         CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
@@ -103,7 +94,5 @@ foreach(target ${ALL_STATIC_TEST})
     add_dependencies(check ${target})
 endforeach()
 
-if(WITH_RUST)
 add_test(NAME cargo-test-lib COMMAND cargo test --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
 add_test(NAME cargo-test-capi COMMAND cargo test -p chewing_capi --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
-endif()

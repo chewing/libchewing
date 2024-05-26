@@ -8,7 +8,6 @@
 /* Platform-dependent declaration */
 #include "plat_types.h"
 
-#ifdef WITH_RUST
 #define LOG_VERBOSE(fmt, ...) \
     do { \
     } while (0)
@@ -41,63 +40,6 @@
 #define LOG_API(fmt, ...) \
     do { \
     } while (0)
-
-#else
-
-#define LOG_VERBOSE(fmt, ...) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, \
-                       "[%s:%d %s] " fmt "\n", \
-                       __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
-    } while (0)
-
-#define LOG_DEBUG(fmt, ...) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_DEBUG, \
-                       "[%s:%d %s] " fmt "\n", \
-                       __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
-    } while (0)
-
-#define LOG_INFO(fmt, ...) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_INFO, \
-                       "[%s:%d %s] " fmt "\n", \
-                       __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
-    } while (0)
-
-#define LOG_WARN(fmt, ...) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_WARN, \
-                       "[%s:%d %s] " fmt "\n", \
-                       __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
-    } while (0)
-
-#define LOG_ERROR(fmt, ...) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_ERROR, \
-                       "[%s:%d %s] " fmt "\n", \
-                       __FILE__, __LINE__, __func__, ##__VA_ARGS__); \
-    } while (0)
-
-#define DEBUG_OUT( fmt, ... ) \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_INFO, fmt, \
-        ##__VA_ARGS__ ); \
-    } while (0)
-
-#define DEBUG_CHECKPOINT() \
-    do { \
-        pgdata->logger(pgdata->loggerData, CHEWING_LOG_VERBOSE, \
-                       "[ File: %s  Func: %s  Line: %d ]\n", \
-                       __FILE__, __FUNCTION__, __LINE__ ); \
-    } while (0)
-
-/* Use LOG_API to log all public API call. */
-#define LOG_API(fmt, ...) \
-    do { \
-        LOG_INFO("API call: " fmt, ##__VA_ARGS__); \
-    } while (0)
-#endif
 
 #define ALC(type, size) \
     (type *) calloc(size, sizeof(type))

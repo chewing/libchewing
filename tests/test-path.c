@@ -17,7 +17,6 @@
 #include <string.h>
 
 #include "testhelper.h"
-#include "global-private.h"
 #include "plat_path.h"
 #include "plat_types.h"
 
@@ -27,25 +26,14 @@ FILE *fd;
 
 int find_path_by_files(const char *search_path, const char *const *files, char *output, size_t output_len);
 
-#ifdef WITH_RUST
 static const char *FILES[] = {
     "tsi.dat",
     "word.dat",
-    SYMBOL_TABLE_FILE,
-    SOFTKBD_TABLE_FILE,
-    PINYIN_TAB_NAME,
+    "symbols.dat",
+    "swkb.dat",
+    "pinyin.tab",
     NULL,
 };
-#else
-static const char *FILES[] = {
-    DICT_FILE,
-    PHONE_TREE_FILE,
-    SYMBOL_TABLE_FILE,
-    SOFTKBD_TABLE_FILE,
-    PINYIN_TAB_NAME,
-    NULL,
-};
-#endif
 
 void test_plat_get_search_path()
 {

@@ -102,6 +102,8 @@ pub enum KB {
     ThlPinyin,
     Mps2Pinyin,
     Carpalx,
+    ColemakDhAnsi,
+    ColemakDhOrth,
 }
 
 /// Opaque context handle used for chewing APIs.

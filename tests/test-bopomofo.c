@@ -17,12 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef WITH_RUST
 #include "chewing_rs.h"
-#else
-#include "key2pho-private.h"
-#include "bopomofo-private.h"
-#endif
 
 #include "plat_types.h"
 #include "testhelper.h"
