@@ -100,9 +100,12 @@ void test_set_candPerPage()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (i = 0; i < ARRAY_SIZE(VALUE); ++i) {
         chewing_set_candPerPage(ctx, VALUE[i]);
         ok(chewing_get_candPerPage(ctx) == VALUE[i], "candPerPage shall be `%d'", VALUE[i]);
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
 
         for (j = 0; j < ARRAY_SIZE(INVALID_VALUE); ++j) {
             // mode shall not change when set mode has invalid value.
@@ -245,6 +248,8 @@ void test_set_addPhraseDirection()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_addPhraseDirection(ctx, value);
         mode = chewing_get_addPhraseDirection(ctx);
@@ -257,6 +262,8 @@ void test_set_addPhraseDirection()
         chewing_set_addPhraseDirection(ctx, 2);
         mode = chewing_get_addPhraseDirection(ctx);
         ok(mode == value, "addPhraseDirection `%d' shall be `%d'", mode, value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -271,6 +278,8 @@ void test_set_spaceAsSelection()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_spaceAsSelection(ctx, value);
         mode = chewing_get_spaceAsSelection(ctx);
@@ -283,6 +292,8 @@ void test_set_spaceAsSelection()
         chewing_set_spaceAsSelection(ctx, 2);
         mode = chewing_get_spaceAsSelection(ctx);
         ok(mode == value, "spaceAsSelection `%d' shall be `%d'", mode, value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -297,6 +308,8 @@ void test_set_escCleanAllBuf()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_escCleanAllBuf(ctx, value);
         mode = chewing_get_escCleanAllBuf(ctx);
@@ -309,6 +322,8 @@ void test_set_escCleanAllBuf()
         chewing_set_escCleanAllBuf(ctx, 2);
         mode = chewing_get_escCleanAllBuf(ctx);
         ok(mode == value, "escCleanAllBuf shall be `%d'", value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -323,6 +338,8 @@ void test_set_autoShiftCur()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_autoShiftCur(ctx, value);
         mode = chewing_get_autoShiftCur(ctx);
@@ -335,6 +352,8 @@ void test_set_autoShiftCur()
         chewing_set_autoShiftCur(ctx, 2);
         mode = chewing_get_autoShiftCur(ctx);
         ok(mode == value, "autoShiftCur shall be `%d'", value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -349,6 +368,8 @@ void test_set_easySymbolInput()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_easySymbolInput(ctx, value);
         mode = chewing_get_easySymbolInput(ctx);
@@ -361,6 +382,8 @@ void test_set_easySymbolInput()
         chewing_set_easySymbolInput(ctx, 2);
         mode = chewing_get_easySymbolInput(ctx);
         ok(mode == value, "easySymbolInput `%d', shall be `%d'", mode, value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -375,6 +398,8 @@ void test_set_phraseChoiceRearward()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (value = 0; value < 2; ++value) {
         chewing_set_phraseChoiceRearward(ctx, value);
         mode = chewing_get_phraseChoiceRearward(ctx);
@@ -387,6 +412,8 @@ void test_set_phraseChoiceRearward()
         chewing_set_phraseChoiceRearward(ctx, 2);
         mode = chewing_get_phraseChoiceRearward(ctx);
         ok(mode == value, "phraseChoiceRearward `%d' shall be `%d'", mode, value);
+
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
     }
 
     chewing_delete(ctx);
@@ -411,9 +438,12 @@ void test_set_ChiEngMode()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (i = 0; i < ARRAY_SIZE(VALUE); ++i) {
         chewing_set_ChiEngMode(ctx, VALUE[i]);
         ok(chewing_get_ChiEngMode(ctx) == VALUE[i], "ChiEngMode shall be `%d'", VALUE[i]);
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
 
         for (j = 0; j < ARRAY_SIZE(INVALID_VALUE); ++j) {
             // mode shall not change when set mode has invalid value.
@@ -444,9 +474,12 @@ void test_set_ShapeMode()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (i = 0; i < ARRAY_SIZE(VALUE); ++i) {
         chewing_set_ShapeMode(ctx, VALUE[i]);
         ok(chewing_get_ShapeMode(ctx) == VALUE[i], "ShapeMode shall be `%d'", VALUE[i]);
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
 
         for (j = 0; j < ARRAY_SIZE(INVALID_VALUE); ++j) {
             // mode shall not change when set mode has invalid value.
@@ -477,9 +510,12 @@ void test_set_autoLearn()
     ctx = chewing_new();
     start_testcase(ctx, fd);
 
+    chewing_set_maxChiSymbolLen(ctx, 10);
+
     for (i = 0; i < ARRAY_SIZE(VALUE); ++i) {
         chewing_set_autoLearn(ctx, VALUE[i]);
         ok(chewing_get_autoLearn(ctx) == VALUE[i], "AutoLearn shall be `%d'", VALUE[i]);
+        ok(chewing_get_maxChiSymbolLen(ctx) == 10, "maxChiSymbolLen shall be 10");
 
         for (j = 0; j < ARRAY_SIZE(INVALID_VALUE); ++j) {
             // mode shall not change when set mode has invalid value.

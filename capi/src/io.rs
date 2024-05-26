@@ -662,7 +662,7 @@ pub unsafe extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingConte
 
     ctx.editor.set_editor_options(EditorOptions {
         phrase_choice_rearward: mode != 0,
-        ..Default::default()
+        ..ctx.editor.editor_options()
     });
 }
 
@@ -689,7 +689,7 @@ pub unsafe extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c
 
     ctx.editor.set_editor_options(EditorOptions {
         disable_auto_learn_phrase: mode != 0,
-        ..Default::default()
+        ..ctx.editor.editor_options()
     });
 }
 

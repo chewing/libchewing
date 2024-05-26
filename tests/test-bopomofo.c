@@ -1107,6 +1107,21 @@ void test_ShiftSpace()
     type_keystroke_by_string(ctx, "a");
     ok_commit_buffer(ctx, "\xEF\xBD\x81"); /* Fullshape a */
 
+    chewing_set_ChiEngMode(ctx, CHINESE_MODE);
+    type_keystroke_by_string(ctx, "<SS>");
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, " ");
+    ok_commit_buffer(ctx, " ");
+
+    type_keystroke_by_string(ctx, "hk4 <E>");
+    ok_commit_buffer(ctx, "冊 ");
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "a ");
+    ok_commit_buffer(ctx, " ");
+
     chewing_delete(ctx);
 }
 
