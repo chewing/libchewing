@@ -113,10 +113,12 @@ set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
 if(WITH_SQLITE3)
-    find_package(SQLite3)
+    find_package(SQLite3 QUIET)
     if(SQLite3_FOUND)
+        message(STATUS "Found SQLite3 version ${SQLite3_VERSION}")
         include_directories(SQLite3_INCLUDE_DIRS)
     else()
+        message(STATUS "Fetching SQLite3 source from internet")
         FetchContent_Declare(
             SQLite3
             URL https://www.sqlite.org/2024/sqlite-amalgamation-3460000.zip
