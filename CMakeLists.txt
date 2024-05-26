@@ -174,7 +174,7 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-add_library(libchewing ${ALL_INC} src/chewing.c)
+add_library(libchewing ${ALL_INC} capi/src/chewing.c)
 set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
 target_compile_definitions(libchewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
