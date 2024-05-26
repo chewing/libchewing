@@ -22,8 +22,6 @@
 static const int MIN_CAND_PER_PAGE = 1;
 static const int MAX_CAND_PER_PAGE = 10;
 static const int DEFAULT_CAND_PER_PAGE = 10;
-static const int MIN_CHI_SYMBOL_LEN = 0;
-static const int MAX_CHI_SYMBOL_LEN = 39;
 
 static const int DEFAULT_SELECT_KEY[] = {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'

@@ -15,7 +15,7 @@
 #include "chewing.h"
 
 /* Only used by calculating char position */
-#include "internal/chewing-utf8-util.h"
+#include "chewing-utf8-util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
