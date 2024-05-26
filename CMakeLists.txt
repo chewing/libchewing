@@ -196,9 +196,6 @@ if(BUILD_SHARED_LIBS)
             PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
             PRIVATE LINKER:--gc-sections
             PRIVATE LINKER:-u,chewing_new
-            PRIVATE LINKER:-u,ueStrLen
-            PRIVATE LINKER:-u,UintFromPhone
-            PRIVATE LINKER:-u,find_path_by_files
         )
     elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
         target_link_options(libchewing
