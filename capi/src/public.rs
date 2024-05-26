@@ -51,6 +51,11 @@ pub const HSU_SELKEY_TYPE1: usize = 1;
 #[deprecated]
 pub const HSU_SELKEY_TYPE2: usize = 2;
 
+pub const KEYSTROKE_IGNORE: usize = 1;
+pub const KEYSTROKE_COMMIT: usize = 2;
+pub const KEYSTROKE_BELL: usize = 4;
+pub const KEYSTROKE_ABSORB: usize = 8;
+
 /// Configuration for chewing runtime features.
 ///
 /// Deprecated, use chewing_set_ series of functions to set parameters instead.

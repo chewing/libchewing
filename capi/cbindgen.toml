@@ -7,7 +7,7 @@ language = "C"
 
 header = """
 /*
- * Copyright (c) 2023
+ * Copyright (c) 2024
  *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -23,51 +23,11 @@ after_includes = """
  */
 typedef struct ChewingContext ChewingContext;
 
-/* specified to Chewing API */
-#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
-#    define CHEWING_DLL_IMPORT __declspec(dllimport)
-#    define CHEWING_DLL_EXPORT __declspec(dllexport)
-#    ifdef CHEWINGDLL_EXPORTS
-#        define CHEWING_API CHEWING_DLL_EXPORT
-#        define CHEWING_PRIVATE
-#    elif CHEWINGDLL_IMPORTS
-#        define CHEWING_API CHEWING_DLL_IMPORT
-#        define CHEWING_PRIVATE
-#    else
-#        define CHEWING_API
-#        define CHEWING_PRIVATE
-#    endif
-#elif (__GNUC__ > 3) && (defined(__ELF__) || defined(__PIC__))
-#    define CHEWING_API __attribute__((__visibility__("default")))
-#    define CHEWING_PRIVATE __attribute__((__visibility__("hidden")))
-#else
-#    define CHEWING_API
-#    define CHEWING_PRIVATE
-#endif
+/** @brief indicate the internal encoding of data processing.
+ *  @since 0.3.0
+ */
+#define LIBCHEWING_ENCODING "UTF-8"
 
-#ifndef UNUSED
-#    if defined(__GNUC__)       /* gcc specific */
-#        define UNUSED __attribute__((unused))
-#    else
-#        define UNUSED
-#    endif
-#endif
-
-#ifndef DEPRECATED
-#    if defined(__GNUC__) && __GNUC__ > 3 || \
-        (__GNUC__ == 3 && __GNUC_MINOR__ >= 1) /* gcc specific */
-#        define DEPRECATED __attribute__((deprecated))
-#        if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
-#            define DEPRECATED_FOR(f) \
-                 __attribute__((deprecated("Use " #f " instead")))
-#        else
-#            define DEPRECATED_FOR(f) DEPRECATED
-#        endif
-#    else
-#        define DEPRECATED
-#        define DEPRECATED_FOR(f)
-#    endif
-#endif
 """
 
 [parse]

@@ -161,34 +161,18 @@ configure_file(
 include_directories(
     ${PROJECT_BINARY_DIR}/include
     ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/include/internal
-    ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/porting_layer/include
 )
 
 set(ALL_INC
     ${INC_DIR}/chewing.h
-    ${INC_DIR}/chewing-compat.h
-    ${INC_DIR}/global.h
 )
-
-list(APPEND ALL_INC ${INC_DIR}/chewing_rs.h)
 
 add_subdirectory(doc)
 add_subdirectory(data)
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
-
-# library
-add_library(common OBJECT
-    src/porting_layer/src/asprintf.h
-
-    src/porting_layer/src/asprintf.c
-)
-target_compile_definitions(common PRIVATE
-    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
-)
 
 add_library(libchewing ${ALL_INC} src/chewing.c)
 set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)

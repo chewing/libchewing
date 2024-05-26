@@ -206,7 +206,7 @@ int get_char_by_string(void *param)
     return ch;
 }
 
-int get_char_from_stdin(void *param UNUSED)
+int get_char_from_stdin(void *_param)
 {
     int ch = getchar();
 
@@ -395,7 +395,7 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
     }
 }
 
-void logger(void *data, int level UNUSED, const char *fmt, ...)
+void logger(void *data, int _level, const char *fmt, ...)
 {
     va_list ap;
     FILE *fd = (FILE *) data;

@@ -20,7 +20,7 @@
 
 #include "chewing.h"
 #include "testhelper.h"
-#include "internal/chewing-utf8-util.h"
+#include "chewing-utf8-util.h"
 
 #define FN_MATERIALS "materials.txt"
 

@@ -7,7 +7,6 @@ set(ALL_TESTCASES
     test-keyboard
     test-keyboardless
     test-logger
-    test-path
     test-regression
     test-reset
     test-special-symbol
@@ -64,7 +63,14 @@ endforeach()
 
 add_library(testhelper STATIC
     ${TEST_SRC_DIR}/testhelper.c
-    $<TARGET_OBJECTS:common>
+    ${TEST_SRC_DIR}/porting_layer/src/asprintf.c
+    ${TEST_SRC_DIR}/porting_layer/src/asprintf.h
+    ${TEST_SRC_DIR}/porting_layer/include/plat_types.h
+    ${TEST_SRC_DIR}/porting_layer/include/sys/plat_posix.h
+    ${TEST_SRC_DIR}/porting_layer/include/sys/plat_windows.h
+)
+target_include_directories(testhelper PUBLIC
+        ${TEST_SRC_DIR}/porting_layer/include
 )
 target_compile_definitions(testhelper PRIVATE
     CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"
