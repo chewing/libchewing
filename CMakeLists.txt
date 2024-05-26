@@ -20,6 +20,7 @@ if(MSVC)
 endif()
 
 include(CheckCCompilerFlag)
+include(FetchContent)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
@@ -40,22 +41,12 @@ add_compile_definitions(HAVE_CONFIG_H=1)
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
-option(WITH_INTERNAL_SQLITE3 "Use internal sqlite3" false)
-
-if(MSVC)
-    set(WITH_INTERNAL_SQLITE3 true)
-endif()
-
-if(CMAKE_SYSTEM_NAME MATCHES "Android")
-    set(WITH_INTERNAL_SQLITE3 true)
-endif()
 
 # Use valgrind when testing
 option(USE_VALGRIND "Use valgrind when testing" true)
 
 find_package(Corrosion QUIET)
 if(NOT Corrosion_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         Corrosion
         GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
@@ -87,33 +78,39 @@ set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
 if(WITH_SQLITE3)
-    if(WITH_INTERNAL_SQLITE3)
-        set(SQLITE3_SRC_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlite-amalgamation)
-        include_directories(
-            ${SQLITE3_SRC_DIR}
+    find_package(SQLite3 QUIET)
+    if(SQLite3_FOUND)
+        message(STATUS "Found SQLite3 version ${SQLite3_VERSION}")
+        include_directories(SQLite3_INCLUDE_DIRS)
+    else()
+        message(STATUS "Fetching SQLite3 source from internet")
+        FetchContent_Declare(
+            SQLite3
+            URL https://www.sqlite.org/2024/sqlite-amalgamation-3460000.zip
+            URL_HASH SHA3_256=1221eed70de626871912bfca144c00411f0c30d3c2b7935cff3963b63370ef7c
         )
-        find_package (Threads)
+        FetchContent_MakeAvailable(SQLite3)
+
+        include_directories(${sqlite3_SOURCE_DIR})
         add_library(sqlite3_library STATIC
-            ${SQLITE3_SRC_DIR}/sqlite3.c
-            ${SQLITE3_SRC_DIR}/sqlite3.h
+            ${sqlite3_SOURCE_DIR}/sqlite3.c
+            ${sqlite3_SOURCE_DIR}/sqlite3.h
         )
-        target_link_libraries(sqlite3_library ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+        find_package(Threads)
+        target_link_libraries(sqlite3_library PUBLIC ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+        set(SQLite3_LIBRARIES sqlite3_library)
 
         add_executable(sqlite3
-            ${SQLITE3_SRC_DIR}/shell.c
+            ${sqlite3_SOURCE_DIR}/shell.c
         )
-        target_link_libraries(sqlite3 sqlite3_library)
+        target_link_libraries(sqlite3 PRIVATE ${SQLite3_LIBRARIES})
         set_target_properties(sqlite3 PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${SQLITE3_SRC_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${SQLITE3_SRC_DIR}
+            RUNTIME_OUTPUT_DIRECTORY ${sqlite3_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${sqlite3_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${sqlite3_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${sqlite3_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${sqlite3_BINARY_DIR}
         )
-        set(SQLite3_LIBRARIES sqlite3_library)
-    else()
-        find_package(SQLite3 REQUIRED)
-        include_directories(SQLite3_INCLUDE_DIRS)
     endif()
 endif()
 
