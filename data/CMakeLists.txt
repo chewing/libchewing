@@ -7,9 +7,9 @@ add_custom_target(data ALL DEPENDS ${ALL_DATA})
 
 # We need to copy static data to binary tree when using out of tree build.
 set(ALL_STATIC_DATA
-    ${DATA_BIN_DIR}/pinyin.tab
-    ${DATA_BIN_DIR}/swkb.dat
-    ${DATA_BIN_DIR}/symbols.dat
+    ${DATA_SRC_DIR}/pinyin.tab
+    ${DATA_SRC_DIR}/swkb.dat
+    ${DATA_SRC_DIR}/symbols.dat
 )
 
 add_custom_target(all_static_data
