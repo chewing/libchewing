@@ -3,7 +3,7 @@ name = "chewing_capi"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
 version = "0.8.3"
-rust-version = "1.70"
+rust-version = "1.78"
 edition = "2021"
 
 [lib]

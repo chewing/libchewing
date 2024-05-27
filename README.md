@@ -100,7 +100,7 @@ be built.
    - cmake >= 3.21.0
 + Toolchain / IDE:
    - clang >= 3.2 OR gcc >= 4.6.3
-   - Rust >= 1.70
+   - Rust >= 1.78
    - Build Tools for Visual Studio 2022 for MSVC build
 + Documentation tools:
    - texinfo >= 4.8
