@@ -292,19 +292,19 @@ pub unsafe extern "C" fn chewing_config_has_option(
     let name = cstr.to_string_lossy();
 
     let ret = match name.as_ref() {
-        "chewing.add_phrase_direction"
-        | "chewing.auto_learn"
+        "chewing.user_phrase_add_direction"
+        | "chewing.disable_auto_learn_phrase"
         | "chewing.auto_shift_cursor"
         | "chewing.candidates_per_page"
-        | "chewing.chi_eng_mode"
+        | "chewing.language_mode"
         | "chewing.easy_symbol_input"
-        | "chewing.esc_clean_all_buffer"
+        | "chewing.esc_clear_all_buffer"
         | "chewing.keyboard_type"
-        | "chewing.max_preedit_buffer_len"
+        | "chewing.auto_commit_threshold"
         | "chewing.phrase_choice_rearward"
         | "chewing.selection_keys"
-        | "chewing.shape_mode"
-        | "chewing.space_as_selection" => true,
+        | "chewing.character_form"
+        | "chewing.space_is_select_key" => true,
         _ => false,
     };
 
@@ -326,7 +326,7 @@ pub unsafe extern "C" fn chewing_config_get_int(
     let option = &ctx.editor.editor_options();
 
     match name.as_ref() {
-        "chewing.user_phrase_add_dir" => match option.user_phrase_add_dir {
+        "chewing.user_phrase_add_direction" => match option.user_phrase_add_dir {
             UserPhraseAddDirection::Forward => 0,
             UserPhraseAddDirection::Backward => 1,
         },
@@ -379,7 +379,7 @@ pub unsafe extern "C" fn chewing_config_set_int(
     }
 
     match name.as_ref() {
-        "chewing.user_phrase_add_dir" => match value {
+        "chewing.user_phrase_add_direction" => match value {
             0 => options.user_phrase_add_dir = UserPhraseAddDirection::Forward,
             1 => options.user_phrase_add_dir = UserPhraseAddDirection::Backward,
             _ => return ERROR,
@@ -735,7 +735,7 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
     unsafe {
         chewing_config_set_int(
             ctx,
-            b"chewing.user_phrase_add_dir\0".as_ptr().cast(),
+            b"chewing.user_phrase_add_direction\0".as_ptr().cast(),
             direction,
         )
     };
@@ -746,7 +746,7 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.user_phrase_add_dir\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, b"chewing.user_phrase_add_direction\0".as_ptr().cast()) }
 }
 
 /// # Safety
