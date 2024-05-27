@@ -45,10 +45,18 @@ jobs:
           rustup update
 
       - name: Build
+        shell: bash
         run: |
-          cmake --preset ${{ matrix.preset }}
-          cmake --build build
-          cmake --install build --prefix install
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+            cmake --preset ${{ matrix.preset }}
+            cmake -S . -B build -DBUILD_TESTING=OFF
+            cmake --build build
+            sudo cmake --install build
+          else
+            cmake --preset ${{ matrix.preset }}
+            cmake --build build
+            cmake --install build --prefix install
+          fi
 
       - name: Test
         run: |
