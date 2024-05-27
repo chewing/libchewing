@@ -39,7 +39,6 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_INFO": true,
-                "WITH_RUST": true,
                 "WITH_SQLITE3": false
             },
             "inherits": [
@@ -75,7 +74,6 @@
             ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "WITH_RUST": true,
                 "WITH_SQLITE3": true
             }
         },
@@ -96,73 +94,6 @@
             "description": "Build libchewing with rust and sqlite3 user dictionary format",
             "inherits": [
                 "rust-with-sqlite",
-                "coverage-base"
-            ]
-        },
-        {
-            "name": "c99",
-            "displayName": "C99 (Debug)",
-            "description": "Build libchewing with only C dependencies",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "BUILD_INFO": true,
-                "WITH_RUST": false,
-                "WITH_SQLITE3": true
-            },
-            "inherits": [
-                "build-base"
-            ]
-        },
-        {
-            "name": "c99-release",
-            "displayName": "C99 (Release)",
-            "description": "Build libchewing with only C dependencies",
-            "inherits": [
-                "c99"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "c99-coverage",
-            "displayName": "C99 (Debug Coverage)",
-            "description": "Build libchewing with only C dependencies",
-            "inherits": [
-                "c99",
-                "coverage-base"
-            ]
-        },
-        {
-            "name": "c99-with-uhash",
-            "displayName": "C99 with uhash (Debug)",
-            "description": "Build libchewing with C and uhash user dictionary format",
-            "inherits": [
-                "c99"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "WITH_RUST": false,
-                "WITH_SQLITE3": false
-            }
-        },
-        {
-            "name": "c99-with-uhash-release",
-            "displayName": "C99 with uhash (Release)",
-            "description": "Build libchewing with C and uhash dictionary format",
-            "inherits": [
-                "c99-with-uhash"
-            ],
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "c99-with-uhash-coverage",
-            "displayName": "C99 with uhash (Debug Coverage)",
-            "description": "Build libchewing with C and uhash dictionary format",
-            "inherits": [
-                "c99-with-uhash",
                 "coverage-base"
             ]
         }

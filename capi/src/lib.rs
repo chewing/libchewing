@@ -10,6 +10,24 @@
 //!
 //! Functions are organized into several modules according to the services
 //! provided by them.
+//!
+//! # Overview
+//!
+//! As far as we expect, input method (in fact, the way for text input and
+//! output, especially in multi-lingual environments) implementations are
+//! becoming more and more complex in system integrations.  The emerging
+//! standard for practical and flexible development cycles is required, so that
+//! we are facing the impacts from various Chinese input method implementations
+//! and the integration into existing framework or system designs.  At the
+//! result, Chewing Input Method (abbreviated as "Chewing") attempts to be one
+//! of the approaches to solve and ease the problems with the inclusion of base
+//! classes, on the basis of cross-platform, and cross-operating-environment
+//! derivative classes, which are built as the abstract backbone of intelligent
+//! Chinese phonetic input method implementations.  From the perspectives,
+//! Chewing defines the abstract behavior how an intelligent phonetic IM should
+//! works via the common interface, and Chewing permits the extra parameters and
+//! properties for the input method implementations to extend their specific
+//! functionality.
 
 mod io;
 mod logger;
@@ -237,6 +255,14 @@ pub mod input {
     /// The value of key should be in the range between ASCII character code
     /// from 0 to 9.
     pub use super::io::chewing_handle_Numlock;
+
+    pub use super::public::KEYSTROKE_IGNORE;
+
+    pub use super::public::KEYSTROKE_COMMIT;
+
+    pub use super::public::KEYSTROKE_BELL;
+
+    pub use super::public::KEYSTROKE_ABSORB;
 }
 
 /// Keyboard layout and variants setting.

@@ -1,7 +1,7 @@
 /**
  * testhelper.h
  * * Copyright (c) 2012
- *	libchewing Core Team. See ChangeLog for details.
+ *	libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -14,14 +14,11 @@
 #include <stdio.h>
 
 #include "chewing.h"
-#include "chewingio.h"
 
-#ifdef WITH_RUST
-#   define DB_NAME  "chewing.dat"
-#else
-#include "chewing-utf8-util.h"
-#include "plat_path.h"
-#endif
+int ueStrLen(const char *str);
+uint16_t UintFromPhone(const char *phone);
+
+#define DB_NAME  "chewing.dat"
 
 /* The following macros are modified from GLIB.
  * from GNU cpp Manual:

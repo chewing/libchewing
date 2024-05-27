@@ -2,7 +2,7 @@
  * test-struct-size.c
  *
  * Copyright (c) 2014
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.

@@ -2,7 +2,7 @@
  * simulate.c
  *
  * Copyright (c) 2008, 2010
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -20,7 +20,7 @@
 
 #include "chewing.h"
 #include "testhelper.h"
-#include "internal/chewing-utf8-util.h"
+#include "chewing-utf8-util.h"
 
 #define FN_MATERIALS "materials.txt"
 

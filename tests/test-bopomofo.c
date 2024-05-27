@@ -2,7 +2,7 @@
  * test-bopomofo.c
  *
  * Copyright (c) 2012
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -17,12 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef WITH_RUST
-#include "chewing_rs.h"
-#else
-#include "key2pho-private.h"
-#include "bopomofo-private.h"
-#endif
+#include "chewing.h"
 
 #include "plat_types.h"
 #include "testhelper.h"
@@ -1107,6 +1102,21 @@ void test_ShiftSpace()
     type_keystroke_by_string(ctx, "a");
     ok_commit_buffer(ctx, "\xEF\xBD\x81"); /* Fullshape a */
 
+    chewing_set_ChiEngMode(ctx, CHINESE_MODE);
+    type_keystroke_by_string(ctx, "<SS>");
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, " ");
+    ok_commit_buffer(ctx, " ");
+
+    type_keystroke_by_string(ctx, "hk4 <E>");
+    ok_commit_buffer(ctx, "冊 ");
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "a ");
+    ok_commit_buffer(ctx, " ");
+
     chewing_delete(ctx);
 }
 
@@ -1553,10 +1563,114 @@ void test_KB_HSU()
 
     type_keystroke_by_string(ctx, "g");
     ok_bopomofo_buffer(ctx, "ㄍ");
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "ㄍㄧ");
+    type_keystroke_by_string(ctx, "n");
+    ok_bopomofo_buffer(ctx, "ㄐㄧㄣ");
+    type_keystroke_by_string(ctx, " ");
+    ok_preedit_buffer(ctx, "今");  /* convert "ㄍㄧㄣ" to "ㄐㄧㄣ" */
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "g");
+    ok_bopomofo_buffer(ctx, "ㄍ");
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "ㄍㄧ");
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "ㄐㄧㄝ");
+    type_keystroke_by_string(ctx, "j");
+    ok_preedit_buffer(ctx, "界");  /* convert "ㄍㄧㄝ" to "ㄐㄧㄝ" */
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "g");
+    ok_bopomofo_buffer(ctx, "ㄍ");
     type_keystroke_by_string(ctx, "u");
     ok_bopomofo_buffer(ctx, "ㄍㄩ");
     type_keystroke_by_string(ctx, " ");
     ok_preedit_buffer(ctx, "居");  /* convert "ㄍㄩ" to "ㄐㄩ" */
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "g");
+    ok_bopomofo_buffer(ctx, "ㄍ");
+    type_keystroke_by_string(ctx, "u");
+    ok_bopomofo_buffer(ctx, "ㄍㄩ");
+    type_keystroke_by_string(ctx, "e");
+    ok_bopomofo_buffer(ctx, "ㄐㄩㄝ");
+    type_keystroke_by_string(ctx, "d");
+    ok_preedit_buffer(ctx, "決");  /* convert "ㄍㄩㄝ" to "ㄐㄩㄝ" */
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
+// Example from https://web.archive.org/web/20240525033152/http://bcc16.ncu.edu.tw/2/nature/DOC/hsu-key/gokey.html
+void test_KB_HSU_example()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_HSU);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "bnfjxl cen deljudmeldrjki jk ");
+    ok_preedit_buffer(ctx, "本中心訂於明日開張");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "xhfjxl cen <D>2vedxkjnefnldhwfhwfdejuljgxl dxdcx ");
+    ok_preedit_buffer(ctx, "我衷心期望你能好好地用功讀書");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "xajlgsbewfmeldty dgsjxl cen <D>3");
+    ok_preedit_buffer(ctx, "為了表明他的忠心");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "jenj<D>3zjjefdgslejlekj");
+    ok_preedit_buffer(ctx, "盡自己的力量");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "jenjzjjefdgsfkdjem ");
+    ok_preedit_buffer(ctx, "進自己的房間");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "cekj<D>2tidbafjelffk zjcof");
+    ok_preedit_buffer(ctx, "向台北警方自首");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "cekj<D>4tidbafjelffk txldekjdgseofnldlej");
+    ok_preedit_buffer(ctx, "像台北警方同樣的有能力");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "jeofuejcdrjceyjxfljcd<D><D>4xfcdxffn ");
+    ok_preedit_buffer(ctx, "九月十日下午二時五十五分");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "e j j <D><D>3kgfijdgscewfhxy mw ");
+    ok_preedit_buffer(ctx, "一隻隻可愛的小花貓");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "sm sxajdwj<D><D>1xfsxajdgscewfhidxfdwj<D><D>1cd<D><D>1rnd");
+    ok_preedit_buffer(ctx, "三歲到五歲的小孩五到十人");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "jxl cewjdxl lxjxfdxmjleojcde cekj<D><D>1xfnxljcdve hwjjeoflod");
+    ok_preedit_buffer(ctx, "忠孝東路五段六十一巷五弄十七號九樓");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "tidxm dgsrndgxl hnfgxaj");
+    ok_preedit_buffer(ctx, "台灣的人工很貴");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ty <D>2pijlekfrndgxl <D><D>4xhfcfulj");
+    ok_preedit_buffer(ctx, "他派兩人供我使用");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "ceflgse ggshnfcx fxddgszwf<D>3");
+    ok_preedit_buffer(ctx, "洗了一個很舒服的澡");
+    chewing_clean_preedit_buf(ctx);
+
+    type_keystroke_by_string(ctx, "tidbafcjcj<D><D>2e ggsmaflejdgsvldcj");
+    ok_preedit_buffer(ctx, "台北市是一個美麗的城市");
     chewing_clean_preedit_buf(ctx);
 
     chewing_delete(ctx);
@@ -1994,6 +2108,7 @@ void test_KB_COLEMAK_DH_ORTH()
 void test_KB()
 {
     test_KB_HSU();
+    test_KB_HSU_example();
     test_KB_HSU_choice_append();
     test_KB_HSU_choice_append_select();
     test_KB_HSU_JVC();

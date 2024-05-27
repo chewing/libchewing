@@ -2,7 +2,7 @@
  * testhelper.c
  *
  * Copyright (c) 2012
- *      libchewing Core Team. See ChangeLog for details.
+ *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file.
@@ -16,17 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chewing-private.h"
-
-#ifdef WITH_RUST
 #include "plat_types.h"
-#else
-#include "chewing-utf8-util.h"
-#include "key2pho-private.h"
-#include "userphrase-private.h"
-#include "plat_path.h"
-#endif
 
+int ueStrLen(const char *str);
 
 static unsigned int test_run;
 static unsigned int test_ok;
@@ -214,7 +206,7 @@ int get_char_by_string(void *param)
     return ch;
 }
 
-int get_char_from_stdin(void *param UNUSED)
+int get_char_from_stdin(void *_param)
 {
     int ch = getchar();
 
@@ -403,7 +395,7 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
     }
 }
 
-void logger(void *data, int level UNUSED, const char *fmt, ...)
+void logger(void *data, int _level, const char *fmt, ...)
 {
     va_list ap;
     FILE *fd = (FILE *) data;
