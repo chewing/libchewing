@@ -194,15 +194,24 @@ if(BUILD_SHARED_LIBS)
             PRIVATE LINKER:--gc-sections
             PRIVATE LINKER:-u,chewing_new
         )
+        set_target_properties(libchewing PROPERTIES
+            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
+        )
     elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
         target_link_options(libchewing
             PRIVATE LINKER:-exported_symbols_list,${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
             PRIVATE LINKER:-dead_strip
         )
+        set_target_properties(libchewing PROPERTIES
+            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
+        )
     elseif(MSVC)
         target_link_options(libchewing
             PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def)
         set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        set_target_properties(libchewing PROPERTIES
+            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
+        )
     endif()
 endif()
 

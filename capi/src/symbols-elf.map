@@ -120,3 +120,12 @@ CHEWING_0.5 {
         chewing_zuin_String;
     local: *;
 };
+
+CHEWING_0.9 {
+    global:
+        chewing_config_has_option;
+        chewing_config_set_int;
+        chewing_config_get_int;
+        chewing_config_set_str;
+        chewing_config_get_str;
+} CHEWING_0.5;

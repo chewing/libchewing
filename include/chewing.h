@@ -240,6 +240,41 @@ int chewing_Reset(struct ChewingContext *ctx);
  *
  * This function should be called with valid pointers.
  */
+int chewing_config_has_option(const struct ChewingContext *ctx, const char *name);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+int chewing_config_get_int(const struct ChewingContext *ctx, const char *name);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+int chewing_config_set_int(struct ChewingContext *ctx, const char *name, int value);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+int chewing_config_get_str(const struct ChewingContext *ctx, const char *name, char **value);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+int chewing_config_set_str(struct ChewingContext *ctx, const char *name, const char *value);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
 int chewing_set_KBType(struct ChewingContext *ctx, int kbtype);
 
 /**
