@@ -262,6 +262,7 @@ void test_set_selKey_normal()
 {
     ChewingContext *ctx;
     int *select_key;
+    char *select_key_str;
 
     ctx = chewing_new();
     start_testcase(ctx, fd);
@@ -278,6 +279,15 @@ void test_set_selKey_normal()
 
     chewing_free(select_key);
 
+    ok(chewing_config_set_str(ctx, "chewing.selection_keys", "asdfghjkl;") == 0,
+        "chewing_config_set_str should return OK");
+    ok(chewing_config_get_str(ctx, "chewing.selection_keys", &select_key_str) == 0,
+        "chewing_config_get_str should return OK");
+    ok(select_key_str, "chewing_config_get_str shall not return NULL");
+    ok(!memcmp(select_key_str, "asdfghjkl;", 10),
+        "select key shall be updated");
+    chewing_free(select_key_str);
+
     chewing_delete(ctx);
 }
 
@@ -285,6 +295,7 @@ void test_set_selKey_error_handling()
 {
     ChewingContext *ctx;
     int *select_key;
+    char *select_key_str;
 
     ctx = chewing_new();
     start_testcase(ctx, fd);
@@ -312,6 +323,15 @@ void test_set_selKey_error_handling()
     ok(select_key, "chewing_get_selKey shall not return NULL");
     ok(!memcmp(select_key, DEFAULT_SELECT_KEY, sizeof(DEFAULT_SELECT_KEY)), "select key shall be DEFAULT_SELECT_KEY");
     chewing_free(select_key);
+
+    ok(chewing_config_set_str(ctx, "chewing.selection_keys", "asdfghjkl;1234") == -1,
+        "chewing_config_set_str should return ERROR");
+    ok(chewing_config_get_str(ctx, "chewing.selection_keys", &select_key_str) == 0,
+        "chewing_config_get_str should return OK");
+    ok(select_key_str, "chewing_config_get_str shall not return NULL");
+    ok(!memcmp(select_key_str, "1234567890", 10),
+        "select key shall be default value");
+    chewing_free(select_key_str);
 
     chewing_delete(ctx);
 }
