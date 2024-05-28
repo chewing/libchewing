@@ -226,26 +226,15 @@ impl Editor {
     pub fn cursor(&self) -> usize {
         self.shared.cursor()
     }
-    pub fn language_mode(&self) -> LanguageMode {
-        self.shared.options.language_mode
-    }
-    pub fn set_language_mode(&mut self, language_mode: LanguageMode) {
-        self.shared.syl.clear();
-        self.shared.options.language_mode = language_mode;
-    }
-
-    pub fn character_form(&self) -> CharacterForm {
-        self.shared.options.character_form
-    }
-    pub fn set_character_form(&mut self, charactor_form: CharacterForm) {
-        self.shared.options.character_form = charactor_form;
-    }
 
     // TODO: deprecate other direct set methods
     pub fn editor_options(&self) -> EditorOptions {
         self.shared.options
     }
     pub fn set_editor_options(&mut self, options: EditorOptions) {
+        if self.shared.options.language_mode != options.language_mode {
+            self.shared.syl.clear();
+        }
         self.shared.options = options;
     }
     pub fn switch_character_form(&mut self) {

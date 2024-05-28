@@ -80,8 +80,17 @@ pub enum KeyboardLayoutCompat {
     ColemakDhOrth,
 }
 
+#[derive(Debug)]
+pub struct ParseKeyboardLayoutError;
+
+impl Display for ParseKeyboardLayoutError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Unable to parse keyboard layout")
+    }
+}
+
 impl FromStr for KeyboardLayoutCompat {
-    type Err = ();
+    type Err = ParseKeyboardLayoutError;
 
     fn from_str(kb_str: &str) -> Result<Self, Self::Err> {
         let layout = match kb_str {
@@ -100,7 +109,7 @@ impl FromStr for KeyboardLayoutCompat {
             "KB_CARPALX" => Self::Carpalx,
             "KB_COLEMAK_DH_ANSI" => Self::ColemakDhAnsi,
             "KB_COLEMAK_DH_ORTH" => Self::ColemakDhOrth,
-            _ => todo!("handle error"),
+            _ => return Err(ParseKeyboardLayoutError),
         };
         Ok(layout)
     }

@@ -17,12 +17,12 @@ use chewing::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
         },
-        BasicEditor, CharacterForm, Editor, EditorKeyBehavior, EditorOptions, LanguageMode,
-        LaxUserFreqEstimate, UserPhraseAddDirection,
+        BasicEditor, CharacterForm, Editor, EditorKeyBehavior, LanguageMode, LaxUserFreqEstimate,
+        UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
-use log::{debug, error, info, warn};
+use log::{debug, error, info};
 
 use crate::public::{
     ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
@@ -283,6 +283,278 @@ pub unsafe extern "C" fn chewing_Reset(ctx: *mut ChewingContext) -> c_int {
 ///
 /// This function should be called with valid pointers.
 #[no_mangle]
+pub unsafe extern "C" fn chewing_config_has_option(
+    ctx: *const ChewingContext,
+    name: *const c_char,
+) -> c_int {
+    let _ctx = as_ref_or_return!(ctx, ERROR);
+    let cstr = unsafe { CStr::from_ptr(name) };
+    let name = cstr.to_string_lossy();
+
+    let ret = match name.as_ref() {
+        "chewing.user_phrase_add_direction"
+        | "chewing.disable_auto_learn_phrase"
+        | "chewing.auto_shift_cursor"
+        | "chewing.candidates_per_page"
+        | "chewing.language_mode"
+        | "chewing.easy_symbol_input"
+        | "chewing.esc_clear_all_buffer"
+        | "chewing.keyboard_type"
+        | "chewing.auto_commit_threshold"
+        | "chewing.phrase_choice_rearward"
+        | "chewing.selection_keys"
+        | "chewing.character_form"
+        | "chewing.space_is_select_key" => true,
+        _ => false,
+    };
+
+    ret as c_int
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
+pub unsafe extern "C" fn chewing_config_get_int(
+    ctx: *const ChewingContext,
+    name: *const c_char,
+) -> c_int {
+    let ctx = as_ref_or_return!(ctx, ERROR);
+    let cstr = unsafe { CStr::from_ptr(name) };
+    let name = cstr.to_string_lossy();
+
+    let option = &ctx.editor.editor_options();
+
+    match name.as_ref() {
+        "chewing.user_phrase_add_direction" => match option.user_phrase_add_dir {
+            UserPhraseAddDirection::Forward => 0,
+            UserPhraseAddDirection::Backward => 1,
+        },
+        "chewing.disable_auto_learn_phrase" => option.disable_auto_learn_phrase as c_int,
+        "chewing.auto_shift_cursor" => option.auto_shift_cursor as c_int,
+        "chewing.candidates_per_page" => option.candidates_per_page as c_int,
+        "chewing.language_mode" => match option.language_mode {
+            LanguageMode::Chinese => CHINESE_MODE,
+            LanguageMode::English => SYMBOL_MODE,
+        },
+        "chewing.easy_symbol_input" => option.easy_symbol_input as c_int,
+        "chewing.esc_clear_all_buffer" => option.esc_clear_all_buffer as c_int,
+        "chewing.auto_commit_threshold" => option.auto_commit_threshold as c_int,
+        "chewing.phrase_choice_rearward" => option.phrase_choice_rearward as c_int,
+        "chewing.character_form" => match option.character_form {
+            CharacterForm::Halfwidth => HALFSHAPE_MODE,
+            CharacterForm::Fullwidth => FULLSHAPE_MODE,
+        },
+        "chewing.space_is_select_key" => option.space_is_select_key as c_int,
+        _ => ERROR,
+    }
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
+pub unsafe extern "C" fn chewing_config_set_int(
+    ctx: *mut ChewingContext,
+    name: *const c_char,
+    value: c_int,
+) -> c_int {
+    let ctx = as_mut_or_return!(ctx, ERROR);
+    let cstr = unsafe { CStr::from_ptr(name) };
+    let name = cstr.to_string_lossy();
+
+    if value < 0 {
+        return ERROR;
+    }
+
+    let mut options = ctx.editor.editor_options();
+
+    macro_rules! ensure_bool {
+        ($expr:expr) => {
+            match $expr {
+                0 | 1 => {}
+                _ => return ERROR,
+            };
+        };
+    }
+
+    match name.as_ref() {
+        "chewing.user_phrase_add_direction" => match value {
+            0 => options.user_phrase_add_dir = UserPhraseAddDirection::Forward,
+            1 => options.user_phrase_add_dir = UserPhraseAddDirection::Backward,
+            _ => return ERROR,
+        },
+        "chewing.disable_auto_learn_phrase" => {
+            ensure_bool!(value);
+            options.disable_auto_learn_phrase = value > 0;
+        }
+        "chewing.auto_shift_cursor" => {
+            ensure_bool!(value);
+            options.auto_shift_cursor = value > 0;
+        }
+        "chewing.candidates_per_page" => {
+            if value == 0 || value > 10 {
+                return ERROR;
+            }
+            options.candidates_per_page = value as usize
+        }
+        "chewing.language_mode" => {
+            options.language_mode = match value {
+                CHINESE_MODE => LanguageMode::Chinese,
+                SYMBOL_MODE => LanguageMode::English,
+                _ => return ERROR,
+            }
+        }
+        "chewing.easy_symbol_input" => {
+            ensure_bool!(value);
+            options.easy_symbol_input = value > 0;
+        }
+        "chewing.esc_clear_all_buffer" => {
+            ensure_bool!(value);
+            options.esc_clear_all_buffer = value > 0;
+        }
+        "chewing.auto_commit_threshold" => {
+            if value < 0 || value > 39 {
+                return ERROR;
+            }
+            options.auto_commit_threshold = value as usize;
+        }
+        "chewing.phrase_choice_rearward" => {
+            ensure_bool!(value);
+            options.phrase_choice_rearward = value > 0;
+        }
+        "chewing.character_form" => {
+            options.character_form = match value {
+                HALFSHAPE_MODE => CharacterForm::Halfwidth,
+                FULLSHAPE_MODE => CharacterForm::Fullwidth,
+                _ => return ERROR,
+            }
+        }
+        "chewing.space_is_select_key" => {
+            ensure_bool!(value);
+            options.space_is_select_key = value > 0;
+        }
+        _ => return ERROR,
+    };
+
+    ctx.editor.set_editor_options(options);
+
+    OK
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
+pub unsafe extern "C" fn chewing_config_get_str(
+    ctx: *const ChewingContext,
+    name: *const c_char,
+    value: *mut *mut c_char,
+) -> c_int {
+    let ctx = as_ref_or_return!(ctx, ERROR);
+    let cstr = unsafe { CStr::from_ptr(name) };
+    let name = cstr.to_string_lossy();
+
+    let _option = &ctx.editor.editor_options();
+
+    let string = match name.as_ref() {
+        "chewing.keyboard_type" => ctx.kb_compat.to_string(),
+        "chewing.selection_keys" => ctx
+            .sel_keys
+            .0
+            .iter()
+            .map(|&key| char::from(key as u8))
+            .collect(),
+        _ => return ERROR,
+    };
+
+    match unsafe { value.as_mut() } {
+        Some(place) => {
+            *place = owned_into_raw(
+                Owned::CString,
+                CString::new(string)
+                    .expect("should have valid string")
+                    .into_raw(),
+            )
+        }
+        None => return ERROR,
+    }
+
+    OK
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
+pub unsafe extern "C" fn chewing_config_set_str(
+    ctx: *mut ChewingContext,
+    name: *const c_char,
+    value: *const c_char,
+) -> c_int {
+    let ctx = as_mut_or_return!(ctx, ERROR);
+    let cstr = unsafe { CStr::from_ptr(name) };
+    let name = cstr.to_string_lossy();
+    let cstr = unsafe { CStr::from_ptr(value) };
+    let string = cstr.to_string_lossy();
+
+    let _option = &mut ctx.editor.editor_options();
+
+    match name.as_ref() {
+        "chewing.keyboard_type" => {
+            use KeyboardLayoutCompat as KB;
+            ctx.kb_compat = match string.parse() {
+                Ok(kbtype) => kbtype,
+                Err(_) => return ERROR,
+            };
+            let (keyboard, syl): (AnyKeyboardLayout, Box<dyn SyllableEditor>) = match ctx.kb_compat
+            {
+                KB::Default => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+                KB::Hsu => (AnyKeyboardLayout::qwerty(), Box::new(Hsu::new())),
+                KB::Ibm => (AnyKeyboardLayout::qwerty(), Box::new(Ibm::new())),
+                KB::GinYieh => (AnyKeyboardLayout::qwerty(), Box::new(GinYieh::new())),
+                KB::Et => (AnyKeyboardLayout::qwerty(), Box::new(Et::new())),
+                KB::Et26 => (AnyKeyboardLayout::qwerty(), Box::new(Et26::new())),
+                KB::Dvorak => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+                KB::DvorakHsu => (AnyKeyboardLayout::qwerty(), Box::new(Hsu::new())),
+                KB::DachenCp26 => (AnyKeyboardLayout::qwerty(), Box::new(DaiChien26::new())),
+                KB::HanyuPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::hanyu())),
+                KB::ThlPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::thl())),
+                KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
+                KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+                KB::ColemakDhAnsi => (
+                    AnyKeyboardLayout::colemak_dh_ansi(),
+                    Box::new(Standard::new()),
+                ),
+                KB::ColemakDhOrth => (
+                    AnyKeyboardLayout::colemak_dh_orth(),
+                    Box::new(Standard::new()),
+                ),
+            };
+            ctx.keyboard = keyboard;
+            ctx.editor.set_syllable_editor(syl);
+        }
+        "chewing.selection_keys" => {
+            if string.len() != 10 {
+                return ERROR;
+            }
+            let mut sel_keys = [0_i32; MAX_SELKEY];
+            string
+                .chars()
+                .enumerate()
+                .for_each(|(i, key)| sel_keys[i] = key as i32);
+            ctx.sel_keys = SelKeys(sel_keys)
+        }
+        _ => return ERROR,
+    };
+
+    OK
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
 pub unsafe extern "C" fn chewing_set_KBType(ctx: *mut ChewingContext, kbtype: c_int) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
     use KeyboardLayoutCompat as KB;
@@ -367,13 +639,7 @@ pub unsafe extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_ChiEngMode(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    match mode {
-        CHINESE_MODE => ctx.editor.set_language_mode(LanguageMode::Chinese),
-        SYMBOL_MODE => ctx.editor.set_language_mode(LanguageMode::English),
-        _ => warn!("invalid language mode {}", mode),
-    }
+    unsafe { chewing_config_set_int(ctx, b"chewing.language_mode\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -381,12 +647,7 @@ pub unsafe extern "C" fn chewing_set_ChiEngMode(ctx: *mut ChewingContext, mode: 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_ChiEngMode(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    match ctx.editor.language_mode() {
-        LanguageMode::Chinese => CHINESE_MODE,
-        LanguageMode::English => SYMBOL_MODE,
-    }
+    unsafe { chewing_config_get_int(ctx, b"chewing.language_mode\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -394,13 +655,7 @@ pub unsafe extern "C" fn chewing_get_ChiEngMode(ctx: *const ChewingContext) -> c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_ShapeMode(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    match mode {
-        HALFSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Halfwidth),
-        FULLSHAPE_MODE => ctx.editor.set_character_form(CharacterForm::Fullwidth),
-        _ => warn!("invalid shape mode {}", mode),
-    }
+    unsafe { chewing_config_set_int(ctx, b"chewing.character_form\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -408,12 +663,7 @@ pub unsafe extern "C" fn chewing_set_ShapeMode(ctx: *mut ChewingContext, mode: c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_ShapeMode(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    match ctx.editor.character_form() {
-        CharacterForm::Halfwidth => HALFSHAPE_MODE,
-        CharacterForm::Fullwidth => FULLSHAPE_MODE,
-    }
+    unsafe { chewing_config_get_int(ctx, b"chewing.character_form\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -421,16 +671,7 @@ pub unsafe extern "C" fn chewing_get_ShapeMode(ctx: *const ChewingContext) -> c_
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if n == 0 || n > 10 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        candidates_per_page: n as usize,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.candidates_per_page\0".as_ptr().cast(), n) };
 }
 
 /// # Safety
@@ -438,9 +679,7 @@ pub unsafe extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_candPerPage(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().candidates_per_page as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.candidates_per_page\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -448,16 +687,7 @@ pub unsafe extern "C" fn chewing_get_candPerPage(ctx: *const ChewingContext) -> 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if !(0..=39).contains(&n) {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        auto_commit_threshold: n as usize,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.auto_commit_threshold\0".as_ptr().cast(), n) };
 }
 
 /// # Safety
@@ -465,9 +695,7 @@ pub unsafe extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_maxChiSymbolLen(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().auto_commit_threshold as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.auto_commit_threshold\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -507,19 +735,13 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
     ctx: *mut ChewingContext,
     direction: c_int,
 ) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if direction != 0 && direction != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        user_phrase_add_dir: match direction {
-            0 => UserPhraseAddDirection::Forward,
-            _ => UserPhraseAddDirection::Backward,
-        },
-        ..ctx.editor.editor_options()
-    });
+    unsafe {
+        chewing_config_set_int(
+            ctx,
+            b"chewing.user_phrase_add_direction\0".as_ptr().cast(),
+            direction,
+        )
+    };
 }
 
 /// # Safety
@@ -527,12 +749,7 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    match ctx.editor.editor_options().user_phrase_add_dir {
-        UserPhraseAddDirection::Forward => 0,
-        UserPhraseAddDirection::Backward => 1,
-    }
+    unsafe { chewing_config_get_int(ctx, b"chewing.user_phrase_add_direction\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -540,16 +757,7 @@ pub unsafe extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingConte
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        space_is_select_key: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.space_is_select_key\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -557,12 +765,7 @@ pub unsafe extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_spaceAsSelection(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    match ctx.editor.editor_options().space_is_select_key {
-        true => 1,
-        false => 0,
-    }
+    unsafe { chewing_config_get_int(ctx, b"chewing.space_is_select_key\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -570,16 +773,7 @@ pub unsafe extern "C" fn chewing_get_spaceAsSelection(ctx: *const ChewingContext
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        esc_clear_all_buffer: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.esc_clear_all_buffer\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -587,12 +781,7 @@ pub unsafe extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mo
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_escCleanAllBuf(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    match ctx.editor.editor_options().esc_clear_all_buffer {
-        true => 1,
-        false => 0,
-    }
+    unsafe { chewing_config_get_int(ctx, b"chewing.esc_clear_all_buffer\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -600,16 +789,7 @@ pub unsafe extern "C" fn chewing_get_escCleanAllBuf(ctx: *const ChewingContext) 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        auto_shift_cursor: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.auto_shift_cursor\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -617,9 +797,7 @@ pub unsafe extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().auto_shift_cursor as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.auto_shift_cursor\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -627,16 +805,7 @@ pub unsafe extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) ->
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        easy_symbol_input: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe { chewing_config_set_int(ctx, b"chewing.easy_symbol_input\0".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -644,9 +813,7 @@ pub unsafe extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, m
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().easy_symbol_input as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.easy_symbol_input\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -654,16 +821,13 @@ pub unsafe extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext)
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        phrase_choice_rearward: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe {
+        chewing_config_set_int(
+            ctx,
+            b"chewing.phrase_choice_rearward\0".as_ptr().cast(),
+            mode,
+        )
+    };
 }
 
 /// # Safety
@@ -671,9 +835,7 @@ pub unsafe extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingConte
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_phraseChoiceRearward(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().phrase_choice_rearward as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.phrase_choice_rearward\0".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -681,16 +843,13 @@ pub unsafe extern "C" fn chewing_get_phraseChoiceRearward(ctx: *const ChewingCon
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c_int) {
-    let ctx = as_mut_or_return!(ctx);
-
-    if mode != 0 && mode != 1 {
-        return;
-    }
-
-    ctx.editor.set_editor_options(EditorOptions {
-        disable_auto_learn_phrase: mode != 0,
-        ..ctx.editor.editor_options()
-    });
+    unsafe {
+        chewing_config_set_int(
+            ctx,
+            b"chewing.disable_auto_learn_phrase\0".as_ptr().cast(),
+            mode,
+        )
+    };
 }
 
 /// # Safety
@@ -698,9 +857,7 @@ pub unsafe extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_autoLearn(ctx: *const ChewingContext) -> c_int {
-    let ctx = as_ref_or_return!(ctx, ERROR);
-
-    ctx.editor.editor_options().disable_auto_learn_phrase as c_int
+    unsafe { chewing_config_get_int(ctx, b"chewing.disable_auto_learn_phrase\0".as_ptr().cast()) }
 }
 
 /// # Safety
