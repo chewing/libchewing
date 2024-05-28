@@ -503,7 +503,10 @@ pub unsafe extern "C" fn chewing_config_set_str(
     match name.as_ref() {
         "chewing.keyboard_type" => {
             use KeyboardLayoutCompat as KB;
-            ctx.kb_compat = string.parse().unwrap_or(KeyboardLayoutCompat::Default);
+            ctx.kb_compat = match string.parse() {
+                Ok(kbtype) => kbtype,
+                Err(_) => return ERROR,
+            };
             let (keyboard, syl): (AnyKeyboardLayout, Box<dyn SyllableEditor>) = match ctx.kb_compat
             {
                 KB::Default => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
