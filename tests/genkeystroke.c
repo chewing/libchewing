@@ -162,6 +162,10 @@ void show_bopomofo_buffer(int x, int y, ChewingContext *ctx)
     showBopomofo(ctx);
     if (hasColor)
         attroff(COLOR_PAIR(1));
+    char *kbstr = chewing_get_KBString(ctx);
+    move(x, strlen(FILL_LINE) - strlen(kbstr));
+    addstr(kbstr);
+    chewing_free(kbstr);
 }
 
 void show_full_shape(int x, int y, ChewingContext *ctx)
@@ -273,6 +277,7 @@ int main(int argc, char *argv[])
     FILE *log = NULL;
     int ch;
     int add_phrase_length;
+    int kbtype;
 
     if (argc < 2) {
         fprintf(stderr, "usage: genkeystroke filename\n");
@@ -317,7 +322,7 @@ int main(int argc, char *argv[])
     ctx = chewing_new2(NULL, NULL, logger, log);
 
     /* Set keyboard type */
-    chewing_set_KBType(ctx, chewing_KBStr2Num("KB_DVORAK_HSU"));
+    chewing_set_KBType(ctx, chewing_KBStr2Num("KB_DEFAULT"));
 
     /* Fill configuration values */
     chewing_set_candPerPage(ctx, 9);
@@ -327,9 +332,26 @@ int main(int argc, char *argv[])
     chewing_set_spaceAsSelection(ctx, 1);
 
     clear();
-    mvaddstr(0, 0, "Any key to start testing...");
 
     while (TRUE) {
+        drawline(0, 0);
+        drawline(2, 0);
+        show_interval_buffer(3, 0, ctx);
+        drawline(4, 0);
+        show_choose_buffer(5, 0, ctx);
+        drawline(6, 0);
+        show_bopomofo_buffer(7, 0, ctx);
+        show_full_shape(7, 5, ctx);
+        drawline(8, 0);
+        mvaddstr(9, 0, "Ctrl + d : leave");
+        mvaddstr(9, 20, "Ctrl + b : toggle Eng/Chi mode");
+        mvaddstr(10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
+        mvaddstr(11, 0, "Ctrl + h : toggle Full/Half shape mode");
+        mvaddstr(12, 0, "Ctrl + n/p : Next / Previous keyboard layout");
+        show_commit_string(14, 0, ctx);
+        show_userphrase(7, 14, ctx);
+        show_edit_buffer(1, 0, ctx);
+
         ch = getch();
         switch (ch) {
         case KEY_LEFT:
@@ -402,6 +424,24 @@ int main(int argc, char *argv[])
             chewing_handle_CtrlNum(ctx, add_phrase_length);
             fprintf(fout, "<C%c>", add_phrase_length);
             break;
+        case KEY_CTRL_('N'):
+            kbtype = chewing_get_KBType(ctx);
+            if (chewing_kbtype_Total(ctx) - 1 == kbtype) {
+                kbtype = 0;
+            } else {
+                kbtype += 1;
+            }
+            chewing_set_KBType(ctx, kbtype);
+            break;
+        case KEY_CTRL_('P'):
+            kbtype = chewing_get_KBType(ctx);
+            if (0 == kbtype) {
+                kbtype = chewing_kbtype_Total(ctx) - 1;
+            } else {
+                kbtype -= 1;
+            }
+            chewing_set_KBType(ctx, kbtype);
+            break;
         case KEY_CTRL_('B'):   /* emulate CapsLock */
             chewing_handle_Capslock(ctx);
             fprintf(fout, "<CB>");
@@ -430,22 +470,6 @@ int main(int argc, char *argv[])
                 fprintf(fout, "<%c>", (char) ch);
             break;
         }
-        drawline(0, 0);
-        drawline(2, 0);
-        show_interval_buffer(3, 0, ctx);
-        drawline(4, 0);
-        show_choose_buffer(5, 0, ctx);
-        drawline(6, 0);
-        show_bopomofo_buffer(7, 0, ctx);
-        show_full_shape(7, 5, ctx);
-        drawline(8, 0);
-        mvaddstr(9, 0, "Ctrl + d : leave");
-        mvaddstr(9, 20, "Ctrl + b : toggle Eng/Chi mode");
-        mvaddstr(10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
-        mvaddstr(11, 0, "Ctrl + h : toggle Full/Half shape mode");
-        show_commit_string(12, 0, ctx);
-        show_userphrase(7, 12, ctx);
-        show_edit_buffer(1, 0, ctx);
     }
   end:
     endwin();
