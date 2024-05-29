@@ -8,6 +8,7 @@
 mod colemak_dh_ansi;
 mod colemak_dh_orth;
 mod dvorak;
+mod dvorak_on_qwerty;
 mod qgmlwy;
 mod qwerty;
 
@@ -16,6 +17,7 @@ use core::fmt;
 pub use colemak_dh_ansi::ColemakDhAnsi;
 pub use colemak_dh_orth::ColemakDhOrth;
 pub use dvorak::Dvorak;
+pub use dvorak_on_qwerty::DvorakOnQwerty;
 pub use qgmlwy::Qgmlwy;
 pub use qwerty::Qwerty;
 
@@ -129,9 +131,11 @@ pub trait KeyboardLayout {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum AnyKeyboardLayout {
     Qwerty(Qwerty),
     Dvorak(Dvorak),
+    DvorakOnQwerty(DvorakOnQwerty),
     Qgmlwy(Qgmlwy),
     ColemakDhAnsi(ColemakDhAnsi),
     ColemakDhOrth(ColemakDhOrth),
@@ -143,6 +147,9 @@ impl AnyKeyboardLayout {
     }
     pub fn dvorak() -> AnyKeyboardLayout {
         AnyKeyboardLayout::Dvorak(Dvorak)
+    }
+    pub fn dvorak_on_qwerty() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::DvorakOnQwerty(DvorakOnQwerty)
     }
     pub fn qgmlwy() -> AnyKeyboardLayout {
         AnyKeyboardLayout::Qgmlwy(Qgmlwy)
@@ -160,6 +167,7 @@ impl KeyboardLayout for AnyKeyboardLayout {
         match self {
             AnyKeyboardLayout::Qwerty(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::Dvorak(kb) => kb.map_with_mod(keycode, modifiers),
+            AnyKeyboardLayout::DvorakOnQwerty(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::Qgmlwy(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhAnsi(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhOrth(kb) => kb.map_with_mod(keycode, modifiers),
