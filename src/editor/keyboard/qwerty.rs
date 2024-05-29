@@ -9,7 +9,7 @@ use super::{
 pub struct Qwerty;
 
 #[rustfmt::skip]
-static KEYCODE_INDEX: [KeyCode; MATRIX_SIZE] = [
+pub(crate) static KEYCODE_INDEX: [KeyCode; MATRIX_SIZE] = [
     Unknown,
     N1, N2, N3, N4, N5, N6, N7, N8, N9, N0, Minus, Equal, BSlash, Grave,
     Q, W, E, R, T, Y, U, I, O, P, LBracket, RBracket,
@@ -20,7 +20,7 @@ static KEYCODE_INDEX: [KeyCode; MATRIX_SIZE] = [
 ];
 
 #[rustfmt::skip]
-static UNICODE_MAP: [char; MATRIX_SIZE] = [
+pub(crate) static UNICODE_MAP: [char; MATRIX_SIZE] = [
     '�',
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\\', '`',
     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']',
@@ -31,7 +31,7 @@ static UNICODE_MAP: [char; MATRIX_SIZE] = [
 ];
 
 #[rustfmt::skip]
-static SHIFT_MAP: [char; MATRIX_SIZE] = [
+pub(crate) static SHIFT_MAP: [char; MATRIX_SIZE] = [
     '�',
     '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '|', '~',
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',
