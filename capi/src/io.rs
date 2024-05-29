@@ -104,9 +104,7 @@ pub extern "C" fn chewing_new() -> *mut ChewingContext {
 pub unsafe extern "C" fn chewing_new2(
     syspath: *const c_char,
     userpath: *const c_char,
-    logger: Option<
-        unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...),
-    >,
+    logger: Option<unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, ...)>,
     loggerdata: *mut c_void,
 ) -> *mut ChewingContext {
     unsafe {
@@ -901,7 +899,7 @@ pub unsafe extern "C" fn chewing_get_phoneSeqLen(ctx: *const ChewingContext) -> 
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_logger(
     ctx: *mut ChewingContext,
-    logger: Option<extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...)>,
+    logger: Option<extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, ...)>,
     data: *mut c_void,
 ) {
     as_mut_or_return!(ctx);

@@ -208,10 +208,7 @@ struct ChewingContext *chewing_new(void);
  */
 struct ChewingContext *chewing_new2(const char *syspath,
                                     const char *userpath,
-                                    void (*logger)(void *data,
-                                                   int level,
-                                                   const char *fmt,
-                                                   ...),
+                                    void (*logger)(void *data, int level, const char *fmt, ...),
                                     void *loggerdata);
 
 /**
@@ -1084,7 +1081,7 @@ void chewing_set_hsuSelKeyType(struct ChewingContext *_ctx, int mode);
 int chewing_get_hsuSelKeyType(struct ChewingContext *_ctx);
 
 #ifdef __cplusplus
-} // extern "C"
-#endif // __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
-#endif /* chewing_public_bindings_h */
+#endif  /* chewing_public_bindings_h */
