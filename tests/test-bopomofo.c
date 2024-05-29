@@ -2076,6 +2076,42 @@ void test_KB_MPS2()
     chewing_delete(ctx);
 }
 
+void test_KB_DVORAK()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_DVORAK);
+    type_keystroke_by_string(ctx, "kgl eh4gl 5l 2t7jl31s4");
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "testTEST");
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92testTEST"
+                      /* 新酷音真的很棒 */ );
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
+void test_KB_DVORAK_HSU()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_DVORAK_HSU);
+    type_keystroke_by_string(ctx, "idl vbcdl cl hu;jlynvc");
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "kd;kKD:K");
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92testTEST"
+                      /* 新酷音真的很棒 */ );
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
 void test_KB_COLEMAK_DH_ANSI()
 {
     ChewingContext *ctx;
@@ -2120,8 +2156,10 @@ void test_KB()
     test_KB_ET26();
     test_KB_ET26_choice_append();
     test_KB_DACHEN_CP26();
-	test_KB_COLEMAK_DH_ANSI();
-	test_KB_COLEMAK_DH_ORTH();
+    test_KB_DVORAK();
+    test_KB_DVORAK_HSU();
+    test_KB_COLEMAK_DH_ANSI();
+    test_KB_COLEMAK_DH_ORTH();
 
     test_KB_HANYU();
     test_KB_THL();
