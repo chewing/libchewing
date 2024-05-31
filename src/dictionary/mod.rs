@@ -16,7 +16,7 @@ pub use layered::Layered;
 pub use loader::{LoadDictionaryError, SystemDictionaryLoader, UserDictionaryLoader};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
-pub use trie::{Trie, TrieBuilder, TrieStatistics};
+pub use trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};
 pub use trie_buf::TrieBuf;
 
 mod layered;
