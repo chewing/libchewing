@@ -170,7 +170,7 @@ impl Bopomofo {
         }
         Some(RIME_MAP[index as usize])
     }
-    /// Returns a [`Bopomofo`] that is categorized as rimes based on the index. It will
+    /// Returns a [`Bopomofo`] that is categorized as tonal marks based on the index. It will
     /// return [`None`] if the index is larger than 3. The index order is listed below starting
     /// from 0.
     ///
