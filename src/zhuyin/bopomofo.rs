@@ -27,94 +27,92 @@ pub enum BopomofoKind {
 
 /// Zhuyin Fuhao, often shortened as zhuyin and commonly called bopomofo
 ///
-/// TODO: refactor this to not use enum?
-///
 /// <https://simple.m.wikipedia.org/wiki/Zhuyin>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Bopomofo {
-    /// ㄅ
+    /// Zhuyin Fuhao: ㄅ
     B,
-    /// ㄆ
+    /// Zhuyin Fuhao: ㄆ
     P,
-    /// ㄇ
+    /// Zhuyin Fuhao: ㄇ
     M,
-    /// ㄈ
+    /// Zhuyin Fuhao: ㄈ
     F,
-    /// ㄉ
+    /// Zhuyin Fuhao: ㄉ
     D,
-    /// ㄊ
+    /// Zhuyin Fuhao: ㄊ
     T,
-    /// ㄋ
+    /// Zhuyin Fuhao: ㄋ
     N,
-    /// ㄌ
+    /// Zhuyin Fuhao: ㄌ
     L,
-    /// ㄍ
+    /// Zhuyin Fuhao: ㄍ
     G,
-    /// ㄎ
+    /// Zhuyin Fuhao: ㄎ
     K,
-    /// ㄏ
+    /// Zhuyin Fuhao: ㄏ
     H,
-    /// ㄐ
+    /// Zhuyin Fuhao: ㄐ
     J,
-    /// ㄑ
+    /// Zhuyin Fuhao: ㄑ
     Q,
-    /// ㄒ
+    /// Zhuyin Fuhao: ㄒ
     X,
-    /// ㄓ
+    /// Zhuyin Fuhao: ㄓ
     ZH,
-    /// ㄔ
+    /// Zhuyin Fuhao: ㄔ
     CH,
-    /// ㄕ
+    /// Zhuyin Fuhao: ㄕ
     SH,
-    /// ㄖ
+    /// Zhuyin Fuhao: ㄖ
     R,
-    /// ㄗ
+    /// Zhuyin Fuhao: ㄗ
     Z,
-    /// ㄘ
+    /// Zhuyin Fuhao: ㄘ
     C,
-    /// ㄙ
+    /// Zhuyin Fuhao: ㄙ
     S,
-    /// 一
+    /// Zhuyin Fuhao: 一
     I,
-    /// ㄨ
+    /// Zhuyin Fuhao: ㄨ
     U,
-    /// ㄩ
+    /// Zhuyin Fuhao: ㄩ
     IU,
-    /// ㄚ
+    /// Zhuyin Fuhao: ㄚ
     A,
-    /// ㄛ
+    /// Zhuyin Fuhao: ㄛ
     O,
-    /// ㄜ
+    /// Zhuyin Fuhao: ㄜ
     E,
-    /// ㄝ
+    /// Zhuyin Fuhao: ㄝ
     EH,
-    /// ㄞ
+    /// Zhuyin Fuhao: ㄞ
     AI,
-    /// ㄟ
+    /// Zhuyin Fuhao: ㄟ
     EI,
-    /// ㄠ
+    /// Zhuyin Fuhao: ㄠ
     AU,
-    /// ㄡ
+    /// Zhuyin Fuhao: ㄡ
     OU,
-    /// ㄢ
+    /// Zhuyin Fuhao: ㄢ
     AN,
-    /// ㄣ
+    /// Zhuyin Fuhao: ㄣ
     EN,
-    /// ㄤ
+    /// Zhuyin Fuhao: ㄤ
     ANG,
-    /// ㄥ
+    /// Zhuyin Fuhao: ㄥ
     ENG,
-    /// ㄦ
+    /// Zhuyin Fuhao: ㄦ
     ER,
-    /// ˙
+    /// Tonal mark: ˙
     TONE5,
-    /// ˊ
+    /// Tonal mark: ˊ
     TONE2,
-    /// ˇ
+    /// Tonal mark: ˇ
     TONE3,
-    /// ˋ
+    /// Tonal mark: ˋ
     TONE4,
-    /// ˉ
+    /// Tonal mark: ˉ
     TONE1,
 }
 
@@ -128,7 +126,8 @@ const RIME_MAP: [Bopomofo; 13] = [A, O, E, EH, AI, EI, AU, OU, AN, EN, ANG, ENG,
 const TONE_MAP: [Bopomofo; 4] = [TONE5, TONE2, TONE3, TONE4];
 
 impl Bopomofo {
-    /// TODO: docs
+    /// Returns [`BopomofoKind`] of the [`Bopomofo`] symbol. See [`BopomofoKind`] to know more about
+    /// each kind category.
     pub const fn kind(&self) -> BopomofoKind {
         match self {
             B | P | M | F | D | T | N | L | G | K | H | J | Q | X | ZH | CH | SH | R | Z | C
@@ -138,28 +137,44 @@ impl Bopomofo {
             TONE1 | TONE2 | TONE3 | TONE4 | TONE5 => BopomofoKind::Tone,
         }
     }
-    /// TODO: docs
+    /// Returns a [`Bopomofo`] that is categorized as initial sounds based on the index. It will
+    /// return [`None`] if the index is larger than 20. The index order is listed below starting
+    /// from 0.
+    ///
+    /// - Initial sounds: ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ
     pub(super) const fn from_initial(index: u16) -> Option<Bopomofo> {
         if index as usize >= INITIAL_MAP.len() {
             return None;
         }
         Some(INITIAL_MAP[index as usize])
     }
-    /// TODO: docs
+    /// Returns a [`Bopomofo`] that is categorized as medial glides based on the index. It will
+    /// return [`None`] if the index is larger than 2. The index order is listed below starting
+    /// from 0.
+    ///
+    /// - Medial glides: ㄧㄨㄩ
     pub(super) const fn from_medial(index: u16) -> Option<Bopomofo> {
         if index as usize >= MEDIAL_MAP.len() {
             return None;
         }
         Some(MEDIAL_MAP[index as usize])
     }
-    /// TODO: docs
+    /// Returns a [`Bopomofo`] that is categorized as rimes based on the index. It will
+    /// return [`None`] if the index is larger than 12. The index order is listed below starting
+    /// from 0.
+    ///
+    /// - Rimes: ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ
     pub(super) const fn from_rime(index: u16) -> Option<Bopomofo> {
         if index as usize >= RIME_MAP.len() {
             return None;
         }
         Some(RIME_MAP[index as usize])
     }
-    /// TODO: docs
+    /// Returns a [`Bopomofo`] that is categorized as tonal marks based on the index. It will
+    /// return [`None`] if the index is larger than 3. The index order is listed below starting
+    /// from 0.
+    ///
+    /// - Tonal marks: ˙ˊˇˋ
     pub(super) const fn from_tone(index: u16) -> Option<Bopomofo> {
         if index as usize >= TONE_MAP.len() {
             return None;
