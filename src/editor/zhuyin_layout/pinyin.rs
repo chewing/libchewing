@@ -565,4 +565,33 @@ mod tests {
 
         assert_eq!(syl![Bopomofo::ZH], hanyu.read());
     }
+
+    #[test]
+    fn hanyu_uan_un_u() {
+        let keyboard = AnyKeyboardLayout::qwerty();
+        let mut hanyu = Pinyin::hanyu();
+
+        hanyu.key_press(keyboard.map(KeyCode::J));
+        hanyu.key_press(keyboard.map(KeyCode::U));
+        hanyu.key_press(keyboard.map(KeyCode::A));
+        hanyu.key_press(keyboard.map(KeyCode::N));
+        hanyu.key_press(keyboard.map(KeyCode::N1));
+
+        assert_eq!(syl![Bopomofo::J, Bopomofo::IU, Bopomofo::AN], hanyu.read());
+
+        hanyu.clear();
+        hanyu.key_press(keyboard.map(KeyCode::Q));
+        hanyu.key_press(keyboard.map(KeyCode::U));
+        hanyu.key_press(keyboard.map(KeyCode::N));
+        hanyu.key_press(keyboard.map(KeyCode::N1));
+
+        assert_eq!(syl![Bopomofo::Q, Bopomofo::IU, Bopomofo::EN], hanyu.read());
+
+        hanyu.clear();
+        hanyu.key_press(keyboard.map(KeyCode::X));
+        hanyu.key_press(keyboard.map(KeyCode::U));
+        hanyu.key_press(keyboard.map(KeyCode::N1));
+
+        assert_eq!(syl![Bopomofo::X, Bopomofo::IU], hanyu.read());
+    }
 }
