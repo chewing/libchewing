@@ -71,6 +71,9 @@ impl Pinyin {
 
 impl SyllableEditor for Pinyin {
     fn key_press(&mut self, key: KeyEvent) -> KeyBehavior {
+        if self.key_seq.is_empty() && !key.code.is_atoz() {
+            return KeyBehavior::KeyError;
+        }
         if ![
             KeyCode::Space,
             KeyCode::N1,

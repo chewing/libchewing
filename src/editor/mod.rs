@@ -1027,6 +1027,32 @@ impl State for Entering {
                         shared.com.insert(Symbol::from(symbol));
                         return self.spin_absorb();
                     }
+                    if ev.is_printable() {
+                        match shared.options.character_form {
+                            CharacterForm::Halfwidth => {
+                                if shared.com.is_empty() {
+                                    // FIXME we should ignore these keys if pre-edit is empty
+                                    shared.commit_buffer.clear();
+                                    shared.commit_buffer.push(ev.unicode);
+                                    return self.spin_commit();
+                                } else {
+                                    shared.com.insert(Symbol::from(ev.unicode));
+                                    return self.spin_absorb();
+                                }
+                            }
+                            CharacterForm::Fullwidth => {
+                                let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                                if shared.com.is_empty() {
+                                    shared.commit_buffer.clear();
+                                    shared.commit_buffer.push(char_);
+                                    return self.spin_commit();
+                                } else {
+                                    shared.com.insert(Symbol::from(char_));
+                                    return self.spin_absorb();
+                                }
+                            }
+                        }
+                    }
                     self.spin_bell()
                 }
                 LanguageMode::English => match shared.options.character_form {

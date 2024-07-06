@@ -2018,6 +2018,28 @@ void test_KB_HANYU()
     chewing_delete(ctx);
 }
 
+void test_KB_HANYU_direct_symbol_output()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_HANYU_PINYIN);
+
+    type_keystroke_by_string(ctx, "pin yin  123 mo2shi4");
+    ok_preedit_buffer(ctx, "拼音 123 模式");
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_set_KBType(ctx, KB_HANYU_PINYIN);
+    chewing_set_ShapeMode(ctx, FULLSHAPE_MODE);
+
+    type_keystroke_by_string(ctx, "pin yin  123 mo2shi4");
+    ok_preedit_buffer(ctx, "拼音　１２３　模式");
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
 
 void test_KB_THL()
 {
@@ -2162,6 +2184,7 @@ void test_KB()
     test_KB_COLEMAK_DH_ORTH();
 
     test_KB_HANYU();
+    test_KB_HANYU_direct_symbol_output();
     test_KB_THL();
     test_KB_MPS2();
 }
