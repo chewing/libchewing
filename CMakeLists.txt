@@ -93,7 +93,7 @@ if(WITH_RUST)
         FetchContent_Declare(
             Corrosion
             GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-            GIT_TAG be76480232216a64f65e3b1d9794d68cbac6c690 # v0.4.5
+            GIT_TAG 64289b1d79d6d19cd2e241db515381a086bb8407 # v0.5
             FIND_PACKAGE_ARGS
         )
         FetchContent_MakeAvailable(Corrosion)
