@@ -230,6 +230,10 @@ impl KeyCode {
             _ => None,
         }
     }
+    #[rustfmt::skip]
+    pub const fn is_atoz(&self) -> bool {
+        matches!(self, A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)
+    }
 }
 
 use KeyCode::*;
@@ -246,6 +250,13 @@ pub struct KeyEvent {
     pub unicode: char,
     /// TODO: doc
     pub modifiers: Modifiers,
+}
+
+impl KeyEvent {
+    pub(crate) fn is_printable(&self) -> bool {
+        // FIXME refactor
+        self.unicode != '�'
+    }
 }
 
 impl fmt::Display for KeyEvent {
