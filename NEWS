@@ -1,3 +1,16 @@
+What's New in libchewing 0.8.5 (July 8, 2024)
+---------------------------------------------------------
+
+* Changed
+  - Bump default Corrosion version to v0.5
+
+* Bug fixed
+  - Hanyu Pinyin empty rime handling. (#585, introduced in v0.8.0, reported by
+    Jidanni)
+  - Printable non A-Z chars should output symbols in pinyin. (#592, introduced
+    in v0.8.0, reported by Jidanni)
+
+
 What's New in libchewing 0.8.4 (Jun 1, 2024)
 ---------------------------------------------------------
 
