@@ -1080,6 +1080,16 @@ void chewing_set_hsuSelKeyType(struct ChewingContext *_ctx, int mode);
  */
 int chewing_get_hsuSelKeyType(struct ChewingContext *_ctx);
 
+const char *chewing_version(void);
+
+int chewing_version_major(void);
+
+int chewing_version_minor(void);
+
+int chewing_version_patch(void);
+
+const char *chewing_version_extra(void);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
