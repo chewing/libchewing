@@ -121,3 +121,8 @@ _chewing_config_set_int
 _chewing_config_get_int
 _chewing_config_set_str
 _chewing_config_get_str
+_chewing_version
+_chewing_version_major
+_chewing_version_minor
+_chewing_version_patch
+_chewing_version_extra

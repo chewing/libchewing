@@ -128,4 +128,9 @@ CHEWING_0.9 {
         chewing_config_get_int;
         chewing_config_set_str;
         chewing_config_get_str;
+        chewing_version;
+        chewing_version_major;
+        chewing_version_minor;
+        chewing_version_patch;
+        chewing_version_extra;
 } CHEWING_0.5;

@@ -8,6 +8,7 @@
  * of this file.
  */
 
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #    include <config.h>
 #endif
@@ -53,6 +54,7 @@ void test_has_option()
         ,"chewing.selection_keys"
         ,"chewing.character_form"
         ,"chewing.space_is_select_key"
+        ,"chewing.fuzzy_search_mode"
     };
 
     ctx = chewing_new();
@@ -160,6 +162,9 @@ void test_default_value_options()
 
     ok(chewing_config_get_int(ctx, "chewing.character_form") == HALFSHAPE_MODE,
         "default chewing.character_form shall be %d", HALFSHAPE_MODE);
+
+    ok(chewing_config_get_int(ctx, "chewing.fuzzy_search_mode") == 0,
+        "default chewing.fuzzy_search_mode shall be 0");
 
     chewing_delete(ctx);
 }
@@ -722,6 +727,21 @@ void test_new2()
     test_new2_userpath();
 }
 
+void test_runtime_version()
+{
+    char buf[256];
+    int major = chewing_version_major();
+    int minor = chewing_version_minor();
+    int patch = chewing_version_patch();
+    const char *extra = chewing_version_extra();
+    const char *version = chewing_version();
+
+    ok(version != NULL, "chewing_version returns a version string");
+
+    sprintf(buf, "%d.%d.%d%s", major, minor, patch, extra);
+    ok(strcmp(buf, version) == 0, "chewing_version can be created from components");
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -759,6 +779,8 @@ int main(int argc, char *argv[])
     test_deprecated();
 
     test_new2();
+
+    test_runtime_version();
 
     fclose(fd);
 

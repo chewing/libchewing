@@ -303,7 +303,7 @@ pub unsafe extern "C" fn chewing_config_has_option(
         | "chewing.selection_keys"
         | "chewing.character_form"
         | "chewing.space_is_select_key"
-        | "chewing.fuzzy_searcy_mode" => true,
+        | "chewing.fuzzy_search_mode" => true,
         _ => false,
     };
 

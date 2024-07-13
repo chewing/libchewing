@@ -33,6 +33,8 @@ mod io;
 mod logger;
 mod public;
 
+pub mod version;
+
 /// Initializes chewing context and environment settings.
 ///
 /// Most of the Chewing IM APIs require a
