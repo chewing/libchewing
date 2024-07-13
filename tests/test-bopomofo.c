@@ -57,10 +57,10 @@ void test_select_candidate_no_rearward()
     type_keystroke_by_string(ctx, "<D>");       /* ㄧˊㄕㄤˋㄌㄞˊ */
     ok_candidate(ctx, CAND_1, ARRAY_SIZE(CAND_1));
 
-    type_keystroke_by_string(ctx, "<D>");       /* ㄕㄤˋㄌㄞˊ */
+    type_keystroke_by_string(ctx, "<D>");       /* 移上 */
     ok_candidate(ctx, CAND_2, ARRAY_SIZE(CAND_2));
 
-    type_keystroke_by_string(ctx, "<D><D>2<E>");        /* select 移上來 */
+    type_keystroke_by_string(ctx, "<D><L><D>2<E>");        /* select 移上來 */
     ok_commit_buffer(ctx, CAND_1[1]);
 
     chewing_delete(ctx);
@@ -103,7 +103,7 @@ void test_select_candidate_rearward()
     type_keystroke_by_string(ctx, "<D>");       /* ㄕㄤˋㄌㄞˊ */
     ok_candidate(ctx, CAND_2, ARRAY_SIZE(CAND_2));
 
-    type_keystroke_by_string(ctx, "<D><D>2<E>");        /* select 移上來 */
+    type_keystroke_by_string(ctx, "<D><L><D>2<E>");        /* select 移上來 */
     ok_commit_buffer(ctx, CAND_1[1]);
 
     chewing_delete(ctx);
@@ -468,7 +468,7 @@ void test_select_candidate_second_page_rewind()
     chewing_set_candPerPage(ctx, 9);
     chewing_set_spaceAsSelection(ctx, 1);
     chewing_set_phraseChoiceRearward(ctx, 1);
-    type_keystroke_by_string(ctx, "zp zp <D><D><R><D>"); /* ㄈㄣ ㄈㄣ */
+    type_keystroke_by_string(ctx, "zp zp <D><D><R><D><D>"); /* ㄈㄣ ㄈㄣ */
     ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
 
     chewing_delete(ctx);
@@ -1698,7 +1698,7 @@ void test_KB_HSU_example()
     ok_preedit_buffer(ctx, "一隻隻可愛的小花貓");
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "sm sxajdwj<D><D>1xfsxajdgscewfhidxfdwj<D><D>1cd<D><D>1rnd");
+    type_keystroke_by_string(ctx, "sm sxajdwj<D><D>1xfsxajdgscewfhidxfdwj<D><D>1cd<D>1rnd");
     ok_preedit_buffer(ctx, "三歲到五歲的小孩五到十人");
     chewing_clean_preedit_buf(ctx);
 

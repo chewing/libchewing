@@ -1224,20 +1224,9 @@ impl Selecting {
         }
     }
     fn total_page(&self, editor: &SharedState, dict: &Layered) -> usize {
-        // MSRV: stable after rust 1.73
-        fn div_ceil(lhs: usize, rhs: usize) -> usize {
-            let d = lhs / rhs;
-            let r = lhs % rhs;
-            if r > 0 && rhs > 0 {
-                d + 1
-            } else {
-                d
-            }
-        }
-        div_ceil(
-            self.candidates(editor, dict).len(),
-            editor.options.candidates_per_page,
-        )
+        self.candidates(editor, dict)
+            .len()
+            .div_ceil(editor.options.candidates_per_page)
     }
     fn select(&mut self, editor: &mut SharedState, n: usize) -> Transition {
         let offset = self.page_no * editor.options.candidates_per_page + n;
@@ -1315,7 +1304,7 @@ impl State for Selecting {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Space => {
+            Down | Space => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
@@ -1327,17 +1316,6 @@ impl State for Selecting {
                         Selector::Symbol(_sel) => (),
                         Selector::SpecialSymmbol(_sel) => (),
                     }
-                }
-                self.spin_absorb()
-            }
-            Down => {
-                match &mut self.sel {
-                    Selector::Phrase(sel) => {
-                        sel.next(&shared.dict);
-                        self.page_no = 0;
-                    }
-                    Selector::Symbol(_sel) => (),
-                    Selector::SpecialSymmbol(_sel) => (),
                 }
                 self.spin_absorb()
             }
