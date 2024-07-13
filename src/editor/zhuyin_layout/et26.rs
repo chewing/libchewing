@@ -9,7 +9,7 @@ use crate::{
 use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Et26 {
     syllable: Syllable,
 }
@@ -244,5 +244,9 @@ impl SyllableEditor for Et26 {
             }
         }
         &[]
+    }
+
+    fn clone(&self) -> Box<dyn SyllableEditor> {
+        Box::new(Clone::clone(self))
     }
 }

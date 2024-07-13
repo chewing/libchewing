@@ -21,8 +21,8 @@ use log::{debug, info, trace, warn};
 use crate::{
     conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
     dictionary::{
-        Dictionary, DictionaryMut, Layered, SystemDictionaryLoader, UpdateDictionaryError,
-        UserDictionaryLoader,
+        Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
+        UpdateDictionaryError, UserDictionaryLoader,
     },
     editor::keyboard::KeyCode,
     zhuyin::{Syllable, SyllableSlice},
@@ -66,6 +66,7 @@ pub struct EditorOptions {
     pub language_mode: LanguageMode,
     pub character_form: CharacterForm,
     pub user_phrase_add_dir: UserPhraseAddDirection,
+    pub fuzzy_search: bool,
 }
 
 impl Default for EditorOptions {
@@ -82,6 +83,7 @@ impl Default for EditorOptions {
             language_mode: LanguageMode::Chinese,
             character_form: CharacterForm::Halfwidth,
             user_phrase_add_dir: UserPhraseAddDirection::Forward,
+            fuzzy_search: false,
         }
     }
 }
@@ -234,6 +236,14 @@ impl Editor {
     pub fn set_editor_options(&mut self, options: EditorOptions) {
         if self.shared.options.language_mode != options.language_mode {
             self.shared.syl.clear();
+        }
+        if self.shared.options.fuzzy_search != options.fuzzy_search {
+            self.shared
+                .dict
+                .set_lookup_strategy(match options.fuzzy_search {
+                    true => LookupStrategy::FuzzyPartialPrefix,
+                    false => LookupStrategy::Standard,
+                })
         }
         self.shared.options = options;
     }
@@ -1126,21 +1136,33 @@ impl State for EnteringSyllable {
                 }
                 self.start_entering()
             }
-            _ => match shared.syl.key_press(ev) {
-                KeyBehavior::Absorb => self.spin_absorb(),
-                KeyBehavior::Commit => {
-                    if shared
-                        .dict
-                        .lookup_first_phrase(&[shared.syl.read()])
-                        .is_some()
-                    {
-                        shared.com.insert(Symbol::from(shared.syl.read()));
+            _ => {
+                let key_behavior = match shared.options.fuzzy_search {
+                    true => shared.syl.fuzzy_key_press(ev),
+                    false => shared.syl.key_press(ev),
+                };
+                match key_behavior {
+                    KeyBehavior::Absorb => self.spin_absorb(),
+                    KeyBehavior::Fuzzy(syl) => {
+                        if shared.dict.lookup_first_phrase(&[syl]).is_some() {
+                            shared.com.insert(Symbol::from(syl));
+                        }
+                        self.spin_absorb()
                     }
-                    shared.syl.clear();
-                    self.start_entering()
+                    KeyBehavior::Commit => {
+                        if shared
+                            .dict
+                            .lookup_first_phrase(&[shared.syl.read()])
+                            .is_some()
+                        {
+                            shared.com.insert(Symbol::from(shared.syl.read()));
+                        }
+                        shared.syl.clear();
+                        self.start_entering()
+                    }
+                    _ => self.spin_bell(),
                 }
-                _ => self.spin_bell(),
-            },
+            }
         }
     }
     fn as_any(&self) -> &dyn Any {

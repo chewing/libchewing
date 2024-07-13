@@ -296,6 +296,18 @@ pub type Phrases<'a> = Box<dyn Iterator<Item = Phrase> + 'a>;
 /// ```
 pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 
+/// The lookup strategy hint for dictionary.
+///
+/// If the dictionary supports the lookup strategy it should try to use.
+/// Otherwise fallback to standard.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LookupStrategy {
+    /// The native lookup strategy supported by the dictionary.
+    Standard,
+    /// Try to fuzzy match partial syllables using only preffix.
+    FuzzyPartialPrefix,
+}
+
 /// An interface for looking up dictionaries.
 ///
 /// This is the main dictionary trait. For more about the concept of
@@ -344,6 +356,10 @@ pub trait Dictionary: Debug {
     fn about(&self) -> DictionaryInfo;
     /// Returns the dictionary file path if it's backed by a file.
     fn path(&self) -> Option<&Path>;
+    /// Set the lookup strategy hint.
+    fn set_lookup_strategy(&mut self, strategy: LookupStrategy) {
+        _ = strategy
+    }
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
 }
 

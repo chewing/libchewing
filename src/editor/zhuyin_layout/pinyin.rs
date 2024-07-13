@@ -10,7 +10,7 @@ use super::{KeyBehavior, SyllableEditor};
 const MAX_PINYIN_LEN: usize = 10;
 
 /// TODO: docs
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum PinyinVariant {
     /// TODO: docs
     #[default]
@@ -22,7 +22,7 @@ pub enum PinyinVariant {
 }
 
 /// TODO: docs
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Pinyin {
     key_seq: String,
     syllable: Syllable,
@@ -255,6 +255,10 @@ impl SyllableEditor for Pinyin {
         KeyBehavior::Commit
     }
 
+    fn fuzzy_key_press(&mut self, key: KeyEvent) -> KeyBehavior {
+        self.key_press(key)
+    }
+
     fn is_empty(&self) -> bool {
         self.key_seq.is_empty()
     }
@@ -275,6 +279,10 @@ impl SyllableEditor for Pinyin {
 
     fn key_seq(&self) -> Option<String> {
         Some(self.key_seq.clone())
+    }
+
+    fn clone(&self) -> Box<dyn SyllableEditor> {
+        Box::new(Clone::clone(self))
     }
 }
 

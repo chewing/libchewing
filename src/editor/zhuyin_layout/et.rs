@@ -10,7 +10,7 @@ use crate::{
 use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Et {
     syllable: Syllable,
 }
@@ -115,6 +115,10 @@ impl SyllableEditor for Et {
 
     fn key_seq(&self) -> Option<String> {
         None
+    }
+
+    fn clone(&self) -> Box<dyn SyllableEditor> {
+        Box::new(Clone::clone(self))
     }
 }
 

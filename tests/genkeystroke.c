@@ -144,10 +144,15 @@ void show_interval_buffer(int x, int y, ChewingContext *ctx)
 
 void showBopomofo(ChewingContext *ctx)
 {
-    if (chewing_get_ChiEngMode(ctx))
-        addstr("[中]");
-    else
+    if (chewing_get_ChiEngMode(ctx)) {
+        if (chewing_config_get_int(ctx, "chewing.fuzzy_search_mode")) {
+            addstr("[糊]");
+        } else {
+            addstr("[中]");
+        }
+    } else {
         addstr("[英]");
+    }
     addstr("        ");
     addstr(chewing_bopomofo_String_static(ctx));
 }
@@ -448,6 +453,12 @@ int main(int argc, char *argv[])
             break;
         case KEY_CTRL_('D'):
             goto end;
+        case KEY_CTRL_('F'):
+            if (chewing_config_get_int(ctx, "chewing.fuzzy_search_mode") == TRUE)
+                chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", FALSE);
+            else
+                chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", TRUE);
+            break;
         case KEY_CTRL_('H'):   /* emulate Shift */
             if (chewing_get_ShapeMode(ctx) == FULLSHAPE_MODE)
                 chewing_set_ShapeMode(ctx, HALFSHAPE_MODE);

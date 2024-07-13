@@ -429,6 +429,13 @@ impl Dictionary for Trie {
         self.path.as_ref().map(|p| p as &Path)
     }
 
+    fn set_lookup_strategy(&mut self, strategy: super::LookupStrategy) {
+        match strategy {
+            super::LookupStrategy::Standard => self.enable_fuzzy_search(false),
+            super::LookupStrategy::FuzzyPartialPrefix => self.enable_fuzzy_search(true),
+        }
+    }
+
     fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
         None
     }
