@@ -1315,7 +1315,7 @@ impl State for Selecting {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Space if shared.options.space_is_select_key => {
+            Space => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
