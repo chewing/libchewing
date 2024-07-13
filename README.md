@@ -100,7 +100,7 @@ be built.
    - cmake >= 3.21.0
 + Toolchain / IDE:
    - clang >= 3.2 OR gcc >= 4.6.3
-   - Rust >= 1.70
+   - Rust >= 1.77
    - Build Tools for Visual Studio 2022 for MSVC build
 + Documentation tools:
    - texinfo >= 4.8
@@ -185,7 +185,7 @@ To ensure libchewing can be built on various Linux distributions, we use the
 minimum rust version available from major distributions' next release branch.
 Data source: https://repology.org/project/rust/versions
 
-* Current MSRV: 1.70.0 (Debian unstable)
+* Current MSRV: 1.77.0 (Debian unstable)
 
 
 ## Usage
