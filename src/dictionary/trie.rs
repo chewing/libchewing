@@ -17,7 +17,7 @@ use der::{
     DecodeValue, Document, Encode, EncodeValue, ErrorKind, FixedTag, Length, Reader, Sequence,
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
 };
-use log::error;
+use log::{error, warn};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -109,6 +109,8 @@ pub struct Trie {
     path: Option<PathBuf>,
     index: Box<[u8]>,
     phrase_seq: Box<[u8]>,
+
+    fuzzy_search: bool,
 }
 
 fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
@@ -133,11 +135,7 @@ impl Trie {
     /// # }
     /// ```
     pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Trie> {
-        let path = path.as_ref().to_path_buf();
-        let mut file = File::open(&path)?;
-        let mut trie = Trie::new(&mut file)?;
-        trie.path = Some(path);
-        Ok(trie)
+        TrieOpenOptions::new().open(path)
     }
     /// Creates a new `Trie` instance from a input stream.
     ///
@@ -159,7 +157,49 @@ impl Trie {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new<T>(mut stream: T) -> io::Result<Trie>
+    pub fn new<T>(stream: T) -> io::Result<Trie>
+    where
+        T: Read,
+    {
+        TrieOpenOptions::new().read_from(stream)
+    }
+    /// Enable or disable fuzzy search.
+    pub fn enable_fuzzy_search(&mut self, fuzzy_search: bool) {
+        self.fuzzy_search = fuzzy_search;
+    }
+}
+
+/// Options and flags which can be used to configure how a trie dictionary is
+/// opened.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TrieOpenOptions {
+    fuzzy_search: bool,
+}
+
+impl Default for TrieOpenOptions {
+    fn default() -> Self {
+        Self {
+            fuzzy_search: false,
+        }
+    }
+}
+
+impl TrieOpenOptions {
+    pub fn new() -> TrieOpenOptions {
+        TrieOpenOptions::default()
+    }
+    pub fn fuzzy_search(&mut self, fuzzy_search: bool) -> &mut Self {
+        self.fuzzy_search = fuzzy_search;
+        self
+    }
+    pub fn open<P: AsRef<Path>>(&self, path: P) -> io::Result<Trie> {
+        let path = path.as_ref().to_path_buf();
+        let mut file = File::open(&path)?;
+        let mut trie = self.read_from(&mut file)?;
+        trie.path = Some(path);
+        Ok(trie)
+    }
+    pub fn read_from<T>(&self, mut stream: T) -> io::Result<Trie>
     where
         T: Read,
     {
@@ -175,6 +215,7 @@ impl Trie {
             path: None,
             index,
             phrase_seq,
+            fuzzy_search: self.fuzzy_search,
         })
     }
 }
@@ -225,36 +266,70 @@ impl Dictionary for Trie {
     fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
         let dict = self.index.as_ref();
         let data = self.phrase_seq.as_ref();
+
         bail_if_oob!(0, TrieNodeView::SIZE, dict.len());
         let root = TrieNodeView(&dict[..TrieNodeView::SIZE]);
-        let mut node = root;
-        // empty dictionary
-        if node.child_begin() == node.child_end() {
+
+        // Return early for empty dictionary
+        if root.child_begin() == root.child_end() {
+            warn!("[!] detected empty dictionary.");
             return vec![];
         }
-        'next: for syl in syllables.to_slice().iter() {
+
+        let search_predicate = match self.fuzzy_search {
+            false => |n: u16, syl: &Syllable| n == syl.to_u16(),
+            true => |n: u16, syl: &Syllable| {
+                if n == 0 {
+                    return false;
+                }
+                if let Ok(syllable) = Syllable::try_from(n) {
+                    syllable.starts_with(*syl)
+                } else {
+                    false
+                }
+            },
+        };
+
+        // Perform a BFS search to find all leaf nodes
+        let mut threads: VecDeque<TrieNodeView<'_>> = VecDeque::new();
+        threads.push_back(root);
+        for syl in syllables.to_slice().iter() {
             debug_assert!(syl.to_u16() != 0);
-            bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
-            let mut child_nodes = dict[node.child_begin()..node.child_end()]
-                .chunks_exact(TrieNodeView::SIZE)
-                .map(TrieNodeView);
-            if let Some(n) = child_nodes.find(|n| n.syllable() == syl.to_u16()) {
-                node = n;
-                continue 'next;
+            for _ in 0..threads.len() {
+                let node = threads.pop_front().unwrap();
+                bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+                let child_nodes = dict[node.child_begin()..node.child_end()]
+                    .chunks_exact(TrieNodeView::SIZE)
+                    .map(TrieNodeView);
+                for n in child_nodes {
+                    if search_predicate(n.syllable(), syl) {
+                        threads.push_back(n);
+                    }
+                }
             }
-            return vec![];
+            if threads.is_empty() {
+                return vec![];
+            }
         }
-        bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
-        let leaf_data = &dict[node.child_begin()..];
-        bail_if_oob!(0, TrieLeafView::SIZE, leaf_data.len());
-        let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
-        if leaf.reserved_zero() != 0 {
-            return vec![];
+
+        // Collect result from all threads
+        let mut result = vec![];
+        for node in threads.into_iter() {
+            bail_if_oob!(node.child_begin(), node.child_end(), dict.len());
+            let leaf_data = &dict[node.child_begin()..];
+            bail_if_oob!(0, TrieLeafView::SIZE, leaf_data.len());
+            let leaf = TrieLeafView(&leaf_data[..TrieLeafView::SIZE]);
+            if leaf.reserved_zero() != 0 {
+                // Skip non leaf nodes
+                continue;
+            }
+            bail_if_oob!(leaf.data_begin(), leaf.data_end(), data.len());
+            result.extend(PhrasesIter::new(&data[leaf.data_begin()..leaf.data_end()]));
+            if result.len() > first {
+                break;
+            }
         }
-        bail_if_oob!(leaf.data_begin(), leaf.data_end(), data.len());
-        PhrasesIter::new(&data[leaf.data_begin()..leaf.data_end()])
-            .take(first)
-            .collect()
+        result
     }
 
     fn entries(&self) -> Entries<'_> {
@@ -352,6 +427,13 @@ impl Dictionary for Trie {
 
     fn path(&self) -> Option<&Path> {
         self.path.as_ref().map(|p| p as &Path)
+    }
+
+    fn set_lookup_strategy(&mut self, strategy: super::LookupStrategy) {
+        match strategy {
+            super::LookupStrategy::Standard => self.enable_fuzzy_search(false),
+            super::LookupStrategy::FuzzyPartialPrefix => self.enable_fuzzy_search(true),
+        }
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
@@ -1124,6 +1206,7 @@ mod tests {
     use crate::{
         dictionary::{
             trie::TrieBuilderNode, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
+            TrieOpenOptions,
         },
         syl,
         zhuyin::Bopomofo,
@@ -1222,6 +1305,35 @@ mod tests {
     }
 
     #[test]
+    fn tree_lookup_word_fuzzy() -> Result<(), Box<dyn std::error::Error>> {
+        let mut builder = TrieBuilder::new();
+        builder.insert(
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            ("測", 1).into(),
+        )?;
+        builder.insert(
+            &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            ("冊", 1).into(),
+        )?;
+        let mut cursor = Cursor::new(vec![]);
+        builder.write(&mut cursor)?;
+        cursor.rewind()?;
+        let dict = TrieOpenOptions::new()
+            .fuzzy_search(true)
+            .read_from(&mut cursor)?;
+        assert_eq!(
+            vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
+            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E]])
+        );
+        assert_eq!(
+            vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
+            dict.lookup_all_phrases(&[syl![Bopomofo::C]])
+        );
+
+        Ok(())
+    }
+
+    #[test]
     fn tree_lookup_phrase() -> Result<(), Box<dyn std::error::Error>> {
         let mut builder = TrieBuilder::new();
         builder.insert(
@@ -1265,6 +1377,75 @@ mod tests {
                 syl![Bopomofo::SH, Bopomofo::TONE4],
                 syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
                 syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+            ])
+        );
+        assert_eq!(
+            Vec::<Phrase>::new(),
+            dict.lookup_all_phrases(&[
+                syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
+                syl![Bopomofo::U, Bopomofo::TONE4]
+            ])
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn tree_lookup_phrase_fuzzy() -> Result<(), Box<dyn std::error::Error>> {
+        let mut builder = TrieBuilder::new();
+        builder.insert(
+            &[
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+            ],
+            ("測試", 1).into(),
+        )?;
+        builder.insert(
+            &[
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+            ],
+            ("策試", 2).into(),
+        )?;
+        builder.insert(
+            &[
+                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                syl![Bopomofo::SH, Bopomofo::TONE4],
+                syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
+                syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+            ],
+            ("測試成功", 3).into(),
+        )?;
+        let mut cursor = Cursor::new(vec![]);
+        builder.write(&mut cursor)?;
+        cursor.rewind()?;
+        let dict = TrieOpenOptions::new()
+            .fuzzy_search(true)
+            .read_from(&mut cursor)?;
+        assert_eq!(
+            vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
+            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E], syl![Bopomofo::SH]])
+        );
+        assert_eq!(
+            vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
+            dict.lookup_all_phrases(&[syl![Bopomofo::C], syl![Bopomofo::SH]])
+        );
+        assert_eq!(
+            vec![Phrase::new("測試成功", 3)],
+            dict.lookup_all_phrases(&[
+                syl![Bopomofo::C, Bopomofo::E],
+                syl![Bopomofo::SH],
+                syl![Bopomofo::CH, Bopomofo::ENG],
+                syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+            ])
+        );
+        assert_eq!(
+            vec![Phrase::new("測試成功", 3)],
+            dict.lookup_all_phrases(&[
+                syl![Bopomofo::C],
+                syl![Bopomofo::SH],
+                syl![Bopomofo::CH],
+                syl![Bopomofo::G],
             ])
         );
         assert_eq!(

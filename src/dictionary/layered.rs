@@ -128,6 +128,13 @@ impl Dictionary for Layered {
         None
     }
 
+    fn set_lookup_strategy(&mut self, strategy: super::LookupStrategy) {
+        self.sys_dict
+            .iter_mut()
+            .for_each(|sys_dict| sys_dict.set_lookup_strategy(strategy));
+        self.user_dict.set_lookup_strategy(strategy);
+    }
+
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
         self.user_dict.as_dict_mut()
     }

@@ -1301,6 +1301,55 @@ void test_Space()
     test_Space_selection_insert_eng_mode();
 }
 
+void test_FuzzySearchMode()
+{
+    const TestData FUZZY_INPUT[] = {
+        {"eji6aup6284cjo42941ul3<E>", "國民大會代表" },
+        {"eji aup 28 cjo 29 1ul <E>", "國民大會代表" },
+        {"ej au 2 cj 2 1 <E>", "國民大會代表" },
+        {"e a 2 c 2 1 <E>", "國民大會代表" },
+        {"ea2c21 <E>", "國民大會代表" },
+    };
+    size_t i;
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", 1);
+
+    for (i = 0; i < ARRAY_SIZE(FUZZY_INPUT); ++i) {
+        type_keystroke_by_string(ctx, FUZZY_INPUT[i].token);
+        ok_commit_buffer(ctx, FUZZY_INPUT[i].expected);
+    }
+
+    chewing_delete(ctx);
+}
+
+void test_FuzzySearchMode_Hanyu()
+{
+    const TestData FUZZY_INPUT[] = {
+        {"guo2min2da4hui4dai4biao3<E>", "國民大會代表" },
+        {"guo min da hui dai biao <E>", "國民大會代表" },
+        {"g m d h d b <E>", "國民大會代表" },
+    };
+    size_t i;
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_KBType(ctx, KB_HANYU_PINYIN);
+    chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", 1);
+
+    for (i = 0; i < ARRAY_SIZE(FUZZY_INPUT); ++i) {
+        type_keystroke_by_string(ctx, FUZZY_INPUT[i].token);
+        ok_commit_buffer(ctx, FUZZY_INPUT[i].expected);
+    }
+
+    chewing_delete(ctx);
+}
+
 void test_get_phoneSeq()
 {
     static const struct {
@@ -2315,6 +2364,8 @@ int main(int argc, char *argv[])
     test_ShiftSpace();
     test_Numlock();
     test_Space();
+    test_FuzzySearchMode();
+    test_FuzzySearchMode_Hanyu();
 
     test_get_phoneSeq();
     test_bopomofo_buffer();

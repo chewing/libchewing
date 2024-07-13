@@ -140,6 +140,21 @@ impl Syllable {
     pub fn has_tone(&self) -> bool {
         self.tone().is_some()
     }
+    pub fn starts_with(&self, other: Syllable) -> bool {
+        let trailing_zeros = other.to_u16().trailing_zeros();
+        let mask = if trailing_zeros >= 9 {
+            9
+        } else if trailing_zeros >= 7 {
+            7
+        } else if trailing_zeros >= 3 {
+            3
+        } else {
+            0
+        };
+        let self_prefix = self.to_u16() >> mask;
+        let other_prefix = other.to_u16() >> mask;
+        return self_prefix == other_prefix;
+    }
     /// Returns the `Syllable` encoded in a u16 integer.
     ///
     /// The data layout used:
@@ -551,6 +566,29 @@ mod test {
     fn syllable_as_u16_roundtrip() {
         let syl = Syllable::builder().insert(Bopomofo::S).unwrap().build();
         assert_eq!(syl, syl.to_u16().try_into().unwrap());
+    }
+
+    #[test]
+    fn syllable_starts_with() {
+        assert!(
+            syl![Bopomofo::X, Bopomofo::I, Bopomofo::EN, Bopomofo::TONE4].starts_with(syl![
+                Bopomofo::X,
+                Bopomofo::I,
+                Bopomofo::EN
+            ])
+        );
+        assert!(
+            syl![Bopomofo::X, Bopomofo::I, Bopomofo::EN, Bopomofo::TONE4]
+                .starts_with(syl![Bopomofo::X, Bopomofo::I])
+        );
+        assert!(
+            syl![Bopomofo::X, Bopomofo::I, Bopomofo::EN, Bopomofo::TONE4]
+                .starts_with(syl![Bopomofo::X])
+        );
+        assert!(
+            !syl![Bopomofo::X, Bopomofo::I, Bopomofo::EN, Bopomofo::TONE4]
+                .starts_with(syl![Bopomofo::Q])
+        );
     }
 
     #[test]

@@ -302,7 +302,8 @@ pub unsafe extern "C" fn chewing_config_has_option(
         | "chewing.phrase_choice_rearward"
         | "chewing.selection_keys"
         | "chewing.character_form"
-        | "chewing.space_is_select_key" => true,
+        | "chewing.space_is_select_key"
+        | "chewing.fuzzy_searcy_mode" => true,
         _ => false,
     };
 
@@ -344,6 +345,7 @@ pub unsafe extern "C" fn chewing_config_get_int(
             CharacterForm::Fullwidth => FULLSHAPE_MODE,
         },
         "chewing.space_is_select_key" => option.space_is_select_key as c_int,
+        "chewing.fuzzy_search_mode" => option.fuzzy_search as c_int,
         _ => ERROR,
     }
 }
@@ -431,6 +433,10 @@ pub unsafe extern "C" fn chewing_config_set_int(
         "chewing.space_is_select_key" => {
             ensure_bool!(value);
             options.space_is_select_key = value > 0;
+        }
+        "chewing.fuzzy_search_mode" => {
+            ensure_bool!(value);
+            options.fuzzy_search = value > 0;
         }
         _ => return ERROR,
     };

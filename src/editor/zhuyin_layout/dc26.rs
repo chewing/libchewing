@@ -8,7 +8,7 @@ use crate::{
 use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct DaiChien26 {
     syllable: Syllable,
 }
@@ -183,5 +183,9 @@ impl SyllableEditor for DaiChien26 {
 
     fn key_seq(&self) -> Option<String> {
         None
+    }
+
+    fn clone(&self) -> Box<dyn SyllableEditor> {
+        Box::new(Clone::clone(self))
     }
 }
