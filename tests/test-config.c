@@ -55,6 +55,7 @@ void test_has_option()
         ,"chewing.character_form"
         ,"chewing.space_is_select_key"
         ,"chewing.fuzzy_search_mode"
+        ,"chewing.conversion_engine"
     };
 
     ctx = chewing_new();

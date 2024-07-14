@@ -9,7 +9,7 @@ use std::{
 };
 
 use chewing::{
-    conversion::{ChewingEngine, Interval, Symbol},
+    conversion::{ChewingEngine, Interval, SimpleEngine, Symbol},
     dictionary::{Layered, SystemDictionaryLoader, UserDictionaryLoader},
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
@@ -17,8 +17,8 @@ use chewing::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
         },
-        BasicEditor, CharacterForm, Editor, EditorKeyBehavior, LanguageMode, LaxUserFreqEstimate,
-        UserPhraseAddDirection,
+        BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior, LanguageMode,
+        LaxUserFreqEstimate, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -171,7 +171,7 @@ pub unsafe extern "C" fn chewing_new2(
     let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
     let dict = Layered::new(dictionaries, user_dictionary);
-    let conversion_engine = ChewingEngine::new();
+    let conversion_engine = Box::new(ChewingEngine::new());
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);
     let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -303,7 +303,8 @@ pub unsafe extern "C" fn chewing_config_has_option(
         | "chewing.selection_keys"
         | "chewing.character_form"
         | "chewing.space_is_select_key"
-        | "chewing.fuzzy_search_mode" => true,
+        | "chewing.fuzzy_search_mode"
+        | "chewing.conversion_engine" => true,
         _ => false,
     };
 
@@ -346,6 +347,10 @@ pub unsafe extern "C" fn chewing_config_get_int(
         },
         "chewing.space_is_select_key" => option.space_is_select_key as c_int,
         "chewing.fuzzy_search_mode" => option.fuzzy_search as c_int,
+        "chewing.conversion_engine" => match option.conversion_engine {
+            ConversionEngineKind::ChewingEngine => 0,
+            ConversionEngineKind::SimpleEngine => 1,
+        },
         _ => ERROR,
     }
 }
@@ -437,6 +442,21 @@ pub unsafe extern "C" fn chewing_config_set_int(
         "chewing.fuzzy_search_mode" => {
             ensure_bool!(value);
             options.fuzzy_search = value > 0;
+        }
+        "chewing.conversion_engine" => {
+            options.conversion_engine = match value {
+                0 => {
+                    ctx.editor
+                        .set_conversion_engine(Box::new(ChewingEngine::new()));
+                    ConversionEngineKind::ChewingEngine
+                }
+                1 => {
+                    ctx.editor
+                        .set_conversion_engine(Box::new(SimpleEngine::new()));
+                    ConversionEngineKind::SimpleEngine
+                }
+                _ => return ERROR,
+            }
         }
         _ => return ERROR,
     };
