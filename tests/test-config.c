@@ -56,6 +56,7 @@ void test_has_option()
         ,"chewing.space_is_select_key"
         ,"chewing.fuzzy_search_mode"
         ,"chewing.conversion_engine"
+        ,"chewing.enable_fullwidth_toggle_key"
     };
 
     ctx = chewing_new();

@@ -77,6 +77,7 @@ pub struct EditorOptions {
     pub user_phrase_add_dir: UserPhraseAddDirection,
     pub fuzzy_search: bool,
     pub conversion_engine: ConversionEngineKind,
+    pub enable_fullwidth_toggle_key: bool,
 }
 
 impl Default for EditorOptions {
@@ -96,6 +97,7 @@ impl Default for EditorOptions {
             fuzzy_search: false,
             // FIXME may be out of sync with the engine used
             conversion_engine: ConversionEngineKind::ChewingEngine,
+            enable_fullwidth_toggle_key: true,
         }
     }
 }
@@ -947,7 +949,7 @@ impl State for Entering {
                 self.spin_absorb()
             }
             Up => self.spin_ignore(),
-            Space if ev.modifiers.shift => {
+            Space if ev.modifiers.shift && shared.options.enable_fullwidth_toggle_key => {
                 shared.options.character_form = match shared.options.character_form {
                     CharacterForm::Halfwidth => CharacterForm::Fullwidth,
                     CharacterForm::Fullwidth => CharacterForm::Halfwidth,

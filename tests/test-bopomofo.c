@@ -1120,6 +1120,48 @@ void test_ShiftSpace()
     chewing_delete(ctx);
 }
 
+void test_ShiftSpaceDisabled()
+{
+    ChewingContext *ctx;
+    int mode;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_config_set_int(ctx, "chewing.enable_fullwidth_toggle_key", 0);
+
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, "<SS>");
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, " ");
+    ok_commit_buffer(ctx, " "); /* Space */
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "a");
+    ok_commit_buffer(ctx, "a"); /* a */
+
+    chewing_set_ChiEngMode(ctx, CHINESE_MODE);
+    type_keystroke_by_string(ctx, "<SS>");
+    mode = chewing_get_ShapeMode(ctx);
+    ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
+
+    type_keystroke_by_string(ctx, " ");
+    ok_commit_buffer(ctx, " ");
+
+    type_keystroke_by_string(ctx, "hk4 <E>");
+    ok_commit_buffer(ctx, "冊 ");
+
+    chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
+    type_keystroke_by_string(ctx, "a ");
+    ok_commit_buffer(ctx, " ");
+
+    chewing_delete(ctx);
+}
+
 void test_Numlock_numeric_input()
 {
     const TestData NUMLOCK_INPUT[] = {
@@ -2384,6 +2426,7 @@ int main(int argc, char *argv[])
     test_PageUp();
     test_PageDown();
     test_ShiftSpace();
+    test_ShiftSpaceDisabled();
     test_Numlock();
     test_Space();
     test_FuzzySearchMode();
