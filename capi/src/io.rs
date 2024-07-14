@@ -10,15 +10,18 @@ use std::{
 
 use chewing::{
     conversion::{ChewingEngine, Interval, SimpleEngine, Symbol},
-    dictionary::{Layered, SystemDictionaryLoader, UserDictionaryLoader},
+    dictionary::{
+        Dictionary, Layered, LoadDictionaryError, SystemDictionaryLoader, Trie,
+        UserDictionaryLoader,
+    },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
         zhuyin_layout::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
         },
-        BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior, LanguageMode,
-        LaxUserFreqEstimate, UserPhraseAddDirection,
+        AbbrevTable, BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior,
+        LanguageMode, LaxUserFreqEstimate, SymbolSelector, UserPhraseAddDirection,
     },
     zhuyin::Syllable,
 };
@@ -130,8 +133,10 @@ pub unsafe extern "C" fn chewing_new2(
     let dictionaries = match dictionaries {
         Ok(d) => d,
         Err(e) => {
+            let builtin = Trie::new(&include_bytes!("../data/mini.dat")[..]);
             error!("Failed to load system dict: {e}");
-            return null_mut();
+            error!("Loading builtin minimum dictionary...");
+            vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
         }
     };
     let abbrev = sys_loader.load_abbrev();
@@ -139,7 +144,8 @@ pub unsafe extern "C" fn chewing_new2(
         Ok(abbr) => abbr,
         Err(e) => {
             error!("Failed to load abbrev table: {e}");
-            return null_mut();
+            error!("Loading empty table...");
+            AbbrevTable::new()
         }
     };
     let sym_sel = sys_loader.load_symbol_selector();
@@ -147,7 +153,8 @@ pub unsafe extern "C" fn chewing_new2(
         Ok(sym_sel) => sym_sel,
         Err(e) => {
             error!("Failed to load symbol table: {e}");
-            return null_mut();
+            error!("Loading empty table...");
+            SymbolSelector::new(b"".as_slice()).unwrap()
         }
     };
     let user_dictionary = if userpath.is_null() {

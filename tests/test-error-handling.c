@@ -329,6 +329,32 @@ END_IGNORE_DEPRECATIONS
     chewing_free(buf);
 }
 
+void test_FallbackDictionary()
+{
+    const TestData SIMPLE_INPUT[] = {
+        {"so4fu0 y42u03ai6g4<E>", "內千字點模市" },
+        {"so4fu0 <D>5y42u03<D>4ai6g4<D>9<E>", "內嵌字典模式" },
+    };
+    size_t i;
+    ChewingContext *ctx;
+
+    putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX "ERROR");
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
+
+    for (i = 0; i < ARRAY_SIZE(SIMPLE_INPUT); ++i) {
+        type_keystroke_by_string(ctx, SIMPLE_INPUT[i].token);
+        ok_commit_buffer(ctx, SIMPLE_INPUT[i].expected);
+    }
+
+    chewing_delete(ctx);
+
+    putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -346,6 +372,7 @@ int main(int argc, char *argv[])
 
 
     test_null();
+    test_FallbackDictionary();
 
     fclose(fd);
 
