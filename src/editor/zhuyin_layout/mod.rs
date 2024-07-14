@@ -78,6 +78,8 @@ pub enum KeyboardLayoutCompat {
     ColemakDhAnsi,
     /// TODO: docs
     ColemakDhOrth,
+    /// Workman standard layout
+    Workman,
 }
 
 #[derive(Debug)]
@@ -109,6 +111,7 @@ impl FromStr for KeyboardLayoutCompat {
             "KB_CARPALX" => Self::Carpalx,
             "KB_COLEMAK_DH_ANSI" => Self::ColemakDhAnsi,
             "KB_COLEMAK_DH_ORTH" => Self::ColemakDhOrth,
+            "KB_WORKMAN" => Self::Workman,
             _ => return Err(ParseKeyboardLayoutError),
         };
         Ok(layout)
@@ -133,6 +136,7 @@ impl Display for KeyboardLayoutCompat {
             KeyboardLayoutCompat::Carpalx => f.write_str("KB_CARPALX"),
             KeyboardLayoutCompat::ColemakDhAnsi => f.write_str("KB_COLEMAK_DH_ANSI"),
             KeyboardLayoutCompat::ColemakDhOrth => f.write_str("KB_COLEMAK_DH_ORTH"),
+            KeyboardLayoutCompat::Workman => f.write_str("KB_WORKMAN"),
         }
     }
 }
@@ -157,6 +161,7 @@ impl TryFrom<u8> for KeyboardLayoutCompat {
             12 => Self::Carpalx,
             13 => Self::ColemakDhAnsi,
             14 => Self::ColemakDhOrth,
+            15 => Self::Workman,
             _ => return Err(()),
         })
     }

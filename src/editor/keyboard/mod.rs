@@ -11,6 +11,7 @@ mod dvorak;
 mod dvorak_on_qwerty;
 mod qgmlwy;
 mod qwerty;
+mod workman;
 
 use core::fmt;
 
@@ -20,6 +21,7 @@ pub use dvorak::Dvorak;
 pub use dvorak_on_qwerty::DvorakOnQwerty;
 pub use qgmlwy::Qgmlwy;
 pub use qwerty::Qwerty;
+pub use workman::Workman;
 
 const MATRIX_SIZE: usize = 63;
 
@@ -139,6 +141,7 @@ pub enum AnyKeyboardLayout {
     Qgmlwy(Qgmlwy),
     ColemakDhAnsi(ColemakDhAnsi),
     ColemakDhOrth(ColemakDhOrth),
+    Workman(Workman),
 }
 
 impl AnyKeyboardLayout {
@@ -160,6 +163,9 @@ impl AnyKeyboardLayout {
     pub fn colemak_dh_orth() -> AnyKeyboardLayout {
         AnyKeyboardLayout::ColemakDhOrth(ColemakDhOrth)
     }
+    pub fn workman() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::Workman(Workman)
+    }
 }
 
 impl KeyboardLayout for AnyKeyboardLayout {
@@ -171,6 +177,7 @@ impl KeyboardLayout for AnyKeyboardLayout {
             AnyKeyboardLayout::Qgmlwy(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhAnsi(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhOrth(kb) => kb.map_with_mod(keycode, modifiers),
+            AnyKeyboardLayout::Workman(kb) => kb.map_with_mod(keycode, modifiers),
         }
     }
 }

@@ -109,6 +109,7 @@ pub enum KB {
     Carpalx,
     ColemakDhAnsi,
     ColemakDhOrth,
+    Workman,
 }
 
 /// Opaque context handle used for chewing APIs.
