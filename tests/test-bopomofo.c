@@ -1350,6 +1350,28 @@ void test_FuzzySearchMode_Hanyu()
     chewing_delete(ctx);
 }
 
+void test_SimpleEngine()
+{
+    const TestData SIMPLE_INPUT[] = {
+        {"ru0320 5j4up ai6g4<E>", "簡單住因模市" },
+        {"ru0320 5j4<D>4up <D>2ai6g4<D><D>2<E>", "簡單注音模式" },
+    };
+    size_t i;
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
+
+    for (i = 0; i < ARRAY_SIZE(SIMPLE_INPUT); ++i) {
+        type_keystroke_by_string(ctx, SIMPLE_INPUT[i].token);
+        ok_commit_buffer(ctx, SIMPLE_INPUT[i].expected);
+    }
+
+    chewing_delete(ctx);
+}
+
 void test_get_phoneSeq()
 {
     static const struct {
@@ -2366,6 +2388,7 @@ int main(int argc, char *argv[])
     test_Space();
     test_FuzzySearchMode();
     test_FuzzySearchMode_Hanyu();
+    test_SimpleEngine();
 
     test_get_phoneSeq();
     test_bopomofo_buffer();

@@ -352,7 +352,9 @@ int main(int argc, char *argv[])
         mvaddstr(9, 20, "Ctrl + b : toggle Eng/Chi mode");
         mvaddstr(10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
         mvaddstr(11, 0, "Ctrl + h : toggle Full/Half shape mode");
-        mvaddstr(12, 0, "Ctrl + n/p : Next / Previous keyboard layout");
+        mvaddstr(12, 0, "Ctrl + f : toggle Fuzzy Search mode");
+        mvaddstr(13, 0, "Ctrl + s : toggle Simple mode");
+        mvaddstr(14, 0, "Ctrl + n/p : Next / Previous keyboard layout");
         show_commit_string(14, 0, ctx);
         show_userphrase(7, 14, ctx);
         show_edit_buffer(1, 0, ctx);
@@ -458,6 +460,12 @@ int main(int argc, char *argv[])
                 chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", FALSE);
             else
                 chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", TRUE);
+            break;
+        case KEY_CTRL_('S'):
+            if (chewing_config_get_int(ctx, "chewing.conversion_engine") == 1)
+                chewing_config_set_int(ctx, "chewing.conversion_engine", 0);
+            else
+                chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
             break;
         case KEY_CTRL_('H'):   /* emulate Shift */
             if (chewing_get_ShapeMode(ctx) == FULLSHAPE_MODE)

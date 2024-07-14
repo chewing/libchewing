@@ -19,7 +19,10 @@ pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use log::{debug, info, trace, warn};
 
 use crate::{
-    conversion::{full_width_symbol_input, special_symbol_input, ChewingEngine, Interval, Symbol},
+    conversion::{
+        full_width_symbol_input, special_symbol_input, ChewingEngine, ConversionEngine, Interval,
+        Symbol,
+    },
     dictionary::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
         UpdateDictionaryError, UserDictionaryLoader,
@@ -53,6 +56,12 @@ pub enum UserPhraseAddDirection {
     Backward,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConversionEngineKind {
+    ChewingEngine,
+    SimpleEngine,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct EditorOptions {
     pub easy_symbol_input: bool,
@@ -67,6 +76,7 @@ pub struct EditorOptions {
     pub character_form: CharacterForm,
     pub user_phrase_add_dir: UserPhraseAddDirection,
     pub fuzzy_search: bool,
+    pub conversion_engine: ConversionEngineKind,
 }
 
 impl Default for EditorOptions {
@@ -84,6 +94,8 @@ impl Default for EditorOptions {
             character_form: CharacterForm::Halfwidth,
             user_phrase_add_dir: UserPhraseAddDirection::Forward,
             fuzzy_search: false,
+            // FIXME may be out of sync with the engine used
+            conversion_engine: ConversionEngineKind::ChewingEngine,
         }
     }
 }
@@ -160,7 +172,7 @@ impl Error for EditorError {}
 pub(crate) struct SharedState {
     com: CompositionEditor,
     syl: Box<dyn SyllableEditor>,
-    conv: ChewingEngine,
+    conv: Box<dyn ConversionEngine>,
     dict: Layered,
     abbr: AbbrevTable,
     sym_sel: SymbolSelector,
@@ -180,7 +192,7 @@ impl Editor {
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
         let dict = Layered::new(system_dict, user_dict);
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
         let sym_sel = SystemDictionaryLoader::new().load_symbol_selector()?;
         let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
@@ -188,7 +200,7 @@ impl Editor {
     }
 
     pub fn new(
-        conv: ChewingEngine,
+        conv: Box<dyn ConversionEngine>,
         dict: Layered,
         estimate: LaxUserFreqEstimate,
         abbr: AbbrevTable,
@@ -217,6 +229,10 @@ impl Editor {
     pub fn set_syllable_editor(&mut self, syl: Box<dyn SyllableEditor>) {
         self.shared.syl = syl;
         info!("Set syllable editor: {:?}", self.shared.syl);
+    }
+    pub fn set_conversion_engine(&mut self, engine: Box<dyn ConversionEngine>) {
+        self.shared.conv = engine;
+        info!("Set conversion engine: {:?}", self.shared.conv);
     }
     pub fn clear(&mut self) {
         self.state = Box::new(Entering);
@@ -1486,7 +1502,7 @@ mod tests {
             vec![Box::new(TrieBuf::new_in_memory())],
             Box::new(TrieBuf::new_in_memory()),
         );
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
@@ -1513,7 +1529,7 @@ mod tests {
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
@@ -1546,7 +1562,7 @@ mod tests {
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
@@ -1589,7 +1605,7 @@ mod tests {
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
@@ -1647,7 +1663,7 @@ mod tests {
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();
@@ -1685,7 +1701,7 @@ mod tests {
         let keyboard = Qwerty;
         let dict = TrieBuf::new_in_memory();
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
-        let conversion_engine = ChewingEngine::new();
+        let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
         let sym_sel = SymbolSelector::default();

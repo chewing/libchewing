@@ -9,10 +9,21 @@ use std::{
     fmt::Debug,
 };
 
-use crate::zhuyin::{Syllable, SyllableSlice};
+use crate::{
+    dictionary::Dictionary,
+    zhuyin::{Syllable, SyllableSlice},
+};
 
-pub use self::chewing::ChewingEngine;
+pub use self::chewing::{ChewingEngine, SimpleEngine};
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
+
+pub trait ConversionEngine: Debug {
+    fn convert<'a>(
+        &'a self,
+        dict: &'a dyn Dictionary,
+        comp: &'a Composition,
+    ) -> Box<dyn Iterator<Item = Vec<Interval>> + 'a>;
+}
 
 /// TODO: doc
 #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
