@@ -193,6 +193,7 @@ if(BUILD_SHARED_LIBS)
             PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
             PRIVATE LINKER:--gc-sections
             PRIVATE LINKER:-u,chewing_new
+            PRIVATE LINKER:-u,chewing_version
         )
         set_target_properties(libchewing PROPERTIES
             LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
