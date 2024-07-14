@@ -339,13 +339,3 @@ impl Composition {
         self.selections.clear();
     }
 }
-
-// /// TODO: doc
-// pub trait ConversionEngine<C: ?Sized> {
-//     /// TODO: doc, combine convert_next as an Iterator
-//     fn convert(
-//         &self,
-//         context: &C,
-//         composition: &Composition,
-//     ) -> impl Iterator<Item = Vec<Interval>>;
-// }
