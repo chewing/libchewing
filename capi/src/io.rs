@@ -560,6 +560,7 @@ pub unsafe extern "C" fn chewing_config_set_str(
                     AnyKeyboardLayout::colemak_dh_orth(),
                     Box::new(Standard::new()),
                 ),
+                KB::Workman => (AnyKeyboardLayout::workman(), Box::new(Standard::new())),
             };
             ctx.keyboard = keyboard;
             ctx.editor.set_syllable_editor(syl);
@@ -614,6 +615,7 @@ pub unsafe extern "C" fn chewing_set_KBType(ctx: *mut ChewingContext, kbtype: c_
             AnyKeyboardLayout::colemak_dh_orth(),
             Box::new(Standard::new()),
         ),
+        KB::Workman => (AnyKeyboardLayout::workman(), Box::new(Standard::new())),
     };
     ctx.kb_compat = kb_compat;
     ctx.keyboard = keyboard;
