@@ -160,18 +160,24 @@ impl SyllableEditor for Pinyin {
         /* Hanyu empty rime
          * ㄓ/ㄔ/ㄕ/ㄖ/ㄗ/ㄘ/ㄙ + -i, -i is empty rime, not ㄧ
          * */
-        if matches!(
-            (medial, rime),
-            (Some(Bopomofo::I), None) | (None, Some(Bopomofo::I))
-        ) {
-            match initial {
-                Some(Bopomofo::ZH) | Some(Bopomofo::CH) | Some(Bopomofo::SH)
-                | Some(Bopomofo::R) | Some(Bopomofo::Z) | Some(Bopomofo::C) | Some(Bopomofo::S) => {
-                    medial.take();
-                    rime.take();
+        match self.variant {
+            PinyinVariant::HanyuPinyin => {
+                if matches!(
+                    (medial, rime),
+                    (Some(Bopomofo::I), None) | (None, Some(Bopomofo::I))
+                ) {
+                    match initial {
+                        Some(Bopomofo::ZH) | Some(Bopomofo::CH) | Some(Bopomofo::SH)
+                        | Some(Bopomofo::R) | Some(Bopomofo::Z) | Some(Bopomofo::C)
+                        | Some(Bopomofo::S) => {
+                            medial.take();
+                            rime.take();
+                        }
+                        _ => (),
+                    }
                 }
-                _ => (),
             }
+            _ => {}
         }
 
         /* Hanyu uan/un/u :
@@ -179,18 +185,21 @@ impl SyllableEditor for Pinyin {
          * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
          * ㄐ/ㄑ/ㄒ + -u,   -u is ㄧ, not ㄨ
          */
-        match initial {
-            Some(Bopomofo::J) | Some(Bopomofo::Q) | Some(Bopomofo::X) => {
-                match (medial, rime) {
-                    (Some(Bopomofo::U), Some(Bopomofo::AN))
-                    | (Some(Bopomofo::U), Some(Bopomofo::EN))
-                    | (Some(Bopomofo::U), None) => {
-                        medial.replace(Bopomofo::IU);
-                    }
-                    _ => (),
-                };
-            }
-            _ => (),
+        match self.variant {
+            PinyinVariant::HanyuPinyin => match initial {
+                Some(Bopomofo::J) | Some(Bopomofo::Q) | Some(Bopomofo::X) => {
+                    match (medial, rime) {
+                        (Some(Bopomofo::U), Some(Bopomofo::AN))
+                        | (Some(Bopomofo::U), Some(Bopomofo::EN))
+                        | (Some(Bopomofo::U), None) => {
+                            medial.replace(Bopomofo::IU);
+                        }
+                        _ => (),
+                    };
+                }
+                _ => (),
+            },
+            _ => {}
         }
 
         /* THL/MPS2 s/sh/c/ch/j :
@@ -200,40 +209,46 @@ impl SyllableEditor for Pinyin {
          * ch- + ㄧ/ㄩ, ch- is ㄑ, not ㄔ (THL)
          * j-  + other than ー/ㄩ, j-  is ㄓ, not ㄐ (MPS2)
          */
-        match medial {
-            Some(Bopomofo::I) | Some(Bopomofo::IU) => {
-                match initial {
-                    Some(Bopomofo::S) | Some(Bopomofo::SH) => {
-                        initial.replace(Bopomofo::X);
-                    }
-                    Some(Bopomofo::C) | Some(Bopomofo::CH) => {
-                        initial.replace(Bopomofo::Q);
-                    }
-                    _ => (),
-                };
-            }
-            _ => {
-                if initial == Some(Bopomofo::J) {
-                    initial.replace(Bopomofo::ZH);
+        match self.variant {
+            PinyinVariant::ThlPinyin | PinyinVariant::Mps2Pinyin => match medial {
+                Some(Bopomofo::I) | Some(Bopomofo::IU) => {
+                    match initial {
+                        Some(Bopomofo::S) | Some(Bopomofo::SH) => {
+                            initial.replace(Bopomofo::X);
+                        }
+                        Some(Bopomofo::C) | Some(Bopomofo::CH) => {
+                            initial.replace(Bopomofo::Q);
+                        }
+                        _ => (),
+                    };
                 }
-            }
+                _ => {
+                    if initial == Some(Bopomofo::J) {
+                        initial.replace(Bopomofo::ZH);
+                    }
+                }
+            },
+            PinyinVariant::HanyuPinyin => {}
         }
 
         /* THL supplemental set
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄥ, -ㄨㄥ is another reading of -ㄥ
          * ㄅ/ㄆ/ㄇ/ㄈ + -ㄨㄛ, -ㄨㄛ is another reading of -ㄛ
          */
-        match initial {
-            Some(Bopomofo::B) | Some(Bopomofo::P) | Some(Bopomofo::M) | Some(Bopomofo::F) => {
-                match (medial, rime) {
-                    (Some(Bopomofo::U), Some(Bopomofo::ENG))
-                    | (Some(Bopomofo::U), Some(Bopomofo::O)) => {
-                        medial.take();
-                    }
-                    _ => (),
-                };
-            }
-            _ => (),
+        match self.variant {
+            PinyinVariant::ThlPinyin | PinyinVariant::Mps2Pinyin => match initial {
+                Some(Bopomofo::B) | Some(Bopomofo::P) | Some(Bopomofo::M) | Some(Bopomofo::F) => {
+                    match (medial, rime) {
+                        (Some(Bopomofo::U), Some(Bopomofo::ENG))
+                        | (Some(Bopomofo::U), Some(Bopomofo::O)) => {
+                            medial.take();
+                        }
+                        _ => (),
+                    };
+                }
+                _ => (),
+            },
+            _ => {}
         }
 
         self.key_seq.clear();
