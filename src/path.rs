@@ -2,6 +2,7 @@
 
 use std::{
     env,
+    ffi::OsStr,
     path::{Path, PathBuf},
 };
 
@@ -16,6 +17,8 @@ const SEARCH_PATH_SEP: char = ';';
 
 #[cfg(target_family = "unix")]
 const SEARCH_PATH_SEP: char = ':';
+
+const DICT_FOLDER: &str = "dictionary.d";
 
 pub(crate) fn sys_path_from_env_var() -> String {
     let chewing_path = env::var("CHEWING_PATH");
@@ -53,6 +56,33 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
         }
     }
     None
+}
+
+pub(crate) fn find_extra_dat_by_path(search_path: &str) -> Vec<PathBuf> {
+    let mut results = vec![];
+    for path in search_path.split(SEARCH_PATH_SEP) {
+        let prefix = Path::new(path).join(DICT_FOLDER);
+        info!("Search dictionary files in {}", prefix.display());
+        if let Ok(read_dir) = prefix.read_dir() {
+            let mut files = vec![];
+            for entry in read_dir {
+                if let Ok(entry) = entry {
+                    let path = entry.path();
+                    let is_dat = path
+                        .extension()
+                        .and_then(OsStr::to_str)
+                        .map_or(false, |ext| ext == "dat");
+                    if path.is_file() && is_dat {
+                        info!("Found {}", path.display());
+                        files.push(path);
+                    }
+                }
+            }
+            files.sort();
+            results.extend(files);
+        }
+    }
+    results
 }
 
 /// Returns the path to the user's default chewing data directory.

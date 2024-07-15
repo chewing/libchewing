@@ -7,11 +7,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::info;
+use log::{info, warn};
 
 use crate::{
     editor::{AbbrevTable, SymbolSelector},
-    path::{find_path_by_files, sys_path_from_env_var, userphrase_path},
+    path::{find_extra_dat_by_path, find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
 #[cfg(feature = "sqlite")]
@@ -70,15 +70,28 @@ impl SystemDictionaryLoader {
         let sys_path = find_path_by_files(&search_path, &[SD_WORD_FILE_NAME, SD_TSI_FILE_NAME])
             .ok_or(LoadDictionaryError::NotFound)?;
 
-        let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
-        info!("Loading {SD_TSI_FILE_NAME}");
-        let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
+        let mut results: Vec<Box<dyn Dictionary>> = vec![];
 
         let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
         info!("Loading {SD_WORD_FILE_NAME}");
         let word_dict = Trie::open(word_dict_path).map_err(io_err)?;
+        results.push(Box::new(word_dict));
 
-        Ok(vec![Box::new(word_dict), Box::new(tsi_dict)])
+        let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
+        info!("Loading {SD_TSI_FILE_NAME}");
+        let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
+        results.push(Box::new(tsi_dict));
+
+        let extra_files = find_extra_dat_by_path(&search_path);
+        for path in extra_files {
+            info!("Loading {}", path.display());
+            match Trie::open(&path) {
+                Ok(dict) => results.push(Box::new(dict)),
+                Err(e) => warn!("Failed to load {}: {e}", path.display()),
+            }
+        }
+
+        Ok(results)
     }
     pub fn load_abbrev(&self) -> Result<AbbrevTable, LoadDictionaryError> {
         let search_path = if let Some(sys_path) = &self.sys_path {
