@@ -258,16 +258,6 @@ impl Editor {
         }
         self.shared.options = options;
     }
-    pub fn switch_character_form(&mut self) {
-        self.shared.options = EditorOptions {
-            character_form: match self.shared.options.character_form {
-                CharacterForm::Halfwidth => CharacterForm::Fullwidth,
-                CharacterForm::Fullwidth => CharacterForm::Halfwidth,
-            },
-            ..self.shared.options
-        };
-    }
-
     pub fn entering_syllable(&self) -> bool {
         !self.shared.syl.is_empty()
     }
@@ -642,6 +632,23 @@ impl SharedState {
             },
             ..self.options
         };
+        match self.options.language_mode {
+            LanguageMode::Chinese => self.notice_buffer = format!("切換為中文模式"),
+            LanguageMode::English => self.notice_buffer = format!("切換為英數模式"),
+        }
+    }
+    fn switch_character_form(&mut self) {
+        self.options = EditorOptions {
+            character_form: match self.options.character_form {
+                CharacterForm::Halfwidth => CharacterForm::Fullwidth,
+                CharacterForm::Fullwidth => CharacterForm::Halfwidth,
+            },
+            ..self.options
+        };
+        match self.options.character_form {
+            CharacterForm::Halfwidth => self.notice_buffer = format!("切換為半形模式"),
+            CharacterForm::Fullwidth => self.notice_buffer = format!("切換為全形模式"),
+        }
     }
     fn cancel_selecting(&mut self) {
         self.com.pop_cursor();
@@ -945,10 +952,7 @@ impl State for Entering {
             }
             Up => self.spin_ignore(),
             Space if ev.modifiers.shift && shared.options.enable_fullwidth_toggle_key => {
-                shared.options.character_form = match shared.options.character_form {
-                    CharacterForm::Halfwidth => CharacterForm::Fullwidth,
-                    CharacterForm::Fullwidth => CharacterForm::Halfwidth,
-                };
+                shared.switch_character_form();
                 self.spin_absorb()
             }
             Space
@@ -1714,7 +1718,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        editor.switch_character_form();
+        editor.shared.switch_character_form();
 
         let steps = [
             (
