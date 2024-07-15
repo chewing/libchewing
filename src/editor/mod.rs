@@ -58,8 +58,9 @@ pub enum UserPhraseAddDirection {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConversionEngineKind {
-    ChewingEngine,
     SimpleEngine,
+    ChewingEngine,
+    FuzzyChewingEngine,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -75,7 +76,7 @@ pub struct EditorOptions {
     pub language_mode: LanguageMode,
     pub character_form: CharacterForm,
     pub user_phrase_add_dir: UserPhraseAddDirection,
-    pub fuzzy_search: bool,
+    pub lookup_strategy: LookupStrategy,
     pub conversion_engine: ConversionEngineKind,
     pub enable_fullwidth_toggle_key: bool,
 }
@@ -94,7 +95,7 @@ impl Default for EditorOptions {
             language_mode: LanguageMode::Chinese,
             character_form: CharacterForm::Halfwidth,
             user_phrase_add_dir: UserPhraseAddDirection::Forward,
-            fuzzy_search: false,
+            lookup_strategy: LookupStrategy::Standard,
             // FIXME may be out of sync with the engine used
             conversion_engine: ConversionEngineKind::ChewingEngine,
             enable_fullwidth_toggle_key: true,
@@ -254,14 +255,6 @@ impl Editor {
     pub fn set_editor_options(&mut self, options: EditorOptions) {
         if self.shared.options.language_mode != options.language_mode {
             self.shared.syl.clear();
-        }
-        if self.shared.options.fuzzy_search != options.fuzzy_search {
-            self.shared
-                .dict
-                .set_lookup_strategy(match options.fuzzy_search {
-                    true => LookupStrategy::FuzzyPartialPrefix,
-                    false => LookupStrategy::Standard,
-                })
         }
         self.shared.options = options;
     }
@@ -579,7 +572,7 @@ impl SharedState {
         if self
             .dict
             .user_dict()
-            .lookup_all_phrases(&syllables)
+            .lookup_all_phrases(&syllables, LookupStrategy::Standard)
             .into_iter()
             .any(|it| it.as_str() == phrase)
         {
@@ -610,7 +603,9 @@ impl SharedState {
             );
             return Err(UpdateDictionaryError::new());
         }
-        let phrases = self.dict.lookup_all_phrases(syllables);
+        let phrases = self
+            .dict
+            .lookup_all_phrases(syllables, LookupStrategy::Standard);
         if phrases.is_empty() {
             self.dict.add_phrase(syllables, (phrase, 1).into())?;
             return Ok(());
@@ -1155,14 +1150,18 @@ impl State for EnteringSyllable {
                 self.start_entering()
             }
             _ => {
-                let key_behavior = match shared.options.fuzzy_search {
-                    true => shared.syl.fuzzy_key_press(ev),
-                    false => shared.syl.key_press(ev),
+                let key_behavior = match shared.options.lookup_strategy {
+                    LookupStrategy::FuzzyPartialPrefix => shared.syl.fuzzy_key_press(ev),
+                    LookupStrategy::Standard => shared.syl.key_press(ev),
                 };
                 match key_behavior {
                     KeyBehavior::Absorb => self.spin_absorb(),
                     KeyBehavior::Fuzzy(syl) => {
-                        if shared.dict.lookup_first_phrase(&[syl]).is_some() {
+                        if shared
+                            .dict
+                            .lookup_first_phrase(&[syl], shared.options.lookup_strategy)
+                            .is_some()
+                        {
                             shared.com.insert(Symbol::from(syl));
                         }
                         self.spin_absorb()
@@ -1170,7 +1169,10 @@ impl State for EnteringSyllable {
                     KeyBehavior::Commit => {
                         if shared
                             .dict
-                            .lookup_first_phrase(&[shared.syl.read()])
+                            .lookup_first_phrase(
+                                &[shared.syl.read()],
+                                shared.options.lookup_strategy,
+                            )
                             .is_some()
                         {
                             shared.com.insert(Symbol::from(shared.syl.read()));
@@ -1199,6 +1201,7 @@ impl Selecting {
 
         let mut sel = PhraseSelector::new(
             !editor.options.phrase_choice_rearward,
+            editor.options.lookup_strategy,
             editor.com.to_composition(),
         );
         sel.init(editor.cursor(), &editor.dict);
@@ -1351,6 +1354,7 @@ impl State for Selecting {
                 if sym.is_syllable() {
                     let mut sel = PhraseSelector::new(
                         !shared.options.phrase_choice_rearward,
+                        shared.options.lookup_strategy,
                         shared.com.to_composition(),
                     );
                     sel.init(shared.cursor(), &shared.dict);
@@ -1376,6 +1380,7 @@ impl State for Selecting {
                 if sym.is_syllable() {
                     let mut sel = PhraseSelector::new(
                         !shared.options.phrase_choice_rearward,
+                        shared.options.lookup_strategy,
                         shared.com.to_composition(),
                     );
                     sel.init(shared.cursor(), &shared.dict);

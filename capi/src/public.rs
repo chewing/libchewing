@@ -15,6 +15,12 @@ pub const SYMBOL_MODE: c_int = 0;
 pub const FULLSHAPE_MODE: c_int = 1;
 /// Indicates chewing will not translate latin and puctuation characters.
 pub const HALFSHAPE_MODE: c_int = 0;
+/// Use conversion engine that doesn't perform intelligent phrasing.
+pub const SIMPLE_CONVERSION_ENGINE: c_int = 0;
+/// Use the original Chewing intelligent phrasing.
+pub const CHEWING_CONVERSION_ENGINE: c_int = 1;
+/// Use original Chewing intelligent phrasing with fuzzy prefix search.
+pub const FUZZY_CHEWING_CONVERSION_ENGINE: c_int = 2;
 /// Indicates automatic user phrase learning is disabled.
 pub const AUTOLEARN_DISABLED: usize = 1;
 /// Indicates automatic user phrase learning is enabled.

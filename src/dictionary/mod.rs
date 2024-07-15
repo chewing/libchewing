@@ -262,14 +262,14 @@ impl Display for Phrase {
 /// # Examples
 ///
 /// ```
-/// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, LookupStrategy, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
 /// let dict = TrieBuf::from([
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
 /// for phrase in dict.lookup_all_phrases(
-///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], LookupStrategy::Standard
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -300,9 +300,10 @@ pub type Entries<'a> = Box<dyn Iterator<Item = (Vec<Syllable>, Phrase)> + 'a>;
 ///
 /// If the dictionary supports the lookup strategy it should try to use.
 /// Otherwise fallback to standard.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LookupStrategy {
     /// The native lookup strategy supported by the dictionary.
+    #[default]
     Standard,
     /// Try to fuzzy match partial syllables using only preffix.
     FuzzyPartialPrefix,
@@ -319,13 +320,13 @@ pub enum LookupStrategy {
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Dictionary, DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, DictionaryMut, LookupStrategy, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
 /// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
 /// for phrase in dict.lookup_all_phrases(
-///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]
+///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], LookupStrategy::Standard
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
 ///     assert_eq!(100, phrase.freq());
@@ -337,18 +338,33 @@ pub trait Dictionary: Debug {
     /// Returns first N phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase>;
+    fn lookup_first_n_phrases(
+        &self,
+        syllables: &dyn SyllableSlice,
+        first: usize,
+        strategy: LookupStrategy,
+    ) -> Vec<Phrase>;
     /// Returns the first phrase matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
-    fn lookup_first_phrase(&self, syllables: &dyn SyllableSlice) -> Option<Phrase> {
-        self.lookup_first_n_phrases(syllables, 1).into_iter().next()
+    fn lookup_first_phrase(
+        &self,
+        syllables: &dyn SyllableSlice,
+        strategy: LookupStrategy,
+    ) -> Option<Phrase> {
+        self.lookup_first_n_phrases(syllables, 1, strategy)
+            .into_iter()
+            .next()
     }
     /// Returns all phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
-    fn lookup_all_phrases(&self, syllables: &dyn SyllableSlice) -> Vec<Phrase> {
-        self.lookup_first_n_phrases(syllables, usize::MAX)
+    fn lookup_all_phrases(
+        &self,
+        syllables: &dyn SyllableSlice,
+        strategy: LookupStrategy,
+    ) -> Vec<Phrase> {
+        self.lookup_first_n_phrases(syllables, usize::MAX, strategy)
     }
     /// Returns an iterator to all phrases in the dictionary.
     fn entries(&self) -> Entries<'_>;
@@ -356,10 +372,6 @@ pub trait Dictionary: Debug {
     fn about(&self) -> DictionaryInfo;
     /// Returns the dictionary file path if it's backed by a file.
     fn path(&self) -> Option<&Path>;
-    /// Set the lookup strategy hint.
-    fn set_lookup_strategy(&mut self, strategy: LookupStrategy) {
-        _ = strategy
-    }
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
 }
 

@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     conversion::{Composition, Gap, Interval},
-    dictionary::{Dictionary, Layered},
+    dictionary::{Dictionary, Layered, LookupStrategy},
     editor::{EditorError, SharedState},
 };
 
@@ -12,16 +12,22 @@ pub(crate) struct PhraseSelector {
     end: usize,
     forward_select: bool,
     orig: usize,
+    lookup_strategy: LookupStrategy,
     com: Composition,
 }
 
 impl PhraseSelector {
-    pub(crate) fn new(forward_select: bool, com: Composition) -> PhraseSelector {
+    pub(crate) fn new(
+        forward_select: bool,
+        lookup_strategy: LookupStrategy,
+        com: Composition,
+    ) -> PhraseSelector {
         PhraseSelector {
             begin: 0,
             end: com.len(),
             forward_select,
             orig: 0,
+            lookup_strategy,
             com,
         }
     }
@@ -45,7 +51,10 @@ impl PhraseSelector {
                 !syllables.is_empty(),
                 "should not enter here if there's no syllable in range"
             );
-            if dict.lookup_first_phrase(&syllables).is_some() {
+            if dict
+                .lookup_first_phrase(&syllables, self.lookup_strategy)
+                .is_some()
+            {
                 break;
             }
             if self.forward_select {
@@ -75,7 +84,10 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.com.symbols()[begin..end];
-            if dict.lookup_first_phrase(&syllables).is_some() {
+            if dict
+                .lookup_first_phrase(&syllables, self.lookup_strategy)
+                .is_some()
+            {
                 return Some((begin, end));
             }
         }
@@ -101,7 +113,10 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.com.symbols()[begin..end];
-            if dict.lookup_first_phrase(&syllables).is_some() {
+            if dict
+                .lookup_first_phrase(&syllables, self.lookup_strategy)
+                .is_some()
+            {
                 return Some((begin, end));
             }
         }
@@ -153,7 +168,10 @@ impl PhraseSelector {
                 }
             }
             let syllables = &self.com.symbols()[self.begin..self.end];
-            if dict.lookup_first_phrase(&syllables).is_some() {
+            if dict
+                .lookup_first_phrase(&syllables, self.lookup_strategy)
+                .is_some()
+            {
                 break;
             }
         }
@@ -198,7 +216,10 @@ impl PhraseSelector {
 
     pub(crate) fn candidates(&self, editor: &SharedState, dict: &Layered) -> Vec<String> {
         let mut candidates = dict
-            .lookup_all_phrases(&&self.com.symbols()[self.begin..self.end])
+            .lookup_all_phrases(
+                &&self.com.symbols()[self.begin..self.end],
+                self.lookup_strategy,
+            )
             .into_iter()
             .map(|phrase| phrase.into())
             .collect::<Vec<String>>();
@@ -208,7 +229,7 @@ impl PhraseSelector {
                 .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable().unwrap());
             for &syl in alt {
                 candidates.extend(
-                    dict.lookup_all_phrases(&[syl])
+                    dict.lookup_all_phrases(&[syl], self.lookup_strategy)
                         .into_iter()
                         .map(|ph| ph.into()),
                 )
@@ -231,7 +252,7 @@ impl PhraseSelector {
 mod tests {
     use crate::{
         conversion::{Composition, Interval, Symbol},
-        dictionary::TrieBuf,
+        dictionary::{LookupStrategy, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
@@ -247,6 +268,7 @@ mod tests {
             end: 1,
             forward_select: false,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
         let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
@@ -266,6 +288,7 @@ mod tests {
             end: 1,
             forward_select: false,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
         let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
@@ -281,6 +304,7 @@ mod tests {
             end: 1,
             forward_select: true,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
         let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
@@ -300,6 +324,7 @@ mod tests {
             end: 1,
             forward_select: true,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
         let dict = TrieBuf::from([(vec![syl![C, E, TONE4]], vec![("測", 100)])]);
@@ -320,6 +345,7 @@ mod tests {
             end: 2,
             forward_select: false,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
 
@@ -339,6 +365,7 @@ mod tests {
             end: 2,
             forward_select: false,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
 
@@ -367,6 +394,7 @@ mod tests {
             end: 2,
             forward_select: false,
             orig: 0,
+            lookup_strategy: LookupStrategy::Standard,
             com,
         };
 
