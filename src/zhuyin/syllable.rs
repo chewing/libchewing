@@ -36,15 +36,15 @@ impl Syllable {
             None => unreachable!(),
         },
     };
-    /// TODO: docs
+    /// Creates a new empty syllable.
     pub const fn new() -> Syllable {
         Syllable::EMPTY
     }
-    /// TODO: docs
+    /// Creates a new syllable builder.
     pub const fn builder() -> SyllableBuilder {
         SyllableBuilder::new()
     }
-    /// TODO: docs
+    /// Returns the initial part of the syllable.
     pub const fn initial(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0111111_00_0000_000) >> 9;
         if index == 0 {
@@ -53,7 +53,7 @@ impl Syllable {
             Bopomofo::from_initial(index - 1)
         }
     }
-    /// TODO: docs
+    /// Returns the medial part of the syllable.
     pub const fn medial(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0000000_11_0000_000) >> 7;
         if index == 0 {
@@ -62,7 +62,7 @@ impl Syllable {
             Bopomofo::from_medial(index - 1)
         }
     }
-    /// TODO: docs
+    /// Returns the rime part of the syllable.
     pub const fn rime(&self) -> Option<Bopomofo> {
         let index = (self.value.get() & 0b0000000_00_1111_000) >> 3;
         if index == 0 {
@@ -71,7 +71,7 @@ impl Syllable {
             Bopomofo::from_rime(index - 1)
         }
     }
-    /// TODO: docs
+    /// Returns the tone of the syllable.
     pub const fn tone(&self) -> Option<Bopomofo> {
         let index = self.value.get() & 0b0000000_00_0000_111;
         if index == 0 {
@@ -80,7 +80,7 @@ impl Syllable {
             Bopomofo::from_tone(index - 1)
         }
     }
-    /// TODO: docs
+    /// Removes the initial from the syllable.
     pub fn remove_initial(&mut self) -> Option<Bopomofo> {
         let ret = self.initial();
         let value = self.value.get() & 0b0000000_11_1111_111;
@@ -90,7 +90,7 @@ impl Syllable {
         };
         ret
     }
-    /// TODO: docs
+    /// Removes the medial from the syllable.
     pub fn remove_medial(&mut self) -> Option<Bopomofo> {
         let ret = self.medial();
         let value = self.value.get() & 0b1111111_00_1111_111;
@@ -100,7 +100,7 @@ impl Syllable {
         };
         ret
     }
-    /// TODO: docs
+    /// Removes the rime from the syllable.
     pub fn remove_rime(&mut self) -> Option<Bopomofo> {
         let ret = self.rime();
         let value = self.value.get() & 0b1111111_11_0000_111;
@@ -110,7 +110,7 @@ impl Syllable {
         };
         ret
     }
-    /// TODO: docs
+    /// Removes the tone from the syllable.
     pub fn remove_tone(&mut self) -> Option<Bopomofo> {
         let ret = self.tone();
         let value = self.value.get() & 0b1111111_11_1111_000;
@@ -120,26 +120,27 @@ impl Syllable {
         };
         ret
     }
-    /// TODO: docs
+    /// Returns whether the syllable is empty.
     pub const fn is_empty(&self) -> bool {
         self.value.get() == Syllable::EMPTY.value.get()
     }
-    /// TODO: docs
+    /// Returns whether the syllable has an initial.
     pub fn has_initial(&self) -> bool {
         self.initial().is_some()
     }
-    /// TODO: docs
+    /// Returns whether the syllable has a medial
     pub fn has_medial(&self) -> bool {
         self.medial().is_some()
     }
-    /// TODO: docs
+    /// Returns whether the syllable has a rime.
     pub fn has_rime(&self) -> bool {
         self.rime().is_some()
     }
-    /// TODO: docs
+    /// Returns whether the syllable has a tone.
     pub fn has_tone(&self) -> bool {
         self.tone().is_some()
     }
+    /// Returns whether the syllable partially matches another syllable.
     pub fn starts_with(&self, other: Syllable) -> bool {
         let trailing_zeros = other.to_u16().trailing_zeros();
         let mask = if trailing_zeros >= 9 {
@@ -183,7 +184,7 @@ impl Syllable {
     fn to_le_bytes(self) -> [u8; 2] {
         self.to_u16().to_le_bytes()
     }
-    /// TODO: docs
+    /// Combines the current syllable with a new sound.
     pub fn update(&mut self, bopomofo: Bopomofo) {
         let orig = self.value.get();
         let value = match bopomofo.kind() {
@@ -194,7 +195,7 @@ impl Syllable {
         };
         self.value = NonZeroU16::new(value).unwrap();
     }
-    /// TODO: docs
+    /// Removes components of the syllable.
     pub fn pop(&mut self) -> Option<Bopomofo> {
         if self.has_tone() {
             return self.remove_tone();
@@ -210,7 +211,7 @@ impl Syllable {
         }
         None
     }
-    /// TODO: docs
+    /// Resets the syllable to empty.
     pub fn clear(&mut self) {
         *self = Syllable::EMPTY
     }
@@ -264,6 +265,7 @@ impl AsRef<Syllable> for Syllable {
     }
 }
 
+/// A slice that can be converted to a slice of syllables.
 pub trait SyllableSlice: Debug {
     fn to_slice(&self) -> Cow<'_, [Syllable]>;
     fn to_bytes(&self) -> Vec<u8> {
@@ -304,7 +306,7 @@ impl Display for Syllable {
     }
 }
 
-/// TODO: docs
+/// A syllable builder can be used to construct syllables at compile time.
 #[derive(Debug)]
 pub struct SyllableBuilder {
     value: u16,
@@ -318,14 +320,14 @@ impl Default for SyllableBuilder {
 }
 
 impl SyllableBuilder {
-    /// TODO: docs
+    /// Creates a new syllable builder.
     pub const fn new() -> SyllableBuilder {
         SyllableBuilder {
             value: Syllable::EMPTY_PATTERN,
             step: 0,
         }
     }
-    /// TODO: docs
+    /// Inserts syllable components and checks they follow correct order.
     #[allow(clippy::unusual_byte_groupings)]
     pub const fn insert(
         mut self,
@@ -379,7 +381,7 @@ impl SyllableBuilder {
         };
         Ok(self)
     }
-    /// TODO: docs
+    /// Builds the syllable.
     pub const fn build(self) -> Syllable {
         Syllable {
             value: match NonZeroU16::new(self.value) {
@@ -390,7 +392,7 @@ impl SyllableBuilder {
     }
 }
 
-/// TODO: docs
+/// Errors during decoding a syllable from a u16.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DecodeSyllableError;
 
@@ -402,6 +404,7 @@ impl Display for DecodeSyllableError {
 
 impl Error for DecodeSyllableError {}
 
+/// Errors when parsing a str to a syllable.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum SyllableErrorKind {
@@ -413,6 +416,7 @@ pub enum SyllableErrorKind {
     InvalidBopomofo,
 }
 
+/// Errors when building a new syllable.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BuildSyllableError {
     kind: SyllableErrorKind,
@@ -457,6 +461,7 @@ impl Display for BuildSyllableError {
 
 impl Error for BuildSyllableError {}
 
+/// Errors when parsing a str to a syllable.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseSyllableError {
     kind: SyllableErrorKind,

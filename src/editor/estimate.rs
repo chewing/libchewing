@@ -1,23 +1,28 @@
 use crate::dictionary::{Dictionary, Phrase};
 
-/// TODO: doc
+/// Estimates new user phrase frequency.
+///
+/// Use UserFreqEstimate to keep track of the time passed and use the original
+/// frequency and time to calculate the new frequency of user phrases.
 pub trait UserFreqEstimate {
-    /// TODO: doc
+    /// Increments the time passed.
+    ///
+    /// This should be called for every user interaction.
     fn tick(&mut self);
-    /// TODO: doc
+    /// Returns the current time in ticks.
     fn now(&self) -> u64;
-    /// TODO: doc
+    /// Returns the estimated new user phrase frequency.
     fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32;
 }
 
-/// TODO: doc
+/// Loosely tracks time without persisting to disk.
 #[derive(Debug)]
 pub struct LaxUserFreqEstimate {
     lifetime: u64,
 }
 
 impl LaxUserFreqEstimate {
-    /// TODO: doc
+    /// Initialize with the last time value from the user dictionary.
     pub fn max_from(user_dict: &dyn Dictionary) -> LaxUserFreqEstimate {
         let lifetime = user_dict
             .entries()
@@ -27,6 +32,7 @@ impl LaxUserFreqEstimate {
         LaxUserFreqEstimate { lifetime }
     }
 
+    /// Creates a new LaxUserFreqEstimate from a initial epoch.
     pub fn new(initial_lifetime: u64) -> LaxUserFreqEstimate {
         LaxUserFreqEstimate {
             lifetime: initial_lifetime,

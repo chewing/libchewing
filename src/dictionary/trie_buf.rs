@@ -16,6 +16,7 @@ use super::{
     LookupStrategy, Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 
+/// A mutable dictionary backed by a Trie and a BTreeMap.
 #[derive(Debug)]
 pub struct TrieBuf {
     trie: Option<Trie>,
@@ -35,6 +36,7 @@ fn software_version() -> String {
 }
 
 impl TrieBuf {
+    /// Open the target Trie dictionary and wrap it create a TrieBuf.
     pub fn open<P: Into<PathBuf>>(path: P) -> io::Result<TrieBuf> {
         let path = path.into();
         if !path.exists() {
@@ -63,6 +65,7 @@ impl TrieBuf {
         })
     }
 
+    /// Creates a pure in memory dictionary.
     pub fn new_in_memory() -> TrieBuf {
         TrieBuf {
             trie: None,

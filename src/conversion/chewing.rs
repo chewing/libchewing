@@ -11,7 +11,7 @@ use crate::dictionary::{Dictionary, LookupStrategy, Phrase};
 
 use super::{Composition, ConversionEngine, Gap, Interval, Symbol};
 
-/// TODO: doc
+/// The default Chewing conversion method.
 #[derive(Debug, Default)]
 pub struct ChewingEngine {
     pub(crate) lookup_strategy: LookupStrategy,
@@ -19,13 +19,13 @@ pub struct ChewingEngine {
 
 impl ChewingEngine {
     const MAX_OUT_PATHS: usize = 100;
-    /// TODO: doc
+    /// Creates a new conversion engine.
     pub fn new() -> ChewingEngine {
         ChewingEngine {
             lookup_strategy: LookupStrategy::Standard,
         }
     }
-    pub fn convert<'a>(
+    pub(crate) fn convert<'a>(
         &'a self,
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
