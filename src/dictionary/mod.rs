@@ -428,7 +428,7 @@ pub trait DictionaryMut: Debug {
     ) -> Result<(), UpdateDictionaryError>;
 }
 
-/// TODO: doc
+/// Errors during dictionary construction.
 #[derive(Debug)]
 pub struct BuildDictionaryError {
     source: Box<dyn Error + Send + Sync>,

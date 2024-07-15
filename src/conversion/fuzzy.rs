@@ -2,13 +2,14 @@ use crate::dictionary::LookupStrategy;
 
 use super::{ChewingEngine, ConversionEngine};
 
-/// TODO: doc
+/// Same conversion method as Chewing but uses fuzzy phrase search.
 #[derive(Debug, Default)]
 pub struct FuzzyChewingEngine {
     inner: ChewingEngine,
 }
 
 impl FuzzyChewingEngine {
+    /// Creates a new conversion engine.
     pub fn new() -> FuzzyChewingEngine {
         FuzzyChewingEngine {
             inner: ChewingEngine {
