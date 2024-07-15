@@ -41,8 +41,23 @@ add_custom_command(
         -t trie
         -n 內建字庫
         ${DATA_SRC_DIR}/word.src word.dat
+    COMMAND chewing-cli init-database
+        -c ${DATA_COPYRIGHT}
+        -l ${DATA_LICENSE}
+        -r ${DATA_VERSION}
+        -t trie
+        -n 內嵌字庫
+        ${DATA_SRC_DIR}/mini.src mini.dat
+    COMMAND chewing-cli init-database
+        -c ${DATA_COPYRIGHT}
+        -l ${DATA_LICENSE}
+        -r ${DATA_VERSION}
+        -t trie
+        -n 內嵌字庫
+        ${DATA_SRC_DIR}/mini.src ${PROJECT_SOURCE_DIR}/capi/data/mini.dat
     DEPENDS
         chewing-cli
+        ${DATA_SRC_DIR}/mini.src
         ${DATA_SRC_DIR}/word.src
         ${DATA_SRC_DIR}/tsi.src
     WORKING_DIRECTORY ${DATA_BIN_DIR}

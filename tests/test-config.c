@@ -680,7 +680,9 @@ void test_new2_syspath_error()
     fprintf(fd, "#\n# %s\n#\n", __func__);
 
     ctx = chewing_new2("NoSuchPath", NULL, logger, fd);
-    ok(ctx == NULL, "chewing_new2 returns `%#p' shall be `%#p'", ctx, NULL);
+    ok(ctx != NULL, "chewing_new2 returns `%#p' shall be `%#p'", ctx, NULL);
+
+    chewing_delete(ctx);
 }
 
 void test_new2_syspath()
