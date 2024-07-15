@@ -288,6 +288,16 @@ pub unsafe extern "C" fn chewing_Reset(ctx: *mut ChewingContext) -> c_int {
 ///
 /// This function should be called with valid pointers.
 #[no_mangle]
+pub unsafe extern "C" fn chewing_ack(ctx: *mut ChewingContext) -> c_int {
+    let ctx = as_mut_or_return!(ctx, ERROR);
+    ctx.editor.ack();
+    OK
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
 pub unsafe extern "C" fn chewing_config_has_option(
     ctx: *const ChewingContext,
     name: *const c_char,

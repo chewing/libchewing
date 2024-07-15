@@ -1424,6 +1424,22 @@ void test_SimpleEngine()
     chewing_delete(ctx);
 }
 
+void test_Acknowledge()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    type_keystroke_by_string(ctx, "hk4g4<E>");
+    ok_commit_buffer(ctx, "測試");
+
+    chewing_ack(ctx);
+    ok_commit_buffer(ctx, "");
+
+    chewing_delete(ctx);
+}
+
 void test_get_phoneSeq()
 {
     static const struct {
@@ -2442,6 +2458,7 @@ int main(int argc, char *argv[])
     test_FuzzySearchMode();
     test_FuzzySearchMode_Hanyu();
     test_SimpleEngine();
+    test_Acknowledge();
 
     test_get_phoneSeq();
     test_bopomofo_buffer();

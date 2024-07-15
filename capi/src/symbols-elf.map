@@ -123,6 +123,7 @@ CHEWING_0.5 {
 
 CHEWING_0.9 {
     global:
+        chewing_ack;
         chewing_config_has_option;
         chewing_config_set_int;
         chewing_config_get_int;

@@ -253,6 +253,13 @@ int chewing_Reset(struct ChewingContext *ctx);
  *
  * This function should be called with valid pointers.
  */
+int chewing_ack(struct ChewingContext *ctx);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
 int chewing_config_has_option(const struct ChewingContext *ctx, const char *name);
 
 /**

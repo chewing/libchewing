@@ -116,6 +116,7 @@ _chewing_userphrase_lookup
 _chewing_userphrase_remove
 _chewing_zuin_Check
 _chewing_zuin_String
+_chewing_ack
 _chewing_config_has_option
 _chewing_config_set_int
 _chewing_config_get_int
