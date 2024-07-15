@@ -467,11 +467,9 @@ int main(int argc, char *argv[])
             else
                 chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
             break;
-        case KEY_CTRL_('H'):   /* emulate Shift */
-            if (chewing_get_ShapeMode(ctx) == FULLSHAPE_MODE)
-                chewing_set_ShapeMode(ctx, HALFSHAPE_MODE);
-            else
-                chewing_set_ShapeMode(ctx, FULLSHAPE_MODE);
+        case KEY_CTRL_('H'):   /* emulate Shift+Space */
+            chewing_handle_ShiftSpace(ctx);
+            fprintf(fout, "<SS>");
             break;
         case KEY_NPAGE:
             chewing_handle_PageDown(ctx);
