@@ -1,6 +1,8 @@
 //! Algorithms to convert syllables to Chinese characters.
 
 mod chewing;
+mod fuzzy;
+mod simple;
 mod symbol;
 
 use std::{
@@ -14,7 +16,9 @@ use crate::{
     zhuyin::{Syllable, SyllableSlice},
 };
 
-pub use self::chewing::{ChewingEngine, SimpleEngine};
+pub use self::chewing::ChewingEngine;
+pub use self::fuzzy::FuzzyChewingEngine;
+pub use self::simple::SimpleEngine;
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
 
 pub trait ConversionEngine: Debug {

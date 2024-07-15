@@ -9,10 +9,9 @@ use std::{
 };
 
 use chewing::{
-    conversion::{ChewingEngine, Interval, SimpleEngine, Symbol},
+    conversion::{ChewingEngine, FuzzyChewingEngine, Interval, SimpleEngine, Symbol},
     dictionary::{
-        Dictionary, Layered, LoadDictionaryError, SystemDictionaryLoader, Trie,
-        UserDictionaryLoader,
+        Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie, UserDictionaryLoader,
     },
     editor::{
         keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
@@ -28,8 +27,9 @@ use chewing::{
 use log::{debug, error, info};
 
 use crate::public::{
-    ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHINESE_MODE, FULLSHAPE_MODE,
-    HALFSHAPE_MODE, MAX_SELKEY, SYMBOL_MODE,
+    ChewingConfigData, ChewingContext, IntervalType, SelKeys, CHEWING_CONVERSION_ENGINE,
+    CHINESE_MODE, FULLSHAPE_MODE, FUZZY_CHEWING_CONVERSION_ENGINE, HALFSHAPE_MODE, MAX_SELKEY,
+    SIMPLE_CONVERSION_ENGINE, SYMBOL_MODE,
 };
 
 use super::logger::ChewingLogger;
@@ -310,7 +310,6 @@ pub unsafe extern "C" fn chewing_config_has_option(
         | "chewing.selection_keys"
         | "chewing.character_form"
         | "chewing.space_is_select_key"
-        | "chewing.fuzzy_search_mode"
         | "chewing.conversion_engine"
         | "chewing.enable_fullwidth_toggle_key" => true,
         _ => false,
@@ -354,10 +353,10 @@ pub unsafe extern "C" fn chewing_config_get_int(
             CharacterForm::Fullwidth => FULLSHAPE_MODE,
         },
         "chewing.space_is_select_key" => option.space_is_select_key as c_int,
-        "chewing.fuzzy_search_mode" => option.fuzzy_search as c_int,
         "chewing.conversion_engine" => match option.conversion_engine {
-            ConversionEngineKind::ChewingEngine => 0,
-            ConversionEngineKind::SimpleEngine => 1,
+            ConversionEngineKind::SimpleEngine => SIMPLE_CONVERSION_ENGINE,
+            ConversionEngineKind::ChewingEngine => CHEWING_CONVERSION_ENGINE,
+            ConversionEngineKind::FuzzyChewingEngine => FUZZY_CHEWING_CONVERSION_ENGINE,
         },
         "chewing.enable_fullwidth_toggle_key" => option.enable_fullwidth_toggle_key as c_int,
         _ => ERROR,
@@ -448,21 +447,25 @@ pub unsafe extern "C" fn chewing_config_set_int(
             ensure_bool!(value);
             options.space_is_select_key = value > 0;
         }
-        "chewing.fuzzy_search_mode" => {
-            ensure_bool!(value);
-            options.fuzzy_search = value > 0;
-        }
         "chewing.conversion_engine" => {
             options.conversion_engine = match value {
-                0 => {
-                    ctx.editor
-                        .set_conversion_engine(Box::new(ChewingEngine::new()));
-                    ConversionEngineKind::ChewingEngine
-                }
-                1 => {
+                SIMPLE_CONVERSION_ENGINE => {
                     ctx.editor
                         .set_conversion_engine(Box::new(SimpleEngine::new()));
+                    options.lookup_strategy = LookupStrategy::Standard;
                     ConversionEngineKind::SimpleEngine
+                }
+                CHEWING_CONVERSION_ENGINE => {
+                    ctx.editor
+                        .set_conversion_engine(Box::new(ChewingEngine::new()));
+                    options.lookup_strategy = LookupStrategy::Standard;
+                    ConversionEngineKind::ChewingEngine
+                }
+                FUZZY_CHEWING_CONVERSION_ENGINE => {
+                    ctx.editor
+                        .set_conversion_engine(Box::new(FuzzyChewingEngine::new()));
+                    options.lookup_strategy = LookupStrategy::FuzzyPartialPrefix;
+                    ConversionEngineKind::ChewingEngine
                 }
                 _ => return ERROR,
             }
@@ -1138,13 +1141,13 @@ pub unsafe extern "C" fn chewing_userphrase_lookup(
         Some(phrase) => ctx
             .editor
             .user_dict()
-            .lookup_all_phrases(&syllables)
+            .lookup_all_phrases(&syllables, LookupStrategy::Standard)
             .iter()
             .any(|ph| ph.as_str() == phrase) as c_int,
         None => ctx
             .editor
             .user_dict()
-            .lookup_first_phrase(&syllables)
+            .lookup_first_phrase(&syllables, LookupStrategy::Standard)
             .is_some() as c_int,
     }
 }

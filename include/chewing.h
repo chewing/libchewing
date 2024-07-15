@@ -51,6 +51,21 @@ typedef struct ChewingContext ChewingContext;
 #define HALFSHAPE_MODE 0
 
 /**
+ * Use conversion engine that doesn't perform intelligent phrasing.
+ */
+#define SIMPLE_CONVERSION_ENGINE 0
+
+/**
+ * Use the original Chewing intelligent phrasing.
+ */
+#define CHEWING_CONVERSION_ENGINE 1
+
+/**
+ * Use original Chewing intelligent phrasing with fuzzy prefix search.
+ */
+#define FUZZY_CHEWING_CONVERSION_ENGINE 2
+
+/**
  * Indicates automatic user phrase learning is disabled.
  */
 #define AUTOLEARN_DISABLED 1

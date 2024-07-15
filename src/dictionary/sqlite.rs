@@ -12,7 +12,7 @@ use crate::zhuyin::{Syllable, SyllableSlice};
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
-    Phrase, UpdateDictionaryError,
+    LookupStrategy, Phrase, UpdateDictionaryError,
 };
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
@@ -298,7 +298,13 @@ impl From<RusqliteError> for UpdateDictionaryError {
 }
 
 impl Dictionary for SqliteDictionary {
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+    fn lookup_first_n_phrases(
+        &self,
+        syllables: &dyn SyllableSlice,
+        first: usize,
+        strategy: LookupStrategy,
+    ) -> Vec<Phrase> {
+        let _ = strategy;
         let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
@@ -583,7 +589,8 @@ mod tests {
 
     use crate::{
         dictionary::{
-            Dictionary, DictionaryBuilder, DictionaryMut, Phrase, SqliteDictionaryBuilder,
+            Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase,
+            SqliteDictionaryBuilder,
         },
         syl,
         zhuyin::Bopomofo,
@@ -636,10 +643,13 @@ mod tests {
                 Phrase::new("策士", 9318).with_time(186613),
                 Phrase::new("測試", 9318).with_time(186613)
             ],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4],
+                ],
+                LookupStrategy::Standard
+            )
         );
     }
 
@@ -670,10 +680,13 @@ mod tests {
         )?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4],
+                ],
+                LookupStrategy::Standard
+            )
         );
         Ok(())
     }
@@ -689,10 +702,13 @@ mod tests {
         dict.update_phrase(&syllables, ("測試", 9318).into(), 9900, 0)?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4],
+                ],
+                LookupStrategy::Standard
+            )
         );
         Ok(())
     }

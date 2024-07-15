@@ -54,7 +54,6 @@ void test_has_option()
         ,"chewing.selection_keys"
         ,"chewing.character_form"
         ,"chewing.space_is_select_key"
-        ,"chewing.fuzzy_search_mode"
         ,"chewing.conversion_engine"
         ,"chewing.enable_fullwidth_toggle_key"
     };
@@ -165,8 +164,8 @@ void test_default_value_options()
     ok(chewing_config_get_int(ctx, "chewing.character_form") == HALFSHAPE_MODE,
         "default chewing.character_form shall be %d", HALFSHAPE_MODE);
 
-    ok(chewing_config_get_int(ctx, "chewing.fuzzy_search_mode") == 0,
-        "default chewing.fuzzy_search_mode shall be 0");
+    ok(chewing_config_get_int(ctx, "chewing.conversion_engine") == 1,
+        "default chewing.fuzzy_search_mode shall be 1");
 
     chewing_delete(ctx);
 }

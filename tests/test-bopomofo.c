@@ -1358,7 +1358,7 @@ void test_FuzzySearchMode()
     ctx = chewing_new();
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 16);
-    chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", 1);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", FUZZY_CHEWING_CONVERSION_ENGINE);
 
     for (i = 0; i < ARRAY_SIZE(FUZZY_INPUT); ++i) {
         type_keystroke_by_string(ctx, FUZZY_INPUT[i].token);
@@ -1382,7 +1382,7 @@ void test_FuzzySearchMode_Hanyu()
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_KBType(ctx, KB_HANYU_PINYIN);
-    chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", 1);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", FUZZY_CHEWING_CONVERSION_ENGINE);
 
     for (i = 0; i < ARRAY_SIZE(FUZZY_INPUT); ++i) {
         type_keystroke_by_string(ctx, FUZZY_INPUT[i].token);
@@ -1404,7 +1404,7 @@ void test_SimpleEngine()
     ctx = chewing_new();
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 16);
-    chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", SIMPLE_CONVERSION_ENGINE);
 
     for (i = 0; i < ARRAY_SIZE(SIMPLE_INPUT); ++i) {
         type_keystroke_by_string(ctx, SIMPLE_INPUT[i].token);

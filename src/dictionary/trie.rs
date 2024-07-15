@@ -21,7 +21,10 @@ use log::{error, warn};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
-use super::{BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, Phrase};
+use super::{
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
+    Phrase,
+};
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -79,7 +82,7 @@ impl TrieLeafView<'_> {
 ///
 /// use chewing::{syl, zhuyin::{Bopomofo, Syllable}};
 /// # use chewing::dictionary::{DictionaryBuilder, TrieBuilder};
-/// use chewing::dictionary::{Dictionary, Trie};
+/// use chewing::dictionary::{Dictionary, LookupStrategy, Trie};
 /// # let mut tempfile = File::create("dict.dat")?;
 /// # let mut builder = TrieBuilder::new();
 /// # builder.insert(&[
@@ -95,7 +98,7 @@ impl TrieLeafView<'_> {
 /// let mut phrase = dict.lookup_first_phrase(&[
 ///     syl![Bopomofo::Z, Bopomofo::TONE4],
 ///     syl![Bopomofo::D, Bopomofo::I, Bopomofo::AN, Bopomofo::TONE3]
-/// ]);
+/// ], LookupStrategy::Standard);
 /// assert_eq!("字典", phrase.unwrap().as_str());
 /// # Ok(())
 /// # }
@@ -263,7 +266,12 @@ macro_rules! iter_bail_if_oob {
 }
 
 impl Dictionary for Trie {
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+    fn lookup_first_n_phrases(
+        &self,
+        syllables: &dyn SyllableSlice,
+        first: usize,
+        strategy: LookupStrategy,
+    ) -> Vec<Phrase> {
         let dict = self.index.as_ref();
         let data = self.phrase_seq.as_ref();
 
@@ -276,9 +284,9 @@ impl Dictionary for Trie {
             return vec![];
         }
 
-        let search_predicate = match self.fuzzy_search {
-            false => |n: u16, syl: &Syllable| n == syl.to_u16(),
-            true => |n: u16, syl: &Syllable| {
+        let search_predicate = match strategy {
+            LookupStrategy::Standard => |n: u16, syl: &Syllable| n == syl.to_u16(),
+            LookupStrategy::FuzzyPartialPrefix => |n: u16, syl: &Syllable| {
                 if n == 0 {
                     return false;
                 }
@@ -427,13 +435,6 @@ impl Dictionary for Trie {
 
     fn path(&self) -> Option<&Path> {
         self.path.as_ref().map(|p| p as &Path)
-    }
-
-    fn set_lookup_strategy(&mut self, strategy: super::LookupStrategy) {
-        match strategy {
-            super::LookupStrategy::Standard => self.enable_fuzzy_search(false),
-            super::LookupStrategy::FuzzyPartialPrefix => self.enable_fuzzy_search(true),
-        }
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
@@ -1205,8 +1206,8 @@ mod tests {
 
     use crate::{
         dictionary::{
-            trie::TrieBuilderNode, Dictionary, DictionaryBuilder, DictionaryInfo, Phrase,
-            TrieOpenOptions,
+            trie::TrieBuilderNode, Dictionary, DictionaryBuilder, DictionaryInfo, LookupStrategy,
+            Phrase, TrieOpenOptions,
         },
         syl,
         zhuyin::Bopomofo,
@@ -1298,7 +1299,10 @@ mod tests {
         let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]])
+            dict.lookup_all_phrases(
+                &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                LookupStrategy::Standard
+            )
         );
 
         Ok(())
@@ -1318,16 +1322,17 @@ mod tests {
         let mut cursor = Cursor::new(vec![]);
         builder.write(&mut cursor)?;
         cursor.rewind()?;
-        let dict = TrieOpenOptions::new()
-            .fuzzy_search(true)
-            .read_from(&mut cursor)?;
+        let dict = TrieOpenOptions::new().read_from(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E]])
+            dict.lookup_all_phrases(
+                &[syl![Bopomofo::C, Bopomofo::E]],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
         assert_eq!(
             vec![Phrase::new("測", 1), Phrase::new("冊", 1)],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C]])
+            dict.lookup_all_phrases(&[syl![Bopomofo::C]], LookupStrategy::FuzzyPartialPrefix)
         );
 
         Ok(())
@@ -1365,26 +1370,35 @@ mod tests {
         let dict = Trie::new(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4]
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4]
+                ],
+                LookupStrategy::Standard
+            )
         );
         assert_eq!(
             vec![Phrase::new("測試成功", 3)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4],
-                syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
-                syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4],
+                    syl![Bopomofo::CH, Bopomofo::ENG, Bopomofo::TONE2],
+                    syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+                ],
+                LookupStrategy::Standard
+            )
         );
         assert_eq!(
             Vec::<Phrase>::new(),
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
-                syl![Bopomofo::U, Bopomofo::TONE4]
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
+                    syl![Bopomofo::U, Bopomofo::TONE4]
+                ],
+                LookupStrategy::Standard
+            )
         );
 
         Ok(())
@@ -1424,36 +1438,51 @@ mod tests {
             .read_from(&mut cursor)?;
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E], syl![Bopomofo::SH]])
+            dict.lookup_all_phrases(
+                &[syl![Bopomofo::C, Bopomofo::E], syl![Bopomofo::SH]],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
         assert_eq!(
             vec![Phrase::new("策試", 2), Phrase::new("測試", 1)],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C], syl![Bopomofo::SH]])
+            dict.lookup_all_phrases(
+                &[syl![Bopomofo::C], syl![Bopomofo::SH]],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
         assert_eq!(
             vec![Phrase::new("測試成功", 3)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E],
-                syl![Bopomofo::SH],
-                syl![Bopomofo::CH, Bopomofo::ENG],
-                syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E],
+                    syl![Bopomofo::SH],
+                    syl![Bopomofo::CH, Bopomofo::ENG],
+                    syl![Bopomofo::G, Bopomofo::U, Bopomofo::ENG],
+                ],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
         assert_eq!(
             vec![Phrase::new("測試成功", 3)],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C],
-                syl![Bopomofo::SH],
-                syl![Bopomofo::CH],
-                syl![Bopomofo::G],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C],
+                    syl![Bopomofo::SH],
+                    syl![Bopomofo::CH],
+                    syl![Bopomofo::G],
+                ],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
         assert_eq!(
             Vec::<Phrase>::new(),
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
-                syl![Bopomofo::U, Bopomofo::TONE4]
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::U, Bopomofo::O, Bopomofo::TONE4],
+                    syl![Bopomofo::U, Bopomofo::TONE4]
+                ],
+                LookupStrategy::FuzzyPartialPrefix
+            )
         );
 
         Ok(())
@@ -1502,7 +1531,10 @@ mod tests {
                 Phrase::new("測", 0),
                 Phrase::new("側", 0),
             ],
-            dict.lookup_all_phrases(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],])
+            dict.lookup_all_phrases(
+                &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],],
+                LookupStrategy::Standard
+            )
         );
         Ok(())
     }
@@ -1557,10 +1589,13 @@ mod tests {
                 Phrase::new("側視", 318),
                 Phrase::new("側室", 318),
             ],
-            dict.lookup_all_phrases(&[
-                syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-                syl![Bopomofo::SH, Bopomofo::TONE4],
-            ])
+            dict.lookup_all_phrases(
+                &[
+                    syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+                    syl![Bopomofo::SH, Bopomofo::TONE4],
+                ],
+                LookupStrategy::Standard
+            )
         );
         Ok(())
     }

@@ -8,7 +8,10 @@ use log::error;
 
 use crate::zhuyin::SyllableSlice;
 
-use super::{Dictionary, DictionaryInfo, DictionaryMut, Entries, Phrase, UpdateDictionaryError};
+use super::{
+    Dictionary, DictionaryInfo, DictionaryMut, Entries, LookupStrategy, Phrase,
+    UpdateDictionaryError,
+};
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -16,7 +19,7 @@ use super::{Dictionary, DictionaryInfo, DictionaryMut, Entries, Phrase, UpdateDi
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Layered, TrieBuf, Dictionary, Phrase}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Layered, TrieBuf, Dictionary, LookupStrategy, Phrase}, syl, zhuyin::Bopomofo};
 ///
 /// let sys_dict = TrieBuf::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
@@ -39,7 +42,7 @@ use super::{Dictionary, DictionaryInfo, DictionaryMut, Entries, Phrase, UpdateDi
 ///     .collect::<Vec<Phrase>>(),
 ///     dict.lookup_all_phrases(&[
 ///         syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]
-///     ]),
+///     ], LookupStrategy::Standard),
 /// );
 /// # Ok(())
 /// # }
@@ -79,7 +82,12 @@ impl Dictionary for Layered {
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
-    fn lookup_first_n_phrases(&self, syllables: &dyn SyllableSlice, first: usize) -> Vec<Phrase> {
+    fn lookup_first_n_phrases(
+        &self,
+        syllables: &dyn SyllableSlice,
+        first: usize,
+        strategy: LookupStrategy,
+    ) -> Vec<Phrase> {
         let mut sort_map: BTreeMap<String, usize> = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
@@ -87,7 +95,7 @@ impl Dictionary for Layered {
             .iter()
             .chain(iter::once(&self.user_dict))
             .for_each(|d| {
-                for phrase in d.lookup_all_phrases(syllables) {
+                for phrase in d.lookup_all_phrases(syllables, strategy) {
                     debug_assert!(!phrase.as_str().is_empty());
                     match sort_map.entry(phrase.to_string()) {
                         Entry::Occupied(entry) => {
@@ -126,13 +134,6 @@ impl Dictionary for Layered {
 
     fn path(&self) -> Option<&std::path::Path> {
         None
-    }
-
-    fn set_lookup_strategy(&mut self, strategy: super::LookupStrategy) {
-        self.sys_dict
-            .iter_mut()
-            .for_each(|sys_dict| sys_dict.set_lookup_strategy(strategy));
-        self.user_dict.set_lookup_strategy(strategy);
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
@@ -213,7 +214,8 @@ mod tests {
 
     use crate::{
         dictionary::{
-            Dictionary, DictionaryBuilder, DictionaryMut, Phrase, Trie, TrieBuf, TrieBuilder,
+            Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase, Trie, TrieBuf,
+            TrieBuilder,
         },
         syl,
         zhuyin::Bopomofo,
@@ -277,7 +279,10 @@ mod tests {
         let dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
         assert_eq!(
             Some(("側", 1, 0).into()),
-            dict.lookup_first_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+            dict.lookup_first_phrase(
+                &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                LookupStrategy::Standard
+            ),
         );
         assert_eq!(
             [
@@ -288,7 +293,10 @@ mod tests {
             ]
             .into_iter()
             .collect::<Vec<Phrase>>(),
-            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+            dict.lookup_all_phrases(
+                &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                LookupStrategy::Standard
+            ),
         );
         Ok(())
     }
@@ -316,7 +324,10 @@ mod tests {
         let mut dict = Layered::new(vec![Box::new(sys_dict)], Box::new(user_dict));
         assert_eq!(
             Some(("側", 1, 0).into()),
-            dict.lookup_first_phrase(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+            dict.lookup_first_phrase(
+                &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                LookupStrategy::Standard
+            ),
         );
         assert_eq!(
             [
@@ -327,7 +338,10 @@ mod tests {
             ]
             .into_iter()
             .collect::<Vec<Phrase>>(),
-            dict.lookup_all_phrases(&vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]]),
+            dict.lookup_all_phrases(
+                &vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+                LookupStrategy::Standard
+            ),
         );
         let _ = dict.about();
         assert!(dict.as_dict_mut().is_none());

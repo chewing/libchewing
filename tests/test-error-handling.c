@@ -343,7 +343,6 @@ void test_FallbackDictionary()
     ctx = chewing_new();
     start_testcase(ctx, fd);
     chewing_set_maxChiSymbolLen(ctx, 16);
-    chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
 
     for (i = 0; i < ARRAY_SIZE(SIMPLE_INPUT); ++i) {
         type_keystroke_by_string(ctx, SIMPLE_INPUT[i].token);
