@@ -16,19 +16,26 @@ use crate::flags;
 #[derive(Debug)]
 struct ParseError {
     line_num: usize,
+    line: String,
     source: anyhow::Error,
 }
 
-fn parse_error(line_num: usize) -> ParseError {
+fn parse_error(line_num: usize, line: &str) -> ParseError {
     ParseError {
         line_num,
+        line: line.to_string(),
         source: anyhow::anyhow!("Invalid format. Use the --csv flag to enable CSV parsing."),
     }
 }
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Parsing failed at line {}", self.line_num + 1)
+        write!(
+            f,
+            "Parsing failed at line {}: {}",
+            self.line_num + 1,
+            self.line
+        )
     }
 }
 
@@ -39,12 +46,16 @@ impl Error for ParseError {
 }
 
 trait IntoParseError<T> {
-    fn parse_error(self, line_num: usize) -> std::result::Result<T, ParseError>;
+    fn parse_error(self, line_num: usize, line: &str) -> std::result::Result<T, ParseError>;
 }
 
 impl<T> IntoParseError<T> for Result<T> {
-    fn parse_error(self, line_num: usize) -> std::result::Result<T, ParseError> {
-        self.map_err(|source| ParseError { line_num, source })
+    fn parse_error(self, line_num: usize, line: &str) -> std::result::Result<T, ParseError> {
+        self.map_err(|source| ParseError {
+            line_num,
+            line: line.to_string(),
+            source,
+        })
     }
 }
 
@@ -115,7 +126,7 @@ fn parse_line(
     let phrase = line
         .split(delimiter)
         .next()
-        .ok_or(parse_error(line_num))?
+        .ok_or(parse_error(line_num, line))?
         .trim_matches('"');
 
     let freq: u32 = match phrase.chars().count() {
@@ -123,11 +134,11 @@ fn parse_line(
         _ => line
             .split(delimiter)
             .nth(1)
-            .ok_or(parse_error(line_num))?
+            .ok_or(parse_error(line_num, line))?
             .trim_matches('"')
             .parse()
             .context("Unable to parse frequency")
-            .parse_error(line_num)?,
+            .parse_error(line_num, line)?,
     };
 
     let mut syllables = vec![];
@@ -146,10 +157,10 @@ fn parse_line(
                     .insert(
                         Bopomofo::try_from(c)
                             .context("parsing bopomofo")
-                            .parse_error(line_num)?,
+                            .parse_error(line_num, line)?,
                     )
                     .with_context(|| format!("Parsing syllables {}", syllable_str))
-                    .parse_error(line_num)?;
+                    .parse_error(line_num, line)?;
             }
             syllables.push(syllable_builder.build());
         }
