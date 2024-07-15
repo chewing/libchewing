@@ -1395,8 +1395,8 @@ void test_FuzzySearchMode_Hanyu()
 void test_SimpleEngine()
 {
     const TestData SIMPLE_INPUT[] = {
-        {"ru0320 5j4up ai6g4<E>", "簡單住因模市" },
-        {"ru0320 5j4<D>4up <D>2ai6g4<D><D>2<E>", "簡單注音模式" },
+        {"ru0320 5j4up ai6g4!<E>", "簡單住因模市！" },
+        {"ru0320 5j4<D>4up <D>2ai6g4<D><D>2!<E>", "簡單注音模式！" },
     };
     size_t i;
     ChewingContext *ctx;
