@@ -117,6 +117,7 @@ EXPORTS
     chewing_userphrase_remove;
     chewing_zuin_Check;
     chewing_zuin_String;
+    chewing_ack;
     chewing_config_has_option;
     chewing_config_set_int;
     chewing_config_get_int;

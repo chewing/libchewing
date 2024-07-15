@@ -824,6 +824,17 @@ pub mod output {
     /// This function fails if the IM editor is not in entering state.
     pub use super::io::chewing_clean_bopomofo_buf;
 
+    /// Acknowledge the commit buffer and aux output buffer.
+    ///
+    /// Chewing automatically acknowledges and clear the output buffers after
+    /// processing new input events.
+    ///
+    /// After handling the ephemeral output buffer like the commit buffer and
+    /// the aux output buffer, IM wrappers can proactively acknowledge and clear
+    /// the buffers. This can be used so that IM wrappers don't have to remember
+    /// whether an output has been handled or not.
+    pub use super::io::chewing_ack;
+
     pub use super::public::IntervalType;
 }
 

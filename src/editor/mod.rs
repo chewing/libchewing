@@ -241,6 +241,10 @@ impl Editor {
         self.state = Box::new(Entering);
         self.shared.clear();
     }
+    pub fn ack(&mut self) {
+        self.shared.notice_buffer.clear();
+        self.shared.commit_buffer.clear();
+    }
     pub fn clear_syllable_editor(&mut self) {
         self.shared.syl.clear();
     }
