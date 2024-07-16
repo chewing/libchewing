@@ -2,7 +2,7 @@ use std::ffi::{c_char, c_int};
 
 #[no_mangle]
 pub extern "C" fn chewing_version() -> *const c_char {
-    c"0.9.0-alpha.1".as_ptr()
+    c"0.9.0-rc.1".as_ptr()
 }
 
 #[no_mangle]
@@ -22,5 +22,5 @@ pub extern "C" fn chewing_version_patch() -> c_int {
 
 #[no_mangle]
 pub extern "C" fn chewing_version_extra() -> *const c_char {
-    c"-alpha.1".as_ptr()
+    c"-rc.1".as_ptr()
 }
