@@ -475,7 +475,7 @@ pub unsafe extern "C" fn chewing_config_set_int(
                     ctx.editor
                         .set_conversion_engine(Box::new(FuzzyChewingEngine::new()));
                     options.lookup_strategy = LookupStrategy::FuzzyPartialPrefix;
-                    ConversionEngineKind::ChewingEngine
+                    ConversionEngineKind::FuzzyChewingEngine
                 }
                 _ => return ERROR,
             }

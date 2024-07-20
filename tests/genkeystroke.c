@@ -145,10 +145,16 @@ void show_interval_buffer(int x, int y, ChewingContext *ctx)
 void showBopomofo(ChewingContext *ctx)
 {
     if (chewing_get_ChiEngMode(ctx)) {
-        if (chewing_config_get_int(ctx, "chewing.fuzzy_search_mode")) {
-            addstr("[糊]");
-        } else {
-            addstr("[中]");
+        switch (chewing_config_get_int(ctx, "chewing.conversion_engine")) {
+            case 0:
+                addstr("[ㄅ]");
+                break;
+            case 1:
+                addstr("[中]");
+                break;
+            case 2:
+                addstr("[糊]");
+                break;
         }
     } else {
         addstr("[英]");
@@ -283,6 +289,7 @@ int main(int argc, char *argv[])
     int ch;
     int add_phrase_length;
     int kbtype;
+    int conversion_engine;
 
     if (argc < 2) {
         fprintf(stderr, "usage: genkeystroke filename\n");
@@ -352,11 +359,10 @@ int main(int argc, char *argv[])
         mvaddstr(9, 20, "Ctrl + b : toggle Eng/Chi mode");
         mvaddstr(10, 0, "F1, F2, F3, ..., F9 : Add user defined phrase");
         mvaddstr(11, 0, "Ctrl + h : toggle Full/Half shape mode");
-        mvaddstr(12, 0, "Ctrl + f : toggle Fuzzy Search mode");
-        mvaddstr(13, 0, "Ctrl + s : toggle Simple mode");
-        mvaddstr(14, 0, "Ctrl + n/p : Next / Previous keyboard layout");
+        mvaddstr(12, 0, "Ctrl + s : cycle Simple/Chewing/Fuzzy mode");
+        mvaddstr(13, 0, "Ctrl + n/p : Next / Previous keyboard layout");
         show_commit_string(14, 0, ctx);
-        show_userphrase(7, 14, ctx);
+        show_userphrase(7, 15, ctx);
         show_edit_buffer(1, 0, ctx);
 
         ch = getch();
@@ -455,17 +461,11 @@ int main(int argc, char *argv[])
             break;
         case KEY_CTRL_('D'):
             goto end;
-        case KEY_CTRL_('F'):
-            if (chewing_config_get_int(ctx, "chewing.fuzzy_search_mode") == TRUE)
-                chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", FALSE);
-            else
-                chewing_config_set_int(ctx, "chewing.fuzzy_search_mode", TRUE);
-            break;
         case KEY_CTRL_('S'):
-            if (chewing_config_get_int(ctx, "chewing.conversion_engine") == 1)
-                chewing_config_set_int(ctx, "chewing.conversion_engine", 0);
-            else
-                chewing_config_set_int(ctx, "chewing.conversion_engine", 1);
+            conversion_engine = chewing_config_get_int(ctx, "chewing.conversion_engine");
+            conversion_engine += 1;
+            conversion_engine %= 3;
+            chewing_config_set_int(ctx, "chewing.conversion_engine", conversion_engine);
             break;
         case KEY_CTRL_('H'):   /* emulate Shift+Space */
             chewing_handle_ShiftSpace(ctx);

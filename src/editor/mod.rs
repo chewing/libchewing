@@ -1120,6 +1120,10 @@ impl EnteringSyllable {
             None => self.spin_ignore(),
         }
     }
+    fn start_selecting_simple_engine(&self, editor: &mut SharedState) -> Transition {
+        editor.syl.clear();
+        Transition::ToState(Box::new(Selecting::new_phrase_for_simple_engine(editor)))
+    }
 }
 
 impl State for EnteringSyllable {
@@ -1175,9 +1179,18 @@ impl State for EnteringSyllable {
                             .is_some()
                         {
                             shared.com.insert(Symbol::from(shared.syl.read()));
+                            shared.syl.clear();
+                            if shared.options.conversion_engine
+                                == ConversionEngineKind::SimpleEngine
+                            {
+                                self.start_selecting_simple_engine(shared)
+                            } else {
+                                self.start_entering()
+                            }
+                        } else {
+                            shared.syl.clear();
+                            self.start_entering()
                         }
-                        shared.syl.clear();
-                        self.start_entering()
                     }
                     _ => self.spin_bell(),
                 }
@@ -1204,6 +1217,23 @@ impl Selecting {
             editor.com.to_composition(),
         );
         sel.init(editor.cursor(), &editor.dict);
+
+        Selecting {
+            page_no: 0,
+            action: SelectingAction::Replace,
+            sel: Selector::Phrase(sel),
+        }
+    }
+    fn new_phrase_for_simple_engine(editor: &mut SharedState) -> Self {
+        editor.com.push_cursor();
+        // editor.com.clamp_cursor();
+
+        let mut sel = PhraseSelector::new(
+            false,
+            editor.options.lookup_strategy,
+            editor.com.to_composition(),
+        );
+        sel.init_single_word(editor.cursor());
 
         Selecting {
             page_no: 0,
