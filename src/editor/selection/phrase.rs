@@ -65,6 +65,12 @@ impl PhraseSelector {
         }
     }
 
+    pub(crate) fn init_single_word(&mut self, cursor: usize) {
+        self.orig = cursor;
+        self.end = min(cursor, self.com.len());
+        self.begin = self.end - 1;
+    }
+
     pub(crate) fn begin(&self) -> usize {
         self.begin
     }
