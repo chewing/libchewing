@@ -148,6 +148,12 @@ typedef struct ChewingContext ChewingContext;
 
 #define KEYSTROKE_ABSORB 8
 
+#define CHEWING_VERSION_MAJOR 0
+
+#define CHEWING_VERSION_MINOR 9
+
+#define CHEWING_VERSION_PATCH 0
+
 /**
  * Keyboard layout index.
  *
