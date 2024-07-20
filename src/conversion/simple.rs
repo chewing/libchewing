@@ -21,7 +21,7 @@ impl SimpleEngine {
 
         for (i, sym) in comp.symbols().iter().enumerate() {
             if comp
-                .selections
+                .selections()
                 .iter()
                 .any(|selection| selection.intersect_range(i, i + 1))
             {
