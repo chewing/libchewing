@@ -937,17 +937,10 @@ void test_Capslock()
     mode = chewing_get_ChiEngMode(ctx);
     ok(mode == SYMBOL_MODE, "mode shall change to SYMBOL_MODE");
 
-    ok_aux_buffer(ctx, "切換為英數模式");
-    ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "");
-    ok_commit_buffer(ctx, "");
-
     type_keystroke_by_string(ctx, "<CB>");
 
     mode = chewing_get_ChiEngMode(ctx);
     ok(mode == CHINESE_MODE, "mode shall change to CHINESE_MODE");
-
-    ok_aux_buffer(ctx, "切換為中文模式");
 
     chewing_delete(ctx);
 }
@@ -1102,7 +1095,6 @@ void test_ShiftSpace()
     type_keystroke_by_string(ctx, "<SS>");
     mode = chewing_get_ShapeMode(ctx);
     ok(mode == FULLSHAPE_MODE, "mode shall be FULLSHAPE_MODE");
-    ok_aux_buffer(ctx, "切換為全形模式");
 
     type_keystroke_by_string(ctx, " ");
     ok_commit_buffer(ctx, "\xE3\x80\x80"); /* Fullshape Space (U+3000) */
@@ -1115,7 +1107,6 @@ void test_ShiftSpace()
     type_keystroke_by_string(ctx, "<SS>");
     mode = chewing_get_ShapeMode(ctx);
     ok(mode == HALFSHAPE_MODE, "mode shall be HALFSHAPE_MODE");
-    ok_aux_buffer(ctx, "切換為半形模式");
 
     type_keystroke_by_string(ctx, " ");
     ok_commit_buffer(ctx, " ");

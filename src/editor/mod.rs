@@ -242,7 +242,6 @@ impl Editor {
         self.shared.clear();
     }
     pub fn ack(&mut self) {
-        self.shared.notice_buffer.clear();
         self.shared.commit_buffer.clear();
     }
     pub fn clear_syllable_editor(&mut self) {
@@ -636,10 +635,6 @@ impl SharedState {
             },
             ..self.options
         };
-        match self.options.language_mode {
-            LanguageMode::Chinese => self.notice_buffer = format!("切換為中文模式"),
-            LanguageMode::English => self.notice_buffer = format!("切換為英數模式"),
-        }
     }
     fn switch_character_form(&mut self) {
         self.options = EditorOptions {
@@ -649,10 +644,6 @@ impl SharedState {
             },
             ..self.options
         };
-        match self.options.character_form {
-            CharacterForm::Halfwidth => self.notice_buffer = format!("切換為半形模式"),
-            CharacterForm::Fullwidth => self.notice_buffer = format!("切換為全形模式"),
-        }
     }
     fn cancel_selecting(&mut self) {
         self.com.pop_cursor();
