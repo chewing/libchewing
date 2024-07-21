@@ -1,3 +1,17 @@
+What's New in libchewing 0.9.0-rc.2 (July 22, 2024)
+---------------------------------------------------------
+
+* Features
+  - Revert mode switch notifications change.
+  - Make simple engine compatiable with Plain Zhuyin in ibus-chewing.
+  - Automatic snapshot selections when the curser is moved.
+* Developer Features
+  - Define version macros
+    - CHEWING_VERSION_MAJOR
+    - CHEWING_VERSION_MINOR
+    - CHEWING_VERSION_PATCH
+
+
 What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
 ---------------------------------------------------------
 
