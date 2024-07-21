@@ -89,7 +89,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chewing"
-version = "0.9.0-rc.1"
+version = "0.9.0-rc.2"
 dependencies = [
  "der",
  "directories",
@@ -100,7 +100,7 @@ dependencies = [
 
 [[package]]
 name = "chewing-cli"
-version = "0.9.0-rc.1"
+version = "0.9.0-rc.2"
 dependencies = [
  "anyhow",
  "chewing",
@@ -110,7 +110,7 @@ dependencies = [
 
 [[package]]
 name = "chewing_capi"
-version = "0.9.0-rc.1"
+version = "0.9.0-rc.2"
 dependencies = [
  "chewing",
  "env_logger",
