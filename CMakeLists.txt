@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.24.0)
 project(libchewing LANGUAGES C)
 
 set(CMAKE_PROJECT_VERSION 0.9.0-rc.2)
+
+find_package(Git)
+if(Git_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} --work-tree ${CMAKE_SOURCE_DIR} describe --dirty --always
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE GIT_DESCRIBE
+        ERROR_VARIABLE GIT_DESCRIBE_ERROR
+    )
+    if(NOT GIT_DESCRIBE_ERROR)
+        string(REPLACE "v" "" CMAKE_PROJECT_VERSION ${GIT_DESCRIBE})
+    endif()
+endif()
+
 set(LIBCHEWING_VERSION ${CMAKE_PROJECT_VERSION})
 set(PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})
 set(LIBCHEWING_BINARY_VERSION 1.0.0)
