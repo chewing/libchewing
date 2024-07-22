@@ -177,6 +177,12 @@ include_directories(
 
 set(ALL_INC
     ${INC_DIR}/chewing.h
+
+    # 0.5.x compatibility headers
+    ${INC_DIR}/chewing-compat.h
+    ${INC_DIR}/chewingio.h
+    ${INC_DIR}/global.h
+    ${INC_DIR}/mod_aux.h
 )
 
 add_subdirectory(doc)
