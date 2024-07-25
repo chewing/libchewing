@@ -988,6 +988,14 @@ pub mod globals {
     /// Returns whether the automatic learning is enabled or disabled.
     pub use super::io::chewing_get_autoLearn;
 
+    pub use super::io::chewing_config_has_option;
+
+    pub use super::io::chewing_config_get_int;
+    pub use super::io::chewing_config_set_int;
+
+    pub use super::io::chewing_config_get_str;
+    pub use super::io::chewing_config_set_str;
+
     pub use super::public::MAX_CHI_SYMBOL_LEN;
     pub use super::public::MIN_CHI_SYMBOL_LEN;
 
