@@ -261,6 +261,23 @@ void test_crash_found_by_fuzzing_20240505_0()
     chewing_delete(ctx);
 }
 
+void test_glue_two_symbols()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 2);
+
+    type_keystroke_by_string(ctx, "!!<L><T><L>");
+    ok_preedit_buffer(ctx, "！！");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -288,6 +305,7 @@ int main(int argc, char *argv[])
     test_empty_prefix_in_conversion_search();
     test_empty_preedit_ignore_certain_keys();
     test_crash_found_by_fuzzing_20240505_0();
+    test_glue_two_symbols();
 
     fclose(fd);
 

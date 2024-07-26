@@ -71,6 +71,10 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
         return acc;
     }
     let last = acc.last().expect("acc should have at least one item");
+    if !last.is_phrase || !interval.is_phrase {
+        acc.push(interval);
+        return acc;
+    }
     if let Some(Gap::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
         let mut phrase = last.str.into_string();
