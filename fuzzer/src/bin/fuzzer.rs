@@ -11,9 +11,10 @@ use chewing_capi::{
         chewing_cand_TotalPage, chewing_cand_hasNext, chewing_set_candPerPage,
     },
     globals::{
-        chewing_set_addPhraseDirection, chewing_set_autoLearn, chewing_set_autoShiftCur,
-        chewing_set_easySymbolInput, chewing_set_escCleanAllBuf, chewing_set_maxChiSymbolLen,
-        chewing_set_phraseChoiceRearward, chewing_set_spaceAsSelection,
+        chewing_config_set_int, chewing_set_addPhraseDirection, chewing_set_autoLearn,
+        chewing_set_autoShiftCur, chewing_set_easySymbolInput, chewing_set_escCleanAllBuf,
+        chewing_set_maxChiSymbolLen, chewing_set_phraseChoiceRearward,
+        chewing_set_spaceAsSelection,
     },
     input::*,
     layout::chewing_set_KBType,
@@ -184,6 +185,24 @@ pub fn main() -> Result<()> {
                 .transpose()?
                 .unwrap_or_default()
                 .clamp(0, 1)
+                .into(),
+        );
+        chewing_config_set_int(
+            ctx,
+            c"chewing.enable_fullwidth_toggle_key".as_ptr(),
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 1)
+                .into(),
+        );
+        chewing_config_set_int(
+            ctx,
+            c"chewing.conversion_engine".as_ptr(),
+            ops.next()
+                .transpose()?
+                .unwrap_or_default()
+                .clamp(0, 2)
                 .into(),
         );
 
