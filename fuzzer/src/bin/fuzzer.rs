@@ -103,6 +103,8 @@ pub fn main() -> Result<()> {
         .expect("The required argument system dictionary path <PATH> is not provided.");
     let syspath = CString::new(syspath).unwrap();
 
+    let gen = env::var("GEN").is_ok();
+
     unsafe {
         let ctx = chewing_new2(
             syspath.as_ptr(),
@@ -114,97 +116,123 @@ pub fn main() -> Result<()> {
         let mut ops = stdin().bytes();
 
         // Take first few bytes as mode settings
-        chewing_set_KBType(ctx, ops.next().transpose()?.unwrap_or_default().into());
-        chewing_set_candPerPage(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(5, 10)
-                .into(),
-        );
-        chewing_set_maxChiSymbolLen(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 39)
-                .into(),
-        );
-        chewing_set_addPhraseDirection(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_spaceAsSelection(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_escCleanAllBuf(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_autoShiftCur(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_easySymbolInput(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_phraseChoiceRearward(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
-        chewing_set_autoLearn(
-            ctx,
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
-        );
+        let kb_type = ops.next().transpose()?.unwrap_or_default().into();
+        let cand_per_page = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(5, 10)
+            .into();
+        let max_chi_symbol_len = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 39)
+            .into();
+        let add_phrase_direction = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let space_as_selection = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let esc_clean_all = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let auto_shift_cur = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let easy_symbol_input = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let phrase_choice_rearward = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let auto_learn = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let fullwidth_toggle = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 1)
+            .into();
+        let conversion_engine = ops
+            .next()
+            .transpose()?
+            .unwrap_or_default()
+            .clamp(0, 2)
+            .into();
+        chewing_set_KBType(ctx, kb_type);
+        chewing_set_candPerPage(ctx, cand_per_page);
+        chewing_set_maxChiSymbolLen(ctx, max_chi_symbol_len);
+        chewing_set_addPhraseDirection(ctx, add_phrase_direction);
+        chewing_set_spaceAsSelection(ctx, space_as_selection);
+        chewing_set_escCleanAllBuf(ctx, esc_clean_all);
+        chewing_set_autoShiftCur(ctx, auto_shift_cur);
+        chewing_set_easySymbolInput(ctx, easy_symbol_input);
+        chewing_set_phraseChoiceRearward(ctx, phrase_choice_rearward);
+        chewing_set_autoLearn(ctx, auto_learn);
         chewing_config_set_int(
             ctx,
             c"chewing.enable_fullwidth_toggle_key".as_ptr(),
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 1)
-                .into(),
+            fullwidth_toggle,
         );
         chewing_config_set_int(
             ctx,
             c"chewing.conversion_engine".as_ptr(),
-            ops.next()
-                .transpose()?
-                .unwrap_or_default()
-                .clamp(0, 2)
-                .into(),
+            conversion_engine,
         );
+        if gen {
+            println!("# chewing_set_KBType(ctx, {});", kb_type);
+            println!("# chewing_set_candPerPage(ctx, {});", cand_per_page);
+            println!(
+                "# chewing_set_maxChiSymbolLen(ctx, {});",
+                max_chi_symbol_len
+            );
+            println!(
+                "# chewing_set_addPhraseDirection(ctx, {});",
+                add_phrase_direction
+            );
+            println!(
+                "# chewing_set_spaceAsSelection(ctx, {});",
+                space_as_selection
+            );
+            println!("# chewing_set_escCleanAllBuf(ctx, {});", esc_clean_all);
+            println!("# chewing_set_autoShiftCur(ctx, {});", auto_shift_cur);
+            println!("# chewing_set_easySymbolInput(ctx, {});", easy_symbol_input);
+            println!(
+                "# chewing_set_phraseChoiceRearward(ctx, {});",
+                phrase_choice_rearward
+            );
+            println!("# chewing_set_autoLearn(ctx, {});", auto_learn);
+            println!(
+                "# chewing.enable_fullwidth_toggle_key = {}",
+                fullwidth_toggle
+            );
+            println!("# chewing.conversion_engine = {}", conversion_engine);
+            println!("")
+        }
 
         while let Some(Ok(op)) = ops.next() {
             use ChewingHandle::*;
@@ -213,91 +241,166 @@ pub fn main() -> Result<()> {
                 Default => {
                     if let Some(Ok(key)) = ops.next() {
                         if key.is_ascii() && !key.is_ascii_control() {
+                            if gen {
+                                print!("{}", char::from(key));
+                            }
                             chewing_handle_Default(ctx, key as i32);
                         }
                     }
                 }
                 Backspace => {
+                    if gen {
+                        print!("<B>");
+                    }
                     chewing_handle_Backspace(ctx);
                 }
                 Capslock => {
+                    if gen {
+                        print!("<CB>");
+                    }
                     chewing_handle_Capslock(ctx);
                 }
                 CtrlNum => {
                     if let Some(Ok(key)) = ops.next() {
                         if key.is_ascii_digit() {
+                            if gen {
+                                print!("<C{}>", key);
+                            }
                             chewing_handle_CtrlNum(ctx, key as i32);
                         }
                     }
                 }
                 Del => {
+                    if gen {
+                        print!("<DC>");
+                    }
                     chewing_handle_Del(ctx);
                 }
                 Enter => {
+                    if gen {
+                        print!("<E>");
+                    }
                     chewing_handle_Enter(ctx);
                 }
                 Esc => {
+                    if gen {
+                        print!("<EE>");
+                    }
                     chewing_handle_Esc(ctx);
                 }
                 Space => {
+                    if gen {
+                        print!(" ");
+                    }
                     chewing_handle_Space(ctx);
                 }
                 Tab => {
+                    if gen {
+                        print!("<T>");
+                    }
                     chewing_handle_Tab(ctx);
                 }
                 Home => {
+                    if gen {
+                        print!("<H>");
+                    }
                     chewing_handle_Home(ctx);
                 }
                 End => {
+                    if gen {
+                        print!("<EN>");
+                    }
                     chewing_handle_End(ctx);
                 }
                 Left => {
+                    if gen {
+                        print!("<L>");
+                    }
                     chewing_handle_Left(ctx);
                 }
                 Right => {
+                    if gen {
+                        print!("<R>");
+                    }
                     chewing_handle_Right(ctx);
                 }
                 Up => {
+                    if gen {
+                        print!("<U>");
+                    }
                     chewing_handle_Up(ctx);
                 }
                 Down => {
+                    if gen {
+                        print!("<D>");
+                    }
                     chewing_handle_Down(ctx);
                 }
                 ShiftLeft => {
+                    if gen {
+                        print!("<SL>");
+                    }
                     chewing_handle_ShiftLeft(ctx);
                 }
                 ShiftRight => {
+                    if gen {
+                        print!("<SR>");
+                    }
                     chewing_handle_ShiftRight(ctx);
                 }
                 ShiftSpace => {
+                    if gen {
+                        print!("<SS>");
+                    }
                     chewing_handle_ShiftSpace(ctx);
                 }
                 PageUp => {
+                    if gen {
+                        print!("<PU>");
+                    }
                     chewing_handle_PageUp(ctx);
                 }
                 PageDown => {
+                    if gen {
+                        print!("<PD>");
+                    }
                     chewing_handle_PageDown(ctx);
                 }
                 DblTab => {
+                    if gen {
+                        print!("<TT>");
+                    }
                     chewing_handle_DblTab(ctx);
                 }
                 Numlock => {
                     if let Some(Ok(key)) = ops.next() {
                         if key.is_ascii_digit() {
+                            if gen {
+                                print!("<N{}>", key);
+                            }
                             chewing_handle_Numlock(ctx, key as i32);
                         }
                     }
                 }
                 Reset => {
+                    if gen {
+                        print!("\n# chewing_Reset(ctx);\n");
+                    }
                     chewing_Reset(ctx);
                 }
                 ChiEngMode => {
                     if let Some(Ok(key)) = ops.next() {
+                        if gen {
+                            print!("\n# chewing_set_ChiEngMode(ctx, {});\n", key % 2);
+                        }
                         chewing_set_ChiEngMode(ctx, (key % 2) as i32);
                     }
                 }
                 ShapeMode => {
                     if let Some(Ok(key)) = ops.next() {
+                        if gen {
+                            print!("\n# chewing_set_ShapeMode(ctx, {});\n", key % 2);
+                        }
                         chewing_set_ShapeMode(ctx, (key % 2) as i32);
                     }
                 }
@@ -341,6 +444,9 @@ pub fn main() -> Result<()> {
         }
 
         chewing_delete(ctx);
+        if gen {
+            println!("");
+        }
     }
 
     Ok(())
