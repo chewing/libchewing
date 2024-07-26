@@ -1,7 +1,7 @@
 use std::{env, io::Result};
 
 use chewing::{
-    dictionary::{Dictionary, Trie},
+    dictionary::{Dictionary, LookupStrategy, Trie},
     syl,
     zhuyin::Bopomofo,
 };
@@ -22,10 +22,13 @@ pub fn main() -> Result<()> {
     debug!("[+] {:?}", info);
 
     info!("[*] try to lookup a phrase...");
-    let entries = dict.lookup_all_phrases(&[
-        syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
-        syl![Bopomofo::SH, Bopomofo::TONE4],
-    ]);
+    let entries = dict.lookup_all_phrases(
+        &[
+            syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
+            syl![Bopomofo::SH, Bopomofo::TONE4],
+        ],
+        LookupStrategy::Standard,
+    );
     for phrase in entries {
         debug!("[+] found {:?}", phrase);
     }
