@@ -13,7 +13,7 @@
 use std::{
     ffi::{c_int, c_ushort},
     io::{self, BufRead, BufReader, Read},
-    mem,
+    mem::size_of,
     str::{self, FromStr},
 };
 
@@ -74,7 +74,7 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
         return Err(invalid_data());
     }
     // NB: lifetime size is platform dependent
-    input.read_exact(&mut buf[0..mem::size_of::<c_int>()])?;
+    input.read_exact(&mut buf[0..size_of::<c_int>()])?;
 
     let mut result = Vec::new();
     loop {
@@ -125,7 +125,7 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
 
 #[cfg(test)]
 mod tests {
-    use std::{ffi::c_int, iter, mem};
+    use std::{ffi::c_int, iter, mem::size_of};
 
     use crate::zhuyin::Syllable;
 
@@ -177,9 +177,7 @@ mod tests {
         input.extend_from_slice(&1_u16.to_ne_bytes());
         input.push(1);
         input.extend_from_slice(b"P");
-        input.extend(
-            iter::repeat(0).take(BIN_FIELD_SIZE - input.len() + 4 + mem::size_of::<c_int>()),
-        );
+        input.extend(iter::repeat(0).take(BIN_FIELD_SIZE - input.len() + 4 + size_of::<c_int>()));
         let phrases = try_load_bin(&input[..]).unwrap();
         assert_eq!(
             vec![(

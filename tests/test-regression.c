@@ -261,6 +261,60 @@ void test_crash_found_by_fuzzing_20240505_0()
     chewing_delete(ctx);
 }
 
+void test_glue_two_symbols()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 2);
+
+    type_keystroke_by_string(ctx, "!!<L><T><L>");
+    ok_preedit_buffer(ctx, "！！");
+
+    chewing_delete(ctx);
+}
+
+void test_end_of_buffer_select_phrase_backwards()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "0  0         0");
+    ok_preedit_buffer(ctx, "鵪");
+
+    chewing_delete(ctx);
+}
+
+void test_zero_capacity_buffer_simple_conversion_engine()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, 1);
+    chewing_set_maxChiSymbolLen(ctx, 0);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 0);
+
+    type_keystroke_by_string(ctx, "x 0");
+    ok_commit_buffer(ctx, "鄔");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -288,6 +342,9 @@ int main(int argc, char *argv[])
     test_empty_prefix_in_conversion_search();
     test_empty_preedit_ignore_certain_keys();
     test_crash_found_by_fuzzing_20240505_0();
+    test_glue_two_symbols();
+    test_end_of_buffer_select_phrase_backwards();
+    test_zero_capacity_buffer_simple_conversion_engine();
 
     fclose(fd);
 
