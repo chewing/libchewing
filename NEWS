@@ -1,3 +1,23 @@
+What's New in libchewing 0.9.0-rc.3 (July 28, 2024)
+---------------------------------------------------------
+
+* Bug fixes
+  - Add back 0.5.x compat C headers. (introduced in v0.9.0-rc.1)
+  - Panic when connecting symbol to symbol or symbol to phrase. (introduced in
+    v0.9.0-rc.1)
+  - Panic when selecting phrases backwards at the end of buffer. (introduced in
+    v0.8.0)
+  - Panic when autocommit in select mode triggered by the simple engine.
+    (introduced in v0.9.0-rc.2)
+
+* Testing
+  - Support new editor options in the fuzzer.
+  - Generate test cases from fuzzer input.
+
+* Misc
+  - Append `git describe` to version string for unreleased version.
+
+
 What's New in libchewing 0.9.0-rc.2 (July 22, 2024)
 ---------------------------------------------------------
 
