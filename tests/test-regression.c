@@ -296,6 +296,25 @@ void test_end_of_buffer_select_phrase_backwards()
     chewing_delete(ctx);
 }
 
+void test_zero_capacity_buffer_simple_conversion_engine()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, 1);
+    chewing_set_maxChiSymbolLen(ctx, 0);
+    chewing_config_set_int(ctx, "chewing.conversion_engine", 0);
+
+    type_keystroke_by_string(ctx, "x 0");
+    ok_commit_buffer(ctx, "鄔");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -325,6 +344,7 @@ int main(int argc, char *argv[])
     test_crash_found_by_fuzzing_20240505_0();
     test_glue_two_symbols();
     test_end_of_buffer_select_phrase_backwards();
+    test_zero_capacity_buffer_simple_conversion_engine();
 
     fclose(fd);
 

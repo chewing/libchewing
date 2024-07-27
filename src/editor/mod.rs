@@ -763,7 +763,7 @@ impl BasicEditor for Editor {
             Transition::Spin(behavior) => self.shared.last_key_behavior = behavior,
         }
 
-        if self.shared.last_key_behavior == EditorKeyBehavior::Absorb {
+        if self.is_entering() && self.shared.last_key_behavior == EditorKeyBehavior::Absorb {
             self.shared.try_auto_commit();
         }
         trace!("last_key_behavior = {:?}", self.shared.last_key_behavior);
