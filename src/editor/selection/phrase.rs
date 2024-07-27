@@ -170,6 +170,7 @@ impl PhraseSelector {
             } else {
                 self.begin += 1;
                 if self.begin == self.end {
+                    self.begin -= 1;
                     self.begin = self.after_previous_break_point(self.begin);
                 }
             }

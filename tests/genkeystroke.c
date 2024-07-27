@@ -342,6 +342,7 @@ int main(int argc, char *argv[])
     chewing_set_addPhraseDirection(ctx, 1);
     chewing_set_selKey(ctx, selKey_define, 10);
     chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
 
     clear();
 

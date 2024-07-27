@@ -278,6 +278,24 @@ void test_glue_two_symbols()
     chewing_delete(ctx);
 }
 
+void test_end_of_buffer_select_phrase_backwards()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "0  0         0");
+    ok_preedit_buffer(ctx, "鵪");
+
+    chewing_delete(ctx);
+}
+
 int main(int argc, char *argv[])
 {
     char *logname;
@@ -306,6 +324,7 @@ int main(int argc, char *argv[])
     test_empty_preedit_ignore_certain_keys();
     test_crash_found_by_fuzzing_20240505_0();
     test_glue_two_symbols();
+    test_end_of_buffer_select_phrase_backwards();
 
     fclose(fd);
 
