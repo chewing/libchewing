@@ -1,38 +1,4 @@
-What's New in libchewing 0.9.0-rc.3 (July 28, 2024)
----------------------------------------------------------
-
-* Bug fixes
-  - Add back 0.5.x compat C headers. (introduced in v0.9.0-rc.1)
-  - Panic when connecting symbol to symbol or symbol to phrase. (introduced in
-    v0.9.0-rc.1)
-  - Panic when selecting phrases backwards at the end of buffer. (introduced in
-    v0.8.0)
-  - Panic when autocommit in select mode triggered by the simple engine.
-    (introduced in v0.9.0-rc.2)
-
-* Testing
-  - Support new editor options in the fuzzer.
-  - Generate test cases from fuzzer input.
-
-* Misc
-  - Append `git describe` to version string for unreleased version.
-
-
-What's New in libchewing 0.9.0-rc.2 (July 22, 2024)
----------------------------------------------------------
-
-* Features
-  - Revert mode switch notifications change.
-  - Make simple engine compatiable with Plain Zhuyin in ibus-chewing.
-  - Automatic snapshot selections when the curser is moved.
-* Developer Features
-  - Define version macros
-    - CHEWING_VERSION_MAJOR
-    - CHEWING_VERSION_MINOR
-    - CHEWING_VERSION_PATCH
-
-
-What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
+What's New in libchewing 0.9.0 (August 11, 2024)
 ---------------------------------------------------------
 
 * Features
@@ -45,14 +11,14 @@ What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
   - A new option to disable fullwidth toggle key.
   - Workman layout support.
   - Load embedded mini dictionary if system dictionaries were not found.
-  - Show notification about mode switches triggered by input.
   - Automatically load extra dictionaries found in search path
     - ${CHEWING_PATH}/dictionary.d/*.dat
+  - Automatic snapshot selections when the curser is moved.
 
 * Developer Features
-  - BREAKING: Remove language_mode and character_form methods
+  - BREAKING: Remove language_mode and character_form methods (Rust).
   - BREAKING: Remove unused pinyin.tab file
-  - BREAKING: Remove most unused C code
+  - BREAKING: Remove most unused C code but keep compat C headers.
   - Bump minimum supported Rust version to 1.77
   - Enable ELF symbol versioning. All existing symbols are marked as version
     CHEWING_0.5 and new symbols from this release are marked as CHEWING_0.9.
@@ -70,9 +36,15 @@ What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
     - chewing_version_extra
   - New API to acknowledge output buffers:
     - chewing_ack
+  - Define version macros
+    - CHEWING_VERSION_MAJOR
+    - CHEWING_VERSION_MINOR
+    - CHEWING_VERSION_PATCH
 
 * Bug Fixes
   - Separate special handling by pinyin variants (#298)
+  - Panic when selecting phrases backwards at the end of buffer. (introduced in
+    v0.8.0)
 
 * Dictionary
   - Default dictionary updates and fixes (#331)
@@ -89,6 +61,8 @@ What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
   - Test chewing_config_set_str with chewing.keyboard_type
   - Allow switching keyboard layout in genkeystroke
   - Add test for simple engine symbol input
+  - Support new editor options in the fuzzer.
+  - Generate test cases from fuzzer input.
 
 * Miscellaneous Tasks
   - Drop outdated ChangeLog
@@ -102,6 +76,7 @@ What's New in libchewing 0.9.0-rc.1 (July 16, 2024)
   - Bump Corrosion to v0.5
   - Fix building without using CMake presets
   - Force linking chewing_version obj file
+  - Append `git describe` to version string for unreleased version.
 
 
 What's New in libchewing 0.8.5 (July 8, 2024)
