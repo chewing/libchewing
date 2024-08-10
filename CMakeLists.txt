@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24.0)
 project(libchewing LANGUAGES C)
 
-set(CMAKE_PROJECT_VERSION 0.9.0-rc.3)
+set(CMAKE_PROJECT_VERSION 0.9.0)
 
 find_package(Git)
 if(Git_FOUND)
