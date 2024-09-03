@@ -84,6 +84,13 @@ if(ENABLE_GCOV)
     corrosion_add_target_local_rustflags(chewing_capi -Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort)
 endif()
 
+if(CMAKE_SYSTEM MATCHES "Windows")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    corrosion_add_target_rustflags(chewing_capi -Ctarget-feature=+crt-static)
+    corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
+    corrosion_add_target_rustflags(chewing-cli -Ctarget-feature=+crt-static)
+endif()
+
 # Feature probe
 include(CheckTypeSize)
 check_type_size(uint16_t UINT16_T)
@@ -228,8 +235,10 @@ if(BUILD_SHARED_LIBS)
         )
     elseif(MSVC)
         target_link_options(libchewing
-            PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def)
-        set_target_properties(libchewing PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+            PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
+            PRIVATE /NODEFAULTLIB:MSVCRT
+            PRIVATE /NODEFAULTLIB:MSVCRTD
+        )
         set_target_properties(libchewing PROPERTIES
             LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
         )
