@@ -35,9 +35,15 @@ jobs:
       - if: ${{ matrix.os == 'macos-latest' }}
         run: brew install ninja
       - if: ${{ matrix.os == 'windows-latest' }}
-        run: choco install ninja
-      - if: ${{ matrix.os == 'windows-latest' }}
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+      - if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          choco install ninja
+          echo VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT >> $env:GITHUB_ENV
+          echo CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake >> $env:GITHUB_ENV
+          echo VCPKG_TARGET_TRIPLET=x64-windows-static >> $env:GITHUB_ENV
+          & $env:VCPKG_INSTALLATION_ROOT\vcpkg install --triplet x64-windows-static sqlite3
+          & $env:VCPKG_INSTALLATION_ROOT\vcpkg install --triplet x64-windows-static-md sqlite3
 
       - name: Setup rustup
         run: |
@@ -46,7 +52,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake --preset ${{ matrix.preset }}
+          cmake --preset ${{ matrix.preset }} -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }}
           cmake --build build
           cmake --install build --prefix install
 

@@ -23,9 +23,6 @@ directories = "5.0.0"
 log = { workspace = true }
 rusqlite = { version = ">= 0.28.0", optional = true }
 
-[target.'cfg(windows)'.dependencies]
-rusqlite = { version = ">= 0.28.0", features = ["bundled"], optional = true }
-
 [dev-dependencies]
 tempfile = { workspace = true }
 
