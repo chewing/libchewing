@@ -89,6 +89,9 @@ if(CMAKE_SYSTEM MATCHES "Windows")
     corrosion_add_target_rustflags(chewing_capi -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing-cli -Ctarget-feature=+crt-static)
+    if(VCPKG_TARGET_TRIPLET)
+        corrosion_set_env_vars(chewing-cli VCPKGRS_TRIPLET=${VCPKG_TARGET_TRIPLET})
+    endif()
 endif()
 
 # Feature probe
@@ -99,39 +102,10 @@ set(CURSES_NEED_WIDE true)
 find_package(Curses)
 
 if(WITH_SQLITE3)
-    find_package(SQLite3 QUIET)
+    find_package(SQLite3 REQUIRED)
     if(SQLite3_FOUND)
         message(STATUS "Found SQLite3 version ${SQLite3_VERSION}")
         include_directories(SQLite3_INCLUDE_DIRS)
-    else()
-        message(STATUS "Fetching SQLite3 source from internet")
-        FetchContent_Declare(
-            SQLite3
-            URL https://www.sqlite.org/2024/sqlite-amalgamation-3460000.zip
-            URL_HASH SHA3_256=1221eed70de626871912bfca144c00411f0c30d3c2b7935cff3963b63370ef7c
-        )
-        FetchContent_MakeAvailable(SQLite3)
-
-        include_directories(${sqlite3_SOURCE_DIR})
-        add_library(sqlite3_library STATIC
-            ${sqlite3_SOURCE_DIR}/sqlite3.c
-            ${sqlite3_SOURCE_DIR}/sqlite3.h
-        )
-        find_package(Threads)
-        target_link_libraries(sqlite3_library PUBLIC ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-        set(SQLite3_LIBRARIES sqlite3_library)
-
-        add_executable(sqlite3
-            ${sqlite3_SOURCE_DIR}/shell.c
-        )
-        target_link_libraries(sqlite3 PRIVATE ${SQLite3_LIBRARIES})
-        set_target_properties(sqlite3 PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${sqlite3_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${sqlite3_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${sqlite3_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${sqlite3_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${sqlite3_BINARY_DIR}
-        )
     endif()
 endif()
 
