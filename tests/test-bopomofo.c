@@ -583,7 +583,7 @@ void test_Del_word()
     chewing_set_maxChiSymbolLen(ctx, 16);
 
     type_keystroke_by_string(ctx, "hk4u g4<L><L><DC><E>");
-    ok_commit_buffer(ctx, "冊市" );
+    ok_commit_buffer(ctx, "測試" );
 
     chewing_delete(ctx);
 }
@@ -654,7 +654,7 @@ void test_Backspace_word()
     chewing_set_maxChiSymbolLen(ctx, 16);
 
     type_keystroke_by_string(ctx, "hk4u g4<L><B><E>");
-    ok_commit_buffer(ctx, "冊市" );
+    ok_commit_buffer(ctx, "測試" );
 
     chewing_delete(ctx);
 }

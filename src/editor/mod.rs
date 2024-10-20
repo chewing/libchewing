@@ -524,10 +524,10 @@ impl SharedState {
         self.conversion().into_iter()
     }
     fn snapshot(&mut self) {
-        for interval in self.intervals() {
-            self.com.select(interval);
-        }
-        self.nth_conversion = 0;
+        // for interval in self.intervals() {
+        //     self.com.select(interval);
+        // }
+        // self.nth_conversion = 0;
     }
     fn cursor(&self) -> usize {
         self.com.cursor()
