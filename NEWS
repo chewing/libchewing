@@ -1,3 +1,15 @@
+What's New in libchewing 0.9.1 (October 26, 2024)
+---------------------------------------------------------
+
+* Bug Fixes
+  - Disable automatic selections snapshot which introduced more problems then
+    what it tried to solve. (introduced in v0.9.0)
+
+* Build
+  - Statically link C runtime on Windows
+  - Use vcpkg on Windows
+
+
 What's New in libchewing 0.9.0 (August 11, 2024)
 ---------------------------------------------------------
 
