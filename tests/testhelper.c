@@ -99,7 +99,7 @@ BufferType BOPOMOFO_BUFFER = {
     chewing_bopomofo_Check,
     chewing_zuin_Check,
     0,
-    0,
+    chewing_bopomofo_String,
     chewing_zuin_String,
     chewing_bopomofo_String_static
 };

@@ -244,6 +244,10 @@ void test_null()
     const_buf = chewing_buffer_String_static(NULL);
     ok(strcmp(const_buf, "") == 0, "chewing_buffer_String_static() returns `%s' shall be `%s'", const_buf, "");
 
+    buf = chewing_bopomofo_String(NULL);
+    ok(strcmp(buf, "") == 0, "chewing_bopomofo_String() returns `%s' shall be `%s'", buf, "");
+    chewing_free(buf);
+
     const_buf = chewing_bopomofo_String_static(NULL);
     ok(strcmp(const_buf, "") == 0, "chewing_bopomofo_String_static() returns `%s' shall be `%s'", const_buf, "");
 

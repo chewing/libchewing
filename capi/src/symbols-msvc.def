@@ -4,6 +4,7 @@ EXPORTS
     chewing_aux_String;
     chewing_aux_String_static;
     chewing_bopomofo_Check;
+    chewing_bopomofo_String;
     chewing_bopomofo_String_static;
     chewing_buffer_Check;
     chewing_buffer_Len;
