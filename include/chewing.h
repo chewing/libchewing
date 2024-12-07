@@ -152,7 +152,7 @@ typedef struct ChewingContext ChewingContext;
 
 #define CHEWING_VERSION_MINOR 9
 
-#define CHEWING_VERSION_PATCH 0
+#define CHEWING_VERSION_PATCH 1
 
 /**
  * Keyboard layout index.
@@ -849,6 +849,13 @@ int chewing_buffer_Len(const struct ChewingContext *ctx);
  * This function should be called with valid pointers.
  */
 const char *chewing_bopomofo_String_static(const struct ChewingContext *ctx);
+
+/**
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+char *chewing_bopomofo_String(const struct ChewingContext *ctx);
 
 /**
  * # Safety

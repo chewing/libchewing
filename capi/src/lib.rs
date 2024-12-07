@@ -707,6 +707,17 @@ pub mod output {
 
     /// Returns the phonetic characters in the pre-edit buffer.
     ///
+    /// The returned value is a pointer to a character string. The memory must
+    /// be freed by the caller using function
+    /// [chewing_free][super::setup::chewing_free].
+    ///
+    /// # Failures
+    ///
+    /// This function returns NULL when memory allocation fails.
+    pub use super::io::chewing_bopomofo_String;
+
+    /// Returns the phonetic characters in the pre-edit buffer.
+    ///
     /// The return value is a const pointer to a character string. The pointer
     /// is only valid immediately after checking the [chewing_bopomofo_Check]
     /// condition.

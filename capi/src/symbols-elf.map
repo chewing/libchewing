@@ -135,3 +135,8 @@ CHEWING_0.9 {
         chewing_version_patch;
         chewing_version_extra;
 } CHEWING_0.5;
+
+CHEWING_0.10 {
+    global:
+        chewing_bopomofo_String;
+} CHEWING_0.9;

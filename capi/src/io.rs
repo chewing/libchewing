@@ -1713,6 +1713,24 @@ pub unsafe extern "C" fn chewing_bopomofo_String_static(
 ///
 /// This function should be called with valid pointers.
 #[no_mangle]
+pub unsafe extern "C" fn chewing_bopomofo_String(ctx: *const ChewingContext) -> *mut c_char {
+    let ctx = as_ref_or_return!(
+        ctx,
+        owned_into_raw(Owned::CString, CString::default().into_raw())
+    );
+
+    let buffer = ctx.editor.syllable_buffer_display();
+    let cstr = match CString::new(buffer) {
+        Ok(cstr) => cstr,
+        Err(_) => return null_mut(),
+    };
+    owned_into_raw(Owned::CString, cstr.into_raw())
+}
+
+/// # Safety
+///
+/// This function should be called with valid pointers.
+#[no_mangle]
 pub unsafe extern "C" fn chewing_bopomofo_Check(ctx: *const ChewingContext) -> c_int {
     let ctx = as_ref_or_return!(ctx, ERROR);
 
