@@ -212,6 +212,7 @@ if(BUILD_SHARED_LIBS)
             PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
             PRIVATE /NODEFAULTLIB:MSVCRT
             PRIVATE /NODEFAULTLIB:MSVCRTD
+            PRIVATE /NODEFAULTLIB:LIBCMTD
         )
         set_target_properties(libchewing PROPERTIES
             LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
