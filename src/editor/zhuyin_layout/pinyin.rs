@@ -160,24 +160,20 @@ impl SyllableEditor for Pinyin {
         /* Hanyu empty rime
          * ㄓ/ㄔ/ㄕ/ㄖ/ㄗ/ㄘ/ㄙ + -i, -i is empty rime, not ㄧ
          * */
-        match self.variant {
-            PinyinVariant::HanyuPinyin => {
-                if matches!(
-                    (medial, rime),
-                    (Some(Bopomofo::I), None) | (None, Some(Bopomofo::I))
-                ) {
-                    match initial {
-                        Some(Bopomofo::ZH) | Some(Bopomofo::CH) | Some(Bopomofo::SH)
-                        | Some(Bopomofo::R) | Some(Bopomofo::Z) | Some(Bopomofo::C)
-                        | Some(Bopomofo::S) => {
-                            medial.take();
-                            rime.take();
-                        }
-                        _ => (),
-                    }
+        if self.variant == PinyinVariant::HanyuPinyin
+            && matches!(
+                (medial, rime),
+                (Some(Bopomofo::I), None) | (None, Some(Bopomofo::I))
+            )
+        {
+            match initial {
+                Some(Bopomofo::ZH) | Some(Bopomofo::CH) | Some(Bopomofo::SH)
+                | Some(Bopomofo::R) | Some(Bopomofo::Z) | Some(Bopomofo::C) | Some(Bopomofo::S) => {
+                    medial.take();
+                    rime.take();
                 }
+                _ => (),
             }
-            _ => {}
         }
 
         /* Hanyu uan/un/u :
@@ -185,8 +181,8 @@ impl SyllableEditor for Pinyin {
          * ㄐ/ㄑ/ㄒ + -un,  -un is ㄩㄣ, not ㄨㄣ
          * ㄐ/ㄑ/ㄒ + -u,   -u is ㄧ, not ㄨ
          */
-        match self.variant {
-            PinyinVariant::HanyuPinyin => match initial {
+        if self.variant == PinyinVariant::HanyuPinyin {
+            match initial {
                 Some(Bopomofo::J) | Some(Bopomofo::Q) | Some(Bopomofo::X) => {
                     match (medial, rime) {
                         (Some(Bopomofo::U), Some(Bopomofo::AN))
@@ -198,8 +194,7 @@ impl SyllableEditor for Pinyin {
                     };
                 }
                 _ => (),
-            },
-            _ => {}
+            }
         }
 
         /* THL/MPS2 s/sh/c/ch/j :

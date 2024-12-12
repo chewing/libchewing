@@ -216,7 +216,7 @@ pub trait SyllableEditor: Debug {
             self.key_press(key);
             return ret;
         }
-        return self.key_press(key);
+        self.key_press(key)
     }
     /// Removes the last input from the buffer.
     fn remove_last(&mut self);

@@ -290,24 +290,24 @@ pub unsafe extern "C" fn chewing_config_has_option(
     let cstr = unsafe { CStr::from_ptr(name) };
     let name = cstr.to_string_lossy();
 
-    let ret = match name.as_ref() {
+    let ret = matches!(
+        name.as_ref(),
         "chewing.user_phrase_add_direction"
-        | "chewing.disable_auto_learn_phrase"
-        | "chewing.auto_shift_cursor"
-        | "chewing.candidates_per_page"
-        | "chewing.language_mode"
-        | "chewing.easy_symbol_input"
-        | "chewing.esc_clear_all_buffer"
-        | "chewing.keyboard_type"
-        | "chewing.auto_commit_threshold"
-        | "chewing.phrase_choice_rearward"
-        | "chewing.selection_keys"
-        | "chewing.character_form"
-        | "chewing.space_is_select_key"
-        | "chewing.conversion_engine"
-        | "chewing.enable_fullwidth_toggle_key" => true,
-        _ => false,
-    };
+            | "chewing.disable_auto_learn_phrase"
+            | "chewing.auto_shift_cursor"
+            | "chewing.candidates_per_page"
+            | "chewing.language_mode"
+            | "chewing.easy_symbol_input"
+            | "chewing.esc_clear_all_buffer"
+            | "chewing.keyboard_type"
+            | "chewing.auto_commit_threshold"
+            | "chewing.phrase_choice_rearward"
+            | "chewing.selection_keys"
+            | "chewing.character_form"
+            | "chewing.space_is_select_key"
+            | "chewing.conversion_engine"
+            | "chewing.enable_fullwidth_toggle_key"
+    );
 
     ret as c_int
 }
@@ -675,7 +675,7 @@ pub unsafe extern "C" fn chewing_KBStr2Num(str: *const c_char) -> c_int {
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_ChiEngMode(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.language_mode\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.language_mode".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -683,7 +683,7 @@ pub unsafe extern "C" fn chewing_set_ChiEngMode(ctx: *mut ChewingContext, mode: 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_ChiEngMode(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.language_mode\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.language_mode".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -691,7 +691,7 @@ pub unsafe extern "C" fn chewing_get_ChiEngMode(ctx: *const ChewingContext) -> c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_ShapeMode(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.character_form\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.character_form".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -699,7 +699,7 @@ pub unsafe extern "C" fn chewing_set_ShapeMode(ctx: *mut ChewingContext, mode: c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_ShapeMode(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.character_form\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.character_form".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -707,7 +707,7 @@ pub unsafe extern "C" fn chewing_get_ShapeMode(ctx: *const ChewingContext) -> c_
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.candidates_per_page\0".as_ptr().cast(), n) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.candidates_per_page".as_ptr().cast(), n) };
 }
 
 /// # Safety
@@ -715,7 +715,7 @@ pub unsafe extern "C" fn chewing_set_candPerPage(ctx: *mut ChewingContext, n: c_
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_candPerPage(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.candidates_per_page\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.candidates_per_page".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -723,7 +723,7 @@ pub unsafe extern "C" fn chewing_get_candPerPage(ctx: *const ChewingContext) -> 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.auto_commit_threshold\0".as_ptr().cast(), n) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.auto_commit_threshold".as_ptr().cast(), n) };
 }
 
 /// # Safety
@@ -731,7 +731,7 @@ pub unsafe extern "C" fn chewing_set_maxChiSymbolLen(ctx: *mut ChewingContext, n
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_maxChiSymbolLen(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.auto_commit_threshold\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.auto_commit_threshold".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -774,7 +774,7 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
     unsafe {
         chewing_config_set_int(
             ctx,
-            b"chewing.user_phrase_add_direction\0".as_ptr().cast(),
+            c"chewing.user_phrase_add_direction".as_ptr().cast(),
             direction,
         )
     };
@@ -785,7 +785,7 @@ pub unsafe extern "C" fn chewing_set_addPhraseDirection(
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.user_phrase_add_direction\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.user_phrase_add_direction".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -793,7 +793,7 @@ pub unsafe extern "C" fn chewing_get_addPhraseDirection(ctx: *const ChewingConte
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.space_is_select_key\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.space_is_select_key".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -801,7 +801,7 @@ pub unsafe extern "C" fn chewing_set_spaceAsSelection(ctx: *mut ChewingContext, 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_spaceAsSelection(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.space_is_select_key\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.space_is_select_key".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -809,7 +809,7 @@ pub unsafe extern "C" fn chewing_get_spaceAsSelection(ctx: *const ChewingContext
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.esc_clear_all_buffer\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.esc_clear_all_buffer".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -817,7 +817,7 @@ pub unsafe extern "C" fn chewing_set_escCleanAllBuf(ctx: *mut ChewingContext, mo
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_escCleanAllBuf(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.esc_clear_all_buffer\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.esc_clear_all_buffer".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -825,7 +825,7 @@ pub unsafe extern "C" fn chewing_get_escCleanAllBuf(ctx: *const ChewingContext) 
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.auto_shift_cursor\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.auto_shift_cursor".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -833,7 +833,7 @@ pub unsafe extern "C" fn chewing_set_autoShiftCur(ctx: *mut ChewingContext, mode
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.auto_shift_cursor\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.auto_shift_cursor".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -841,7 +841,7 @@ pub unsafe extern "C" fn chewing_get_autoShiftCur(ctx: *const ChewingContext) ->
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe { chewing_config_set_int(ctx, b"chewing.easy_symbol_input\0".as_ptr().cast(), mode) };
+    unsafe { chewing_config_set_int(ctx, c"chewing.easy_symbol_input".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -849,7 +849,7 @@ pub unsafe extern "C" fn chewing_set_easySymbolInput(ctx: *mut ChewingContext, m
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.easy_symbol_input\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.easy_symbol_input".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -857,13 +857,7 @@ pub unsafe extern "C" fn chewing_get_easySymbolInput(ctx: *const ChewingContext)
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingContext, mode: c_int) {
-    unsafe {
-        chewing_config_set_int(
-            ctx,
-            b"chewing.phrase_choice_rearward\0".as_ptr().cast(),
-            mode,
-        )
-    };
+    unsafe { chewing_config_set_int(ctx, c"chewing.phrase_choice_rearward".as_ptr().cast(), mode) };
 }
 
 /// # Safety
@@ -871,7 +865,7 @@ pub unsafe extern "C" fn chewing_set_phraseChoiceRearward(ctx: *mut ChewingConte
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_phraseChoiceRearward(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.phrase_choice_rearward\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.phrase_choice_rearward".as_ptr().cast()) }
 }
 
 /// # Safety
@@ -882,7 +876,7 @@ pub unsafe extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c
     unsafe {
         chewing_config_set_int(
             ctx,
-            b"chewing.disable_auto_learn_phrase\0".as_ptr().cast(),
+            c"chewing.disable_auto_learn_phrase".as_ptr().cast(),
             mode,
         )
     };
@@ -893,7 +887,7 @@ pub unsafe extern "C" fn chewing_set_autoLearn(ctx: *mut ChewingContext, mode: c
 /// This function should be called with valid pointers.
 #[no_mangle]
 pub unsafe extern "C" fn chewing_get_autoLearn(ctx: *const ChewingContext) -> c_int {
-    unsafe { chewing_config_get_int(ctx, b"chewing.disable_auto_learn_phrase\0".as_ptr().cast()) }
+    unsafe { chewing_config_get_int(ctx, c"chewing.disable_auto_learn_phrase".as_ptr().cast()) }
 }
 
 /// # Safety

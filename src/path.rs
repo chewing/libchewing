@@ -65,17 +65,15 @@ pub(crate) fn find_extra_dat_by_path(search_path: &str) -> Vec<PathBuf> {
         info!("Search dictionary files in {}", prefix.display());
         if let Ok(read_dir) = prefix.read_dir() {
             let mut files = vec![];
-            for entry in read_dir {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    let is_dat = path
-                        .extension()
-                        .and_then(OsStr::to_str)
-                        .map_or(false, |ext| ext == "dat");
-                    if path.is_file() && is_dat {
-                        info!("Found {}", path.display());
-                        files.push(path);
-                    }
+            for entry in read_dir.flatten() {
+                let path = entry.path();
+                let is_dat = path
+                    .extension()
+                    .and_then(OsStr::to_str)
+                    .map_or(false, |ext| ext == "dat");
+                if path.is_file() && is_dat {
+                    info!("Found {}", path.display());
+                    files.push(path);
                 }
             }
             files.sort();
