@@ -5,7 +5,7 @@ use std::{
     mem,
     ptr::{null, null_mut},
     slice, str,
-    sync::OnceLock,
+    sync::RwLock,
 };
 
 use chewing::{
@@ -46,25 +46,19 @@ enum Owned {
     CUShortSlice(usize),
 }
 
-static mut OWNED: OnceLock<BTreeMap<*mut c_void, Owned>> = OnceLock::new();
+static OWNED: RwLock<BTreeMap<usize, Owned>> = RwLock::new(BTreeMap::new());
 
 fn owned_into_raw<T>(owned: Owned, ptr: *mut T) -> *mut T {
-    unsafe {
-        if OWNED.get().is_none() {
-            let _ = OWNED.set(BTreeMap::new());
-        }
-    }
-    let void_ptr: *mut c_void = ptr.cast();
-    match unsafe { OWNED.get_mut() } {
-        Some(map) => {
-            map.insert(void_ptr, owned);
+    match OWNED.write() {
+        Ok(mut map) => {
+            map.insert(ptr as usize, owned);
             ptr
         }
-        None => null_mut(),
+        Err(_) => null_mut(),
     }
 }
 
-static mut EMPTY_STRING_BUFFER: [u8; 1] = [0; 1];
+static EMPTY_STRING_BUFFER: [u8; 1] = [0; 1];
 
 fn copy_cstr(buf: &mut [u8], buffer: &str) -> *const c_char {
     let n = min(buf.len(), buffer.len());
@@ -73,8 +67,8 @@ fn copy_cstr(buf: &mut [u8], buffer: &str) -> *const c_char {
     buf.as_ptr().cast()
 }
 
-fn global_empty_cstr() -> *mut c_char {
-    unsafe { EMPTY_STRING_BUFFER.as_mut_ptr().cast() }
+fn global_empty_cstr() -> *const c_char {
+    EMPTY_STRING_BUFFER.as_ptr().cast()
 }
 
 unsafe fn slice_from_ptr_with_nul<'a>(ptr: *const c_char) -> Option<&'a [c_char]> {
@@ -110,11 +104,6 @@ pub unsafe extern "C" fn chewing_new2(
     logger: Option<unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, ...)>,
     loggerdata: *mut c_void,
 ) -> *mut ChewingContext {
-    unsafe {
-        if OWNED.get().is_none() {
-            let _ = OWNED.set(BTreeMap::new());
-        }
-    }
     LOGGER.init();
     let _ = log::set_logger(&LOGGER);
     log::set_max_level(log::LevelFilter::Trace);
@@ -220,11 +209,6 @@ pub unsafe extern "C" fn chewing_new2(
 #[no_mangle]
 pub unsafe extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
     if !ctx.is_null() {
-        unsafe {
-            if OWNED.get().is_none() {
-                let _ = OWNED.take();
-            }
-        }
         LOGGER.set(None);
         info!("Destroying context {ctx:?}");
         drop(unsafe { Box::from_raw(ctx) })
@@ -237,8 +221,8 @@ pub unsafe extern "C" fn chewing_delete(ctx: *mut ChewingContext) {
 #[no_mangle]
 pub unsafe extern "C" fn chewing_free(ptr: *mut c_void) {
     if !ptr.is_null() {
-        if let Some(map) = unsafe { OWNED.get() } {
-            if let Some(owned) = map.get(&ptr) {
+        if let Ok(map) = OWNED.write() {
+            if let Some(owned) = map.get(&(ptr as usize)) {
                 match owned {
                     Owned::CString => drop(unsafe { CString::from_raw(ptr.cast()) }),
                     Owned::CUShortSlice(len) => {
@@ -437,7 +421,7 @@ pub unsafe extern "C" fn chewing_config_set_int(
             options.esc_clear_all_buffer = value > 0;
         }
         "chewing.auto_commit_threshold" => {
-            if value < 0 || value > 39 {
+            if !(0..=39).contains(&value) {
                 return ERROR;
             }
             options.auto_commit_threshold = value as usize;
