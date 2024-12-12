@@ -174,17 +174,9 @@ impl Trie {
 
 /// Options and flags which can be used to configure how a trie dictionary is
 /// opened.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct TrieOpenOptions {
     fuzzy_search: bool,
-}
-
-impl Default for TrieOpenOptions {
-    fn default() -> Self {
-        Self {
-            fuzzy_search: false,
-        }
-    }
 }
 
 impl TrieOpenOptions {

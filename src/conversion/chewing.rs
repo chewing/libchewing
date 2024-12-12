@@ -887,7 +887,7 @@ mod tests {
         }
         assert_eq!(
             40,
-            engine.convert(&dict, &composition).nth(0).unwrap().len()
+            engine.convert(&dict, &composition).next().unwrap().len()
         );
         assert_eq!(
             41,

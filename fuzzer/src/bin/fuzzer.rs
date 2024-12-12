@@ -108,7 +108,7 @@ pub fn main() -> Result<()> {
     unsafe {
         let ctx = chewing_new2(
             syspath.as_ptr(),
-            b":memory:\0".as_ptr().cast(),
+            c":memory:".as_ptr().cast(),
             None,
             null_mut(),
         );
@@ -231,7 +231,7 @@ pub fn main() -> Result<()> {
                 fullwidth_toggle
             );
             println!("# chewing.conversion_engine = {}", conversion_engine);
-            println!("")
+            println!()
         }
 
         while let Some(Ok(op)) = ops.next() {
@@ -445,7 +445,7 @@ pub fn main() -> Result<()> {
 
         chewing_delete(ctx);
         if gen {
-            println!("");
+            println!();
         }
     }
 

@@ -154,7 +154,7 @@ impl Syllable {
         };
         let self_prefix = self.to_u16() >> mask;
         let other_prefix = other.to_u16() >> mask;
-        return self_prefix == other_prefix;
+        self_prefix == other_prefix
     }
     /// Returns the `Syllable` encoded in a u16 integer.
     ///
