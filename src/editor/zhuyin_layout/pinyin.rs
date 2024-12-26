@@ -12,16 +12,19 @@ const MAX_PINYIN_LEN: usize = 10;
 /// TODO: docs
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum PinyinVariant {
-    /// TODO: docs
+    /// [Hanyu Pinyin](https://en.wikipedia.org/wiki/Pinyin), or simply pinyin
     #[default]
     HanyuPinyin,
-    /// TODO: docs
+    /// [THL, Taíwan Huáyǔ Luómǎ Pinyin](https://pinyin.thl.tw/)
     ThlPinyin,
-    /// TODO: docs
+    /// [MPS2, Mandarin Phonetic Symbols II](https://pinyin.info/romanization/mps2)
     Mps2Pinyin,
 }
 
-/// TODO: docs
+/// Pinyin
+///
+/// Current support types: [`PinyinVariant`](enum@PinyinVariant)
+///
 #[derive(Default, Debug, Clone)]
 pub struct Pinyin {
     key_seq: String,

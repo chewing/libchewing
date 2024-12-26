@@ -21,6 +21,15 @@ impl Hsu {
             syllable: Default::default(),
         }
     }
+
+    ///
+    /// tone key is hsu_end_key
+    ///  KeyCode::S -> Bopomofo::TONE5
+    ///  KeyCode::D -> Bopomofo::TONE2
+    ///  KeyCode::F -> Bopomofo::TONE3
+    ///  KeyCode::J -> Bopomofo::TONE4
+    ///  KeyCode::Space -> Bopomofo::TONE1
+    ///
     fn is_hsu_end_key(&self, key: KeyEvent) -> bool {
         // TODO allow customize end key mapping
         match key.code {
