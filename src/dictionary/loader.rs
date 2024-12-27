@@ -11,7 +11,7 @@ use log::{info, warn};
 
 use crate::{
     editor::{AbbrevTable, SymbolSelector},
-    path::{find_extra_dat_by_path, find_path_by_files, sys_path_from_env_var, userphrase_path},
+    path::{find_drop_in_dat_by_path, find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
 #[cfg(feature = "sqlite")]
@@ -60,11 +60,13 @@ impl SystemDictionaryLoader {
         SystemDictionaryLoader::default()
     }
     /// Override the default system dictionary search path.
-    pub fn sys_path(mut self, path: impl Into<String>) -> SystemDictionaryLoader {
-        self.sys_path = Some(path.into());
+    pub fn sys_path(mut self, search_path: impl Into<String>) -> SystemDictionaryLoader {
+        self.sys_path = Some(search_path.into());
         self
     }
-    /// Searches and loads the system dictionaries and extra dictionaries.
+    /// Searches and loads the system dictionaries.
+    ///
+    /// Search path can be changed using [`sys_path`][SystemDictionaryLoader::sys_path].
     ///
     /// If no dictionary were found, a builtn minimum dictionary will be loaded.
     pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
@@ -88,8 +90,23 @@ impl SystemDictionaryLoader {
         let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
         results.push(Box::new(tsi_dict));
 
-        let extra_files = find_extra_dat_by_path(&search_path);
-        for path in extra_files {
+        Ok(results)
+    }
+    /// Searches and loads the "drop-in" dictionaries.
+    ///
+    /// Drop-in dictionaries are dictionary files placed under the
+    /// `dictionary.d` folder that exist in any folder on the search path.
+    ///
+    /// Loading order are decided by the filesystem's sorting order.
+    pub fn load_drop_in(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
+        let files = find_drop_in_dat_by_path(&search_path);
+        let mut results: Vec<Box<dyn Dictionary>> = vec![];
+        for path in files {
             info!("Loading {}", path.display());
             match Trie::open(&path) {
                 Ok(dict) => results.push(Box::new(dict)),

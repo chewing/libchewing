@@ -57,7 +57,7 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
     None
 }
 
-pub(crate) fn find_extra_dat_by_path(search_path: &str) -> Vec<PathBuf> {
+pub(crate) fn find_drop_in_dat_by_path(search_path: &str) -> Vec<PathBuf> {
     let mut results = vec![];
     for path in search_path.split(SEARCH_PATH_SEP) {
         let prefix = Path::new(path).join(DICT_FOLDER);
