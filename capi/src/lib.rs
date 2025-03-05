@@ -318,6 +318,7 @@ pub mod layout {
     /// * KB_THL_PINYIN
     /// * KB_MPS2_PINYIN
     /// * KB_CARPALX
+    /// * KB_COLEMAK
     /// * KB_COLEMAK_DH_ANSI
     /// * KB_COLEMAK_DH_ORTH
     /// * KB_WORKMAN

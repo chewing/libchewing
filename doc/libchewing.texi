@@ -470,6 +470,7 @@ The string @var{str} might be one of the following layouts:
 @item @code{KB_THL_PINYIN}
 @item @code{KB_MPS2_PINYIN}
 @item @code{KB_CARPALX}
+@item @code{KB_COLEMAK}
 @item @code{KB_COLEMAK_DH_ANSI}
 @item @code{KB_COLEMAK_DH_ORTH}
 @end itemize

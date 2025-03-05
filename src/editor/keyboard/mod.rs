@@ -5,6 +5,7 @@
 //! to map different English layouts to layout independent key indexes that can be
 //! used to drive the phonetic conversion engines.
 
+mod colemak;
 mod colemak_dh_ansi;
 mod colemak_dh_orth;
 mod dvorak;
@@ -15,6 +16,7 @@ mod workman;
 
 use core::fmt;
 
+pub use colemak::Colemak;
 pub use colemak_dh_ansi::ColemakDhAnsi;
 pub use colemak_dh_orth::ColemakDhOrth;
 pub use dvorak::Dvorak;
@@ -139,6 +141,7 @@ pub enum AnyKeyboardLayout {
     Dvorak(Dvorak),
     DvorakOnQwerty(DvorakOnQwerty),
     Qgmlwy(Qgmlwy),
+    Colemak(Colemak),
     ColemakDhAnsi(ColemakDhAnsi),
     ColemakDhOrth(ColemakDhOrth),
     Workman(Workman),
@@ -156,6 +159,9 @@ impl AnyKeyboardLayout {
     }
     pub fn qgmlwy() -> AnyKeyboardLayout {
         AnyKeyboardLayout::Qgmlwy(Qgmlwy)
+    }
+    pub fn colemak() -> AnyKeyboardLayout {
+        AnyKeyboardLayout::Colemak(Colemak)
     }
     pub fn colemak_dh_ansi() -> AnyKeyboardLayout {
         AnyKeyboardLayout::ColemakDhAnsi(ColemakDhAnsi)
@@ -175,6 +181,7 @@ impl KeyboardLayout for AnyKeyboardLayout {
             AnyKeyboardLayout::Dvorak(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::DvorakOnQwerty(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::Qgmlwy(kb) => kb.map_with_mod(keycode, modifiers),
+            AnyKeyboardLayout::Colemak(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhAnsi(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::ColemakDhOrth(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::Workman(kb) => kb.map_with_mod(keycode, modifiers),

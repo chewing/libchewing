@@ -113,6 +113,7 @@ pub enum KB {
     ThlPinyin,
     Mps2Pinyin,
     Carpalx,
+    Colemak,
     ColemakDhAnsi,
     ColemakDhOrth,
     Workman,
