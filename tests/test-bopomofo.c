@@ -2323,6 +2323,7 @@ void test_KB()
     test_KB_DACHEN_CP26();
     test_KB_DVORAK();
     test_KB_DVORAK_HSU();
+    test_KB_COLEMAK();
     test_KB_COLEMAK_DH_ANSI();
     test_KB_COLEMAK_DH_ORTH();
 
