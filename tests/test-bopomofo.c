@@ -2261,6 +2261,22 @@ void test_KB_DVORAK_HSU()
     chewing_delete(ctx);
 }
 
+void test_KB_COLEMAK()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx, fd);
+
+    chewing_set_KBType(ctx, KB_COLEMAK);
+    type_keystroke_by_string(ctx, "vl; sn4l; 5; 2e7c;31o4");
+    ok_preedit_buffer(ctx, "\xE6\x96\xB0\xE9\x85\xB7\xE9\x9F\xB3\xE7\x9C\x9F\xE7\x9A\x84\xE5\xBE\x88\xE6\xA3\x92"
+                      /* 新酷音真的很棒 */ );
+    chewing_clean_preedit_buf(ctx);
+
+    chewing_delete(ctx);
+}
+
 void test_KB_COLEMAK_DH_ANSI()
 {
     ChewingContext *ctx;
