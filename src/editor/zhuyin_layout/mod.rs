@@ -163,10 +163,10 @@ impl TryFrom<u8> for KeyboardLayoutCompat {
             10 => Self::ThlPinyin,
             11 => Self::Mps2Pinyin,
             12 => Self::Carpalx,
-            13 => Self::Colemak,
-            14 => Self::ColemakDhAnsi,
-            15 => Self::ColemakDhOrth,
-            16 => Self::Workman,
+            13 => Self::ColemakDhAnsi,
+            14 => Self::ColemakDhOrth,
+            15 => Self::Workman,
+            16 => Self::Colemak,
             _ => return Err(()),
         })
     }
