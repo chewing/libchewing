@@ -35,8 +35,8 @@ static const char *const KEYBOARD_STRING[] = {
     "KB_CARPALX",
     "KB_COLEMAK_DH_ANSI",
     "KB_COLEMAK_DH_ORTH",
-    "KB_WORKMAN"
-    "KB_COLEMAK",
+    "KB_WORKMAN",
+    "KB_COLEMAK"
 };
 
 static const int KEYBOARD_DEFAULT_TYPE = 0;
