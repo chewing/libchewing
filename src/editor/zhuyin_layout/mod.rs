@@ -75,13 +75,13 @@ pub enum KeyboardLayoutCompat {
     /// TODO: docs
     Carpalx,
     /// TODO: docs
-    Colemak,
-    /// TODO: docs
     ColemakDhAnsi,
     /// TODO: docs
     ColemakDhOrth,
     /// Workman standard layout
     Workman,
+    /// TODO: docs
+    Colemak,
 }
 
 #[derive(Debug)]
