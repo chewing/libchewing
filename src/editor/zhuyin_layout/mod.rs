@@ -80,6 +80,8 @@ pub enum KeyboardLayoutCompat {
     ColemakDhOrth,
     /// Workman standard layout
     Workman,
+    /// TODO: docs
+    Colemak,
 }
 
 #[derive(Debug)]
@@ -109,6 +111,7 @@ impl FromStr for KeyboardLayoutCompat {
             "KB_THL_PINYIN" => Self::ThlPinyin,
             "KB_MPS2_PINYIN" => Self::Mps2Pinyin,
             "KB_CARPALX" => Self::Carpalx,
+            "KB_COLEMAK" => Self::Colemak,
             "KB_COLEMAK_DH_ANSI" => Self::ColemakDhAnsi,
             "KB_COLEMAK_DH_ORTH" => Self::ColemakDhOrth,
             "KB_WORKMAN" => Self::Workman,
@@ -134,6 +137,7 @@ impl Display for KeyboardLayoutCompat {
             KeyboardLayoutCompat::ThlPinyin => f.write_str("KB_THL_PINYIN"),
             KeyboardLayoutCompat::Mps2Pinyin => f.write_str("KB_MPS2_PINYIN"),
             KeyboardLayoutCompat::Carpalx => f.write_str("KB_CARPALX"),
+            KeyboardLayoutCompat::Colemak => f.write_str("KB_COLEMAK"),
             KeyboardLayoutCompat::ColemakDhAnsi => f.write_str("KB_COLEMAK_DH_ANSI"),
             KeyboardLayoutCompat::ColemakDhOrth => f.write_str("KB_COLEMAK_DH_ORTH"),
             KeyboardLayoutCompat::Workman => f.write_str("KB_WORKMAN"),
@@ -162,6 +166,7 @@ impl TryFrom<u8> for KeyboardLayoutCompat {
             13 => Self::ColemakDhAnsi,
             14 => Self::ColemakDhOrth,
             15 => Self::Workman,
+            16 => Self::Colemak,
             _ => return Err(()),
         })
     }

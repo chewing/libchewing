@@ -175,6 +175,7 @@ typedef enum KB {
   KB_COLEMAK_DH_ANSI,
   KB_COLEMAK_DH_ORTH,
   KB_WORKMAN,
+  KB_COLEMAK,
   KB_TYPE_NUM,
 } KB;
 

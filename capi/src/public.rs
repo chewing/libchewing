@@ -116,6 +116,7 @@ pub enum KB {
     ColemakDhAnsi,
     ColemakDhOrth,
     Workman,
+    Colemak,
 }
 
 /// Opaque context handle used for chewing APIs.

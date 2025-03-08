@@ -556,6 +556,7 @@ pub unsafe extern "C" fn chewing_config_set_str(
                 KB::ThlPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::thl())),
                 KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
                 KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+                KB::Colemak => (AnyKeyboardLayout::colemak(), Box::new(Standard::new())),
                 KB::ColemakDhAnsi => (
                     AnyKeyboardLayout::colemak_dh_ansi(),
                     Box::new(Standard::new()),
@@ -611,6 +612,7 @@ pub unsafe extern "C" fn chewing_set_KBType(ctx: *mut ChewingContext, kbtype: c_
         KB::ThlPinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::thl())),
         KB::Mps2Pinyin => (AnyKeyboardLayout::qwerty(), Box::new(Pinyin::mps2())),
         KB::Carpalx => (AnyKeyboardLayout::qwerty(), Box::new(Standard::new())),
+        KB::Colemak => (AnyKeyboardLayout::colemak(), Box::new(Standard::new())),
         KB::ColemakDhAnsi => (
             AnyKeyboardLayout::colemak_dh_ansi(),
             Box::new(Standard::new()),
