@@ -62,7 +62,7 @@ preference settings.
 + The inactive one: [SCIM](https://github.com/chewing/scim-chewing), standalone Microsoft Windows 32/64-bit ([windows-chewing](https://github.com/chewing/windows-chewing)), mozc, [uim](https://github.com/uim/uim-chewing), [ucimf](https://github.com/matlinuxer2/ucimf), JMCCE, xcin, IIIMF, standalone MacOS X (SpaceChewing), Sun's Java Desktop System Input Method Framework, OpenVanilla Input Method Framework (previous than version 1.0), and OXIM.
 
 
-### 2. support phonetic keyboard layout
+### 2. Support phonetic keyboard layout
 
   - DaChen (default)
   - Hsu
@@ -78,6 +78,7 @@ preference settings.
   - Colemak
   - Colemak-DH ANSI
   - Colemak-DH Ortholinear
+  - Workman
 
 
 ### 3. External and unmerged projects
