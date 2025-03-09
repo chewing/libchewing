@@ -88,7 +88,17 @@ impl SystemDictionaryLoader {
         let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
         results.push(Box::new(tsi_dict));
 
+        Ok(results)
+    }
+    /// Searches and loads the extra dictionaries.
+    pub fn load_extra(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
+        let search_path = if let Some(sys_path) = &self.sys_path {
+            sys_path.to_owned()
+        } else {
+            sys_path_from_env_var()
+        };
         let extra_files = find_extra_dat_by_path(&search_path);
+        let mut results: Vec<Box<dyn Dictionary>> = vec![];
         for path in extra_files {
             info!("Loading {}", path.display());
             match Trie::open(&path) {
