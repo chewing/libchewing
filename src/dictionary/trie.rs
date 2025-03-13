@@ -13,9 +13,9 @@ use std::{
 };
 
 use der::{
-    asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
     DecodeValue, Document, Encode, EncodeValue, ErrorKind, FixedTag, Length, Reader, Sequence,
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
+    asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
 };
 use log::{error, warn};
 
@@ -1198,8 +1198,8 @@ mod tests {
 
     use crate::{
         dictionary::{
-            trie::TrieBuilderNode, Dictionary, DictionaryBuilder, DictionaryInfo, LookupStrategy,
-            Phrase, TrieOpenOptions,
+            Dictionary, DictionaryBuilder, DictionaryInfo, LookupStrategy, Phrase, TrieOpenOptions,
+            trie::TrieBuilderNode,
         },
         syl,
         zhuyin::Bopomofo,

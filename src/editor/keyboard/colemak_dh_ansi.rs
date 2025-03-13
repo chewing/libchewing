@@ -1,7 +1,6 @@
 use super::{
-    generic_map_keycode,
     KeyCode::{self, *},
-    KeyEvent, KeyboardLayout, Modifiers, MATRIX_SIZE,
+    KeyEvent, KeyboardLayout, MATRIX_SIZE, Modifiers, generic_map_keycode,
 };
 
 /// A Colemak-DH Ansiolinear keyboard.

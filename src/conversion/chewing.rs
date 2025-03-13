@@ -115,8 +115,7 @@ impl ChewingEngine {
                 // There's a conflicting partial intersecting selection.
                 trace!(
                     "No best phrase for {:?} due to selection {:?}",
-                    symbols,
-                    selection
+                    symbols, selection
                 );
                 return None;
             }
