@@ -67,10 +67,7 @@ pub(crate) fn find_extra_dat_by_path(search_path: &str) -> Vec<PathBuf> {
             let mut files = vec![];
             for entry in read_dir.flatten() {
                 let path = entry.path();
-                let is_dat = path
-                    .extension()
-                    .and_then(OsStr::to_str)
-                    .map_or(false, |ext| ext == "dat");
+                let is_dat = path.extension().and_then(OsStr::to_str) == Some("dat");
                 if path.is_file() && is_dat {
                     info!("Found {}", path.display());
                     files.push(path);
