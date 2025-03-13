@@ -6,7 +6,7 @@ use std::{
     str,
 };
 
-use rusqlite::{params, Connection, Error as RusqliteError, OpenFlags, OptionalExtension};
+use rusqlite::{Connection, Error as RusqliteError, OpenFlags, OptionalExtension, params};
 
 use crate::zhuyin::{Syllable, SyllableSlice};
 
@@ -376,11 +376,7 @@ impl Dictionary for SqliteDictionary {
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        if !self.read_only {
-            Some(self)
-        } else {
-            None
-        }
+        if !self.read_only { Some(self) } else { None }
     }
 }
 
@@ -584,8 +580,8 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
 mod tests {
     use std::error::Error;
 
-    use rusqlite::{params, Connection};
-    use tempfile::{tempdir, NamedTempFile};
+    use rusqlite::{Connection, params};
+    use tempfile::{NamedTempFile, tempdir};
 
     use crate::{
         dictionary::{

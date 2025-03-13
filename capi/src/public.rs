@@ -3,7 +3,7 @@ use std::{ffi::c_int, fmt::Debug, iter::Peekable};
 use chewing::{
     conversion::Interval,
     dictionary::Entries,
-    editor::{keyboard::AnyKeyboardLayout, zhuyin_layout::KeyboardLayoutCompat, Editor},
+    editor::{Editor, keyboard::AnyKeyboardLayout, zhuyin_layout::KeyboardLayoutCompat},
 };
 
 /// Indicates chewing will translate keystrokes to Chinese characters.

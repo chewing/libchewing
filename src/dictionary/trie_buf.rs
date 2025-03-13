@@ -1,7 +1,7 @@
 use std::{
     borrow::Cow,
     cmp,
-    collections::{btree_map::Entry, BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, btree_map::Entry},
     io,
     path::{Path, PathBuf},
     thread::{self, JoinHandle},

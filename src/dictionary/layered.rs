@@ -1,6 +1,6 @@
 use std::{
     cmp,
-    collections::{btree_map::Entry, BTreeMap},
+    collections::{BTreeMap, btree_map::Entry},
     iter,
 };
 
@@ -347,23 +347,26 @@ mod tests {
         assert!(dict.as_dict_mut().is_none());
         assert!(dict.reopen().is_ok());
         assert!(dict.flush().is_ok());
-        assert!(dict
-            .add_phrase(
+        assert!(
+            dict.add_phrase(
                 &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
                 ("冊", 100).into()
             )
-            .is_ok());
-        assert!(dict
-            .update_phrase(
+            .is_ok()
+        );
+        assert!(
+            dict.update_phrase(
                 &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
                 ("冊", 100).into(),
                 0,
                 0,
             )
-            .is_ok());
-        assert!(dict
-            .remove_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], "冊")
-            .is_ok());
+            .is_ok()
+        );
+        assert!(
+            dict.remove_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], "冊")
+                .is_ok()
+        );
         Ok(())
     }
 }

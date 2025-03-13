@@ -129,7 +129,7 @@ mod tests {
 
     use crate::zhuyin::Syllable;
 
-    use super::{try_load_bin, try_load_text, Phrase, BIN_FIELD_SIZE};
+    use super::{BIN_FIELD_SIZE, Phrase, try_load_bin, try_load_text};
 
     #[test]
     fn load_valid_text() {

@@ -1,4 +1,4 @@
-use super::{dvorak, qwerty, KeyCode, KeyEvent, KeyboardLayout, Modifiers, INDEX_MAP};
+use super::{INDEX_MAP, KeyCode, KeyEvent, KeyboardLayout, Modifiers, dvorak, qwerty};
 
 /// A Dvorak keyboard.
 #[derive(Debug)]

@@ -4,8 +4,8 @@ description = "The Chewing (酷音) intelligent Zhuyin input method."
 documentation = "https://docs.rs/chewing"
 license = "LGPL-2.1-or-later"
 version = "0.9.1"
-rust-version = "1.83.0"
-edition = "2021"
+rust-version = "1.85.0"
+edition = "2024"
 
 include = [
     "src/**/*.rs",

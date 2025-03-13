@@ -16,7 +16,7 @@ use crate::{
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{uhash, Dictionary, Trie, TrieBuf};
+use super::{Dictionary, Trie, TrieBuf, uhash};
 
 const SD_WORD_FILE_NAME: &str = "word.dat";
 const SD_TSI_FILE_NAME: &str = "tsi.dat";

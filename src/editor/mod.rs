@@ -20,8 +20,8 @@ use log::{debug, info, trace, warn};
 
 use crate::{
     conversion::{
-        full_width_symbol_input, special_symbol_input, ChewingEngine, ConversionEngine, Interval,
-        Symbol,
+        ChewingEngine, ConversionEngine, Interval, Symbol, full_width_symbol_input,
+        special_symbol_input,
     },
     dictionary::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
@@ -1541,15 +1541,15 @@ mod tests {
         conversion::ChewingEngine,
         dictionary::{Layered, TrieBuf},
         editor::{
-            abbrev::AbbrevTable, estimate, keyboard::Modifiers, EditorKeyBehavior, SymbolSelector,
+            EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate, keyboard::Modifiers,
         },
         syl,
         zhuyin::Bopomofo,
     };
 
     use super::{
-        keyboard::{KeyCode, KeyboardLayout, Qwerty},
         BasicEditor, Editor,
+        keyboard::{KeyCode, KeyboardLayout, Qwerty},
     };
 
     #[test]
