@@ -6,7 +6,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use directories::{BaseDirs, ProjectDirs};
 use log::{info, warn};
 
 const DEFAULT_UNIX_SYS_PATH: &str = "/usr/share/libchewing";
@@ -112,10 +111,7 @@ pub fn data_dir() -> Option<PathBuf> {
             return Some(path);
         }
     }
-    let data_dir = ProjectDirs::from("im", "chewing", "Chewing")
-        .as_ref()
-        .map(ProjectDirs::data_dir)
-        .map(Path::to_owned);
+    let data_dir = project_data_dir();
     if let Some(path) = &data_dir {
         info!("Using default userpath: {}", path.display());
     } else {
@@ -124,22 +120,51 @@ pub fn data_dir() -> Option<PathBuf> {
     data_dir
 }
 
+// home_dir() is fixed in rust 1.85 and will be marked as
+// undeprecated in rust 1.87
+#[allow(deprecated)]
+fn project_data_dir() -> Option<PathBuf> {
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(path) = env::var("AppData") {
+            return Some(PathBuf::from(path).join("data"));
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        return env::home_dir().map(|path| {
+            path.join("Library")
+                .join("Application Support")
+                .join("im.chewing.Chewing")
+        });
+    }
+    #[cfg(not(target_family = "unix"))]
+    {
+        return None;
+    }
+
+    #[cfg(target_family = "unix")]
+    {
+        if let Ok(path) = env::var("XDG_DATA_HOME") {
+            return Some(PathBuf::from(path).join("chewing"));
+        }
+        return env::home_dir().map(|path| path.join(".local").join("share").join("chewing"));
+    }
+}
+
+// home_dir() is fixed in rust 1.85 and will be marked as
+// undeprecated in rust 1.87
+#[allow(deprecated)]
 fn legacy_data_dir() -> Option<PathBuf> {
     if cfg!(target_os = "windows") {
-        return BaseDirs::new()
-            .as_ref()
-            .map(BaseDirs::home_dir)
-            .map(|path| path.join("ChewingTextService"));
+        return env::home_dir().map(|path| path.join("ChewingTextService"));
     }
 
     if cfg!(any(target_os = "macos", target_os = "ios")) {
         return Some("/Library/ChewingOSX".into());
     }
 
-    BaseDirs::new()
-        .as_ref()
-        .map(BaseDirs::home_dir)
-        .map(|path| path.join(".chewing"))
+    env::home_dir().map(|path| path.join(".chewing"))
 }
 
 /// Returns the path to the user's default userphrase database file.
@@ -152,13 +177,16 @@ pub fn userphrase_path() -> Option<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use directories::BaseDirs;
+    use super::{data_dir, project_data_dir};
 
-    use super::data_dir;
+    #[test]
+    fn support_project_data_dir() {
+        assert!(project_data_dir().is_some());
+    }
 
     #[test]
     fn resolve_data_dir() {
-        if BaseDirs::new().is_some() {
+        if project_data_dir().is_some() {
             let data_dir = data_dir();
             assert!(data_dir.is_some());
         }
