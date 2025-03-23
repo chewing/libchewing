@@ -17,7 +17,7 @@ const SEARCH_PATH_SEP: char = ':';
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> c_int {
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
@@ -46,7 +46,7 @@ pub unsafe extern "C" fn get_search_path(path: *mut c_char, path_len: usize) -> 
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn find_path_by_files(
     search_path: *const c_char,
     files: *const *const c_char,
@@ -55,7 +55,7 @@ pub unsafe extern "C" fn find_path_by_files(
 ) -> c_int {
     let search_path = unsafe { CStr::from_ptr(search_path) };
     let search_path = search_path.to_str();
-    let files = files_ptr_to_slice(files);
+    let files = unsafe { files_ptr_to_slice(files) };
     if let Ok(search_path) = search_path {
         for path in search_path.split(SEARCH_PATH_SEP) {
             let prefix = Path::new(path).to_path_buf();

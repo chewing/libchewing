@@ -19,7 +19,6 @@ include = [
 
 [dependencies]
 der = { version = "0.7.7", features = ["std"] }
-directories = "5.0.0"
 log = { workspace = true }
 rusqlite = { version = ">= 0.28.0", optional = true }
 
@@ -32,7 +31,7 @@ sqlite = ["dep:rusqlite"]
 
 [workspace]
 members = ["capi", "fuzzer", "tests/testhelper", "tools"]
-resolver = "2"
+resolver = "3"
 
 [workspace.dependencies]
 log = "0.4.21"

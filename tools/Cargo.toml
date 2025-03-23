@@ -3,7 +3,7 @@ name = "chewing-cli"
 description = "Tools of the Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
 version = "0.9.1"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 anyhow = "1.0.0"
