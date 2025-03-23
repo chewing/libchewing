@@ -7,13 +7,13 @@ use std::{
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrLen(str: *const c_char) -> c_int {
     let cstr = unsafe { CStr::from_ptr(str) };
     cstr.to_str().unwrap_or("").chars().count() as c_int
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn ueBytesFromChar(b: c_uchar) -> c_int {
     const UTF8LEN_TAB: [c_int; 256] = [
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -34,7 +34,7 @@ pub extern "C" fn ueBytesFromChar(b: c_uchar) -> c_int {
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrNBytes(str: *const c_char, n: c_int) -> c_int {
     let cstr = unsafe { CStr::from_ptr(str) };
     let rstr = match cstr.to_str() {
@@ -55,7 +55,7 @@ enum StrNCpyClose {
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrNCpy(
     dest: *mut c_char,
     src: *const c_char,
@@ -73,7 +73,7 @@ pub unsafe extern "C" fn ueStrNCpy(
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrSeek(src: *mut c_char, n: usize) -> *mut c_char {
     let bytes = unsafe { ueStrNBytes(src, n as c_int) };
     unsafe { src.offset(bytes as isize) }
@@ -82,7 +82,7 @@ pub unsafe extern "C" fn ueStrSeek(src: *mut c_char, n: usize) -> *mut c_char {
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueConstStrSeek(src: *const c_char, n: usize) -> *const c_char {
     let bytes = unsafe { ueStrNBytes(src, n as c_int) };
     unsafe { src.offset(bytes as isize) }
@@ -91,7 +91,7 @@ pub unsafe extern "C" fn ueConstStrSeek(src: *const c_char, n: usize) -> *const 
 /// # Safety
 ///
 /// This function should be called with valid pointers.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrStr(
     str: *const c_char,
     _lstr: usize,
