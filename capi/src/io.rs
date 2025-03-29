@@ -128,6 +128,7 @@ pub unsafe extern "C" fn chewing_new2(
             vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
         }
     };
+    let drop_in_dicts = sys_loader.load_drop_in().unwrap_or_default();
     let abbrev = sys_loader.load_abbrev();
     let abbrev = match abbrev {
         Ok(abbr) => abbr,
@@ -166,7 +167,8 @@ pub unsafe extern "C" fn chewing_new2(
 
     let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
-    let dict = Layered::new(dictionaries, user_dictionary);
+    let system_dicts = Vec::from_iter(dictionaries.into_iter().chain(drop_in_dicts.into_iter()));
+    let dict = Layered::new(system_dicts, user_dictionary);
     let conversion_engine = Box::new(ChewingEngine::new());
     let kb_compat = KeyboardLayoutCompat::Default;
     let keyboard = AnyKeyboardLayout::Qwerty(Qwerty);

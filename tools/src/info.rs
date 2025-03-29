@@ -4,20 +4,35 @@ use chewing::dictionary::{Dictionary, SystemDictionaryLoader, UserDictionaryLoad
 use crate::flags;
 
 pub(crate) fn run(args: flags::Info) -> Result<()> {
-    let mut dictionaries = vec![];
-    if args.user {
-        dictionaries.push(UserDictionaryLoader::new().load()?);
-    }
     if args.system {
-        dictionaries.extend(SystemDictionaryLoader::new().load()?);
+        let dictionaries = SystemDictionaryLoader::new().load()?;
+        if args.json {
+            print_json_info(&dictionaries, "base");
+        } else {
+            print_info(&dictionaries, "base");
+        }
+        let drop_in = SystemDictionaryLoader::new().load_drop_in()?;
+        if args.json {
+            print_json_info(&drop_in, "drop_in");
+        } else {
+            print_info(&drop_in, "drop_in");
+        }
+    }
+    if args.user {
+        let dict = UserDictionaryLoader::new().load()?;
+        if args.json {
+            print_json_info(&[dict], "user");
+        } else {
+            print_info(&[dict], "user");
+        }
     }
     if let Some(path) = args.path {
-        dictionaries.push(UserDictionaryLoader::new().userphrase_path(path).load()?);
-    }
-    if args.json {
-        print_json_info(&dictionaries);
-    } else {
-        print_info(&dictionaries);
+        let dict = UserDictionaryLoader::new().userphrase_path(path).load()?;
+        if args.json {
+            print_json_info(&[dict], "input");
+        } else {
+            print_info(&[dict], "input");
+        }
     }
     Ok(())
 }
@@ -39,7 +54,7 @@ fn escape_json(str: String) -> String {
     out
 }
 
-fn print_json_info(dictionaries: &[Box<dyn Dictionary>]) {
+fn print_json_info(dictionaries: &[Box<dyn Dictionary>], from: &str) {
     let mut iter = dictionaries.iter().peekable();
     println!("[");
     while let Some(dict) = iter.next() {
@@ -49,6 +64,7 @@ fn print_json_info(dictionaries: &[Box<dyn Dictionary>]) {
             .unwrap_or(String::new());
         let info = dict.about();
         println!("  {{");
+        println!(r#"    "from": "{from}","#);
         println!(r#"    "path": "{}","#, escape_json(path));
         println!(r#"    "name": "{}","#, escape_json(info.name));
         println!(r#"    "version": "{}","#, escape_json(info.version));
@@ -60,7 +76,7 @@ fn print_json_info(dictionaries: &[Box<dyn Dictionary>]) {
     println!("]");
 }
 
-fn print_info(dictionaries: &[Box<dyn Dictionary>]) {
+fn print_info(dictionaries: &[Box<dyn Dictionary>], from: &str) {
     for dict in dictionaries {
         let path = dict
             .path()
@@ -68,6 +84,7 @@ fn print_info(dictionaries: &[Box<dyn Dictionary>]) {
             .unwrap_or(String::new());
         let info = dict.about();
         println!("---");
+        println!("From      : {from}");
         println!("Path      : {}", path);
         println!("Name      : {}", info.name);
         println!("Version   : {}", info.version);

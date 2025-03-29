@@ -191,13 +191,16 @@ pub(crate) struct SharedState {
 
 impl Editor {
     pub fn chewing() -> Result<Editor, Box<dyn Error>> {
-        let system_dict = SystemDictionaryLoader::new().load()?;
+        let sys_loader = SystemDictionaryLoader::new();
+        let base_dict = sys_loader.load()?;
+        let drop_in_dict = sys_loader.load_drop_in()?;
+        let system_dict = Vec::from_iter(base_dict.into_iter().chain(drop_in_dict.into_iter()));
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
         let dict = Layered::new(system_dict, user_dict);
         let conversion_engine = Box::new(ChewingEngine::new());
-        let abbrev = SystemDictionaryLoader::new().load_abbrev()?;
-        let sym_sel = SystemDictionaryLoader::new().load_symbol_selector()?;
+        let abbrev = sys_loader.load_abbrev()?;
+        let sym_sel = sys_loader.load_symbol_selector()?;
         let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
         Ok(editor)
     }
