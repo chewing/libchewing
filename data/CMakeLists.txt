@@ -48,13 +48,6 @@ add_custom_command(
         -t trie
         -n 內嵌字庫
         ${DATA_SRC_DIR}/mini.src mini.dat
-    COMMAND chewing-cli init-database
-        -c ${DATA_COPYRIGHT}
-        -l ${DATA_LICENSE}
-        -r ${DATA_VERSION}
-        -t trie
-        -n 內嵌字庫
-        ${DATA_SRC_DIR}/mini.src ${PROJECT_SOURCE_DIR}/capi/data/mini.dat
     DEPENDS
         chewing-cli
         ${DATA_SRC_DIR}/mini.src
