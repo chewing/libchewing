@@ -125,6 +125,7 @@ fn parse_line(
 ) -> Result<(Vec<Syllable>, &str, u32)> {
     let phrase = line
         .split(delimiter)
+        .filter(|s| !s.is_empty())
         .next()
         .ok_or(parse_error(line_num, line))?
         .trim_matches('"');
@@ -133,6 +134,7 @@ fn parse_line(
         1 if !keep_word_freq => 0,
         _ => line
             .split(delimiter)
+            .filter(|s| !s.is_empty())
             .nth(1)
             .ok_or(parse_error(line_num, line))?
             .trim_matches('"')
@@ -142,28 +144,33 @@ fn parse_line(
     };
 
     let mut syllables = vec![];
-    for syllables_field in line.splitn(3, delimiter).skip(2) {
-        let syllables_field = syllables_field.trim_matches('"');
-        for syllable_str in syllables_field.split_whitespace() {
-            if syllable_str.is_empty() {
-                continue;
-            }
-            let mut syllable_builder = Syllable::builder();
-            if syllable_str.starts_with('#') {
-                break;
-            }
-            for c in syllable_str.chars() {
-                syllable_builder = syllable_builder
-                    .insert(
-                        Bopomofo::try_from(c)
-                            .context("parsing bopomofo")
-                            .parse_error(line_num, line)?,
-                    )
-                    .with_context(|| format!("Parsing syllables {}", syllable_str))
-                    .parse_error(line_num, line)?;
-            }
-            syllables.push(syllable_builder.build());
+
+    for syllable_str in line
+        .split(|c: char| c == ',' || c.is_whitespace())
+        .filter(|s| !s.is_empty())
+        .skip(2)
+    // skip phrase and freq
+    {
+        let syllable_str = syllable_str.trim_matches('"');
+        println!("syllable {:?}", syllable_str);
+        if syllable_str.is_empty() {
+            continue;
         }
+        let mut syllable_builder = Syllable::builder();
+        if syllable_str.starts_with('#') {
+            break;
+        }
+        for c in syllable_str.chars() {
+            syllable_builder = syllable_builder
+                .insert(
+                    Bopomofo::try_from(c)
+                        .context("parsing bopomofo")
+                        .parse_error(line_num, line)?,
+                )
+                .with_context(|| format!("Parsing syllables {}", syllable_str))
+                .parse_error(line_num, line)?;
+        }
+        syllables.push(syllable_builder.build());
     }
 
     Ok((syllables, phrase, freq))
@@ -179,6 +186,18 @@ mod tests {
     #[test]
     fn parse_ssv() {
         let line = "鑰匙 668 ㄧㄠˋ ㄔˊ # not official";
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
+            assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
+            assert_eq!("鑰匙", phrase);
+            assert_eq!(668, freq);
+        } else {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn parse_ssv_multiple_whitespace() {
+        let line = "鑰匙     668 ㄧㄠˋ ㄔˊ # not official";
         if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
