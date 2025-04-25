@@ -2,7 +2,7 @@ use core::slice;
 use std::{
     borrow::Cow,
     env,
-    ffi::{c_char, c_int, CStr, CString},
+    ffi::{CStr, CString, c_char, c_int},
     path::Path,
 };
 

@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{stdout, BufWriter, Write},
+    io::{BufWriter, Write, stdout},
     path::PathBuf,
 };
 

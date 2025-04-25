@@ -110,21 +110,20 @@ pub unsafe extern "C" fn chewing_new2(
     if let Some(logger) = logger {
         LOGGER.set(Some((logger, loggerdata)));
     }
-    let sys_loader = if syspath.is_null() {
-        SystemDictionaryLoader::new()
-    } else {
-        let search_path = unsafe { CStr::from_ptr(syspath) }
-            .to_str()
-            .expect("invalid syspath string");
-        SystemDictionaryLoader::new().sys_path(search_path)
-    };
-    let dictionaries = sys_loader.load();
-    let dictionaries = match dictionaries {
+    let mut sys_loader = SystemDictionaryLoader::new();
+    if !syspath.is_null() {
+        if let Ok(search_path) = unsafe { CStr::from_ptr(syspath).to_str() } {
+            sys_loader = sys_loader.sys_path(search_path);
+        }
+    }
+    let dictionaries = match sys_loader.load() {
         Ok(d) => d,
         Err(e) => {
             let builtin = Trie::new(&include_bytes!("../data/mini.dat")[..]);
             error!("Failed to load system dict: {e}");
             error!("Loading builtin minimum dictionary...");
+            // NB: we can unwrap because the built-in dictionary should always
+            // be valid.
             vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
         }
     };
@@ -144,24 +143,21 @@ pub unsafe extern "C" fn chewing_new2(
         Err(e) => {
             error!("Failed to load symbol table: {e}");
             error!("Loading empty table...");
+            // NB: we can unwrap here because empty table is always valid.
             SymbolSelector::new(b"".as_slice()).unwrap()
         }
     };
-    let user_dictionary = if userpath.is_null() {
-        UserDictionaryLoader::new().load()
-    } else {
-        let data_path = unsafe { CStr::from_ptr(userpath) }
-            .to_str()
-            .expect("invalid syspath string");
-        UserDictionaryLoader::new()
-            .userphrase_path(data_path)
-            .load()
-    };
-    let user_dictionary = match user_dictionary {
+    let mut user_dictionary = UserDictionaryLoader::new();
+    if !userpath.is_null() {
+        if let Ok(data_path) = unsafe { CStr::from_ptr(userpath).to_str() } {
+            user_dictionary = user_dictionary.userphrase_path(data_path);
+        }
+    }
+    let user_dictionary = match user_dictionary.load() {
         Ok(d) => d,
         Err(e) => {
             error!("Failed to load user dict: {e}");
-            return null_mut();
+            UserDictionaryLoader::in_memory()
         }
     };
 
@@ -907,6 +903,7 @@ pub unsafe extern "C" fn chewing_get_phoneSeq(ctx: *const ChewingContext) -> *mu
         .iter()
         .cloned()
         .filter(Symbol::is_syllable)
+        // NB: we just checked symbol is valid syllable
         .map(|sym| sym.to_syllable().unwrap().to_u16())
         .collect();
     let len = syllables.len();
@@ -974,6 +971,7 @@ pub unsafe extern "C" fn chewing_userphrase_has_next(
         return 0;
     }
 
+    // NB: we just checked the iter is Some
     match ctx.userphrase_iter.as_mut().unwrap().peek() {
         Some(entry) => {
             if !phrase_len.is_null() {
@@ -1015,6 +1013,7 @@ pub unsafe extern "C" fn chewing_userphrase_get(
         return -1;
     }
 
+    // NB: we just checked the iter is Some
     match ctx.userphrase_iter.as_mut().unwrap().next() {
         Some(entry) => {
             if !phrase_buf.is_null() {
@@ -1870,7 +1869,9 @@ pub unsafe extern "C" fn chewing_cand_string_by_index(
         if let Some(phrase) = phrases.get(index as usize) {
             return owned_into_raw(
                 Owned::CString,
-                CString::new(phrase.to_owned()).unwrap().into_raw(),
+                CString::new(phrase.to_owned())
+                    .expect("phrase should be valid UTF-8")
+                    .into_raw(),
             );
         }
     }
@@ -2018,7 +2019,8 @@ pub unsafe extern "C" fn chewing_aux_String(ctx: *const ChewingContext) -> *mut 
         None => return owned_into_raw(Owned::CString, CString::default().into_raw()),
     };
 
-    let cstring = CString::new(ctx.editor.notification()).unwrap();
+    let cstring =
+        CString::new(ctx.editor.notification()).expect("notification should be valid UTF-8");
     owned_into_raw(Owned::CString, cstring.into_raw())
 }
 
