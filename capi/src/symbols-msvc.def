@@ -25,6 +25,7 @@ EXPORTS
     chewing_cand_list_prev;
     chewing_cand_open;
     chewing_cand_String;
+    chewing_cand_string_by_index;
     chewing_cand_string_by_index_static;
     chewing_cand_String_static;
     chewing_cand_TotalChoice;

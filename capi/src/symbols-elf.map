@@ -138,5 +138,6 @@ CHEWING_0.9 {
 
 CHEWING_0.10 {
     global:
+        chewing_cand_string_by_index;
         chewing_bopomofo_String;
 } CHEWING_0.9;
