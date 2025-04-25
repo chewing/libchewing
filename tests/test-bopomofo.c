@@ -382,7 +382,7 @@ void test_select_candidate_in_middle_no_reaward()
 {
     ChewingContext *ctx;
     int ret;
-    const char *cand;
+    char *cand;
 
     clean_userphrase();
 
@@ -394,14 +394,16 @@ void test_select_candidate_in_middle_no_reaward()
     ret = chewing_cand_open(ctx);
     ok(ret == 0, "chewing_cand_open return %d shall be %d", ret, 0);
 
-    cand = chewing_cand_string_by_index_static(ctx, 0);
+    cand = chewing_cand_string_by_index(ctx, 0);
     ok(strcmp(cand, "\xE9\x81\xA9\xE5\xAE\x9C") == 0, "first candidate `%s' shall be `%s'", cand, "\xE9\x81\xA9\xE5\xAE\x9C" /* 適宜 */);
+    chewing_free(cand);
 
     ret = chewing_cand_list_next(ctx);
     ok(ret == 0, "chewing_cand_list_next return %d shall be %d", ret, 0);
 
-    cand = chewing_cand_string_by_index_static(ctx, 0);
+    cand = chewing_cand_string_by_index(ctx, 0);
     ok(strcmp(cand, "\xE5\xB8\x82") == 0, "first candidate `%s' shall be `%s'", cand, "\xE5\xB8\x82" /* 市 */);
+    chewing_free(cand);
 
     chewing_delete(ctx);
 }

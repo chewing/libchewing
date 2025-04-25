@@ -170,8 +170,7 @@ impl UserDictionaryLoader {
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
-            info!("Use in memory trie dictionary");
-            return Ok(Box::new(TrieBuf::new_in_memory()));
+            return Ok(Self::in_memory());
         }
         if data_path.exists() {
             info!("Loading {}", data_path.display());
@@ -233,6 +232,11 @@ impl UserDictionaryLoader {
         }
 
         Ok(fresh_dict)
+    }
+    /// Load a in-memory user dictionary.
+    pub fn in_memory() -> Box<dyn Dictionary> {
+        info!("Use in memory trie dictionary");
+        Box::new(TrieBuf::new_in_memory())
     }
 }
 

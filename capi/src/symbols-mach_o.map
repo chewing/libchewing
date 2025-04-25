@@ -24,6 +24,7 @@ _chewing_cand_list_next
 _chewing_cand_list_prev
 _chewing_cand_open
 _chewing_cand_String
+_chewing_cand_string_by_index
 _chewing_cand_string_by_index_static
 _chewing_cand_String_static
 _chewing_cand_TotalChoice

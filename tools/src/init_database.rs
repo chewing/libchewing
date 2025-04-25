@@ -152,7 +152,6 @@ fn parse_line(
     // skip phrase and freq
     {
         let syllable_str = syllable_str.trim_matches('"');
-        println!("syllable {:?}", syllable_str);
         if syllable_str.is_empty() {
             continue;
         }

@@ -707,7 +707,7 @@ void test_new2_userpath_alternative()
     chewing_delete(ctx);
 }
 
-void test_new2_userpath_error()
+void test_new2_userpath_error_recover()
 {
     ChewingContext *ctx;
 
@@ -715,13 +715,15 @@ void test_new2_userpath_error()
     fprintf(fd, "#\n# %s\n#\n", __func__);
 
     ctx = chewing_new2(NULL, TEST_HASH_DIR, logger, fd);
-    ok(ctx == NULL, "chewing_new2 returns `%#p' shall be `%#p'", ctx, NULL);
+    ok(ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL);
+
+    chewing_delete(ctx);
 }
 
 void test_new2_userpath()
 {
     test_new2_userpath_alternative();
-    test_new2_userpath_error();
+    test_new2_userpath_error_recover();
 }
 
 void test_new2()
