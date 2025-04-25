@@ -125,8 +125,7 @@ fn parse_line(
 ) -> Result<(Vec<Syllable>, &str, u32)> {
     let phrase = line
         .split(delimiter)
-        .filter(|s| !s.is_empty())
-        .next()
+        .find(|s| !s.is_empty())
         .ok_or(parse_error(line_num, line))?
         .trim_matches('"');
 

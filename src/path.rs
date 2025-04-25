@@ -148,7 +148,7 @@ fn project_data_dir() -> Option<PathBuf> {
         if let Ok(path) = env::var("XDG_DATA_HOME") {
             return Some(PathBuf::from(path).join("chewing"));
         }
-        return env::home_dir().map(|path| path.join(".local").join("share").join("chewing"));
+        env::home_dir().map(|path| path.join(".local").join("share").join("chewing"))
     }
 }
 
