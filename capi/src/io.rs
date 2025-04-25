@@ -163,7 +163,7 @@ pub unsafe extern "C" fn chewing_new2(
 
     let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
-    let system_dicts = Vec::from_iter(dictionaries.into_iter().chain(drop_in_dicts.into_iter()));
+    let system_dicts = Vec::from_iter(dictionaries.into_iter().chain(drop_in_dicts));
     let dict = Layered::new(system_dicts, user_dictionary);
     let conversion_engine = Box::new(ChewingEngine::new());
     let kb_compat = KeyboardLayoutCompat::Default;

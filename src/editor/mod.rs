@@ -194,7 +194,7 @@ impl Editor {
         let sys_loader = SystemDictionaryLoader::new();
         let base_dict = sys_loader.load()?;
         let drop_in_dict = sys_loader.load_drop_in()?;
-        let system_dict = Vec::from_iter(base_dict.into_iter().chain(drop_in_dict.into_iter()));
+        let system_dict = Vec::from_iter(base_dict.into_iter().chain(drop_in_dict));
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
         let dict = Layered::new(system_dict, user_dict);
