@@ -179,16 +179,12 @@ impl ChewingEngine {
         com: &Composition,
     ) -> Vec<PossibleInterval> {
         let mut intervals = vec![];
-        for begin in 0..com.symbols.len() {
-            for end in begin..=com.symbols.len() {
+        for start in 0..com.symbols.len() {
+            for end in (start + 1)..=com.symbols.len() {
                 if let Some(phrase) =
-                    self.find_best_phrase(dict, begin, &com.symbols[begin..end], com)
+                    self.find_best_phrase(dict, start, &com.symbols[start..end], com)
                 {
-                    intervals.push(PossibleInterval {
-                        start: begin,
-                        end,
-                        phrase,
-                    });
+                    intervals.push(PossibleInterval { start, end, phrase });
                 }
             }
         }
@@ -594,6 +590,31 @@ mod tests {
         let composition = Composition::new();
         assert_eq!(
             Some(Vec::<Interval>::new()),
+            engine.convert(&dict, &composition).next()
+        );
+    }
+
+    // Some corrupted user dictionary may contain empty length syllables
+    #[test]
+    fn convert_zero_length_entry() {
+        let mut dict = test_dictionary();
+        let dict_mut = dict.as_dict_mut().unwrap();
+        dict_mut.add_phrase(&[], ("", 0).into()).unwrap();
+        let engine = ChewingEngine::new();
+        let mut composition = Composition::new();
+        for sym in [
+            Symbol::from(syl![C, E, TONE4]),
+            Symbol::from(syl![SH, TONE4]),
+        ] {
+            composition.push(sym);
+        }
+        assert_eq!(
+            Some(vec![Interval {
+                start: 0,
+                end: 2,
+                is_phrase: true,
+                str: "測試".into()
+            },]),
             engine.convert(&dict, &composition).next()
         );
     }
