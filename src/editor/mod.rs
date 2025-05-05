@@ -520,7 +520,7 @@ impl SharedState {
             self.conv
                 .convert(&self.dict, self.com.as_ref())
                 .next()
-                .unwrap()
+                .unwrap_or_default()
         }
     }
     fn intervals(&self) -> impl Iterator<Item = Interval> {
