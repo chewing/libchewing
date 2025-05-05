@@ -35,6 +35,9 @@ impl ChewingEngine {
                 return vec![PossiblePath::default()];
             }
             let intervals = self.find_intervals(dict, comp);
+            if intervals.is_empty() {
+                return vec![PossiblePath::default()];
+            }
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
             trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
