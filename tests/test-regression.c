@@ -17,7 +17,6 @@
 #include <stdlib.h>
 
 #include "chewing.h"
-#include "plat_types.h"
 #include "testhelper.h"
 
 void test_libchewing_googlecode_issue_472()

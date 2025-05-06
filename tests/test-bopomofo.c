@@ -19,7 +19,6 @@
 
 #include "chewing.h"
 
-#include "plat_types.h"
 #include "testhelper.h"
 
 void test_select_candidate_no_rearward()

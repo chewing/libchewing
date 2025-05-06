@@ -109,10 +109,6 @@ if(WITH_SQLITE3)
     endif()
 endif()
 
-include(CheckIncludeFiles)
-check_include_files(unistd.h HAVE_UNISTD_H)
-check_include_files(stdint.h HAVE_STDINT_H)
-
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
 set(TOOLS_SRC_DIR ${PROJECT_SOURCE_DIR}/src/tools)

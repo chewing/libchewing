@@ -12,12 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#else
-#    include "plat_types.h"
-#endif
-
 #include "chewing.h"
 #include "testhelper.h"
 #include "chewing-utf8-util.h"
@@ -30,10 +24,10 @@ static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0
 
 int init_sim()
 {
-    if (0 == access(FN_MATERIALS "-random", R_OK))
-        fp = fopen(FN_MATERIALS "-random", "r");
-    else
+    fp = fopen(FN_MATERIALS "-random", "r");
+    if (fp == NULL) {
         fp = fopen(FN_MATERIALS, "r");
+    }
     return (fp != NULL);
 }
 

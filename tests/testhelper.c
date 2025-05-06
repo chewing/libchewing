@@ -16,8 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "plat_types.h"
-
 int ueStrLen(const char *str);
 
 static unsigned int test_run;
@@ -414,7 +412,7 @@ char *get_test_userphrase_path()
     if (userphrase_path)
         return userphrase_path;
     else
-        return TEST_HASH_DIR PLAT_SEPARATOR DB_NAME;
+        return TEST_HASH_DIR "/" DB_NAME;
 }
 
 void clean_userphrase()
