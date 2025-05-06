@@ -20,8 +20,6 @@
 #include "plat_types.h"
 #include "testhelper.h"
 
-FILE *fd;
-
 void test_libchewing_googlecode_issue_472()
 {
     static const char *const INPUT[] = {
@@ -35,7 +33,7 @@ void test_libchewing_googlecode_issue_472()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_autoShiftCur(ctx, 1);
 
@@ -57,7 +55,7 @@ void test_libchewing_googlecode_issue_473()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_autoShiftCur(ctx, 1);
     chewing_set_candPerPage(ctx, 9);
@@ -80,7 +78,7 @@ void test_libchewing_issue_30()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_autoShiftCur(ctx, 1);
     chewing_set_spaceAsSelection(ctx, 1);
@@ -100,7 +98,7 @@ void test_libchewing_issue_108()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "yjo4cl3183<E>");
 
@@ -114,7 +112,7 @@ void test_libchewing_issue_194()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     type_keystroke_by_string(ctx, "test");
@@ -133,7 +131,7 @@ void test_libchewing_data_issue_1()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     type_keystroke_by_string(ctx, DATA.token);
     ok_preedit_buffer(ctx, DATA.expected);
@@ -148,7 +146,7 @@ void test_forgot_selection()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_escCleanAllBuf(ctx, 1);
 
@@ -168,7 +166,7 @@ void test_move_cursor_backwards()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4<L>hk4g4");
     ok_preedit_buffer(ctx, "冊測試市");
@@ -183,7 +181,7 @@ void test_insert_symbol_between_selection()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4<L><L><D>3<R>?");
     ok_preedit_buffer(ctx, "冊？市");
@@ -198,7 +196,7 @@ void test_empty_prefix_in_conversion_search()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4hk4g4<T><T><B><B><B><B><E>");
     ok_preedit_buffer(ctx, "");
@@ -231,7 +229,7 @@ void test_empty_preedit_ignore_certain_keys()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     for (int i = 0; i < ARRAY_SIZE(KEYS); ++i) {
         type_keystroke_by_string(ctx, KEYS[i]);
@@ -253,7 +251,7 @@ void test_crash_found_by_fuzzing_20240505_0()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "93<D>093<D>0<H><D>2");
     ok_preedit_buffer(ctx, "靄靄");
@@ -268,7 +266,7 @@ void test_glue_two_symbols()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_config_set_int(ctx, "chewing.conversion_engine", 2);
 
@@ -285,7 +283,7 @@ void test_end_of_buffer_select_phrase_backwards()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_spaceAsSelection(ctx, 1);
     chewing_set_phraseChoiceRearward(ctx, 1);
@@ -303,7 +301,7 @@ void test_zero_capacity_buffer_simple_conversion_engine()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_KBType(ctx, 1);
     chewing_set_maxChiSymbolLen(ctx, 0);
@@ -317,13 +315,8 @@ void test_zero_capacity_buffer_simple_conversion_engine()
 
 int main(int argc, char *argv[])
 {
-    char *logname = "test-regression.log";
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
-
-    fd = fopen(logname, "w");
-    assert(fd);
 
     test_libchewing_data_issue_1();
     test_libchewing_issue_30();
@@ -340,8 +333,6 @@ int main(int argc, char *argv[])
     test_glue_two_symbols();
     test_end_of_buffer_select_phrase_backwards();
     test_zero_capacity_buffer_simple_conversion_engine();
-
-    fclose(fd);
 
     return exit_status();
 }

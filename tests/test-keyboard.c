@@ -41,8 +41,6 @@ static const char *const KEYBOARD_STRING[] = {
 
 static const int KEYBOARD_DEFAULT_TYPE = 0;
 
-FILE *fd;
-
 void test_set_keyboard_type()
 {
     ChewingContext *ctx;
@@ -51,7 +49,7 @@ void test_set_keyboard_type()
     int keyboard_type;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     keyboard_string = chewing_get_KBString(ctx);
     ok(strcmp(keyboard_string, KEYBOARD_STRING[KEYBOARD_DEFAULT_TYPE]) == 0,
@@ -90,7 +88,7 @@ void test_set_keyboard_type_options()
     int keyboard_type;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     for (i = 0; i < ARRAY_SIZE(KEYBOARD_STRING); ++i) {
         ok(chewing_config_set_str(ctx, "chewing.keyboard_type", KEYBOARD_STRING[i]) == 0,
@@ -120,7 +118,7 @@ void test_KBStr2Num()
     int i;
     int ret;
 
-    start_testcase(NULL, fd);
+    start_testcase(NULL);
 
     for (i = 0; i < (int) ARRAY_SIZE(KEYBOARD_STRING); ++i) {
         // XXX: chewing_KBStr2Num shall accept const char *.
@@ -136,7 +134,7 @@ void test_enumerate_keyboard_type()
     char *keyboard_string;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ok(chewing_kbtype_Total(ctx) == ARRAY_SIZE(KEYBOARD_STRING),
        "total keyboard_string type shall be %d", ARRAY_SIZE(KEYBOARD_STRING));
@@ -162,7 +160,7 @@ void test_hsu_po_to_bo()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_KBType(ctx, chewing_KBStr2Num("KB_HSU"));
 
@@ -186,7 +184,7 @@ void test_et26_po_to_bo()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_KBType(ctx, chewing_KBStr2Num("KB_ET26"));
 
@@ -206,13 +204,8 @@ void test_et26()
 
 int main(int argc, char *argv[])
 {
-    char *logname = "test-keyboard.log";
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
-
-    fd = fopen(logname, "w");
-    assert(fd);
 
     test_set_keyboard_type();
     test_set_keyboard_type_options();
@@ -221,8 +214,6 @@ int main(int argc, char *argv[])
 
     test_hsu();
     test_et26();
-
-    fclose(fd);
 
     return exit_status();
 }

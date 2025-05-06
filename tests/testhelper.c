@@ -395,23 +395,11 @@ void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, 
     }
 }
 
-void logger(void *data, int _level, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fd = (FILE *) data;
-
-    va_start(ap, fmt);
-    vfprintf(fd, fmt, ap);
-    va_end(ap);
-}
-
-void internal_start_testcase(const char *func, ChewingContext *ctx, FILE * file)
+void internal_start_testcase(const char *func, ChewingContext *ctx)
 {
     assert(func);
 
     printf("#\n# %s\n#\n", func);
-    fprintf(file, "#\n# %s\n#\n", func);
-    chewing_set_logger(ctx, logger, file);
 }
 
 int exit_status()

@@ -96,15 +96,13 @@ static const TestData FULLSHAPE_DATA[] = {
     {"-", "\xEF\xBC\x8D" /* － */ },
 };
 
-FILE *fd;
-
 void test_fullshape_input()
 {
     ChewingContext *ctx;
     size_t i;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     chewing_set_ShapeMode(ctx, FULLSHAPE_MODE);
@@ -124,7 +122,7 @@ void test_set_fullshape()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ok(chewing_get_ShapeMode(ctx) == HALFSHAPE_MODE, "default is HALFSHAPE_MODE");
 
@@ -146,18 +144,11 @@ void test_set_fullshape()
 
 int main(int argc, char *argv[])
 {
-    char *logname = "test-fullshape.log";
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    fd = fopen(logname, "w");
-    assert(fd);
-
     test_set_fullshape();
     test_fullshape_input();
-
-    fclose(fd);
 
     return exit_status();
 }
