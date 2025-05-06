@@ -14,7 +14,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "chewing.h"
 #include "testhelper.h"
@@ -43,18 +42,13 @@ void test_reset_shall_not_clean_static_data()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
+    char *logname = "test-reset.log";
 
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
     fd = fopen(logname, "w");
     assert(fd);
-    free(logname);
 
     test_reset_shall_not_clean_static_data();
 

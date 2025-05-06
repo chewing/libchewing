@@ -109,9 +109,6 @@ if(WITH_SQLITE3)
     endif()
 endif()
 
-include(CheckFunctionExists)
-check_function_exists(asprintf HAVE_ASPRINTF)
-
 include(CheckIncludeFiles)
 check_include_files(unistd.h HAVE_UNISTD_H)
 check_include_files(stdint.h HAVE_STDINT_H)

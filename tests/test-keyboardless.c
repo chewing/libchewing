@@ -918,19 +918,13 @@ void test_clean_bopomofo()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
+    char *logname = "test-keyboardless.log";
 
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
     fd = fopen(logname, "w");
     assert(fd);
-    free(logname);
-
 
     test_cand_open();
     test_cand_close();

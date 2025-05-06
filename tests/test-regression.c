@@ -317,18 +317,13 @@ void test_zero_capacity_buffer_simple_conversion_engine()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
+    char *logname = "test-regression.log";
 
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
     fd = fopen(logname, "w");
     assert(fd);
-    free(logname);
 
     test_libchewing_data_issue_1();
     test_libchewing_issue_30();
