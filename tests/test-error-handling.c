@@ -14,8 +14,6 @@
 #include "testhelper.h"
 #include "chewing.h"
 
-FILE *fd;
-
 void test_null()
 {
     int ret;
@@ -24,7 +22,7 @@ void test_null()
     int *key;
     unsigned short *phone;
 
-    start_testcase(NULL, fd);
+    start_testcase(NULL);
 
     chewing_Reset(NULL);        // shall not crash
 
@@ -345,7 +343,7 @@ void test_FallbackDictionary()
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX "ERROR");
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
 
     for (i = 0; i < ARRAY_SIZE(SIMPLE_INPUT); ++i) {
@@ -360,24 +358,11 @@ void test_FallbackDictionary()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
-    fd = fopen(logname, "w");
-    assert(fd);
-    free(logname);
-
-
     test_null();
     test_FallbackDictionary();
-
-    fclose(fd);
 
     return exit_status();
 }

@@ -331,15 +331,13 @@ static const char *CAND[] = {
     "\xE7\xB7\x9A\xE6\xAE\xB5" /* 線段 */ ,
 };
 
-FILE *fd;
-
 void test_type_symbol()
 {
     ChewingContext *ctx;
     size_t i;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_candPerPage(ctx, 10);
     chewing_set_maxChiSymbolLen(ctx, 16);
@@ -358,7 +356,7 @@ void test_symbol_cand_page()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_candPerPage(ctx, 10);
     chewing_set_maxChiSymbolLen(ctx, 16);
@@ -378,7 +376,7 @@ void test_symbol_count()
     int total;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "`3");
     total = chewing_cand_TotalChoice(ctx);
@@ -398,7 +396,7 @@ void test_nocand_symbol()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_candPerPage(ctx, 10);
     chewing_set_maxChiSymbolLen(ctx, 16);
@@ -417,24 +415,12 @@ void test_nocand_symbol()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
-
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
-    fd = fopen(logname, "w");
-    assert(fd);
-    free(logname);
 
     test_type_symbol();
     test_symbol();
     test_nocand_symbol();
-
-    fclose(fd);
 
     return exit_status();
 }

@@ -91,8 +91,8 @@ uint16_t UintFromPhone(const char *phone);
     internal_ok_keystroke_rtn(__FILE__, __LINE__, ctx, rtn)
 #define has_userphrase(ctx, bopomofo, phrase) \
     chewing_userphrase_lookup(ctx, phrase, bopomofo)
-#define start_testcase(ctx, file) \
-    internal_start_testcase(__func__, ctx, file)
+#define start_testcase(ctx) \
+    internal_start_testcase(__func__, ctx)
 
 typedef struct {
     /* Key code. This code is only valid in testing framework. */
@@ -146,5 +146,5 @@ void internal_ok(const char *file, int line, int test, const char *test_txt, con
 void internal_ok_candidate(const char *file, int line, ChewingContext *ctx, const char *cand[], size_t cand_len);
 void internal_ok_candidate_len(const char *file, int line, ChewingContext *ctx, size_t expected_len);
 void internal_ok_keystroke_rtn(const char *file, int line, ChewingContext *ctx, int rtn);
-void internal_start_testcase(const char *func, ChewingContext *ctx, FILE * file);
+void internal_start_testcase(const char *func, ChewingContext *ctx);
 void logger(void *data, int level, const char *fmt, ...);

@@ -18,17 +18,14 @@
 #include <stdio.h>
 
 #include "chewing.h"
-#include "plat_types.h"
 #include "testhelper.h"
-
-FILE *fd;
 
 void test_ShiftLeft_not_entering_chewing()
 {
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     type_keystroke_by_string(ctx, "<SL>");
     ok_keystroke_rtn(ctx, KEYSTROKE_IGNORE);
 
@@ -47,7 +44,7 @@ void test_ShiftLeft_add_userphrase()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
 
     ok(has_userphrase(ctx, bopomofo, phrase) == 0, "`%s' shall not be in userphrase", phrase);
@@ -73,7 +70,7 @@ void test_ShiftRight_not_entering_chewing()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     type_keystroke_by_string(ctx, "<SR>");
     ok_keystroke_rtn(ctx, KEYSTROKE_IGNORE);
 
@@ -92,7 +89,7 @@ void test_ShiftRight_add_userphrase()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
 
     ok(has_userphrase(ctx, bopomofo, phrase) == 0, "`%s' shall not be in userphrase", phrase);
@@ -131,7 +128,7 @@ void test_CtrlNum_add_phrase_right()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 0);
 
@@ -171,7 +168,7 @@ void test_CtrlNum_add_phrase_left()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 1);
 
@@ -202,7 +199,7 @@ void test_CtrlNum_add_phrase_right_symbol_in_between()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 0);
 
@@ -226,7 +223,7 @@ void test_CtrlNum_add_phrase_left_symbol_in_between()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 1);
 
@@ -252,7 +249,7 @@ void test_CtrlNum_add_phrase_right_start_with_symbol()
 
     clean_userphrase();
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 0);
 
@@ -280,7 +277,7 @@ void test_CtrlNum_add_phrase_left_start_with_symbol()
 
     clean_userphrase();
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 1);
 
@@ -318,7 +315,7 @@ void test_userphrase_auto_learn()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
     ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
@@ -349,7 +346,7 @@ void test_userphrase_auto_learn_with_symbol()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ok(has_userphrase(ctx, bopomofo_1, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_1);
 
@@ -379,7 +376,7 @@ void test_userphrase_auto_learn_hardcode_break()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_addPhraseDirection(ctx, 1);
 
@@ -403,7 +400,7 @@ void test_userphrase_auto_learn_only_after_commit()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     /* user just inputs some characters: don't auto learn. */
     type_keystroke_by_string(ctx, "t;6q06");
@@ -448,7 +445,7 @@ void test_userphrase_enumerate_normal()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase, bopomofo);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -491,7 +488,7 @@ void test_userphrase_enumerate_empty()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_lookup(ctx, phrase, bopomofo);
     ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
@@ -522,7 +519,7 @@ void test_userphrase_enumerate_rewind()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase, bopomofo);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -585,7 +582,7 @@ void test_userphrase_manipulate_normal()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
     ret = chewing_userphrase_lookup(ctx, phrase, bopomofo);
     ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
 
@@ -630,7 +627,7 @@ void test_userphrase_manipulate_maximum()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase_in_limit, bopomofo_in_limit);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -669,7 +666,7 @@ void test_userphrase_manipulate_hash_collision()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase_1, bopomofo_1);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -702,7 +699,7 @@ void test_userphrase_manipulate_error_handling()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ,
                                  "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B" /* ㄘㄜˋ */ );
@@ -731,7 +728,7 @@ void test_userphrase_manipulate_remove_same_phone()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase_1, bopomofo);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -768,7 +765,7 @@ void test_userphrase_manipulate_remove_same_phrase()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_add(ctx, phrase, bopomofo_1);
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
@@ -802,7 +799,7 @@ void test_userphrase_manipulate_remove_non_userphrase()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_lookup(ctx, phrase, bopomofo);
     ok(ret == 0, "chewing_lookup() return value `%d' shall be `%d'", ret, 0);
@@ -832,7 +829,7 @@ void test_userphrase_lookup()
     clean_userphrase();
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ret = chewing_userphrase_lookup(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ,
                                     "\xE3\x84\x98\xE3\x84\x9C\xCB\x8B" /* ㄘㄜˋ */ );
@@ -855,7 +852,7 @@ void test_userphrase_double_free()
 
     clean_userphrase();
 
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ctx = chewing_new();
     ret = chewing_userphrase_add(ctx, p1, b1);
@@ -888,7 +885,7 @@ void test_userphrase_remove()
 
     clean_userphrase();
 
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     ctx = chewing_new();
     ret = chewing_userphrase_add(ctx, p1, b1);
@@ -915,18 +912,8 @@ void test_userphrase_remove()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
-
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
-    fd = fopen(logname, "w");
-    assert(fd);
-    free(logname);
 
     test_ShiftLeft();
     test_ShiftRight();
@@ -937,8 +924,6 @@ int main(int argc, char *argv[])
     test_userphrase_lookup();
     test_userphrase_double_free();
     test_userphrase_remove();
-
-    fclose(fd);
 
     return exit_status();
 }

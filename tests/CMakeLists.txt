@@ -30,10 +30,12 @@ endif()
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
 foreach(target ${ALL_TESTCASES})
-    add_test(
-        NAME ${target}
-        COMMAND ${TEST_BIN_DIR}/${target}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    add_test(NAME ${target} COMMAND ${target})
+    set_tests_properties(
+        ${target}
+        PROPERTIES
+        ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:$<TARGET_RUNTIME_DLL_DIRS:${target}>;RUST_LOG=set:trace"
     )
 endforeach()
 
@@ -63,14 +65,6 @@ endforeach()
 
 add_library(testhelper STATIC
     ${TEST_SRC_DIR}/testhelper.c
-    ${TEST_SRC_DIR}/porting_layer/src/asprintf.c
-    ${TEST_SRC_DIR}/porting_layer/src/asprintf.h
-    ${TEST_SRC_DIR}/porting_layer/include/plat_types.h
-    ${TEST_SRC_DIR}/porting_layer/include/sys/plat_posix.h
-    ${TEST_SRC_DIR}/porting_layer/include/sys/plat_windows.h
-)
-target_include_directories(testhelper PUBLIC
-        ${TEST_SRC_DIR}/porting_layer/include
 )
 target_compile_definitions(testhelper PRIVATE
     CHEWING_DATA_PREFIX=\"${DATA_BIN_DIR}\"

@@ -19,8 +19,6 @@
 #include "chewing.h"
 #include "testhelper.h"
 
-FILE *fd;
-
 static const TestData EASY_SYMBOL[] = {
     {"Q", "\xE3\x80\x94" /* 〔 */ },
     {"W", "\xE3\x80\x95" /* 〕 */ },
@@ -58,7 +56,7 @@ void test_type_easy_symbol()
     size_t i;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_maxChiSymbolLen(ctx, 16);
     chewing_set_easySymbolInput(ctx, 1);
@@ -78,7 +76,7 @@ void test_mode_change()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_maxChiSymbolLen(ctx, 16);
 
@@ -99,24 +97,11 @@ void test_mode_change()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
-    fd = fopen(logname, "w");
-    assert(fd);
-    free(logname);
-
-
     test_type_easy_symbol();
     test_mode_change();
-
-    fclose(fd);
 
     return exit_status();
 }

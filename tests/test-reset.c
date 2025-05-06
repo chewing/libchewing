@@ -14,12 +14,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "chewing.h"
 #include "testhelper.h"
-
-FILE *fd;
 
 void test_reset_shall_not_clean_static_data()
 {
@@ -27,7 +24,7 @@ void test_reset_shall_not_clean_static_data()
     ChewingContext *ctx;
 
     ctx = chewing_new();
-    start_testcase(ctx, fd);
+    start_testcase(ctx);
 
     chewing_set_KBType(ctx, chewing_KBStr2Num("KB_DEFAULT"));
 
@@ -43,22 +40,10 @@ void test_reset_shall_not_clean_static_data()
 
 int main(int argc, char *argv[])
 {
-    char *logname;
-    int ret;
-
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
 
-    ret = asprintf(&logname, "%s.log", argv[0]);
-    if (ret == -1)
-        return -1;
-    fd = fopen(logname, "w");
-    assert(fd);
-    free(logname);
-
     test_reset_shall_not_clean_static_data();
-
-    fclose(fd);
 
     return exit_status();
 }
