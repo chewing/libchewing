@@ -110,7 +110,7 @@ if(WITH_SQLITE3)
 endif()
 
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
+set(INC_DIR ${PROJECT_SOURCE_DIR}/capi/include)
 set(TOOLS_SRC_DIR ${PROJECT_SOURCE_DIR}/src/tools)
 set(TOOLS_BIN_DIR ${PROJECT_BINARY_DIR}/src/tools)
 set(DATA_SRC_DIR ${PROJECT_SOURCE_DIR}/data)
@@ -145,8 +145,7 @@ configure_file(
 
 include_directories(
     ${PROJECT_BINARY_DIR}/include
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src/porting_layer/include
+    ${PROJECT_SOURCE_DIR}/capi/include
 )
 
 set(ALL_INC
