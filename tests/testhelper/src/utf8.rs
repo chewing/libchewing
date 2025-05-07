@@ -1,6 +1,6 @@
 use std::{
     ffi::{CStr, c_char, c_int, c_uchar},
-    ptr::{self, null},
+    ptr,
     str,
 };
 
@@ -31,11 +31,7 @@ pub extern "C" fn ueBytesFromChar(b: c_uchar) -> c_int {
     UTF8LEN_TAB[b as usize]
 }
 
-/// # Safety
-///
-/// This function should be called with valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn ueStrNBytes(str: *const c_char, n: c_int) -> c_int {
+unsafe fn ue_str_nbytes(str: *const c_char, n: c_int) -> c_int {
     let cstr = unsafe { CStr::from_ptr(str) };
     let rstr = match cstr.to_str() {
         Ok(rstr) => rstr,
@@ -62,7 +58,7 @@ pub unsafe extern "C" fn ueStrNCpy(
     n: usize,
     end: c_int,
 ) -> c_int {
-    let bytes = unsafe { ueStrNBytes(src, n as c_int) } as usize;
+    let bytes = unsafe { ue_str_nbytes(src, n as c_int) } as usize;
     unsafe { src.copy_to(dest, bytes) };
     if end == StrNCpyClose::StrncpyClose as i32 {
         unsafe { ptr::write(dest.add(bytes), 0) };
@@ -75,37 +71,6 @@ pub unsafe extern "C" fn ueStrNCpy(
 /// This function should be called with valid pointers.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn ueStrSeek(src: *mut c_char, n: usize) -> *mut c_char {
-    let bytes = unsafe { ueStrNBytes(src, n as c_int) };
+    let bytes = unsafe { ue_str_nbytes(src, n as c_int) };
     unsafe { src.offset(bytes as isize) }
-}
-
-/// # Safety
-///
-/// This function should be called with valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn ueConstStrSeek(src: *const c_char, n: usize) -> *const c_char {
-    let bytes = unsafe { ueStrNBytes(src, n as c_int) };
-    unsafe { src.offset(bytes as isize) }
-}
-
-/// # Safety
-///
-/// This function should be called with valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn ueStrStr(
-    str: *const c_char,
-    _lstr: usize,
-    substr: *const c_char,
-    _lsub: usize,
-) -> *const c_char {
-    let cstr = unsafe { CStr::from_ptr(str) }
-        .to_str()
-        .expect("should be valid utf8");
-    let sub = unsafe { CStr::from_ptr(substr) }
-        .to_str()
-        .expect("should be valid utf8");
-    match cstr.find(sub) {
-        Some(count) => unsafe { str.add(count) },
-        None => null(),
-    }
 }

@@ -15,7 +15,6 @@
 
 #include "chewing.h"
 
-int ueStrLen(const char *str);
 uint16_t UintFromPhone(const char *phone);
 
 #define DB_NAME  "chewing.dat"
