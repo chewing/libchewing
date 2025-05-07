@@ -44,9 +44,5 @@ panic = "abort"
 codegen-units = 1
 debug = true
 
-[package.metadata.vet]
-store = { path = "./vet" }
-
 [package.metadata.docs.rs]
 features = ["sqlite"]
-# rustdoc-args = ["-Zunstable-options", "--sort-modules-by-appearance"]

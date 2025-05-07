@@ -32,14 +32,6 @@ int ueStrLen(const char *str);
  */
 int ueBytesFromChar(unsigned char b);
 
-/**
- * @brief Get the number of bytes of a UTF-8 string until n characters.
- * @param[in] str the UTF-8 string.
- * @param[in] n   the number of characters.
- * @return the total bytes of first n characters encoded in UTF-8.
- */
-int ueStrNBytes(const char *str, int n);
-
 #define STRNCPY_CLOSE 1
 #define STRNCPY_NOT_CLOSE 0
 
@@ -67,26 +59,6 @@ int ueStrNCpy(char dest[], const char *src, size_t n, int end);
  * @return a pointer to the first byte of the character.
  */
 char *ueStrSeek(char *src, size_t n);
-
-/**
- * @brief Const version of ueStrSeek().
- * @param[in] src the UTF-8 string.
- * @param[in] n   the nth character.
- * @return a pointer to the first byte of the character.
- */
-const char *ueConstStrSeek(const char *src, size_t n);
-
-/**
- * @brief Locate a UTF-8 substring from UTF-8 string
- * @param[in] str     UTF-8 string to be scanned.
- * @param[in] lstr    length of `str` in bytes.
- * @param[in] substr  UTF-8 string to match.
- * @param[in] lsub    length of `substr` in bytes.
- * @return a pointer to the first occurrence in `str` of the entire
- *   sequence of characters specified in `substr`, or a null pointer
- *   if the sequence is not present in `str`.
- */
-const char *ueStrStr(const char *str, size_t lstr, const char *substr, size_t lsub);
 
 /* *INDENT-OFF* */
 #endif                          /* CHEWING_UTF8_UTILS_H */

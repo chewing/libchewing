@@ -20,6 +20,7 @@
 #include "chewing.h"
 
 #include "testhelper.h"
+#include "chewing-utf8-util.h"
 
 void test_select_candidate_no_rearward()
 {
