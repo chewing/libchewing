@@ -129,9 +129,7 @@ _chewing_version_major
 _chewing_version_minor
 _chewing_version_patch
 _chewing_version_extra
-_display_candidates
-_display_text_buffer
-_display_preedit_buffer
-_display_commit_buffer
+_process_key
+_select_candidate
 _chewing_init
 _chewing_terminate

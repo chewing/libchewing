@@ -2,25 +2,79 @@
 
 #include "chewing-cpp.h"
 #include <cstdio> // for printf
-#include <vector> // for exit
+
+#ifdef __cplusplus
+#include <functional>
+#include <string>
+
+// Helper to wrap nullable C callbacks into std::function with no-op fallback
+template <typename R, typename... Args>
+static std::function<R(Args...)> make_callback(Callbacks *ctx,
+                                               R (*Callbacks::*mem)(Args...))
+{
+    if (ctx && ctx->*mem) {
+        return std::function<R(Args...)>(ctx->*mem);
+    }
+    return std::function<R(Args...)>([](Args...) { /* no-op */ });
+}
+
+class CallbacksWrapper
+{
+  public:
+    explicit CallbacksWrapper(Callbacks *ctx)
+        : logger_{make_callback(ctx, &Callbacks::logger_func)},
+          candidateInfo_{
+              make_callback(ctx, &Callbacks::candidate_info_callback)},
+          bufferCallback_{make_callback(ctx, &Callbacks::buffer_callback)},
+          bopomofoCallback_{make_callback(ctx, &Callbacks::bopomofo_callback)},
+          commitCallback_{make_callback(ctx, &Callbacks::commit_callback)}
+    {
+    }
+
+    void log(int level, const char *msg) const { logger_(level, msg); }
+    void onCandidateInfo(const int pageSize, int numPages, int candidateOnPage,
+                         int totalChoices, const char **candidate) const
+    {
+        candidateInfo_(pageSize, numPages, candidateOnPage, totalChoices,
+                       candidate);
+    }
+    void onBuffer(const char *buffer) const { bufferCallback_(buffer); }
+    void onBopomofo(const char *buffer) const { bopomofoCallback_(buffer); }
+    void onCommit(const char *buffer) const { commitCallback_(buffer); }
+
+  private:
+    std::function<void(int, const char *)> logger_;
+    std::function<void(const int, int, int, int, const char **)> candidateInfo_;
+    std::function<void(const char *)> bufferCallback_;
+    std::function<void(const char *)> bopomofoCallback_;
+    std::function<void(const char *)> commitCallback_;
+};
+
+#endif // __cplusplus
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static CallbacksContext *s_callbacks_context = nullptr;
+static CallbacksWrapper s_callbacks{nullptr};
+static ChewingContext *s_context{nullptr};
+
+constexpr char enterKey = 10;
 
 // shim: format variadic logs into a single message, then call the simple logger
 static void chewing_cpp_logger_shim(void *data, int level, const char *fmt, ...)
 {
-    char buf[1024];
-    va_list args;
+    va_list args{};
     va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
+    int len = std::vsnprintf(nullptr, 0, fmt, args);
     va_end(args);
-    if (s_callbacks_context && s_callbacks_context->logger_func) {
-        s_callbacks_context->logger_func(data, level, buf);
-    }
+
+    std::string buf;
+    buf.resize(len + 1);
+    va_start(args, fmt);
+    std::vsnprintf(&buf[0], buf.size(), fmt, args);
+    va_end(args);
+    s_callbacks.log(level, buf.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,102 +85,98 @@ static void chewing_cpp_logger_shim(void *data, int level, const char *fmt, ...)
 /// @param[in] ctx - the context which holds the candidates
 /// @retval int - the number of canidates
 //////////////////////////////////////////////////////////////////////////////////////////////
-int display_candidates(ChewingContext *ctx)
+int fetch_candidates()
 {
-    int pageSize{chewing_get_candPerPage(ctx)};
-    int numPages{chewing_cand_TotalPage(ctx)};
-    int choicePerPage{chewing_cand_ChoicePerPage(ctx)};
-    int index{0};
-    printf("Pages: %d, PageSize: %d, ChoicePerPage: %d, \nCandidates:\n",
-           numPages, pageSize, choicePerPage);
-    if (s_callbacks_context->candidate_info_callback) {
-        s_callbacks_context->candidate_info_callback(pageSize, numPages,
-                                                     choicePerPage);
-    }
-    chewing_cand_Enumerate(ctx);
-    while (chewing_cand_hasNext(ctx) && index < pageSize) {
-        auto buf{const_cast<char *>(chewing_cand_String(ctx))};
-        if (s_callbacks_context->print_func) {
-            s_callbacks_context->print_func(buf, "   candidate: ");
-        }
-        if (s_callbacks_context->candidate_callback) {
-            s_callbacks_context->candidate_callback(buf);
-        }
+    chewing_handle_Down(s_context);
+    // chewing_cand_open(s_context);
+    const int totalChoices{chewing_cand_TotalChoice(s_context)};
+    int pageSize{chewing_get_candPerPage(s_context)};
+    int numPages{chewing_cand_TotalPage(s_context)};
+    int choicePerPage{chewing_cand_ChoicePerPage(s_context)};
 
-        index++;
+    std::vector<const char *> v;
+    v.reserve(totalChoices);
+    chewing_cand_Enumerate(s_context);
+    while (chewing_cand_hasNext(s_context)) {
+        auto *cand = chewing_cand_String(s_context);
+        if (cand == nullptr) {
+            continue;
+        }
+        v.emplace_back(cand);
     }
+    s_callbacks.onCandidateInfo(pageSize, numPages, choicePerPage, totalChoices,
+                                v.data());
+    for (auto item : v) {
+        chewing_free((void *)item);
+    }
+    // chewing_cand_close(s_context);
+    
 
-    return index;
+    chewing_handle_Up(s_context);
+    return totalChoices;
+}
+
+void select_candidate(int index)
+{
+    printf("Selecting candidate %d\n", index);
+    chewing_handle_Down(s_context);
+    chewing_cand_Enumerate(s_context);
+    chewing_cand_choose_by_index(s_context, index);
+    chewing_handle_Up(s_context);;
+        // Trigger callbacks based on updated context
+    if (chewing_bopomofo_Check(s_context)) {
+    printf("chewing_bopomofo_Check\n");
+        s_callbacks.onBopomofo(chewing_bopomofo_String_static(s_context));
+    }
+    if (chewing_buffer_Check(s_context)) {
+    printf("chewing_buffer_Check\n");
+        s_callbacks.onBuffer(chewing_buffer_String_static(s_context));
+    }
+    if (chewing_commit_Check(s_context)) {
+    printf("chewing_commit_Check\n");
+        s_callbacks.onCommit(chewing_commit_String_static(s_context));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-/// Display the current contents of a buffer which hold text in Chinese which
-/// has been converted up to this point. The text will be moved to the commit
-/// buffer if the commit key is pressed. However it is still subject to
-/// conversion.
+/// Processses the keyboard input. Updates the internal state of the library and
+/// the UI of the app. For more information about the each key's functionaly
+/// read the README.md in the same directory.
 ///
-/// @param[in] ctx - the context which holds the buffer
-/// @retval bool - false if the buffer is empty, true otherwise.
+/// @param[in] ctx - the context which holds the buffer.
+/// @param[in] key - the keyboard key that was inputted.
 //////////////////////////////////////////////////////////////////////////////////////////////
-bool display_text_buffer(ChewingContext *ctx)
+void process_key(char key)
 {
-    if (chewing_buffer_Check(ctx)) {
-        auto buf{const_cast<char *>(chewing_buffer_String_static(ctx))};
-        if (s_callbacks_context->print_func) {
-            s_callbacks_context->print_func(buf, "buffer: ");
-        }
-        if (s_callbacks_context->buffer_callback) {
-            s_callbacks_context->buffer_callback(buf);
-        }
-        return true;
+    switch (key) {
+    case enterKey:
+        chewing_handle_Enter(s_context);
+        break;
+    case ' ':
+        chewing_handle_Space(s_context);
+        break;
+    case 127: // Backspace key
+        chewing_handle_Backspace(s_context);
+        break;
+    default:
+        chewing_handle_Default(s_context, key);
+        fetch_candidates();
+        break;
     }
-    return false;
-}
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-/// Display the current contents of the preedit buffer. The preedit buffer is
-/// the buffer that contains the bopomofo text which gets converted to Chinese.
-///
-/// @param[in] ctx - the context which holds the buffer
-/// @retval bool - false if the buffer is empty, true otherwise.
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool display_preedit_buffer(ChewingContext *ctx)
-{
-    if (chewing_bopomofo_Check(ctx)) {
-        auto bopomofo_buf{
-            const_cast<char *>(chewing_bopomofo_String_static(ctx))};
-        if (s_callbacks_context->print_func) {
-            s_callbacks_context->print_func(bopomofo_buf, "bopomofo: ");
-        }
-        if (s_callbacks_context->bopomofo_callback) {
-            s_callbacks_context->bopomofo_callback(bopomofo_buf);
-        }
-        return true;
+    // Trigger callbacks based on updated context
+    if (chewing_bopomofo_Check(s_context)) {
+    printf("chewing_bopomofo_Check\n");
+        s_callbacks.onBopomofo(chewing_bopomofo_String_static(s_context));
     }
-    return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-/// Display the current contents of the commit buffer. The commit buffer is the
-/// buffer that contains the converted text in Chinese which should be written
-/// to the screen and will no longer be subject to conversion.
-///
-/// @param[in] ctx - the context which holds the buffer
-/// @retval bool - false if the buffer is empty, true otherwise.
-//////////////////////////////////////////////////////////////////////////////////////////////
-bool display_commit_buffer(ChewingContext *ctx)
-{
-    if (chewing_commit_Check(ctx)) {
-        auto commit_buf{const_cast<char *>(chewing_commit_String_static(ctx))};
-        if (s_callbacks_context->print_func) {
-            s_callbacks_context->print_func(commit_buf, "commit: ");
-        }
-        if (s_callbacks_context->commit_callback) {
-            s_callbacks_context->commit_callback(commit_buf);
-        }
-        return true;
+    if (chewing_buffer_Check(s_context)) {
+    printf("chewing_buffer_Check\n");
+        s_callbacks.onBuffer(chewing_buffer_String_static(s_context));
     }
-    return false;
+    if (chewing_commit_Check(s_context)) {
+    printf("chewing_commit_Check\n");
+        s_callbacks.onCommit(chewing_commit_String_static(s_context));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,52 +184,50 @@ bool display_commit_buffer(ChewingContext *ctx)
 ///
 /// @param[in] ctx - the context to be initialized.
 //////////////////////////////////////////////////////////////////////////////////////////////
-void chewing_init(ChewingContext **ctx, CallbacksContext *callbacks_context)
+bool chewing_init(ApplicationContext *ctx)
 {
     if (ctx == nullptr) {
-        return;
+        return false;
     }
+    s_callbacks = CallbacksWrapper(&ctx->callbacks);
 
-    if (callbacks_context == nullptr) {
-        printf("Error: callbacks_context is null\n");
-        return;
-    }
-    s_callbacks_context = callbacks_context;
-
-    const char *data_path = callbacks_context->data_path;
+    const char *data_path = ctx->config_data.data_path;
     if (data_path == nullptr) {
-        printf("Error: data_path is null\n");
-        return;
-    }
-    if (s_callbacks_context->print_func) {
-        s_callbacks_context->print_func(data_path, "data_path: ");
+        s_callbacks.log(CHEWING_LOG_ERROR, "Error: data_path is null");
+        return false;
     }
 
-    *ctx = chewing_new2(data_path, nullptr, nullptr, nullptr);
-    if (*ctx == nullptr) {
-        fprintf(stderr, "Error: chewing_new2 failed to initialize context\n");
-        return;
+    s_context = chewing_new2(data_path, nullptr, nullptr, nullptr);
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "Error: chewing_new2 failed to initialize context");
+        return false;
     }
     // Register logger if provided
-    if (s_callbacks_context->logger_func) {
-        chewing_set_logger(*ctx,
-                           chewing_cpp_logger_shim,
-                           s_callbacks_context->logger_data);
+    if (ctx->callbacks.logger_func) {
+        chewing_set_logger(s_context, chewing_cpp_logger_shim, nullptr);
     }
     // Only configure if initialization succeeded
-    chewing_set_candPerPage(*ctx, 10);
-    chewing_set_maxChiSymbolLen(*ctx, 18);
-    chewing_set_KBType(*ctx, chewing_KBStr2Num("KB_DEFAULT"));
+    chewing_set_candPerPage(s_context, ctx->config_data.candPerPage);
+    chewing_set_maxChiSymbolLen(s_context, ctx->config_data.maxChiSymbolLen);
+    chewing_set_KBType(s_context, chewing_KBStr2Num("KB_DEFAULT"));
+
+    return true;
 }
 
-void chewing_terminate(ChewingContext **ctx)
+bool chewing_terminate()
 {
-    if (ctx == nullptr || *ctx == nullptr) {
-        return;
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "Error: chewing_terminate called with null context");
+        return false;
     }
-    s_callbacks_context = nullptr;
-    chewing_delete(*ctx);
-    *ctx = nullptr;
+    s_callbacks = CallbacksWrapper(nullptr);
+
+    chewing_delete(s_context);
+    s_context = nullptr;
+
+    return true;
 }
 
 #ifdef __cplusplus

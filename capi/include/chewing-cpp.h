@@ -11,45 +11,46 @@ extern "C" {
 
 // typedefs for pointers to callbacks that can take and proccess
 // candidates/buffers
-typedef void (*candidate_info_callback_t)(const int pageCnt, int numPages,
-                                          int cntPerPage);
-typedef void (*candidate_callback_t)(const char *candidate);
+typedef void (*candidate_info_callback_t)(const int pageSize, int numPages,
+                                          int candidateOnPage, int totalChoices,
+                                          const char **candidates);
 typedef void (*buffer_callback_t)(const char *buffer);
 typedef void (*bopomofo_callback_t)(const char *buffer);
-
 typedef void (*commit_callback_t)(const char *buffer);
-
-typedef void (*print_func_t)(const char *buf, const char *prefix);
-
-typedef void (*logger_func_t)(void *data, int level, const char *message);
+typedef void (*logger_func_t)(int level, const char *message);
 
 // a struct that holds the data path and pointers to callbacks that can take and
 // proccess candidates/buffers
-typedef struct CallbacksContext {
-    char *data_path;
-    candidate_info_callback_t candidate_info_callback;
-    candidate_callback_t candidate_callback;
+typedef struct Callbacks {
+    candidate_info_callback_t candidate_info_callback; // the candidates that are
+                                           // going to be displayed
     buffer_callback_t buffer_callback;
-    bopomofo_callback_t bopomofo_callback;
-    commit_callback_t commit_callback;
-    print_func_t print_func;
+    bopomofo_callback_t bopomofo_callback; // preedit buffer the sounds that are
+                                           // going to be converted
+    commit_callback_t commit_callback; // the text that should be
+                                       // in the input field
     logger_func_t logger_func;
-    void *logger_data;
-} CallbacksContext;
+} Callbacks;
 
-int display_candidates(ChewingContext *ctx);
+typedef struct ConfigData {
+    char *data_path;
+    int candPerPage = 10;
+    int maxChiSymbolLen = 18;
+} ConfigData;
 
-bool display_text_buffer(ChewingContext *ctx);
+typedef struct ApplicationContext {
+    ConfigData config_data;
+    Callbacks callbacks;
+} ApplicationContext;
 
-bool display_preedit_buffer(ChewingContext *ctx);
+///
+void process_key(char key);
 
-bool display_commit_buffer(ChewingContext *ctx);
+bool chewing_init(ApplicationContext *ctx);
 
+void select_candidate(int index);
 
-
-void chewing_init(ChewingContext **ctx, CallbacksContext *callbacks_context);
-
-void chewing_terminate(ChewingContext **ctx);
+bool chewing_terminate();
 
 #ifdef __cplusplus
 }
