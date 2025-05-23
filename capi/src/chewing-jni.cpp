@@ -6,13 +6,28 @@
 #include <vector>
 static std::vector<std::string> gCandidates;
 static std::vector<std::string> gBuffers;
-static void jni_candidate_callback(const char *candidate)
+static void jni_candidate_callback(const int /*pageSize*/, int /*numPages*/, int /*candOnPage*/, int /*total*/, const char **candidates)
 {
-    gCandidates.emplace_back(candidate);
+    gCandidates.clear();
+    if (!candidates) return;
+    for (int i = 0; candidates[i]; ++i) {
+        gCandidates.emplace_back(candidates[i]);
+    }
 }
 static void jni_buffer_callback(const char *buffer)
 {
-    gBuffers.emplace_back(buffer);
+    if (buffer)
+        gBuffers.emplace_back(buffer);
+}
+static void jni_bopomofo_callback(const char *buffer)
+{
+    if (buffer)
+        gBuffers.emplace_back(buffer);
+}
+static void jni_commit_callback(const char *buffer)
+{
+    if (buffer)
+        gBuffers.emplace_back(buffer);
 }
 
 static JavaVM *gJvm = nullptr;
@@ -26,29 +41,20 @@ jint JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 }
 
 // Shim that forwards logs to the Java Logger object
-static void jni_logger_shim(void *data, int level, const char *message)
+static void jni_logger_shim(int level, const char *message)
 {
-    if (!gJvm || !data)
+    if (!gJvm || !gLoggerObj)
         return;
     JNIEnv *env = nullptr;
     gJvm->AttachCurrentThread((void **)&env, nullptr);
     jstring jmsg = env->NewStringUTF(message);
-    env->CallVoidMethod((jobject)data, gLoggerMethod, level, jmsg);
+    env->CallVoidMethod(gLoggerObj, gLoggerMethod, level, jmsg);
     env->DeleteLocalRef(jmsg);
 }
 
 // Variadic shim for chewing_set_logger: formats into a buffer then forwards to
 // jni_logger_shim
-static void chewing_jni_variadic_logger(void *data, int level, const char *fmt,
-                                        ...)
-{
-    char buf[1024];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    jni_logger_shim(data, level, buf);
-}
+// No longer needed: variadic logger
 
 extern "C" {
 
@@ -61,19 +67,20 @@ JNIEXPORT jlong JNICALL
 Java_com_example_chewing_ChewingJNI_init(JNIEnv *env, jclass, jstring jDataPath)
 {
     const char *path = env->GetStringUTFChars(jDataPath, nullptr);
-    static CallbacksContext cb_ctx;
-    cb_ctx.data_path = const_cast<char *>(path);
-    cb_ctx.candidate_callback = jni_candidate_callback;
-    cb_ctx.buffer_callback = jni_buffer_callback;
-    cb_ctx.bopomofo_callback = jni_buffer_callback;
-    cb_ctx.commit_callback = jni_buffer_callback;
-    cb_ctx.print_func = nullptr;
-    cb_ctx.logger_func = jni_logger_shim;
-    cb_ctx.logger_data = gLoggerObj;
-    ChewingContext *ctx = nullptr;
-    chewing_init(&ctx, &cb_ctx);
+    auto *appCtx = new ApplicationContext();
+    appCtx->config_data.data_path        = strdup(path);
+    appCtx->config_data.candPerPage      = 5;               // default or override via setCandPerPage()
+    appCtx->config_data.maxChiSymbolLen  = 18;              // default or override via setMaxChiSymbolLen()
+    appCtx->callbacks.candidate_info_callback = jni_candidate_callback;
+    appCtx->callbacks.buffer_callback         = jni_buffer_callback;
+    appCtx->callbacks.bopomofo_callback       = jni_bopomofo_callback;
+    appCtx->callbacks.commit_callback         = jni_commit_callback;
+    appCtx->callbacks.logger_func             = jni_logger_shim;
+
+    // initialize libchewing
+    chewing_init(appCtx);
     env->ReleaseStringUTFChars(jDataPath, path);
-    return reinterpret_cast<jlong>(ctx);
+    return reinterpret_cast<jlong>(appCtx);
 }
 
 /*
@@ -84,49 +91,54 @@ Java_com_example_chewing_ChewingJNI_init(JNIEnv *env, jclass, jstring jDataPath)
 JNIEXPORT void JNICALL
 Java_com_example_chewing_ChewingJNI_terminate(JNIEnv *, jclass, jlong ctxPtr)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
-    chewing_terminate(&ctx);
+    // shut down chewing and free our ApplicationContext
+    chewing_terminate();
+    auto *appCtx = reinterpret_cast<ApplicationContext *>(ctxPtr);
+    free(appCtx->config_data.data_path);
+    delete appCtx;
 }
 
-/*
- * Dispatchers for all the handle_* functions
- */
-#define HANDLE_FN(name)                                                        \
-    JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_handle##name(   \
-        JNIEnv *, jclass, jlong ctxPtr)                                        \
-    {                                                                          \
-        auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);                \
-        chewing_handle_##name(ctx);                                            \
-    }
 
-HANDLE_FN(Down)
-HANDLE_FN(Up)
-HANDLE_FN(PageUp)
-HANDLE_FN(PageDown)
-HANDLE_FN(Enter)
-HANDLE_FN(Space)
-#undef HANDLE_FN
+// New key handlers using process_key and C++ wrapper API
+#define DEF_HANDLE(name, code)                                 \
+JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_handle##name(\
+    JNIEnv *, jclass, jlong) {                                \
+    process_key(code);                                        \
+}
+
+DEF_HANDLE(Down,    '/')
+DEF_HANDLE(Up,      '\\')
+DEF_HANDLE(PageUp,  '[')
+DEF_HANDLE(PageDown,']')
+DEF_HANDLE(Enter,   '\n')  // or CHEWING_KEY_Enter if defined
+DEF_HANDLE(Space,   ' ')
+#undef DEF_HANDLE
 
 /*
  * Default handler (with key)
  */
 JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_handleDefault(
-    JNIEnv *, jclass, jlong ctxPtr, jint key)
+    JNIEnv *, jclass, jlong /*ctxPtr*/, jint key)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
-    chewing_handle_Default(ctx, key);
+    process_key(static_cast<char>(key));
 }
+
+/*
+ * Select a candidate by index (JNI shim)
+ */
+JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_selectCandidate(
+    JNIEnv *, jclass, jlong /*ctxPtr*/, jint index)
+{
+    select_candidate(static_cast<int>(index));
+}
+
 
 /*
  * Fetch candidate list as a String[]
  */
 JNIEXPORT jobjectArray JNICALL
-Java_com_example_chewing_ChewingJNI_getCandidates(JNIEnv *env, jclass,
-                                                  jlong ctxPtr)
+Java_com_example_chewing_ChewingJNI_getCandidates(JNIEnv *env, jclass, jlong /*ctxPtr*/)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
-    gCandidates.clear();
-    display_candidates(ctx);
     jclass strCls = env->FindClass("java/lang/String");
     jobjectArray arr = env->NewObjectArray(gCandidates.size(), strCls, nullptr);
     for (size_t i = 0; i < gCandidates.size(); ++i) {
@@ -136,41 +148,29 @@ Java_com_example_chewing_ChewingJNI_getCandidates(JNIEnv *env, jclass,
     return arr;
 }
 
-/*
- * Fetch preedit/text/commit buffers
- */
 JNIEXPORT jstring JNICALL Java_com_example_chewing_ChewingJNI_getPreeditBuffer(
-    JNIEnv *env, jclass, jlong ctxPtr)
+    JNIEnv *env, jclass, jlong /*ctxPtr*/)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
+    if (gBuffers.empty()) return nullptr;
+    jstring s = env->NewStringUTF(gBuffers.front().c_str());
     gBuffers.clear();
-    display_preedit_buffer(ctx);
-    if (!gBuffers.empty()) {
-        return env->NewStringUTF(gBuffers.front().c_str());
-    }
-    return nullptr;
+    return s;
 }
 JNIEXPORT jstring JNICALL Java_com_example_chewing_ChewingJNI_getTextBuffer(
-    JNIEnv *env, jclass, jlong ctxPtr)
+    JNIEnv *env, jclass, jlong /*ctxPtr*/)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
+    if (gBuffers.empty()) return nullptr;
+    jstring s = env->NewStringUTF(gBuffers.front().c_str());
     gBuffers.clear();
-    display_text_buffer(ctx);
-    if (!gBuffers.empty()) {
-        return env->NewStringUTF(gBuffers.front().c_str());
-    }
-    return nullptr;
+    return s;
 }
 JNIEXPORT jstring JNICALL Java_com_example_chewing_ChewingJNI_getCommitBuffer(
-    JNIEnv *env, jclass, jlong ctxPtr)
+    JNIEnv *env, jclass, jlong /*ctxPtr*/)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
+    if (gBuffers.empty()) return nullptr;
+    jstring s = env->NewStringUTF(gBuffers.front().c_str());
     gBuffers.clear();
-    display_commit_buffer(ctx);
-    if (!gBuffers.empty()) {
-        return env->NewStringUTF(gBuffers.front().c_str());
-    }
-    return nullptr;
+    return s;
 }
 
 /*
@@ -203,15 +203,15 @@ Java_com_example_chewing_ChewingJNI_commitCheck(JNIEnv *, jclass, jlong ctxPtr)
 JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_setCandPerPage(
     JNIEnv *, jclass, jlong ctxPtr, jint page)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
-    chewing_set_candPerPage(ctx, page);
+    auto *appCtx = reinterpret_cast<ApplicationContext *>(ctxPtr);
+    appCtx->config_data.candPerPage = page;
 }
 
 JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_setMaxChiSymbolLen(
     JNIEnv *, jclass, jlong ctxPtr, jint len)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
-    chewing_set_maxChiSymbolLen(ctx, len);
+    auto *appCtx = reinterpret_cast<ApplicationContext *>(ctxPtr);
+    appCtx->config_data.maxChiSymbolLen = len;
 }
 
 JNIEXPORT jint JNICALL Java_com_example_chewing_ChewingJNI_KBStr2Num(
@@ -237,7 +237,7 @@ JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_setKBType(
 JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_registerLogger(
     JNIEnv *env, jclass, jlong ctxPtr, jobject logger)
 {
-    auto *ctx = reinterpret_cast<ChewingContext *>(ctxPtr);
+    auto *appCtx = reinterpret_cast<ApplicationContext *>(ctxPtr);
     // Release old reference
     if (gLoggerObj) {
         env->DeleteGlobalRef(gLoggerObj);
@@ -250,10 +250,10 @@ JNIEXPORT void JNICALL Java_com_example_chewing_ChewingJNI_registerLogger(
         jclass cls = env->GetObjectClass(logger);
         gLoggerMethod = env->GetMethodID(cls, "log", "(ILjava/lang/String;)V");
         // Register shim as the C logger
-        chewing_set_logger(ctx, chewing_jni_variadic_logger, gLoggerObj);
+        appCtx->callbacks.logger_func = jni_logger_shim;
     } else {
         // Clear logger in C
-        chewing_set_logger(ctx, nullptr, nullptr);
+        appCtx->callbacks.logger_func = nullptr;
     }
 }
 

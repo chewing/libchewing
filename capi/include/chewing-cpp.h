@@ -34,8 +34,8 @@ typedef struct Callbacks {
 
 typedef struct ConfigData {
     char *data_path;
-    int candPerPage = 10;
-    int maxChiSymbolLen = 18;
+    int candPerPage;
+    int maxChiSymbolLen;
 } ConfigData;
 
 typedef struct ApplicationContext {
