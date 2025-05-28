@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 mkdir -p ../build/swift
