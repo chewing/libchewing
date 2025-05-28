@@ -1,14 +1,10 @@
-#include <stdarg.h>
-
 #include "chewing-simplified.h"
-#include <cstdio> // for printf
 
 #ifdef __cplusplus
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 // Helper to wrap nullable C callbacks into std::function with no-op fallback
@@ -120,25 +116,22 @@ static int cs_fetch_candidates()
     const int numPages = chewing_cand_TotalPage(s_context);
     const int choicePerPage = chewing_cand_ChoicePerPage(s_context);
 
-    // RAII-managed candidate strings
-    std::vector<std::unique_ptr<char, decltype(&chewing_free)>> ownedCandidates;
-    ownedCandidates.reserve(totalChoices);
+    std::vector<const char *> rawPointers;
+    rawPointers.reserve(totalChoices);
     chewing_cand_Enumerate(s_context);
     while (chewing_cand_hasNext(s_context)) {
         if (auto *raw = chewing_cand_String(s_context)) {
-            ownedCandidates.emplace_back(raw, &chewing_free);
+            rawPointers.emplace_back(raw);
         }
     }
 
-    // Build raw pointer array for callback
-    std::vector<const char *> rawPointers;
-    rawPointers.reserve(ownedCandidates.size());
-    std::transform(ownedCandidates.begin(), ownedCandidates.end(),
-                   std::back_inserter(rawPointers),
-                   [](const auto &ptr) { return ptr.get(); });
-
     s_callbacks.onCandidateInfo(pageSize, numPages, choicePerPage, totalChoices,
                                 rawPointers.data());
+
+    // Clean up raw pointers
+    for (const auto *ptr : rawPointers) {
+        chewing_free(const_cast<char *>(ptr));
+    }
 
     chewing_handle_Up(s_context);
     return totalChoices;
