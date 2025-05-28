@@ -8,32 +8,36 @@ func swift_disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &origTermios)
 }
 
-let escapeKey: Int32         = 27  // ESC
-
+let escapeKey: Int32 = 27  // ESC
 
 //
 // Callback shims
 //
 @_cdecl("swift_logger_callback")
-func swift_logger_callback(_ level: Int32,
-                           _ message: UnsafePointer<CChar>?) {
+func swift_logger_callback(
+    _ level: Int32,
+    _ message: UnsafePointer<CChar>?
+) {
     guard level != CHEWING_LOG_VERBOSE else { return }
     let msg = message.map { String(cString: $0) } ?? ""
-    let lvl = [
-        CHEWING_LOG_DEBUG: "DEBUG",
-        CHEWING_LOG_INFO:  "INFO",
-        CHEWING_LOG_WARN:  "WARN",
-        CHEWING_LOG_ERROR: "ERROR"
-    ][level] ?? "UNKNOWN"
+    let lvl =
+        [
+            CHEWING_LOG_DEBUG: "DEBUG",
+            CHEWING_LOG_INFO: "INFO",
+            CHEWING_LOG_WARN: "WARN",
+            CHEWING_LOG_ERROR: "ERROR",
+        ][level] ?? "UNKNOWN"
     print("[chewing \(lvl)] \(msg)")
 }
 
 @_cdecl("swift_candidate_info_callback")
-func swift_candidate_info_callback(_ pageSize: CInt,
-                                   _ numPages: CInt,
-                                   _ candOnPage: CInt,
-                                   _ total: CInt,
-                                   _ items: UnsafeMutablePointer<UnsafePointer<CChar>?>?) {
+func swift_candidate_info_callback(
+    _ pageSize: CInt,
+    _ numPages: CInt,
+    _ candOnPage: CInt,
+    _ total: CInt,
+    _ items: UnsafeMutablePointer<UnsafePointer<CChar>?>?
+) {
     guard let candidates = items else { return }
     print("Candidates [\(candOnPage)/\(total)] (page \(pageSize) of \(numPages))")
     for i in 0..<Int(total) {
@@ -102,7 +106,7 @@ func main() {
         let c = getchar()
         if c == escapeKey { break }
         if c == "`".utf8CString[0] {
-            cs_select_candidate(2)
+            cs_select_candidate(5)
             continue
         }
         processKey(c)
