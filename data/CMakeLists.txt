@@ -27,21 +27,21 @@ set(DATA_VERSION ${LIBCHEWING_VERSION})
 add_custom_command(
     OUTPUT
         ${ALL_DATA}
-    COMMAND chewing-cli init-database
+    COMMAND $<TARGET_FILE:chewing-cli> init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
         -t trie
         -n 內建詞庫
         ${DATA_SRC_DIR}/tsi.src tsi.dat
-    COMMAND chewing-cli init-database
+    COMMAND $<TARGET_FILE:chewing-cli> init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
         -t trie
         -n 內建字庫
         ${DATA_SRC_DIR}/word.src word.dat
-    COMMAND chewing-cli init-database
+    COMMAND $<TARGET_FILE:chewing-cli> init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
@@ -58,4 +58,3 @@ add_custom_command(
 
 install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
 install(FILES ${ALL_STATIC_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
-

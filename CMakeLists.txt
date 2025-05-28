@@ -81,9 +81,12 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
 
+# Tell Corrosion “chewing-cli is a host‐built tool”,
+# so don’t ever pass --target=<whatever>-ios to it
+corrosion_set_hostbuild(chewing-cli)
+
 if(WITH_SQLITE3)
     corrosion_set_features(chewing_capi FEATURES sqlite)
-    corrosion_set_features(chewing_testhelper FEATURES sqlite)
 endif()
 
 if(ENABLE_GCOV)
@@ -94,7 +97,6 @@ endif()
 if(CMAKE_SYSTEM MATCHES "Windows")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
     corrosion_add_target_rustflags(chewing_capi -Ctarget-feature=+crt-static)
-    corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing-cli -Ctarget-feature=+crt-static)
 
     if(VCPKG_TARGET_TRIPLET)
