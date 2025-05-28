@@ -130,3 +130,7 @@ EXPORTS
     chewing_version_minor;
     chewing_version_patch;
     chewing_version_extra;
+    cs_init;
+    cs_terminate;
+    cs_process_key;
+    cs_select_candidate;

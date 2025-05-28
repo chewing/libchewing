@@ -159,7 +159,7 @@ include_directories(
 
 set(ALL_INC
     ${INC_DIR}/chewing.h
-    ${INC_DIR}/chewing-cpp.h
+    ${INC_DIR}/chewing-simplified.h
 
     # 0.5.x compatibility headers
     ${INC_DIR}/chewing-compat.h
@@ -178,7 +178,7 @@ endif()
 # C and C++sources
 set(ALL_SOURCES
     capi/src/chewing.c
-    capi/src/chewing-cpp.cpp
+    capi/src/chewing-simplified.cpp
 )
 
 add_library(libchewing ${ALL_INC} ${ALL_SOURCES})

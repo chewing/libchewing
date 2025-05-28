@@ -152,7 +152,7 @@ typedef struct ChewingContext ChewingContext;
 
 #define CHEWING_VERSION_MINOR 9
 
-#define CHEWING_VERSION_PATCH 1
+#define CHEWING_VERSION_PATCH 2
 
 /**
  * Keyboard layout index.
