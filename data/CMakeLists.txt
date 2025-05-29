@@ -30,21 +30,21 @@ set(DATA_VERSION ${LIBCHEWING_VERSION})
 add_custom_command(
     OUTPUT
         ${ALL_DATA}
-    COMMAND $<TARGET_FILE:chewing-cli> init-database
+    COMMAND chewing-cli init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
         -t trie
         -n 內建詞庫
         ${DATA_SRC_DIR}/tsi.src tsi.dat
-    COMMAND $<TARGET_FILE:chewing-cli> init-database
+    COMMAND chewing-cli init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
         -t trie
         -n 內建字庫
         ${DATA_SRC_DIR}/word.src word.dat
-    COMMAND $<TARGET_FILE:chewing-cli> init-database
+    COMMAND chewing-cli init-database
         -c ${DATA_COPYRIGHT}
         -l ${DATA_LICENSE}
         -r ${DATA_VERSION}
