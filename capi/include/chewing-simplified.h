@@ -87,21 +87,25 @@ typedef struct cs_context_s {
  *  @param ctx Pointer to cs_context_t.
  *  @return true on success, false on failure.
  */
+extern "C" __attribute__((visibility("default")))
 bool cs_init(const cs_context_t *ctx);
 
 /** @brief Terminate CS context and release resources.
  *  @return true on success, false on failure.
  */
+extern "C" __attribute__((visibility("default")))
 bool cs_terminate(void);
 
 /** @brief Process a single key input through CS.
  *  @param key Input key character.
  */
+extern "C" __attribute__((visibility("default")))
 void cs_process_key(const char key);
 
 /** @brief Select a candidate from the current list.
  *  @param index Zero-based index of the candidate to select.
  */
+extern "C" __attribute__((visibility("default")))
 void cs_select_candidate(const int index);
 
 #ifdef __cplusplus
