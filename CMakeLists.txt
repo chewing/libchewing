@@ -78,7 +78,6 @@ if(NOT Corrosion_FOUND)
 endif()
 
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
-corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
 
 # Tell Corrosion “chewing-cli is a host‐built tool”,
