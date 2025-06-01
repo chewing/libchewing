@@ -127,7 +127,7 @@ fn project_data_dir() -> Option<PathBuf> {
     #[cfg(target_os = "windows")]
     {
         if let Ok(path) = env::var("AppData") {
-            return Some(PathBuf::from(path).join("data"));
+            return Some(PathBuf::from(path).join("Chewing"));
         }
     }
     #[cfg(target_os = "macos")]
