@@ -57,7 +57,7 @@ impl SymbolSelector {
                 let cat = &self.category[n];
                 if cat.1 == usize::MAX {
                     self.cursor = None;
-                    Some(Symbol::from(cat.0.chars().next().unwrap()))
+                    cat.0.chars().next().map(Symbol::from)
                 } else {
                     self.cursor = Some(cat.1 as u8);
                     None
@@ -181,5 +181,15 @@ mod tests {
         assert_eq!(None, sel.select(2));
         assert_eq!(vec!["，", "、", "。"], sel.menu());
         assert_eq!(Symbol::from('，'), sel.select(0).unwrap());
+    }
+
+    #[test]
+    fn select_empty_level_two_leaf() {
+        let reader = io::Cursor::new("…\n※\n常用符號=，、。\n\n");
+        let mut sel = SymbolSelector::new(reader).expect("should parse");
+
+        assert_eq!(vec!["…", "※", "常用符號", ""], sel.menu());
+        assert_eq!(None, sel.select(3));
+        assert_eq!(vec!["…", "※", "常用符號", ""], sel.menu());
     }
 }
