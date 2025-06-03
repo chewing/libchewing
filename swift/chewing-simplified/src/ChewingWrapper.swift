@@ -192,7 +192,10 @@ private extension ChewingWrapper {
             CHEWING_LOG_ERROR: "ERROR",
         ][level] ?? "UNKNOWN"
         let logMSG = "[chewing \(lvl)] \(msg)"
-        wrapper.loggingCallback?(Int(level), logMSG)
-        print(logMSG)
+        if let cb = wrapper.loggingCallback {
+            cb(Int(level), logMSG)
+        } else {
+            print(logMSG)
+        }
     }
 }
