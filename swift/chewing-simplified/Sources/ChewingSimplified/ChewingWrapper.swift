@@ -65,14 +65,14 @@ public class ChewingWrapper {
 
         ctx = cs_context_s(config: config, callbacks: callbacks)
 
+        // Register this instance for callback routing
+        ChewingWrapper.currentWrapper = self
+
         // Call cs_init
         isInitialized = cs_init(&ctx)
         if !isInitialized {
             throw ChewingWrapperError.initializationFailed
         }
-
-        // Register this instance for callback routing
-        ChewingWrapper.currentWrapper = self
     }
 
     deinit {
