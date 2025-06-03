@@ -38,7 +38,7 @@ set(PACKAGE_DIR "${CMAKE_SOURCE_DIR}/../swift/chewing-simplified")
 set(XCFRAMEWORK_OUTPUT "${PACKAGE_DIR}/libchewing.xcframework")
 
 # Where to copy any *.dat files for SwiftPM resources:
-set(SPM_RESOURCES_DIR "${PACKAGE_DIR}/Sources/ChewingSimplified/Resources/data")
+set(SPM_RESOURCES_DIR "${PACKAGE_DIR}/src/Resources/data")
 
 #
 # 4) ExternalProject for each slice

@@ -23,7 +23,7 @@ public class ChewingWrapper {
     public var onBufferUpdate: ((String) -> Void)?
     public var onPreeditUpdate: ((String) -> Void)?
     public var loggingCallback: ((Int, String) -> Void)?
-    public var loggingEnabled: Bool = false
+    public var loggingEnabled: Bool = true
 
     /// Returns the file system path to the directory containing Chewing data files.
     ///
@@ -55,7 +55,7 @@ public class ChewingWrapper {
             max_chi_symbol_len: Int32(maxChiSymbolLen)
         )
 
-        var callbacks = cs_callbacks_s(
+        let callbacks = cs_callbacks_s(
             candidate_info: ChewingWrapper.candidateInfoHandler,
             buffer: ChewingWrapper.bufferHandler,
             bopomofo: ChewingWrapper.preeditHandler,
@@ -193,5 +193,6 @@ private extension ChewingWrapper {
         ][level] ?? "UNKNOWN"
         let logMSG = "[chewing \(lvl)] \(msg)"
         wrapper.loggingCallback?(Int(level), logMSG)
+        print(logMSG)
     }
 }
