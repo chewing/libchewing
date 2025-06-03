@@ -105,10 +105,7 @@ func main() {
     while true {
         let c = getchar()
         if c == escapeKey { break }
-        if c == "`".utf8CString[0] {
-            cs_select_candidate(5)
-            continue
-        }
+        // TODO: add candidate selection handling
         processKey(c)
     }
 

@@ -91,6 +91,12 @@ static void cs_logger_shim(void *data, int level, const char *fmt, ...)
  */
 static void cs_notify_state_change()
 {
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "cs_notify_state_change called with null context");
+        return;
+    }
+
     if (chewing_bopomofo_Check(s_context)) {
         s_callbacks.onBopomofo(chewing_bopomofo_String_static(s_context));
     }
@@ -107,8 +113,14 @@ static void cs_notify_state_change()
  * info callback.
  * @return Total number of candidates fetched.
  */
-static int cs_fetch_candidates()
+static void cs_fetch_candidates()
 {
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "cs_fetch_candidates called with null context");
+        return;
+    }
+
     chewing_handle_Down(s_context);
 
     const int totalChoices = chewing_cand_TotalChoice(s_context);
@@ -116,8 +128,15 @@ static int cs_fetch_candidates()
     const int numPages = chewing_cand_TotalPage(s_context);
     const int choicePerPage = chewing_cand_ChoicePerPage(s_context);
 
+    if (totalChoices <= 0) {
+        chewing_handle_Up(s_context);
+        return;
+    }
+
+    size_t safeCount = static_cast<size_t>(totalChoices);
     std::vector<const char *> rawPointers;
-    rawPointers.reserve(totalChoices);
+    rawPointers.reserve(safeCount);
+
     chewing_cand_Enumerate(s_context);
     while (chewing_cand_hasNext(s_context)) {
         if (auto *raw = chewing_cand_String(s_context)) {
@@ -134,7 +153,6 @@ static int cs_fetch_candidates()
     }
 
     chewing_handle_Up(s_context);
-    return totalChoices;
 }
 
 /**
@@ -143,6 +161,17 @@ static int cs_fetch_candidates()
  */
 void cs_select_candidate(const int index)
 {
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "cs_select_candidate called with null context");
+        return;
+    }
+    if (index < 0 || index >= chewing_cand_TotalChoice(s_context)) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "cs_select_candidate called with invalid index");
+        return;
+    }
+
     chewing_handle_Down(s_context);
     chewing_cand_Enumerate(s_context);
     chewing_cand_choose_by_index(s_context, index);
@@ -157,6 +186,12 @@ void cs_select_candidate(const int index)
  */
 void cs_process_key(const char key)
 {
+    if (s_context == nullptr) {
+        s_callbacks.log(CHEWING_LOG_ERROR,
+                        "cs_process_key called with null context");
+        return;
+    }
+
     switch (key) {
     case CHEWING_KEY_Enter:
         chewing_handle_Enter(s_context);
@@ -225,6 +260,8 @@ bool cs_terminate(void)
     if (s_context == nullptr) {
         s_callbacks.log(CHEWING_LOG_ERROR,
                         "cs_terminate called with null context");
+
+        s_callbacks = CallbacksWrapper(cs_callbacks_t{});
         return false;
     }
     s_callbacks = CallbacksWrapper(cs_callbacks_t{});

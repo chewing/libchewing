@@ -79,10 +79,7 @@ int main()
     // event loop
     char ch;
     while ((ch = std::getchar()) != escapeKey) {
-        if (ch == '`') {
-            cs_select_candidate(5);
-            continue;
-        }
+        // TODO: add candidate selection handling
         std::cout << "\n---------------------------\n";
         std::cout << "You pressed: " << ch << std::endl;
         cs_process_key(ch);

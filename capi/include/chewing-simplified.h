@@ -25,6 +25,9 @@ static const char CHEWING_KEY_Backspace = 127; // Backspace key
  *  @param candidateOnPage Index of current candidate on the page.
  *  @param totalChoices Total candidate count.
  *  @param candidates Null-terminated array of candidate strings.
+ *
+ * @note The candidates array is freed after the callback returns.
+ *       The callback should copy the strings if needed.
  */
 typedef void (*cs_candidate_info_callback_t)(const int pageSize,
                                              const int numPages,
