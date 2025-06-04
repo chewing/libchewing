@@ -166,7 +166,6 @@ void cs_select_candidate(const int index)
                         "cs_select_candidate called with null context");
         return;
     }
-
     if (index < 0) {
         std::string msg = "cs_select_candidate called with invalid index " +
                           std::to_string(index);
