@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.24.0)
-project(libchewing LANGUAGES C)
+project(libchewing LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_PROJECT_VERSION 0.9.1)
 
 find_package(Git)
+
 if(Git_FOUND)
     execute_process(
         COMMAND ${GIT_EXECUTABLE} --work-tree ${CMAKE_SOURCE_DIR} describe --dirty --always
@@ -11,6 +15,7 @@ if(Git_FOUND)
         OUTPUT_VARIABLE GIT_DESCRIBE
         ERROR_VARIABLE GIT_DESCRIBE_ERROR
     )
+
     if(NOT GIT_DESCRIBE_ERROR)
         string(REPLACE "v" "" CMAKE_PROJECT_VERSION ${GIT_DESCRIBE})
     endif()
@@ -42,6 +47,7 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
     set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
     add_compile_definitions(_GNU_SOURCE)
     option(ENABLE_GCOV "Coverage support" false)
+
     if(ENABLE_GCOV)
         if(CMAKE_C_COMPILER_ID MATCHES Clang)
             set(CMAKE_C_FLAGS "-fprofile-instr-generate -fcoverage-mapping ${CMAKE_C_FLAGS}")
@@ -60,6 +66,7 @@ option(WITH_SQLITE3 "Use sqlite3 to store userphrase" true)
 option(USE_VALGRIND "Use valgrind when testing" true)
 
 find_package(Corrosion QUIET)
+
 if(NOT Corrosion_FOUND)
     FetchContent_Declare(
         Corrosion
@@ -89,6 +96,7 @@ if(CMAKE_SYSTEM MATCHES "Windows")
     corrosion_add_target_rustflags(chewing_capi -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing-cli -Ctarget-feature=+crt-static)
+
     if(VCPKG_TARGET_TRIPLET)
         corrosion_set_env_vars(chewing-cli VCPKGRS_TRIPLET=${VCPKG_TARGET_TRIPLET})
     endif()
@@ -103,6 +111,7 @@ find_package(Curses)
 
 if(WITH_SQLITE3)
     find_package(SQLite3 REQUIRED)
+
     if(SQLite3_FOUND)
         message(STATUS "Found SQLite3 version ${SQLite3_VERSION}")
         include_directories(SQLite3_INCLUDE_DIRS)
@@ -150,6 +159,7 @@ include_directories(
 
 set(ALL_INC
     ${INC_DIR}/chewing.h
+    ${INC_DIR}/chewing-simplified.h
 
     # 0.5.x compatibility headers
     ${INC_DIR}/chewing-compat.h
@@ -160,26 +170,34 @@ set(ALL_INC
 
 add_subdirectory(doc)
 add_subdirectory(data)
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-add_library(libchewing ${ALL_INC} capi/src/chewing.c)
-set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
+# C and C++sources
+set(ALL_SOURCES
+    capi/src/chewing.c
+    capi/src/chewing-simplified.cpp
+)
+
+add_library(libchewing ${ALL_INC} ${ALL_SOURCES})
+set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(libchewing PRIVATE
     CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
 )
 target_include_directories(libchewing
     PUBLIC
-        $<BUILD_INTERFACE:${INC_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/chewing>
+    $<BUILD_INTERFACE:${INC_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/chewing>
 )
 
 corrosion_set_env_vars(chewing_capi
     CHEWING_DATADIR=${CMAKE_INSTALL_FULL_DATADIR}/libchewing
 )
-target_link_libraries(libchewing PRIVATE chewing_capi)
+target_link_libraries(libchewing PRIVATE chewing_capi stdc++)
 target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
+
 if(BUILD_SHARED_LIBS)
     if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
         target_link_options(libchewing
@@ -248,12 +266,12 @@ export(EXPORT libchewingTargets
     NAMESPACE Chewing::
     FILE "${CMAKE_CURRENT_BINARY_DIR}/ChewingTargets.cmake")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfig.cmake"
-              "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ChewingConfigVersion.cmake"
     DESTINATION ${CONFIG_PACKAGE_DIR})
 install(EXPORT libchewingTargets
     FILE ChewingTargets.cmake
     NAMESPACE Chewing::
-	DESTINATION ${CONFIG_PACKAGE_DIR})
+    DESTINATION ${CONFIG_PACKAGE_DIR})
 
 set(CPACK_PACKAGE_CHECKSUM SHA256)
 set(CPACK_PACKAGE_VERSION ${CMAKE_PROJECT_VERSION})

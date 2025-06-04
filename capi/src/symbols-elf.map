@@ -140,4 +140,8 @@ CHEWING_0.10 {
     global:
         chewing_cand_string_by_index;
         chewing_bopomofo_String;
+        cs_init;
+        cs_terminate;
+        cs_process_key;
+        cs_select_candidate;
 } CHEWING_0.9;

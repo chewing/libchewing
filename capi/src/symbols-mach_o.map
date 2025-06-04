@@ -129,3 +129,7 @@ _chewing_version_major
 _chewing_version_minor
 _chewing_version_patch
 _chewing_version_extra
+_cs_init
+_cs_terminate
+_cs_process_key
+_cs_select_candidate
