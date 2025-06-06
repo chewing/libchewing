@@ -1,12 +1,10 @@
 //
 //  ChewingKey.swift
-//  ChewingSimplified
-//
-//  Created by Rumen Cholakov on 2.06.25.
+//  Chewing
 //
 
 import Foundation
-@_implementationOnly import CLibChewing
+import CLibChewing
 
 /// Keys recognized by the Chewing engine.
 ///
@@ -37,5 +35,15 @@ public enum ChewingKey {
     /// (e.g., printing or feeding back into `process(key:)`).
     public var character: Character {
         return Character(UnicodeScalar(UInt8(self.cValue)))
+    }
+}
+
+extension ChewingKey: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .enter:     return "Enter"
+        case .space:     return "Space"
+        case .backspace: return "Backspace"
+        }
     }
 }

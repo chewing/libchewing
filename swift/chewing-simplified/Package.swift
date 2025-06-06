@@ -13,6 +13,9 @@ let package = Package(
             targets: ["Chewing"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+    ],
     targets: [
         .binaryTarget(
             name: "CLibChewing",
@@ -25,7 +28,7 @@ let package = Package(
             ],
             path: "src",
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
         ),
     ]

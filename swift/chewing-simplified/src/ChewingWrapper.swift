@@ -1,11 +1,14 @@
-@_implementationOnly import CLibChewing
+
 import Foundation
+import CLibChewing
 
 // MARK: - ChewingWrapperError
 
 /// Errors that can occur when initializing or using the ChewingWrapper.
 public enum ChewingWrapperError: Error {
+    /// Indicates that the Chewing data directory could not be located.
     case notFound
+    /// Indicates that initialization of the native Chewing engine failed.
     case initializationFailed
 }
 
@@ -17,13 +20,20 @@ public enum ChewingWrapperError: Error {
 /// forwards keystrokes to the library, and dispatches callback events
 /// (buffer updates, candidate lists, commits, and logging) to Swift closures.
 public class ChewingWrapper {
+    
     // These are Swift closures that user code can set:
+    /// Closure invoked when the Chewing engine generates a new list of candidates.
+    /// - Parameter candidates: An array of candidate strings from the engine.
     public var onCandidateUpdate: (([String]) -> Void)?
+    /// Closure invoked when the Chewing engine commits text to the application.
+    /// - Parameter committedText: The string that was committed.
     public var onCommit: ((String) -> Void)?
+    /// Closure invoked when the Chewing engine’s composed buffer is updated.
+    /// - Parameter bufferText: The current content of the composition buffer.
     public var onBufferUpdate: ((String) -> Void)?
+    /// Closure invoked when the Chewing engine’s preedit (in-progress composition) text changes.
+    /// - Parameter preeditText: The current preedit text.
     public var onPreeditUpdate: ((String) -> Void)?
-    public var loggingCallback: ((Int, String) -> Void)?
-    public var loggingEnabled: Bool = true
 
     /// Returns the file system path to the directory containing Chewing data files.
     ///
@@ -33,7 +43,7 @@ public class ChewingWrapper {
     public static var dataDirectoryPath: String? {
         return Bundle.module.resourcePath
     }
-
+    
     /// Initializes a new ChewingWrapper instance.
     ///
     /// - Parameters:
@@ -41,72 +51,81 @@ public class ChewingWrapper {
     ///   - maxChiSymbolLen: Maximum length of a Chinese symbol sequence (default is 18).
     ///   - dataDirectoryPath: Optional override for the Chewing data directory path.
     ///                        If `nil`, `ChewingWrapper.dataDirectoryPath` is used.
+    ///   - loggingConfig: Configuration for logging behaviour.
+    ///                    If logging is enabled but no callback is provided an internal logger will be used
     /// - Throws: `ChewingWrapperError.notFound` if the data directory cannot be located.
     ///           `ChewingWrapperError.initializationFailed` if the native `cs_init` call fails.
-    public init(candPerPage: Int = 10, maxChiSymbolLen: Int = 18, dataDirectoryPath: String? = nil) throws {
-        let dataDirectoryPath = dataDirectoryPath ?? ChewingWrapper.dataDirectoryPath
-        guard let dataDirectoryPath else {
+    public required init(candPerPage: Int = 10,
+                         maxChiSymbolLen: Int = 18,
+                         dataDirectoryPath: String? = nil,
+                         loggingConfig: LoggingConfig) throws
+    {
+        // Initialize the internal logger to route Chewing logs
+        logger = ChewingLogger(config: loggingConfig)
+
+        guard let dataDirectoryPath = dataDirectoryPath ?? ChewingWrapper.dataDirectoryPath else {
+            logger.log(level: .critical, message: "Failed to retrieve data directory path")
             throw ChewingWrapperError.notFound
         }
-
+        
         let config = cs_config_t(
             data_path: strdup(dataDirectoryPath),
             cand_per_page: Int32(candPerPage),
             max_chi_symbol_len: Int32(maxChiSymbolLen)
         )
-
+        
         let callbacks = cs_callbacks_s(
             candidate_info: ChewingWrapper.candidateInfoHandler,
             buffer: ChewingWrapper.bufferHandler,
             bopomofo: ChewingWrapper.preeditHandler,
             commit: ChewingWrapper.commitHandler,
-            logger: ChewingWrapper.loggerHandler
+            logger: ChewingLogger.cLogger
         )
-
+        
         ctx = cs_context_s(config: config, callbacks: callbacks)
-
+        
         // Register this instance for callback routing
         ChewingWrapper.currentWrapper = self
-
+        
         // Call cs_init
         isInitialized = cs_init(&ctx)
         if !isInitialized {
+            logger.log(level: .critical, message: "Failed to initialize Chewing")
             throw ChewingWrapperError.initializationFailed
         }
     }
-
+    
     deinit {
         if isInitialized {
             _ = cs_terminate()
             ctx = cs_context_s()
         }
     }
-
+    
     /// Sends a single key input to the Chewing engine.
     ///
     /// - Parameter key: A `Character` representing a keystroke (e.g., a letter, space, backspace, or enter).
     ///                  This is converted to a C `char` and forwarded to `cs_process_key`.
     public func process(key: Character) {
         guard isInitialized else { return }
+        guard let cKey = key.asciiValue else { return }
 
-        // convert Character to char
-        let scalarVal = String(key).utf8CString
-        guard let cChar = scalarVal.first else { return }
-        cs_process_key(cChar)
+        cs_process_key(CChar(cKey))
     }
-
+    
     /// Selects a candidate word by its index in the current candidate list.
     ///
     /// - Parameter index: Zero-based index of the candidate to commit.
     ///                    The Chewing engine will commit that candidate to the buffer.
     public func selectCandidate(at index: Int) {
         guard isInitialized else { return }
-
+        
         cs_select_candidate(Int32(index))
     }
-
-    private var ctx: cs_context_s
+    
+    private var ctx: cs_context_s = .init()
     private var isInitialized: Bool = false
+    private var logger: ChewingLogger
 }
 
 public extension ChewingWrapper {
@@ -116,17 +135,21 @@ public extension ChewingWrapper {
     ///                  The underlying `CChar` is extracted and sent to `cs_process_key`.
     func process(key: ChewingKey) {
         guard isInitialized else { return }
-
+        
         cs_process_key(key.cValue)
     }
 }
 
+// MARK: Private extensions
+
+
 private extension ChewingWrapper {
-    /// Holds a reference to the most recently initialized wrapper, used by C callbacks.
+    /// Holds a weak reference to the most recently initialized ChewingWrapper instance,
+    /// used for routing callback invocations from the C library into the Swift closures.
     private weak static var currentWrapper: ChewingWrapper?
-
+    
     // MARK: - C callback entry points (bridge to instance closures)
-
+    
     /// C callback invoked when the Chewing engine has generated a list of candidates.
     ///
     /// - Parameters:
@@ -147,7 +170,7 @@ private extension ChewingWrapper {
         }
         wrapper.onCandidateUpdate?(candidates)
     }
-
+    
     /// C callback invoked when the Chewing engine’s buffer (composed text) is updated.
     ///
     /// - Parameter buf: C string containing the current buffer content.
@@ -156,7 +179,7 @@ private extension ChewingWrapper {
         let str = String(cString: buf)
         wrapper.onBufferUpdate?(str)
     }
-
+    
     /// C callback invoked when the Chewing engine’s preedit (in-progress composition) is updated.
     ///
     /// - Parameter buf: C string containing the current preedit text.
@@ -165,7 +188,7 @@ private extension ChewingWrapper {
         let str = String(cString: buf)
         wrapper.onPreeditUpdate?(str)
     }
-
+    
     /// C callback invoked when the Chewing engine commits text to the application.
     ///
     /// - Parameter buf: C string containing the committed text.
@@ -173,29 +196,5 @@ private extension ChewingWrapper {
         guard let wrapper = ChewingWrapper.currentWrapper, let buf else { return }
         let str = String(cString: buf)
         wrapper.onCommit?(str)
-    }
-
-    /// C callback invoked for logging messages from the Chewing engine.
-    ///
-    /// - Parameters:
-    ///   - level: Numeric log level (e.g., `CHEWING_LOG_DEBUG`, `CHEWING_LOG_INFO`).
-    ///   - message: C string containing the log message.
-    private static let loggerHandler: @convention(c) (Int32, UnsafePointer<CChar>?) -> Void = { level, message in
-        guard let wrapper = ChewingWrapper.currentWrapper else { return }
-        guard level != CHEWING_LOG_VERBOSE, wrapper.loggingEnabled else { return }
-        let msg = message.map { String(cString: $0) } ?? ""
-        let lvl =
-        [
-            CHEWING_LOG_DEBUG: "DEBUG",
-            CHEWING_LOG_INFO: "INFO",
-            CHEWING_LOG_WARN: "WARN",
-            CHEWING_LOG_ERROR: "ERROR",
-        ][level] ?? "UNKNOWN"
-        let logMSG = "[chewing \(lvl)] \(msg)"
-        if let cb = wrapper.loggingCallback {
-            cb(Int(level), logMSG)
-        } else {
-            print(logMSG)
-        }
     }
 }
