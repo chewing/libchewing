@@ -1,3 +1,8 @@
+//
+//  LoggingConfig.swift
+//  Chewing
+//
+
 import Foundation
 
 // MARK: - LogLevel
@@ -32,11 +37,11 @@ public struct LogLevel: OptionSet, CustomStringConvertible {
     public var description: String {
         var parts: [String] = []
         if contains(.critical) { parts.append("critical") }
-        if contains(.error)    { parts.append("error")    }
-        if contains(.warning)  { parts.append("warning")  }
-        if contains(.info)     { parts.append("info")     }
-        if contains(.debug)    { parts.append("debug")    }
-        if contains(.verbose)  { parts.append("verbose")  }
+        if contains(.error) { parts.append("error") }
+        if contains(.warning) { parts.append("warning") }
+        if contains(.info) { parts.append("info") }
+        if contains(.debug) { parts.append("debug") }
+        if contains(.verbose) { parts.append("verbose") }
         return parts.isEmpty ? "none" : parts.joined(separator: "|")
     }
 }

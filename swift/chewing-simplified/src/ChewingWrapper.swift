@@ -1,6 +1,10 @@
+//
+//  ChewingWrapper.swift
+//  Chewing
+//
 
-import Foundation
 import CLibChewing
+import Foundation
 
 // MARK: - ChewingWrapperError
 
@@ -20,8 +24,7 @@ public enum ChewingWrapperError: Error {
 /// forwards keystrokes to the library, and dispatches callback events
 /// (buffer updates, candidate lists, commits, and logging) to Swift closures.
 public class ChewingWrapper {
-    
-    // These are Swift closures that user code can set:
+    /// These are Swift closures that user code can set:
     /// Closure invoked when the Chewing engine generates a new list of candidates.
     /// - Parameter candidates: An array of candidate strings from the engine.
     public var onCandidateUpdate: (([String]) -> Void)?
@@ -43,7 +46,7 @@ public class ChewingWrapper {
     public static var dataDirectoryPath: String? {
         return Bundle.module.resourcePath
     }
-    
+
     /// Initializes a new ChewingWrapper instance.
     ///
     /// - Parameters:
@@ -67,13 +70,13 @@ public class ChewingWrapper {
             logger.log(level: .critical, message: "Failed to retrieve data directory path")
             throw ChewingWrapperError.notFound
         }
-        
+
         let config = cs_config_t(
             data_path: strdup(dataDirectoryPath),
             cand_per_page: Int32(candPerPage),
             max_chi_symbol_len: Int32(maxChiSymbolLen)
         )
-        
+
         let callbacks = cs_callbacks_s(
             candidate_info: ChewingWrapper.candidateInfoHandler,
             buffer: ChewingWrapper.bufferHandler,
@@ -81,12 +84,12 @@ public class ChewingWrapper {
             commit: ChewingWrapper.commitHandler,
             logger: ChewingLogger.cLogger
         )
-        
+
         ctx = cs_context_s(config: config, callbacks: callbacks)
-        
+
         // Register this instance for callback routing
         ChewingWrapper.currentWrapper = self
-        
+
         // Call cs_init
         isInitialized = cs_init(&ctx)
         if !isInitialized {
@@ -94,14 +97,14 @@ public class ChewingWrapper {
             throw ChewingWrapperError.initializationFailed
         }
     }
-    
+
     deinit {
         if isInitialized {
             _ = cs_terminate()
             ctx = cs_context_s()
         }
     }
-    
+
     /// Sends a single key input to the Chewing engine.
     ///
     /// - Parameter key: A `Character` representing a keystroke (e.g., a letter, space, backspace, or enter).
@@ -112,17 +115,17 @@ public class ChewingWrapper {
 
         cs_process_key(CChar(cKey))
     }
-    
+
     /// Selects a candidate word by its index in the current candidate list.
     ///
     /// - Parameter index: Zero-based index of the candidate to commit.
     ///                    The Chewing engine will commit that candidate to the buffer.
     public func selectCandidate(at index: Int) {
         guard isInitialized else { return }
-        
+
         cs_select_candidate(Int32(index))
     }
-    
+
     private var ctx: cs_context_s = .init()
     private var isInitialized: Bool = false
     private var logger: ChewingLogger
@@ -135,21 +138,20 @@ public extension ChewingWrapper {
     ///                  The underlying `CChar` is extracted and sent to `cs_process_key`.
     func process(key: ChewingKey) {
         guard isInitialized else { return }
-        
+
         cs_process_key(key.cValue)
     }
 }
 
 // MARK: Private extensions
 
-
 private extension ChewingWrapper {
     /// Holds a weak reference to the most recently initialized ChewingWrapper instance,
     /// used for routing callback invocations from the C library into the Swift closures.
     private weak static var currentWrapper: ChewingWrapper?
-    
+
     // MARK: - C callback entry points (bridge to instance closures)
-    
+
     /// C callback invoked when the Chewing engine has generated a list of candidates.
     ///
     /// - Parameters:
@@ -170,7 +172,7 @@ private extension ChewingWrapper {
         }
         wrapper.onCandidateUpdate?(candidates)
     }
-    
+
     /// C callback invoked when the Chewing engine’s buffer (composed text) is updated.
     ///
     /// - Parameter buf: C string containing the current buffer content.
@@ -179,7 +181,7 @@ private extension ChewingWrapper {
         let str = String(cString: buf)
         wrapper.onBufferUpdate?(str)
     }
-    
+
     /// C callback invoked when the Chewing engine’s preedit (in-progress composition) is updated.
     ///
     /// - Parameter buf: C string containing the current preedit text.
@@ -188,7 +190,7 @@ private extension ChewingWrapper {
         let str = String(cString: buf)
         wrapper.onPreeditUpdate?(str)
     }
-    
+
     /// C callback invoked when the Chewing engine commits text to the application.
     ///
     /// - Parameter buf: C string containing the committed text.
