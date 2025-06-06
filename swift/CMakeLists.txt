@@ -131,23 +131,12 @@ add_custom_target(create_xcframework
 #
 # 7) Copy any .dat files from the build‐tree into the SwiftPM resources folder
 #
-file(GLOB_RECURSE ALL_DAT_FILES
-    "${BUILD_BASE_DIR}/**/*.dat"
-)
-
 add_custom_target(copy_resources ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory "${SPM_RESOURCES_DIR}"
+    COMMAND /usr/bin/find "${BUILD_BASE_DIR}" -name "*.dat" -exec ${CMAKE_COMMAND} -E copy_if_different {} "${SPM_RESOURCES_DIR}/" "\\;"
 )
 
 add_dependencies(copy_resources create_xcframework)
-
-foreach(dat_file IN LISTS ALL_DAT_FILES)
-    get_filename_component(dat_name "${dat_file}" NAME)
-    add_custom_command(POST_BUILD
-        TARGET copy_resources
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dat_file}" "${SPM_RESOURCES_DIR}/${dat_name}"
-    )
-endforeach()
 
 #
 # 8) Top-level “all_build” target to tie everything together
