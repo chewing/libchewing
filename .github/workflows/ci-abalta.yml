@@ -1,0 +1,45 @@
+name: Build xcframework
+
+on:
+  push:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: 4.0.x
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: libchewing
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+        with:
+          repository: leetal/ios-cmake
+          path: ios-cmake
+
+      - name: Setup rust
+        shell: bash
+        run: |
+          rustup target add aarch64-apple-ios
+          rustup target add --toolchain stable-aarch64-apple-darwin aarch64-apple-ios-sim
+          rustup target add --toolchain stable-aarch64-apple-darwin x86_64-apple-ios
+
+      - name: Run cmake
+        shell: bash
+        working-directory: swift
+        run: |
+          mkdir -p cmake-build && cd cmake-build
+          cmake .. \
+            -DTOOLCHAIN_FILE=${{ github.workspace }}/ios-cmake/ios.toolchain.cmake \
+          cmake --build .
