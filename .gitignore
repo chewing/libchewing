@@ -33,6 +33,7 @@ include/stamp-h1
 # cmake generated files
 /out
 /build
+/build-*
 config.h
 /libchewing.*
 /libsqlite3_library.a

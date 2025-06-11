@@ -5,13 +5,16 @@ set(ALL_DATA
 
 add_custom_target(data ALL DEPENDS ${ALL_DATA})
 
+add_dependencies(data all_static_data)
+
 # We need to copy static data to binary tree when using out of tree build.
 set(ALL_STATIC_DATA
     ${DATA_SRC_DIR}/swkb.dat
     ${DATA_SRC_DIR}/symbols.dat
 )
 
-add_custom_target(all_static_data
+add_custom_target(all_static_data ALL
+    DEPENDS ${ALL_STATIC_DATA}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/swkb.dat ${DATA_BIN_DIR}/swkb.dat
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DATA_SRC_DIR}/symbols.dat ${DATA_BIN_DIR}/symbols.dat
 )
@@ -58,4 +61,3 @@ add_custom_command(
 
 install(FILES ${ALL_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
 install(FILES ${ALL_STATIC_DATA} DESTINATION ${CMAKE_INSTALL_DATADIR}/libchewing)
-

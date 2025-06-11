@@ -7,6 +7,8 @@ file(GLOB APP_SOURCES_CPP *.c *.cpp)
 file(GLOB APP_SOURCES_C *.c)
 file(GLOB APP_HEADERS *.h)
 
+option(BUILD_TESTING "Build tests" OFF)
+
 add_executable(${PROJECT_NAME} ${APP_SOURCES_C} ${APP_SOURCES_CPP} ${APP_HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE

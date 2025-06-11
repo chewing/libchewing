@@ -1,0 +1,7 @@
+build/
+.build/
+cmake-build/
+.swiftpm/
+*.xcframework
+*.dat
+xcuserdata/

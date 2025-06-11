@@ -3,7 +3,7 @@
 mkdir -p ../build/swift
 pushd ../build/swift
 
-cmake ../../../
+cmake ../../../ -DBUILD_TESTING=off
 
 make
 

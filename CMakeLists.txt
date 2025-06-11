@@ -78,12 +78,22 @@ if(NOT Corrosion_FOUND)
 endif()
 
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_capi)
-corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
 corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
+
+if(BUILD_TESTING)
+    corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing_testhelper)
+endif()
+
+# Tell Corrosion “chewing-cli is a host‐built tool”,
+# so don’t ever pass --target=<whatever>-ios to it
+corrosion_set_hostbuild(chewing-cli)
 
 if(WITH_SQLITE3)
     corrosion_set_features(chewing_capi FEATURES sqlite)
-    corrosion_set_features(chewing_testhelper FEATURES sqlite)
+
+    if(BUILD_TESTING)
+        corrosion_set_features(chewing_testhelper FEATURES sqlite)
+    endif()
 endif()
 
 if(ENABLE_GCOV)
@@ -94,8 +104,11 @@ endif()
 if(CMAKE_SYSTEM MATCHES "Windows")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
     corrosion_add_target_rustflags(chewing_capi -Ctarget-feature=+crt-static)
-    corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
     corrosion_add_target_rustflags(chewing-cli -Ctarget-feature=+crt-static)
+
+    if(BUILD_TESTING)
+        corrosion_add_target_rustflags(chewing_testhelper -Ctarget-feature=+crt-static)
+    endif()
 
     if(VCPKG_TARGET_TRIPLET)
         corrosion_set_env_vars(chewing-cli VCPKGRS_TRIPLET=${VCPKG_TARGET_TRIPLET})
@@ -200,25 +213,8 @@ target_link_libraries(libchewing PRIVATE chewing_capi stdc++)
 target_link_libraries(chewing_capi INTERFACE ${SQLite3_LIBRARIES})
 
 if(BUILD_SHARED_LIBS)
-    if(CMAKE_C_COMPILER_ID MATCHES GNU|^Clang)
-        target_link_options(libchewing
-            PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
-            PRIVATE LINKER:--gc-sections
-            PRIVATE LINKER:-u,chewing_new
-            PRIVATE LINKER:-u,chewing_version
-        )
-        set_target_properties(libchewing PROPERTIES
-            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
-        )
-    elseif(CMAKE_C_COMPILER_ID MATCHES AppleClang)
-        target_link_options(libchewing
-            PRIVATE LINKER:-exported_symbols_list,${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
-            PRIVATE LINKER:-dead_strip
-        )
-        set_target_properties(libchewing PROPERTIES
-            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
-        )
-    elseif(MSVC)
+    if(MSVC)
+        # MSVC export list
         target_link_options(libchewing
             PRIVATE /DEF:${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
             PRIVATE /NODEFAULTLIB:MSVCRT
@@ -227,6 +223,30 @@ if(BUILD_SHARED_LIBS)
         )
         set_target_properties(libchewing PROPERTIES
             LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-msvc.def
+        )
+    elseif(APPLE)
+        # Mach-O export list on Apple platforms (macOS, iOS)
+        target_link_options(libchewing
+            PRIVATE LINKER:-exported_symbols_list,${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
+            PRIVATE LINKER:-dead_strip
+            PRIVATE LINKER:-u,_cs_init
+            PRIVATE LINKER:-u,_cs_terminate
+            PRIVATE LINKER:-u,_cs_process_key
+            PRIVATE LINKER:-u,_cs_select_candidate
+        )
+        set_target_properties(libchewing PROPERTIES
+            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-mach_o.map
+        )
+    else()
+        # ELF version-script on other UNIX platforms
+        target_link_options(libchewing
+            PRIVATE LINKER:-version-script,${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
+            PRIVATE LINKER:--gc-sections
+            PRIVATE LINKER:-u,chewing_new
+            PRIVATE LINKER:-u,chewing_version
+        )
+        set_target_properties(libchewing PROPERTIES
+            LINK_DEPENDS ${PROJECT_SOURCE_DIR}/capi/src/symbols-elf.map
         )
     endif()
 endif()
@@ -238,8 +258,7 @@ if(MSVC)
 else()
     set_target_properties(libchewing PROPERTIES
         OUTPUT_NAME chewing
-        SOVERSION 3
-        VERSION 3.3.1
+        INSTALL_NAME_DIR "@rpath"
     )
 endif()
 

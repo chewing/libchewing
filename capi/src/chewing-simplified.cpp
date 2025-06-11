@@ -166,9 +166,10 @@ void cs_select_candidate(const int index)
                         "cs_select_candidate called with null context");
         return;
     }
-    if (index < 0 || index >= chewing_cand_TotalChoice(s_context)) {
-        s_callbacks.log(CHEWING_LOG_ERROR,
-                        "cs_select_candidate called with invalid index");
+    if (index < 0) {
+        std::string msg = "cs_select_candidate called with invalid index " +
+                          std::to_string(index);
+        s_callbacks.log(CHEWING_LOG_ERROR, msg.c_str());
         return;
     }
 
