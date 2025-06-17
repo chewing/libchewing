@@ -94,6 +94,28 @@ jobs:
         id: get_version
         run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
 
+      - name: Check if release with this version already exists
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const version = '${{ steps.get_version.outputs.VERSION }}';
+            console.log(`Checking for release with tag: ${version}`);
+
+            try {
+              await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: version
+              });
+              core.setFailed(`A release with tag '${version}' already exists.`);
+            } catch (error) {
+              if (error.status === 404) {
+                console.log(`No release found with tag '${version}', continuing.`);
+              } else {
+                throw error;
+              }
+            }
       - name: Update Package.swift
         run: |
           sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" swift/chewing-simplified/Package.swift
