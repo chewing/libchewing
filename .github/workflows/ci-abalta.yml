@@ -66,38 +66,49 @@ jobs:
       if: ${{ github.ref == 'refs/heads/master' }}
       needs: build-xcframework
       runs-on: ubuntu-latest
+      permissions: write-all
 
       steps:
-        - name: Checkout
-          uses: actions/checkout@v4
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: libchewing.xcframework.zip
-            path: .
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: 1159088
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-        - name: Get version
-          shell: bash
-          working-directory: swift/chewing-simplified
-          id: get_version
-          run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
 
-        - name: Update Package.swift
-          run: |
-            sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" swift/chewing-simplified/Package.swift
-            sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 libchewing.xcframework.zip | cut -d ' ' -f 1)\"/" swift/chewing-simplified/Package.swift
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
-        - name: Commit and push
-          run: |
-            git config --local user.email "abalta-github-build@abaltatech.com"
-            git config --local user.name "abalta-github-build"
-            git add swift/chewing-simplified/Package.swift
-            git diff --cached --quiet && echo "No changes to commit" || git commit -m "Update Package.swift"
-            git push origin master
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: libchewing.xcframework.zip
+          path: .
 
-        - name: Release
-          uses: softprops/action-gh-release@v2
-          with:
-           files: ${{ github.workspace }}/libchewing.xcframework.zip
-           tag_name: ${{ steps.get_version.outputs.VERSION }}
+      - name: Get version
+        shell: bash
+        working-directory: swift/chewing-simplified
+        id: get_version
+        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
+
+      - name: Update Package.swift
+        run: |
+          sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" swift/chewing-simplified/Package.swift
+          sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 libchewing.xcframework.zip | cut -d ' ' -f 1)\"/" swift/chewing-simplified/Package.swift
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add swift/chewing-simplified/Package.swift
+          git diff --cached --quiet && echo "No changes to commit" || git commit -m "Update Package.swift"
+          git push origin master
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/libchewing.xcframework.zip
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
