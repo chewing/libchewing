@@ -188,11 +188,13 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+option(ENABLE_JNI "Enable JNI support" OFF)
+
 # C and C++sources
 set(ALL_SOURCES
     capi/src/chewing.c
     capi/src/chewing-simplified.cpp
-    capi/src/chewingJNI.cpp
+    $<$<BOOL:${ENABLE_JNI}>:capi/src/chewingJNI.cpp>
 )
 
 add_library(libchewing ${ALL_INC} ${ALL_SOURCES})
