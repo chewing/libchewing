@@ -30,7 +30,7 @@ pub(crate) fn sys_path_from_env_var() -> String {
         let user_datadir = data_dir();
         let sys_datadir = SYS_PATH.unwrap_or(DEFAULT_SYS_PATH);
         let chewing_path = if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
-            format!("{datadir}:{sys_datadir}")
+            format!("{datadir}{SEARCH_PATH_SEP}{sys_datadir}")
         } else {
             sys_datadir.into()
         };
