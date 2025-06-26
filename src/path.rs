@@ -3,6 +3,8 @@
 use std::{
     env,
     ffi::OsStr,
+    fs,
+    io::ErrorKind,
     path::{Path, PathBuf},
 };
 
@@ -20,6 +22,20 @@ const SEARCH_PATH_SEP: char = ';';
 const SEARCH_PATH_SEP: char = ':';
 
 const DICT_FOLDER: &str = "dictionary.d";
+
+// On Windows if a low integrity process tries to write to a higher integrity
+// process, it fails with PermissionDenied error. Current `fs::exists()` in Rust
+// happens to use CreateFile to check if a file exists that triggers this error.
+fn file_exists(path: &Path) -> bool {
+    match fs::exists(path) {
+        Ok(true) => true,
+        Ok(false) => false,
+        Err(error) => match error.kind() {
+            ErrorKind::PermissionDenied => true,
+            _ => false,
+        },
+    }
+}
 
 pub(crate) fn sys_path_from_env_var() -> String {
     let chewing_path = env::var("CHEWING_PATH");
@@ -50,7 +66,7 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
                 path.push(it);
                 path
             })
-            .all(|it| it.exists())
+            .all(|it| file_exists(&it))
         {
             info!("Found {:?} in {}", files, prefix.display());
             return Some(prefix);
@@ -108,7 +124,7 @@ pub fn data_dir() -> Option<PathBuf> {
         return Some(path.into());
     }
     if let Some(path) = legacy_data_dir() {
-        if path.exists() && path.is_dir() {
+        if file_exists(&path) && path.is_dir() {
             info!("Using legacy userpath: {}", path.display());
             return Some(path);
         }
