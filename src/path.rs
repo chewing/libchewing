@@ -8,12 +8,14 @@ use std::{
 
 use log::{info, warn};
 
-const DEFAULT_UNIX_SYS_PATH: &str = "/usr/share/libchewing";
-const UNIX_SYS_PATH: Option<&str> = option_env!("CHEWING_DATADIR");
+#[cfg(target_family = "windows")]
+const DEFAULT_SYS_PATH: &str = "C:\\Program Files\\ChewingTextService\\Dictionary";
+#[cfg(target_family = "unix")]
+const DEFAULT_SYS_PATH: &str = "/usr/share/libchewing";
+const SYS_PATH: Option<&str> = option_env!("CHEWING_DATADIR");
 
 #[cfg(target_family = "windows")]
 const SEARCH_PATH_SEP: char = ';';
-
 #[cfg(target_family = "unix")]
 const SEARCH_PATH_SEP: char = ':';
 
@@ -26,7 +28,7 @@ pub(crate) fn sys_path_from_env_var() -> String {
         chewing_path
     } else {
         let user_datadir = data_dir();
-        let sys_datadir = UNIX_SYS_PATH.unwrap_or(DEFAULT_UNIX_SYS_PATH);
+        let sys_datadir = SYS_PATH.unwrap_or(DEFAULT_SYS_PATH);
         let chewing_path = if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
             format!("{datadir}:{sys_datadir}")
         } else {
