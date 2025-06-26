@@ -1,7 +1,6 @@
 use std::{
     ffi::{CStr, c_char, c_int, c_uchar},
-    ptr,
-    str,
+    ptr, str,
 };
 
 /// # Safety
