@@ -39,6 +39,9 @@ impl SymbolSelector {
             cursor: None,
         })
     }
+    pub(crate) fn is_empty(&self) -> bool {
+        self.category.is_empty()
+    }
     pub(crate) fn menu(&self) -> Vec<String> {
         match self.cursor {
             Some(cursor) => self.table[cursor as usize]

@@ -846,7 +846,11 @@ impl Entering {
         }
     }
     fn start_symbol_input(&self, editor: &mut SharedState) -> Transition {
-        Transition::ToState(Box::new(Selecting::new_symbol(editor)))
+        if editor.sym_sel.is_empty() {
+            self.spin_bell()
+        } else {
+            Transition::ToState(Box::new(Selecting::new_symbol(editor)))
+        }
     }
     fn start_enter_syllable(&self) -> Transition {
         Transition::ToState(Box::new(EnteringSyllable))
@@ -1807,5 +1811,22 @@ mod tests {
     }
 
     #[test]
-    fn editing_mode_input_symbol() {}
+    fn editing_mode_open_empty_symbol_table_then_bell() {
+        let keyboard = Qwerty;
+        let dict = Layered::new(
+            vec![Box::new(TrieBuf::new_in_memory())],
+            Box::new(TrieBuf::new_in_memory()),
+        );
+        let conversion_engine = Box::new(ChewingEngine::new());
+        let estimate = LaxUserFreqEstimate::new(0);
+        let abbrev = AbbrevTable::new();
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
+
+        let ev = keyboard.map(KeyCode::Grave);
+        let key_behavior = editor.process_keyevent(ev);
+
+        assert_eq!(EditorKeyBehavior::Bell, key_behavior);
+        assert_eq!(syl![], editor.syllable_buffer());
+    }
 }
