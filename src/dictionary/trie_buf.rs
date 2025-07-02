@@ -22,7 +22,7 @@ pub struct TrieBuf {
     trie: Option<Trie>,
     btree: BTreeMap<PhraseKey, (u32, u64)>,
     graveyard: BTreeSet<PhraseKey>,
-    join_handle: Option<JoinHandle<Result<Trie, UpdateDictionaryError>>>,
+    join_handle: Option<JoinHandle<Result<(), UpdateDictionaryError>>>,
     dirty: bool,
 }
 
@@ -224,14 +224,13 @@ impl TrieBuf {
                 return Ok(());
             }
             match join_handle.join() {
-                Ok(Ok(trie)) => {
-                    if self.dirty {
-                        info!("Aborted. The in memory dictionary is already dirty.");
-                        return Ok(());
+                Ok(Ok(())) => {
+                    info!("Reloading...");
+                    self.trie = Some(Trie::open(self.path().unwrap())?);
+                    if !self.dirty {
+                        self.btree.clear();
+                        self.graveyard.clear();
                     }
-                    self.trie = Some(trie);
-                    self.btree.clear();
-                    self.graveyard.clear();
                 }
                 Ok(Err(e)) => {
                     error!("Failed to flush dictionary due to error: {e}");
@@ -279,11 +278,8 @@ impl TrieBuf {
             }
             info!("Flushing snapshot...");
             builder.build(snapshot.path().unwrap())?;
-            let trie = Trie::open(snapshot.path().unwrap()).map_err(|err| UpdateDictionaryError {
-                source: Some(Box::new(err)),
-            });
             info!("    Done");
-            trie
+            Ok(())
         }));
         self.dirty = false;
     }
