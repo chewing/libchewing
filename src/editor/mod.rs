@@ -766,6 +766,13 @@ impl BasicEditor for Editor {
             Transition::Spin(behavior) => self.shared.last_key_behavior = behavior,
         }
 
+        if self.shared.options.conversion_engine == ConversionEngineKind::SimpleEngine
+            && self.is_entering()
+            && !self.shared.com.is_empty()
+        {
+            self.shared.commit();
+        }
+
         if self.is_entering() && self.shared.last_key_behavior == EditorKeyBehavior::Absorb {
             self.shared.try_auto_commit();
         }
