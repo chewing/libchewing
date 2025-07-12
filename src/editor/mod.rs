@@ -1478,6 +1478,9 @@ impl State for Selecting {
             Esc => {
                 shared.cancel_selecting();
                 shared.com.pop_cursor();
+                if shared.options.conversion_engine == ConversionEngineKind::SimpleEngine {
+                    shared.com.clear();
+                }
                 self.start_entering()
             }
             Del => {
