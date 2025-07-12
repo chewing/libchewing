@@ -1403,7 +1403,9 @@ void test_SimpleEngine()
         {"ai61", "模" },
         {"g41", "市" },
         {"!", "！" },
-        {"ru03<EE>", "簡" },
+        {"ru03<EE>", "" },
+        {"ru03<D>1", "筧" },
+        {"ru03<D><EE>", "" },
     };
     size_t i;
     ChewingContext *ctx;
