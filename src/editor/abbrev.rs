@@ -19,15 +19,43 @@ impl AbbrevTable {
         let mut table = BTreeMap::new();
         for line in reader.lines() {
             let line = line?;
-            let (abbr, expended) = line
-                .split_once(' ')
-                .expect("each line should have at last one separator");
-            table.insert(abbr.chars().nth(0).unwrap(), expended.to_owned());
+            // each line should have at last one separator
+            if let Some((abbr, expended)) = line.split_once(' ') {
+                if let Some(ch) = abbr.chars().nth(0) {
+                    if !expended.is_empty() {
+                        table.insert(ch, expended.to_owned());
+                    }
+                }
+            }
         }
         Ok(AbbrevTable { table })
     }
 
     pub fn find_abbrev(&self, ch: char) -> Option<&String> {
         self.table.get(&ch)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+    use std::fs;
+
+    use super::AbbrevTable;
+    use tempfile::NamedTempFile;
+
+    #[test]
+    fn load_good_abbrev_file() -> Result<(), Box<dyn Error>> {
+        let file = NamedTempFile::new()?;
+        let abbrev_dat = file.into_temp_path();
+        fs::write(&abbrev_dat, "A A\nBB\nC\nD D\n  E E\n")?;
+
+        let abbrev = AbbrevTable::open(&abbrev_dat)?;
+
+        assert_eq!(Some(&"A".to_string()), abbrev.find_abbrev('A'));
+        assert_eq!(Some(&"D".to_string()), abbrev.find_abbrev('D'));
+        assert_eq!(None, abbrev.find_abbrev('B'));
+        assert_eq!(None, abbrev.find_abbrev('C'));
+        Ok(())
     }
 }
