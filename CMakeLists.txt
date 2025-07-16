@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24.0)
+cmake_minimum_required(VERSION 3.24.0...3.31.6)
 project(libchewing LANGUAGES C)
 
 set(CMAKE_PROJECT_VERSION 0.9.1)
