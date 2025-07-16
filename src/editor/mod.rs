@@ -1045,25 +1045,16 @@ impl State for Entering {
                             }
                         }
                     }
-                    LanguageMode::Chinese if shared.options.easy_symbol_input => {
-                        // Priortize symbol input
-                        if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
-                            expended
-                                .chars()
-                                .for_each(|ch| shared.com.insert(Symbol::from(ch)));
-                            return self.spin_absorb();
-                        }
-                        if let Some(symbol) = special_symbol_input(ev.unicode) {
-                            shared.com.insert(Symbol::from(symbol));
-                            return self.spin_absorb();
-                        }
-                        if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev)
-                        {
-                            return self.start_enter_syllable();
-                        }
-                        self.spin_bell()
-                    }
                     LanguageMode::Chinese => {
+                        if shared.options.easy_symbol_input && ev.modifiers.shift {
+                            // Priortize symbol input
+                            if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
+                                expended
+                                    .chars()
+                                    .for_each(|ch| shared.com.insert(Symbol::from(ch)));
+                                return self.spin_absorb();
+                            }
+                        }
                         if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev)
                         {
                             return self.start_enter_syllable();

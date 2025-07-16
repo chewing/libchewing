@@ -46,9 +46,6 @@ static const TestData SPECIAL_SYMBOL_TABLE[] = {
     {"\\", "\xEF\xBC\xBC" /* ＼ */ },
     {"|", "\xEF\xBD\x9C" /* ｜ */ },
     {"?", "\xEF\xBC\x9F" /* ？ */ },
-    {",", "\xEF\xBC\x8C" /* ， */ },
-    {".", "\xE3\x80\x82" /* 。 */ },
-    {";", "\xEF\xBC\x9B" /* ； */ },
 };
 
 int is_bopomofo_collision_key(const char *key)
