@@ -543,7 +543,7 @@ impl SharedState {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
             Ok(phrase) => {
-                self.notice_buffer = format!("加入：{}", phrase);
+                self.notice_buffer = format!("加入：{phrase}");
                 Ok(())
             }
             Err(msg) => {

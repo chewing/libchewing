@@ -117,7 +117,7 @@ pub struct Trie {
 }
 
 fn io_error(e: impl Into<Box<dyn Error + Send + Sync>>) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, e)
+    io::Error::other(e)
 }
 
 impl Trie {
@@ -1168,7 +1168,7 @@ impl DictionaryBuilder for TrieBuilder {
             .duration_since(SystemTime::UNIX_EPOCH)
             .map(|du| du.subsec_micros())
             .unwrap_or_default();
-        tmpname.set_file_name(format!("chewing-{}.dat", pseudo_random));
+        tmpname.set_file_name(format!("chewing-{pseudo_random}.dat"));
         let database = File::create(&tmpname)?;
         let mut writer = BufWriter::new(&database);
         self.write(&mut writer)?;

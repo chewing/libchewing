@@ -30,10 +30,7 @@ fn file_exists(path: &Path) -> bool {
     match fs::exists(path) {
         Ok(true) => true,
         Ok(false) => false,
-        Err(error) => match error.kind() {
-            ErrorKind::PermissionDenied => true,
-            _ => false,
-        },
+        Err(error) => matches!(error.kind(), ErrorKind::PermissionDenied),
     }
 }
 
