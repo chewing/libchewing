@@ -1527,6 +1527,26 @@ void test_bopomofo_buffer()
     chewing_delete(ctx);
 }
 
+void test_five_word_phrase()
+{
+    ChewingContext *ctx;
+    IntervalType it;
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+
+    type_keystroke_by_string(ctx, "g4ru,442u4fu.6b4" /* ㄕˋ ㄐㄧㄝˋ ㄉㄧˋ ㄑㄧㄡˊ ㄖˋ */ );
+    ok_preedit_buffer(ctx, "世界地球日");
+
+    chewing_interval_Enumerate(ctx);
+
+    ok(chewing_interval_hasNext(ctx) == 1, "shall have next interval");
+    chewing_interval_Get(ctx, &it);
+    ok(it.from == 0 && it.to == 5, "interval (%d, %d) shall be (0, 5)", it.from, it.to);
+
+    chewing_delete(ctx);
+}
+
 void test_longest_phrase()
 {
     ChewingContext *ctx;
@@ -2485,6 +2505,7 @@ int main(int argc, char *argv[])
     test_get_phoneSeq();
     test_bopomofo_buffer();
 
+    test_five_word_phrase();
     test_longest_phrase();
     test_auto_commit();
 
