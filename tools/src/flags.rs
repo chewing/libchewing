@@ -43,6 +43,9 @@ pub(crate) struct InitDatabase {
     /// Skip invalid lines
     #[arg(short, long)]
     pub(crate) skip_invalid: bool,
+    /// Attempt to fix simple spelling errors
+    #[arg(long)]
+    pub(crate) fix: bool,
     /// Read the dictionary source as CSV with header
     #[arg(long)]
     pub(crate) csv: bool,
