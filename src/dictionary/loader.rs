@@ -44,7 +44,7 @@ pub enum LoadDictionaryError {
 
 impl Display for LoadDictionaryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Unable to load system dictionary: {:?}", self)
+        write!(f, "Unable to load system dictionary: {self:?}")
     }
 }
 
@@ -220,13 +220,13 @@ impl UserDictionaryLoader {
                             .as_dict_mut()
                             .unwrap()
                             .update_phrase(&syllables, phrase, freq, last_used)
-                            .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                            .map_err(|e| io::Error::other(Box::new(e)))?;
                     }
                     fresh_dict
                         .as_dict_mut()
                         .unwrap()
                         .flush()
-                        .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                        .map_err(|e| io::Error::other(Box::new(e)))?;
                 }
             }
         }
