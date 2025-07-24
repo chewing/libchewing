@@ -96,3 +96,4 @@ endforeach()
 
 add_test(NAME cargo-test-lib COMMAND cargo test --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
 add_test(NAME cargo-test-capi COMMAND cargo test -p chewing_capi --features $<$<BOOL:${WITH_SQLITE3}>:sqlite>)
+add_test(NAME cargo-test-cli COMMAND cargo test -p chewing-cli)
