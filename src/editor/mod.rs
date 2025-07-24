@@ -581,14 +581,12 @@ impl SharedState {
             return Err(format!("已有：{phrase}"));
         }
         let result = self
-            .dict
-            .add_phrase(&syllables, (phrase.as_ref(), 100).into())
-            .map(|_| phrase)
+            .learn_phrase(&syllables, &phrase)
             .map_err(|_| "加詞失敗：字數不符或夾雜符號".to_owned());
         if result.is_ok() {
             self.dirty_level += 1;
         }
-        result
+        result.map(|_| phrase)
     }
     fn learn_phrase(
         &mut self,
