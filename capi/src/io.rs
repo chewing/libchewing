@@ -44,6 +44,7 @@ static LOGGER: ChewingLogger = ChewingLogger::new();
 enum Owned {
     CString,
     CUShortSlice(usize),
+    CIntSlice(usize),
 }
 
 static OWNED: RwLock<BTreeMap<usize, Owned>> = RwLock::new(BTreeMap::new());
@@ -224,7 +225,10 @@ pub unsafe extern "C" fn chewing_free(ptr: *mut c_void) {
                 match owned {
                     Owned::CString => drop(unsafe { CString::from_raw(ptr.cast()) }),
                     Owned::CUShortSlice(len) => {
-                        drop(unsafe { Vec::from_raw_parts(ptr, *len, *len) })
+                        drop(unsafe { Vec::<c_ushort>::from_raw_parts(ptr.cast(), *len, *len) })
+                    }
+                    Owned::CIntSlice(len) => {
+                        drop(unsafe { Vec::<c_int>::from_raw_parts(ptr.cast(), *len, *len) })
                     }
                 }
             }
@@ -760,7 +764,9 @@ pub unsafe extern "C" fn chewing_set_selKey(
 pub unsafe extern "C" fn chewing_get_selKey(ctx: *const ChewingContext) -> *mut c_int {
     let ctx = as_ref_or_return!(ctx, null_mut());
 
-    ctx.sel_keys.0.as_ptr().cast_mut()
+    let len = ctx.sel_keys.0.len();
+    let ptr = Box::into_raw(ctx.sel_keys.0.to_vec().into_boxed_slice());
+    owned_into_raw(Owned::CIntSlice(len), ptr.cast())
 }
 
 /// # Safety
