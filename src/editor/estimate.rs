@@ -43,7 +43,7 @@ impl LaxUserFreqEstimate {
 const SHORT_INCREASE_FREQ: u32 = 10;
 const MEDIUM_INCREASE_FREQ: u32 = 5;
 const LONG_DECREASE_FREQ: u32 = 10;
-const MAX_USER_FREQ: u32 = 99999999;
+const MAX_USER_FREQ: u32 = 9999999;
 
 impl UserFreqEstimate for LaxUserFreqEstimate {
     fn tick(&mut self) {

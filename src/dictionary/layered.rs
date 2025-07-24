@@ -1,5 +1,4 @@
 use std::{
-    cmp,
     collections::{BTreeMap, btree_map::Entry},
     iter,
 };
@@ -78,7 +77,7 @@ impl Dictionary for Layered {
     /// Foreach d in d_layers
     ///   Foreach phrase, freq in d.lookup_syllables()
     ///     If phrase in phrases
-    ///       Set phrases[phrase].freq = max(phrases[phrase].freq, freq)
+    ///       Set phrases[phrase].freq = freq
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
@@ -100,7 +99,7 @@ impl Dictionary for Layered {
                     match sort_map.entry(phrase.to_string()) {
                         Entry::Occupied(entry) => {
                             let index = *entry.get();
-                            phrases[index] = cmp::max(&phrase, &phrases[index]).clone();
+                            phrases[index] = phrase.clone();
                         }
                         Entry::Vacant(entry) => {
                             entry.insert(phrases.len());
