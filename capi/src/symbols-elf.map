@@ -144,4 +144,8 @@ CHEWING_0.10 {
         cs_terminate;
         cs_process_key;
         cs_select_candidate;
+        Java_com_abaltatech_keyboard_chinese_ChineseConverter_initChewing;
+        Java_com_abaltatech_keyboard_chinese_ChineseConverter_processKey;
+        Java_com_abaltatech_keyboard_chinese_ChineseConverter_selectCandidate;
+        Java_com_abaltatech_keyboard_chinese_ChineseConverter_terminateChewing;
 } CHEWING_0.9;
