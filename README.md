@@ -59,6 +59,7 @@ preference settings.
   - [HIME](https://hime-ime.github.io/)
   - [fcitx](https://github.com/fcitx/fcitx5-chewing)
   - [Guileless Bopomofo](https://github.com/hiroshiyui/GuilelessBopomofo)
+  - [Fcitx5 macOS](https://github.com/fcitx-contrib/fcitx5-macos)
 + The inactive one: [SCIM](https://github.com/chewing/scim-chewing), standalone Microsoft Windows 32/64-bit ([windows-chewing](https://github.com/chewing/windows-chewing)), mozc, [uim](https://github.com/uim/uim-chewing), [ucimf](https://github.com/matlinuxer2/ucimf), JMCCE, xcin, IIIMF, standalone MacOS X (SpaceChewing), Sun's Java Desktop System Input Method Framework, OpenVanilla Input Method Framework (previous than version 1.0), and OXIM.
 
 
