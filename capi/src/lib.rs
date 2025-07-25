@@ -115,7 +115,9 @@ pub mod setup {
     /// instead.
     pub use super::io::chewing_Configure;
 
-    /// Resets all settings in the given Chewing IM instance.
+    /// Reset the context but keep all settings.
+    ///
+    /// All preedit buffers are reset to empty.
     ///
     /// The return value is 0 on success and -1 on failure.
     pub use super::io::chewing_Reset;
