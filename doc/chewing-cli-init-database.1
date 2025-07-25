@@ -4,7 +4,7 @@
 .SH NAME
 chewing\-cli\-init\-database \- Create a new dictionary file
 .SH SYNOPSIS
-\fBchewing\-cli init\-database\fR [\fB\-t\fR|\fB\-\-db\-type\fR] [\fB\-n\fR|\fB\-\-name\fR] [\fB\-c\fR|\fB\-\-copyright\fR] [\fB\-l\fR|\fB\-\-license\fR] [\fB\-r\fR|\fB\-\-version\fR] [\fB\-k\fR|\fB\-\-keep\-word\-freq\fR] [\fB\-s\fR|\fB\-\-skip\-invalid\fR] [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fITSI_SRC\fR> <\fIOUTPUT\fR> 
+\fBchewing\-cli init\-database\fR [\fB\-t\fR|\fB\-\-db\-type\fR] [\fB\-n\fR|\fB\-\-name\fR] [\fB\-c\fR|\fB\-\-copyright\fR] [\fB\-l\fR|\fB\-\-license\fR] [\fB\-r\fR|\fB\-\-version\fR] [\fB\-k\fR|\fB\-\-keep\-word\-freq\fR] [\fB\-s\fR|\fB\-\-skip\-invalid\fR] [\fB\-\-fix\fR] [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fITSI_SRC\fR> <\fIOUTPUT\fR> 
 .SH DESCRIPTION
 Create a new dictionary file
 .SH OPTIONS
@@ -33,6 +33,9 @@ Keep single word frequency
 .TP
 \fB\-s\fR, \fB\-\-skip\-invalid\fR
 Skip invalid lines
+.TP
+\fB\-\-fix\fR
+Attempt to fix simple spelling errors
 .TP
 \fB\-\-csv\fR
 Read the dictionary source as CSV with header
