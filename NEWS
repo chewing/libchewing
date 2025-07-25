@@ -20,6 +20,8 @@ What's New in libchewing 0.10.0 (July 26, 2025)
     ㄅ/半 experience.
 
 * Bug Fixes
+  - `chewing_keystroke_CheckAbsorb()` correctly return true when a keystroke
+    was absorbed due to error.
   - Avoid panics in `chewing_new()`
   - Don't panic when conversion fails
   - Don't panic when symbols table contains empty line

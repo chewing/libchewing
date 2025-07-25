@@ -1439,6 +1439,22 @@ void test_Acknowledge()
     chewing_delete(ctx);
 }
 
+void test_BellCondition()
+{
+    ChewingContext *ctx;
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+
+    type_keystroke_by_string(ctx, "zp zp<E>");
+    ok_preedit_buffer(ctx, "分");
+    ok_bopomofo_buffer(ctx, "ㄈㄣ");
+    ok_commit_buffer(ctx, "");
+    ok_keystroke_rtn(ctx, KEYSTROKE_ABSORB);
+
+    chewing_delete(ctx);
+}
+
 void test_get_phoneSeq()
 {
     static const struct {
@@ -2464,6 +2480,7 @@ int main(int argc, char *argv[])
     test_FuzzySearchMode_Hanyu();
     test_SimpleEngine();
     test_Acknowledge();
+    test_BellCondition();
 
     test_get_phoneSeq();
     test_bopomofo_buffer();

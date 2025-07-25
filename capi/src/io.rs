@@ -2062,6 +2062,9 @@ pub unsafe extern "C" fn chewing_keystroke_CheckAbsorb(ctx: *const ChewingContex
 
     match ctx.editor.last_key_behavior() {
         EditorKeyBehavior::Absorb => TRUE,
+        // Historically Absorb and Bell are returned as ABSORiB | BELL so here
+        // we should return true.
+        EditorKeyBehavior::Bell => TRUE,
         _ => FALSE,
     }
 }
