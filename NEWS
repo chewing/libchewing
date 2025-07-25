@@ -1,3 +1,60 @@
+What's New in libchewing 0.10.0 (July 26, 2025)
+---------------------------------------------------------
+
+* Features
+  - New keyboard layout Colemak.
+  - cli: New --fix option enables auto correction for simple tsi.src errors
+  - cli: Allow multiple whitespace in dictionary source file
+
+* Developer Features
+  - New API `chewing_bopomofo_String()` can be used to retrieve current bopomofo
+    string in the buffer. This deprecates the old non-thread safe
+    `chewing_bopomofo_String_static`.
+  - New API `chewing_cand_string_by_index()` can be used in UILess mode to query
+    candidate string from candidate list.
+
+* Changes
+  - BREAKING: System dictionary loader now loads base and extra dictionary
+    separately. (Rust)
+  - Simple mode now always auto-commit after candidate selection to align with
+    ㄅ/半 experience.
+
+* Bug Fixes
+  - Avoid panics in `chewing_new()`
+  - Don't panic when conversion fails
+  - Don't panic when symbols table contains empty line
+  - Avoid opening empty symbol table
+  - Skip malformed lines in abbrev table
+  - Handle special symbol input normally when easy symbol is enabled
+  - Ignore zero-length phrases
+  - Use correct %AppData% path on Windows
+  - Fallback to Windows default sys path
+  - Use correct search path separator on Windows
+  - Check file existence with Windows quirks
+  - Ensure to reload dictionary after flush buffers
+  - Esc key clears buffer in simple mode
+  - Correctly allocate and free array returned to C FFI
+  - Initialize learned user phrase freq with orig_freq
+  - Ensure user phrase takes precedence
+  
+* Dictionary
+  - Add alternative sound for 麼
+  - Removed some inconsistent phrases (#709)
+
+* Build
+  - Do not link to libcmtd on Windows
+  - Bump corrosion to 0.5.1 to fix rustup breaking change
+  - Bump MSRV to 1.85
+  - Bump tools and testhelper to 2024 edition
+  - Stop updating mini.dat for every build
+  - Move C headers to the capi module
+  - Remove unused cargo-vet settings
+  - Clean-up porting layer usage in tests
+  - Add upper bound to cmake_minimum_required version
+  - Enable cli test
+  - Stop depending on the directories crate
+
+
 What's New in libchewing 0.9.1 (October 26, 2024)
 ---------------------------------------------------------
 
