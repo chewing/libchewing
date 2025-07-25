@@ -247,6 +247,9 @@ impl Editor {
     pub fn ack(&mut self) {
         self.shared.commit_buffer.clear();
     }
+    pub fn clear_composition_editor(&mut self) {
+        self.shared.com.clear();
+    }
     pub fn clear_syllable_editor(&mut self) {
         self.shared.syl.clear();
     }
@@ -396,7 +399,7 @@ impl Editor {
         &self.shared.commit_buffer
     }
     pub fn commit(&mut self) -> Result<(), EditorError> {
-        if !self.is_entering() || self.shared.com.is_empty() {
+        if self.shared.com.is_empty() {
             return Err(EditorError::InvalidState);
         }
         self.shared.commit();

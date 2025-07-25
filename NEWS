@@ -22,6 +22,10 @@ What's New in libchewing 0.10.0 (July 26, 2025)
 * Bug Fixes
   - `chewing_keystroke_CheckAbsorb()` correctly return true when a keystroke
     was absorbed due to error.
+  - `chewing_commit_preedit_buf()` does not return error when the bopomofo
+    buffer is empty, to match previous behavior.
+  - `chewing_clean_preedit_buf()` does not return error when the bopomofo
+    buffer is empty, to match previous behavior.
   - Avoid panics in `chewing_new()`
   - Don't panic when conversion fails
   - Don't panic when symbols table contains empty line

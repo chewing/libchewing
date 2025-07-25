@@ -738,6 +738,27 @@ void test_commit_preedit_empty()
     chewing_delete(ctx);
 }
 
+void test_commit_preedit_during_bopomofo_entering()
+{
+    static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
+    ChewingContext *ctx;
+    int ret;
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+
+    type_keystroke_by_string(ctx, "hk4g4hk" /* 測試ㄘㄜ */ );
+
+    ret = chewing_commit_preedit_buf(ctx);
+    ok(ret == 0, "chewing_commit_preedit_buf() returns `%d' shall be `%d'", ret, 0);
+
+    ok_preedit_buffer(ctx, "");
+    ok_commit_buffer(ctx, phrase);
+    ok_bopomofo_buffer(ctx, "ㄘㄜ");
+
+    chewing_delete(ctx);
+}
+
 void test_commit_preedit_during_cand_selecting()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
@@ -765,6 +786,7 @@ void test_commit_preedit()
 {
     test_commit_preedit_normal();
     test_commit_preedit_empty();
+    test_commit_preedit_during_bopomofo_entering();
     test_commit_preedit_during_cand_selecting();
 }
 
@@ -803,6 +825,29 @@ void test_clean_preedit_empty()
     chewing_delete(ctx);
 }
 
+void test_clean_preedit_during_bopomofo_entering()
+{
+    static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
+    ChewingContext *ctx;
+    int ret;
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+
+    type_keystroke_by_string(ctx, "hk4g4hk" /* 測試ㄘㄜ */ );
+
+    ok_preedit_buffer(ctx, phrase);
+
+    ret = chewing_clean_preedit_buf(ctx);
+    ok(ret == 0, "chewing_clean_preedit_buf() returns `%d' shall be `%d'", ret, 0);
+
+    ok_preedit_buffer(ctx, "");
+    ok_commit_buffer(ctx, "");
+    ok_bopomofo_buffer(ctx, "ㄘㄜ");
+
+    chewing_delete(ctx);
+}
+
 void test_clean_preedit_during_cand_selecting()
 {
     static const char phrase[] = "\xE6\xB8\xAC\xE8\xA9\xA6" /* 測試 */ ;
@@ -830,6 +875,7 @@ void test_clean_preedit()
 {
     test_clean_preedit_normal();
     test_clean_preedit_empty();
+    test_clean_preedit_during_bopomofo_entering();
     test_clean_preedit_during_cand_selecting();
 }
 
