@@ -135,9 +135,6 @@ pub fn data_dir() -> Option<PathBuf> {
     data_dir
 }
 
-// home_dir() is fixed in rust 1.85 and will be marked as
-// undeprecated in rust 1.87
-#[allow(deprecated)]
 fn project_data_dir() -> Option<PathBuf> {
     #[cfg(target_os = "windows")]
     {
@@ -167,9 +164,6 @@ fn project_data_dir() -> Option<PathBuf> {
     }
 }
 
-// home_dir() is fixed in rust 1.85 and will be marked as
-// undeprecated in rust 1.87
-#[allow(deprecated)]
 fn legacy_data_dir() -> Option<PathBuf> {
     if cfg!(target_os = "windows") {
         return env::home_dir().map(|path| path.join("ChewingTextService"));
