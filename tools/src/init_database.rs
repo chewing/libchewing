@@ -83,6 +83,10 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
             continue;
         }
         let line = line?;
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
         match parse_line(line_num, delimiter, &line, args.keep_word_freq, args.fix) {
             Ok((syllables, phrase, freq)) => builder.insert(&syllables, (phrase, freq).into())?,
             Err(error) => errors.push(error),
