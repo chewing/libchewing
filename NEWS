@@ -7,6 +7,19 @@ What's New in libchewing (unreleased)
 * Build
   - Bump MSRV to 1.88
 
+What's New in libchewing 0.10.1 (August 2, 2025)
+---------------------------------------------------------
+
+* Features
+  - cli: Ignore empty lines or lines starts with # when processing dictionary
+
+* Bug Fixes
+  - Add missing bopomofo mapping to the GinYieh layout
+  - Correct IBM layout mapping
+
+* Dictionary
+  - Import improvements from libchewing-data
+
 
 What's New in libchewing 0.10.0 (July 26, 2025)
 ---------------------------------------------------------
