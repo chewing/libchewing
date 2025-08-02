@@ -1807,7 +1807,7 @@ void test_KB_HSU_example()
     ok_preedit_buffer(ctx, "三歲到五歲的小孩五到十人");
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "jxl cewjdxl lxjxfdxmjleojcde cekj<D><D>1xfnxljcdve hwjjeoflod");
+    type_keystroke_by_string(ctx, "jxl cewjdxl lxjxfdxmjleojcde cekj<D><D>1xfnxljcdve hwj<D>1jeoflod");
     ok_preedit_buffer(ctx, "忠孝東路五段六十一巷五弄十七號九樓");
     chewing_clean_preedit_buf(ctx);
 
