@@ -39,7 +39,7 @@ include(FetchContent)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
-    set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
+    set(CMAKE_C_FLAGS "-std=gnu99 -finput-charset=utf-8 ${CMAKE_C_FLAGS}")
     add_compile_definitions(_GNU_SOURCE)
     option(ENABLE_GCOV "Coverage support" false)
     if(ENABLE_GCOV)
