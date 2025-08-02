@@ -1,3 +1,12 @@
+What's New in libchewing (unreleased)
+---------------------------------------------------------
+
+* Changes
+  - Use less heuristic when calculating phrase segmentation score
+
+* Build
+  - Bump MSRV to 1.88
+
 What's New in libchewing 0.10.1 (August 2, 2025)
 ---------------------------------------------------------
 

@@ -2,7 +2,6 @@ use std::{
     collections::VecDeque,
     fmt::{Debug, Display, Write},
     iter,
-    ops::{Mul, Neg},
 };
 
 use log::trace;
@@ -38,6 +37,7 @@ impl ChewingEngine {
             if intervals.is_empty() {
                 return vec![PossiblePath::default()];
             }
+            let intervals = log_softmax(intervals);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
             trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
@@ -56,6 +56,23 @@ impl ChewingEngine {
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         })
     }
+}
+
+fn log_softmax(intervals: Vec<PossibleInterval>) -> Vec<PossibleInterval> {
+    let scale = 1e5; // max count in tsi.src was about 120,000
+    let x: Vec<f64> = intervals.iter().map(|v| v.phrase.freq() as f64).collect();
+    let shifted: Vec<f64> = x.iter().map(|&x| x / scale).collect();
+    let log_sum_exp = shifted.iter().map(|&v| v.exp()).sum::<f64>().ln();
+
+    let intervals = intervals
+        .into_iter()
+        .zip(shifted.into_iter())
+        .map(|(mut i, v)| {
+            i.weight = v - log_sum_exp;
+            i
+        })
+        .collect();
+    intervals
 }
 
 impl ConversionEngine for ChewingEngine {
@@ -184,7 +201,12 @@ impl ChewingEngine {
                 if let Some(phrase) =
                     self.find_best_phrase(dict, start, &com.symbols[start..end], com)
                 {
-                    intervals.push(PossibleInterval { start, end, phrase });
+                    intervals.push(PossibleInterval {
+                        start,
+                        end,
+                        phrase,
+                        weight: 0.0,
+                    });
                 }
             }
         }
@@ -361,11 +383,12 @@ impl From<PossiblePhrase> for Box<str> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq)]
 struct PossibleInterval {
     start: usize,
     end: usize,
     phrase: PossiblePhrase,
+    weight: f64,
 }
 
 impl Debug for PossibleInterval {
@@ -373,6 +396,7 @@ impl Debug for PossibleInterval {
         f.debug_tuple("I")
             .field(&(self.start..self.end))
             .field(&self.phrase)
+            .field(&self.weight)
             .finish()
     }
 }
@@ -400,7 +424,7 @@ impl From<PossibleInterval> for Interval {
     }
 }
 
-#[derive(Default, Clone, Eq)]
+#[derive(Default, Clone)]
 struct PossiblePath {
     intervals: Vec<PossibleInterval>,
 }
@@ -408,30 +432,17 @@ struct PossiblePath {
 impl Debug for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PossiblePath")
-            .field("rule_largest_sum()", &self.rule_largest_sum().mul(1000))
-            .field(
-                "rule_largest_avgwordlen()",
-                &self.rule_largest_avgwordlen().mul(1000),
-            )
-            .field(
-                "rule_smallest_lenvariance()",
-                &self.rule_smallest_lenvariance().mul(100),
-            )
-            .field("rule_largest_freqsum()", &self.rule_largest_freqsum())
-            .field("total_score()", &self.score())
+            .field("phrase_log_probability()", &self.phrase_log_probability())
+            .field("length_log_probability()", &self.length_log_probability())
+            .field("total_probability()", &self.total_probability())
             .field("intervals", &self.intervals)
             .finish()
     }
 }
 
 impl PossiblePath {
-    fn score(&self) -> i32 {
-        let mut score = 0;
-        score += 1000 * self.rule_largest_sum();
-        score += 1000 * self.rule_largest_avgwordlen();
-        score += 100 * self.rule_smallest_lenvariance();
-        score += self.rule_largest_freqsum();
-        score
+    fn total_probability(&self) -> f64 {
+        self.phrase_log_probability() + self.length_log_probability()
     }
 
     /// Copied from IsRecContain to trim some paths
@@ -454,50 +465,28 @@ impl PossiblePath {
         true
     }
 
-    fn rule_largest_sum(&self) -> i32 {
-        let mut score = 0;
-        for interval in &self.intervals {
-            score += interval.end - interval.start;
-        }
-        score as i32
+    fn phrase_log_probability(&self) -> f64 {
+        self.intervals.iter().map(|it| it.weight).sum()
     }
-
-    fn rule_largest_avgwordlen(&self) -> i32 {
-        if self.intervals.is_empty() {
-            return 0;
-        }
-        // Constant factor 6=1*2*3, to keep value as integer
-        6 * self.rule_largest_sum()
-            / i32::try_from(self.intervals.len()).expect("number of intervals should be small")
-    }
-
-    fn rule_smallest_lenvariance(&self) -> i32 {
-        let len = self.intervals.len();
-        let mut score = 0;
-        // kcwu: heuristic? why variance no square function?
-        for i in 0..len {
-            for j in i + 1..len {
-                let interval_1 = &self.intervals[i];
-                let interval_2 = &self.intervals[j];
-                score += interval_1.len().abs_diff(interval_2.len());
-            }
-        }
-        i32::try_from(score).expect("score should fit in i32").neg()
-    }
-
-    fn rule_largest_freqsum(&self) -> i32 {
-        let mut score = 0;
-        for interval in &self.intervals {
-            let reduction_factor = if interval.len() == 1 { 512 } else { 1 };
-            score += interval.phrase.freq() / reduction_factor;
-        }
-        i32::try_from(score).expect("score should fit in i32")
+    fn length_log_probability(&self) -> f64 {
+        self.intervals
+            .iter()
+            .map(|it| match it.len() {
+                // log probability of phrase lenght calculated from tsi.src
+                1 => -1.520439227173415,
+                2 => -0.4236568120124837,
+                3 => -1.455835986003893,
+                4 => -1.6178072894679227,
+                5 => -4.425765184802149,
+                _ => -4.787357595622411,
+            })
+            .sum()
     }
 }
 
 impl PartialEq for PossiblePath {
     fn eq(&self, other: &Self) -> bool {
-        self.score() == other.score()
+        self.cmp(other).is_eq()
     }
 }
 
@@ -509,13 +498,16 @@ impl PartialOrd for PossiblePath {
 
 impl Ord for PossiblePath {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.score().cmp(&other.score())
+        self.total_probability()
+            .total_cmp(&other.total_probability())
     }
 }
 
+impl Eq for PossiblePath {}
+
 impl Display for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#PossiblePath({}", self.score())?;
+        write!(f, "#PossiblePath({}", self.total_probability())?;
         for interval in &self.intervals {
             write!(
                 f,
@@ -930,11 +922,13 @@ mod tests {
                     start: 0,
                     end: 2,
                     phrase: Phrase::new("測試", 0).into(),
+                    weight: 0.0,
                 },
                 PossibleInterval {
                     start: 2,
                     end: 4,
                     phrase: Phrase::new("一下", 0).into(),
+                    weight: 0.0,
                 },
             ],
         };
@@ -944,16 +938,19 @@ mod tests {
                     start: 0,
                     end: 2,
                     phrase: Phrase::new("測試", 0).into(),
+                    weight: 0.0,
                 },
                 PossibleInterval {
                     start: 2,
                     end: 3,
                     phrase: Phrase::new("遺", 0).into(),
+                    weight: 0.0,
                 },
                 PossibleInterval {
                     start: 3,
                     end: 4,
                     phrase: Phrase::new("下", 0).into(),
+                    weight: 0.0,
                 },
             ],
         };
