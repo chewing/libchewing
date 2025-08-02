@@ -47,7 +47,7 @@ impl SyllableEditor for Ibm {
             KeyIndex::K15 => Bopomofo::J,
             KeyIndex::K16 => Bopomofo::Q,
             KeyIndex::K17 => Bopomofo::X,
-            KeyIndex::K18 => Bopomofo::S,
+            KeyIndex::K18 => Bopomofo::ZH,
             KeyIndex::K19 => Bopomofo::CH,
             KeyIndex::K20 => Bopomofo::SH,
             KeyIndex::K21 => Bopomofo::R,
