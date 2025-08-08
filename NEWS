@@ -1,6 +1,9 @@
 What's New in libchewing (unreleased)
 ---------------------------------------------------------
 
+* Features
+  - cli: Now outputs and reads dictionary metadata in source file
+
 * Changes
   - Use less heuristic when calculating phrase segmentation score
 

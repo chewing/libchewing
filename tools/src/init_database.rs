@@ -65,17 +65,16 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         flags::DbType::Trie => Box::new(TrieBuilder::new()),
     };
 
-    builder.set_info(DictionaryInfo {
-        name: args.name,
-        copyright: args.copyright,
-        license: args.license,
-        version: args.version,
-        software: format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
-    })?;
+    let mut name = args.name;
+    let mut copyright = args.copyright;
+    let mut license = args.license;
+    let mut version = args.version;
+    let software = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
     let tsi = File::open(args.tsi_src)?;
     let reader = BufReader::new(tsi);
     let delimiter = if args.csv { ',' } else { ' ' };
+    let mut read_front_matter = true;
     let mut errors = vec![];
 
     for (line_num, line) in reader.lines().enumerate() {
@@ -84,7 +83,28 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         }
         let line = line?;
         let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
+        if line.is_empty() {
+            continue;
+        }
+        // Read front matter until first non-comment line
+        if read_front_matter && !line.starts_with('#') {
+            read_front_matter = false;
+        } else if read_front_matter {
+            let Some((key, value)) = line.trim_start_matches('#').trim().split_once(delimiter)
+            else {
+                errors.push(parse_error(line_num, "invalid metadata").into());
+                continue;
+            };
+            let value = value.trim_end_matches(delimiter).to_string();
+            match key.trim() {
+                "dc:title" => name = value,
+                "dc:rights" => copyright = value,
+                "dc:license" => license = value,
+                "dc:identifier" => version = value,
+                _ => (),
+            }
+            continue;
+        } else if line.starts_with('#') {
             continue;
         }
         match parse_line(line_num, delimiter, &line, args.keep_word_freq, args.fix) {
@@ -107,11 +127,25 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     if path.exists() {
         fs::remove_file(path).context("unable to overwrite output")?;
     }
+
+    let info = DictionaryInfo {
+        name,
+        copyright,
+        license,
+        version,
+        software,
+    };
+    builder.set_info(info.clone())?;
+
     builder.build(path)?;
 
     if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieBuilder>() {
         let stats = trie_builder.statistics();
         eprintln!("== Trie Dictionary Statistics ==");
+        eprintln!("Name                 : {}", info.name);
+        eprintln!("Copyright            : {}", info.copyright);
+        eprintln!("License              : {}", info.license);
+        eprintln!("Version              : {}", info.version);
         eprintln!("Node count           : {}", stats.node_count);
         eprintln!("Leaf count           : {}", stats.leaf_count);
         eprintln!("Phrase count         : {}", stats.phrase_count);

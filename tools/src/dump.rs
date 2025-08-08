@@ -38,6 +38,12 @@ pub(crate) fn run(args: flags::Dump) -> Result<()> {
 }
 
 fn dump_dict_tsi_src(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary) -> Result<()> {
+    let info = dict.about();
+    writeln!(sink, "# dc:title {}", info.name)?;
+    writeln!(sink, "# dc:rights {}", info.copyright)?;
+    writeln!(sink, "# dc:license {}", info.license)?;
+    writeln!(sink, "# dc:identifier {}", info.version)?;
+    writeln!(sink, "# 詞(phrase) 詞頻(freq) 注音(bopomofo)")?;
     for (syllables, phrase) in dict.entries() {
         writeln!(
             sink,
@@ -55,7 +61,12 @@ fn dump_dict_tsi_src(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary)
 }
 
 fn dump_dict_csv(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary) -> Result<()> {
-    writeln!(sink, "詞(phrase),詞頻(freq),注音(bopomofo)")?;
+    let info = dict.about();
+    writeln!(sink, "# dc:title,{},", info.name)?;
+    writeln!(sink, "# dc:rights,{},", info.copyright)?;
+    writeln!(sink, "# dc:license,{},", info.license)?;
+    writeln!(sink, "# dc:identifier,{},", info.version)?;
+    writeln!(sink, "# 詞(phrase),詞頻(freq),注音(bopomofo)")?;
     for (syllables, phrase) in dict.entries() {
         writeln!(
             sink,
