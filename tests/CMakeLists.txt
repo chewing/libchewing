@@ -26,6 +26,21 @@ if(CURSES_FOUND)
     set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
 endif()
 
+add_custom_target(static_data ALL DEPENDS dict_chewing misc
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${PROJECT_BINARY_DIR}/data/misc/swkb.dat
+        ${PROJECT_BINARY_DIR}/static_data/swkb.dat
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${PROJECT_BINARY_DIR}/data/misc/symbols.dat
+        ${PROJECT_BINARY_DIR}/static_data/symbols.dat
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${PROJECT_BINARY_DIR}/data/dict/chewing/tsi.dat
+        ${PROJECT_BINARY_DIR}/static_data/tsi.dat
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${PROJECT_BINARY_DIR}/data/dict/chewing/word.dat
+        ${PROJECT_BINARY_DIR}/static_data/word.dat
+)
+set(DATA_BIN_DIR ${PROJECT_BINARY_DIR}/static_data)
 
 set(ALL_TESTS ${ALL_TESTCASES} ${ALL_TESTTOOLS})
 
@@ -59,7 +74,7 @@ foreach(target ${ALL_TESTS})
         TEST_DATA_DIR=\"${TEST_SRC_DIR}/data\"
         TESTDATA=\"${TEST_SRC_DIR}/default-test.txt\"
     )
-    add_dependencies(${target} data all_static_data)
+    add_dependencies(${target} dict_chewing)
     add_dependencies(check ${target})
 endforeach()
 

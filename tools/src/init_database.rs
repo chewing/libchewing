@@ -78,9 +78,6 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     let mut errors = vec![];
 
     for (line_num, line) in reader.lines().enumerate() {
-        if args.csv && line_num == 0 {
-            continue;
-        }
         let line = line?;
         let line = line.trim();
         if line.is_empty() {
