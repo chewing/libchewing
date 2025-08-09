@@ -6,6 +6,7 @@ What's New in libchewing (unreleased)
 
 * Changes
   - Use less heuristic when calculating phrase segmentation score
+  - Dictionary data are built directly from the libchewing-data repository
 
 * Build
   - Bump MSRV to 1.88
