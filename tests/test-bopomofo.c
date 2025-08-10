@@ -504,6 +504,37 @@ void test_select_candidate_shift_cursor()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_shift_cursor_rearword()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+    chewing_set_maxChiSymbolLen(ctx, 16);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    chewing_set_autoShiftCur(ctx, 1);
+
+    type_keystroke_by_string(ctx, "fu g;418 vu84s84xu3");
+    ok_preedit_buffer(ctx, "七上八下那裡");
+
+    type_keystroke_by_string(ctx, "<L><L><L>");
+
+    type_keystroke_by_string(ctx, "<D>1");
+    ok_preedit_buffer(ctx, "七上八下那裡");
+
+    type_keystroke_by_string(ctx, "<D>2");
+
+    ok_preedit_buffer(ctx, "七上八下納李");
+
+    type_keystroke_by_string(ctx, "<D>2");
+
+    ok_preedit_buffer(ctx, "七上八下納里");
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -519,6 +550,7 @@ void test_select_candidate()
     test_select_candidate_second_page();
     test_select_candidate_second_page_rewind();
     test_select_candidate_shift_cursor();
+    test_select_candidate_shift_cursor_rearword();
 }
 
 void test_Esc_not_entering_chewing()

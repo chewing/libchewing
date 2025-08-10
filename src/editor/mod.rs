@@ -1319,7 +1319,11 @@ impl Selecting {
                         debug!("Auto Shift {}", editor.options.auto_shift_cursor);
                         editor.com.pop_cursor();
                         if editor.options.auto_shift_cursor {
-                            editor.com.move_cursor_right(len);
+                            if editor.options.phrase_choice_rearward {
+                                editor.com.move_cursor_right(1);
+                            } else {
+                                editor.com.move_cursor_right(len);
+                            }
                         }
                         self.start_entering()
                     }
