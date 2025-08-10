@@ -963,12 +963,12 @@ impl State for Entering {
             }
             Left => {
                 shared.snapshot();
-                shared.com.move_cursor_left();
+                shared.com.move_cursor_left(1);
                 self.spin_absorb()
             }
             Right => {
                 shared.snapshot();
-                shared.com.move_cursor_right();
+                shared.com.move_cursor_right(1);
                 self.spin_absorb()
             }
             Up => self.spin_ignore(),
@@ -1313,11 +1313,13 @@ impl Selecting {
                 debug!("candidates: {:?}", &candidates);
                 match candidates.get(offset) {
                     Some(phrase) => {
-                        editor.com.select(sel.interval(phrase.as_str()));
+                        let interval = sel.interval(phrase.as_str());
+                        let len = interval.len();
+                        editor.com.select(interval);
                         debug!("Auto Shift {}", editor.options.auto_shift_cursor);
                         editor.com.pop_cursor();
                         if editor.options.auto_shift_cursor {
-                            editor.com.move_cursor_right();
+                            editor.com.move_cursor_right(len);
                         }
                         self.start_entering()
                     }

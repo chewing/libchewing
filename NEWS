@@ -4,6 +4,10 @@ What's New in libchewing (unreleased)
 * Features
   - cli: Now outputs and reads dictionary metadata in source file
 
+* Bug Fixes
+  - Auto shift cursor after candidate selection now moves the cursor to the
+    next phrase instead of the next word.
+
 * Changes
   - Use less heuristic when calculating phrase segmentation score
   - Dictionary data are built directly from the libchewing-data repository
@@ -69,7 +73,7 @@ What's New in libchewing 0.10.0 (July 26, 2025)
   - Correctly allocate and free array returned to C FFI
   - Initialize learned user phrase freq with orig_freq
   - Ensure user phrase takes precedence
-  
+
 * Dictionary
   - Add alternative sound for 麼
   - Removed some inconsistent phrases (#709)
