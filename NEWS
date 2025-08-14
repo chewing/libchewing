@@ -1,3 +1,13 @@
+What's New in libchewing 0.10.2 (UNRELEASED)
+---------------------------------------------------------
+
+* Bug Fixes
+  - Fix ㄈㄥ was incorrectly mapped to 風靡
+
+* Dictionary
+  - Added missing bopomofo for 風靡
+
+
 What's New in libchewing 0.10.1 (August 2, 2025)
 ---------------------------------------------------------
 
@@ -56,7 +66,7 @@ What's New in libchewing 0.10.0 (July 26, 2025)
   - Correctly allocate and free array returned to C FFI
   - Initialize learned user phrase freq with orig_freq
   - Ensure user phrase takes precedence
-  
+
 * Dictionary
   - Add alternative sound for 麼
   - Removed some inconsistent phrases (#709)
