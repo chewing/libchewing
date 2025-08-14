@@ -12,6 +12,9 @@ What's New in libchewing (unreleased)
   - Use less heuristic when calculating phrase segmentation score
   - Dictionary data are built directly from the libchewing-data repository
 
+* Dictionary
+  - Default symbols.dat now includes commonly used emojis.
+
 * Build
   - Bump MSRV to 1.88
 
