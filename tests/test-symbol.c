@@ -329,6 +329,15 @@ static const char *CAND[] = {
     "\xE9\x9B\x99\xE7\xB7\x9A\xE6\xA1\x86" /* 雙線框 */ ,
     "\xE5\xA1\xAB\xE8\x89\xB2\xE6\x96\xB9\xE5\xA1\x8A" /* 填色方塊 */ ,
     "\xE7\xB7\x9A\xE6\xAE\xB5" /* 線段 */ ,
+    "表情與情緒",
+    "人物與身體",
+    "動物、大自然",
+    "飲食",
+    "時間",
+    "天象與天氣",
+    "節慶與活動",
+    "物品",
+    "符號與標示",
 };
 
 void test_type_symbol()
@@ -363,7 +372,7 @@ void test_symbol_cand_page()
 
     chewing_handle_Default(ctx, '`');
     ok(chewing_cand_CurrentPage(ctx) == 0, "current page shall be 0");
-    ok(chewing_cand_TotalPage(ctx) == 2, "total page shall be 2");
+    ok(chewing_cand_TotalPage(ctx) == 3, "total page shall be 3");
 
     ok_candidate(ctx, CAND, ARRAY_SIZE(CAND));
 

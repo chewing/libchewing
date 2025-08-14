@@ -1373,7 +1373,7 @@ void test_Space_selection_symbol()
     ok(strcmp(const_buf, CAND_2) == 0, "second candidate list head `%s' shall be `%s'", const_buf, CAND_2);
 
     /* rollover */
-    type_keystroke_by_string(ctx, " ");
+    type_keystroke_by_string(ctx, "     ");
     chewing_cand_Enumerate(ctx);
     const_buf = chewing_cand_String_static(ctx);
     ok(strcmp(const_buf, CAND_1) == 0, "first candidate list head `%s' shall be `%s'", const_buf, CAND_1);
