@@ -15,6 +15,17 @@ What's New in libchewing (unreleased)
 * Build
   - Bump MSRV to 1.88
 
+
+What's New in libchewing 0.10.2 (August 14, 2025)
+---------------------------------------------------------
+
+* Bug Fixes
+  - Fix ㄈㄥ was incorrectly mapped to 風靡
+
+* Dictionary
+  - Added missing bopomofo for 風靡
+
+
 What's New in libchewing 0.10.1 (August 2, 2025)
 ---------------------------------------------------------
 
