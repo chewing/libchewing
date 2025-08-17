@@ -1,3 +1,4 @@
 [submodule "data"]
 	path = data
 	url = https://github.com/chewing/libchewing-data
+	shallow = true
