@@ -3,6 +3,7 @@ What's New in libchewing (unreleased)
 
 * Features
   - cli: Now outputs and reads dictionary metadata in source file
+  - cli: Detects mismatched phrase word count and syllable count
 
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the

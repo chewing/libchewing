@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chewing::{
     dictionary::{DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieBuilder},
     zhuyin::{Bopomofo, Syllable},
@@ -105,13 +105,21 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
             continue;
         }
         match parse_line(line_num, delimiter, &line, args.keep_word_freq, args.fix) {
-            Ok((syllables, phrase, freq)) => builder.insert(&syllables, (phrase, freq).into())?,
+            Ok((syllables, phrase, freq)) => {
+                if syllables.len() != phrase.chars().count() {
+                    errors.push(
+                        anyhow!("word count doesn't match").context(parse_error(line_num, line)),
+                    );
+                    continue;
+                }
+                builder.insert(&syllables, (phrase, freq).into())?;
+            }
             Err(error) => errors.push(error),
         };
     }
     if !errors.is_empty() {
         for err in errors {
-            eprintln!("{}", err);
+            eprintln!("{:#}", err);
         }
         if !args.fix {
             eprintln!("Hint: Use --fix to automatically fix common errors");
