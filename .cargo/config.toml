@@ -1,2 +1,7 @@
 [alias]
 xtask = "run --package xtask --"
+
+[target.aarch64-linux-android]
+rustflags = [
+    "-C", "link-args=-Wl,-z,max-page-size=16384"
+]

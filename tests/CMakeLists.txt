@@ -22,6 +22,9 @@ set(ALL_TESTTOOLS
     testchewing
 )
 
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+
 if(CURSES_FOUND)
     set(ALL_TESTTOOLS ${ALL_TESTTOOLS} genkeystroke)
 endif()
