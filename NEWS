@@ -10,6 +10,9 @@ What's New in libchewing (unreleased)
     next phrase instead of the next word.
 
 * Changes
+  - SQLite support is not fully optional and disabled by default
+  - rust: new sqlite-bundled feature can be used to build with bundled sqlite
+    to simplify the build configuration on Windows
   - Use less heuristic when calculating phrase segmentation score
   - Dictionary data are built directly from the libchewing-data repository
 

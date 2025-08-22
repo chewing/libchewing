@@ -28,6 +28,7 @@ tempfile = { workspace = true }
 [features]
 default = []
 sqlite = ["dep:rusqlite"]
+sqlite-bundled = ["sqlite", "rusqlite/bundled"]
 
 [workspace]
 members = ["capi", "fuzzer", "tests/testhelper", "tools"]

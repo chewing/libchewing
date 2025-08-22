@@ -92,7 +92,7 @@ jobs:
     name: Coverage preset=${{ matrix.preset }}
 
     steps:
-      - run: sudo dnf -y install clang cmake ninja-build sqlite-devel llvm rustup bzip2 git
+      - run: sudo dnf -y install clang cmake ninja-build sqlite-devel llvm rustup bzip2 git gnupg2
 
       - uses: actions/checkout@v4
         with:

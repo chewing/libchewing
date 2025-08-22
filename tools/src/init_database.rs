@@ -1,6 +1,10 @@
+#[cfg(not(feature = "sqlite"))]
+use anyhow::bail;
 use anyhow::{Context, Result, anyhow};
+#[cfg(feature = "sqlite")]
+use chewing::dictionary::SqliteDictionaryBuilder;
 use chewing::{
-    dictionary::{DictionaryBuilder, DictionaryInfo, SqliteDictionaryBuilder, TrieBuilder},
+    dictionary::{DictionaryBuilder, DictionaryInfo, TrieBuilder},
     zhuyin::{Bopomofo, Syllable},
 };
 use std::{
@@ -61,7 +65,14 @@ impl<T> IntoParseError<T> for Result<T> {
 
 pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     let mut builder: Box<dyn DictionaryBuilder> = match args.db_type {
-        flags::DbType::Sqlite => Box::new(SqliteDictionaryBuilder::new()),
+        flags::DbType::Sqlite => {
+            #[cfg(feature = "sqlite")]
+            {
+                Box::new(SqliteDictionaryBuilder::new())
+            }
+            #[cfg(not(feature = "sqlite"))]
+            bail!("sqlite3 dictionary format support was not enabled.");
+        }
         flags::DbType::Trie => Box::new(TrieBuilder::new()),
     };
 

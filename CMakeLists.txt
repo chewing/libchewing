@@ -78,6 +78,7 @@ corrosion_import_crate(MANIFEST_PATH Cargo.toml CRATES chewing-cli)
 if(WITH_SQLITE3)
     corrosion_set_features(chewing_capi FEATURES sqlite)
     corrosion_set_features(chewing_testhelper FEATURES sqlite)
+    corrosion_set_features(chewing-cli FEATURES sqlite)
 endif()
 
 if(ENABLE_GCOV)

@@ -19,3 +19,4 @@ tempfile = { workspace = true }
 
 [features]
 sqlite = ["chewing/sqlite"]
+sqlite-bundled = ["sqlite", "chewing/sqlite-bundled"]
