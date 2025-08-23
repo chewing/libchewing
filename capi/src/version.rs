@@ -2,11 +2,11 @@ use std::ffi::{c_char, c_int};
 
 pub const CHEWING_VERSION_MAJOR: c_int = 0;
 pub const CHEWING_VERSION_MINOR: c_int = 10;
-pub const CHEWING_VERSION_PATCH: c_int = 2;
+pub const CHEWING_VERSION_PATCH: c_int = 3;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn chewing_version() -> *const c_char {
-    c"0.10.2".as_ptr()
+    c"0.10.3".as_ptr()
 }
 
 #[unsafe(no_mangle)]
