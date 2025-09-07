@@ -7,7 +7,7 @@ language = "C"
 
 header = """
 /*
- * Copyright (c) 2024
+ * Copyright (c) 2025
  *      libchewing Core Team.
  *
  * See the file "COPYING" for information on usage and redistribution
@@ -18,10 +18,6 @@ include_guard = "chewing_public_bindings_h"
 pragma_once = true
 cpp_compat = true
 after_includes = """
-
-/** @brief context handle used for Chewing IM APIs
- */
-typedef struct ChewingContext ChewingContext;
 
 /** @brief indicate the internal encoding of data processing.
  *  @since 0.3.0

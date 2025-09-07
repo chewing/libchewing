@@ -12,6 +12,7 @@ assignees: ''
 - [ ] Update version numbers in
   - [ ] CMakeLists.txt
   - [ ] Cargo.toml, */Cargo.toml
+- [ ] Run cbindgen to regenerate chewing.h
 - [ ] Update Cargo.lock
 - [ ] Prepare pre-release/release tarball
   ```sh
