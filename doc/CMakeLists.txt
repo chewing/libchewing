@@ -2,6 +2,7 @@ set(INFO_SRC ${PROJECT_SOURCE_DIR}/doc/libchewing.texi)
 set(INFO_BIN ${PROJECT_BINARY_DIR}/doc/libchewing.info)
 
 option(BUILD_INFO "Build info doc from texi source")
+option(COMPRESS_MANS "Compress man-pages on installation" ON)
 
 find_program(MAKEINFO makeinfo)
 if(BUILD_INFO AND MAKEINFO)
@@ -25,6 +26,8 @@ set(MANPAGES
     chewing-cli-info.1
     chewing-cli-dump.1
 )
+
+if(COMPRESS_MANS)
 foreach(man ${MANPAGES})
     file(ARCHIVE_CREATE
         OUTPUT ${PROJECT_BINARY_DIR}/doc/${man}.gz
@@ -35,4 +38,9 @@ foreach(man ${MANPAGES})
         DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
     )
 endforeach()
+else()
+    install(FILES ${MANPAGES}
+        DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+endif()
+
 endif()
