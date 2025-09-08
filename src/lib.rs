@@ -70,8 +70,10 @@
 //!
 //! Other required files `swkb.dat` and `symbols.dat` can be copied directly to
 //! the dictionary folder.
+
 pub mod conversion;
 pub mod dictionary;
 pub mod editor;
+pub mod input;
 pub mod path;
 pub mod zhuyin;

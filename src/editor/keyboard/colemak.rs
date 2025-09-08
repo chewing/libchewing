@@ -1,6 +1,7 @@
 use super::{
-    KeyCode::{self, *},
-    KeyEvent, KeyboardLayout, MATRIX_SIZE, Modifiers, generic_map_keycode,
+    KeyEvent, KeyboardLayout,
+    Keysym::{self, *},
+    MATRIX_SIZE, Modifiers, generic_map_keycode,
 };
 
 /// A Colemak keyboard.
@@ -8,7 +9,7 @@ use super::{
 pub struct Colemak;
 
 #[rustfmt::skip]
-static KEYCODE_INDEX: [KeyCode; MATRIX_SIZE] = [
+static KEYCODE_INDEX: [Keysym; MATRIX_SIZE] = [
     Unknown,
     N1, N2, N3, N4, N5, N6, N7, N8, N9, N0, Minus, Equal, BSlash, Grave,
     Q, W, F, P, G, J, L, U, Y, SColon, LBracket, RBracket,
@@ -41,7 +42,7 @@ static SHIFT_MAP: [char; MATRIX_SIZE] = [
 ];
 
 impl KeyboardLayout for Colemak {
-    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+    fn map_with_mod(&self, keycode: Keysym, modifiers: Modifiers) -> KeyEvent {
         generic_map_keycode(&KEYCODE_INDEX, &UNICODE_MAP, &SHIFT_MAP, keycode, modifiers)
     }
 }

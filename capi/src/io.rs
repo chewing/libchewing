@@ -16,7 +16,7 @@ use chewing::{
     editor::{
         AbbrevTable, BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior,
         LanguageMode, LaxUserFreqEstimate, SymbolSelector, UserPhraseAddDirection,
-        keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout, Modifiers, Qwerty},
+        keyboard::{AnyKeyboardLayout, Keysym, KeyboardLayout, Modifiers, Qwerty},
         zhuyin_layout::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
@@ -1678,7 +1678,7 @@ pub unsafe extern "C" fn chewing_handle_Space(ctx: *mut ChewingContext) -> c_int
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::Space));
+        .process_keyevent(ctx.keyboard.map(Keysym::Space));
     OK
 }
 
@@ -1691,7 +1691,7 @@ pub unsafe extern "C" fn chewing_handle_Space(ctx: *mut ChewingContext) -> c_int
 pub unsafe extern "C" fn chewing_handle_Esc(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Esc));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Esc));
     OK
 }
 
@@ -1705,7 +1705,7 @@ pub unsafe extern "C" fn chewing_handle_Enter(ctx: *mut ChewingContext) -> c_int
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::Enter));
+        .process_keyevent(ctx.keyboard.map(Keysym::Enter));
     OK
 }
 
@@ -1718,7 +1718,7 @@ pub unsafe extern "C" fn chewing_handle_Enter(ctx: *mut ChewingContext) -> c_int
 pub unsafe extern "C" fn chewing_handle_Del(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Del));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Del));
     OK
 }
 
@@ -1732,7 +1732,7 @@ pub unsafe extern "C" fn chewing_handle_Backspace(ctx: *mut ChewingContext) -> c
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::Backspace));
+        .process_keyevent(ctx.keyboard.map(Keysym::Backspace));
     OK
 }
 
@@ -1745,7 +1745,7 @@ pub unsafe extern "C" fn chewing_handle_Backspace(ctx: *mut ChewingContext) -> c
 pub unsafe extern "C" fn chewing_handle_Tab(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Tab));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Tab));
     OK
 }
 
@@ -1759,7 +1759,7 @@ pub unsafe extern "C" fn chewing_handle_ShiftLeft(ctx: *mut ChewingContext) -> c
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map_with_mod(KeyCode::Left, Modifiers::shift()));
+        .process_keyevent(ctx.keyboard.map_with_mod(Keysym::Left, Modifiers::shift()));
     OK
 }
 
@@ -1772,7 +1772,7 @@ pub unsafe extern "C" fn chewing_handle_ShiftLeft(ctx: *mut ChewingContext) -> c
 pub unsafe extern "C" fn chewing_handle_Left(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    let key_event = ctx.keyboard.map(KeyCode::Left);
+    let key_event = ctx.keyboard.map(Keysym::Left);
     ctx.editor.process_keyevent(key_event);
     OK
 }
@@ -1788,7 +1788,7 @@ pub unsafe extern "C" fn chewing_handle_ShiftRight(ctx: *mut ChewingContext) -> 
 
     ctx.editor.process_keyevent(
         ctx.keyboard
-            .map_with_mod(KeyCode::Right, Modifiers::shift()),
+            .map_with_mod(Keysym::Right, Modifiers::shift()),
     );
     OK
 }
@@ -1803,7 +1803,7 @@ pub unsafe extern "C" fn chewing_handle_Right(ctx: *mut ChewingContext) -> c_int
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::Right));
+        .process_keyevent(ctx.keyboard.map(Keysym::Right));
     OK
 }
 
@@ -1819,7 +1819,7 @@ pub unsafe extern "C" fn chewing_handle_Right(ctx: *mut ChewingContext) -> c_int
 pub unsafe extern "C" fn chewing_handle_Up(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Up));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Up));
     OK
 }
 
@@ -1832,7 +1832,7 @@ pub unsafe extern "C" fn chewing_handle_Up(ctx: *mut ChewingContext) -> c_int {
 pub unsafe extern "C" fn chewing_handle_Home(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Home));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Home));
     OK
 }
 
@@ -1845,7 +1845,7 @@ pub unsafe extern "C" fn chewing_handle_Home(ctx: *mut ChewingContext) -> c_int 
 pub unsafe extern "C" fn chewing_handle_End(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::End));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::End));
     OK
 }
 
@@ -1859,7 +1859,7 @@ pub unsafe extern "C" fn chewing_handle_PageUp(ctx: *mut ChewingContext) -> c_in
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::PageUp));
+        .process_keyevent(ctx.keyboard.map(Keysym::PageUp));
     OK
 }
 
@@ -1873,7 +1873,7 @@ pub unsafe extern "C" fn chewing_handle_PageDown(ctx: *mut ChewingContext) -> c_
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     ctx.editor
-        .process_keyevent(ctx.keyboard.map(KeyCode::PageDown));
+        .process_keyevent(ctx.keyboard.map(Keysym::PageDown));
     OK
 }
 
@@ -1888,7 +1888,7 @@ pub unsafe extern "C" fn chewing_handle_PageDown(ctx: *mut ChewingContext) -> c_
 pub unsafe extern "C" fn chewing_handle_Down(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(ctx.keyboard.map(KeyCode::Down));
+    ctx.editor.process_keyevent(ctx.keyboard.map(Keysym::Down));
     OK
 }
 
@@ -1903,7 +1903,7 @@ pub unsafe extern "C" fn chewing_handle_Capslock(ctx: *mut ChewingContext) -> c_
 
     ctx.editor.process_keyevent(
         ctx.keyboard
-            .map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
+            .map_with_mod(Keysym::Unknown, Modifiers::capslock()),
     );
     OK
 }
@@ -1962,16 +1962,16 @@ pub unsafe extern "C" fn chewing_handle_CtrlNum(ctx: *mut ChewingContext, key: c
     let ctx = as_mut_or_return!(ctx, ERROR);
 
     let keycode = match key as u8 {
-        b'0' => KeyCode::N0,
-        b'1' => KeyCode::N1,
-        b'2' => KeyCode::N2,
-        b'3' => KeyCode::N3,
-        b'4' => KeyCode::N4,
-        b'5' => KeyCode::N5,
-        b'6' => KeyCode::N6,
-        b'7' => KeyCode::N7,
-        b'8' => KeyCode::N8,
-        b'9' => KeyCode::N9,
+        b'0' => Keysym::N0,
+        b'1' => Keysym::N1,
+        b'2' => Keysym::N2,
+        b'3' => Keysym::N3,
+        b'4' => Keysym::N4,
+        b'5' => Keysym::N5,
+        b'6' => Keysym::N6,
+        b'7' => Keysym::N7,
+        b'8' => Keysym::N8,
+        b'9' => Keysym::N9,
         _ => return -1,
     };
 
@@ -1991,7 +1991,7 @@ pub unsafe extern "C" fn chewing_handle_ShiftSpace(ctx: *mut ChewingContext) -> 
 
     ctx.editor.process_keyevent(
         ctx.keyboard
-            .map_with_mod(KeyCode::Space, Modifiers::shift()),
+            .map_with_mod(Keysym::Space, Modifiers::shift()),
     );
     OK
 }

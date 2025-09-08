@@ -1,11 +1,11 @@
-use super::{INDEX_MAP, KeyCode, KeyEvent, KeyboardLayout, Modifiers, dvorak, qwerty};
+use super::{INDEX_MAP, Keysym, KeyEvent, KeyboardLayout, Modifiers, dvorak, qwerty};
 
 /// A Dvorak keyboard.
 #[derive(Debug)]
 pub struct DvorakOnQwerty;
 
 impl KeyboardLayout for DvorakOnQwerty {
-    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+    fn map_with_mod(&self, keycode: Keysym, modifiers: Modifiers) -> KeyEvent {
         let index = qwerty::KEYCODE_INDEX
             .iter()
             .position(|key| *key == keycode)
@@ -16,8 +16,8 @@ impl KeyboardLayout for DvorakOnQwerty {
             dvorak::UNICODE_MAP[index]
         };
         KeyEvent {
-            index: INDEX_MAP[index],
-            code: dvorak::KEYCODE_INDEX[index],
+            code: INDEX_MAP[index],
+            key: dvorak::KEYCODE_INDEX[index],
             unicode,
             modifiers,
         }

@@ -1,5 +1,5 @@
 use super::{
-    KeyCode::{self, *},
+    Keysym::{self, *},
     KeyEvent, KeyboardLayout, MATRIX_SIZE, Modifiers, generic_map_keycode,
 };
 
@@ -8,7 +8,7 @@ use super::{
 pub struct Workman;
 
 #[rustfmt::skip]
-pub(crate) static KEYCODE_INDEX: [KeyCode; MATRIX_SIZE] = [
+pub(crate) static KEYCODE_INDEX: [Keysym; MATRIX_SIZE] = [
     Unknown,
     N1, N2, N3, N4, N5, N6, N7, N8, N9, N0, Minus, Equal, BSlash, Grave,
       Q, D, R, W, B, J, F, U, P, SColon, LBracket, RBracket,
@@ -41,7 +41,7 @@ pub(crate) static SHIFT_MAP: [char; MATRIX_SIZE] = [
 ];
 
 impl KeyboardLayout for Workman {
-    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+    fn map_with_mod(&self, keycode: Keysym, modifiers: Modifiers) -> KeyEvent {
         generic_map_keycode(&KEYCODE_INDEX, &UNICODE_MAP, &SHIFT_MAP, keycode, modifiers)
     }
 }

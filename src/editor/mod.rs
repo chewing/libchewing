@@ -27,7 +27,7 @@ use crate::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
         UpdateDictionaryError, UserDictionaryLoader,
     },
-    editor::keyboard::KeyCode,
+    editor::keyboard::Keysym,
     zhuyin::{Syllable, SyllableSlice},
 };
 
@@ -873,9 +873,9 @@ impl Entering {
 
 impl State for Entering {
     fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
+        use Keysym::*;
 
-        match ev.code {
+        match ev.key {
             Backspace => {
                 if shared.com.is_empty() {
                     self.spin_ignore()
@@ -1018,10 +1018,10 @@ impl State for Entering {
                     shared.snapshot();
                 }
                 match shared.options.language_mode {
-                    LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
+                    LanguageMode::Chinese if ev.key == Grave && ev.modifiers.is_none() => {
                         self.start_symbol_input(shared)
                     }
-                    LanguageMode::Chinese if ev.code == Space => {
+                    LanguageMode::Chinese if ev.key == Space => {
                         match shared.options.character_form {
                             CharacterForm::Halfwidth => {
                                 if shared.com.is_empty() {
@@ -1155,9 +1155,9 @@ impl EnteringSyllable {
 
 impl State for EnteringSyllable {
     fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
+        use Keysym::*;
 
-        match ev.code {
+        match ev.key {
             Backspace => {
                 shared.syl.remove_last();
 
@@ -1367,13 +1367,13 @@ impl Selecting {
 
 impl State for Selecting {
     fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
+        use Keysym::*;
 
         if ev.modifiers.ctrl || ev.modifiers.shift {
             return self.spin_bell();
         }
 
-        match ev.code {
+        match ev.key {
             Backspace => {
                 shared.cancel_selecting();
                 self.start_entering()
@@ -1509,9 +1509,9 @@ impl Highlighting {
 
 impl State for Highlighting {
     fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
+        use Keysym::*;
 
-        match ev.code {
+        match ev.key {
             Unknown if ev.modifiers.capslock => {
                 shared.switch_language_mode();
                 self.start_entering()
@@ -1564,7 +1564,7 @@ mod tests {
 
     use super::{
         BasicEditor, Editor,
-        keyboard::{KeyCode, KeyboardLayout, Qwerty},
+        keyboard::{Keysym, KeyboardLayout, Qwerty},
     };
 
     #[test]
@@ -1580,13 +1580,13 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let ev = keyboard.map(KeyCode::H);
+        let ev = keyboard.map(Keysym::H);
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
-        let ev = keyboard.map(KeyCode::K);
+        let ev = keyboard.map(Keysym::K);
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
@@ -1607,7 +1607,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
+        let keys = [Keysym::H, Keysym::K, Keysym::N4];
         let key_behaviors: Vec<_> = keys
             .into_iter()
             .map(|key| keyboard.map(key))
@@ -1641,13 +1641,13 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
-            keyboard.map(KeyCode::H),
-            keyboard.map(KeyCode::K),
-            keyboard.map(KeyCode::N4),
+            keyboard.map(Keysym::H),
+            keyboard.map(Keysym::K),
+            keyboard.map(Keysym::N4),
             // TODO: capslock probably shouldn't be a modifier
             // Toggle english mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::Z),
+            keyboard.map_with_mod(Keysym::Unknown, Modifiers::capslock()),
+            keyboard.map(Keysym::Z),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1685,8 +1685,8 @@ mod tests {
 
         let keys = [
             // Switch to english mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::X),
+            keyboard.map_with_mod(Keysym::Unknown, Modifiers::capslock()),
+            keyboard.map(Keysym::X),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1703,10 +1703,10 @@ mod tests {
 
         let keys = [
             // Switch to chinese mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::H),
-            keyboard.map(KeyCode::K),
-            keyboard.map(KeyCode::N4),
+            keyboard.map_with_mod(Keysym::Unknown, Modifiers::capslock()),
+            keyboard.map(Keysym::H),
+            keyboard.map(Keysym::K),
+            keyboard.map(Keysym::N4),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1742,11 +1742,11 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
-            keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
-            keyboard.map_with_mod(KeyCode::H, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::K, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::N4, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::Comma, Modifiers::shift()),
+            keyboard.map_with_mod(Keysym::N1, Modifiers::shift()),
+            keyboard.map_with_mod(Keysym::H, Modifiers::default()),
+            keyboard.map_with_mod(Keysym::K, Modifiers::default()),
+            keyboard.map_with_mod(Keysym::N4, Modifiers::default()),
+            keyboard.map_with_mod(Keysym::Comma, Modifiers::shift()),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1783,7 +1783,7 @@ mod tests {
 
         let steps = [
             (
-                KeyCode::Unknown,
+                Keysym::Unknown,
                 Modifiers::capslock(),
                 EditorKeyBehavior::Absorb,
                 "",
@@ -1791,7 +1791,7 @@ mod tests {
                 "",
             ),
             (
-                KeyCode::N0,
+                Keysym::N0,
                 Modifiers::default(),
                 EditorKeyBehavior::Commit,
                 "",
@@ -1799,7 +1799,7 @@ mod tests {
                 "０",
             ),
             (
-                KeyCode::Minus,
+                Keysym::Minus,
                 Modifiers::default(),
                 EditorKeyBehavior::Commit,
                 "",
@@ -1831,7 +1831,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let ev = keyboard.map(KeyCode::Grave);
+        let ev = keyboard.map(Keysym::Grave);
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Bell, key_behavior);

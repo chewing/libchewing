@@ -86,10 +86,10 @@ impl Modifiers {
 }
 
 fn generic_map_keycode(
-    keycode_index: &[KeyCode; MATRIX_SIZE],
+    keycode_index: &[Keysym; MATRIX_SIZE],
     unicode_map: &[char; MATRIX_SIZE],
     shift_map: &[char; MATRIX_SIZE],
-    keycode: KeyCode,
+    keycode: Keysym,
     modifiers: Modifiers,
 ) -> KeyEvent {
     let index = keycode_index
@@ -102,8 +102,8 @@ fn generic_map_keycode(
         unicode_map[index]
     };
     KeyEvent {
-        index: INDEX_MAP[index],
-        code: keycode,
+        code: INDEX_MAP[index],
+        key: keycode,
         unicode,
         modifiers,
     }
@@ -112,8 +112,8 @@ fn generic_map_keycode(
 /// Describe a Keyboard Layout
 pub trait KeyboardLayout {
     /// Map the keycode to a key event according to the keyboard layout
-    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent;
-    fn map(&self, keycode: KeyCode) -> KeyEvent {
+    fn map_with_mod(&self, keycode: Keysym, modifiers: Modifiers) -> KeyEvent;
+    fn map(&self, keycode: Keysym) -> KeyEvent {
         self.map_with_mod(keycode, Modifiers::default())
     }
     /// Map the ascii to keycode then to a key event
@@ -175,7 +175,7 @@ impl AnyKeyboardLayout {
 }
 
 impl KeyboardLayout for AnyKeyboardLayout {
-    fn map_with_mod(&self, keycode: KeyCode, modifiers: Modifiers) -> KeyEvent {
+    fn map_with_mod(&self, keycode: Keysym, modifiers: Modifiers) -> KeyEvent {
         match self {
             AnyKeyboardLayout::Qwerty(kb) => kb.map_with_mod(keycode, modifiers),
             AnyKeyboardLayout::Dvorak(kb) => kb.map_with_mod(keycode, modifiers),
@@ -195,7 +195,7 @@ impl KeyboardLayout for AnyKeyboardLayout {
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[rustfmt::skip]
-pub enum KeyIndex {
+pub enum Keycode {
     K0 = 0,
 //  1   2   3   4   5   6   7   8   9   0    -    =    \    `
     K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14,
@@ -211,7 +211,7 @@ pub enum KeyIndex {
 }
 
 #[rustfmt::skip]
-static INDEX_MAP: [KeyIndex; MATRIX_SIZE] = [
+static INDEX_MAP: [Keycode; MATRIX_SIZE] = [
     K0,
     K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14,
       K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26,
@@ -227,7 +227,7 @@ static INDEX_MAP: [KeyIndex; MATRIX_SIZE] = [
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[rustfmt::skip]
-pub enum KeyCode {
+pub enum Keysym {
     Unknown = 0,
     N1, N2, N3, N4, N5, N6, N7, N8, N9, N0, Minus, Equal, BSlash, Grave,
       Q, W, E, R, T, Y, U, I, O, P, LBracket, RBracket,
@@ -237,7 +237,7 @@ pub enum KeyCode {
     PageUp, PageDown, NumLock,
 }
 
-impl KeyCode {
+impl Keysym {
     pub const fn to_digit(self) -> Option<u8> {
         match self {
             code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => Some(code as u8),
@@ -250,16 +250,16 @@ impl KeyCode {
     }
 }
 
-use KeyCode::*;
-use KeyIndex::*;
+use Keycode::*;
+use Keysym::*;
 
 /// Key processed by a keymap
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct KeyEvent {
     /// TODO: doc
-    pub index: KeyIndex,
+    pub code: Keycode,
     /// TODO: doc
-    pub code: KeyCode,
+    pub key: Keysym,
     /// TODO: doc
     pub unicode: char,
     /// TODO: doc
@@ -275,7 +275,7 @@ impl KeyEvent {
 
 impl fmt::Display for KeyEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "key-{:?}-{:?}-{}-", self.index, self.code, self.unicode)?;
+        write!(f, "key-{:?}-{:?}-{}-", self.code, self.key, self.unicode)?;
         if self.modifiers.capslock {
             write!(f, "C")?;
         }
@@ -296,7 +296,7 @@ macro_rules! keycode_map {
 }
 
 #[rustfmt::skip]
-static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 95] = keycode_map! {
+static KEYCODE_MAP: [(u8, (Keysym, Modifiers)); 95] = keycode_map! {
   b'1' => (N1, Modifiers::new()),
   b'2' => (N2, Modifiers::new()),
   b'3' => (N3, Modifiers::new()),
@@ -397,7 +397,7 @@ static KEYCODE_MAP: [(u8, (KeyCode, Modifiers)); 95] = keycode_map! {
 
 // FIXME should we map to real numlock keycode?
 #[rustfmt::skip]
-static NUMLOCK_MAP: [(u8, (KeyCode, Modifiers)); 15] = keycode_map! {
+static NUMLOCK_MAP: [(u8, (Keysym, Modifiers)); 15] = keycode_map! {
   b'1' => (N1, Modifiers::numlock()),
   b'2' => (N2, Modifiers::numlock()),
   b'3' => (N3, Modifiers::numlock()),
