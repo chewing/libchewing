@@ -106,6 +106,7 @@ pub mod input {
     pub use super::io::chewing_handle_Enter;
     pub use super::io::chewing_handle_Esc;
     pub use super::io::chewing_handle_Home;
+    pub use super::io::chewing_handle_KeyboardEvent;
     pub use super::io::chewing_handle_Left;
     pub use super::io::chewing_handle_Numlock;
     pub use super::io::chewing_handle_PageDown;

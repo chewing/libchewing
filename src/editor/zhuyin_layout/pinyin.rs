@@ -1,7 +1,7 @@
 //! Pinyin
 
 use crate::{
-    editor::keyboard::{KeyCode, KeyEvent},
+    input::{KeyboardEvent, Keysym},
     zhuyin::{Bopomofo, Syllable},
 };
 
@@ -73,37 +73,38 @@ impl Pinyin {
 }
 
 impl SyllableEditor for Pinyin {
-    fn key_press(&mut self, key: KeyEvent) -> KeyBehavior {
-        if self.key_seq.is_empty() && !key.code.is_atoz() {
+    fn key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
+        let ksym = &key.ksym;
+        if self.key_seq.is_empty() && !ksym.is_atoz() {
             return KeyBehavior::KeyError;
         }
         if ![
-            KeyCode::Space,
-            KeyCode::N1,
-            KeyCode::N2,
-            KeyCode::N3,
-            KeyCode::N4,
-            KeyCode::N5,
+            Keysym::from(' '),
+            Keysym::from('1'),
+            Keysym::from('2'),
+            Keysym::from('3'),
+            Keysym::from('4'),
+            Keysym::from('5'),
         ]
-        .contains(&key.code)
+        .contains(ksym)
         {
             if self.key_seq.len() == MAX_PINYIN_LEN {
                 // buffer is full, ignore this keystroke
                 return KeyBehavior::NoWord;
             }
-            if !key.unicode.is_ascii_alphabetic() {
+            if !ksym.is_ascii() {
                 return KeyBehavior::KeyError;
             }
-            self.key_seq.push(key.unicode);
+            self.key_seq.push(ksym.to_unicode());
             return KeyBehavior::Absorb;
         }
 
-        let tone = match key.code {
+        let tone = match ksym.to_digit() {
             // KeyCode::Space | KeyCode::N1 => Some(Bopomofo::TONE1),
-            KeyCode::N2 => Some(Bopomofo::TONE2),
-            KeyCode::N3 => Some(Bopomofo::TONE3),
-            KeyCode::N4 => Some(Bopomofo::TONE4),
-            KeyCode::N5 => Some(Bopomofo::TONE5),
+            Some(2) => Some(Bopomofo::TONE2),
+            Some(3) => Some(Bopomofo::TONE3),
+            Some(4) => Some(Bopomofo::TONE4),
+            Some(5) => Some(Bopomofo::TONE5),
             _ => None,
         };
 
@@ -268,7 +269,7 @@ impl SyllableEditor for Pinyin {
         KeyBehavior::Commit
     }
 
-    fn fuzzy_key_press(&mut self, key: KeyEvent) -> KeyBehavior {
+    fn fuzzy_key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
         self.key_press(key)
     }
 
@@ -529,66 +530,69 @@ mod table {
 #[cfg(test)]
 mod tests {
     use crate::{
-        editor::{
-            keyboard::{AnyKeyboardLayout, KeyCode, KeyboardLayout},
-            zhuyin_layout::SyllableEditor,
-        },
+        editor::zhuyin_layout::SyllableEditor,
+        input::{KeyboardEvent, Keycode, Keysym},
         syl,
         zhuyin::Bopomofo,
     };
 
     use super::Pinyin;
 
+    fn map_key(ksym: Keysym) -> KeyboardEvent {
+        KeyboardEvent {
+            code: Keycode::default(),
+            ksym,
+            state: 0,
+        }
+    }
+
     #[test]
     fn hanyu_empty_rime_zi() {
-        let keyboard = AnyKeyboardLayout::qwerty();
         let mut hanyu = Pinyin::hanyu();
 
-        hanyu.key_press(keyboard.map(KeyCode::Z));
-        hanyu.key_press(keyboard.map(KeyCode::I));
-        hanyu.key_press(keyboard.map(KeyCode::N1));
+        hanyu.key_press(map_key(Keysym::from('z')));
+        hanyu.key_press(map_key(Keysym::from('i')));
+        hanyu.key_press(map_key(Keysym::from('1')));
 
         assert_eq!(syl![Bopomofo::Z], hanyu.read());
     }
 
     #[test]
     fn hanyu_empty_rime_zhi() {
-        let keyboard = AnyKeyboardLayout::qwerty();
         let mut hanyu = Pinyin::hanyu();
 
-        hanyu.key_press(keyboard.map(KeyCode::Z));
-        hanyu.key_press(keyboard.map(KeyCode::H));
-        hanyu.key_press(keyboard.map(KeyCode::I));
-        hanyu.key_press(keyboard.map(KeyCode::N1));
+        hanyu.key_press(map_key(Keysym::from('z')));
+        hanyu.key_press(map_key(Keysym::from('h')));
+        hanyu.key_press(map_key(Keysym::from('i')));
+        hanyu.key_press(map_key(Keysym::from('1')));
 
         assert_eq!(syl![Bopomofo::ZH], hanyu.read());
     }
 
     #[test]
     fn hanyu_uan_un_u() {
-        let keyboard = AnyKeyboardLayout::qwerty();
         let mut hanyu = Pinyin::hanyu();
 
-        hanyu.key_press(keyboard.map(KeyCode::J));
-        hanyu.key_press(keyboard.map(KeyCode::U));
-        hanyu.key_press(keyboard.map(KeyCode::A));
-        hanyu.key_press(keyboard.map(KeyCode::N));
-        hanyu.key_press(keyboard.map(KeyCode::N1));
+        hanyu.key_press(map_key(Keysym::from('j')));
+        hanyu.key_press(map_key(Keysym::from('u')));
+        hanyu.key_press(map_key(Keysym::from('a')));
+        hanyu.key_press(map_key(Keysym::from('n')));
+        hanyu.key_press(map_key(Keysym::from('1')));
 
         assert_eq!(syl![Bopomofo::J, Bopomofo::IU, Bopomofo::AN], hanyu.read());
 
         hanyu.clear();
-        hanyu.key_press(keyboard.map(KeyCode::Q));
-        hanyu.key_press(keyboard.map(KeyCode::U));
-        hanyu.key_press(keyboard.map(KeyCode::N));
-        hanyu.key_press(keyboard.map(KeyCode::N1));
+        hanyu.key_press(map_key(Keysym::from('q')));
+        hanyu.key_press(map_key(Keysym::from('u')));
+        hanyu.key_press(map_key(Keysym::from('n')));
+        hanyu.key_press(map_key(Keysym::from('1')));
 
         assert_eq!(syl![Bopomofo::Q, Bopomofo::IU, Bopomofo::EN], hanyu.read());
 
         hanyu.clear();
-        hanyu.key_press(keyboard.map(KeyCode::X));
-        hanyu.key_press(keyboard.map(KeyCode::U));
-        hanyu.key_press(keyboard.map(KeyCode::N1));
+        hanyu.key_press(map_key(Keysym::from('x')));
+        hanyu.key_press(map_key(Keysym::from('u')));
+        hanyu.key_press(map_key(Keysym::from('1')));
 
         assert_eq!(syl![Bopomofo::X, Bopomofo::IU], hanyu.read());
     }

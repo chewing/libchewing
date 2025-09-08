@@ -1,12 +1,12 @@
 //! Hsu keyboard layout
 
 use crate::{
-    editor::keyboard::KeyCode,
+    input::KeyboardEvent,
     syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
-use super::{KeyBehavior, KeyEvent, SyllableEditor};
+use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]
@@ -22,20 +22,17 @@ impl Hsu {
         }
     }
 
-    ///
     /// tone key is hsu_end_key
-    ///  KeyCode::S -> Bopomofo::TONE5
-    ///  KeyCode::D -> Bopomofo::TONE2
-    ///  KeyCode::F -> Bopomofo::TONE3
-    ///  KeyCode::J -> Bopomofo::TONE4
-    ///  KeyCode::Space -> Bopomofo::TONE1
     ///
-    fn is_hsu_end_key(&self, key: KeyEvent) -> bool {
+    ///  S -> Bopomofo::TONE5
+    ///  D -> Bopomofo::TONE2
+    ///  F -> Bopomofo::TONE3
+    ///  J -> Bopomofo::TONE4
+    ///  Space -> Bopomofo::TONE1
+    fn is_hsu_end_key(&self, key: KeyboardEvent) -> bool {
         // TODO allow customize end key mapping
-        match key.code {
-            KeyCode::S | KeyCode::D | KeyCode::F | KeyCode::J | KeyCode::Space => {
-                !self.syllable.is_empty()
-            }
+        match key.ksym.to_unicode() {
+            's' | 'd' | 'f' | 'j' | ' ' => !self.syllable.is_empty(),
             _ => false,
         }
     }
@@ -74,7 +71,7 @@ impl Default for Hsu {
 }
 
 impl SyllableEditor for Hsu {
-    fn key_press(&mut self, key: KeyEvent) -> KeyBehavior {
+    fn key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
         if self.is_hsu_end_key(key) {
             if !self.syllable.has_medial() && !self.syllable.has_rime() {
                 if let Some(key) = self.syllable.initial() {
@@ -126,92 +123,92 @@ impl SyllableEditor for Hsu {
                 _ => (),
             }
 
-            match key.code {
+            match key.ksym.to_unicode() {
                 // KeyCode::Space => Some(Bopomofo::TONE1),
-                KeyCode::D => self.syllable.update(Bopomofo::TONE2),
-                KeyCode::F => self.syllable.update(Bopomofo::TONE3),
-                KeyCode::J => self.syllable.update(Bopomofo::TONE4),
-                KeyCode::S => self.syllable.update(Bopomofo::TONE5),
+                'd' => self.syllable.update(Bopomofo::TONE2),
+                'f' => self.syllable.update(Bopomofo::TONE3),
+                'j' => self.syllable.update(Bopomofo::TONE4),
+                's' => self.syllable.update(Bopomofo::TONE5),
                 _ => {
                     self.syllable.remove_tone();
                 }
             };
             KeyBehavior::Commit
         } else {
-            let bopomofo = match key.code {
-                KeyCode::A => {
+            let bopomofo = match key.ksym.to_unicode() {
+                'a' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::EI
                     } else {
                         Bopomofo::C
                     }
                 }
-                KeyCode::B => Bopomofo::B,
-                KeyCode::C => Bopomofo::SH,
-                KeyCode::D => Bopomofo::D,
-                KeyCode::E => {
+                'b' => Bopomofo::B,
+                'c' => Bopomofo::SH,
+                'd' => Bopomofo::D,
+                'e' => {
                     if self.syllable.has_medial() {
                         Bopomofo::EH
                     } else {
                         Bopomofo::I
                     }
                 }
-                KeyCode::F => Bopomofo::F,
-                KeyCode::G => {
+                'f' => Bopomofo::F,
+                'g' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::E
                     } else {
                         Bopomofo::G
                     }
                 }
-                KeyCode::H => {
+                'h' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::O
                     } else {
                         Bopomofo::H
                     }
                 }
-                KeyCode::I => Bopomofo::AI,
-                KeyCode::J => Bopomofo::ZH,
-                KeyCode::K => {
+                'i' => Bopomofo::AI,
+                'j' => Bopomofo::ZH,
+                'k' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::ANG
                     } else {
                         Bopomofo::K
                     }
                 }
-                KeyCode::L => {
+                'l' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::ENG
                     } else {
                         Bopomofo::L
                     }
                 }
-                KeyCode::M => {
+                'm' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::AN
                     } else {
                         Bopomofo::M
                     }
                 }
-                KeyCode::N => {
+                'n' => {
                     if self.has_initial_or_medial() {
                         Bopomofo::EN
                     } else {
                         Bopomofo::N
                     }
                 }
-                KeyCode::O => Bopomofo::OU,
-                KeyCode::P => Bopomofo::P,
-                KeyCode::R => Bopomofo::R,
-                KeyCode::S => Bopomofo::S,
-                KeyCode::T => Bopomofo::T,
-                KeyCode::U => Bopomofo::IU,
-                KeyCode::V => Bopomofo::CH,
-                KeyCode::W => Bopomofo::AU,
-                KeyCode::X => Bopomofo::U,
-                KeyCode::Y => Bopomofo::A,
-                KeyCode::Z => Bopomofo::Z,
+                'o' => Bopomofo::OU,
+                'p' => Bopomofo::P,
+                'r' => Bopomofo::R,
+                's' => Bopomofo::S,
+                't' => Bopomofo::T,
+                'u' => Bopomofo::IU,
+                'v' => Bopomofo::CH,
+                'w' => Bopomofo::AU,
+                'x' => Bopomofo::U,
+                'y' => Bopomofo::A,
+                'z' => Bopomofo::Z,
                 _ => return KeyBehavior::NoWord,
             };
             let kind = bopomofo.kind();
@@ -299,23 +296,28 @@ impl SyllableEditor for Hsu {
 mod test {
 
     use crate::{
-        editor::{
-            keyboard::{KeyCode, KeyboardLayout, Qwerty},
-            zhuyin_layout::SyllableEditor,
-        },
+        editor::zhuyin_layout::SyllableEditor,
+        input::{KeyboardEvent, Keycode, Keysym},
         zhuyin::Bopomofo,
     };
 
     use super::Hsu;
 
+    fn map_key(ksym: Keysym) -> KeyboardEvent {
+        KeyboardEvent {
+            code: Keycode::default(),
+            ksym,
+            state: 0,
+        }
+    }
+
     #[test]
     fn cen() {
         let mut hsu = Hsu::new();
-        let keyboard = Qwerty;
-        hsu.key_press(keyboard.map(KeyCode::C));
-        hsu.key_press(keyboard.map(KeyCode::E));
-        hsu.key_press(keyboard.map(KeyCode::N));
-        hsu.key_press(keyboard.map(KeyCode::Space));
+        hsu.key_press(map_key(Keysym::from('c')));
+        hsu.key_press(map_key(Keysym::from('e')));
+        hsu.key_press(map_key(Keysym::from('n')));
+        hsu.key_press(map_key(Keysym::from(' ')));
         let result = hsu.read();
         assert_eq!(result.initial(), Some(Bopomofo::X));
         assert_eq!(result.medial(), Some(Bopomofo::I));
@@ -325,9 +327,8 @@ mod test {
     #[test]
     fn convert_n_to_en() {
         let mut hsu = Hsu::new();
-        let keyboard = Qwerty;
-        hsu.key_press(keyboard.map(KeyCode::N));
-        hsu.key_press(keyboard.map(KeyCode::F));
+        hsu.key_press(map_key(Keysym::from('n')));
+        hsu.key_press(map_key(Keysym::from('f')));
         let result = hsu.read();
         assert_eq!(result.rime(), Some(Bopomofo::EN));
     }

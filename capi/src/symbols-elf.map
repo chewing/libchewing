@@ -141,3 +141,8 @@ CHEWING_0.10 {
         chewing_cand_string_by_index;
         chewing_bopomofo_String;
 } CHEWING_0.9;
+
+CHEWING_0.11 {
+    global:
+        chewing_handle_KeyboardEvent;
+} CHEWING_0.10;

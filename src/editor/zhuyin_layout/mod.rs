@@ -20,7 +20,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::zhuyin::Syllable;
+use crate::{input::KeyboardEvent, zhuyin::Syllable};
 
 pub use self::{
     dc26::DaiChien26,
@@ -32,8 +32,6 @@ pub use self::{
     pinyin::{Pinyin, PinyinVariant},
     standard::Standard,
 };
-
-use super::keyboard::KeyEvent;
 
 mod dc26;
 mod et;
@@ -197,12 +195,12 @@ pub enum KeyBehavior {
 /// TODO: docs
 pub trait SyllableEditor: Debug {
     /// Handles a key press event and returns the behavior of the layout.
-    fn key_press(&mut self, key: KeyEvent) -> KeyBehavior;
+    fn key_press(&mut self, key: KeyboardEvent) -> KeyBehavior;
     /// Handles a key press event and returns the behavior of the layout.
     ///
     /// If a syllable is completed prematurely due to fuzzy logic, a
     /// `Fuzzy(Syllable)` will be returned.
-    fn fuzzy_key_press(&mut self, key: KeyEvent) -> KeyBehavior {
+    fn fuzzy_key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
         if self.is_empty() {
             return self.key_press(key);
         }

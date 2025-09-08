@@ -3,7 +3,8 @@ use std::{ffi::c_int, fmt::Debug, iter::Peekable};
 use chewing::{
     conversion::Interval,
     dictionary::Entries,
-    editor::{Editor, keyboard::AnyKeyboardLayout, zhuyin_layout::KeyboardLayoutCompat},
+    editor::{Editor, zhuyin_layout::KeyboardLayoutCompat},
+    input::keymap::Keymap,
 };
 
 /// Indicates chewing will translate keystrokes to Chinese characters.
@@ -124,7 +125,7 @@ pub enum KB {
 /// cbindgen:rename-all=None
 pub struct ChewingContext {
     pub(crate) kb_compat: KeyboardLayoutCompat,
-    pub(crate) keyboard: AnyKeyboardLayout,
+    pub(crate) keymap: &'static Keymap,
     pub(crate) editor: Editor,
     pub(crate) kbcompat_iter: Option<Peekable<Box<dyn Iterator<Item = KeyboardLayoutCompat>>>>,
     pub(crate) cand_iter: Option<Peekable<Box<dyn Iterator<Item = String>>>>,
@@ -143,7 +144,7 @@ impl Debug for ChewingContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ChewingContext")
             .field("kb_compat", &self.kb_compat)
-            .field("keyboard", &self.keyboard)
+            .field("keyboard", &self.keymap)
             .field("editor", &self.editor)
             .field("kbcompat_iter.is_some()", &self.kbcompat_iter.is_some())
             .field("cand_iter.is_some()", &self.cand_iter.is_some())

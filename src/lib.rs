@@ -32,16 +32,19 @@
 //! ```rust,no_run
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use chewing::editor::{BasicEditor, Editor};
-//! use chewing::editor::keyboard::{KeyboardLayout, KeyCode, Qwerty};
+//! use chewing::input::{Keycode, Keysym, KeyboardEvent};
+//! use chewing::input::keymap::{map_ascii, QWERTY_MAP};
 //!
-//! let keyboard = Qwerty;
 //! let mut editor = Editor::chewing()?;
 //!
-//! editor.process_keyevent(keyboard.map(KeyCode::D));
-//! editor.process_keyevent(keyboard.map(KeyCode::J));
-//! editor.process_keyevent(keyboard.map(KeyCode::N4));
-//! editor.process_keyevent(keyboard.map(KeyCode::Down));
-//! editor.process_keyevent(keyboard.map(KeyCode::N3));
+//! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'd'));
+//! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'j'));
+//! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'4'));
+//! editor.process_keyevent(KeyboardEvent::builder()
+//!   .code(Keycode::KEY_DOWN)
+//!   .ksym(Keysym::Down)
+//!   .build());
+//! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'3'));
 //!
 //! assert_eq!("酷", editor.display());
 //! # Ok(()) }
@@ -70,8 +73,10 @@
 //!
 //! Other required files `swkb.dat` and `symbols.dat` can be copied directly to
 //! the dictionary folder.
+
 pub mod conversion;
 pub mod dictionary;
 pub mod editor;
+pub mod input;
 pub mod path;
 pub mod zhuyin;

@@ -148,7 +148,42 @@
 
 #define CHEWING_VERSION_MINOR 10
 
-#define CHEWING_VERSION_PATCH 2
+#define CHEWING_VERSION_PATCH 3
+
+/**
+ * Shift is activated.
+ */
+#define KeyboardEvent_SHIFT_MASK (1 << 0)
+
+/**
+ * Caps Lock is activated.
+ */
+#define KeyboardEvent_CAPSLOCK_MASK (1 << 1)
+
+/**
+ * Control is activated.
+ */
+#define KeyboardEvent_CONTROL_MASK (1 << 2)
+
+/**
+ * Alt or Meta is activated.
+ */
+#define KeyboardEvent_ALT_MASK (1 << 3)
+
+/**
+ * Num Lock is activated.
+ */
+#define KeyboardEvent_NUMLOCK_MASK (1 << 4)
+
+/**
+ * Super is activated.
+ */
+#define KeyboardEvent_SUPER_MASK (1 << 6)
+
+/**
+ * Key is released.
+ */
+#define KeyboardEvent_RELEASE_MASK (1 << 30)
 
 /**
  * Keyboard layout index.
@@ -180,6 +215,8 @@ typedef enum KB {
  *
  */
 typedef struct ChewingContext ChewingContext;
+
+typedef struct Keycode Keycode;
 
 /**
  * Specifies the interval of a phrase segment in the pre-editng area
@@ -213,6 +250,222 @@ typedef struct ChewingConfigData {
   int bPhraseChoiceRearward;
   int hsuSelKeyType;
 } ChewingConfigData;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -1006,6 +1259,48 @@ int chewing_clean_bopomofo_buf(struct ChewingContext *ctx);
  * This function should be called with valid pointers.
  */
 int chewing_phone_to_bopomofo(unsigned short phone, char *buf, unsigned short len);
+
+/**
+ * Handles all possible key events.
+ *
+ * **code**
+ *
+ * Code that identifies a physical key on a keyboard.
+ *
+ * Keycodes are the result of the low-level processing of the data that
+ * keyboards send to a computer. For instance 36 may represent the return
+ * key.
+ *
+ * Symbolic names are assigned to raw keycodes in order to facilitate
+ * their mapping to symbols. By convention keycode names are based on US
+ * QWERTY layout. For example the keycode for the return key is
+ * Keycode::RETURN.
+ *
+ * Chewing keycodes have same numeric encoding as X11 or xkbcommon
+ * keycodes.
+ *
+ * **ksym**
+ *
+ * The symbol on the cap of a key.
+ *
+ * Keysyms (short for "key symbol") are translated from keycodes via a
+ * keymap. On different layout (qwerty, dvorak, etc.) all keyboards emit
+ * the same keycodes but produce different keysyms after translation.
+ * The key press / release state and state of modifier keys.
+ *
+ * **state**
+ *
+ * Use the state mask to read whether a modifier key is active and
+ * whether the key is pressed.
+ *
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+int chewing_handle_KeyboardEvent(struct ChewingContext *ctx,
+                                 uint8_t code,
+                                 uint32_t ksym,
+                                 uint32_t state);
 
 /**
  * Handles the Space key.

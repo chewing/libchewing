@@ -5,6 +5,11 @@ What's New in libchewing (unreleased)
   - cli: Now outputs and reads dictionary metadata in source file
   - cli: Detects mismatched phrase word count and syllable count
 
+* Developer Features
+  - New API `chewing_handle_KeyboardEvent()` can be used to support any
+    keyboard layout combination without updating libchewing. Other keyboard
+    handling API will be deprecated in future release.
+
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the
     next phrase instead of the next word.

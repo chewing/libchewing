@@ -56,6 +56,7 @@ _chewing_get_phraseChoiceRearward
 _chewing_get_selKey
 _chewing_get_ShapeMode
 _chewing_get_spaceAsSelection
+_chewing_handle_KeyboardEvent
 _chewing_handle_Backspace
 _chewing_handle_Capslock
 _chewing_handle_CtrlNum

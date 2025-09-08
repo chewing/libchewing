@@ -57,6 +57,7 @@ EXPORTS
     chewing_get_selKey;
     chewing_get_ShapeMode;
     chewing_get_spaceAsSelection;
+    chewing_handle_KeyboardEvent;
     chewing_handle_Backspace;
     chewing_handle_Capslock;
     chewing_handle_CtrlNum;

@@ -3,7 +3,6 @@
 mod abbrev;
 mod composition_editor;
 mod estimate;
-pub mod keyboard;
 mod selection;
 pub mod zhuyin_layout;
 
@@ -27,13 +26,12 @@ use crate::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
         UpdateDictionaryError, UserDictionaryLoader,
     },
-    editor::keyboard::KeyCode,
+    input::{KeyboardEvent, Keysym},
     zhuyin::{Syllable, SyllableSlice},
 };
 
 use self::{
     composition_editor::CompositionEditor,
-    keyboard::KeyEvent,
     selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
     zhuyin_layout::{KeyBehavior, Standard, SyllableEditor},
 };
@@ -106,13 +104,13 @@ impl Default for EditorOptions {
 /// An editor can react to KeyEvents and change its state.
 pub trait BasicEditor {
     /// Handles a KeyEvent
-    fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior;
+    fn process_keyevent(&mut self, key_event: KeyboardEvent) -> EditorKeyBehavior;
 }
 
 /// The internal state of the editor.
 trait State: Debug {
     /// Transits the state to next state with the key event.
-    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition;
+    fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition;
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
@@ -750,8 +748,8 @@ fn is_break_word(word: &str) -> bool {
 }
 
 impl BasicEditor for Editor {
-    fn process_keyevent(&mut self, key_event: KeyEvent) -> EditorKeyBehavior {
-        debug!("process_keyevent: {}", &key_event);
+    fn process_keyevent(&mut self, key_event: KeyboardEvent) -> EditorKeyBehavior {
+        debug!("process_keyevent: {:?}", key_event);
         self.shared.estimate.tick();
         // reset?
         self.shared.notice_buffer.clear();
@@ -872,11 +870,9 @@ impl Entering {
 }
 
 impl State for Entering {
-    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
-
-        match ev.code {
-            Backspace => {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
+        match ev.ksym {
+            Keysym::BackSpace => {
                 if shared.com.is_empty() {
                     self.spin_ignore()
                 } else {
@@ -884,15 +880,15 @@ impl State for Entering {
                     self.spin_absorb()
                 }
             }
-            Unknown if ev.modifiers.capslock => {
+            Keysym::Caps_Lock => {
                 shared.switch_language_mode();
                 self.spin_absorb()
             }
-            code @ (N0 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9) if ev.modifiers.ctrl => {
-                if code == N0 || code == N1 {
+            code if ev.ksym.is_digit() && ev.is_flag_on(KeyboardEvent::CONTROL_MASK) => {
+                let n = code.to_digit().unwrap_or_default() as usize;
+                if n == 0 || n == 1 {
                     return self.start_symbol_input(shared);
                 }
-                let n = code as usize;
                 let result = match shared.options.user_phrase_add_dir {
                     UserPhraseAddDirection::Forward => {
                         shared.learn_phrase_in_range_notify(shared.cursor(), shared.cursor() + n)
@@ -912,16 +908,26 @@ impl State for Entering {
                     Err(_) => self.spin_bell(),
                 }
             }
-            Enter | Esc | Tab | Home | End | Left | Right | Up | Down | PageUp | PageDown
+            Keysym::Return
+            | Keysym::Escape
+            | Keysym::Tab
+            | Keysym::Home
+            | Keysym::End
+            | Keysym::Left
+            | Keysym::Right
+            | Keysym::Up
+            | Keysym::Down
+            | Keysym::Page_Up
+            | Keysym::Page_Down
                 if shared.com.is_empty() =>
             {
                 self.spin_ignore()
             }
-            Tab if shared.com.is_end_of_buffer() => {
+            Keysym::Tab if shared.com.is_end_of_buffer() => {
                 shared.nth_conversion += 1;
                 self.spin_absorb()
             }
-            Tab => {
+            Keysym::Tab => {
                 let interval_ends: Vec<_> = shared.conversion().iter().map(|it| it.end).collect();
                 if interval_ends.contains(&shared.cursor()) {
                     shared.com.insert_glue();
@@ -934,7 +940,7 @@ impl State for Entering {
             //     // editor.reset_user_break_and_connect_at_cursor();
             //     (EditorKeyBehavior::Absorb, &Entering)
             // }
-            Del => {
+            Keysym::Delete => {
                 if shared.com.is_end_of_buffer() {
                     self.spin_ignore()
                 } else {
@@ -942,60 +948,63 @@ impl State for Entering {
                     self.spin_absorb()
                 }
             }
-            Home => {
+            Keysym::Home => {
                 shared.snapshot();
                 shared.com.move_cursor_to_beginning();
                 self.spin_absorb()
             }
-            Left if ev.modifiers.shift => {
+            Keysym::Left if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if shared.com.is_beginning_of_buffer() {
                     return self.spin_ignore();
                 }
                 shared.snapshot();
                 self.start_highlighting(shared.cursor() - 1)
             }
-            Right if ev.modifiers.shift => {
+            Keysym::Right if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
                 shared.snapshot();
                 self.start_highlighting(shared.cursor() + 1)
             }
-            Left => {
+            Keysym::Left => {
                 shared.snapshot();
                 shared.com.move_cursor_left(1);
                 self.spin_absorb()
             }
-            Right => {
+            Keysym::Right => {
                 shared.snapshot();
                 shared.com.move_cursor_right(1);
                 self.spin_absorb()
             }
-            Up => self.spin_ignore(),
-            Space if ev.modifiers.shift && shared.options.enable_fullwidth_toggle_key => {
+            Keysym::Up => self.spin_ignore(),
+            Keysym::Space
+                if ev.is_flag_on(KeyboardEvent::SHIFT_MASK)
+                    && shared.options.enable_fullwidth_toggle_key =>
+            {
                 shared.switch_character_form();
                 self.spin_absorb()
             }
-            Space
+            Keysym::Space
                 if shared.options.space_is_select_key
                     && shared.options.language_mode == LanguageMode::Chinese =>
             {
                 self.start_selecting_or_input_space(shared)
             }
-            Down => {
+            Keysym::Down => {
                 debug!("buffer {:?}", shared.com);
                 self.start_selecting(shared)
             }
-            End | PageUp | PageDown => {
+            Keysym::End | Keysym::Page_Up | Keysym::Page_Down => {
                 shared.snapshot();
                 shared.com.move_cursor_to_end();
                 self.spin_absorb()
             }
-            Enter => {
+            Keysym::Return => {
                 shared.commit();
                 self.spin_commit()
             }
-            Esc => {
+            Keysym::Escape => {
                 if shared.options.esc_clear_all_buffer && !shared.com.is_empty() {
                     shared.com.clear();
                     self.spin_absorb()
@@ -1003,13 +1012,13 @@ impl State for Entering {
                     self.spin_ignore()
                 }
             }
-            _ if ev.modifiers.numlock => {
+            _ if ev.is_flag_on(KeyboardEvent::NUMLOCK_MASK) => {
                 if shared.com.is_empty() {
                     shared.commit_buffer.clear();
-                    shared.commit_buffer.push(ev.unicode);
+                    shared.commit_buffer.push(ev.ksym.to_unicode());
                     self.spin_commit()
                 } else {
-                    shared.com.insert(Symbol::from(ev.unicode));
+                    shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
                     self.spin_absorb()
                 }
             }
@@ -1018,23 +1027,23 @@ impl State for Entering {
                     shared.snapshot();
                 }
                 match shared.options.language_mode {
-                    LanguageMode::Chinese if ev.code == Grave && ev.modifiers.is_none() => {
+                    LanguageMode::Chinese if ev.ksym == Keysym::Grave && ev.state == 0 => {
                         self.start_symbol_input(shared)
                     }
-                    LanguageMode::Chinese if ev.code == Space => {
+                    LanguageMode::Chinese if ev.ksym == Keysym::Space => {
                         match shared.options.character_form {
                             CharacterForm::Halfwidth => {
                                 if shared.com.is_empty() {
                                     shared.commit_buffer.clear();
-                                    shared.commit_buffer.push(ev.unicode);
+                                    shared.commit_buffer.push(ev.ksym.to_unicode());
                                     self.spin_commit()
                                 } else {
-                                    shared.com.insert(Symbol::from(ev.unicode));
+                                    shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
                                     self.spin_absorb()
                                 }
                             }
                             CharacterForm::Fullwidth => {
-                                let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                                let char_ = full_width_symbol_input(ev.ksym.to_unicode()).unwrap();
                                 if shared.com.is_empty() {
                                     shared.commit_buffer.clear();
                                     shared.commit_buffer.push(char_);
@@ -1047,38 +1056,40 @@ impl State for Entering {
                         }
                     }
                     LanguageMode::Chinese => {
-                        if shared.options.easy_symbol_input && ev.modifiers.shift {
+                        if shared.options.easy_symbol_input
+                            && ev.is_flag_on(KeyboardEvent::SHIFT_MASK)
+                        {
                             // Priortize symbol input
-                            if let Some(expended) = shared.abbr.find_abbrev(ev.unicode) {
+                            if let Some(expended) = shared.abbr.find_abbrev(ev.ksym.to_unicode()) {
                                 expended
                                     .chars()
                                     .for_each(|ch| shared.com.insert(Symbol::from(ch)));
                                 return self.spin_absorb();
                             }
                         }
-                        if ev.modifiers.is_none() && KeyBehavior::Absorb == shared.syl.key_press(ev)
-                        {
+                        if ev.state == 0 && KeyBehavior::Absorb == shared.syl.key_press(ev) {
                             return self.start_enter_syllable();
                         }
-                        if let Some(symbol) = special_symbol_input(ev.unicode) {
+                        if let Some(symbol) = special_symbol_input(ev.ksym.to_unicode()) {
                             shared.com.insert(Symbol::from(symbol));
                             return self.spin_absorb();
                         }
-                        if ev.is_printable() {
+                        if ev.ksym.is_unicode() {
                             match shared.options.character_form {
                                 CharacterForm::Halfwidth => {
                                     if shared.com.is_empty() {
                                         // FIXME we should ignore these keys if pre-edit is empty
                                         shared.commit_buffer.clear();
-                                        shared.commit_buffer.push(ev.unicode);
+                                        shared.commit_buffer.push(ev.ksym.to_unicode());
                                         return self.spin_commit();
                                     } else {
-                                        shared.com.insert(Symbol::from(ev.unicode));
+                                        shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
                                         return self.spin_absorb();
                                     }
                                 }
                                 CharacterForm::Fullwidth => {
-                                    let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                                    let char_ =
+                                        full_width_symbol_input(ev.ksym.to_unicode()).unwrap();
                                     if shared.com.is_empty() {
                                         shared.commit_buffer.clear();
                                         shared.commit_buffer.push(char_);
@@ -1097,15 +1108,15 @@ impl State for Entering {
                             if shared.com.is_empty() {
                                 // FIXME we should ignore these keys if pre-edit is empty
                                 shared.commit_buffer.clear();
-                                shared.commit_buffer.push(ev.unicode);
+                                shared.commit_buffer.push(ev.ksym.to_unicode());
                                 self.spin_commit()
                             } else {
-                                shared.com.insert(Symbol::from(ev.unicode));
+                                shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
                                 self.spin_absorb()
                             }
                         }
                         CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(ev.unicode).unwrap();
+                            let char_ = full_width_symbol_input(ev.ksym.to_unicode()).unwrap();
                             if shared.com.is_empty() {
                                 shared.commit_buffer.clear();
                                 shared.commit_buffer.push(char_);
@@ -1154,11 +1165,9 @@ impl EnteringSyllable {
 }
 
 impl State for EnteringSyllable {
-    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
-
-        match ev.code {
-            Backspace => {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
+        match ev.ksym {
+            Keysym::BackSpace => {
                 shared.syl.remove_last();
 
                 if !shared.syl.is_empty() {
@@ -1167,12 +1176,12 @@ impl State for EnteringSyllable {
                     self.start_entering()
                 }
             }
-            Unknown if ev.modifiers.capslock => {
+            Keysym::Caps_Lock => {
                 shared.syl.clear();
                 shared.switch_language_mode();
                 self.start_entering()
             }
-            Esc => {
+            Keysym::Escape => {
                 shared.syl.clear();
                 if shared.options.esc_clear_all_buffer {
                     shared.com.clear();
@@ -1366,28 +1375,26 @@ impl Selecting {
 }
 
 impl State for Selecting {
-    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
-
-        if ev.modifiers.ctrl || ev.modifiers.shift {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
+        if ev.is_flag_on(KeyboardEvent::CONTROL_MASK) || ev.is_flag_on(KeyboardEvent::SHIFT_MASK) {
             return self.spin_bell();
         }
 
-        match ev.code {
-            Backspace => {
+        match ev.ksym {
+            Keysym::BackSpace => {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Unknown if ev.modifiers.capslock => {
+            Keysym::Caps_Lock => {
                 shared.switch_language_mode();
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Up => {
+            Keysym::Up => {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Down | Space => {
+            Keysym::Down | Keysym::Space => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
@@ -1402,7 +1409,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            J => {
+            Keysym::J => {
                 if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
@@ -1427,7 +1434,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            K => {
+            Keysym::K => {
                 if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
@@ -1453,7 +1460,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Left | PageUp => {
+            Keysym::Left | Keysym::Page_Up => {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
@@ -1461,7 +1468,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Right | PageDown => {
+            Keysym::Right | Keysym::Page_Down => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
@@ -1469,11 +1476,12 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            code @ (N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N0) => {
-                let n = code.to_digit().unwrap().saturating_sub(1) as usize;
+            _ if ev.ksym.is_digit() => {
+                let n = ev.ksym.to_digit().unwrap() as usize;
+                let n = if n == 0 { 9 } else { n - 1 };
                 self.select(shared, n)
             }
-            Esc => {
+            Keysym::Escape => {
                 shared.cancel_selecting();
                 shared.com.pop_cursor();
                 if shared.options.conversion_engine == ConversionEngineKind::SimpleEngine {
@@ -1481,7 +1489,7 @@ impl State for Selecting {
                 }
                 self.start_entering()
             }
-            Del => {
+            Keysym::Delete => {
                 // NB: should be Ignore but return Absorb for backward compat
                 self.spin_absorb()
             }
@@ -1508,27 +1516,25 @@ impl Highlighting {
 }
 
 impl State for Highlighting {
-    fn next(&mut self, shared: &mut SharedState, ev: KeyEvent) -> Transition {
-        use KeyCode::*;
-
-        match ev.code {
-            Unknown if ev.modifiers.capslock => {
+    fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
+        match ev.ksym {
+            Keysym::Caps_Lock => {
                 shared.switch_language_mode();
                 self.start_entering()
             }
-            Left if ev.modifiers.shift => {
+            Keysym::Left if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if self.moving_cursor != 0 {
                     self.moving_cursor -= 1;
                 }
                 self.spin_absorb()
             }
-            Right if ev.modifiers.shift => {
+            Keysym::Right if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if self.moving_cursor != shared.com.len() {
                     self.moving_cursor += 1;
                 }
                 self.spin_absorb()
             }
-            Enter => {
+            Keysym::Return => {
                 let start = min(self.moving_cursor, shared.com.cursor());
                 let end = max(self.moving_cursor, shared.com.cursor());
                 shared.com.move_cursor(self.moving_cursor);
@@ -1555,21 +1561,25 @@ mod tests {
     use crate::{
         conversion::ChewingEngine,
         dictionary::{Layered, TrieBuf},
-        editor::{
-            EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate, keyboard::Modifiers,
+        editor::{EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate},
+        input::{
+            KeyboardEvent, Keycode, Keysym,
+            keymap::{QWERTY_MAP, map_ascii},
         },
         syl,
         zhuyin::Bopomofo,
     };
 
-    use super::{
-        BasicEditor, Editor,
-        keyboard::{KeyCode, KeyboardLayout, Qwerty},
+    use super::{BasicEditor, Editor};
+
+    const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent {
+        code: Keycode::KEY_CAPSLOCK,
+        ksym: Keysym::Caps_Lock,
+        state: KeyboardEvent::CAPSLOCK_MASK,
     };
 
     #[test]
     fn editing_mode_input_bopomofo() {
-        let keyboard = Qwerty;
         let dict = Layered::new(
             vec![Box::new(TrieBuf::new_in_memory())],
             Box::new(TrieBuf::new_in_memory()),
@@ -1580,13 +1590,21 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let ev = keyboard.map(KeyCode::H);
+        let ev = KeyboardEvent {
+            code: Keycode::KEY_H,
+            ksym: Keysym::from('h'),
+            state: 0,
+        };
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
-        let ev = keyboard.map(KeyCode::K);
+        let ev = KeyboardEvent {
+            code: Keycode::KEY_K,
+            ksym: Keysym::from('k'),
+            state: 0,
+        };
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
@@ -1595,7 +1613,6 @@ mod tests {
 
     #[test]
     fn editing_mode_input_bopomofo_commit() {
-        let keyboard = Qwerty;
         let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
@@ -1607,10 +1624,10 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let keys = [KeyCode::H, KeyCode::K, KeyCode::N4];
+        let keys = [b'h', b'k', b'4'];
         let key_behaviors: Vec<_> = keys
             .into_iter()
-            .map(|key| keyboard.map(key))
+            .map(|key| map_ascii(&QWERTY_MAP, key))
             .map(|ev| editor.process_keyevent(ev))
             .collect();
 
@@ -1628,7 +1645,6 @@ mod tests {
 
     #[test]
     fn editing_mode_input_chinese_to_english_mode() {
-        let keyboard = Qwerty;
         let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
@@ -1641,13 +1657,12 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
-            keyboard.map(KeyCode::H),
-            keyboard.map(KeyCode::K),
-            keyboard.map(KeyCode::N4),
-            // TODO: capslock probably shouldn't be a modifier
+            map_ascii(&QWERTY_MAP, b'h'),
+            map_ascii(&QWERTY_MAP, b'k'),
+            map_ascii(&QWERTY_MAP, b'4'),
             // Toggle english mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::Z),
+            CAPSLOCK_EVENT,
+            map_ascii(&QWERTY_MAP, b'z'),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1671,7 +1686,6 @@ mod tests {
 
     #[test]
     fn editing_mode_input_english_to_chinese_mode() {
-        let keyboard = Qwerty;
         let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
@@ -1685,8 +1699,8 @@ mod tests {
 
         let keys = [
             // Switch to english mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::X),
+            CAPSLOCK_EVENT,
+            map_ascii(&QWERTY_MAP, b'x'),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1703,10 +1717,10 @@ mod tests {
 
         let keys = [
             // Switch to chinese mode
-            keyboard.map_with_mod(KeyCode::Unknown, Modifiers::capslock()),
-            keyboard.map(KeyCode::H),
-            keyboard.map(KeyCode::K),
-            keyboard.map(KeyCode::N4),
+            CAPSLOCK_EVENT,
+            map_ascii(&QWERTY_MAP, b'h'),
+            map_ascii(&QWERTY_MAP, b'k'),
+            map_ascii(&QWERTY_MAP, b'4'),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1729,7 +1743,6 @@ mod tests {
 
     #[test]
     fn editing_chinese_mode_input_special_symbol() {
-        let keyboard = Qwerty;
         let dict = TrieBuf::from([(
             vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
             vec![("冊", 100)],
@@ -1742,11 +1755,11 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let keys = [
-            keyboard.map_with_mod(KeyCode::N1, Modifiers::shift()),
-            keyboard.map_with_mod(KeyCode::H, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::K, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::N4, Modifiers::default()),
-            keyboard.map_with_mod(KeyCode::Comma, Modifiers::shift()),
+            map_ascii(&QWERTY_MAP, b'!'),
+            map_ascii(&QWERTY_MAP, b'h'),
+            map_ascii(&QWERTY_MAP, b'k'),
+            map_ascii(&QWERTY_MAP, b'4'),
+            map_ascii(&QWERTY_MAP, b'<'),
         ];
 
         let key_behaviors: Vec<_> = keys
@@ -1770,7 +1783,6 @@ mod tests {
 
     #[test]
     fn editing_mode_input_full_shape_symbol() {
-        let keyboard = Qwerty;
         let dict = TrieBuf::new_in_memory();
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
         let conversion_engine = Box::new(ChewingEngine::new());
@@ -1782,25 +1794,16 @@ mod tests {
         editor.shared.switch_character_form();
 
         let steps = [
+            (CAPSLOCK_EVENT, EditorKeyBehavior::Absorb, "", "", ""),
             (
-                KeyCode::Unknown,
-                Modifiers::capslock(),
-                EditorKeyBehavior::Absorb,
-                "",
-                "",
-                "",
-            ),
-            (
-                KeyCode::N0,
-                Modifiers::default(),
+                map_ascii(&QWERTY_MAP, b'0'),
                 EditorKeyBehavior::Commit,
                 "",
                 "",
                 "０",
             ),
             (
-                KeyCode::Minus,
-                Modifiers::default(),
+                map_ascii(&QWERTY_MAP, b'-'),
                 EditorKeyBehavior::Commit,
                 "",
                 "",
@@ -1809,18 +1812,17 @@ mod tests {
         ];
 
         for s in steps {
-            let key = keyboard.map_with_mod(s.0, s.1);
+            let key = s.0;
             let kb = editor.process_keyevent(key);
-            assert_eq!(s.2, kb);
-            assert_eq!(s.3, editor.syllable_buffer().to_string());
-            assert_eq!(s.4, editor.display());
-            assert_eq!(s.5, editor.display_commit());
+            assert_eq!(s.1, kb);
+            assert_eq!(s.2, editor.syllable_buffer().to_string());
+            assert_eq!(s.3, editor.display());
+            assert_eq!(s.4, editor.display_commit());
         }
     }
 
     #[test]
     fn editing_mode_open_empty_symbol_table_then_bell() {
-        let keyboard = Qwerty;
         let dict = Layered::new(
             vec![Box::new(TrieBuf::new_in_memory())],
             Box::new(TrieBuf::new_in_memory()),
@@ -1831,7 +1833,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        let ev = keyboard.map(KeyCode::Grave);
+        let ev = map_ascii(&QWERTY_MAP, b'`');
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Bell, key_behavior);
