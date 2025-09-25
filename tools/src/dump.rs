@@ -21,7 +21,7 @@ pub(crate) fn run(args: flags::Dump) -> Result<()> {
         if cfg!(feature = "sqlite") {
             #[cfg(feature = "sqlite")]
             {
-                Box::new(SqliteDictionary::open_read_only(&args.path)?)
+                Box::new(SqliteDictionary::open(&args.path)?)
             }
             #[cfg(not(feature = "sqlite"))]
             unreachable!();
