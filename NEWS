@@ -24,11 +24,14 @@ What's New in libchewing (unreleased)
   - Bump MSRV to 1.88
 
 
-What's New in libchewing 0.10.3 (Unreleased)
+What's New in libchewing 0.10.3 (August 24, 2025)
 ---------------------------------------------------------
 
 * Bug Fixes
   - Fix quick symbol menu for ｜(introduced in 0.8.0) (#737)
+
+* Dictionary
+  - Remove some incorrect phrase-bopomofo mapping entries
 
 
 What's New in libchewing 0.10.2 (August 14, 2025)
