@@ -2,8 +2,9 @@
 //!
 //! Another commonly used keyboard layout on older IBM PC.
 
+use crate::input::keycode::*;
 use crate::{
-    input::{KeyboardEvent, Keycode},
+    input::KeyboardEvent,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
@@ -33,48 +34,48 @@ impl Default for GinYieh {
 impl SyllableEditor for GinYieh {
     fn key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
         let bopomofo = match key.code {
-            Keycode::KEY_1 => Bopomofo::TONE5,
-            Keycode::KEY_2 => Bopomofo::B,
-            Keycode::KEY_3 => Bopomofo::D,
-            Keycode::KEY_6 => Bopomofo::ZH,
-            Keycode::KEY_8 => Bopomofo::A,
-            Keycode::KEY_9 => Bopomofo::AI,
-            Keycode::KEY_0 => Bopomofo::AN,
-            Keycode::KEY_MINUS => Bopomofo::I,
-            Keycode::KEY_EQUAL => Bopomofo::ER,
-            Keycode::KEY_Q => Bopomofo::TONE2,
-            Keycode::KEY_W => Bopomofo::P,
-            Keycode::KEY_E => Bopomofo::T,
-            Keycode::KEY_R => Bopomofo::G,
-            Keycode::KEY_T => Bopomofo::J,
-            Keycode::KEY_Y => Bopomofo::CH,
-            Keycode::KEY_U => Bopomofo::Z,
-            Keycode::KEY_I => Bopomofo::O,
-            Keycode::KEY_O => Bopomofo::EI,
-            Keycode::KEY_P => Bopomofo::EN,
-            Keycode::KEY_LEFTBRACE => Bopomofo::U,
-            Keycode::KEY_A => Bopomofo::TONE3,
-            Keycode::KEY_S => Bopomofo::M,
-            Keycode::KEY_D => Bopomofo::N,
-            Keycode::KEY_F => Bopomofo::K,
-            Keycode::KEY_G => Bopomofo::Q,
-            Keycode::KEY_H => Bopomofo::SH,
-            Keycode::KEY_J => Bopomofo::C,
-            Keycode::KEY_K => Bopomofo::E,
-            Keycode::KEY_L => Bopomofo::AU,
-            Keycode::KEY_SEMICOLON => Bopomofo::ANG,
-            Keycode::KEY_APOSTROPHE => Bopomofo::IU,
-            Keycode::KEY_Z => Bopomofo::TONE4,
-            Keycode::KEY_X => Bopomofo::F,
-            Keycode::KEY_C => Bopomofo::L,
-            Keycode::KEY_V => Bopomofo::H,
-            Keycode::KEY_B => Bopomofo::X,
-            Keycode::KEY_N => Bopomofo::R,
-            Keycode::KEY_M => Bopomofo::S,
-            Keycode::KEY_COMMA => Bopomofo::EH,
-            Keycode::KEY_DOT => Bopomofo::OU,
-            Keycode::KEY_SLASH => Bopomofo::ENG,
-            Keycode::KEY_SPACE => Bopomofo::TONE1,
+            KEY_1 => Bopomofo::TONE5,
+            KEY_2 => Bopomofo::B,
+            KEY_3 => Bopomofo::D,
+            KEY_6 => Bopomofo::ZH,
+            KEY_8 => Bopomofo::A,
+            KEY_9 => Bopomofo::AI,
+            KEY_0 => Bopomofo::AN,
+            KEY_MINUS => Bopomofo::I,
+            KEY_EQUAL => Bopomofo::ER,
+            KEY_Q => Bopomofo::TONE2,
+            KEY_W => Bopomofo::P,
+            KEY_E => Bopomofo::T,
+            KEY_R => Bopomofo::G,
+            KEY_T => Bopomofo::J,
+            KEY_Y => Bopomofo::CH,
+            KEY_U => Bopomofo::Z,
+            KEY_I => Bopomofo::O,
+            KEY_O => Bopomofo::EI,
+            KEY_P => Bopomofo::EN,
+            KEY_LEFTBRACE => Bopomofo::U,
+            KEY_A => Bopomofo::TONE3,
+            KEY_S => Bopomofo::M,
+            KEY_D => Bopomofo::N,
+            KEY_F => Bopomofo::K,
+            KEY_G => Bopomofo::Q,
+            KEY_H => Bopomofo::SH,
+            KEY_J => Bopomofo::C,
+            KEY_K => Bopomofo::E,
+            KEY_L => Bopomofo::AU,
+            KEY_SEMICOLON => Bopomofo::ANG,
+            KEY_APOSTROPHE => Bopomofo::IU,
+            KEY_Z => Bopomofo::TONE4,
+            KEY_X => Bopomofo::F,
+            KEY_C => Bopomofo::L,
+            KEY_V => Bopomofo::H,
+            KEY_B => Bopomofo::X,
+            KEY_N => Bopomofo::R,
+            KEY_M => Bopomofo::S,
+            KEY_COMMA => Bopomofo::EH,
+            KEY_DOT => Bopomofo::OU,
+            KEY_SLASH => Bopomofo::ENG,
+            KEY_SPACE => Bopomofo::TONE1,
             _ => return KeyBehavior::KeyError,
         };
         if bopomofo.kind() == BopomofoKind::Tone {
@@ -126,7 +127,7 @@ impl SyllableEditor for GinYieh {
 mod test {
     use crate::{
         editor::zhuyin_layout::{KeyBehavior, SyllableEditor},
-        input::{KeyboardEvent, Keycode, Keysym},
+        input::{KeyboardEvent, Keysym, keycode::KEY_SPACE},
     };
 
     use super::GinYieh;
@@ -135,7 +136,7 @@ mod test {
     fn space() {
         let mut editor = GinYieh::new();
         let behavior = editor.key_press(KeyboardEvent {
-            code: Keycode::KEY_SPACE,
+            code: KEY_SPACE,
             ksym: Keysym::from(' '),
             state: 0,
         });

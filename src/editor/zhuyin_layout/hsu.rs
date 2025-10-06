@@ -297,18 +297,14 @@ mod test {
 
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
-        input::{KeyboardEvent, Keycode, Keysym},
+        input::{KeyboardEvent, Keysym},
         zhuyin::Bopomofo,
     };
 
     use super::Hsu;
 
     fn map_key(ksym: Keysym) -> KeyboardEvent {
-        KeyboardEvent {
-            code: Keycode::default(),
-            ksym,
-            state: 0,
-        }
+        KeyboardEvent::builder().ksym(ksym).build()
     }
 
     #[test]

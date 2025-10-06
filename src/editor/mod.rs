@@ -1563,7 +1563,7 @@ mod tests {
         dictionary::{Layered, TrieBuf},
         editor::{EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate},
         input::{
-            KeyboardEvent, Keycode, Keysym,
+            KeyboardEvent, Keysym, keycode,
             keymap::{QWERTY_MAP, map_ascii},
         },
         syl,
@@ -1573,7 +1573,7 @@ mod tests {
     use super::{BasicEditor, Editor};
 
     const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent {
-        code: Keycode::KEY_CAPSLOCK,
+        code: keycode::KEY_CAPSLOCK,
         ksym: Keysym::Caps_Lock,
         state: KeyboardEvent::CAPSLOCK_MASK,
     };
@@ -1591,7 +1591,7 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let ev = KeyboardEvent {
-            code: Keycode::KEY_H,
+            code: keycode::KEY_H,
             ksym: Keysym::from('h'),
             state: 0,
         };
@@ -1601,7 +1601,7 @@ mod tests {
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
         let ev = KeyboardEvent {
-            code: Keycode::KEY_K,
+            code: keycode::KEY_K,
             ksym: Keysym::from('k'),
             state: 0,
         };

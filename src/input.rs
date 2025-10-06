@@ -1,9 +1,9 @@
 //! Input handling modules
 
-pub use keycode::Keycode;
+use keycode::Keycode;
 pub use keysym::Keysym;
 
-mod keycode;
+pub mod keycode;
 pub mod keymap;
 mod keysym;
 
@@ -21,19 +21,19 @@ mod keysym;
 ///
 /// ```rust
 /// use chewing::input::KeyboardEvent;
-/// use chewing::input::Keycode;
+/// use chewing::input::keycode;
 /// use chewing::input::Keysym;
 ///
 /// let control_down = true;
 /// let caps_lock = false;
 /// let evt = KeyboardEvent::builder()
-///     .code(Keycode::KEY_A)
+///     .code(keycode::KEY_A)
 ///     .ksym(Keysym::from('a'))
 ///     .shift()
 ///     .control_if(control_down)
 ///     .caps_lock_if(caps_lock)
 ///     .build();
-/// # assert_eq!(Keycode::KEY_A, evt.code);
+/// # assert_eq!(keycode::KEY_A, evt.code);
 /// # assert_eq!(Keysym::from('a'), evt.ksym);
 /// # assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
 /// # assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));
@@ -182,15 +182,15 @@ impl KeyboardEventBuilder {
 #[cfg(test)]
 mod tests {
     use super::KeyboardEvent;
-    use super::Keycode;
     use super::Keysym;
+    use super::keycode;
 
     #[test]
     fn keyboard_event_builder() {
         let control_down = true;
         let caps_lock = false;
         let evt = KeyboardEvent::builder()
-            .code(Keycode::KEY_A)
+            .code(keycode::KEY_A)
             .ksym(Keysym::from('a'))
             .shift()
             .control_if(control_down)
@@ -200,7 +200,7 @@ mod tests {
             .super_if(false)
             .release_if(false)
             .build();
-        assert_eq!(Keycode::KEY_A, evt.code);
+        assert_eq!(keycode::KEY_A, evt.code);
         assert_eq!(Keysym::from('a'), evt.ksym);
         assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
         assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));

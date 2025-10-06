@@ -531,7 +531,7 @@ mod table {
 mod tests {
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
-        input::{KeyboardEvent, Keycode, Keysym},
+        input::{KeyboardEvent, Keysym},
         syl,
         zhuyin::Bopomofo,
     };
@@ -539,11 +539,7 @@ mod tests {
     use super::Pinyin;
 
     fn map_key(ksym: Keysym) -> KeyboardEvent {
-        KeyboardEvent {
-            code: Keycode::default(),
-            ksym,
-            state: 0,
-        }
+        KeyboardEvent::builder().ksym(ksym).build()
     }
 
     #[test]

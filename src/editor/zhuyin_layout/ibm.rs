@@ -2,8 +2,9 @@
 //!
 //! Another commonly used keyboard layout on older IBM PC.
 
+use crate::input::keycode::*;
 use crate::{
-    input::{KeyboardEvent, Keycode},
+    input::KeyboardEvent,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
 
@@ -33,48 +34,48 @@ impl Default for Ibm {
 impl SyllableEditor for Ibm {
     fn key_press(&mut self, key: KeyboardEvent) -> KeyBehavior {
         let bopomofo = match key.code {
-            Keycode::KEY_1 => Bopomofo::B,
-            Keycode::KEY_2 => Bopomofo::P,
-            Keycode::KEY_3 => Bopomofo::M,
-            Keycode::KEY_4 => Bopomofo::F,
-            Keycode::KEY_5 => Bopomofo::D,
-            Keycode::KEY_6 => Bopomofo::T,
-            Keycode::KEY_7 => Bopomofo::N,
-            Keycode::KEY_8 => Bopomofo::L,
-            Keycode::KEY_9 => Bopomofo::G,
-            Keycode::KEY_0 => Bopomofo::K,
-            Keycode::KEY_MINUS => Bopomofo::H,
-            Keycode::KEY_Q => Bopomofo::J,
-            Keycode::KEY_W => Bopomofo::Q,
-            Keycode::KEY_E => Bopomofo::X,
-            Keycode::KEY_R => Bopomofo::ZH,
-            Keycode::KEY_T => Bopomofo::CH,
-            Keycode::KEY_Y => Bopomofo::SH,
-            Keycode::KEY_U => Bopomofo::R,
-            Keycode::KEY_I => Bopomofo::Z,
-            Keycode::KEY_O => Bopomofo::C,
-            Keycode::KEY_P => Bopomofo::S,
-            Keycode::KEY_A => Bopomofo::I,
-            Keycode::KEY_S => Bopomofo::U,
-            Keycode::KEY_D => Bopomofo::IU,
-            Keycode::KEY_F => Bopomofo::A,
-            Keycode::KEY_G => Bopomofo::O,
-            Keycode::KEY_H => Bopomofo::E,
-            Keycode::KEY_J => Bopomofo::EH,
-            Keycode::KEY_K => Bopomofo::AI,
-            Keycode::KEY_L => Bopomofo::EI,
-            Keycode::KEY_SEMICOLON => Bopomofo::AU,
-            Keycode::KEY_Z => Bopomofo::OU,
-            Keycode::KEY_X => Bopomofo::AN,
-            Keycode::KEY_C => Bopomofo::EN,
-            Keycode::KEY_V => Bopomofo::ANG,
-            Keycode::KEY_B => Bopomofo::ENG,
-            Keycode::KEY_N => Bopomofo::ER,
-            Keycode::KEY_M => Bopomofo::TONE2,
-            Keycode::KEY_COMMA => Bopomofo::TONE3,
-            Keycode::KEY_DOT => Bopomofo::TONE4,
-            Keycode::KEY_SLASH => Bopomofo::TONE5,
-            Keycode::KEY_SPACE => Bopomofo::TONE1,
+            KEY_1 => Bopomofo::B,
+            KEY_2 => Bopomofo::P,
+            KEY_3 => Bopomofo::M,
+            KEY_4 => Bopomofo::F,
+            KEY_5 => Bopomofo::D,
+            KEY_6 => Bopomofo::T,
+            KEY_7 => Bopomofo::N,
+            KEY_8 => Bopomofo::L,
+            KEY_9 => Bopomofo::G,
+            KEY_0 => Bopomofo::K,
+            KEY_MINUS => Bopomofo::H,
+            KEY_Q => Bopomofo::J,
+            KEY_W => Bopomofo::Q,
+            KEY_E => Bopomofo::X,
+            KEY_R => Bopomofo::ZH,
+            KEY_T => Bopomofo::CH,
+            KEY_Y => Bopomofo::SH,
+            KEY_U => Bopomofo::R,
+            KEY_I => Bopomofo::Z,
+            KEY_O => Bopomofo::C,
+            KEY_P => Bopomofo::S,
+            KEY_A => Bopomofo::I,
+            KEY_S => Bopomofo::U,
+            KEY_D => Bopomofo::IU,
+            KEY_F => Bopomofo::A,
+            KEY_G => Bopomofo::O,
+            KEY_H => Bopomofo::E,
+            KEY_J => Bopomofo::EH,
+            KEY_K => Bopomofo::AI,
+            KEY_L => Bopomofo::EI,
+            KEY_SEMICOLON => Bopomofo::AU,
+            KEY_Z => Bopomofo::OU,
+            KEY_X => Bopomofo::AN,
+            KEY_C => Bopomofo::EN,
+            KEY_V => Bopomofo::ANG,
+            KEY_B => Bopomofo::ENG,
+            KEY_N => Bopomofo::ER,
+            KEY_M => Bopomofo::TONE2,
+            KEY_COMMA => Bopomofo::TONE3,
+            KEY_DOT => Bopomofo::TONE4,
+            KEY_SLASH => Bopomofo::TONE5,
+            KEY_SPACE => Bopomofo::TONE1,
             _ => return KeyBehavior::KeyError,
         };
         if bopomofo.kind() == BopomofoKind::Tone {
@@ -126,7 +127,7 @@ impl SyllableEditor for Ibm {
 mod test {
     use crate::{
         editor::zhuyin_layout::{KeyBehavior, SyllableEditor},
-        input::{KeyboardEvent, Keycode, Keysym},
+        input::{KeyboardEvent, Keysym, keycode::KEY_SPACE},
     };
 
     use super::Ibm;
@@ -135,7 +136,7 @@ mod test {
     fn space() {
         let mut editor = Ibm::new();
         let behavior = editor.key_press(KeyboardEvent {
-            code: Keycode::KEY_SPACE,
+            code: KEY_SPACE,
             ksym: Keysym::from(' '),
             state: 0,
         });
