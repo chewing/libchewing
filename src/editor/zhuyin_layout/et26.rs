@@ -1,7 +1,10 @@
 //! ET26 (倚天26鍵)
 
 use crate::{
-    input::{KeyboardEvent, Keysym},
+    input::{
+        KeyboardEvent,
+        keysym::{SYM_LOWER_D, SYM_LOWER_F, SYM_LOWER_J, SYM_LOWER_K, SYM_SPACE, Keysym},
+    },
     syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
@@ -22,8 +25,10 @@ impl Et26 {
         }
     }
     fn is_end_key(&self, key: Keysym) -> bool {
-        match key.to_unicode() {
-            'd' | 'f' | 'j' | 'k' | ' ' => !self.syllable.is_empty(),
+        match key {
+            SYM_LOWER_D | SYM_LOWER_F | SYM_LOWER_J | SYM_LOWER_K | SYM_SPACE => {
+                !self.syllable.is_empty()
+            }
             _ => false,
         }
     }

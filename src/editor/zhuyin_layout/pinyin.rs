@@ -1,7 +1,7 @@
 //! Pinyin
 
 use crate::{
-    input::{KeyboardEvent, Keysym},
+    input::{KeyboardEvent, keysym},
     zhuyin::{Bopomofo, Syllable},
 };
 
@@ -79,12 +79,12 @@ impl SyllableEditor for Pinyin {
             return KeyBehavior::KeyError;
         }
         if ![
-            Keysym::from(' '),
-            Keysym::from('1'),
-            Keysym::from('2'),
-            Keysym::from('3'),
-            Keysym::from('4'),
-            Keysym::from('5'),
+            keysym::SYM_SPACE,
+            keysym::SYM_1,
+            keysym::SYM_2,
+            keysym::SYM_3,
+            keysym::SYM_4,
+            keysym::SYM_5,
         ]
         .contains(ksym)
         {
@@ -531,7 +531,10 @@ mod table {
 mod tests {
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
-        input::{KeyboardEvent, Keysym},
+        input::{
+            KeyboardEvent,
+            keysym::{self, Keysym},
+        },
         syl,
         zhuyin::Bopomofo,
     };
@@ -546,9 +549,9 @@ mod tests {
     fn hanyu_empty_rime_zi() {
         let mut hanyu = Pinyin::hanyu();
 
-        hanyu.key_press(map_key(Keysym::from('z')));
-        hanyu.key_press(map_key(Keysym::from('i')));
-        hanyu.key_press(map_key(Keysym::from('1')));
+        hanyu.key_press(map_key(keysym::SYM_LOWER_Z));
+        hanyu.key_press(map_key(keysym::SYM_LOWER_I));
+        hanyu.key_press(map_key(keysym::SYM_1));
 
         assert_eq!(syl![Bopomofo::Z], hanyu.read());
     }
@@ -557,10 +560,10 @@ mod tests {
     fn hanyu_empty_rime_zhi() {
         let mut hanyu = Pinyin::hanyu();
 
-        hanyu.key_press(map_key(Keysym::from('z')));
-        hanyu.key_press(map_key(Keysym::from('h')));
-        hanyu.key_press(map_key(Keysym::from('i')));
-        hanyu.key_press(map_key(Keysym::from('1')));
+        hanyu.key_press(map_key(keysym::SYM_LOWER_Z));
+        hanyu.key_press(map_key(keysym::SYM_LOWER_H));
+        hanyu.key_press(map_key(keysym::SYM_LOWER_I));
+        hanyu.key_press(map_key(keysym::SYM_1));
 
         assert_eq!(syl![Bopomofo::ZH], hanyu.read());
     }

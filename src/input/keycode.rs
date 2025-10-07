@@ -1,4 +1,8 @@
 //! Layout independent keycode based on xkbcommon
+//!
+//! The numerical keycode is same as defined in X11 / xkbcommon (evdev + 8).
+//!
+//! Only the standard 104-key have defined constant.
 
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Keycode(pub u8);
@@ -17,6 +21,7 @@ pub const KEY_0: Keycode = Keycode(19);
 pub const KEY_MINUS: Keycode = Keycode(20);
 pub const KEY_EQUAL: Keycode = Keycode(21);
 pub const KEY_BACKSPACE: Keycode = Keycode(22);
+
 pub const KEY_TAB: Keycode = Keycode(23);
 pub const KEY_Q: Keycode = Keycode(24);
 pub const KEY_W: Keycode = Keycode(25);
@@ -31,7 +36,9 @@ pub const KEY_P: Keycode = Keycode(33);
 pub const KEY_LEFTBRACE: Keycode = Keycode(34);
 pub const KEY_RIGHTBRACE: Keycode = Keycode(35);
 pub const KEY_ENTER: Keycode = Keycode(36);
+
 pub const KEY_LEFTCTRL: Keycode = Keycode(37);
+
 pub const KEY_A: Keycode = Keycode(38);
 pub const KEY_S: Keycode = Keycode(39);
 pub const KEY_D: Keycode = Keycode(40);
@@ -44,6 +51,7 @@ pub const KEY_L: Keycode = Keycode(46);
 pub const KEY_SEMICOLON: Keycode = Keycode(47);
 pub const KEY_APOSTROPHE: Keycode = Keycode(48);
 pub const KEY_GRAVE: Keycode = Keycode(49);
+
 pub const KEY_LEFTSHIFT: Keycode = Keycode(50);
 pub const KEY_BACKSLASH: Keycode = Keycode(51);
 pub const KEY_Z: Keycode = Keycode(52);
@@ -57,10 +65,12 @@ pub const KEY_COMMA: Keycode = Keycode(59);
 pub const KEY_DOT: Keycode = Keycode(60);
 pub const KEY_SLASH: Keycode = Keycode(61);
 pub const KEY_RIGHTSHIFT: Keycode = Keycode(62);
+
 pub const KEY_KPASTERISK: Keycode = Keycode(63);
 pub const KEY_LEFTALT: Keycode = Keycode(64);
 pub const KEY_SPACE: Keycode = Keycode(65);
 pub const KEY_CAPSLOCK: Keycode = Keycode(66);
+
 pub const KEY_F1: Keycode = Keycode(67);
 pub const KEY_F2: Keycode = Keycode(68);
 pub const KEY_F3: Keycode = Keycode(69);
@@ -71,6 +81,7 @@ pub const KEY_F7: Keycode = Keycode(73);
 pub const KEY_F8: Keycode = Keycode(74);
 pub const KEY_F9: Keycode = Keycode(75);
 pub const KEY_F10: Keycode = Keycode(76);
+
 pub const KEY_NUMLOCK: Keycode = Keycode(77);
 pub const KEY_SCROLLLOCK: Keycode = Keycode(78);
 pub const KEY_KP7: Keycode = Keycode(79);
@@ -91,11 +102,17 @@ pub const KEY_F11: Keycode = Keycode(95);
 pub const KEY_F12: Keycode = Keycode(96);
 
 pub const KEY_KPENTER: Keycode = Keycode(104);
+
 pub const KEY_RIGHTCTRL: Keycode = Keycode(105);
+
 pub const KEY_KPSLASH: Keycode = Keycode(106);
+
 pub const KEY_SYSRQ: Keycode = Keycode(107);
+
 pub const KEY_RIGHTALT: Keycode = Keycode(108);
+
 pub const KEY_LINEFEED: Keycode = Keycode(109);
+
 pub const KEY_HOME: Keycode = Keycode(110);
 pub const KEY_UP: Keycode = Keycode(111);
 pub const KEY_PAGEUP: Keycode = Keycode(112);

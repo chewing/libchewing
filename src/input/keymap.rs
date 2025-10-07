@@ -8,8 +8,9 @@
 //! It's recommended to use full featured library like xkbcommon to map keycode
 //! to keysyms.
 
+use crate::input::KeyboardEvent;
 use crate::input::keycode::*;
-use crate::input::{KeyboardEvent, keysym::Keysym};
+use crate::input::keysym::*;
 
 macro_rules! keymap {
     ($($k:expr => ($code:expr, $ksym:expr, $state:expr)),* $(,)?) => {{
@@ -35,22 +36,22 @@ pub fn map_ascii(keymap: &Keymap, ascii: u8) -> KeyboardEvent {
 }
 
 pub static KEYPAD_MAP: [(u8, KeyboardEvent); 16] = keypad_map! {
-    b'1' => (KEY_KP1,        Keysym::KP_1,        KeyboardEvent::NUMLOCK_MASK),
-    b'2' => (KEY_KP2,        Keysym::KP_2,        KeyboardEvent::NUMLOCK_MASK),
-    b'3' => (KEY_KP3,        Keysym::KP_3,        KeyboardEvent::NUMLOCK_MASK),
-    b'4' => (KEY_KP4,        Keysym::KP_4,        KeyboardEvent::NUMLOCK_MASK),
-    b'5' => (KEY_KP5,        Keysym::KP_5,        KeyboardEvent::NUMLOCK_MASK),
-    b'6' => (KEY_KP6,        Keysym::KP_6,        KeyboardEvent::NUMLOCK_MASK),
-    b'7' => (KEY_KP7,        Keysym::KP_7,        KeyboardEvent::NUMLOCK_MASK),
-    b'8' => (KEY_KP8,        Keysym::KP_8,        KeyboardEvent::NUMLOCK_MASK),
-    b'9' => (KEY_KP9,        Keysym::KP_9,        KeyboardEvent::NUMLOCK_MASK),
-    b'0' => (KEY_KP0,        Keysym::KP_0,        KeyboardEvent::NUMLOCK_MASK),
-    b'+' => (KEY_KPPLUS,     Keysym::KP_Add,      KeyboardEvent::NUMLOCK_MASK),
-    b'-' => (KEY_KPMINUS,    Keysym::KP_Subtract, KeyboardEvent::NUMLOCK_MASK),
-    b'*' => (KEY_KPASTERISK, Keysym::KP_Multiply, KeyboardEvent::NUMLOCK_MASK),
-    b'/' => (KEY_KPSLASH,    Keysym::KP_Divide,   KeyboardEvent::NUMLOCK_MASK),
-    b'.' => (KEY_KPDOT,      Keysym::KP_Decimal,  KeyboardEvent::NUMLOCK_MASK),
-    b'=' => (KEY_KPEQUAL,    Keysym::KP_Equal,    KeyboardEvent::NUMLOCK_MASK),
+    b'1' => (KEY_KP1,        SYM_KP1,        KeyboardEvent::NUMLOCK_MASK),
+    b'2' => (KEY_KP2,        SYM_KP2,        KeyboardEvent::NUMLOCK_MASK),
+    b'3' => (KEY_KP3,        SYM_KP3,        KeyboardEvent::NUMLOCK_MASK),
+    b'4' => (KEY_KP4,        SYM_KP4,        KeyboardEvent::NUMLOCK_MASK),
+    b'5' => (KEY_KP5,        SYM_KP5,        KeyboardEvent::NUMLOCK_MASK),
+    b'6' => (KEY_KP6,        SYM_KP6,        KeyboardEvent::NUMLOCK_MASK),
+    b'7' => (KEY_KP7,        SYM_KP7,        KeyboardEvent::NUMLOCK_MASK),
+    b'8' => (KEY_KP8,        SYM_KP8,        KeyboardEvent::NUMLOCK_MASK),
+    b'9' => (KEY_KP9,        SYM_KP9,        KeyboardEvent::NUMLOCK_MASK),
+    b'0' => (KEY_KP0,        SYM_KP0,        KeyboardEvent::NUMLOCK_MASK),
+    b'+' => (KEY_KPPLUS,     SYM_KPADD,      KeyboardEvent::NUMLOCK_MASK),
+    b'-' => (KEY_KPMINUS,    SYM_KPSUBTRACT, KeyboardEvent::NUMLOCK_MASK),
+    b'*' => (KEY_KPASTERISK, SYM_KPMULTIPLY, KeyboardEvent::NUMLOCK_MASK),
+    b'/' => (KEY_KPSLASH,    SYM_KPDIVIDE,   KeyboardEvent::NUMLOCK_MASK),
+    b'.' => (KEY_KPDOT,      SYM_KPDECIMAL,  KeyboardEvent::NUMLOCK_MASK),
+    b'=' => (KEY_KPEQUAL,    SYM_KPEQUAL,    KeyboardEvent::NUMLOCK_MASK),
 };
 
 pub static QWERTY_MAP: [(u8, KeyboardEvent); 95] = keymap! {

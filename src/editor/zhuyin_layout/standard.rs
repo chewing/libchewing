@@ -128,7 +128,7 @@ impl SyllableEditor for Standard {
 mod test {
     use crate::{
         editor::zhuyin_layout::{KeyBehavior, SyllableEditor},
-        input::{KeyboardEvent, Keysym, keycode::KEY_SPACE},
+        input::{KeyboardEvent, keycode::KEY_SPACE, keysym::SYM_SPACE},
     };
 
     use super::Standard;
@@ -138,7 +138,7 @@ mod test {
         let mut editor = Standard::new();
         let behavior = editor.key_press(KeyboardEvent {
             code: KEY_SPACE,
-            ksym: Keysym::from(' '),
+            ksym: SYM_SPACE,
             state: 0,
         });
         assert_eq!(KeyBehavior::KeyError, behavior);

@@ -297,7 +297,10 @@ mod test {
 
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
-        input::{KeyboardEvent, Keysym},
+        input::{
+            KeyboardEvent,
+            keysym::{self, Keysym},
+        },
         zhuyin::Bopomofo,
     };
 
@@ -310,10 +313,10 @@ mod test {
     #[test]
     fn cen() {
         let mut hsu = Hsu::new();
-        hsu.key_press(map_key(Keysym::from('c')));
-        hsu.key_press(map_key(Keysym::from('e')));
-        hsu.key_press(map_key(Keysym::from('n')));
-        hsu.key_press(map_key(Keysym::from(' ')));
+        hsu.key_press(map_key(keysym::SYM_LOWER_C));
+        hsu.key_press(map_key(keysym::SYM_LOWER_E));
+        hsu.key_press(map_key(keysym::SYM_LOWER_N));
+        hsu.key_press(map_key(keysym::SYM_SPACE));
         let result = hsu.read();
         assert_eq!(result.initial(), Some(Bopomofo::X));
         assert_eq!(result.medial(), Some(Bopomofo::I));
@@ -323,8 +326,8 @@ mod test {
     #[test]
     fn convert_n_to_en() {
         let mut hsu = Hsu::new();
-        hsu.key_press(map_key(Keysym::from('n')));
-        hsu.key_press(map_key(Keysym::from('f')));
+        hsu.key_press(map_key(keysym::SYM_LOWER_N));
+        hsu.key_press(map_key(keysym::SYM_LOWER_F));
         let result = hsu.read();
         assert_eq!(result.rime(), Some(Bopomofo::EN));
     }

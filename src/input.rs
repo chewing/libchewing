@@ -1,11 +1,13 @@
 //! Input handling modules
 
 use keycode::Keycode;
-pub use keysym::Keysym;
+use keysym::Keysym;
+
+use crate::input::keysym::SYM_NONE;
 
 pub mod keycode;
 pub mod keymap;
-mod keysym;
+pub mod keysym;
 
 /// Keyboard layout independent KeyboardEvent
 ///
@@ -22,19 +24,19 @@ mod keysym;
 /// ```rust
 /// use chewing::input::KeyboardEvent;
 /// use chewing::input::keycode;
-/// use chewing::input::Keysym;
+/// use chewing::input::keysym;
 ///
 /// let control_down = true;
 /// let caps_lock = false;
 /// let evt = KeyboardEvent::builder()
 ///     .code(keycode::KEY_A)
-///     .ksym(Keysym::from('a'))
+///     .ksym(keysym::SYM_LOWER_A)
 ///     .shift()
 ///     .control_if(control_down)
 ///     .caps_lock_if(caps_lock)
 ///     .build();
 /// # assert_eq!(keycode::KEY_A, evt.code);
-/// # assert_eq!(Keysym::from('a'), evt.ksym);
+/// # assert_eq!(keysym::SYM_LOWER_A, evt.ksym);
 /// # assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
 /// # assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));
 /// # assert!(!evt.is_flag_on(KeyboardEvent::CAPSLOCK_MASK));
@@ -104,7 +106,7 @@ impl KeyboardEvent {
         }
     }
     pub fn is_invalid(&self) -> bool {
-        self.code.0 == 0 && self.ksym == Keysym::NoSymbol && self.state == 0
+        self.code.0 == 0 && self.ksym == SYM_NONE && self.state == 0
     }
     pub fn is_flag_on(&self, mask: u32) -> bool {
         self.state & mask == mask
@@ -182,8 +184,8 @@ impl KeyboardEventBuilder {
 #[cfg(test)]
 mod tests {
     use super::KeyboardEvent;
-    use super::Keysym;
     use super::keycode;
+    use super::keysym;
 
     #[test]
     fn keyboard_event_builder() {
@@ -191,7 +193,7 @@ mod tests {
         let caps_lock = false;
         let evt = KeyboardEvent::builder()
             .code(keycode::KEY_A)
-            .ksym(Keysym::from('a'))
+            .ksym(keysym::SYM_LOWER_A)
             .shift()
             .control_if(control_down)
             .caps_lock_if(caps_lock)
@@ -201,7 +203,7 @@ mod tests {
             .release_if(false)
             .build();
         assert_eq!(keycode::KEY_A, evt.code);
-        assert_eq!(Keysym::from('a'), evt.ksym);
+        assert_eq!(keysym::SYM_LOWER_A, evt.ksym);
         assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
         assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));
         assert!(!evt.is_flag_on(KeyboardEvent::CAPSLOCK_MASK));
