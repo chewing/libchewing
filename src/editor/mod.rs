@@ -26,7 +26,8 @@ use crate::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
         UpdateDictionaryError, UserDictionaryLoader,
     },
-    input::{KeyboardEvent, Keysym},
+    input::KeyboardEvent,
+    input::keysym::*,
     zhuyin::{Syllable, SyllableSlice},
 };
 
@@ -872,7 +873,7 @@ impl Entering {
 impl State for Entering {
     fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
         match ev.ksym {
-            Keysym::BackSpace => {
+            SYM_BACKSPACE => {
                 if shared.com.is_empty() {
                     self.spin_ignore()
                 } else {
@@ -880,7 +881,7 @@ impl State for Entering {
                     self.spin_absorb()
                 }
             }
-            Keysym::Caps_Lock => {
+            SYM_CAPSLOCK => {
                 shared.switch_language_mode();
                 self.spin_absorb()
             }
@@ -908,26 +909,17 @@ impl State for Entering {
                     Err(_) => self.spin_bell(),
                 }
             }
-            Keysym::Return
-            | Keysym::Escape
-            | Keysym::Tab
-            | Keysym::Home
-            | Keysym::End
-            | Keysym::Left
-            | Keysym::Right
-            | Keysym::Up
-            | Keysym::Down
-            | Keysym::Page_Up
-            | Keysym::Page_Down
+            SYM_RETURN | SYM_ESC | SYM_TAB | SYM_HOME | SYM_END | SYM_LEFT | SYM_RIGHT | SYM_UP
+            | SYM_DOWN | SYM_PAGEUP | SYM_PAGEDOWN
                 if shared.com.is_empty() =>
             {
                 self.spin_ignore()
             }
-            Keysym::Tab if shared.com.is_end_of_buffer() => {
+            SYM_TAB if shared.com.is_end_of_buffer() => {
                 shared.nth_conversion += 1;
                 self.spin_absorb()
             }
-            Keysym::Tab => {
+            SYM_TAB => {
                 let interval_ends: Vec<_> = shared.conversion().iter().map(|it| it.end).collect();
                 if interval_ends.contains(&shared.cursor()) {
                     shared.com.insert_glue();
@@ -940,7 +932,7 @@ impl State for Entering {
             //     // editor.reset_user_break_and_connect_at_cursor();
             //     (EditorKeyBehavior::Absorb, &Entering)
             // }
-            Keysym::Delete => {
+            SYM_DELETE => {
                 if shared.com.is_end_of_buffer() {
                     self.spin_ignore()
                 } else {
@@ -948,63 +940,63 @@ impl State for Entering {
                     self.spin_absorb()
                 }
             }
-            Keysym::Home => {
+            SYM_HOME => {
                 shared.snapshot();
                 shared.com.move_cursor_to_beginning();
                 self.spin_absorb()
             }
-            Keysym::Left if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_LEFT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if shared.com.is_beginning_of_buffer() {
                     return self.spin_ignore();
                 }
                 shared.snapshot();
                 self.start_highlighting(shared.cursor() - 1)
             }
-            Keysym::Right if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_RIGHT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
                 shared.snapshot();
                 self.start_highlighting(shared.cursor() + 1)
             }
-            Keysym::Left => {
+            SYM_LEFT => {
                 shared.snapshot();
                 shared.com.move_cursor_left(1);
                 self.spin_absorb()
             }
-            Keysym::Right => {
+            SYM_RIGHT => {
                 shared.snapshot();
                 shared.com.move_cursor_right(1);
                 self.spin_absorb()
             }
-            Keysym::Up => self.spin_ignore(),
-            Keysym::Space
+            SYM_UP => self.spin_ignore(),
+            SYM_SPACE
                 if ev.is_flag_on(KeyboardEvent::SHIFT_MASK)
                     && shared.options.enable_fullwidth_toggle_key =>
             {
                 shared.switch_character_form();
                 self.spin_absorb()
             }
-            Keysym::Space
+            SYM_SPACE
                 if shared.options.space_is_select_key
                     && shared.options.language_mode == LanguageMode::Chinese =>
             {
                 self.start_selecting_or_input_space(shared)
             }
-            Keysym::Down => {
+            SYM_DOWN => {
                 debug!("buffer {:?}", shared.com);
                 self.start_selecting(shared)
             }
-            Keysym::End | Keysym::Page_Up | Keysym::Page_Down => {
+            SYM_END | SYM_PAGEUP | SYM_PAGEDOWN => {
                 shared.snapshot();
                 shared.com.move_cursor_to_end();
                 self.spin_absorb()
             }
-            Keysym::Return => {
+            SYM_RETURN => {
                 shared.commit();
                 self.spin_commit()
             }
-            Keysym::Escape => {
+            SYM_ESC => {
                 if shared.options.esc_clear_all_buffer && !shared.com.is_empty() {
                     shared.com.clear();
                     self.spin_absorb()
@@ -1027,10 +1019,10 @@ impl State for Entering {
                     shared.snapshot();
                 }
                 match shared.options.language_mode {
-                    LanguageMode::Chinese if ev.ksym == Keysym::Grave && ev.state == 0 => {
+                    LanguageMode::Chinese if ev.ksym == SYM_GRAVE && ev.state == 0 => {
                         self.start_symbol_input(shared)
                     }
-                    LanguageMode::Chinese if ev.ksym == Keysym::Space => {
+                    LanguageMode::Chinese if ev.ksym == SYM_SPACE => {
                         match shared.options.character_form {
                             CharacterForm::Halfwidth => {
                                 if shared.com.is_empty() {
@@ -1167,7 +1159,7 @@ impl EnteringSyllable {
 impl State for EnteringSyllable {
     fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
         match ev.ksym {
-            Keysym::BackSpace => {
+            SYM_BACKSPACE => {
                 shared.syl.remove_last();
 
                 if !shared.syl.is_empty() {
@@ -1176,12 +1168,12 @@ impl State for EnteringSyllable {
                     self.start_entering()
                 }
             }
-            Keysym::Caps_Lock => {
+            SYM_CAPSLOCK => {
                 shared.syl.clear();
                 shared.switch_language_mode();
                 self.start_entering()
             }
-            Keysym::Escape => {
+            SYM_ESC => {
                 shared.syl.clear();
                 if shared.options.esc_clear_all_buffer {
                     shared.com.clear();
@@ -1381,20 +1373,20 @@ impl State for Selecting {
         }
 
         match ev.ksym {
-            Keysym::BackSpace => {
+            SYM_BACKSPACE => {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Keysym::Caps_Lock => {
+            SYM_CAPSLOCK => {
                 shared.switch_language_mode();
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Keysym::Up => {
+            SYM_UP => {
                 shared.cancel_selecting();
                 self.start_entering()
             }
-            Keysym::Down | Keysym::Space => {
+            SYM_DOWN | SYM_SPACE => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
@@ -1409,7 +1401,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Keysym::J => {
+            SYM_LOWER_J => {
                 if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
@@ -1434,7 +1426,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Keysym::K => {
+            SYM_LOWER_K => {
                 if shared.com.is_empty() {
                     return self.spin_ignore();
                 }
@@ -1460,7 +1452,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Keysym::Left | Keysym::Page_Up => {
+            SYM_LEFT | SYM_PAGEUP => {
                 if self.page_no > 0 {
                     self.page_no -= 1;
                 } else {
@@ -1468,7 +1460,7 @@ impl State for Selecting {
                 }
                 self.spin_absorb()
             }
-            Keysym::Right | Keysym::Page_Down => {
+            SYM_RIGHT | SYM_PAGEDOWN => {
                 if self.page_no + 1 < self.total_page(shared, &shared.dict) {
                     self.page_no += 1;
                 } else {
@@ -1481,7 +1473,7 @@ impl State for Selecting {
                 let n = if n == 0 { 9 } else { n - 1 };
                 self.select(shared, n)
             }
-            Keysym::Escape => {
+            SYM_ESC => {
                 shared.cancel_selecting();
                 shared.com.pop_cursor();
                 if shared.options.conversion_engine == ConversionEngineKind::SimpleEngine {
@@ -1489,7 +1481,7 @@ impl State for Selecting {
                 }
                 self.start_entering()
             }
-            Keysym::Delete => {
+            SYM_DELETE => {
                 // NB: should be Ignore but return Absorb for backward compat
                 self.spin_absorb()
             }
@@ -1518,23 +1510,23 @@ impl Highlighting {
 impl State for Highlighting {
     fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
         match ev.ksym {
-            Keysym::Caps_Lock => {
+            SYM_CAPSLOCK => {
                 shared.switch_language_mode();
                 self.start_entering()
             }
-            Keysym::Left if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_LEFT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if self.moving_cursor != 0 {
                     self.moving_cursor -= 1;
                 }
                 self.spin_absorb()
             }
-            Keysym::Right if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_RIGHT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
                 if self.moving_cursor != shared.com.len() {
                     self.moving_cursor += 1;
                 }
                 self.spin_absorb()
             }
-            Keysym::Return => {
+            SYM_RETURN => {
                 let start = min(self.moving_cursor, shared.com.cursor());
                 let end = max(self.moving_cursor, shared.com.cursor());
                 shared.com.move_cursor(self.moving_cursor);
@@ -1563,8 +1555,9 @@ mod tests {
         dictionary::{Layered, TrieBuf},
         editor::{EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate},
         input::{
-            KeyboardEvent, Keycode, Keysym,
+            KeyboardEvent, keycode,
             keymap::{QWERTY_MAP, map_ascii},
+            keysym,
         },
         syl,
         zhuyin::Bopomofo,
@@ -1573,8 +1566,8 @@ mod tests {
     use super::{BasicEditor, Editor};
 
     const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent {
-        code: Keycode::KEY_CAPSLOCK,
-        ksym: Keysym::Caps_Lock,
+        code: keycode::KEY_CAPSLOCK,
+        ksym: keysym::SYM_CAPSLOCK,
         state: KeyboardEvent::CAPSLOCK_MASK,
     };
 
@@ -1591,8 +1584,8 @@ mod tests {
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
         let ev = KeyboardEvent {
-            code: Keycode::KEY_H,
-            ksym: Keysym::from('h'),
+            code: keycode::KEY_H,
+            ksym: keysym::SYM_LOWER_H,
             state: 0,
         };
         let key_behavior = editor.process_keyevent(ev);
@@ -1601,8 +1594,8 @@ mod tests {
         assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
 
         let ev = KeyboardEvent {
-            code: Keycode::KEY_K,
-            ksym: Keysym::from('k'),
+            code: keycode::KEY_K,
+            ksym: keysym::SYM_LOWER_K,
             state: 0,
         };
         let key_behavior = editor.process_keyevent(ev);

@@ -32,7 +32,7 @@
 //! ```rust,no_run
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use chewing::editor::{BasicEditor, Editor};
-//! use chewing::input::{Keycode, Keysym, KeyboardEvent};
+//! use chewing::input::{keycode, keysym, KeyboardEvent};
 //! use chewing::input::keymap::{map_ascii, QWERTY_MAP};
 //!
 //! let mut editor = Editor::chewing()?;
@@ -41,8 +41,8 @@
 //! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'j'));
 //! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'4'));
 //! editor.process_keyevent(KeyboardEvent::builder()
-//!   .code(Keycode::KEY_DOWN)
-//!   .ksym(Keysym::Down)
+//!   .code(keycode::KEY_DOWN)
+//!   .ksym(keysym::SYM_DOWN)
 //!   .build());
 //! editor.process_keyevent(map_ascii(&QWERTY_MAP, b'3'));
 //!
