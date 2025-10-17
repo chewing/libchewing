@@ -111,6 +111,12 @@ impl KeyboardEvent {
     pub fn is_flag_on(&self, mask: u32) -> bool {
         self.state & mask == mask
     }
+    pub fn has_modifiers(&self) -> bool {
+        self.is_flag_on(Self::SHIFT_MASK)
+            || self.is_flag_on(Self::CONTROL_MASK)
+            || self.is_flag_on(Self::ALT_MASK)
+            || self.is_flag_on(Self::SUPER_MASK)
+    }
 }
 
 #[derive(Clone, Copy, Debug)]

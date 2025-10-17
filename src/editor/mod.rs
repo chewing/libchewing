@@ -1004,7 +1004,7 @@ impl State for Entering {
                     self.spin_ignore()
                 }
             }
-            _ if ev.is_flag_on(KeyboardEvent::NUMLOCK_MASK) => {
+            _ if ev.ksym.is_keypad() && ev.is_flag_on(KeyboardEvent::NUMLOCK_MASK) => {
                 if shared.com.is_empty() {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.ksym.to_unicode());
@@ -1019,7 +1019,7 @@ impl State for Entering {
                     shared.snapshot();
                 }
                 match shared.options.language_mode {
-                    LanguageMode::Chinese if ev.ksym == SYM_GRAVE && ev.state == 0 => {
+                    LanguageMode::Chinese if ev.ksym == SYM_GRAVE && !ev.has_modifiers() => {
                         self.start_symbol_input(shared)
                     }
                     LanguageMode::Chinese if ev.ksym == SYM_SPACE => {
@@ -1059,7 +1059,7 @@ impl State for Entering {
                                 return self.spin_absorb();
                             }
                         }
-                        if ev.state == 0 && KeyBehavior::Absorb == shared.syl.key_press(ev) {
+                        if !ev.has_modifiers() && KeyBehavior::Absorb == shared.syl.key_press(ev) {
                             return self.start_enter_syllable();
                         }
                         if let Some(symbol) = special_symbol_input(ev.ksym.to_unicode()) {
@@ -1095,30 +1095,35 @@ impl State for Entering {
                         }
                         self.spin_bell()
                     }
-                    LanguageMode::English => match shared.options.character_form {
-                        CharacterForm::Halfwidth => {
-                            if shared.com.is_empty() {
-                                // FIXME we should ignore these keys if pre-edit is empty
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(ev.ksym.to_unicode());
-                                self.spin_commit()
-                            } else {
-                                shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
-                                self.spin_absorb()
+                    LanguageMode::English => {
+                        if !ev.ksym.is_unicode() {
+                            return self.spin_bell();
+                        }
+                        match shared.options.character_form {
+                            CharacterForm::Halfwidth => {
+                                if shared.com.is_empty() {
+                                    // FIXME we should ignore these keys if pre-edit is empty
+                                    shared.commit_buffer.clear();
+                                    shared.commit_buffer.push(ev.ksym.to_unicode());
+                                    self.spin_commit()
+                                } else {
+                                    shared.com.insert(Symbol::from(ev.ksym.to_unicode()));
+                                    self.spin_absorb()
+                                }
+                            }
+                            CharacterForm::Fullwidth => {
+                                let char_ = full_width_symbol_input(ev.ksym.to_unicode()).unwrap();
+                                if shared.com.is_empty() {
+                                    shared.commit_buffer.clear();
+                                    shared.commit_buffer.push(char_);
+                                    self.spin_commit()
+                                } else {
+                                    shared.com.insert(Symbol::from(char_));
+                                    self.spin_absorb()
+                                }
                             }
                         }
-                        CharacterForm::Fullwidth => {
-                            let char_ = full_width_symbol_input(ev.ksym.to_unicode()).unwrap();
-                            if shared.com.is_empty() {
-                                shared.commit_buffer.clear();
-                                shared.commit_buffer.push(char_);
-                                self.spin_commit()
-                            } else {
-                                shared.com.insert(Symbol::from(char_));
-                                self.spin_absorb()
-                            }
-                        }
-                    },
+                    }
                 }
             }
         }
