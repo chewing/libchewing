@@ -35,6 +35,15 @@ pub fn map_ascii(keymap: &Keymap, ascii: u8) -> KeyboardEvent {
         .unwrap_or_default()
 }
 
+/// Map the keycode to a key event
+pub fn map_keycode(keymap: &Keymap, keycode: Keycode, shift: bool) -> KeyboardEvent {
+    keymap
+        .iter()
+        .find(|item| item.1.code == keycode && (shift ^ (item.1.state == 0)))
+        .map(|item| item.1)
+        .unwrap_or_default()
+}
+
 pub static KEYPAD_MAP: [(u8, KeyboardEvent); 16] = keypad_map! {
     b'1' => (KEY_KP1,        SYM_KP1,        KeyboardEvent::NUMLOCK_MASK),
     b'2' => (KEY_KP2,        SYM_KP2,        KeyboardEvent::NUMLOCK_MASK),
