@@ -37,6 +37,13 @@ pub fn map_ascii(keymap: &Keymap, ascii: u8) -> KeyboardEvent {
 
 /// Map the keycode to a key event
 pub fn map_keycode(keymap: &Keymap, keycode: Keycode, shift: bool) -> KeyboardEvent {
+    if let Some(evt) = KEYPAD_MAP
+        .iter()
+        .find(|item| item.1.code == keycode)
+        .map(|item| item.1)
+    {
+        return evt;
+    }
     keymap
         .iter()
         .find(|item| item.1.code == keycode && (shift ^ (item.1.state == 0)))
