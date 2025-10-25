@@ -1827,11 +1827,13 @@ pub unsafe extern "C" fn chewing_handle_Tab(ctx: *mut ChewingContext) -> c_int {
 pub unsafe extern "C" fn chewing_handle_ShiftLeft(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code: KEY_LEFT,
-        ksym: SYM_LEFT,
-        state: KeyboardEvent::SHIFT_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(KEY_LEFT)
+            .ksym(SYM_LEFT)
+            .shift()
+            .build(),
+    );
     OK
 }
 
@@ -1861,11 +1863,13 @@ pub unsafe extern "C" fn chewing_handle_Left(ctx: *mut ChewingContext) -> c_int 
 pub unsafe extern "C" fn chewing_handle_ShiftRight(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code: KEY_RIGHT,
-        ksym: SYM_RIGHT,
-        state: KeyboardEvent::SHIFT_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(KEY_RIGHT)
+            .ksym(SYM_RIGHT)
+            .shift()
+            .build(),
+    );
     OK
 }
 
@@ -2002,11 +2006,13 @@ pub unsafe extern "C" fn chewing_handle_Down(ctx: *mut ChewingContext) -> c_int 
 pub unsafe extern "C" fn chewing_handle_Capslock(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code: KEY_CAPSLOCK,
-        ksym: SYM_CAPSLOCK,
-        state: KeyboardEvent::CAPSLOCK_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(KEY_CAPSLOCK)
+            .ksym(SYM_CAPSLOCK)
+            .caps_lock()
+            .build(),
+    );
     OK
 }
 
@@ -2077,11 +2083,13 @@ pub unsafe extern "C" fn chewing_handle_CtrlNum(ctx: *mut ChewingContext, key: c
         _ => return -1,
     };
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code,
-        ksym,
-        state: KeyboardEvent::CONTROL_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(code)
+            .ksym(ksym)
+            .control()
+            .build(),
+    );
     OK
 }
 
@@ -2094,11 +2102,13 @@ pub unsafe extern "C" fn chewing_handle_CtrlNum(ctx: *mut ChewingContext, key: c
 pub unsafe extern "C" fn chewing_handle_ShiftSpace(ctx: *mut ChewingContext) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code: KEY_SPACE,
-        ksym: SYM_SPACE,
-        state: KeyboardEvent::SHIFT_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(KEY_SPACE)
+            .ksym(SYM_SPACE)
+            .shift()
+            .build(),
+    );
     OK
 }
 
@@ -2146,11 +2156,13 @@ pub unsafe extern "C" fn chewing_handle_Numlock(ctx: *mut ChewingContext, key: c
         _ => return -1,
     };
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code,
-        ksym,
-        state: KeyboardEvent::NUMLOCK_MASK,
-    });
+    ctx.editor.process_keyevent(
+        KeyboardEvent::builder()
+            .code(code)
+            .ksym(ksym)
+            .num_lock_if(true)
+            .build(),
+    );
     OK
 }
 

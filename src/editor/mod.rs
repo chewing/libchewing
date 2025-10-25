@@ -26,8 +26,7 @@ use crate::{
         Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
         UpdateDictionaryError, UserDictionaryLoader,
     },
-    input::KeyboardEvent,
-    input::keysym::*,
+    input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::{Syllable, SyllableSlice},
 };
 
@@ -885,7 +884,7 @@ impl State for Entering {
                 shared.switch_language_mode();
                 self.spin_absorb()
             }
-            code if ev.ksym.is_digit() && ev.is_flag_on(KeyboardEvent::CONTROL_MASK) => {
+            code if ev.ksym.is_digit() && ev.is_state_on(KeyState::Control) => {
                 let n = code.to_digit().unwrap_or_default() as usize;
                 if n == 0 || n == 1 {
                     return self.start_symbol_input(shared);
@@ -945,14 +944,14 @@ impl State for Entering {
                 shared.com.move_cursor_to_beginning();
                 self.spin_absorb()
             }
-            SYM_LEFT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_LEFT if ev.is_state_on(KeyState::Shift) => {
                 if shared.com.is_beginning_of_buffer() {
                     return self.spin_ignore();
                 }
                 shared.snapshot();
                 self.start_highlighting(shared.cursor() - 1)
             }
-            SYM_RIGHT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_RIGHT if ev.is_state_on(KeyState::Shift) => {
                 if shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
@@ -971,7 +970,7 @@ impl State for Entering {
             }
             SYM_UP => self.spin_ignore(),
             SYM_SPACE
-                if ev.is_flag_on(KeyboardEvent::SHIFT_MASK)
+                if ev.is_state_on(KeyState::Shift)
                     && shared.options.enable_fullwidth_toggle_key =>
             {
                 shared.switch_character_form();
@@ -1004,7 +1003,7 @@ impl State for Entering {
                     self.spin_ignore()
                 }
             }
-            _ if ev.ksym.is_keypad() && ev.is_flag_on(KeyboardEvent::NUMLOCK_MASK) => {
+            _ if ev.ksym.is_keypad() && ev.is_state_on(KeyState::NumLock) => {
                 if shared.com.is_empty() {
                     shared.commit_buffer.clear();
                     shared.commit_buffer.push(ev.ksym.to_unicode());
@@ -1048,9 +1047,7 @@ impl State for Entering {
                         }
                     }
                     LanguageMode::Chinese => {
-                        if shared.options.easy_symbol_input
-                            && ev.is_flag_on(KeyboardEvent::SHIFT_MASK)
-                        {
+                        if shared.options.easy_symbol_input && ev.is_state_on(KeyState::Shift) {
                             // Priortize symbol input
                             if let Some(expended) = shared.abbr.find_abbrev(ev.ksym.to_unicode()) {
                                 expended
@@ -1373,7 +1370,7 @@ impl Selecting {
 
 impl State for Selecting {
     fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition {
-        if ev.is_flag_on(KeyboardEvent::CONTROL_MASK) || ev.is_flag_on(KeyboardEvent::SHIFT_MASK) {
+        if ev.is_state_on(KeyState::Control) || ev.is_state_on(KeyState::Shift) {
             return self.spin_bell();
         }
 
@@ -1519,13 +1516,13 @@ impl State for Highlighting {
                 shared.switch_language_mode();
                 self.start_entering()
             }
-            SYM_LEFT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_LEFT if ev.is_state_on(KeyState::Shift) => {
                 if self.moving_cursor != 0 {
                     self.moving_cursor -= 1;
                 }
                 self.spin_absorb()
             }
-            SYM_RIGHT if ev.is_flag_on(KeyboardEvent::SHIFT_MASK) => {
+            SYM_RIGHT if ev.is_state_on(KeyState::Shift) => {
                 if self.moving_cursor != shared.com.len() {
                     self.moving_cursor += 1;
                 }
@@ -1570,11 +1567,11 @@ mod tests {
 
     use super::{BasicEditor, Editor};
 
-    const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent {
-        code: keycode::KEY_CAPSLOCK,
-        ksym: keysym::SYM_CAPSLOCK,
-        state: KeyboardEvent::CAPSLOCK_MASK,
-    };
+    const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent::builder()
+        .code(keycode::KEY_CAPSLOCK)
+        .ksym(keysym::SYM_CAPSLOCK)
+        .caps_lock_if(true)
+        .build();
 
     #[test]
     fn editing_mode_input_bopomofo() {

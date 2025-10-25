@@ -9,6 +9,27 @@ pub mod keycode;
 pub mod keymap;
 pub mod keysym;
 
+/// Modifier keys and key press/release state
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum KeyState {
+    /// Shift is activated.
+    Shift = 1 << 0,
+    /// Caps Lock is activated.
+    CapsLock = 1 << 1,
+    /// Control is activated.
+    Control = 1 << 2,
+    /// Alt or Meta is activated.
+    Alt = 1 << 3,
+    /// Num Lock is activated.
+    NumLock = 1 << 4,
+    /// Super is activated.
+    Super = 1 << 6,
+    /// Key is released.
+    Release = 1 << 30,
+}
+
 /// Keyboard layout independent KeyboardEvent
 ///
 /// Use `code` to identify a physical key on a keyboard, use `ksym` to
@@ -23,6 +44,7 @@ pub mod keysym;
 ///
 /// ```rust
 /// use chewing::input::KeyboardEvent;
+/// use chewing::input::KeyState;
 /// use chewing::input::keycode;
 /// use chewing::input::keysym;
 ///
@@ -37,9 +59,9 @@ pub mod keysym;
 ///     .build();
 /// # assert_eq!(keycode::KEY_A, evt.code);
 /// # assert_eq!(keysym::SYM_LOWER_A, evt.ksym);
-/// # assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
-/// # assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));
-/// # assert!(!evt.is_flag_on(KeyboardEvent::CAPSLOCK_MASK));
+/// # assert!(evt.is_state_on(KeyState::Shift));
+/// # assert!(evt.is_state_on(KeyState::Control));
+/// # assert!(!evt.is_state_on(KeyState::CapsLock));
 /// ```
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct KeyboardEvent {
@@ -73,21 +95,6 @@ pub struct KeyboardEvent {
 }
 
 impl KeyboardEvent {
-    /// Shift is activated.
-    pub const SHIFT_MASK: u32 = 1 << 0;
-    /// Caps Lock is activated.
-    pub const CAPSLOCK_MASK: u32 = 1 << 1;
-    /// Control is activated.
-    pub const CONTROL_MASK: u32 = 1 << 2;
-    /// Alt or Meta is activated.
-    pub const ALT_MASK: u32 = 1 << 3;
-    /// Num Lock is activated.
-    pub const NUMLOCK_MASK: u32 = 1 << 4;
-    /// Super is activated.
-    pub const SUPER_MASK: u32 = 1 << 6;
-    /// Key is released.
-    pub const RELEASE_MASK: u32 = 1 << 30;
-
     /// Create a builder to construct the KeyboardEvent.
     ///
     /// # Example
@@ -100,22 +107,38 @@ impl KeyboardEvent {
     ///     .shift_if(shift_pressed)
     ///     .build();
     /// ```
-    pub fn builder() -> KeyboardEventBuilder {
+    pub const fn builder() -> KeyboardEventBuilder {
         KeyboardEventBuilder {
-            evt: KeyboardEvent::default(),
+            evt: KeyboardEvent {
+                code: Keycode(0),
+                ksym: Keysym(0),
+                state: 0,
+            },
         }
     }
     pub fn is_invalid(&self) -> bool {
         self.code.0 == 0 && self.ksym == SYM_NONE && self.state == 0
     }
-    pub fn is_flag_on(&self, mask: u32) -> bool {
+    /// Determine whether a modifier is down or toggled
+    pub fn is_state_on(&self, m: KeyState) -> bool {
+        match m {
+            KeyState::Shift => self.is_flag_on(KeyState::Shift as u32),
+            KeyState::Control => self.is_flag_on(KeyState::Control as u32),
+            KeyState::Alt => self.is_flag_on(KeyState::Alt as u32),
+            KeyState::Super => self.is_flag_on(KeyState::Super as u32),
+            KeyState::CapsLock => self.is_flag_on(KeyState::CapsLock as u32),
+            KeyState::NumLock => self.is_flag_on(KeyState::NumLock as u32),
+            KeyState::Release => self.is_flag_on(KeyState::Release as u32),
+        }
+    }
+    fn is_flag_on(&self, mask: u32) -> bool {
         self.state & mask == mask
     }
     pub fn has_modifiers(&self) -> bool {
-        self.is_flag_on(Self::SHIFT_MASK)
-            || self.is_flag_on(Self::CONTROL_MASK)
-            || self.is_flag_on(Self::ALT_MASK)
-            || self.is_flag_on(Self::SUPER_MASK)
+        self.is_state_on(KeyState::Shift)
+            || self.is_state_on(KeyState::Control)
+            || self.is_state_on(KeyState::Alt)
+            || self.is_state_on(KeyState::Super)
     }
 }
 
@@ -125,70 +148,77 @@ pub struct KeyboardEventBuilder {
 }
 
 impl KeyboardEventBuilder {
-    pub fn code(&mut self, code: Keycode) -> &mut KeyboardEventBuilder {
+    pub const fn code(&mut self, code: Keycode) -> &mut KeyboardEventBuilder {
         self.evt.code = code;
         self
     }
-    pub fn ksym(&mut self, key: Keysym) -> &mut KeyboardEventBuilder {
+    pub const fn ksym(&mut self, key: Keysym) -> &mut KeyboardEventBuilder {
         self.evt.ksym = key;
         self
     }
-    pub fn shift(&mut self) -> &mut KeyboardEventBuilder {
+    pub const fn shift(&mut self) -> &mut KeyboardEventBuilder {
         self.shift_if(true)
     }
-    pub fn shift_if(&mut self, shift: bool) -> &mut KeyboardEventBuilder {
+    pub const fn shift_if(&mut self, shift: bool) -> &mut KeyboardEventBuilder {
         if shift {
-            self.evt.state |= KeyboardEvent::SHIFT_MASK;
+            self.evt.state |= KeyState::Shift as u32;
         }
         self
     }
-    pub fn caps_lock_if(&mut self, caps_lock: bool) -> &mut KeyboardEventBuilder {
+    pub const fn caps_lock(&mut self) -> &mut KeyboardEventBuilder {
+        self.caps_lock_if(true)
+    }
+    pub const fn caps_lock_if(&mut self, caps_lock: bool) -> &mut KeyboardEventBuilder {
         if caps_lock {
-            self.evt.state |= KeyboardEvent::CAPSLOCK_MASK;
+            self.evt.state |= KeyState::CapsLock as u32;
         }
         self
     }
-    pub fn control_if(&mut self, control: bool) -> &mut KeyboardEventBuilder {
+    pub const fn control(&mut self) -> &mut KeyboardEventBuilder {
+        self.control_if(true)
+    }
+    pub const fn control_if(&mut self, control: bool) -> &mut KeyboardEventBuilder {
         if control {
-            self.evt.state |= KeyboardEvent::CONTROL_MASK;
+            self.evt.state |= KeyState::Control as u32;
         }
         self
     }
-    pub fn alt_if(&mut self, alt: bool) -> &mut KeyboardEventBuilder {
+    pub const fn alt_if(&mut self, alt: bool) -> &mut KeyboardEventBuilder {
         if alt {
-            self.evt.state |= KeyboardEvent::ALT_MASK;
+            self.evt.state |= KeyState::Alt as u32;
         }
         self
     }
-    pub fn num_lock_if(&mut self, num_lock: bool) -> &mut KeyboardEventBuilder {
+    pub const fn num_lock_if(&mut self, num_lock: bool) -> &mut KeyboardEventBuilder {
         if num_lock {
-            self.evt.state |= KeyboardEvent::NUMLOCK_MASK;
+            self.evt.state |= KeyState::NumLock as u32;
         }
         self
     }
-    pub fn super_if(&mut self, supa: bool) -> &mut KeyboardEventBuilder {
+    pub const fn super_if(&mut self, supa: bool) -> &mut KeyboardEventBuilder {
         if supa {
-            self.evt.state |= KeyboardEvent::SUPER_MASK;
+            self.evt.state |= KeyState::Super as u32;
         }
         self
     }
-    pub fn release_if(&mut self, release: bool) -> &mut KeyboardEventBuilder {
+    pub const fn release(&mut self) -> &mut KeyboardEventBuilder {
+        self.release_if(true)
+    }
+    pub const fn release_if(&mut self, release: bool) -> &mut KeyboardEventBuilder {
         if release {
-            self.evt.state |= KeyboardEvent::RELEASE_MASK;
+            self.evt.state |= KeyState::Release as u32;
         }
         self
     }
-    pub fn release(&mut self) -> &mut KeyboardEventBuilder {
-        self.evt.state |= KeyboardEvent::RELEASE_MASK;
-        self
-    }
-    pub fn build(&mut self) -> KeyboardEvent {
+    pub const fn build(&mut self) -> KeyboardEvent {
         self.evt
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::input::KeyState;
+
     use super::KeyboardEvent;
     use super::keycode;
     use super::keysym;
@@ -210,8 +240,8 @@ mod tests {
             .build();
         assert_eq!(keycode::KEY_A, evt.code);
         assert_eq!(keysym::SYM_LOWER_A, evt.ksym);
-        assert!(evt.is_flag_on(KeyboardEvent::SHIFT_MASK));
-        assert!(evt.is_flag_on(KeyboardEvent::CONTROL_MASK));
-        assert!(!evt.is_flag_on(KeyboardEvent::CAPSLOCK_MASK));
+        assert!(evt.is_state_on(KeyState::Control));
+        assert!(evt.is_state_on(KeyState::Shift));
+        assert!(!evt.is_state_on(KeyState::CapsLock));
     }
 }

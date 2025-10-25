@@ -3,7 +3,7 @@
 use crate::{
     input::{
         KeyboardEvent,
-        keysym::{SYM_LOWER_D, SYM_LOWER_F, SYM_LOWER_J, SYM_LOWER_K, SYM_SPACE, Keysym},
+        keysym::{Keysym, SYM_LOWER_D, SYM_LOWER_F, SYM_LOWER_J, SYM_LOWER_K, SYM_SPACE},
     },
     syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
