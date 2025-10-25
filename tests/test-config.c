@@ -737,7 +737,7 @@ void test_runtime_version()
 
     ok(version != NULL, "chewing_version returns a version string");
 
-    sprintf(buf, "%d.%d.%d%s", major, minor, patch, extra);
+    sprintf(buf, "%d.%d.%d-%s", major, minor, patch, extra);
     ok(strcmp(buf, version) == 0, "chewing_version can be created from components");
 }
 
