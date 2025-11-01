@@ -330,21 +330,25 @@ void test_del_bopomofo_as_mode_switch()
     ctx = chewing_new();
     start_testcase(ctx);
 
-    type_keystroke_by_string(ctx, "2k");        /* ㄉㄜ */
+    type_keystroke_by_string(ctx, "2k72k");        /* ㄉㄜ˙ ㄉㄜ */
     ok_bopomofo_buffer(ctx, "\xe3\x84\x89\xe3\x84\x9c" /* ㄉㄜ */ );
-    ok_preedit_buffer(ctx, "");
+    ok_preedit_buffer(ctx, "的");
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "");
+    ok_preedit_buffer(ctx, "的");
+
+    // can enter English after mode switch
+    type_keystroke_by_string(ctx, "test");
+    ok_preedit_buffer(ctx, "的test");
 
     chewing_set_ChiEngMode(ctx, CHINESE_MODE);
 
     type_keystroke_by_string(ctx, "ji");        /* ㄨㄛ */
     ok_bopomofo_buffer(ctx, "\xe3\x84\xa8\xe3\x84\x9b" /* ㄨㄛ */ );
-    ok_preedit_buffer(ctx, "");
+    ok_preedit_buffer(ctx, "的test");
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "");
+    ok_preedit_buffer(ctx, "的test");
 
     chewing_delete(ctx);
 }

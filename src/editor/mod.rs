@@ -261,7 +261,7 @@ impl Editor {
     }
     pub fn set_editor_options(&mut self, options: EditorOptions) {
         if self.shared.options.language_mode != options.language_mode {
-            self.shared.syl.clear();
+            self.cancel_entering_syllable();
         }
         self.shared.options = options;
     }
@@ -365,6 +365,11 @@ impl Editor {
         } else {
             Err(EditorError::InvalidState)
         }
+    }
+    pub fn cancel_entering_syllable(&mut self) {
+        self.shared.syl.clear();
+        self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
+        self.state = Box::new(Entering);
     }
     pub fn last_key_behavior(&self) -> EditorKeyBehavior {
         self.shared.last_key_behavior
