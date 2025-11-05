@@ -170,9 +170,6 @@ endif()
 
 add_library(libchewing ${ALL_INC} capi/src/chewing.c)
 set_target_properties(libchewing PROPERTIES LINKER_LANGUAGE C)
-target_compile_definitions(libchewing PRIVATE
-    CHEWING_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}/libchewing\"
-)
 target_include_directories(libchewing
     PUBLIC
         $<BUILD_INTERFACE:${INC_DIR}>
