@@ -9,6 +9,8 @@ What's New in libchewing (unreleased)
   - New API `chewing_handle_KeyboardEvent()` can be used to support any
     keyboard layout combination without updating libchewing. Other keyboard
     handling API will be deprecated in future release.
+  - New API `chewing_new3()` and `chewing_get_defaultDictonaryNames()` can be
+    used to initialize a chewing context with specific dictionaries enabled.
 
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the

@@ -144,5 +144,7 @@ CHEWING_0.10 {
 
 CHEWING_0.11 {
     global:
+        chewing_new3;
+        chewing_get_defaultDictionaryNames;
         chewing_handle_KeyboardEvent;
 } CHEWING_0.10;

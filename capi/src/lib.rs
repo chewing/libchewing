@@ -79,8 +79,10 @@ pub mod setup {
     pub use super::io::chewing_Terminate;
     pub use super::io::chewing_delete;
     pub use super::io::chewing_free;
+    pub use super::io::chewing_get_defaultDictionaryNames;
     pub use super::io::chewing_new;
     pub use super::io::chewing_new2;
+    pub use super::io::chewing_new3;
     pub use super::io::chewing_set_logger;
     pub use super::public::CHEWING_LOG_DEBUG;
     pub use super::public::CHEWING_LOG_ERROR;

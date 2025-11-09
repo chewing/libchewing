@@ -146,44 +146,9 @@
 
 #define CHEWING_VERSION_MAJOR 0
 
-#define CHEWING_VERSION_MINOR 10
+#define CHEWING_VERSION_MINOR 11
 
-#define CHEWING_VERSION_PATCH 3
-
-/**
- * Shift is activated.
- */
-#define KeyboardEvent_SHIFT_MASK (1 << 0)
-
-/**
- * Caps Lock is activated.
- */
-#define KeyboardEvent_CAPSLOCK_MASK (1 << 1)
-
-/**
- * Control is activated.
- */
-#define KeyboardEvent_CONTROL_MASK (1 << 2)
-
-/**
- * Alt or Meta is activated.
- */
-#define KeyboardEvent_ALT_MASK (1 << 3)
-
-/**
- * Num Lock is activated.
- */
-#define KeyboardEvent_NUMLOCK_MASK (1 << 4)
-
-/**
- * Super is activated.
- */
-#define KeyboardEvent_SUPER_MASK (1 << 6)
-
-/**
- * Key is released.
- */
-#define KeyboardEvent_RELEASE_MASK (1 << 30)
+#define CHEWING_VERSION_PATCH 0
 
 /**
  * Keyboard layout index.
@@ -283,6 +248,41 @@ struct ChewingContext *chewing_new2(const char *syspath,
                                     const char *userpath,
                                     void (*logger)(void *data, int level, const char *fmt, ...),
                                     void *loggerdata);
+
+/**
+ * Creates a new instance of the Chewing IM.
+ *
+ * The `syspath` is the directory path to system dictionary. The `userpath`
+ * is file path to user dictionary. User shall have enough permission to
+ * update this file. The `enabled_dicts` is a comma separated list of
+ * dictionary file names.
+ *
+ * The logger and loggerdata is logger function and its data.
+ *
+ * All parameters will be default if set to NULL.
+ *
+ * The return value is a pointer to the new Chewing IM instance. See also
+ * the [chewing_new], [chewing_delete] function.
+ *
+ * # Safety
+ *
+ * This function should be called with valid pointers.
+ */
+struct ChewingContext *chewing_new3(const char *syspath,
+                                    const char *userpath,
+                                    const char *enabled_dicts,
+                                    void (*logger)(void *data, int level, const char *fmt, ...),
+                                    void *loggerdata);
+
+/**
+ * Returns the default comma separated dictionary names.
+ *
+ * This function should be used with [`chewing_new3`].
+ *
+ * The return value is a const pointer to a character string. The pointer
+ * don't need to be freed.
+ */
+const char *chewing_get_defaultDictionaryNames(void);
 
 /**
  * Releases the resources used by the given Chewing IM instance.

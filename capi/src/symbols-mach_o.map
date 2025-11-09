@@ -93,6 +93,8 @@ _chewing_keystroke_CheckAbsorb
 _chewing_keystroke_CheckIgnore
 _chewing_new
 _chewing_new2
+_chewing_new3
+_chewing_get_defaultDictionaryNames
 _chewing_phone_to_bopomofo
 _chewing_Reset
 _chewing_set_addPhraseDirection

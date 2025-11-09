@@ -94,6 +94,8 @@ EXPORTS
     chewing_keystroke_CheckIgnore;
     chewing_new;
     chewing_new2;
+    chewing_new3;
+    chewing_get_defaultDictionaryNames;
     chewing_phone_to_bopomofo;
     chewing_Reset;
     chewing_set_addPhraseDirection;
