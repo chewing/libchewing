@@ -741,21 +741,6 @@ void test_runtime_version()
     ok(strcmp(buf, version) == 0, "chewing_version can be created from components");
 }
 
-void test_dictionary_d()
-{
-    ChewingContext *ctx;
-
-    ctx = chewing_new2(TEST_DATA_DIR, NULL, NULL, NULL);
-    start_testcase(ctx);
-
-    ok(ctx != NULL, "chewing_new2 returns `%#p' shall not be `%#p'", ctx, NULL);
-
-    type_keystroke_by_string(ctx, "k6j94<E>");
-    ok_commit_buffer(ctx, "額外");
-
-    chewing_delete(ctx);
-}
-
 int main(int argc, char *argv[])
 {
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
@@ -784,8 +769,6 @@ int main(int argc, char *argv[])
     test_new2();
 
     test_runtime_version();
-
-    test_dictionary_d();
 
     return exit_status();
 }

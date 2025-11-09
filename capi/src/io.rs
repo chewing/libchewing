@@ -11,7 +11,8 @@ use std::{
 use chewing::{
     conversion::{ChewingEngine, FuzzyChewingEngine, Interval, SimpleEngine, Symbol},
     dictionary::{
-        Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie, UserDictionaryLoader,
+        DEFAULT_DICT_NAMES, Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie,
+        UserDictionaryLoader,
     },
     editor::{
         AbbrevTable, BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior,
@@ -143,7 +144,7 @@ pub unsafe extern "C" fn chewing_new2(
             sys_loader = sys_loader.sys_path(search_path);
         }
     }
-    let dictionaries = match sys_loader.load() {
+    let system_dicts = match sys_loader.load(DEFAULT_DICT_NAMES) {
         Ok(d) => d,
         Err(e) => {
             let builtin = Trie::new(&include_bytes!("../data/mini.dat")[..]);
@@ -154,7 +155,6 @@ pub unsafe extern "C" fn chewing_new2(
             vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
         }
     };
-    let drop_in_dicts = sys_loader.load_drop_in().unwrap_or_default();
     let abbrev = sys_loader.load_abbrev();
     let abbrev = match abbrev {
         Ok(abbr) => abbr,
@@ -190,7 +190,6 @@ pub unsafe extern "C" fn chewing_new2(
 
     let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
 
-    let system_dicts = Vec::from_iter(dictionaries.into_iter().chain(drop_in_dicts));
     let dict = Layered::new(system_dicts, user_dictionary);
     let conversion_engine = Box::new(ChewingEngine::new());
     let kb_compat = KeyboardLayoutCompat::Default;

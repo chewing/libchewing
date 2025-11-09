@@ -34,19 +34,26 @@ fn file_exists(path: &Path) -> bool {
     }
 }
 
-pub(crate) fn sys_path_from_env_var() -> String {
+pub fn sys_path_from_env_var() -> String {
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
         info!("Using syspath from env CHEWING_PATH: {}", chewing_path);
         chewing_path
     } else {
-        let user_datadir = data_dir();
-        let sys_datadir = SYS_PATH.unwrap_or(DEFAULT_SYS_PATH);
-        let chewing_path = if let Some(datadir) = user_datadir.as_ref().and_then(|p| p.to_str()) {
-            format!("{datadir}{SEARCH_PATH_SEP}{sys_datadir}")
-        } else {
-            sys_datadir.into()
-        };
+        let mut paths = vec![];
+        if let Some(user_datadir) = data_dir() {
+            paths.push(
+                user_datadir
+                    .join(DICT_FOLDER)
+                    .to_string_lossy()
+                    .into_owned(),
+            );
+            paths.push(user_datadir.to_string_lossy().into_owned());
+        }
+        let sys_datadir = PathBuf::from(SYS_PATH.unwrap_or(DEFAULT_SYS_PATH));
+        paths.push(sys_datadir.join(DICT_FOLDER).to_string_lossy().into_owned());
+        paths.push(sys_datadir.to_string_lossy().into_owned());
+        let chewing_path = paths.join(&SEARCH_PATH_SEP.to_string());
         info!("Using default syspath: {}", chewing_path);
         chewing_path
     }
@@ -72,26 +79,54 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
     None
 }
 
-pub(crate) fn find_drop_in_dat_by_path(search_path: &str) -> Vec<PathBuf> {
-    let mut results = vec![];
+pub fn find_files_by_ext(search_path: &str, exts: &[&str]) -> Vec<PathBuf> {
+    let mut files = vec![];
     for path in search_path.split(SEARCH_PATH_SEP) {
-        let prefix = Path::new(path).join(DICT_FOLDER);
-        info!("Search dictionary files in {}", prefix.display());
+        let prefix = Path::new(path).to_path_buf();
+        info!(
+            "Search files with extension {:?} in {}",
+            exts,
+            prefix.display()
+        );
         if let Ok(read_dir) = prefix.read_dir() {
-            let mut files = vec![];
             for entry in read_dir.flatten() {
-                let path = entry.path();
-                let is_dat = path.extension().and_then(OsStr::to_str) == Some("dat");
-                if path.is_file() && is_dat {
-                    info!("Found {}", path.display());
-                    files.push(path);
+                let file_path = entry.path();
+                if file_path.is_file()
+                    && file_path
+                        .extension()
+                        .and_then(OsStr::to_str)
+                        .is_some_and(|ext| exts.contains(&ext))
+                {
+                    info!("Found {}", file_path.display());
+                    files.push(file_path.to_path_buf());
                 }
             }
-            files.sort();
-            results.extend(files);
         }
     }
-    results
+    files
+}
+
+pub fn find_files_by_names<T>(search_path: &str, names: &[T]) -> Vec<PathBuf>
+where
+    T: AsRef<str>,
+{
+    let mut files = vec![];
+    for path in search_path.split(SEARCH_PATH_SEP) {
+        let prefix = Path::new(path).to_path_buf();
+        info!("Search files in {}", prefix.display());
+        if let Ok(read_dir) = prefix.read_dir() {
+            for entry in read_dir.flatten() {
+                let file_path = entry.path();
+                if file_path.is_file()
+                    && names.iter().any(|name| file_path.ends_with(name.as_ref()))
+                {
+                    info!("Found {}", file_path.display());
+                    files.push(file_path.to_path_buf());
+                }
+            }
+        }
+    }
+    files
 }
 
 /// Returns the path to the user's default chewing data directory.
@@ -186,7 +221,13 @@ pub fn userphrase_path() -> Option<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use super::{data_dir, project_data_dir};
+    use std::{error::Error, fs};
+
+    use tempfile::TempDir;
+
+    use super::{
+        SEARCH_PATH_SEP, data_dir, find_files_by_ext, find_files_by_names, project_data_dir,
+    };
 
     #[test]
     fn support_project_data_dir() {
@@ -199,5 +240,63 @@ mod tests {
             let data_dir = data_dir();
             assert!(data_dir.is_some());
         }
+    }
+
+    #[test]
+    fn find_files_by_ext_from_places_two_exts() -> Result<(), Box<dyn Error>> {
+        let project_data_dir = TempDir::new()?;
+        let user_data_dir = TempDir::new()?;
+        let user_drop_in_dir = TempDir::new()?;
+
+        let project_tsi_dat = project_data_dir.path().join("tsi.dat");
+        let user_tsi_dat = user_data_dir.path().join("tsi.dat");
+        let user_sqlite3 = user_drop_in_dir.path().join("chewing.sqlite3");
+
+        fs::write(&project_tsi_dat, "")?;
+        fs::write(&user_tsi_dat, "")?;
+        fs::write(&user_sqlite3, "")?;
+
+        let search_path = [
+            project_data_dir.path().to_string_lossy().as_ref(),
+            user_data_dir.path().to_string_lossy().as_ref(),
+            user_drop_in_dir.path().to_string_lossy().as_ref(),
+        ]
+        .join(&SEARCH_PATH_SEP.to_string());
+
+        assert_eq!(
+            [project_tsi_dat, user_tsi_dat, user_sqlite3].as_slice(),
+            find_files_by_ext(&search_path, &["dat", "sqlite3"])
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn find_files_by_names_from_places_two_names() -> Result<(), Box<dyn Error>> {
+        let project_data_dir = TempDir::new()?;
+        let user_data_dir = TempDir::new()?;
+        let user_drop_in_dir = TempDir::new()?;
+
+        let project_tsi_dat = project_data_dir.path().join("tsi.dat");
+        let user_tsi_dat = user_data_dir.path().join("tsi.dat");
+        let user_alt_dat = user_drop_in_dir.path().join("alt.dat");
+
+        fs::write(&project_tsi_dat, "")?;
+        fs::write(&user_tsi_dat, "")?;
+        fs::write(&user_alt_dat, "")?;
+
+        let search_path = [
+            project_data_dir.path().to_string_lossy().as_ref(),
+            user_data_dir.path().to_string_lossy().as_ref(),
+            user_drop_in_dir.path().to_string_lossy().as_ref(),
+        ]
+        .join(&SEARCH_PATH_SEP.to_string());
+
+        assert_eq!(
+            [project_tsi_dat, user_tsi_dat, user_alt_dat].as_slice(),
+            find_files_by_names(&search_path, &["tsi.dat", "alt.dat"])
+        );
+
+        Ok(())
     }
 }

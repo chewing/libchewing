@@ -44,13 +44,15 @@ unsafe fn assert_phrase_only_in_user_dictionary(
 ) -> Result<(), Box<dyn Error>> {
     assert!(!ctx.is_null());
 
-    chewing_handle_Default(ctx, b'h' as c_int);
-    chewing_handle_Default(ctx, b'k' as c_int);
-    chewing_handle_Default(ctx, b'4' as c_int);
-    chewing_handle_Default(ctx, b'g' as c_int);
-    chewing_handle_Default(ctx, b'4' as c_int);
+    unsafe {
+        chewing_handle_Default(ctx, b'h' as c_int);
+        chewing_handle_Default(ctx, b'k' as c_int);
+        chewing_handle_Default(ctx, b'4' as c_int);
+        chewing_handle_Default(ctx, b'g' as c_int);
+        chewing_handle_Default(ctx, b'4' as c_int);
+    }
 
-    let preedit = chewing_buffer_String(ctx);
+    let preedit = unsafe { chewing_buffer_String(ctx) };
     let preedit = unsafe { CStr::from_ptr(preedit) };
     assert_eq!(preedit, CString::new("策試")?.as_c_str());
 

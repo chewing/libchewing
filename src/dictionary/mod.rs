@@ -13,7 +13,10 @@ use std::{
 use crate::zhuyin::{Syllable, SyllableSlice};
 
 pub use layered::Layered;
-pub use loader::{LoadDictionaryError, SystemDictionaryLoader, UserDictionaryLoader};
+pub use loader::{
+    DEFAULT_DICT_NAMES, LoadDictionaryError, SingleDictionaryLoader, SystemDictionaryLoader,
+    UserDictionaryLoader,
+};
 #[cfg(feature = "sqlite")]
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};

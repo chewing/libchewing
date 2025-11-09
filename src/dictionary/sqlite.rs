@@ -55,7 +55,7 @@ pub struct SqliteDictionary {
     conn: Connection,
     path: Option<PathBuf>,
     info: DictionaryInfo,
-    read_only: bool,
+    readonly: bool,
 }
 
 impl SqliteDictionary {
@@ -72,12 +72,12 @@ impl SqliteDictionary {
             conn,
             path: Some(path),
             info,
-            read_only: false,
+            readonly: false,
         })
     }
 
     /// TODO: doc
-    pub fn open_read_only<P: AsRef<Path>>(
+    pub fn open_readonly<P: AsRef<Path>>(
         path: P,
     ) -> Result<SqliteDictionary, SqliteDictionaryError> {
         let path = path.as_ref().to_path_buf();
@@ -89,7 +89,7 @@ impl SqliteDictionary {
             conn,
             path: Some(path),
             info,
-            read_only: true,
+            readonly: true,
         })
     }
 
@@ -104,7 +104,7 @@ impl SqliteDictionary {
             conn,
             path: None,
             info,
-            read_only: false,
+            readonly: false,
         })
     }
 
@@ -376,7 +376,7 @@ impl Dictionary for SqliteDictionary {
     }
 
     fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        if !self.read_only { Some(self) } else { None }
+        if !self.readonly { Some(self) } else { None }
     }
 }
 
@@ -395,7 +395,7 @@ impl DictionaryMut for SqliteDictionary {
         syllables: &dyn SyllableSlice,
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
-        if self.read_only {
+        if self.readonly {
             return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
@@ -419,7 +419,7 @@ impl DictionaryMut for SqliteDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), UpdateDictionaryError> {
-        if self.read_only {
+        if self.readonly {
             return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
             });
@@ -650,14 +650,14 @@ mod tests {
     }
 
     #[test]
-    fn open_read_only() {
+    fn open_readonly() {
         let temp_dir = tempdir().expect("Unable to create tempdir");
         let temp_path = temp_dir.path().join("readonly.sqlite3");
         let mut builder = SqliteDictionaryBuilder::new();
         builder.build(&temp_path).expect("Build failure");
 
         let mut dict =
-            SqliteDictionary::open_read_only(&temp_path).expect("Unable to open database");
+            SqliteDictionary::open_readonly(&temp_path).expect("Unable to open database");
         assert_eq!(temp_path.to_path_buf(), dict.path().unwrap());
         assert!(dict.as_dict_mut().is_none());
     }

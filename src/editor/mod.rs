@@ -23,8 +23,8 @@ use crate::{
         special_symbol_input,
     },
     dictionary::{
-        Dictionary, DictionaryMut, Layered, LookupStrategy, SystemDictionaryLoader,
-        UpdateDictionaryError, UserDictionaryLoader,
+        DEFAULT_DICT_NAMES, Dictionary, DictionaryMut, Layered, LookupStrategy,
+        SystemDictionaryLoader, UpdateDictionaryError, UserDictionaryLoader,
     },
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::{Syllable, SyllableSlice},
@@ -190,9 +190,7 @@ pub(crate) struct SharedState {
 impl Editor {
     pub fn chewing() -> Result<Editor, Box<dyn Error>> {
         let sys_loader = SystemDictionaryLoader::new();
-        let base_dict = sys_loader.load()?;
-        let drop_in_dict = sys_loader.load_drop_in()?;
-        let system_dict = Vec::from_iter(base_dict.into_iter().chain(drop_in_dict));
+        let system_dict = sys_loader.load(DEFAULT_DICT_NAMES)?;
         let user_dict = UserDictionaryLoader::new().load()?;
         let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
         let dict = Layered::new(system_dict, user_dict);

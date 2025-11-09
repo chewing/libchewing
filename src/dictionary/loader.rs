@@ -7,25 +7,25 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{info, warn};
+use log::{error, info};
 
 use crate::{
     editor::{AbbrevTable, SymbolSelector},
-    path::{find_drop_in_dat_by_path, find_path_by_files, sys_path_from_env_var, userphrase_path},
+    path::{find_files_by_names, find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
-use super::{Dictionary, Trie, TrieBuf, uhash};
+use super::{Dictionary, TrieBuf, uhash};
 
-const SD_WORD_FILE_NAME: &str = "word.dat";
-const SD_TSI_FILE_NAME: &str = "tsi.dat";
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 // const UD_TRIE_FILE_NAME: &str = "chewing.dat";
 const UD_SQLITE_FILE_NAME: &str = "chewing.sqlite3";
 const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
+
+pub const DEFAULT_DICT_NAMES: &[&str] = &["word.dat", "tsi.dat"];
 
 /// Automatically searchs and loads system dictionaries.
 #[derive(Debug, Default)]
@@ -64,56 +64,35 @@ impl SystemDictionaryLoader {
         self.sys_path = Some(search_path.into());
         self
     }
-    /// Searches and loads the system dictionaries.
+    /// Searches and loads the specified dictionaries.
     ///
     /// Search path can be changed using [`sys_path`][SystemDictionaryLoader::sys_path].
-    ///
-    /// If no dictionary were found, a builtn minimum dictionary will be loaded.
-    pub fn load(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
+    pub fn load<T>(&self, names: &[T]) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError>
+    where
+        T: AsRef<str>,
+    {
         let search_path = if let Some(sys_path) = &self.sys_path {
             sys_path.to_owned()
         } else {
             sys_path_from_env_var()
         };
-        let sys_path = find_path_by_files(&search_path, &[SD_WORD_FILE_NAME, SD_TSI_FILE_NAME])
-            .ok_or(LoadDictionaryError::NotFound)?;
-
-        let mut results: Vec<Box<dyn Dictionary>> = vec![];
-
-        let word_dict_path = sys_path.join(SD_WORD_FILE_NAME);
-        info!("Loading {SD_WORD_FILE_NAME}");
-        let word_dict = Trie::open(word_dict_path).map_err(io_err)?;
-        results.push(Box::new(word_dict));
-
-        let tsi_dict_path = sys_path.join(SD_TSI_FILE_NAME);
-        info!("Loading {SD_TSI_FILE_NAME}");
-        let tsi_dict = Trie::open(tsi_dict_path).map_err(io_err)?;
-        results.push(Box::new(tsi_dict));
-
-        Ok(results)
-    }
-    /// Searches and loads the "drop-in" dictionaries.
-    ///
-    /// Drop-in dictionaries are dictionary files placed under the
-    /// `dictionary.d` folder that exist in any folder on the search path.
-    ///
-    /// Loading order are decided by the filesystem's sorting order.
-    pub fn load_drop_in(&self) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError> {
-        let search_path = if let Some(sys_path) = &self.sys_path {
-            sys_path.to_owned()
-        } else {
-            sys_path_from_env_var()
-        };
-        let files = find_drop_in_dat_by_path(&search_path);
-        let mut results: Vec<Box<dyn Dictionary>> = vec![];
-        for path in files {
-            info!("Loading {}", path.display());
-            match Trie::open(&path) {
-                Ok(dict) => results.push(Box::new(dict)),
-                Err(e) => warn!("Failed to load {}: {e}", path.display()),
+        let loader = SingleDictionaryLoader::new();
+        let files = find_files_by_names(&search_path, &names);
+        let mut results = vec![];
+        'next: for target_name in names {
+            for file in files.iter() {
+                if let Some(file_name) = file.file_name()
+                    && target_name.as_ref() == file_name.to_string_lossy()
+                    && let Ok(dict) = loader.guess_format_and_load(&file)
+                {
+                    info!("Load dictionary {}", file.display());
+                    results.push(dict);
+                    continue 'next;
+                }
             }
+            error!("Dictionary file not found: {}", target_name.as_ref());
+            return Err(LoadDictionaryError::NotFound);
         }
-
         Ok(results)
     }
     /// Loads the abbrev table.
@@ -165,6 +144,8 @@ impl UserDictionaryLoader {
     /// If no user dictionary were found, a new dictionary will be created at
     /// the default path.
     pub fn load(self) -> io::Result<Box<dyn Dictionary>> {
+        let mut loader = SingleDictionaryLoader::new();
+        loader.migrate_sqlite(true);
         let data_path = self
             .data_path
             .or_else(userphrase_path)
@@ -174,7 +155,7 @@ impl UserDictionaryLoader {
         }
         if data_path.exists() {
             info!("Loading {}", data_path.display());
-            return guess_format_and_load(&data_path);
+            return loader.guess_format_and_load(&data_path);
         }
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
@@ -182,7 +163,7 @@ impl UserDictionaryLoader {
             fs::create_dir_all(userdata_dir)?;
         }
         info!("Loading {}", data_path.display());
-        let mut fresh_dict = init_user_dictionary(&data_path)?;
+        let mut fresh_dict = loader.guess_format_and_load(&data_path)?;
 
         let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);
         if cfg!(feature = "sqlite") && user_dict_path.exists() {
@@ -240,33 +221,52 @@ impl UserDictionaryLoader {
     }
 }
 
-fn guess_format_and_load(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
-    let metadata = dict_path.metadata()?;
-    if metadata.permissions().readonly() {
-        return Err(io::Error::from(io::ErrorKind::PermissionDenied));
-    }
-
-    init_user_dictionary(dict_path)
+#[derive(Debug)]
+pub struct SingleDictionaryLoader {
+    migrate_sqlite: bool,
 }
 
-fn init_user_dictionary(dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
-    let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
-    if ext.eq_ignore_ascii_case("sqlite3") {
-        #[cfg(feature = "sqlite")]
-        {
-            SqliteDictionary::open(dict_path)
+impl SingleDictionaryLoader {
+    pub fn new() -> SingleDictionaryLoader {
+        SingleDictionaryLoader {
+            migrate_sqlite: false,
+        }
+    }
+    pub fn migrate_sqlite(&mut self, migrate: bool) {
+        self.migrate_sqlite = migrate;
+    }
+    pub fn guess_format_and_load(&self, dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
+        if self.migrate_sqlite && dict_path.is_file() {
+            let metadata = dict_path.metadata()?;
+            if metadata.permissions().readonly() {
+                return Err(io::Error::from(io::ErrorKind::PermissionDenied));
+            }
+        }
+
+        let ext = dict_path.extension().unwrap_or(OsStr::new("unknown"));
+        if ext.eq_ignore_ascii_case("sqlite3") {
+            #[cfg(feature = "sqlite")]
+            {
+                if self.migrate_sqlite {
+                    SqliteDictionary::open(dict_path)
+                        .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
+                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+                } else {
+                    SqliteDictionary::open_readonly(dict_path)
+                        .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
+                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+                }
+            }
+            #[cfg(not(feature = "sqlite"))]
+            {
+                Err(io::Error::from(io::ErrorKind::Unsupported))
+            }
+        } else if ext.eq_ignore_ascii_case("dat") {
+            TrieBuf::open(dict_path)
                 .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+        } else {
+            Err(io::Error::from(io::ErrorKind::Other))
         }
-        #[cfg(not(feature = "sqlite"))]
-        {
-            Err(io::Error::from(io::ErrorKind::Unsupported))
-        }
-    } else if ext.eq_ignore_ascii_case("dat") {
-        TrieBuf::open(dict_path)
-            .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
-    } else {
-        Err(io::Error::from(io::ErrorKind::Other))
     }
 }
