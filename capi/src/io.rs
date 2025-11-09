@@ -376,6 +376,11 @@ pub unsafe extern "C" fn chewing_config_get_int(
     name: *const c_char,
 ) -> c_int {
     let ctx = as_ref_or_return!(ctx, ERROR);
+
+    if unsafe { chewing_config_has_option(ctx, name) } != 1 {
+        return ERROR;
+    }
+
     let cstr = unsafe { CStr::from_ptr(name) };
     let name = cstr.to_string_lossy();
 
@@ -422,6 +427,11 @@ pub unsafe extern "C" fn chewing_config_set_int(
     value: c_int,
 ) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
+
+    if unsafe { chewing_config_has_option(ctx, name) } != 1 {
+        return ERROR;
+    }
+
     let cstr = unsafe { CStr::from_ptr(name) };
     let name = cstr.to_string_lossy();
 
@@ -541,6 +551,11 @@ pub unsafe extern "C" fn chewing_config_get_str(
     value: *mut *mut c_char,
 ) -> c_int {
     let ctx = as_ref_or_return!(ctx, ERROR);
+
+    if unsafe { chewing_config_has_option(ctx, name) } != 1 {
+        return ERROR;
+    }
+
     let cstr = unsafe { CStr::from_ptr(name) };
     let name = cstr.to_string_lossy();
 
@@ -582,6 +597,11 @@ pub unsafe extern "C" fn chewing_config_set_str(
     value: *const c_char,
 ) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
+
+    if unsafe { chewing_config_has_option(ctx, name) } != 1 {
+        return ERROR;
+    }
+
     let cstr = unsafe { CStr::from_ptr(name) };
     let name = cstr.to_string_lossy();
     let cstr = unsafe { CStr::from_ptr(value) };
