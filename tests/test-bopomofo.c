@@ -539,6 +539,36 @@ void test_select_candidate_shift_cursor_rearword()
     chewing_delete(ctx);
 }
 
+void test_select_candidate_sorted()
+{
+    ChewingContext *ctx;
+
+    static const char *CAND1[] = {
+        "妙", "廟", "繆", "玅", "謬", "庙", "庿"
+    };
+
+    static const char *CAND2[] = {
+        "廟", "妙", "繆", "玅", "謬", "庙", "庿"
+    };
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+
+    chewing_set_candPerPage(ctx, 2);
+    chewing_set_spaceAsSelection(ctx, 1);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    ok(chewing_config_set_int(ctx, "chewing.sort_candidates_by_frequency", 1) == 0, "set config should return OK");
+    type_keystroke_by_string(ctx, "aul4 ");
+    ok_candidate(ctx, CAND1, ARRAY_SIZE(CAND1));
+    type_keystroke_by_string(ctx, "2<E>");
+    type_keystroke_by_string(ctx, "aul4 ");
+    ok_candidate(ctx, CAND2, ARRAY_SIZE(CAND2));
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -555,6 +585,7 @@ void test_select_candidate()
     test_select_candidate_second_page_rewind();
     test_select_candidate_shift_cursor();
     test_select_candidate_shift_cursor_rearword();
+    test_select_candidate_sorted();
 }
 
 void test_Esc_not_entering_chewing()

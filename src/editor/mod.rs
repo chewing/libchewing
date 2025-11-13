@@ -77,6 +77,7 @@ pub struct EditorOptions {
     pub lookup_strategy: LookupStrategy,
     pub conversion_engine: ConversionEngineKind,
     pub enable_fullwidth_toggle_key: bool,
+    pub sort_candidates_by_frequency: bool,
 }
 
 impl Default for EditorOptions {
@@ -97,6 +98,7 @@ impl Default for EditorOptions {
             // FIXME may be out of sync with the engine used
             conversion_engine: ConversionEngineKind::ChewingEngine,
             enable_fullwidth_toggle_key: true,
+            sort_candidates_by_frequency: false,
         }
     }
 }
@@ -1558,7 +1560,7 @@ mod tests {
     use crate::{
         conversion::ChewingEngine,
         dictionary::{Layered, TrieBuf},
-        editor::{EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable, estimate},
+        editor::{EditorKeyBehavior, EditorOptions, SymbolSelector, abbrev::AbbrevTable, estimate},
         input::{
             KeyboardEvent, keycode,
             keymap::{QWERTY_MAP, map_ascii},
@@ -1639,6 +1641,102 @@ mod tests {
         );
         assert!(editor.syllable_buffer().is_empty());
         assert_eq!("冊", editor.display());
+    }
+
+    #[test]
+    fn editing_mode_input_bopomofo_select() {
+        let dict = TrieBuf::from([(
+            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("冊", 100), ("測", 200)],
+        )]);
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let conversion_engine = Box::new(ChewingEngine::new());
+        let estimate = LaxUserFreqEstimate::new(0);
+        let abbrev = AbbrevTable::new();
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
+
+        editor.set_editor_options(EditorOptions {
+            sort_candidates_by_frequency: false,
+            ..Default::default()
+        });
+
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_H)
+                .ksym(keysym::SYM_LOWER_H)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_K)
+                .ksym(keysym::SYM_LOWER_H)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_4)
+                .ksym(keysym::SYM_4)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_DOWN)
+                .ksym(keysym::SYM_DOWN)
+                .build(),
+        );
+        let candidates = editor
+            .all_candidates()
+            .expect("should be in selection mode");
+        assert_eq!(vec!["冊", "測"], candidates);
+    }
+
+    #[test]
+    fn editing_mode_input_bopomofo_select_sorted() {
+        let dict = TrieBuf::from([(
+            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![("冊", 100), ("測", 200)],
+        )]);
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let conversion_engine = Box::new(ChewingEngine::new());
+        let estimate = LaxUserFreqEstimate::new(0);
+        let abbrev = AbbrevTable::new();
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
+
+        editor.set_editor_options(EditorOptions {
+            sort_candidates_by_frequency: true,
+            ..Default::default()
+        });
+
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_H)
+                .ksym(keysym::SYM_LOWER_H)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_K)
+                .ksym(keysym::SYM_LOWER_H)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_4)
+                .ksym(keysym::SYM_4)
+                .build(),
+        );
+        editor.process_keyevent(
+            KeyboardEvent::builder()
+                .code(keycode::KEY_DOWN)
+                .ksym(keysym::SYM_DOWN)
+                .build(),
+        );
+        let candidates = editor
+            .all_candidates()
+            .expect("should be in selection mode");
+        assert_eq!(vec!["測", "冊"], candidates);
     }
 
     #[test]

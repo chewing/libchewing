@@ -4,6 +4,8 @@ What's New in libchewing (unreleased)
 * Features
   - cli: Now outputs and reads dictionary metadata in source file
   - cli: Detects mismatched phrase word count and syllable count
+  - editor: Support optional sorting candidates by frequency. Previously the
+    candidates are always sorted by their order in the dictionary.
 
 * Developer Features
   - New API `chewing_handle_KeyboardEvent()` can be used to support any
@@ -11,6 +13,8 @@ What's New in libchewing (unreleased)
     handling API will be deprecated in future release.
   - New API `chewing_new3()` and `chewing_get_defaultDictonaryNames()` can be
     used to initialize a chewing context with specific dictionaries enabled.
+  - New boolean config option `chewing.sort_candidates_by_frequency` can be
+    set to enable sorting candidates by frequency.
 
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the

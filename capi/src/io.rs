@@ -417,6 +417,7 @@ pub unsafe extern "C" fn chewing_config_has_option(
             | "chewing.space_is_select_key"
             | "chewing.conversion_engine"
             | "chewing.enable_fullwidth_toggle_key"
+            | "chewing.sort_candidates_by_frequency"
     );
 
     ret as c_int
@@ -468,6 +469,7 @@ pub unsafe extern "C" fn chewing_config_get_int(
             ConversionEngineKind::FuzzyChewingEngine => FUZZY_CHEWING_CONVERSION_ENGINE,
         },
         "chewing.enable_fullwidth_toggle_key" => option.enable_fullwidth_toggle_key as c_int,
+        "chewing.sort_candidates_by_frequency" => option.sort_candidates_by_frequency as c_int,
         _ => ERROR,
     }
 }
@@ -587,6 +589,10 @@ pub unsafe extern "C" fn chewing_config_set_int(
         "chewing.enable_fullwidth_toggle_key" => {
             ensure_bool!(value);
             options.enable_fullwidth_toggle_key = value > 0;
+        }
+        "chewing.sort_candidates_by_frequency" => {
+            ensure_bool!(value);
+            options.sort_candidates_by_frequency = value > 0;
         }
         _ => return ERROR,
     };

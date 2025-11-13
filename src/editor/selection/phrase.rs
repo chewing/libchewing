@@ -1,4 +1,4 @@
-use std::cmp::min;
+use std::cmp::{Reverse, min};
 
 use crate::{
     conversion::{Composition, Gap, Interval},
@@ -228,8 +228,7 @@ impl PhraseSelector {
                 self.lookup_strategy,
             )
             .into_iter()
-            .map(|phrase| phrase.into())
-            .collect::<Vec<String>>();
+            .collect::<Vec<_>>();
         if self.end - self.begin == 1 {
             let alt = editor
                 .syl
@@ -237,12 +236,14 @@ impl PhraseSelector {
             for &syl in alt {
                 candidates.extend(
                     dict.lookup_all_phrases(&[syl], self.lookup_strategy)
-                        .into_iter()
-                        .map(|ph| ph.into()),
+                        .into_iter(),
                 )
             }
         }
-        candidates
+        if editor.options.sort_candidates_by_frequency {
+            candidates.sort_by_key(|ph| Reverse(ph.freq()));
+        }
+        candidates.into_iter().map(|ph| ph.into()).collect()
     }
 
     pub(crate) fn interval(&self, phrase: impl Into<Box<str>>) -> Interval {
