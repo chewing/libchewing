@@ -3,7 +3,7 @@ name = "chewing"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
 documentation = "https://docs.rs/chewing"
 license = "LGPL-2.1-or-later"
-version = "0.11.0-alpha.3"
+version = "0.11.0-alpha.4"
 rust-version = "1.88.0"
 edition = "2024"
 

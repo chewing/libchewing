@@ -7,7 +7,7 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-chewing = { version = "0.11.0-alpha.3", path = "../.." }
+chewing = { version = "0.11.0-alpha.4", path = "../.." }
 
 [features]
 sqlite = ["chewing/sqlite"]
