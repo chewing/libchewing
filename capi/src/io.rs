@@ -1789,11 +1789,49 @@ pub unsafe extern "C" fn chewing_handle_KeyboardEvent(
 ) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
 
-    ctx.editor.process_keyevent(KeyboardEvent {
-        code: Keycode(code),
-        ksym: Keysym(ksym),
-        state,
-    });
+    // XXX hack for selkey
+    let key = if ctx.editor.is_selecting() {
+        match ctx
+            .sel_keys
+            .0
+            .iter()
+            .position(|&it| it == Keysym(ksym).to_unicode() as i32)
+        {
+            Some(idx) => {
+                let key = match idx {
+                    0 => b'1',
+                    1 => b'2',
+                    2 => b'3',
+                    3 => b'4',
+                    4 => b'5',
+                    5 => b'6',
+                    6 => b'7',
+                    7 => b'8',
+                    8 => b'9',
+                    9 => b'0',
+                    _ => b'0',
+                };
+                Some(key as c_int)
+            }
+            None => None,
+        }
+    } else {
+        None
+    };
+
+    let evt = if let Some(key) = key {
+        let mut evt = map_ascii(&ctx.keymap, key as u8);
+        evt.state = state;
+        evt
+    } else {
+        KeyboardEvent {
+            code: Keycode(code),
+            ksym: Keysym(ksym),
+            state,
+        }
+    };
+
+    ctx.editor.process_keyevent(evt);
     OK
 }
 
@@ -2107,31 +2145,6 @@ pub unsafe extern "C" fn chewing_handle_Capslock(ctx: *mut ChewingContext) -> c_
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn chewing_handle_Default(ctx: *mut ChewingContext, key: c_int) -> c_int {
     let ctx = as_mut_or_return!(ctx, ERROR);
-
-    // XXX hack for selkey
-    let key = if ctx.editor.is_selecting() {
-        match ctx.sel_keys.0.iter().position(|&it| it == key) {
-            Some(idx) => {
-                let key = match idx {
-                    0 => b'1',
-                    1 => b'2',
-                    2 => b'3',
-                    3 => b'4',
-                    4 => b'5',
-                    5 => b'6',
-                    6 => b'7',
-                    7 => b'8',
-                    8 => b'9',
-                    9 => b'0',
-                    _ => b'0',
-                };
-                key as c_int
-            }
-            None => key,
-        }
-    } else {
-        key
-    };
 
     let evt = map_ascii(&ctx.keymap, key as u8);
 
