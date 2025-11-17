@@ -12,7 +12,7 @@ pub trait UserFreqEstimate {
     /// Returns the current time in ticks.
     fn now(&self) -> u64;
     /// Returns the estimated new user phrase frequency.
-    fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32;
+    fn estimate(&self, phrase: &Phrase, max_freq: u32) -> u32;
 }
 
 /// Loosely tracks time without persisting to disk.
@@ -42,7 +42,7 @@ impl LaxUserFreqEstimate {
 
 const SHORT_INCREASE_FREQ: u32 = 10;
 const MEDIUM_INCREASE_FREQ: u32 = 5;
-const LONG_DECREASE_FREQ: u32 = 10;
+const LONG_INCREASE_FREQ: u32 = 1;
 const MAX_USER_FREQ: u32 = 9999999;
 
 impl UserFreqEstimate for LaxUserFreqEstimate {
@@ -54,33 +54,39 @@ impl UserFreqEstimate for LaxUserFreqEstimate {
         self.lifetime
     }
 
-    fn estimate(&self, phrase: &Phrase, orig_freq: u32, max_freq: u32) -> u32 {
-        let delta_time = self.lifetime - phrase.last_used().unwrap_or(self.lifetime);
-
-        if delta_time < 4000 {
-            let delta = if phrase.freq() >= max_freq {
-                ((max_freq - orig_freq) / 5 + 1).min(SHORT_INCREASE_FREQ)
-            } else {
-                ((max_freq - orig_freq) / 5 + 1).max(SHORT_INCREASE_FREQ)
-            };
-            (phrase.freq() + delta).min(MAX_USER_FREQ)
-        } else if delta_time < 50000 {
-            let delta = if phrase.freq() >= max_freq {
-                ((max_freq - orig_freq) / 10 + 1).min(MEDIUM_INCREASE_FREQ)
-            } else {
-                ((max_freq - orig_freq) / 10 + 1).max(MEDIUM_INCREASE_FREQ)
-            };
-            (phrase.freq() + delta).min(MAX_USER_FREQ)
+    fn estimate(&self, phrase: &Phrase, max_freq: u32) -> u32 {
+        let last_used = phrase.last_used().unwrap_or(self.lifetime);
+        let delta_time = if self.lifetime >= last_used {
+            self.lifetime - last_used
         } else {
-            let delta = ((phrase.freq() - orig_freq) / 5).max(LONG_DECREASE_FREQ);
-            (phrase.freq() - delta).max(orig_freq)
+            u64::MAX
+        };
+
+        // # New phrase
+        //
+        // If the phrase is added to the user dictionary the first time,
+        // always bump it to the highest frequency so new phrases are prefered.
+        //
+        // # Seen phrase
+        //
+        // If the phrase was seen recently, then bump the frequency faster. Otherwise
+        // use smaller increase factor to avoid rarely used phrase suddenly become
+        // more preferred.
+        if delta_time == 0 {
+            (max_freq + SHORT_INCREASE_FREQ).min(MAX_USER_FREQ)
+        } else if delta_time < 4000 {
+            (phrase.freq() + SHORT_INCREASE_FREQ).min(MAX_USER_FREQ)
+        } else if delta_time < 50000 {
+            (phrase.freq() + MEDIUM_INCREASE_FREQ).min(MAX_USER_FREQ)
+        } else {
+            (phrase.freq() + LONG_INCREASE_FREQ).min(MAX_USER_FREQ)
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{dictionary::TrieBuf, syl};
+    use crate::{dictionary::TrieBuf, editor::UserFreqEstimate, syl};
 
     use super::LaxUserFreqEstimate;
 
@@ -99,5 +105,40 @@ mod tests {
         let estimate = LaxUserFreqEstimate::max_from(&user_dict);
 
         assert_eq!(100, estimate.lifetime);
+    }
+
+    #[test]
+    fn estimate_first_use_phrase() {
+        let est = LaxUserFreqEstimate::new(1000);
+        let phrase = ("不", 0).into();
+        assert_eq!(910, est.estimate(&phrase, 900));
+    }
+
+    #[test]
+    fn estimate_second_use_phrase() {
+        let est = LaxUserFreqEstimate::new(1000);
+        let phrase = ("不", 50, 10).into();
+        assert_eq!(60, est.estimate(&phrase, 900));
+    }
+
+    #[test]
+    fn estimate_long_unused_phrase() {
+        let est = LaxUserFreqEstimate::new(5000);
+        let phrase = ("不", 50, 10).into();
+        assert_eq!(55, est.estimate(&phrase, 900));
+    }
+
+    #[test]
+    fn estimate_long_long_unused_phrase() {
+        let est = LaxUserFreqEstimate::new(60000);
+        let phrase = ("不", 50, 10).into();
+        assert_eq!(51, est.estimate(&phrase, 900));
+    }
+
+    #[test]
+    fn estimate_out_of_sync_lifetime() {
+        let est = LaxUserFreqEstimate::new(100);
+        let phrase = ("不", 50, 1000).into();
+        assert_eq!(51, est.estimate(&phrase, 900));
     }
 }

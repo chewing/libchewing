@@ -616,15 +616,14 @@ impl SharedState {
             self.dict.add_phrase(syllables, (phrase, 1).into())?;
             return Ok(());
         }
-        let phrase_freq = phrases
+        let phrase = phrases
             .iter()
             .find(|p| p.as_str() == phrase)
-            .map(|p| p.freq())
-            .unwrap_or(0);
-        let phrase = (phrase, phrase_freq).into();
+            .cloned()
+            .unwrap_or((phrase, 0).into());
         // TODO: fine tune learning curve
         let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
-        let user_freq = self.estimate.estimate(&phrase, phrase.freq(), max_freq);
+        let user_freq = self.estimate.estimate(&phrase, max_freq);
         let time = self.estimate.now();
 
         let _ = self.dict.update_phrase(syllables, phrase, user_freq, time);

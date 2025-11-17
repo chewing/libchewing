@@ -21,6 +21,9 @@ What's New in libchewing (unreleased)
     next phrase instead of the next word.
   - Fixed a bug when switching input mode from Chinese to English, the state
     can be stuck in entering bopomofo.
+  - Fixed the frequency estimation function used by phrase learning to really
+    take last used time into consideration. Also assign higher frequency to
+    newly learned phrases.
 
 * Changes
   - SQLite support is now fully optional and disabled by default
