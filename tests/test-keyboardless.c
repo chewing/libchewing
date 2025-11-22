@@ -304,7 +304,7 @@ void test_cand_choose_out_of_range()
     ret = chewing_cand_choose_by_index(ctx, -1);
     ok(ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1);
 
-    ok_preedit_buffer(ctx, "\xE5\x86\x8A" /* 冊 */ );
+    ok_preedit_buffer(ctx, "測");
 
     chewing_delete(ctx);
 }
@@ -349,7 +349,7 @@ void test_cand_choose_not_in_select()
     ret = chewing_cand_choose_by_index(ctx, 2);
     ok(ret == -1, "chewing_cand_choose_by_index() returns `%d' shall be `%d'", ret, -1);
 
-    ok_preedit_buffer(ctx, "\xE5\x86\x8A" /* 冊 */ );
+    ok_preedit_buffer(ctx, "測");
 
     chewing_delete(ctx);
 }
@@ -924,7 +924,7 @@ void test_clean_bopomofo_after_complete()
     ret = chewing_clean_bopomofo_buf(ctx);
     ok(ret == 0, "chewing_clean_bopomofo_buf() returns `%d' shall be `%d'", ret, 0);
 
-    ok_preedit_buffer(ctx, "\xE5\x86\x8A" /* 冊 */ );
+    ok_preedit_buffer(ctx, "測");
     ok_bopomofo_buffer(ctx, "");
 
     chewing_delete(ctx);

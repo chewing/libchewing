@@ -37,9 +37,6 @@ pub(crate) struct InitDatabase {
     /// Version of the dictionary
     #[arg(short('r'), long, default_value = "1.0.0")]
     pub(crate) version: String,
-    /// Keep single word frequency
-    #[arg(short, long)]
-    pub(crate) keep_word_freq: bool,
     /// Skip invalid lines
     #[arg(short, long)]
     pub(crate) skip_invalid: bool,

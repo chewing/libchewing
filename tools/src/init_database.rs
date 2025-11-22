@@ -115,7 +115,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         } else if line.starts_with('#') {
             continue;
         }
-        match parse_line(line_num, delimiter, &line, args.keep_word_freq, args.fix) {
+        match parse_line(line_num, delimiter, &line, args.fix) {
             Ok((syllables, phrase, freq)) => {
                 if syllables.len() != phrase.chars().count() {
                     errors.push(
@@ -178,7 +178,6 @@ fn parse_line(
     line_num: usize,
     delimiter: char,
     line: &str,
-    keep_word_freq: bool,
     fix: bool,
 ) -> Result<(Vec<Syllable>, &str, u32)> {
     let phrase = line
@@ -187,18 +186,15 @@ fn parse_line(
         .ok_or(parse_error(line_num, line))?
         .trim_matches('"');
 
-    let freq: u32 = match phrase.chars().count() {
-        1 if !keep_word_freq => 0,
-        _ => line
-            .split(delimiter)
-            .filter(|s| !s.is_empty())
-            .nth(1)
-            .ok_or(parse_error(line_num, line))?
-            .trim_matches('"')
-            .parse()
-            .context("Unable to parse frequency")
-            .parse_error(line_num, line)?,
-    };
+    let freq: u32 = line
+        .split(delimiter)
+        .filter(|s| !s.is_empty())
+        .nth(1)
+        .ok_or(parse_error(line_num, line))?
+        .trim_matches('"')
+        .parse()
+        .context("Unable to parse frequency")
+        .parse_error(line_num, line)?;
 
     let mut syllables = vec![];
 
@@ -255,7 +251,7 @@ mod tests {
     #[test]
     fn parse_ssv() {
         let line = "鑰匙 668 ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -267,7 +263,7 @@ mod tests {
     #[test]
     fn parse_ssv_multiple_whitespace() {
         let line = "鑰匙     668 ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -279,7 +275,7 @@ mod tests {
     #[test]
     fn parse_ssv_syllable_errors() {
         let line = "地永天長 50 ㄉ一ˋ ㄩㄥˇ ㄊ一ㄢ ㄔ丫ˊ";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false, true) {
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, true) {
             assert_eq!(
                 syllables,
                 vec![
@@ -299,7 +295,7 @@ mod tests {
     #[test]
     fn parse_csv() {
         let line = "鑰匙,668,ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -311,7 +307,7 @@ mod tests {
     #[test]
     fn parse_csv_quoted() {
         let line = "\"鑰匙\",668,\"ㄧㄠˋ ㄔˊ # not official\"";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);

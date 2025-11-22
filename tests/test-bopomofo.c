@@ -499,7 +499,7 @@ void test_select_candidate_shift_cursor()
 
     type_keystroke_by_string(ctx, "<D><D>2");
 
-    ok_preedit_buffer(ctx, "七上八下納李");
+    ok_preedit_buffer(ctx, "七上八下納裡");
 
     type_keystroke_by_string(ctx, "<D>2");
 
@@ -530,7 +530,7 @@ void test_select_candidate_shift_cursor_rearword()
 
     type_keystroke_by_string(ctx, "<D>2");
 
-    ok_preedit_buffer(ctx, "七上八下納李");
+    ok_preedit_buffer(ctx, "七上八下納裡");
 
     type_keystroke_by_string(ctx, "<D>2");
 
@@ -1210,7 +1210,7 @@ void test_ShiftSpace()
     ok_commit_buffer(ctx, " ");
 
     type_keystroke_by_string(ctx, "hk4 <E>");
-    ok_commit_buffer(ctx, "冊 ");
+    ok_commit_buffer(ctx, "測 ");
 
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     type_keystroke_by_string(ctx, "a ");
@@ -1252,7 +1252,7 @@ void test_ShiftSpaceDisabled()
     ok_commit_buffer(ctx, " ");
 
     type_keystroke_by_string(ctx, "hk4 <E>");
-    ok_commit_buffer(ctx, "冊 ");
+    ok_commit_buffer(ctx, "測 ");
 
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     type_keystroke_by_string(ctx, "a ");
@@ -1429,7 +1429,7 @@ void test_Space_selection_insert_eng_mode()
     type_keystroke_by_string(ctx, "hk4");
     chewing_set_ChiEngMode(ctx, SYMBOL_MODE);
     type_keystroke_by_string(ctx, " j");
-    ok_preedit_buffer(ctx, "冊 j");
+    ok_preedit_buffer(ctx, "測 j");
 
     chewing_delete(ctx);
 }
@@ -1678,7 +1678,7 @@ void test_auto_commit_phrase()
     chewing_set_maxChiSymbolLen(ctx, 3);
 
     type_keystroke_by_string(ctx, "hk4g4<L><T><L><D>1<EN>`31hk4" /* 測試，測 */ );
-    ok_preedit_buffer(ctx, "，冊");
+    ok_preedit_buffer(ctx, "，測");
     ok_commit_buffer(ctx, "測試");
     type_keystroke_by_string(ctx, "g4" /* 試 */ );
     ok_preedit_buffer(ctx, "，測試");
@@ -1801,7 +1801,7 @@ void test_KB_HSU()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8D" /* ㄍ */ );
     type_keystroke_by_string(ctx, " "); /* convert "ㄍ" to "ㄜ" */
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE9\x98\xBF" /* 阿 */);
+    ok_preedit_buffer(ctx, "婀");
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "n");
@@ -1815,14 +1815,14 @@ void test_KB_HSU()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8E" /* ㄎ */ );
     type_keystroke_by_string(ctx, " "); /* convert "ㄎ" to "ㄤ" */
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE9\xAA\xAF" /* 骯 */);
+    ok_preedit_buffer(ctx, "腌");
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "l");
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8C" /* ㄌ */);
     type_keystroke_by_string(ctx, "f"); /* convert "ㄌ" to "ㄦ" */
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE7\x88\xBE" /* 爾 */);
+    ok_preedit_buffer(ctx, "耳");
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "g");
@@ -1850,7 +1850,7 @@ void test_KB_HSU()
     type_keystroke_by_string(ctx, "e");
     ok_bopomofo_buffer(ctx, "ㄐㄧㄝ");
     type_keystroke_by_string(ctx, "j");
-    ok_preedit_buffer(ctx, "界");  /* convert "ㄍㄧㄝ" to "ㄐㄧㄝ" */
+    ok_preedit_buffer(ctx, "藉");  /* convert "ㄍㄧㄝ" to "ㄐㄧㄝ" */
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "g");
@@ -1889,7 +1889,7 @@ void test_KB_HSU_example()
     ok_preedit_buffer(ctx, "本中心訂於明日開張");
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "xhfjxl cen <D>2vedxkjnefnldhwfhwfdejuljgxl dxdcx ");
+    type_keystroke_by_string(ctx, "xhfjxl cen <D>2vedxkjnefnldhwfhwfdej<D>1uljgxl dxdcx ");
     ok_preedit_buffer(ctx, "我衷心期望你能好好地用功讀書");
     chewing_clean_preedit_buf(ctx);
 
@@ -1901,7 +1901,7 @@ void test_KB_HSU_example()
     ok_preedit_buffer(ctx, "盡自己的力量");
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "jenjzjjefdgsfkdjem ");
+    type_keystroke_by_string(ctx, "jenj<D>1zjjefdgsfkdjem ");
     ok_preedit_buffer(ctx, "進自己的房間");
     chewing_clean_preedit_buf(ctx);
 
@@ -2122,7 +2122,7 @@ void test_KB_ET26()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8A" /* ㄊ */ );
     type_keystroke_by_string(ctx, " "); /* convert "ㄊ" to "ㄤ" */
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE9\xAA\xAF" /* 骯 */);
+    ok_preedit_buffer(ctx, "腌");
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "l");
@@ -2136,7 +2136,7 @@ void test_KB_ET26()
     ok_bopomofo_buffer(ctx, "\xE3\x84\x8F" /* ㄏ */);
     type_keystroke_by_string(ctx, "j"); /* convert "ㄏ" to "ㄦ" */
     ok_bopomofo_buffer(ctx, "");
-    ok_preedit_buffer(ctx, "\xE7\x88\xBE" /* 爾 */);
+    ok_preedit_buffer(ctx, "耳");
     chewing_clean_preedit_buf(ctx);
 
     type_keystroke_by_string(ctx, "g");

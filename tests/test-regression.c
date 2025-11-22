@@ -150,10 +150,10 @@ void test_forgot_selection()
     chewing_set_escCleanAllBuf(ctx, 1);
 
     type_keystroke_by_string(ctx, "<EE>hk4g4<L><L><D>3<R><R>g4");
-    ok_preedit_buffer(ctx, "策士市");
+    ok_preedit_buffer(ctx, "策士是");
 
     type_keystroke_by_string(ctx, "<EE>hk4g4<L><L><D>2<R><R>g4");
-    ok_preedit_buffer(ctx, "策試市");
+    ok_preedit_buffer(ctx, "策試是");
 
     chewing_delete(ctx);
 }
@@ -168,7 +168,7 @@ void test_move_cursor_backwards()
     start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4<L>hk4g4");
-    ok_preedit_buffer(ctx, "冊測試市");
+    ok_preedit_buffer(ctx, "測測試是");
 
     chewing_delete(ctx);
 }
@@ -183,7 +183,7 @@ void test_insert_symbol_between_selection()
     start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4<L><L><D>3<R>?");
-    ok_preedit_buffer(ctx, "冊？市");
+    ok_preedit_buffer(ctx, "測？是");
 
     chewing_delete(ctx);
 }

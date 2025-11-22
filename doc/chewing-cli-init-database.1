@@ -4,32 +4,29 @@
 .SH NAME
 chewing\-cli\-init\-database \- Create a new dictionary file
 .SH SYNOPSIS
-\fBchewing\-cli init\-database\fR [\fB\-t\fR|\fB\-\-db\-type\fR] [\fB\-n\fR|\fB\-\-name\fR] [\fB\-c\fR|\fB\-\-copyright\fR] [\fB\-l\fR|\fB\-\-license\fR] [\fB\-r\fR|\fB\-\-version\fR] [\fB\-k\fR|\fB\-\-keep\-word\-freq\fR] [\fB\-s\fR|\fB\-\-skip\-invalid\fR] [\fB\-\-fix\fR] [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fITSI_SRC\fR> <\fIOUTPUT\fR> 
+\fBchewing\-cli init\-database\fR [\fB\-t\fR|\fB\-\-db\-type\fR] [\fB\-n\fR|\fB\-\-name\fR] [\fB\-c\fR|\fB\-\-copyright\fR] [\fB\-l\fR|\fB\-\-license\fR] [\fB\-r\fR|\fB\-\-version\fR] [\fB\-s\fR|\fB\-\-skip\-invalid\fR] [\fB\-\-fix\fR] [\fB\-\-csv\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fITSI_SRC\fR> <\fIOUTPUT\fR> 
 .SH DESCRIPTION
 Create a new dictionary file
 .SH OPTIONS
 .TP
-\fB\-t\fR, \fB\-\-db\-type\fR=\fIDB_TYPE\fR [default: trie]
+\fB\-t\fR, \fB\-\-db\-type\fR \fI<DB_TYPE>\fR [default: trie]
 Choose the underlying database implementation
 .br
 
 .br
 [\fIpossible values: \fRtrie, sqlite]
 .TP
-\fB\-n\fR, \fB\-\-name\fR=\fINAME\fR [default: 我的詞庫]
+\fB\-n\fR, \fB\-\-name\fR \fI<NAME>\fR [default: 我的詞庫]
 Name of the phrase dictionary
 .TP
-\fB\-c\fR, \fB\-\-copyright\fR=\fICOPYRIGHT\fR [default: Unknown]
+\fB\-c\fR, \fB\-\-copyright\fR \fI<COPYRIGHT>\fR [default: Unknown]
 Copyright information of the dictionary
 .TP
-\fB\-l\fR, \fB\-\-license\fR=\fILICENSE\fR [default: Unknown]
+\fB\-l\fR, \fB\-\-license\fR \fI<LICENSE>\fR [default: Unknown]
 License information of the dictionary
 .TP
-\fB\-r\fR, \fB\-\-version\fR=\fIVERSION\fR [default: 1.0.0]
+\fB\-r\fR, \fB\-\-version\fR \fI<VERSION>\fR [default: 1.0.0]
 Version of the dictionary
-.TP
-\fB\-k\fR, \fB\-\-keep\-word\-freq\fR
-Keep single word frequency
 .TP
 \fB\-s\fR, \fB\-\-skip\-invalid\fR
 Skip invalid lines

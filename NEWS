@@ -32,6 +32,8 @@ What's New in libchewing (unreleased)
   - cli: will try to migrate to new schema when dumping chewing.sqlite3 file
   - Use less heuristic when calculating phrase segmentation score
   - Dictionary data are built directly from the libchewing-data repository
+  - cli: init-database will no longer normalize the frequency of single word
+    phrase to zero.
 
 * Dictionary
   - Default symbols.dat now includes commonly used emojis.
