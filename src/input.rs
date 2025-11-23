@@ -1,5 +1,7 @@
 //! Input handling modules
 
+use std::fmt::Display;
+
 use keycode::Keycode;
 use keysym::Keysym;
 
@@ -139,6 +141,43 @@ impl KeyboardEvent {
             || self.is_state_on(KeyState::Control)
             || self.is_state_on(KeyState::Alt)
             || self.is_state_on(KeyState::Super)
+    }
+}
+
+impl Display for KeyboardEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#KeyboardEvent(")?;
+        write!(f, ":code {}", self.code.0)?;
+        write!(f, " :ksym {}", self.ksym.0)?;
+        if self.ksym.is_unicode() {
+            write!(f, " :char '{}'", self.ksym.to_unicode())?;
+        }
+        if self.state != 0 {
+            write!(f, " :state '")?;
+            if self.is_state_on(KeyState::Control) {
+                write!(f, "c")?;
+            }
+            if self.is_state_on(KeyState::Shift) {
+                write!(f, "s")?;
+            }
+            if self.is_state_on(KeyState::Alt) {
+                write!(f, "a")?;
+            }
+            if self.is_state_on(KeyState::Super) {
+                write!(f, "S")?;
+            }
+            if self.is_state_on(KeyState::CapsLock) {
+                write!(f, "C")?;
+            }
+            if self.is_state_on(KeyState::NumLock) {
+                write!(f, "N")?;
+            }
+            if self.is_state_on(KeyState::Release) {
+                write!(f, "R")?;
+            }
+        }
+        write!(f, ")")?;
+        Ok(())
     }
 }
 

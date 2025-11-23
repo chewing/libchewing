@@ -783,7 +783,7 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
 
 impl BasicEditor for Editor {
     fn process_keyevent(&mut self, key_event: KeyboardEvent) -> EditorKeyBehavior {
-        debug!("process_keyevent: {:?}", key_event);
+        debug!("process {}", key_event);
         self.shared.estimate.tick();
         // reset?
         self.shared.notice_buffer.clear();
