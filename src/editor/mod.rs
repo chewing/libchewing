@@ -11,11 +11,12 @@ use std::{
     cmp::{max, min},
     error::Error,
     fmt::{Debug, Display},
+    mem,
 };
 
 pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
-use log::{debug, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 
 use crate::{
     conversion::{
@@ -700,39 +701,10 @@ impl SharedState {
         self.last_key_behavior = EditorKeyBehavior::Commit;
     }
     fn auto_learn(&mut self, intervals: &[Interval]) {
-        debug!("intervals {:?}", intervals);
-        let mut pending = String::new();
-        let mut syllables = Vec::new();
-        for interval in intervals {
-            if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.str) {
-                pending.push_str(&interval.str);
-                syllables.extend_from_slice(&self.com.symbols()[interval.start..interval.end]);
-            } else {
-                if !pending.is_empty() {
-                    debug!("autolearn-2 {:?} as {}", &syllables, &pending);
-                    let _ = self.learn_phrase(&syllables, &pending);
-                    pending.clear();
-                    syllables.clear();
-                }
-                if interval.is_phrase {
-                    debug!(
-                        "autolearn-3 {:?} as {}",
-                        &self.com.symbols()[interval.start..interval.end],
-                        &interval.str
-                    );
-                    // FIXME avoid copy
-                    let _ = self.learn_phrase(
-                        &self.com.symbols()[interval.start..interval.end].to_vec(),
-                        &interval.str,
-                    );
-                }
+        for (symbols, phrase) in collect_new_phrases(intervals, self.com.symbols()) {
+            if let Err(error) = self.learn_phrase(&symbols, &phrase) {
+                error!("Failed to learn phrase {phrase} from {symbols:?}: {error:#}");
             }
-        }
-        if !pending.is_empty() {
-            debug!("autolearn-1 {:?} as {}", &syllables, &pending);
-            let _ = self.learn_phrase(&syllables, &pending);
-            pending.clear();
-            syllables.clear();
         }
     }
 }
@@ -749,6 +721,50 @@ fn is_break_word(word: &str) -> bool {
      "兒", "年", "月", "日",
      "時", "分", "秒", "街",
      "路", "村", "在"].contains(&word)
+}
+
+fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<Symbol>, String)> {
+    debug!("intervals {:?}", intervals);
+    let mut pending = String::new();
+    let mut syllables = Vec::new();
+    let mut phrases = vec![];
+    let mut collect = |syllables, pending| {
+        if phrases.iter().find(|(_, p)| p == &pending).is_none() {
+            debug!("autolearn {:?} as {}", &syllables, &pending);
+            phrases.push((syllables, pending))
+        }
+    };
+    // Step 1. collect all intervals
+    for interval in intervals.iter().filter(|it| it.is_phrase) {
+        let syllables = symbols[interval.start..interval.end].to_vec();
+        let pending = interval.str.clone().into_string();
+        collect(syllables, pending);
+    }
+    // Step 2. collect all intervals with length one with break words removed
+    for interval in intervals.iter() {
+        if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.str) {
+            pending.push_str(&interval.str);
+            syllables.extend_from_slice(&symbols[interval.start..interval.end]);
+        } else if !pending.is_empty() {
+            collect(mem::take(&mut syllables), mem::take(&mut pending));
+        }
+    }
+    if !pending.is_empty() {
+        collect(mem::take(&mut syllables), mem::take(&mut pending));
+    }
+    // Step 3. collect all intervals with length one including break words
+    for interval in intervals {
+        if interval.is_phrase && interval.len() == 1 {
+            pending.push_str(&interval.str);
+            syllables.extend_from_slice(&symbols[interval.start..interval.end]);
+        } else if !pending.is_empty() {
+            collect(mem::take(&mut syllables), mem::take(&mut pending));
+        }
+    }
+    if !pending.is_empty() {
+        collect(syllables, pending);
+    }
+    phrases
 }
 
 impl BasicEditor for Editor {
@@ -1557,7 +1573,7 @@ mod tests {
     use estimate::LaxUserFreqEstimate;
 
     use crate::{
-        conversion::ChewingEngine,
+        conversion::{ChewingEngine, Interval, Symbol},
         dictionary::{Layered, TrieBuf},
         editor::{EditorKeyBehavior, EditorOptions, SymbolSelector, abbrev::AbbrevTable, estimate},
         input::{
@@ -1566,9 +1582,10 @@ mod tests {
             keysym,
         },
         syl,
-        zhuyin::Bopomofo,
+        zhuyin::Bopomofo as bpmf,
     };
 
+    use super::collect_new_phrases;
     use super::{BasicEditor, Editor};
 
     const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent::builder()
@@ -1597,7 +1614,7 @@ mod tests {
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
-        assert_eq!(syl![Bopomofo::C], editor.syllable_buffer());
+        assert_eq!(syl![bpmf::C], editor.syllable_buffer());
 
         let ev = KeyboardEvent {
             code: keycode::KEY_K,
@@ -1607,13 +1624,13 @@ mod tests {
         let key_behavior = editor.process_keyevent(ev);
 
         assert_eq!(EditorKeyBehavior::Absorb, key_behavior);
-        assert_eq!(syl![Bopomofo::C, Bopomofo::E], editor.syllable_buffer());
+        assert_eq!(syl![bpmf::C, bpmf::E], editor.syllable_buffer());
     }
 
     #[test]
     fn editing_mode_input_bopomofo_commit() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1645,7 +1662,7 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo_select() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100), ("測", 200)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1693,7 +1710,7 @@ mod tests {
     #[test]
     fn editing_mode_input_bopomofo_select_sorted() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100), ("測", 200)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1741,7 +1758,7 @@ mod tests {
     #[test]
     fn editing_mode_input_chinese_to_english_mode() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1782,7 +1799,7 @@ mod tests {
     #[test]
     fn editing_mode_input_english_to_chinese_mode() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1839,7 +1856,7 @@ mod tests {
     #[test]
     fn editing_chinese_mode_input_special_symbol() {
         let dict = TrieBuf::from([(
-            vec![crate::syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
+            vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
         let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
@@ -1933,5 +1950,139 @@ mod tests {
 
         assert_eq!(EditorKeyBehavior::Bell, key_behavior);
         assert_eq!(syl![], editor.syllable_buffer());
+    }
+
+    #[test]
+    fn collect_new_phrases_with_no_break_word() {
+        let intervals = [
+            Interval {
+                start: 0,
+                end: 2,
+                is_phrase: true,
+                str: "今天".into(),
+            },
+            Interval {
+                start: 2,
+                end: 4,
+                is_phrase: true,
+                str: "天氣".into(),
+            },
+            Interval {
+                start: 4,
+                end: 6,
+                is_phrase: true,
+                str: "真好".into(),
+            },
+        ];
+        let symbols = [
+            Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
+            Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+            Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+            Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+            Symbol::Syllable(syl![bpmf::ZH, bpmf::EN]),
+            Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
+        ];
+        let phrases = collect_new_phrases(&intervals, &symbols);
+        assert_eq!(
+            vec![
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
+                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                    ],
+                    "今天".to_string()
+                ),
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                        Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+                    ],
+                    "天氣".to_string()
+                ),
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::ZH, bpmf::EN]),
+                        Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
+                    ],
+                    "真好".to_string()
+                ),
+            ],
+            phrases
+        );
+    }
+
+    #[test]
+    fn collect_new_phrases_with_break_word() {
+        let intervals = [
+            Interval {
+                start: 0,
+                end: 2,
+                is_phrase: true,
+                str: "今天".into(),
+            },
+            Interval {
+                start: 2,
+                end: 3,
+                is_phrase: true,
+                str: "也".into(),
+            },
+            Interval {
+                start: 3,
+                end: 4,
+                is_phrase: true,
+                str: "是".into(),
+            },
+            Interval {
+                start: 4,
+                end: 7,
+                is_phrase: true,
+                str: "好天氣".into(),
+            },
+        ];
+        let symbols = [
+            Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
+            Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+            Symbol::Syllable(syl![bpmf::I, bpmf::EH, bpmf::TONE3]),
+            Symbol::Syllable(syl![bpmf::SH, bpmf::TONE4]),
+            Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
+            Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+            Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+        ];
+        let phrases = collect_new_phrases(&intervals, &symbols);
+        assert_eq!(
+            vec![
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
+                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                    ],
+                    "今天".to_string()
+                ),
+                (
+                    vec![Symbol::Syllable(syl![bpmf::I, bpmf::EH, bpmf::TONE3]),],
+                    "也".to_string()
+                ),
+                (
+                    vec![Symbol::Syllable(syl![bpmf::SH, bpmf::TONE4])],
+                    "是".to_string()
+                ),
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
+                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                        Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+                    ],
+                    "好天氣".to_string()
+                ),
+                (
+                    vec![
+                        Symbol::Syllable(syl![bpmf::I, bpmf::EH, bpmf::TONE3]),
+                        Symbol::Syllable(syl![bpmf::SH, bpmf::TONE4])
+                    ],
+                    "也是".to_string()
+                ),
+            ],
+            phrases
+        );
     }
 }

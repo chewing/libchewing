@@ -34,6 +34,8 @@ What's New in libchewing (unreleased)
   - Dictionary data are built directly from the libchewing-data repository
   - cli: init-database will no longer normalize the frequency of single word
     phrase to zero.
+  - autolearn: new phrases with break words inside will be learned both with
+    and without the break word.
 
 * Dictionary
   - Default symbols.dat now includes commonly used emojis.

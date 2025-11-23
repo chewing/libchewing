@@ -264,7 +264,7 @@ void test_CtrlNum_add_phrase_right_start_with_symbol()
     ok(strcmp(const_buf, phrase) == 0, "first candidate `%s' shall be `%s'", const_buf, phrase);
 
     chewing_delete(ctx);
-} 
+}
 
 void test_CtrlNum_add_phrase_left_start_with_symbol()
 {
@@ -383,7 +383,7 @@ void test_userphrase_auto_learn_hardcode_break()
     ok(has_userphrase(ctx, bopomofo, phrase) == 0, "`%s' shall not be in userphrase", phrase);
 
     type_keystroke_by_string(ctx, "2k72k7<E>");
-    ok(has_userphrase(ctx, bopomofo, phrase) == 0, "`%s' shall not be in userphrase", phrase);
+    ok(has_userphrase(ctx, bopomofo, phrase) == 1, "`%s' shall be in userphrase", phrase);
 
     chewing_delete(ctx);
 }
@@ -415,7 +415,7 @@ void test_userphrase_auto_learn_only_after_commit()
     /* user selectes another cadidate and commit: auto learn phrase(s), but not the selected candidate. */
     type_keystroke_by_string(ctx, "<L><D>2<E>");
     ok(has_userphrase(ctx, bopomofo_1, NULL) == 1, "`%s' shall be in userphrase", bopomofo_1);
-    ok(has_userphrase(ctx, bopomofo_2, NULL) == 0, "`%s' shall not be in userphrase", bopomofo_2);
+    ok(has_userphrase(ctx, bopomofo_2, NULL) == 1, "`%s' shall be in userphrase", bopomofo_2);
 
     chewing_delete(ctx);
 }
