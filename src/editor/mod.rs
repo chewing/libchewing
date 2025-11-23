@@ -7,7 +7,7 @@ mod selection;
 pub mod zhuyin_layout;
 
 use std::{
-    any::{Any, TypeId},
+    any::Any,
     cmp::{max, min},
     error::Error,
     fmt::{Debug, Display},
@@ -111,11 +111,9 @@ pub trait BasicEditor {
 }
 
 /// The internal state of the editor.
-trait State: Debug {
+trait State: Any + Debug {
     /// Transits the state to next state with the key event.
     fn next(&mut self, shared: &mut SharedState, ev: KeyboardEvent) -> Transition;
-    fn as_any(&self) -> &dyn Any;
-    fn as_any_mut(&mut self) -> &mut dyn Any;
 
     fn spin_ignore(&self) -> Transition {
         Transition::Spin(EditorKeyBehavior::Ignore)
@@ -300,7 +298,7 @@ impl Editor {
     }
     /// All candidates after current page
     pub fn paginated_candidates(&self) -> Result<Vec<String>, EditorError> {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting
                 .candidates(&self.shared, &self.shared.dict)
@@ -312,7 +310,7 @@ impl Editor {
         }
     }
     pub fn all_candidates(&self) -> Result<Vec<String>, EditorError> {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.candidates(&self.shared, &self.shared.dict))
         } else {
@@ -320,7 +318,7 @@ impl Editor {
         }
     }
     pub fn current_page_no(&self) -> Result<usize, EditorError> {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.page_no)
         } else {
@@ -328,7 +326,7 @@ impl Editor {
         }
     }
     pub fn total_page(&self) -> Result<usize, EditorError> {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.total_page(&self.shared, &self.shared.dict))
         } else {
@@ -336,7 +334,7 @@ impl Editor {
         }
     }
     pub fn select(&mut self, n: usize) -> Result<(), EditorError> {
-        let any = self.state.as_any_mut();
+        let any = self.state.as_mut() as &mut dyn Any;
         let selecting = match any.downcast_mut::<Selecting>() {
             Some(selecting) => selecting,
             None => return Err(EditorError::InvalidState),
@@ -376,10 +374,12 @@ impl Editor {
         self.shared.last_key_behavior
     }
     pub fn is_entering(&self) -> bool {
-        self.state.as_any().type_id() == TypeId::of::<Entering>()
+        let any = self.state.as_ref() as &dyn Any;
+        any.is::<Entering>()
     }
     pub fn is_selecting(&self) -> bool {
-        self.state.as_any().type_id() == TypeId::of::<Selecting>()
+        let any = self.state.as_ref() as &dyn Any;
+        any.is::<Selecting>()
     }
     pub fn intervals(&self) -> impl Iterator<Item = Interval> {
         self.shared.intervals()
@@ -410,7 +410,7 @@ impl Editor {
         Ok(())
     }
     pub fn has_next_selection_point(&self) -> bool {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(s) = any.downcast_ref::<Selecting>() {
             match &s.sel {
                 Selector::Phrase(s) => s.next_selection_point(&self.shared.dict).is_some(),
@@ -422,7 +422,7 @@ impl Editor {
         }
     }
     pub fn has_prev_selection_point(&self) -> bool {
-        let any = self.state.as_any();
+        let any = self.state.as_ref() as &dyn Any;
         if let Some(s) = any.downcast_ref::<Selecting>() {
             match &s.sel {
                 Selector::Phrase(s) => s.prev_selection_point(&self.shared.dict).is_some(),
@@ -434,7 +434,7 @@ impl Editor {
         }
     }
     pub fn jump_to_next_selection_point(&mut self) -> Result<(), EditorError> {
-        let any = self.state.as_any_mut();
+        let any = self.state.as_mut() as &mut dyn Any;
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_next_selection_point(&self.shared.dict),
@@ -445,7 +445,7 @@ impl Editor {
         }
     }
     pub fn jump_to_prev_selection_point(&mut self) -> Result<(), EditorError> {
-        let any = self.state.as_any_mut();
+        let any = self.state.as_mut() as &mut dyn Any;
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_prev_selection_point(&self.shared.dict),
@@ -456,7 +456,7 @@ impl Editor {
         }
     }
     pub fn jump_to_first_selection_point(&mut self) -> Result<(), EditorError> {
-        let any = self.state.as_any_mut();
+        let any = self.state.as_mut() as &mut dyn Any;
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => {
@@ -470,7 +470,7 @@ impl Editor {
         }
     }
     pub fn jump_to_last_selection_point(&mut self) -> Result<(), EditorError> {
-        let any = self.state.as_any_mut();
+        let any = self.state.as_mut() as &mut dyn Any;
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => {
@@ -484,9 +484,10 @@ impl Editor {
         }
     }
     pub fn start_selecting(&mut self) -> Result<(), EditorError> {
-        let transition = if let Some(s) = self.state.as_any_mut().downcast_mut::<Entering>() {
+        let any = self.state.as_mut() as &mut dyn Any;
+        let transition = if let Some(s) = any.downcast_mut::<Entering>() {
             s.start_selecting(&mut self.shared)
-        } else if let Some(s) = self.state.as_any_mut().downcast_mut::<EnteringSyllable>() {
+        } else if let Some(s) = any.downcast_mut::<EnteringSyllable>() {
             // Force entering selection
             s.start_selecting(&mut self.shared)
         } else {
@@ -1158,14 +1159,6 @@ impl State for Entering {
             }
         }
     }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 }
 
 impl EnteringSyllable {
@@ -1256,13 +1249,6 @@ impl State for EnteringSyllable {
                 }
             }
         }
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
@@ -1520,14 +1506,6 @@ impl State for Selecting {
             _ => self.spin_bell(),
         }
     }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 }
 
 impl Highlighting {
@@ -1567,14 +1545,6 @@ impl State for Highlighting {
             }
             _ => self.start_entering(),
         }
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
