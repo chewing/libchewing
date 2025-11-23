@@ -37,6 +37,7 @@ What's New in libchewing (unreleased)
     phrase to zero.
   - autolearn: new phrases with break words inside will be learned both with
     and without the break word.
+  - rust: simplified dictionary API.
 
 * Dictionary
   - Default symbols.dat now includes commonly used emojis.

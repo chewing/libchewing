@@ -77,13 +77,13 @@ impl SystemDictionaryLoader {
             sys_path_from_env_var()
         };
         let loader = SingleDictionaryLoader::new();
-        let files = find_files_by_names(&search_path, &names);
+        let files = find_files_by_names(&search_path, names);
         let mut results = vec![];
         'next: for target_name in names {
             for file in files.iter() {
                 if let Some(file_name) = file.file_name()
                     && target_name.as_ref() == file_name.to_string_lossy()
-                    && let Ok(dict) = loader.guess_format_and_load(&file)
+                    && let Ok(dict) = loader.guess_format_and_load(file)
                 {
                     info!("Load dictionary {}", file.display());
                     results.push(dict);

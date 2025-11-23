@@ -3,6 +3,7 @@ use std::{
     collections::BTreeMap,
     ffi::{CStr, CString, c_char, c_int, c_uint, c_ushort, c_void},
     mem,
+    ops::Not,
     ptr::{null, null_mut},
     slice, str,
     sync::RwLock,
@@ -1506,14 +1507,15 @@ pub unsafe extern "C" fn chewing_userphrase_lookup(
         Some(phrase) => ctx
             .editor
             .user_dict()
-            .lookup_all_phrases(&syllables, LookupStrategy::Standard)
+            .lookup(&syllables, LookupStrategy::Standard)
             .iter()
             .any(|ph| ph.as_str() == phrase) as c_int,
         None => ctx
             .editor
             .user_dict()
-            .lookup_first_phrase(&syllables, LookupStrategy::Standard)
-            .is_some() as c_int,
+            .lookup(&syllables, LookupStrategy::Standard)
+            .is_empty()
+            .not() as c_int,
     }
 }
 

@@ -87,7 +87,7 @@ impl TrieBuf {
         let store_iter = self
             .trie
             .iter()
-            .flat_map(move |trie| trie.lookup_all_phrases(syllables, strategy));
+            .flat_map(move |trie| trie.lookup(syllables, strategy));
         let btree_iter = self
             .btree
             .range(min_key..max_key)
@@ -127,12 +127,7 @@ impl TrieBuf {
         })
     }
 
-    pub(crate) fn lookup_first_n_phrases(
-        &self,
-        syllables: &[Syllable],
-        first: usize,
-        strategy: LookupStrategy,
-    ) -> Vec<Phrase> {
+    pub(crate) fn lookup(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
         let mut sort_map = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
@@ -148,7 +143,6 @@ impl TrieBuf {
                 }
             }
         }
-        phrases.truncate(first);
         phrases
     }
 
@@ -293,13 +287,8 @@ impl From<BuildDictionaryError> for UpdateDictionaryError {
 }
 
 impl Dictionary for TrieBuf {
-    fn lookup_first_n_phrases(
-        &self,
-        syllables: &[Syllable],
-        first: usize,
-        strategy: LookupStrategy,
-    ) -> Vec<Phrase> {
-        TrieBuf::lookup_first_n_phrases(self, syllables, first, strategy)
+    fn lookup(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
+        TrieBuf::lookup(self, syllables, strategy)
     }
 
     fn entries(&self) -> Entries<'_> {
@@ -406,10 +395,12 @@ mod tests {
         assert_eq!("Unknown", info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
-            dict.lookup_first_phrase(
+            dict.lookup(
                 &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
                 LookupStrategy::Standard
             )
+            .first()
+            .cloned()
         );
         Ok(())
     }
@@ -432,10 +423,12 @@ mod tests {
         assert_eq!("Unknown", info.copyright);
         assert_eq!(
             Some(("dict", 1, 2).into()),
-            dict.lookup_first_phrase(
+            dict.lookup(
                 &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
                 LookupStrategy::Standard
             )
+            .first()
+            .cloned()
         );
         Ok(())
     }

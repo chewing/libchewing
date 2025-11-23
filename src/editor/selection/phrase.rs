@@ -56,10 +56,7 @@ impl PhraseSelector {
                 !syllables.is_empty(),
                 "should not enter here if there's no syllable in range"
             );
-            if dict
-                .lookup_first_phrase(&syllables, self.lookup_strategy)
-                .is_some()
-            {
+            if !dict.lookup(&syllables, self.lookup_strategy).is_empty() {
                 break;
             }
             if self.forward_select {
@@ -99,10 +96,7 @@ impl PhraseSelector {
                 .iter()
                 .map(|s| s.to_syllable().unwrap_or_default())
                 .collect();
-            if dict
-                .lookup_first_phrase(&syllables, self.lookup_strategy)
-                .is_some()
-            {
+            if !dict.lookup(&syllables, self.lookup_strategy).is_empty() {
                 return Some((begin, end));
             }
         }
@@ -132,10 +126,7 @@ impl PhraseSelector {
                 .iter()
                 .map(|s| s.to_syllable().unwrap_or_default())
                 .collect();
-            if dict
-                .lookup_first_phrase(&syllables, self.lookup_strategy)
-                .is_some()
-            {
+            if !dict.lookup(&syllables, self.lookup_strategy).is_empty() {
                 return Some((begin, end));
             }
         }
@@ -192,10 +183,7 @@ impl PhraseSelector {
                 .iter()
                 .map(|s| s.to_syllable().unwrap_or_default())
                 .collect();
-            if dict
-                .lookup_first_phrase(&syllables, self.lookup_strategy)
-                .is_some()
-            {
+            if !dict.lookup(&syllables, self.lookup_strategy).is_empty() {
                 break;
             }
         }
@@ -244,7 +232,7 @@ impl PhraseSelector {
             .map(|s| s.to_syllable().unwrap_or_default())
             .collect();
         let mut candidates = dict
-            .lookup_all_phrases(&syllables, self.lookup_strategy)
+            .lookup(&syllables, self.lookup_strategy)
             .into_iter()
             .collect::<Vec<_>>();
         if self.end - self.begin == 1 {
@@ -252,10 +240,7 @@ impl PhraseSelector {
                 .syl
                 .alt_syllables(self.com.symbol(self.begin).unwrap().to_syllable().unwrap());
             for &syl in alt {
-                candidates.extend(
-                    dict.lookup_all_phrases(&[syl], self.lookup_strategy)
-                        .into_iter(),
-                )
+                candidates.extend(dict.lookup(&[syl], self.lookup_strategy).into_iter())
             }
         }
         if editor.options.sort_candidates_by_frequency {

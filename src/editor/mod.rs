@@ -585,7 +585,7 @@ impl SharedState {
         if self
             .dict
             .user_dict()
-            .lookup_all_phrases(&syllables, LookupStrategy::Standard)
+            .lookup(&syllables, LookupStrategy::Standard)
             .into_iter()
             .any(|it| it.as_str() == phrase)
         {
@@ -614,9 +614,7 @@ impl SharedState {
             );
             return Err(UpdateDictionaryError::new());
         }
-        let phrases = self
-            .dict
-            .lookup_all_phrases(syllables, LookupStrategy::Standard);
+        let phrases = self.dict.lookup(syllables, LookupStrategy::Standard);
         if phrases.is_empty() {
             self.dict.add_phrase(syllables, (phrase, 1).into())?;
             return Ok(());
@@ -733,7 +731,7 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
     let mut syllables = Vec::new();
     let mut phrases = vec![];
     let mut collect = |syllables, pending| {
-        if phrases.iter().find(|(_, p)| p == &pending).is_none() {
+        if !phrases.iter().any(|(_, p)| p == &pending) {
             debug!("autolearn {:?} as {}", &syllables, &pending);
             phrases.push((syllables, pending))
         }
@@ -1225,23 +1223,20 @@ impl State for EnteringSyllable {
                 match key_behavior {
                     KeyBehavior::Absorb => self.spin_absorb(),
                     KeyBehavior::Fuzzy(syl) => {
-                        if shared
+                        if !shared
                             .dict
-                            .lookup_first_phrase(&[syl], shared.options.lookup_strategy)
-                            .is_some()
+                            .lookup(&[syl], shared.options.lookup_strategy)
+                            .is_empty()
                         {
                             shared.com.insert(Symbol::from(syl));
                         }
                         self.spin_absorb()
                     }
                     KeyBehavior::Commit => {
-                        if shared
+                        if !shared
                             .dict
-                            .lookup_first_phrase(
-                                &[shared.syl.read()],
-                                shared.options.lookup_strategy,
-                            )
-                            .is_some()
+                            .lookup(&[shared.syl.read()], shared.options.lookup_strategy)
+                            .is_empty()
                         {
                             shared.com.insert(Symbol::from(shared.syl.read()));
                             shared.syl.clear();

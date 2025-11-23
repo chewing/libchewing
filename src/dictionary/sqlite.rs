@@ -313,12 +313,7 @@ impl From<RusqliteError> for UpdateDictionaryError {
 }
 
 impl Dictionary for SqliteDictionary {
-    fn lookup_first_n_phrases(
-        &self,
-        syllables: &[Syllable],
-        first: usize,
-        strategy: LookupStrategy,
-    ) -> Vec<Phrase> {
+    fn lookup(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
         let _ = strategy;
         let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
@@ -343,7 +338,6 @@ impl Dictionary for SqliteDictionary {
         })
         .unwrap()
         .map(|r| r.unwrap())
-        .take(first)
         .collect()
     }
 
@@ -654,7 +648,7 @@ mod tests {
                 Phrase::new("策士", 9318).with_time(186613),
                 Phrase::new("測試", 9318).with_time(186613)
             ],
-            dict.lookup_all_phrases(
+            dict.lookup(
                 &[
                     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                     syl![Bopomofo::SH, Bopomofo::TONE4],
@@ -691,7 +685,7 @@ mod tests {
         )?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_all_phrases(
+            dict.lookup(
                 &[
                     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                     syl![Bopomofo::SH, Bopomofo::TONE4],
@@ -713,7 +707,7 @@ mod tests {
         dict.update_phrase(&syllables, ("測試", 9318).into(), 9900, 0)?;
         assert_eq!(
             vec![Phrase::new("測試", 9900).with_time(0)],
-            dict.lookup_all_phrases(
+            dict.lookup(
                 &[
                     syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
                     syl![Bopomofo::SH, Bopomofo::TONE4],

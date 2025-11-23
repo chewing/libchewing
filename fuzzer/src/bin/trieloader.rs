@@ -22,7 +22,7 @@ pub fn main() -> Result<()> {
     debug!("[+] {:?}", info);
 
     info!("[*] try to lookup a phrase...");
-    let entries = dict.lookup_all_phrases(
+    let entries = dict.lookup(
         &[
             syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4],
             syl![Bopomofo::SH, Bopomofo::TONE4],

@@ -67,15 +67,14 @@ fn log_softmax(intervals: Vec<PossibleInterval>) -> Vec<PossibleInterval> {
     let shifted: Vec<f64> = x.iter().map(|&x| x / scale).collect();
     let log_sum_exp = shifted.iter().map(|&v| v.exp()).sum::<f64>().ln();
 
-    let intervals = intervals
+    intervals
         .into_iter()
-        .zip(shifted.into_iter())
+        .zip(shifted)
         .map(|(mut i, v)| {
             i.weight = v - log_sum_exp;
             i
         })
-        .collect();
-    intervals
+        .collect()
 }
 
 impl ConversionEngine for ChewingEngine {
@@ -159,7 +158,7 @@ impl ChewingEngine {
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        'next_phrase: for phrase in dict.lookup_all_phrases(&syllables, self.lookup_strategy) {
+        'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
             // different then we can skip this phrase.

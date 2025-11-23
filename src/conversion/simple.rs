@@ -1,6 +1,6 @@
 use std::iter;
 
-use crate::dictionary::Dictionary;
+use crate::dictionary::{Dictionary, LookupStrategy};
 
 use super::{Composition, ConversionEngine, Interval};
 
@@ -35,10 +35,10 @@ impl SimpleEngine {
                     str: sym.to_char().unwrap().to_string().into_boxed_str(),
                 });
             } else {
-                let phrase = dict.lookup_first_phrase(
-                    &[sym.to_syllable().unwrap()],
-                    crate::dictionary::LookupStrategy::Standard,
-                );
+                let phrase = dict
+                    .lookup(&[sym.to_syllable().unwrap()], LookupStrategy::Standard)
+                    .first()
+                    .cloned();
                 let phrase_str = phrase.map_or_else(
                     || sym.to_syllable().unwrap().to_string(),
                     |phrase| phrase.to_string(),

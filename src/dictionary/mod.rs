@@ -271,7 +271,7 @@ impl Display for Phrase {
 ///     (vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], vec![("測", 100)]),
 /// ]);
 ///
-/// for phrase in dict.lookup_all_phrases(
+/// for phrase in dict.lookup(
 ///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], LookupStrategy::Standard
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
@@ -328,7 +328,7 @@ pub enum LookupStrategy {
 /// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
 ///
-/// for phrase in dict.lookup_all_phrases(
+/// for phrase in dict.lookup(
 ///     &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], LookupStrategy::Standard
 /// ) {
 ///     assert_eq!("測", phrase.as_str());
@@ -338,33 +338,10 @@ pub enum LookupStrategy {
 /// # }
 /// ```
 pub trait Dictionary: Debug {
-    /// Returns first N phrases matched by the syllables.
-    ///
-    /// The result should use a stable order each time for the same input.
-    fn lookup_first_n_phrases(
-        &self,
-        syllables: &[Syllable],
-        first: usize,
-        strategy: LookupStrategy,
-    ) -> Vec<Phrase>;
-    /// Returns the first phrase matched by the syllables.
-    ///
-    /// The result should use a stable order each time for the same input.
-    fn lookup_first_phrase(
-        &self,
-        syllables: &[Syllable],
-        strategy: LookupStrategy,
-    ) -> Option<Phrase> {
-        self.lookup_first_n_phrases(syllables, 1, strategy)
-            .into_iter()
-            .next()
-    }
     /// Returns all phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
-    fn lookup_all_phrases(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
-        self.lookup_first_n_phrases(syllables, usize::MAX, strategy)
-    }
+    fn lookup(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase>;
     /// Returns an iterator to all phrases in the dictionary.
     fn entries(&self) -> Entries<'_>;
     /// Returns information about the dictionary instance.
