@@ -19,7 +19,7 @@ use der::{
 };
 use log::{error, warn};
 
-use crate::zhuyin::{Syllable, SyllableSlice};
+use crate::zhuyin::Syllable;
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
@@ -260,7 +260,7 @@ macro_rules! iter_bail_if_oob {
 impl Dictionary for Trie {
     fn lookup_first_n_phrases(
         &self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         first: usize,
         strategy: LookupStrategy,
     ) -> Vec<Phrase> {
@@ -293,7 +293,7 @@ impl Dictionary for Trie {
         // Perform a BFS search to find all leaf nodes
         let mut threads: VecDeque<TrieNodeView<'_>> = VecDeque::new();
         threads.push_back(root);
-        for syl in syllables.to_slice().iter() {
+        for syl in syllables {
             debug_assert!(syl.to_u16() != 0);
             for _ in 0..threads.len() {
                 let node = threads.pop_front().unwrap();

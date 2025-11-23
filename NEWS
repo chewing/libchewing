@@ -15,6 +15,7 @@ What's New in libchewing (unreleased)
     used to initialize a chewing context with specific dictionaries enabled.
   - New boolean config option `chewing.sort_candidates_by_frequency` can be
     set to enable sorting candidates by frequency.
+  - Rust type SyllableSlice is removed from public interfaces.
 
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the

@@ -1,5 +1,4 @@
 use std::{
-    borrow::Cow,
     error::Error,
     fmt::{Debug, Display, Write},
     num::NonZeroU16,
@@ -170,20 +169,6 @@ impl Syllable {
     pub fn to_u16(self) -> u16 {
         self.value.get()
     }
-    /// Returns the `Syllable` encoded in a u16 integer in little-endian bytes.
-    ///
-    /// The data layout used:
-    ///
-    /// ```text
-    ///  0                   1
-    ///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-    /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// |   Initial   | M | Rime  |Tone |
-    /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// ```
-    fn to_le_bytes(self) -> [u8; 2] {
-        self.to_u16().to_le_bytes()
-    }
     /// Combines the current syllable with a new sound.
     pub fn update(&mut self, bopomofo: Bopomofo) {
         let orig = self.value.get();
@@ -262,36 +247,6 @@ impl FromStr for Syllable {
 impl AsRef<Syllable> for Syllable {
     fn as_ref(&self) -> &Syllable {
         self
-    }
-}
-
-/// A slice that can be converted to a slice of syllables.
-pub trait SyllableSlice: Debug {
-    fn to_slice(&self) -> Cow<'_, [Syllable]>;
-    fn to_bytes(&self) -> Vec<u8> {
-        let mut syllables_bytes = vec![];
-        self.to_slice()
-            .iter()
-            .for_each(|syl| syllables_bytes.extend_from_slice(&syl.as_ref().to_le_bytes()));
-        syllables_bytes
-    }
-}
-
-impl SyllableSlice for &[Syllable] {
-    fn to_slice(&self) -> Cow<'_, [Syllable]> {
-        Cow::Borrowed(*self)
-    }
-}
-
-impl SyllableSlice for Vec<Syllable> {
-    fn to_slice(&self) -> Cow<'_, [Syllable]> {
-        Cow::Borrowed(self)
-    }
-}
-
-impl<const N: usize> SyllableSlice for [Syllable; N] {
-    fn to_slice(&self) -> Cow<'_, [Syllable]> {
-        Cow::Borrowed(self)
     }
 }
 

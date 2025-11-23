@@ -4,6 +4,7 @@ use crate::{
     conversion::{Composition, Gap, Interval},
     dictionary::{Dictionary, Layered, LookupStrategy},
     editor::{EditorError, SharedState},
+    zhuyin::Syllable,
 };
 
 #[derive(Debug)]
@@ -46,7 +47,11 @@ impl PhraseSelector {
             self.begin = self.after_previous_break_point(cursor);
         }
         loop {
-            let syllables = &self.com.symbols()[self.begin..self.end];
+            let symbols = &self.com.symbols()[self.begin..self.end];
+            let syllables: Vec<Syllable> = symbols
+                .iter()
+                .map(|s| s.to_syllable().unwrap_or_default())
+                .collect();
             debug_assert!(
                 !syllables.is_empty(),
                 "should not enter here if there's no syllable in range"
@@ -89,7 +94,11 @@ impl PhraseSelector {
                     return None;
                 }
             }
-            let syllables = &self.com.symbols()[begin..end];
+            let symbols = &self.com.symbols()[begin..end];
+            let syllables: Vec<Syllable> = symbols
+                .iter()
+                .map(|s| s.to_syllable().unwrap_or_default())
+                .collect();
             if dict
                 .lookup_first_phrase(&syllables, self.lookup_strategy)
                 .is_some()
@@ -118,7 +127,11 @@ impl PhraseSelector {
                     return None;
                 }
             }
-            let syllables = &self.com.symbols()[begin..end];
+            let symbols = &self.com.symbols()[begin..end];
+            let syllables: Vec<Syllable> = symbols
+                .iter()
+                .map(|s| s.to_syllable().unwrap_or_default())
+                .collect();
             if dict
                 .lookup_first_phrase(&syllables, self.lookup_strategy)
                 .is_some()
@@ -174,7 +187,11 @@ impl PhraseSelector {
                     self.begin = self.after_previous_break_point(self.begin);
                 }
             }
-            let syllables = &self.com.symbols()[self.begin..self.end];
+            let symbols = &self.com.symbols()[self.begin..self.end];
+            let syllables: Vec<Syllable> = symbols
+                .iter()
+                .map(|s| s.to_syllable().unwrap_or_default())
+                .collect();
             if dict
                 .lookup_first_phrase(&syllables, self.lookup_strategy)
                 .is_some()
@@ -222,11 +239,12 @@ impl PhraseSelector {
     }
 
     pub(crate) fn candidates(&self, editor: &SharedState, dict: &Layered) -> Vec<String> {
+        let syllables: Vec<Syllable> = self.com.symbols()[self.begin..self.end]
+            .iter()
+            .map(|s| s.to_syllable().unwrap_or_default())
+            .collect();
         let mut candidates = dict
-            .lookup_all_phrases(
-                &&self.com.symbols()[self.begin..self.end],
-                self.lookup_strategy,
-            )
+            .lookup_all_phrases(&syllables, self.lookup_strategy)
             .into_iter()
             .collect::<Vec<_>>();
         if self.end - self.begin == 1 {

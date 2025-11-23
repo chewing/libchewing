@@ -6,15 +6,11 @@ mod simple;
 mod symbol;
 
 use std::{
-    borrow::Cow,
     cmp::{max, min},
     fmt::Debug,
 };
 
-use crate::{
-    dictionary::Dictionary,
-    zhuyin::{Syllable, SyllableSlice},
-};
+use crate::{dictionary::Dictionary, zhuyin::Syllable};
 
 pub use self::chewing::ChewingEngine;
 pub use self::fuzzy::FuzzyChewingEngine;
@@ -147,30 +143,6 @@ impl From<Syllable> for Symbol {
 impl From<char> for Symbol {
     fn from(value: char) -> Self {
         Symbol::Char(value)
-    }
-}
-
-impl SyllableSlice for &[Symbol] {
-    fn to_slice(&self) -> Cow<'static, [Syllable]> {
-        self.iter()
-            .map_while(|&sym| match sym {
-                Symbol::Syllable(syl) => Some(syl),
-                Symbol::Char(_) => None,
-            })
-            .collect::<Vec<_>>()
-            .into()
-    }
-}
-
-impl SyllableSlice for Vec<Symbol> {
-    fn to_slice(&self) -> Cow<'static, [Syllable]> {
-        self.iter()
-            .map_while(|&sym| match sym {
-                Symbol::Syllable(syl) => Some(syl),
-                Symbol::Char(_) => None,
-            })
-            .collect::<Vec<_>>()
-            .into()
     }
 }
 

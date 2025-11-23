@@ -8,7 +8,7 @@ use std::{
 
 use rusqlite::{Connection, Error as RusqliteError, OpenFlags, OptionalExtension, params};
 
-use crate::zhuyin::{Syllable, SyllableSlice};
+use crate::zhuyin::Syllable;
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
@@ -17,6 +17,21 @@ use super::{
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
 const USER_VERSION: u32 = 0;
+
+/// A slice that can be converted to a slice of syllables.
+trait SyllableSlice {
+    fn to_bytes(&self) -> Vec<u8>;
+}
+
+impl SyllableSlice for &[Syllable] {
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut syllables_bytes = vec![];
+        self.iter().for_each(|syl| {
+            syllables_bytes.extend_from_slice(&syl.as_ref().to_u16().to_le_bytes())
+        });
+        syllables_bytes
+    }
+}
 
 /// TODO: doc
 #[derive(Debug)]
@@ -300,7 +315,7 @@ impl From<RusqliteError> for UpdateDictionaryError {
 impl Dictionary for SqliteDictionary {
     fn lookup_first_n_phrases(
         &self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         first: usize,
         strategy: LookupStrategy,
     ) -> Vec<Phrase> {
@@ -392,7 +407,7 @@ impl DictionaryMut for SqliteDictionary {
 
     fn add_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
         if self.readonly {
@@ -414,7 +429,7 @@ impl DictionaryMut for SqliteDictionary {
 
     fn update_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
@@ -468,7 +483,7 @@ impl DictionaryMut for SqliteDictionary {
 
     fn remove_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
         let syllables_bytes = syllables.to_bytes();

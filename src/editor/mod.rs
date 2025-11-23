@@ -28,7 +28,7 @@ use crate::{
         SystemDictionaryLoader, UpdateDictionaryError, UserDictionaryLoader,
     },
     input::{KeyState, KeyboardEvent, keysym::*},
-    zhuyin::{Syllable, SyllableSlice},
+    zhuyin::Syllable,
 };
 
 use self::{
@@ -286,14 +286,14 @@ impl Editor {
     }
     pub fn learn_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: &str,
     ) -> Result<(), UpdateDictionaryError> {
         self.shared.learn_phrase(syllables, phrase)
     }
     pub fn unlearn_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: &str,
     ) -> Result<(), UpdateDictionaryError> {
         self.shared.unlearn_phrase(syllables, phrase)
@@ -564,10 +564,14 @@ impl SharedState {
         if end > self.com.len() {
             return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
-        let syllables = self.com.symbols()[start..end].to_vec();
-        if syllables.iter().any(Symbol::is_char) {
+        let symbols = self.com.symbols()[start..end].to_vec();
+        if symbols.iter().any(Symbol::is_char) {
             return Err("加詞失敗：字數不符或夾雜符號".to_owned());
         }
+        let syllables: Vec<Syllable> = symbols
+            .iter()
+            .map(|s| s.to_syllable().unwrap_or_default())
+            .collect();
         // FIXME
         let phrase = self
             .conversion()
@@ -597,14 +601,14 @@ impl SharedState {
     }
     fn learn_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        if syllables.to_slice().len() != phrase.chars().count() {
+        if syllables.len() != phrase.chars().count() {
             warn!(
                 "syllables({:?})[{}] and phrase({})[{}] has different length",
                 &syllables,
-                syllables.to_slice().len(),
+                syllables.len(),
                 &phrase,
                 phrase.chars().count()
             );
@@ -633,7 +637,7 @@ impl SharedState {
     }
     fn unlearn_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: &str,
     ) -> Result<(), UpdateDictionaryError> {
         let _ = self.dict.remove_phrase(syllables, phrase);
@@ -701,9 +705,9 @@ impl SharedState {
         self.last_key_behavior = EditorKeyBehavior::Commit;
     }
     fn auto_learn(&mut self, intervals: &[Interval]) {
-        for (symbols, phrase) in collect_new_phrases(intervals, self.com.symbols()) {
-            if let Err(error) = self.learn_phrase(&symbols, &phrase) {
-                error!("Failed to learn phrase {phrase} from {symbols:?}: {error:#}");
+        for (syllables, phrase) in collect_new_phrases(intervals, self.com.symbols()) {
+            if let Err(error) = self.learn_phrase(&syllables, &phrase) {
+                error!("Failed to learn phrase {phrase} from {syllables:?}: {error:#}");
             }
         }
     }
@@ -723,7 +727,7 @@ fn is_break_word(word: &str) -> bool {
      "路", "村", "在"].contains(&word)
 }
 
-fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<Symbol>, String)> {
+fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<Syllable>, String)> {
     debug!("intervals {:?}", intervals);
     let mut pending = String::new();
     let mut syllables = Vec::new();
@@ -736,7 +740,10 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
     };
     // Step 1. collect all intervals
     for interval in intervals.iter().filter(|it| it.is_phrase) {
-        let syllables = symbols[interval.start..interval.end].to_vec();
+        let syllables = symbols[interval.start..interval.end]
+            .iter()
+            .map(|s| s.to_syllable().unwrap())
+            .collect();
         let pending = interval.str.clone().into_string();
         collect(syllables, pending);
     }
@@ -744,7 +751,11 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
     for interval in intervals.iter() {
         if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.str) {
             pending.push_str(&interval.str);
-            syllables.extend_from_slice(&symbols[interval.start..interval.end]);
+            syllables.extend(
+                symbols[interval.start..interval.end]
+                    .iter()
+                    .map(|s| s.to_syllable().unwrap()),
+            );
         } else if !pending.is_empty() {
             collect(mem::take(&mut syllables), mem::take(&mut pending));
         }
@@ -756,7 +767,11 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
     for interval in intervals {
         if interval.is_phrase && interval.len() == 1 {
             pending.push_str(&interval.str);
-            syllables.extend_from_slice(&symbols[interval.start..interval.end]);
+            syllables.extend(
+                symbols[interval.start..interval.end]
+                    .iter()
+                    .map(|s| s.to_syllable().unwrap()),
+            );
         } else if !pending.is_empty() {
             collect(mem::take(&mut syllables), mem::take(&mut pending));
         }
@@ -1987,22 +2002,22 @@ mod tests {
             vec![
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
-                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                        syl![bpmf::J, bpmf::I, bpmf::EN],
+                        syl![bpmf::T, bpmf::I, bpmf::AN],
                     ],
                     "今天".to_string()
                 ),
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
-                        Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+                        syl![bpmf::T, bpmf::I, bpmf::AN],
+                        syl![bpmf::Q, bpmf::I, bpmf::TONE4],
                     ],
                     "天氣".to_string()
                 ),
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::ZH, bpmf::EN]),
-                        Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
+                        syl![bpmf::ZH, bpmf::EN],
+                        syl![bpmf::H, bpmf::AU, bpmf::TONE3],
                     ],
                     "真好".to_string()
                 ),
@@ -2053,31 +2068,25 @@ mod tests {
             vec![
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::J, bpmf::I, bpmf::EN]),
-                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
+                        syl![bpmf::J, bpmf::I, bpmf::EN],
+                        syl![bpmf::T, bpmf::I, bpmf::AN],
                     ],
                     "今天".to_string()
                 ),
-                (
-                    vec![Symbol::Syllable(syl![bpmf::I, bpmf::EH, bpmf::TONE3]),],
-                    "也".to_string()
-                ),
-                (
-                    vec![Symbol::Syllable(syl![bpmf::SH, bpmf::TONE4])],
-                    "是".to_string()
-                ),
+                (vec![syl![bpmf::I, bpmf::EH, bpmf::TONE3]], "也".to_string()),
+                (vec![syl![bpmf::SH, bpmf::TONE4]], "是".to_string()),
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::H, bpmf::AU, bpmf::TONE3]),
-                        Symbol::Syllable(syl![bpmf::T, bpmf::I, bpmf::AN]),
-                        Symbol::Syllable(syl![bpmf::Q, bpmf::I, bpmf::TONE4]),
+                        syl![bpmf::H, bpmf::AU, bpmf::TONE3],
+                        syl![bpmf::T, bpmf::I, bpmf::AN],
+                        syl![bpmf::Q, bpmf::I, bpmf::TONE4],
                     ],
                     "好天氣".to_string()
                 ),
                 (
                     vec![
-                        Symbol::Syllable(syl![bpmf::I, bpmf::EH, bpmf::TONE3]),
-                        Symbol::Syllable(syl![bpmf::SH, bpmf::TONE4])
+                        syl![bpmf::I, bpmf::EH, bpmf::TONE3],
+                        syl![bpmf::SH, bpmf::TONE4]
                     ],
                     "也是".to_string()
                 ),

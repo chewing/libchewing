@@ -10,7 +10,7 @@ use std::{
     path::Path,
 };
 
-use crate::zhuyin::{Syllable, SyllableSlice};
+use crate::zhuyin::Syllable;
 
 pub use layered::Layered;
 pub use loader::{
@@ -343,7 +343,7 @@ pub trait Dictionary: Debug {
     /// The result should use a stable order each time for the same input.
     fn lookup_first_n_phrases(
         &self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         first: usize,
         strategy: LookupStrategy,
     ) -> Vec<Phrase>;
@@ -352,7 +352,7 @@ pub trait Dictionary: Debug {
     /// The result should use a stable order each time for the same input.
     fn lookup_first_phrase(
         &self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         strategy: LookupStrategy,
     ) -> Option<Phrase> {
         self.lookup_first_n_phrases(syllables, 1, strategy)
@@ -362,11 +362,7 @@ pub trait Dictionary: Debug {
     /// Returns all phrases matched by the syllables.
     ///
     /// The result should use a stable order each time for the same input.
-    fn lookup_all_phrases(
-        &self,
-        syllables: &dyn SyllableSlice,
-        strategy: LookupStrategy,
-    ) -> Vec<Phrase> {
+    fn lookup_all_phrases(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
         self.lookup_first_n_phrases(syllables, usize::MAX, strategy)
     }
     /// Returns an iterator to all phrases in the dictionary.
@@ -410,14 +406,14 @@ pub trait DictionaryMut: Debug {
     /// TODO: doc
     fn add_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError>;
 
     /// TODO: doc
     fn update_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
@@ -426,7 +422,7 @@ pub trait DictionaryMut: Debug {
     /// TODO: doc
     fn remove_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError>;
 }

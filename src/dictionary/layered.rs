@@ -5,7 +5,7 @@ use std::{
 
 use log::error;
 
-use crate::zhuyin::SyllableSlice;
+use crate::zhuyin::Syllable;
 
 use super::{
     Dictionary, DictionaryInfo, DictionaryMut, Entries, LookupStrategy, Phrase,
@@ -83,7 +83,7 @@ impl Dictionary for Layered {
     /// ```
     fn lookup_first_n_phrases(
         &self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         first: usize,
         strategy: LookupStrategy,
     ) -> Vec<Phrase> {
@@ -159,7 +159,7 @@ impl DictionaryMut for Layered {
 
     fn add_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
         if phrase.as_str().is_empty() {
@@ -175,7 +175,7 @@ impl DictionaryMut for Layered {
 
     fn update_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase: Phrase,
         user_freq: u32,
         time: u64,
@@ -193,7 +193,7 @@ impl DictionaryMut for Layered {
 
     fn remove_phrase(
         &mut self,
-        syllables: &dyn SyllableSlice,
+        syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
         if let Some(writer) = self.user_dict.as_dict_mut() {
