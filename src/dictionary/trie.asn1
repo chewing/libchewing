@@ -25,7 +25,7 @@ BEGIN
   Phrase ::= SEQUENCE
   {
     phrase     UTF8String,
-    freq       INTEGER (0..65535),
+    freq       INTEGER (0..4294967295),
     lastUsed   [0] IMPLICIT Uint64 OPTIONAL,
     ...
   }
