@@ -141,8 +141,9 @@ impl ChewingEngine {
 
         let mut max_freq = 0;
         let mut best_phrase = None;
-        let phrases = dict.lookup(&syllables, self.lookup_strategy);
-        let total_for_bopomofo: f64 = phrases.iter().map(|it| f64::from(it.freq())).sum();
+        // Approximate value. We only use this global for scaling for now, so we can
+        // use any value.
+        let global_total: f64 = 1_000_000_000.0;
         'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
@@ -168,9 +169,9 @@ impl ChewingEngine {
             // Calculate conditional probability:
             //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
             max_freq = phrase.freq();
-            let log_prob = match total_for_bopomofo {
+            let log_prob = match global_total {
                 0.0 => -23.025850929940457, //1e-10_f64.ln()
-                _ => (max_freq as f64 / total_for_bopomofo).ln(),
+                _ => (max_freq as f64 / global_total).ln(),
             };
             best_phrase = Some(PossiblePhrase::Phrase(phrase, log_prob));
         }
