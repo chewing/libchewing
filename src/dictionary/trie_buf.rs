@@ -92,7 +92,7 @@ impl TrieBuf {
             .btree
             .range(min_key..max_key)
             .map(|(key, value)| Phrase {
-                phrase: key.1.clone().into(),
+                text: key.1.clone().into(),
                 freq: value.0,
                 last_used: Some(value.1),
             });
@@ -113,7 +113,7 @@ impl TrieBuf {
                 (
                     key.0.clone().into_owned(),
                     Phrase {
-                        phrase: key.1.clone().into(),
+                        text: key.1.clone().into(),
                         freq: value.0,
                         last_used: Some(value.1),
                     },
@@ -165,7 +165,7 @@ impl TrieBuf {
         self.btree.insert(
             (
                 Cow::from(syllables.to_vec()),
-                Cow::from(phrase.phrase.into_string()),
+                Cow::from(phrase.text.into_string()),
             ),
             (phrase.freq, phrase.last_used.unwrap_or_default()),
         );
@@ -184,7 +184,7 @@ impl TrieBuf {
         self.btree.insert(
             (
                 Cow::from(syllables.to_vec()),
-                Cow::from(phrase.phrase.into_string()),
+                Cow::from(phrase.text.into_string()),
             ),
             (user_freq, time),
         );

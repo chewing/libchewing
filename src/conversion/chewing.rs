@@ -168,10 +168,11 @@ impl ChewingEngine {
             // Calculate conditional probability:
             //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
             max_freq = phrase.freq();
-            best_phrase = Some(PossiblePhrase::Phrase(
-                phrase,
-                (max_freq as f64 / total_for_bopomofo).ln(),
-            ));
+            let log_prob = match total_for_bopomofo {
+                0.0 => -23.025850929940457, //1e-10_f64.ln()
+                _ => (max_freq as f64 / total_for_bopomofo).ln(),
+            };
+            best_phrase = Some(PossiblePhrase::Phrase(phrase, log_prob));
         }
 
         if best_phrase.is_none() {
@@ -423,7 +424,9 @@ impl Debug for PossiblePath {
 
 impl PossiblePath {
     fn total_probability(&self) -> f64 {
-        self.phrase_log_probability() + self.length_log_probability()
+        let prob = self.phrase_log_probability() + self.length_log_probability();
+        debug_assert!(!prob.is_nan());
+        prob
     }
 
     /// Copied from IsRecContain to trim some paths

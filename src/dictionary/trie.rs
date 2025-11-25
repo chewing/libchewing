@@ -582,7 +582,7 @@ impl<'a> DecodeValue<'a> for Phrase {
             let freq = reader.decode()?;
             let last_used = reader.context_specific(TagNumber::N0, TagMode::Implicit)?;
             Ok(Phrase {
-                phrase: String::from(phrase).into_boxed_str(),
+                text: String::from(phrase).into_boxed_str(),
                 freq,
                 last_used,
             })

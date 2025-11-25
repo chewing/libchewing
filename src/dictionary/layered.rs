@@ -18,7 +18,11 @@ use super::{
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Layered, TrieBuf, Dictionary, LookupStrategy, Phrase}, syl, zhuyin::Bopomofo};
+/// use chewing::{
+///     dictionary::{Dictionary, Layered, LookupStrategy, Phrase, TrieBuf},
+///     syl,
+///     zhuyin::Bopomofo,
+/// };
 ///
 /// let sys_dict = TrieBuf::from([(
 ///     vec![syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],

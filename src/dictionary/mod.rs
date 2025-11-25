@@ -126,7 +126,7 @@ pub struct DictionaryInfo {
 /// ```
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Phrase {
-    phrase: Box<str>,
+    text: Box<str>,
     freq: u32,
     last_used: Option<u64>,
 }
@@ -146,7 +146,7 @@ impl Phrase {
         S: Into<Box<str>>,
     {
         Phrase {
-            phrase: phrase.into(),
+            text: phrase.into(),
             freq,
             last_used: None,
         }
@@ -188,7 +188,7 @@ impl Phrase {
     /// assert_eq!("詞", phrase.as_str());
     /// ```
     pub fn as_str(&self) -> &str {
-        self.phrase.borrow()
+        self.text.borrow()
     }
 }
 
@@ -208,7 +208,7 @@ impl Ord for Phrase {
             Ordering::Equal => {}
             ord => return ord,
         }
-        self.phrase.cmp(&other.phrase)
+        self.text.cmp(&other.text)
     }
 }
 
@@ -220,19 +220,19 @@ impl AsRef<str> for Phrase {
 
 impl From<Phrase> for String {
     fn from(phrase: Phrase) -> Self {
-        phrase.phrase.into_string()
+        phrase.text.into_string()
     }
 }
 
 impl From<Phrase> for Box<str> {
     fn from(phrase: Phrase) -> Self {
-        phrase.phrase
+        phrase.text
     }
 }
 
 impl From<Phrase> for (String, u32) {
     fn from(phrase: Phrase) -> Self {
-        (phrase.phrase.into_string(), phrase.freq)
+        (phrase.text.into_string(), phrase.freq)
     }
 }
 
