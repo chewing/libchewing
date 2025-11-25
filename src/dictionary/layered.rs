@@ -33,7 +33,7 @@ use super::{
 /// assert_eq!(
 ///     [
 ///         ("側", 1, 0).into(),
-///         ("冊", 100, 0).into(),
+///         ("冊", 101, 0).into(),
 ///         ("測", 1, 0).into(),
 ///         ("策", 100, 0).into(),
 ///     ]
@@ -68,7 +68,11 @@ impl Layered {
 impl Dictionary for Layered {
     /// Lookup phrases from all underlying dictionaries.
     ///
-    /// Phrases are ordered by their first apperance in the underlying dictionaries.
+    /// Phrases are ordered by their first apperance in the underlying
+    /// dictionaries.
+    ///
+    /// When a phrase appears in multiple dictionaries, the final
+    /// frequency is the sum of all frequency in all dictionaries.
     ///
     /// Pseudo code
     ///
@@ -77,7 +81,7 @@ impl Dictionary for Layered {
     /// Foreach d in d_layers
     ///   Foreach phrase, freq in d.lookup_syllables()
     ///     If phrase in phrases
-    ///       Set phrases[phrase].freq = freq
+    ///       Set phrases[phrase].freq += freq
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
@@ -94,7 +98,14 @@ impl Dictionary for Layered {
                     match sort_map.entry(phrase.to_string()) {
                         Entry::Occupied(entry) => {
                             let index = *entry.get();
-                            phrases[index] = phrase.clone();
+                            phrases[index].freq += phrase.freq;
+                            phrases[index].last_used =
+                                match (phrases[index].last_used, phrase.last_used) {
+                                    (Some(orig), Some(new)) => Some(u64::max(orig, new)),
+                                    (Some(orig), None) => Some(orig),
+                                    (None, Some(new)) => Some(new),
+                                    (None, None) => None,
+                                };
                         }
                         Entry::Vacant(entry) => {
                             entry.insert(phrases.len());
@@ -282,7 +293,7 @@ mod tests {
         assert_eq!(
             [
                 ("側", 1, 0).into(),
-                ("冊", 100, 0).into(),
+                ("冊", 101, 0).into(),
                 ("測", 1, 0).into(),
                 ("策", 100, 0).into(),
             ]
@@ -329,7 +340,7 @@ mod tests {
         assert_eq!(
             [
                 ("側", 1, 0).into(),
-                ("冊", 100, 0).into(),
+                ("冊", 101, 0).into(),
                 ("測", 1, 0).into(),
                 ("策", 100, 0).into(),
             ]

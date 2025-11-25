@@ -40,7 +40,6 @@ impl ChewingEngine {
             if intervals.is_empty() {
                 return vec![PossiblePath::default()];
             }
-            let intervals = log_softmax(intervals);
             let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
             trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
@@ -59,22 +58,6 @@ impl ChewingEngine {
                 .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
         })
     }
-}
-
-fn log_softmax(intervals: Vec<PossibleInterval>) -> Vec<PossibleInterval> {
-    let scale = 1e5; // max count in tsi.src was about 120,000
-    let x: Vec<f64> = intervals.iter().map(|v| v.phrase.freq() as f64).collect();
-    let shifted: Vec<f64> = x.iter().map(|&x| x / scale).collect();
-    let log_sum_exp = shifted.iter().map(|&v| v.exp()).sum::<f64>().ln();
-
-    intervals
-        .into_iter()
-        .zip(shifted)
-        .map(|(mut i, v)| {
-            i.weight = v - log_sum_exp;
-            i
-        })
-        .collect()
 }
 
 impl ConversionEngine for ChewingEngine {
@@ -144,7 +127,7 @@ impl ChewingEngine {
         }
 
         if symbols.len() == 1 && symbols[0].is_char() {
-            return Some(symbols[0].into());
+            return Some(PossiblePhrase::Symbol(symbols[0]));
         }
 
         if symbols.iter().any(|sym| sym.is_char()) {
@@ -158,6 +141,8 @@ impl ChewingEngine {
 
         let mut max_freq = 0;
         let mut best_phrase = None;
+        let phrases = dict.lookup(&syllables, self.lookup_strategy);
+        let total_for_bopomofo: f64 = phrases.iter().map(|it| f64::from(it.freq())).sum();
         'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
             // If there exists a user selected interval which is a
             // sub-interval of this phrase but the substring is
@@ -180,15 +165,23 @@ impl ChewingEngine {
             if !(phrase.freq() > max_freq || best_phrase.is_none()) {
                 continue;
             }
+            // Calculate conditional probability:
+            //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
             max_freq = phrase.freq();
-            best_phrase = Some(phrase.into());
+            best_phrase = Some(PossiblePhrase::Phrase(
+                phrase,
+                (max_freq as f64 / total_for_bopomofo).ln(),
+            ));
         }
 
         if best_phrase.is_none() {
             // try to find if there's a forced selection
             for selection in &com.selections {
                 if start == selection.start && end == selection.end {
-                    best_phrase = Some(Phrase::new(selection.str.clone(), 0).into());
+                    best_phrase = Some(PossiblePhrase::Phrase(
+                        Phrase::new(selection.str.clone(), 0),
+                        0.0,
+                    ));
                     break;
                 }
             }
@@ -208,12 +201,7 @@ impl ChewingEngine {
                 if let Some(phrase) =
                     self.find_best_phrase(dict, start, &com.symbols[start..end], com)
                 {
-                    intervals.push(PossibleInterval {
-                        start,
-                        end,
-                        phrase,
-                        weight: 0.0,
-                    });
+                    intervals.push(PossibleInterval { start, end, phrase });
                 }
             }
         }
@@ -345,17 +333,17 @@ impl ChewingEngine {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 enum PossiblePhrase {
     Symbol(Symbol),
-    Phrase(Phrase),
+    Phrase(Phrase, f64),
 }
 
 impl PossiblePhrase {
-    fn freq(&self) -> u32 {
+    fn log_prob(&self) -> f64 {
         match self {
-            PossiblePhrase::Symbol(_) => 0,
-            PossiblePhrase::Phrase(phrase) => phrase.freq(),
+            PossiblePhrase::Symbol(_) => 0.0,
+            PossiblePhrase::Phrase(_, log_prob) => *log_prob,
         }
     }
 }
@@ -364,20 +352,8 @@ impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char().unwrap()),
-            PossiblePhrase::Phrase(phrase) => f.write_str(phrase.as_str()),
+            PossiblePhrase::Phrase(phrase, _) => f.write_str(phrase.as_str()),
         }
-    }
-}
-
-impl From<Phrase> for PossiblePhrase {
-    fn from(value: Phrase) -> Self {
-        PossiblePhrase::Phrase(value)
-    }
-}
-
-impl From<Symbol> for PossiblePhrase {
-    fn from(value: Symbol) -> Self {
-        PossiblePhrase::Symbol(value)
     }
 }
 
@@ -385,7 +361,7 @@ impl From<PossiblePhrase> for Box<str> {
     fn from(value: PossiblePhrase) -> Self {
         match value {
             PossiblePhrase::Symbol(sym) => sym.to_char().unwrap().to_string().into_boxed_str(),
-            PossiblePhrase::Phrase(phrase) => phrase.into(),
+            PossiblePhrase::Phrase(phrase, _) => phrase.into(),
         }
     }
 }
@@ -395,7 +371,6 @@ struct PossibleInterval {
     start: usize,
     end: usize,
     phrase: PossiblePhrase,
-    weight: f64,
 }
 
 impl Debug for PossibleInterval {
@@ -403,7 +378,6 @@ impl Debug for PossibleInterval {
         f.debug_tuple("I")
             .field(&(self.start..self.end))
             .field(&self.phrase)
-            .field(&self.weight)
             .finish()
     }
 }
@@ -424,7 +398,7 @@ impl From<PossibleInterval> for Interval {
             end: value.end,
             is_phrase: match value.phrase {
                 PossiblePhrase::Symbol(_) => false,
-                PossiblePhrase::Phrase(_) => true,
+                PossiblePhrase::Phrase(_, _) => true,
             },
             str: value.phrase.into(),
         }
@@ -473,7 +447,7 @@ impl PossiblePath {
     }
 
     fn phrase_log_probability(&self) -> f64 {
-        self.intervals.iter().map(|it| it.weight).sum()
+        self.intervals.iter().map(|it| it.phrase.log_prob()).sum()
     }
     fn length_log_probability(&self) -> f64 {
         self.intervals
@@ -530,7 +504,7 @@ impl Display for PossiblePath {
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Composition, Gap, Interval, Symbol},
+        conversion::{Composition, Gap, Interval, Symbol, chewing::PossiblePhrase},
         dictionary::{Dictionary, Phrase, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -928,14 +902,12 @@ mod tests {
                 PossibleInterval {
                     start: 0,
                     end: 2,
-                    phrase: Phrase::new("測試", 0).into(),
-                    weight: 0.0,
+                    phrase: PossiblePhrase::Phrase(Phrase::new("測試", 0), 0.0),
                 },
                 PossibleInterval {
                     start: 2,
                     end: 4,
-                    phrase: Phrase::new("一下", 0).into(),
-                    weight: 0.0,
+                    phrase: PossiblePhrase::Phrase(Phrase::new("一下", 0), 0.0),
                 },
             ],
         };
@@ -944,20 +916,17 @@ mod tests {
                 PossibleInterval {
                     start: 0,
                     end: 2,
-                    phrase: Phrase::new("測試", 0).into(),
-                    weight: 0.0,
+                    phrase: PossiblePhrase::Phrase(Phrase::new("測試", 0), 0.0),
                 },
                 PossibleInterval {
                     start: 2,
                     end: 3,
-                    phrase: Phrase::new("遺", 0).into(),
-                    weight: 0.0,
+                    phrase: PossiblePhrase::Phrase(Phrase::new("遺", 0), 0.0),
                 },
                 PossibleInterval {
                     start: 3,
                     end: 4,
-                    phrase: Phrase::new("下", 0).into(),
-                    weight: 0.0,
+                    phrase: PossiblePhrase::Phrase(Phrase::new("下", 0), 0.0),
                 },
             ],
         };

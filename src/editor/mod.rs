@@ -617,14 +617,14 @@ impl SharedState {
         }
         let phrases = self.dict.lookup(syllables, LookupStrategy::Standard);
         if phrases.is_empty() {
-            self.dict.add_phrase(syllables, (phrase, 1).into())?;
+            self.dict.add_phrase(syllables, (phrase, 10).into())?;
             return Ok(());
         }
         let phrase = phrases
             .iter()
             .find(|p| p.as_str() == phrase)
             .cloned()
-            .unwrap_or((phrase, 0).into());
+            .unwrap_or((phrase, 10).into());
         // TODO: fine tune learning curve
         let max_freq = phrases.iter().map(|p| p.freq()).max().unwrap_or(1);
         let user_freq = self.estimate.estimate(&phrase, max_freq);
