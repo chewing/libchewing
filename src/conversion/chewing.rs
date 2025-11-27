@@ -1,8 +1,7 @@
 use std::{
-    collections::VecDeque,
+    collections::{BinaryHeap, HashSet},
     fmt::{Debug, Display, Write},
     iter,
-    ops::Not,
 };
 
 use log::trace;
@@ -21,7 +20,7 @@ pub struct ChewingEngine {
 }
 
 impl ChewingEngine {
-    const MAX_OUT_PATHS: usize = 100;
+    const MAX_OUT_PATHS: usize = 200;
     /// Creates a new conversion engine.
     pub fn new() -> ChewingEngine {
         ChewingEngine {
@@ -37,17 +36,18 @@ impl ChewingEngine {
             if comp.is_empty() {
                 return vec![PossiblePath::default()];
             }
-            let intervals = self.find_edges(dict, comp);
-            if intervals.is_empty() {
+            let (edges, phrases) = self.find_edges(dict, comp);
+            if edges.is_empty() {
                 return vec![PossiblePath::default()];
             }
-            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), intervals);
+            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), edges, &phrases);
             trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
 
             let mut trimmed_paths = self.trim_paths(paths);
             debug_assert!(!trimmed_paths.is_empty());
 
+            // TODO: Reranking
             trimmed_paths.sort_by(|a, b| b.cmp(a));
             trimmed_paths
         })
@@ -127,8 +127,10 @@ impl ChewingEngine {
             }
         }
 
-        if symbols.len() == 1 && symbols[0].is_char() {
-            return vec![PossiblePhrase::Symbol(symbols[0])];
+        if symbols.len() == 1
+            && let Some(sym) = symbols[0].to_char()
+        {
+            return vec![PossiblePhrase::Symbol(sym)];
         }
 
         if symbols.iter().any(|sym| sym.is_char()) {
@@ -172,37 +174,6 @@ impl ChewingEngine {
             .collect::<Vec<_>>();
         phrases.sort_by(|a, b| f64::total_cmp(&-a.log_prob(), &-b.log_prob()));
         phrases.truncate(max_phrases_count);
-        // 'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
-        //     // If there exists a user selected interval which is a
-        //     // sub-interval of this phrase but the substring is
-        //     // different then we can skip this phrase.
-        //     for selection in &com.selections {
-        //         debug_assert!(!selection.str.is_empty());
-        //         if start <= selection.start && end >= selection.end {
-        //             let offset = selection.start - start;
-        //             let len = selection.end - selection.start;
-        //             let substring: String =
-        //                 phrase.as_str().chars().skip(offset).take(len).collect();
-        //             if substring != selection.str.as_ref() {
-        //                 continue 'next_phrase;
-        //             }
-        //         }
-        //     }
-
-        //     // If there are phrases that can satisfy all the constraints
-        //     // then pick the one with highest frequency.
-        //     if !(phrase.freq() > max_freq || best_phrase.is_none()) {
-        //         continue;
-        //     }
-        //     // Calculate conditional probability:
-        //     //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
-        //     max_freq = phrase.freq();
-        //     let log_prob = match global_total {
-        //         0.0 => -23.025850929940457, //1e-10_f64.ln()
-        //         _ => (max_freq as f64 / global_total).ln(),
-        //     };
-        //     best_phrase = Some(PossiblePhrase::Phrase(phrase, log_prob));
-        // }
 
         if phrases.is_empty() {
             // try to find if there's a forced selection
@@ -220,21 +191,29 @@ impl ChewingEngine {
         trace!("best phraces for {:?} is {:?}", symbols, phrases);
         phrases
     }
-    fn find_edges<D: Dictionary + ?Sized>(&self, dict: &D, com: &Composition) -> Vec<Edge> {
-        let mut intervals = vec![];
+    fn find_edges<D: Dictionary + ?Sized>(
+        &self,
+        dict: &D,
+        com: &Composition,
+    ) -> (Vec<Edge>, Vec<PossiblePhrase>) {
+        let mut sn = 0;
+        let mut edges = vec![];
+        let mut phrases = vec![];
         for start in 0..com.symbols.len() {
             for end in (start + 1)..=com.symbols.len() {
-                let phrases = self.find_best_phrases(dict, start, &com.symbols[start..end], com);
-                if phrases.is_empty().not() {
-                    intervals.push(Edge {
+                for phrase in self.find_best_phrases(dict, start, &com.symbols[start..end], com) {
+                    edges.push(Edge {
                         start,
                         end,
-                        phrases,
+                        sn,
+                        cost: -phrase.log_prob(),
                     });
+                    phrases.push(phrase);
+                    sn += 1;
                 }
             }
         }
-        intervals
+        (edges, phrases)
     }
 
     /// Find K possible best alternative paths.
@@ -243,19 +222,20 @@ impl ChewingEngine {
     /// source and single sink DAG.
     ///
     /// [1]: https://en.wikipedia.org/wiki/Yen%27s_algorithm
-    fn find_k_paths(&self, k: usize, len: usize, edges: Vec<Edge>) -> Vec<PossiblePath> {
+    fn find_k_paths(
+        &self,
+        k: usize,
+        len: usize,
+        edges: Vec<Edge>,
+        phrases: &[PossiblePhrase],
+    ) -> Vec<PossiblePath> {
         let mut ksp = Vec::with_capacity(k);
         let mut candidates = vec![];
         let mut graph = vec![vec![]; len];
-        let mut removed_edges = vec![false; len * len];
+        let mut removed_edges = HashSet::new();
 
         for edge in edges.into_iter() {
             graph[edge.start].push(edge);
-        }
-        for segment in &mut graph {
-            segment.sort_by(|a, b| {
-                f64::total_cmp(&-a.phrases[0].log_prob(), &-b.phrases[0].log_prob())
-            });
         }
         ksp.push(self.shortest_path(&graph, &removed_edges, 0, len).unwrap());
 
@@ -267,7 +247,7 @@ impl ChewingEngine {
 
                 for p in &ksp {
                     if i < p.len() {
-                        removed_edges[p[i].start * len + p[i].end - 1] = true;
+                        removed_edges.insert(p[i].sn);
                     }
                 }
 
@@ -286,7 +266,6 @@ impl ChewingEngine {
             candidates.sort_unstable_by_key(|k| k.len());
             ksp.push(candidates.swap_remove(0));
         }
-        // TODO: Reranking
         ksp.into_iter()
             .map(|edges| {
                 edges
@@ -295,9 +274,10 @@ impl ChewingEngine {
                         let Edge {
                             start,
                             end,
-                            phrases,
+                            sn,
+                            cost: _,
                         } = edge;
-                        let phrase = phrases[0].clone();
+                        let phrase = phrases[sn].clone();
                         PossibleInterval { start, end, phrase }
                     })
                     .collect()
@@ -309,38 +289,48 @@ impl ChewingEngine {
     fn shortest_path(
         &self,
         graph: &[Vec<Edge>],
-        removed_edges: &[bool],
+        removed_edges: &HashSet<usize>,
         source: usize,
-        len: usize,
+        goal: usize,
     ) -> Option<Vec<Edge>> {
-        let mut parent = vec![None; len + 1];
-        let mut queue = VecDeque::new();
-        queue.push_back(source);
-        'bfs: loop {
-            let Some(node) = queue.pop_front() else {
+        let mut back_link: Vec<Option<Edge>> = vec![None; goal + 1];
+        let mut frontier = BinaryHeap::new();
+        frontier.push(FrontierNode {
+            position: source,
+            cost: 0.0,
+        });
+        while let Some(FrontierNode { position, cost }) = frontier.pop() {
+            if position == goal {
                 break;
-            };
-            if let Some(next_edges) = graph.get(node) {
-                for edge in next_edges {
-                    if removed_edges[edge.start * len + edge.end - 1] {
+            }
+            if back_link[position].is_some_and(|prev| cost > prev.cost) {
+                continue;
+            }
+            if let Some(neighbor_edges) = graph.get(position) {
+                for edge in neighbor_edges {
+                    if removed_edges.contains(&edge.sn) {
                         continue;
                     }
-                    if parent[edge.end].is_none() {
-                        parent[edge.end] = Some(edge);
-                        queue.push_back(edge.end);
-                    }
-                    if edge.end == len {
-                        break 'bfs;
+                    let alt = FrontierNode {
+                        position: edge.end,
+                        cost: cost + edge.cost,
+                    };
+                    if back_link[alt.position].is_none_or(|prev| alt.cost < prev.cost) {
+                        back_link[alt.position] = Some(Edge {
+                            cost: alt.cost,
+                            ..*edge
+                        });
+                        frontier.push(alt);
                     }
                 }
             }
         }
         let mut path = vec![];
-        let mut node = len;
+        let mut node = goal;
         while node != source {
-            let interval = parent[node]?;
-            node = interval.start;
-            path.push(interval.clone());
+            let edge = back_link[node]?;
+            node = edge.start;
+            path.push(edge);
         }
         path.reverse();
         Some(path)
@@ -381,7 +371,7 @@ impl ChewingEngine {
 
 #[derive(Debug, Clone, PartialEq)]
 enum PossiblePhrase {
-    Symbol(Symbol),
+    Symbol(char),
     Phrase(Phrase, f64),
 }
 
@@ -397,7 +387,7 @@ impl PossiblePhrase {
 impl Display for PossiblePhrase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PossiblePhrase::Symbol(sym) => f.write_char(sym.to_char().unwrap()),
+            PossiblePhrase::Symbol(sym) => f.write_char(*sym),
             PossiblePhrase::Phrase(phrase, _) => f.write_str(phrase.as_str()),
         }
     }
@@ -406,17 +396,50 @@ impl Display for PossiblePhrase {
 impl From<PossiblePhrase> for Box<str> {
     fn from(value: PossiblePhrase) -> Self {
         match value {
-            PossiblePhrase::Symbol(sym) => sym.to_char().unwrap().to_string().into_boxed_str(),
+            PossiblePhrase::Symbol(sym) => sym.to_string().into_boxed_str(),
             PossiblePhrase::Phrase(phrase, _) => phrase.into(),
         }
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Copy, Clone)]
+struct FrontierNode {
+    position: usize,
+    cost: f64,
+}
+
+impl Ord for FrontierNode {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other.cost.total_cmp(&self.cost)
+    }
+}
+
+impl PartialOrd for FrontierNode {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Eq for FrontierNode {}
+
+impl PartialEq for FrontierNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.position == other.position
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 struct Edge {
     start: usize,
     end: usize,
-    phrases: Vec<PossiblePhrase>,
+    sn: usize,
+    cost: f64,
+}
+
+impl PartialEq for Edge {
+    fn eq(&self, other: &Self) -> bool {
+        self.sn == other.sn
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -558,8 +581,13 @@ impl Display for PossiblePath {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use crate::{
-        conversion::{Composition, Gap, Interval, Symbol, chewing::PossiblePhrase},
+        conversion::{
+            Composition, Gap, Interval, Symbol,
+            chewing::{Edge, PossiblePhrase},
+        },
         dictionary::{Dictionary, Phrase, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -609,6 +637,104 @@ mod tests {
             (vec![syl![H, A]], vec![("哈", 1)]),
             (vec![syl![H, A], syl![H, A]], vec![("哈哈", 1)]),
         ])
+    }
+
+    #[test]
+    fn simple_shortest_path() {
+        let engine = ChewingEngine::new();
+        let graph = vec![
+            vec![
+                Edge {
+                    start: 0,
+                    end: 1,
+                    sn: 0,
+                    cost: 1.0,
+                },
+                Edge {
+                    start: 0,
+                    end: 2,
+                    sn: 2,
+                    cost: 3.0,
+                },
+            ],
+            vec![Edge {
+                start: 1,
+                end: 2,
+                sn: 1,
+                cost: 1.0,
+            }],
+        ];
+        let removed_edges = HashSet::new();
+
+        assert_eq!(
+            Some(vec![
+                Edge {
+                    start: 0,
+                    end: 1,
+                    sn: 0,
+                    cost: 1.0,
+                },
+                Edge {
+                    start: 1,
+                    end: 2,
+                    sn: 1,
+                    cost: 1.0,
+                }
+            ]),
+            engine.shortest_path(&graph, &removed_edges, 0, 2)
+        );
+    }
+
+    #[test]
+    fn multi_edge_shortest_path() {
+        let engine = ChewingEngine::new();
+        let graph = vec![
+            vec![
+                Edge {
+                    start: 0,
+                    end: 1,
+                    sn: 0,
+                    cost: 1.0,
+                },
+                Edge {
+                    start: 0,
+                    end: 1,
+                    sn: 3,
+                    cost: 2.0,
+                },
+                Edge {
+                    start: 0,
+                    end: 2,
+                    sn: 2,
+                    cost: 3.0,
+                },
+            ],
+            vec![Edge {
+                start: 1,
+                end: 2,
+                sn: 1,
+                cost: 1.0,
+            }],
+        ];
+        let removed_edges = HashSet::new();
+
+        assert_eq!(
+            Some(vec![
+                Edge {
+                    start: 0,
+                    end: 1,
+                    sn: 0,
+                    cost: 1.0,
+                },
+                Edge {
+                    start: 1,
+                    end: 2,
+                    sn: 1,
+                    cost: 1.0,
+                }
+            ]),
+            engine.shortest_path(&graph, &removed_edges, 0, 2)
+        );
     }
 
     #[test]
