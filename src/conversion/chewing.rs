@@ -2,6 +2,7 @@ use std::{
     collections::VecDeque,
     fmt::{Debug, Display, Write},
     iter,
+    ops::Not,
 };
 
 use log::trace;
@@ -36,7 +37,7 @@ impl ChewingEngine {
             if comp.is_empty() {
                 return vec![PossiblePath::default()];
             }
-            let intervals = self.find_intervals(dict, comp);
+            let intervals = self.find_edges(dict, comp);
             if intervals.is_empty() {
                 return vec![PossiblePath::default()];
             }
@@ -97,13 +98,13 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
 }
 
 impl ChewingEngine {
-    fn find_best_phrase<D: Dictionary + ?Sized>(
+    fn find_best_phrases<D: Dictionary + ?Sized>(
         &self,
         dict: &D,
         start: usize,
         symbols: &[Symbol],
         com: &Composition,
-    ) -> Option<PossiblePhrase> {
+    ) -> Vec<PossiblePhrase> {
         let end = start + symbols.len();
 
         for i in (start..end).skip(1) {
@@ -111,7 +112,7 @@ impl ChewingEngine {
                 // There exists a break point that forbids connecting these
                 // syllables.
                 trace!("No best phrase for {:?} due to break point", symbols);
-                return None;
+                return vec![];
             }
         }
 
@@ -122,16 +123,16 @@ impl ChewingEngine {
                     "No best phrase for {:?} due to selection {:?}",
                     symbols, selection
                 );
-                return None;
+                return vec![];
             }
         }
 
         if symbols.len() == 1 && symbols[0].is_char() {
-            return Some(PossiblePhrase::Symbol(symbols[0]));
+            return vec![PossiblePhrase::Symbol(symbols[0])];
         }
 
         if symbols.iter().any(|sym| sym.is_char()) {
-            return None;
+            return vec![];
         }
 
         let syllables: Vec<Syllable> = symbols
@@ -139,71 +140,97 @@ impl ChewingEngine {
             .map(|s| s.to_syllable().unwrap_or_default())
             .collect();
 
-        let mut max_freq = 0;
-        let mut best_phrase = None;
+        let max_phrases_count = 10;
         // Approximate value. We only use this global for scaling for now, so we can
         // use any value.
         let global_total: f64 = 1_000_000_000.0;
-        'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
-            // If there exists a user selected interval which is a
-            // sub-interval of this phrase but the substring is
-            // different then we can skip this phrase.
-            for selection in &com.selections {
-                debug_assert!(!selection.str.is_empty());
-                if start <= selection.start && end >= selection.end {
-                    let offset = selection.start - start;
-                    let len = selection.end - selection.start;
-                    let substring: String =
-                        phrase.as_str().chars().skip(offset).take(len).collect();
-                    if substring != selection.str.as_ref() {
-                        continue 'next_phrase;
+        let mut phrases = dict
+            .lookup(&syllables, self.lookup_strategy)
+            .into_iter()
+            .filter(|phrase| {
+                // If there exists a user selected interval which is a
+                // sub-interval of this phrase but the substring is
+                // different then we can skip this phrase.
+                for selection in &com.selections {
+                    debug_assert!(!selection.str.is_empty());
+                    if start <= selection.start && end >= selection.end {
+                        let offset = selection.start - start;
+                        let len = selection.end - selection.start;
+                        let substring: String =
+                            phrase.as_str().chars().skip(offset).take(len).collect();
+                        if substring != selection.str.as_ref() {
+                            return false;
+                        }
                     }
                 }
-            }
+                true
+            })
+            .map(|phrase| {
+                let log_prob = (phrase.freq() as f64 / global_total).ln();
+                PossiblePhrase::Phrase(phrase, log_prob)
+            })
+            .collect::<Vec<_>>();
+        phrases.sort_by(|a, b| f64::total_cmp(&-a.log_prob(), &-b.log_prob()));
+        phrases.truncate(max_phrases_count);
+        // 'next_phrase: for phrase in dict.lookup(&syllables, self.lookup_strategy) {
+        //     // If there exists a user selected interval which is a
+        //     // sub-interval of this phrase but the substring is
+        //     // different then we can skip this phrase.
+        //     for selection in &com.selections {
+        //         debug_assert!(!selection.str.is_empty());
+        //         if start <= selection.start && end >= selection.end {
+        //             let offset = selection.start - start;
+        //             let len = selection.end - selection.start;
+        //             let substring: String =
+        //                 phrase.as_str().chars().skip(offset).take(len).collect();
+        //             if substring != selection.str.as_ref() {
+        //                 continue 'next_phrase;
+        //             }
+        //         }
+        //     }
 
-            // If there are phrases that can satisfy all the constraints
-            // then pick the one with highest frequency.
-            if !(phrase.freq() > max_freq || best_phrase.is_none()) {
-                continue;
-            }
-            // Calculate conditional probability:
-            //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
-            max_freq = phrase.freq();
-            let log_prob = match global_total {
-                0.0 => -23.025850929940457, //1e-10_f64.ln()
-                _ => (max_freq as f64 / global_total).ln(),
-            };
-            best_phrase = Some(PossiblePhrase::Phrase(phrase, log_prob));
-        }
+        //     // If there are phrases that can satisfy all the constraints
+        //     // then pick the one with highest frequency.
+        //     if !(phrase.freq() > max_freq || best_phrase.is_none()) {
+        //         continue;
+        //     }
+        //     // Calculate conditional probability:
+        //     //     P(phrase|bopomofo) = count(bopomofo, phrase) / count(bopomofo)
+        //     max_freq = phrase.freq();
+        //     let log_prob = match global_total {
+        //         0.0 => -23.025850929940457, //1e-10_f64.ln()
+        //         _ => (max_freq as f64 / global_total).ln(),
+        //     };
+        //     best_phrase = Some(PossiblePhrase::Phrase(phrase, log_prob));
+        // }
 
-        if best_phrase.is_none() {
+        if phrases.is_empty() {
             // try to find if there's a forced selection
             for selection in &com.selections {
                 if start == selection.start && end == selection.end {
-                    best_phrase = Some(PossiblePhrase::Phrase(
+                    phrases = vec![PossiblePhrase::Phrase(
                         Phrase::new(selection.str.clone(), 0),
                         0.0,
-                    ));
+                    )];
                     break;
                 }
             }
         }
 
-        trace!("best phrace for {:?} is {:?}", symbols, best_phrase);
-        best_phrase
+        trace!("best phraces for {:?} is {:?}", symbols, phrases);
+        phrases
     }
-    fn find_intervals<D: Dictionary + ?Sized>(
-        &self,
-        dict: &D,
-        com: &Composition,
-    ) -> Vec<PossibleInterval> {
+    fn find_edges<D: Dictionary + ?Sized>(&self, dict: &D, com: &Composition) -> Vec<Edge> {
         let mut intervals = vec![];
         for start in 0..com.symbols.len() {
             for end in (start + 1)..=com.symbols.len() {
-                if let Some(phrase) =
-                    self.find_best_phrase(dict, start, &com.symbols[start..end], com)
-                {
-                    intervals.push(PossibleInterval { start, end, phrase });
+                let phrases = self.find_best_phrases(dict, start, &com.symbols[start..end], com);
+                if phrases.is_empty().not() {
+                    intervals.push(Edge {
+                        start,
+                        end,
+                        phrases,
+                    });
                 }
             }
         }
@@ -216,19 +243,19 @@ impl ChewingEngine {
     /// source and single sink DAG.
     ///
     /// [1]: https://en.wikipedia.org/wiki/Yen%27s_algorithm
-    fn find_k_paths(
-        &self,
-        k: usize,
-        len: usize,
-        intervals: Vec<PossibleInterval>,
-    ) -> Vec<PossiblePath> {
+    fn find_k_paths(&self, k: usize, len: usize, edges: Vec<Edge>) -> Vec<PossiblePath> {
         let mut ksp = Vec::with_capacity(k);
         let mut candidates = vec![];
         let mut graph = vec![vec![]; len];
         let mut removed_edges = vec![false; len * len];
 
-        for edge in intervals.into_iter() {
+        for edge in edges.into_iter() {
             graph[edge.start].push(edge);
+        }
+        for segment in &mut graph {
+            segment.sort_by(|a, b| {
+                f64::total_cmp(&-a.phrases[0].log_prob(), &-b.phrases[0].log_prob())
+            });
         }
         ksp.push(self.shortest_path(&graph, &removed_edges, 0, len).unwrap());
 
@@ -259,23 +286,40 @@ impl ChewingEngine {
             candidates.sort_unstable_by_key(|k| k.len());
             ksp.push(candidates.swap_remove(0));
         }
+        // TODO: Reranking
         ksp.into_iter()
+            .map(|edges| {
+                edges
+                    .into_iter()
+                    .map(|edge| {
+                        let Edge {
+                            start,
+                            end,
+                            phrases,
+                        } = edge;
+                        let phrase = phrases[0].clone();
+                        PossibleInterval { start, end, phrase }
+                    })
+                    .collect()
+            })
             .map(|intervals| PossiblePath { intervals })
             .collect()
     }
 
     fn shortest_path(
         &self,
-        graph: &[Vec<PossibleInterval>],
+        graph: &[Vec<Edge>],
         removed_edges: &[bool],
         source: usize,
         len: usize,
-    ) -> Option<Vec<PossibleInterval>> {
+    ) -> Option<Vec<Edge>> {
         let mut parent = vec![None; len + 1];
         let mut queue = VecDeque::new();
         queue.push_back(source);
-        'bfs: while !queue.is_empty() {
-            let node = queue.pop_front().unwrap();
+        'bfs: loop {
+            let Some(node) = queue.pop_front() else {
+                break;
+            };
             if let Some(next_edges) = graph.get(node) {
                 for edge in next_edges {
                     if removed_edges[edge.start * len + edge.end - 1] {
@@ -366,6 +410,13 @@ impl From<PossiblePhrase> for Box<str> {
             PossiblePhrase::Phrase(phrase, _) => phrase.into(),
         }
     }
+}
+
+#[derive(Clone, PartialEq)]
+struct Edge {
+    start: usize,
+    end: usize,
+    phrases: Vec<PossiblePhrase>,
 }
 
 #[derive(Clone, PartialEq)]
