@@ -991,13 +991,13 @@ void test_Tab_at_the_end()
     start_testcase(ctx);
 
     type_keystroke_by_string(ctx, "hk4g4u6vu84");
-    ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE4\xB8\x80\xE4\xB8\x8B" /* 測試一下 */ );
+    ok_preedit_buffer(ctx, "測試一下");
 
     type_keystroke_by_string(ctx, "<T>");
-    ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE5\x84\x80\xE4\xB8\x8B" /* 測試儀下 */ );
+    ok_preedit_buffer(ctx, "測試儀下");
 
     type_keystroke_by_string(ctx, "<T>");
-    ok_preedit_buffer(ctx, "\xE6\xB8\xAC\xE8\xA9\xA6\xE4\xB8\x80\xE4\xB8\x8B" /* 測試一下 */ );
+    ok_preedit_buffer(ctx, "測試遺下");
 
     chewing_delete(ctx);
 }

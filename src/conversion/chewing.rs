@@ -40,16 +40,13 @@ impl ChewingEngine {
             if edges.is_empty() {
                 return vec![PossiblePath::default()];
             }
-            let paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), edges, &phrases);
+            let mut paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), edges, &phrases);
             trace!("paths: {:#?}", paths);
             debug_assert!(!paths.is_empty());
 
-            let mut trimmed_paths = self.trim_paths(paths);
-            debug_assert!(!trimmed_paths.is_empty());
-
             // TODO: Reranking
-            trimmed_paths.sort_by(|a, b| b.cmp(a));
-            trimmed_paths
+            paths.sort_by(|a, b| b.cmp(a));
+            paths
         })
         .flatten()
         .map(|p| {
@@ -335,38 +332,6 @@ impl ChewingEngine {
         path.reverse();
         Some(path)
     }
-
-    /// Trim some paths that were part of other paths
-    ///
-    /// Ported from original C implementation, but the original algorithm seems wrong.
-    fn trim_paths(&self, paths: Vec<PossiblePath>) -> Vec<PossiblePath> {
-        let mut trimmed_paths: Vec<PossiblePath> = vec![];
-        for candidate in paths.into_iter() {
-            trace!("Trim check {}", candidate);
-            let mut drop_candidate = false;
-            let mut keeper = vec![];
-            for p in trimmed_paths.into_iter() {
-                if drop_candidate || p.contains(&candidate) {
-                    drop_candidate = true;
-                    trace!("  Keep {}", p);
-                    keeper.push(p);
-                    continue;
-                }
-                if candidate.contains(&p) {
-                    trace!("  Drop {}", p);
-                    continue;
-                }
-                trace!("  Keep {}", p);
-                keeper.push(p);
-            }
-            if !drop_candidate {
-                trace!("  Keep {}", candidate);
-                keeper.push(candidate);
-            }
-            trimmed_paths = keeper;
-        }
-        trimmed_paths
-    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -459,9 +424,6 @@ impl Debug for PossibleInterval {
 }
 
 impl PossibleInterval {
-    fn contains(&self, other: &PossibleInterval) -> bool {
-        self.start <= other.start && self.end >= other.end
-    }
     fn len(&self) -> usize {
         self.end - self.start
     }
@@ -502,26 +464,6 @@ impl PossiblePath {
         let prob = self.phrase_log_probability() + self.length_log_probability();
         debug_assert!(!prob.is_nan());
         prob
-    }
-
-    /// Copied from IsRecContain to trim some paths
-    fn contains(&self, other: &Self) -> bool {
-        let mut big = 0;
-        for sml in 0..other.intervals.len() {
-            loop {
-                if big < self.intervals.len()
-                    && self.intervals[big].start < other.intervals[sml].end
-                {
-                    if self.intervals[big].contains(&other.intervals[sml]) {
-                        break;
-                    }
-                } else {
-                    return false;
-                }
-                big += 1;
-            }
-        }
-        true
     }
 
     fn phrase_log_probability(&self) -> f64 {
@@ -584,16 +526,13 @@ mod tests {
     use std::collections::HashSet;
 
     use crate::{
-        conversion::{
-            Composition, Gap, Interval, Symbol,
-            chewing::{Edge, PossiblePhrase},
-        },
-        dictionary::{Dictionary, Phrase, TrieBuf},
+        conversion::{Composition, Gap, Interval, Symbol, chewing::Edge},
+        dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
 
-    use super::{ChewingEngine, PossibleInterval, PossiblePath};
+    use super::ChewingEngine;
 
     fn test_dictionary() -> impl Dictionary {
         TrieBuf::from([
@@ -1074,43 +1013,5 @@ mod tests {
             41,
             engine.convert(&dict, &composition).nth(2).unwrap().len()
         );
-    }
-
-    #[test]
-    fn possible_path_contains() {
-        let path_1 = PossiblePath {
-            intervals: vec![
-                PossibleInterval {
-                    start: 0,
-                    end: 2,
-                    phrase: PossiblePhrase::Phrase(Phrase::new("測試", 0), 0.0),
-                },
-                PossibleInterval {
-                    start: 2,
-                    end: 4,
-                    phrase: PossiblePhrase::Phrase(Phrase::new("一下", 0), 0.0),
-                },
-            ],
-        };
-        let path_2 = PossiblePath {
-            intervals: vec![
-                PossibleInterval {
-                    start: 0,
-                    end: 2,
-                    phrase: PossiblePhrase::Phrase(Phrase::new("測試", 0), 0.0),
-                },
-                PossibleInterval {
-                    start: 2,
-                    end: 3,
-                    phrase: PossiblePhrase::Phrase(Phrase::new("遺", 0), 0.0),
-                },
-                PossibleInterval {
-                    start: 3,
-                    end: 4,
-                    phrase: PossiblePhrase::Phrase(Phrase::new("下", 0), 0.0),
-                },
-            ],
-        };
-        assert!(path_1.contains(&path_2));
     }
 }
