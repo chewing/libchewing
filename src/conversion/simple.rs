@@ -1,5 +1,3 @@
-use std::iter;
-
 use crate::{
     conversion::Outcome,
     dictionary::{Dictionary, LookupStrategy},

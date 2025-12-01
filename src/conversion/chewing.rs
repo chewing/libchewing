@@ -20,7 +20,7 @@ pub struct ChewingEngine {
 }
 
 impl ChewingEngine {
-    const MAX_OUT_PATHS: usize = 300;
+    const MAX_OUT_PATHS: usize = 100;
     /// Creates a new conversion engine.
     pub fn new() -> ChewingEngine {
         ChewingEngine {
@@ -169,7 +169,18 @@ impl ChewingEngine {
                 true
             })
             .map(|phrase| {
-                let log_prob = (phrase.freq().clamp(1, 9999999) as f64 / global_total).ln();
+                let log_phrase_prob = (phrase.freq().clamp(1, 9999999) as f64 / global_total).ln();
+                let log_length_prob: f64 = match syllables.len() {
+                    // log probability of phrase lenght calculated from tsi.src
+                    1 => -1.520439227173415,
+                    2 => -0.4236568120124837,
+                    3 => -1.455835986003893,
+                    4 => -1.6178072894679227,
+                    5 => -4.425765184802149,
+                    _ => -4.787357595622411,
+                };
+                let log_prob = log_phrase_prob + log_length_prob;
+                debug_assert!(log_prob.is_normal());
                 PossiblePhrase::Phrase(phrase, log_prob)
             })
             .collect::<Vec<_>>();
@@ -427,12 +438,6 @@ impl Debug for PossibleInterval {
     }
 }
 
-impl PossibleInterval {
-    fn len(&self) -> usize {
-        self.end - self.start
-    }
-}
-
 impl From<PossibleInterval> for Interval {
     fn from(value: PossibleInterval) -> Self {
         Interval {
@@ -455,8 +460,6 @@ struct PossiblePath {
 impl Debug for PossiblePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PossiblePath")
-            .field("phrase_log_probability()", &self.phrase_log_probability())
-            .field("length_log_probability()", &self.length_log_probability())
             .field("total_probability()", &self.total_probability())
             .field("intervals", &self.intervals)
             .finish()
@@ -465,26 +468,12 @@ impl Debug for PossiblePath {
 
 impl PossiblePath {
     fn total_probability(&self) -> f64 {
-        let prob = self.phrase_log_probability() + self.length_log_probability();
+        let prob = self.phrase_log_probability();
         debug_assert!(!prob.is_nan());
         prob
     }
     fn phrase_log_probability(&self) -> f64 {
         self.intervals.iter().map(|it| it.phrase.log_prob()).sum()
-    }
-    fn length_log_probability(&self) -> f64 {
-        self.intervals
-            .iter()
-            .map(|it| match it.len() {
-                // log probability of phrase lenght calculated from tsi.src
-                1 => -1.520439227173415,
-                2 => -0.4236568120124837,
-                3 => -1.455835986003893,
-                4 => -1.6178072894679227,
-                5 => -4.425765184802149,
-                _ => -4.787357595622411,
-            })
-            .sum()
     }
 }
 
