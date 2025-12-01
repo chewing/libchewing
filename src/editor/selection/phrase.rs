@@ -254,7 +254,7 @@ impl PhraseSelector {
             start: self.begin,
             end: self.end,
             is_phrase: true,
-            str: phrase.into(),
+            text: phrase.into(),
         }
     }
 }
@@ -398,7 +398,7 @@ mod tests {
             start: 0,
             end: 1,
             is_phrase: true,
-            str: "冊".into(),
+            text: "冊".into(),
         });
         let sel = PhraseSelector {
             begin: 0,

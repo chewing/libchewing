@@ -23,11 +23,13 @@ pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
 /// put intervals should cover the whole range of inputs, sorted in first in
 /// first out order.
 pub trait ConversionEngine: Debug {
-    fn convert<'a>(
-        &'a self,
-        dict: &'a dyn Dictionary,
-        comp: &'a Composition,
-    ) -> Box<dyn Iterator<Item = Vec<Interval>> + 'a>;
+    fn convert<'a>(&'a self, dict: &'a dyn Dictionary, comp: &'a Composition) -> Vec<Outcome>;
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct Outcome {
+    pub(crate) intervals: Vec<Interval>,
+    pub(crate) log_prob: f64,
 }
 
 /// Output of conversion.
@@ -42,14 +44,14 @@ pub struct Interval {
     /// Whether the output is a phrase from dictionary or just symbols.
     pub is_phrase: bool,
     /// The output string.
-    pub str: Box<str>,
+    pub text: Box<str>,
 }
 
 impl Debug for Interval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("I")
             .field(&(self.start..self.end))
-            .field(&self.str)
+            .field(&self.text)
             .finish()
     }
 }

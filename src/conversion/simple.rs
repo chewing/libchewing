@@ -1,6 +1,9 @@
 use std::iter;
 
-use crate::dictionary::{Dictionary, LookupStrategy};
+use crate::{
+    conversion::Outcome,
+    dictionary::{Dictionary, LookupStrategy},
+};
 
 use super::{Composition, ConversionEngine, Interval};
 
@@ -12,11 +15,7 @@ impl SimpleEngine {
     pub fn new() -> SimpleEngine {
         SimpleEngine
     }
-    pub fn convert<'a>(
-        &'a self,
-        dict: &'a dyn Dictionary,
-        comp: &'a Composition,
-    ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
+    pub fn convert<'a>(&'a self, dict: &'a dyn Dictionary, comp: &'a Composition) -> Vec<Outcome> {
         let mut intervals = vec![];
 
         for (i, sym) in comp.symbols().iter().enumerate() {
@@ -32,7 +31,7 @@ impl SimpleEngine {
                     start: i,
                     end: i + 1,
                     is_phrase: false,
-                    str: sym.to_char().unwrap().to_string().into_boxed_str(),
+                    text: sym.to_char().unwrap().to_string().into_boxed_str(),
                 });
             } else {
                 let phrase = dict
@@ -47,30 +46,29 @@ impl SimpleEngine {
                     start: i,
                     end: i + 1,
                     is_phrase: true,
-                    str: phrase_str.into_boxed_str(),
+                    text: phrase_str.into_boxed_str(),
                 })
             }
         }
         intervals.extend_from_slice(comp.selections());
         intervals.sort_by_key(|int| int.start);
-        iter::once(intervals)
+        vec![Outcome {
+            intervals,
+            log_prob: 0.0,
+        }]
     }
 }
 
 impl ConversionEngine for SimpleEngine {
-    fn convert<'a>(
-        &'a self,
-        dict: &'a dyn Dictionary,
-        comp: &'a Composition,
-    ) -> Box<dyn Iterator<Item = Vec<Interval>> + 'a> {
-        Box::new(SimpleEngine::convert(self, dict, comp))
+    fn convert<'a>(&'a self, dict: &'a dyn Dictionary, comp: &'a Composition) -> Vec<Outcome> {
+        SimpleEngine::convert(self, dict, comp)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        conversion::{Composition, Interval, Symbol},
+        conversion::{Composition, Interval, Outcome, Symbol},
         dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -130,8 +128,11 @@ mod tests {
         let engine = SimpleEngine::new();
         let composition = Composition::new();
         assert_eq!(
-            Some(Vec::<Interval>::new()),
-            engine.convert(&dict, &composition).next()
+            vec![Outcome {
+                intervals: vec![],
+                log_prob: 0.0
+            }],
+            engine.convert(&dict, &composition)
         );
     }
 
@@ -150,21 +151,24 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            Some(vec![
-                Interval {
-                    start: 0,
-                    end: 1,
-                    is_phrase: true,
-                    str: "測".into()
-                },
-                Interval {
-                    start: 1,
-                    end: 2,
-                    is_phrase: true,
-                    str: "試".into()
-                },
-            ]),
-            engine.convert(&dict, &composition).next()
+            vec![Outcome {
+                intervals: vec![
+                    Interval {
+                        start: 0,
+                        end: 1,
+                        is_phrase: true,
+                        text: "測".into()
+                    },
+                    Interval {
+                        start: 1,
+                        end: 2,
+                        is_phrase: true,
+                        text: "試".into()
+                    },
+                ],
+                log_prob: 0.0
+            }],
+            engine.convert(&dict, &composition)
         );
     }
 
@@ -184,45 +188,48 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            Some(vec![
-                Interval {
-                    start: 0,
-                    end: 1,
-                    is_phrase: true,
-                    str: "國".into()
-                },
-                Interval {
-                    start: 1,
-                    end: 2,
-                    is_phrase: true,
-                    str: "民".into()
-                },
-                Interval {
-                    start: 2,
-                    end: 3,
-                    is_phrase: true,
-                    str: "大".into()
-                },
-                Interval {
-                    start: 3,
-                    end: 4,
-                    is_phrase: true,
-                    str: "會".into()
-                },
-                Interval {
-                    start: 4,
-                    end: 5,
-                    is_phrase: true,
-                    str: "代".into()
-                },
-                Interval {
-                    start: 5,
-                    end: 6,
-                    is_phrase: true,
-                    str: "表".into()
-                },
-            ]),
-            engine.convert(&dict, &composition).next()
+            vec![Outcome {
+                intervals: vec![
+                    Interval {
+                        start: 0,
+                        end: 1,
+                        is_phrase: true,
+                        text: "國".into()
+                    },
+                    Interval {
+                        start: 1,
+                        end: 2,
+                        is_phrase: true,
+                        text: "民".into()
+                    },
+                    Interval {
+                        start: 2,
+                        end: 3,
+                        is_phrase: true,
+                        text: "大".into()
+                    },
+                    Interval {
+                        start: 3,
+                        end: 4,
+                        is_phrase: true,
+                        text: "會".into()
+                    },
+                    Interval {
+                        start: 4,
+                        end: 5,
+                        is_phrase: true,
+                        text: "代".into()
+                    },
+                    Interval {
+                        start: 5,
+                        end: 6,
+                        is_phrase: true,
+                        text: "表".into()
+                    },
+                ],
+                log_prob: 0.0
+            }],
+            engine.convert(&dict, &composition)
         );
     }
 }

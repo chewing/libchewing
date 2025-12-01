@@ -1,12 +1,12 @@
 use std::{
     collections::{BinaryHeap, HashSet},
     fmt::{Debug, Display, Write},
-    iter,
 };
 
 use log::trace;
 
 use crate::{
+    conversion::Outcome,
     dictionary::{Dictionary, LookupStrategy, Phrase},
     zhuyin::Syllable,
 };
@@ -20,7 +20,7 @@ pub struct ChewingEngine {
 }
 
 impl ChewingEngine {
-    const MAX_OUT_PATHS: usize = 200;
+    const MAX_OUT_PATHS: usize = 300;
     /// Creates a new conversion engine.
     pub fn new() -> ChewingEngine {
         ChewingEngine {
@@ -31,14 +31,14 @@ impl ChewingEngine {
         &'a self,
         dict: &'a dyn Dictionary,
         comp: &'a Composition,
-    ) -> impl Iterator<Item = Vec<Interval>> + Clone + 'a {
-        iter::once_with(move || {
+    ) -> Vec<Outcome> {
+        let paths = {
             if comp.is_empty() {
-                return vec![PossiblePath::default()];
+                return vec![Outcome::default()];
             }
             let (edges, phrases) = self.find_edges(dict, comp);
             if edges.is_empty() {
-                return vec![PossiblePath::default()];
+                return vec![Outcome::default()];
             }
             let mut paths = self.find_k_paths(Self::MAX_OUT_PATHS, comp.len(), edges, &phrases);
             trace!("paths: {:#?}", paths);
@@ -47,24 +47,28 @@ impl ChewingEngine {
             // TODO: Reranking
             paths.sort_by(|a, b| b.cmp(a));
             paths
-        })
-        .flatten()
-        .map(|p| {
-            p.intervals
-                .into_iter()
-                .map(|it| it.into())
-                .fold(vec![], |acc, interval| glue_fn(comp, acc, interval))
-        })
+        };
+        paths
+            .into_iter()
+            .map(|p| {
+                let log_prob = p.total_probability();
+                let intervals = p
+                    .intervals
+                    .into_iter()
+                    .map(|it| it.into())
+                    .fold(vec![], |acc, interval| glue_fn(comp, acc, interval));
+                Outcome {
+                    intervals,
+                    log_prob,
+                }
+            })
+            .collect()
     }
 }
 
 impl ConversionEngine for ChewingEngine {
-    fn convert<'a>(
-        &'a self,
-        dict: &'a dyn Dictionary,
-        comp: &'a Composition,
-    ) -> Box<dyn Iterator<Item = Vec<Interval>> + 'a> {
-        Box::new(ChewingEngine::convert(self, dict, comp))
+    fn convert<'a>(&'a self, dict: &'a dyn Dictionary, comp: &'a Composition) -> Vec<Outcome> {
+        ChewingEngine::convert(self, dict, comp)
     }
 }
 
@@ -80,13 +84,13 @@ fn glue_fn(com: &Composition, mut acc: Vec<Interval>, interval: Interval) -> Vec
     }
     if let Some(Gap::Glue) = com.gap(last.end) {
         let last = acc.pop().expect("acc should have at least one item");
-        let mut phrase = last.str.into_string();
-        phrase.push_str(&interval.str);
+        let mut phrase = last.text.into_string();
+        phrase.push_str(&interval.text);
         acc.push(Interval {
             start: last.start,
             end: interval.end,
             is_phrase: true,
-            str: phrase.into_boxed_str(),
+            text: phrase.into_boxed_str(),
         })
     } else {
         acc.push(interval);
@@ -151,13 +155,13 @@ impl ChewingEngine {
                 // sub-interval of this phrase but the substring is
                 // different then we can skip this phrase.
                 for selection in &com.selections {
-                    debug_assert!(!selection.str.is_empty());
+                    debug_assert!(!selection.text.is_empty());
                     if start <= selection.start && end >= selection.end {
                         let offset = selection.start - start;
                         let len = selection.end - selection.start;
                         let substring: String =
                             phrase.as_str().chars().skip(offset).take(len).collect();
-                        if substring != selection.str.as_ref() {
+                        if substring != selection.text.as_ref() {
                             return false;
                         }
                     }
@@ -165,7 +169,7 @@ impl ChewingEngine {
                 true
             })
             .map(|phrase| {
-                let log_prob = (phrase.freq() as f64 / global_total).ln();
+                let log_prob = (phrase.freq().clamp(1, 9999999) as f64 / global_total).ln();
                 PossiblePhrase::Phrase(phrase, log_prob)
             })
             .collect::<Vec<_>>();
@@ -177,7 +181,7 @@ impl ChewingEngine {
             for selection in &com.selections {
                 if start == selection.start && end == selection.end {
                     phrases = vec![PossiblePhrase::Phrase(
-                        Phrase::new(selection.str.clone(), 0),
+                        Phrase::new(selection.text.clone(), 0),
                         0.0,
                     )];
                     break;
@@ -438,7 +442,7 @@ impl From<PossibleInterval> for Interval {
                 PossiblePhrase::Symbol(_) => false,
                 PossiblePhrase::Phrase(_, _) => true,
             },
-            str: value.phrase.into(),
+            text: value.phrase.into(),
         }
     }
 }
@@ -465,7 +469,6 @@ impl PossiblePath {
         debug_assert!(!prob.is_nan());
         prob
     }
-
     fn phrase_log_probability(&self) -> f64 {
         self.intervals.iter().map(|it| it.phrase.log_prob()).sum()
     }
@@ -526,7 +529,7 @@ mod tests {
     use std::collections::HashSet;
 
     use crate::{
-        conversion::{Composition, Gap, Interval, Symbol, chewing::Edge},
+        conversion::{Composition, Gap, Interval, Outcome, Symbol, chewing::Edge},
         dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -682,8 +685,8 @@ mod tests {
         let engine = ChewingEngine::new();
         let composition = Composition::new();
         assert_eq!(
-            Some(Vec::<Interval>::new()),
-            engine.convert(&dict, &composition).next()
+            vec![Outcome::default()],
+            engine.convert(&dict, &composition)
         );
     }
 
@@ -702,13 +705,13 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            Some(vec![Interval {
+            vec![Interval {
                 start: 0,
                 end: 2,
                 is_phrase: true,
-                str: "測試".into()
-            },]),
-            engine.convert(&dict, &composition).next()
+                text: "測試".into()
+            }],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -728,27 +731,27 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    str: "國民".into()
+                    text: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    str: "大會".into()
+                    text: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    str: "代表".into()
+                    text: "代表".into()
                 },
-            ]),
-            engine.convert(&dict, &composition).next()
+            ],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -770,39 +773,39 @@ mod tests {
         composition.set_gap(1, Gap::Break);
         composition.set_gap(5, Gap::Break);
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    str: "國".into()
+                    text: "國".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    str: "民".into()
+                    text: "民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    str: "大會".into()
+                    text: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 5,
                     is_phrase: true,
-                    str: "代".into()
+                    text: "代".into()
                 },
                 Interval {
                     start: 5,
                     end: 6,
                     is_phrase: true,
-                    str: "表".into()
+                    text: "表".into()
                 },
-            ]),
-            engine.convert(&dict, &composition).next()
+            ],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -825,30 +828,30 @@ mod tests {
             start: 4,
             end: 6,
             is_phrase: true,
-            str: "戴錶".into(),
+            text: "戴錶".into(),
         });
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    str: "國民".into()
+                    text: "國民".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    str: "大會".into()
+                    text: "大會".into()
                 },
                 Interval {
                     start: 4,
                     end: 6,
                     is_phrase: true,
-                    str: "戴錶".into()
+                    text: "戴錶".into()
                 },
-            ]),
-            engine.convert(&dict, &composition).next()
+            ],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -868,16 +871,16 @@ mod tests {
             start: 1,
             end: 3,
             is_phrase: true,
-            str: "酷音".into(),
+            text: "酷音".into(),
         });
         assert_eq!(
-            Some(vec![Interval {
+            vec![Interval {
                 start: 0,
                 end: 3,
                 is_phrase: true,
-                str: "新酷音".into()
-            },]),
-            engine.convert(&dict, &composition).next()
+                text: "新酷音".into()
+            }],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -897,33 +900,33 @@ mod tests {
                 start: 0,
                 end: 1,
                 is_phrase: true,
-                str: "代".into(),
+                text: "代".into(),
             },
             Interval {
                 start: 1,
                 end: 2,
                 is_phrase: true,
-                str: "錶".into(),
+                text: "錶".into(),
             },
         ] {
             composition.push_selection(interval);
         }
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 1,
                     is_phrase: true,
-                    str: "代".into()
+                    text: "代".into()
                 },
                 Interval {
                     start: 1,
                     end: 2,
                     is_phrase: true,
-                    str: "錶".into()
+                    text: "錶".into()
                 }
-            ]),
-            engine.convert(&dict, &composition).next()
+            ],
+            engine.convert(&dict, &composition)[0].intervals
         );
     }
 
@@ -941,38 +944,38 @@ mod tests {
             composition.push(sym);
         }
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    str: "測試".into()
+                    text: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    str: "一下".into()
+                    text: "一下".into()
                 }
-            ]),
-            engine.convert(&dict, &composition).next()
+            ],
+            engine.convert(&dict, &composition)[0].intervals
         );
         assert_eq!(
-            Some(vec![
+            vec![
                 Interval {
                     start: 0,
                     end: 3,
                     is_phrase: true,
-                    str: "測試儀".into()
+                    text: "測試儀".into()
                 },
                 Interval {
                     start: 3,
                     end: 4,
                     is_phrase: true,
-                    str: "下".into()
+                    text: "下".into()
                 }
-            ]),
-            engine.convert(&dict, &composition).nth(1)
+            ],
+            engine.convert(&dict, &composition)[1].intervals
         );
         assert_eq!(
             Some(vec![
@@ -980,16 +983,21 @@ mod tests {
                     start: 0,
                     end: 2,
                     is_phrase: true,
-                    str: "測試".into()
+                    text: "測試".into()
                 },
                 Interval {
                     start: 2,
                     end: 4,
                     is_phrase: true,
-                    str: "一下".into()
+                    text: "一下".into()
                 }
             ]),
-            engine.convert(&dict, &composition).cycle().nth(2)
+            engine
+                .convert(&dict, &composition)
+                .into_iter()
+                .cycle()
+                .nth(2)
+                .map(|p| p.intervals)
         );
     }
 
@@ -1001,17 +1009,8 @@ mod tests {
         for _ in 0..80 {
             composition.push(Symbol::from(syl![H, A]));
         }
-        assert_eq!(
-            40,
-            engine.convert(&dict, &composition).next().unwrap().len()
-        );
-        assert_eq!(
-            41,
-            engine.convert(&dict, &composition).nth(1).unwrap().len()
-        );
-        assert_eq!(
-            41,
-            engine.convert(&dict, &composition).nth(2).unwrap().len()
-        );
+        assert_eq!(40, engine.convert(&dict, &composition)[0].intervals.len());
+        assert_eq!(41, engine.convert(&dict, &composition)[1].intervals.len());
+        assert_eq!(41, engine.convert(&dict, &composition)[2].intervals.len());
     }
 }

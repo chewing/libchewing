@@ -395,7 +395,7 @@ impl Editor {
         self.shared
             .conversion()
             .into_iter()
-            .map(|interval| interval.str)
+            .map(|interval| interval.text)
             .collect::<String>()
     }
     // TODO: decide the return type
@@ -521,15 +521,11 @@ impl SharedState {
         self.nth_conversion = 0;
     }
     fn conversion(&self) -> Vec<Interval> {
-        if self.nth_conversion > 0 {
-            let paths: Vec<_> = self.conv.convert(&self.dict, self.com.as_ref()).collect();
-            paths[self.nth_conversion % paths.len()].clone()
-        } else {
-            self.conv
-                .convert(&self.dict, self.com.as_ref())
-                .next()
-                .unwrap_or_default()
+        let paths = self.conv.convert(&self.dict, self.com.as_ref());
+        if paths.is_empty() {
+            return vec![];
         }
+        paths[self.nth_conversion % paths.len()].intervals.clone()
     }
     fn intervals(&self) -> impl Iterator<Item = Interval> {
         self.conversion().into_iter()
@@ -577,7 +573,7 @@ impl SharedState {
         let phrase = self
             .conversion()
             .into_iter()
-            .map(|interval| interval.str)
+            .map(|interval| interval.text)
             .collect::<String>()
             .chars()
             .skip(start)
@@ -673,7 +669,7 @@ impl SharedState {
         }
         let output = intervals
             .into_iter()
-            .map(|interval| interval.str)
+            .map(|interval| interval.text)
             .collect::<String>();
         self.commit_buffer.push_str(&output);
         self.com.clear();
@@ -690,7 +686,7 @@ impl SharedState {
         let mut remove = 0;
         self.commit_buffer.clear();
         for it in intervals {
-            self.commit_buffer.push_str(&it.str);
+            self.commit_buffer.push_str(&it.text);
             remove += it.len();
             if len - remove <= self.options.auto_commit_threshold {
                 break;
@@ -743,13 +739,13 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
             .iter()
             .map(|s| s.to_syllable().unwrap())
             .collect();
-        let pending = interval.str.clone().into_string();
+        let pending = interval.text.clone().into_string();
         collect(syllables, pending);
     }
     // Step 2. collect all intervals with length one with break words removed
     for interval in intervals.iter() {
-        if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.str) {
-            pending.push_str(&interval.str);
+        if interval.is_phrase && interval.len() == 1 && !is_break_word(&interval.text) {
+            pending.push_str(&interval.text);
             syllables.extend(
                 symbols[interval.start..interval.end]
                     .iter()
@@ -765,7 +761,7 @@ fn collect_new_phrases(intervals: &[Interval], symbols: &[Symbol]) -> Vec<(Vec<S
     // Step 3. collect all intervals with length one including break words
     for interval in intervals {
         if interval.is_phrase && interval.len() == 1 {
-            pending.push_str(&interval.str);
+            pending.push_str(&interval.text);
             syllables.extend(
                 symbols[interval.start..interval.end]
                     .iter()
@@ -1939,19 +1935,19 @@ mod tests {
                 start: 0,
                 end: 2,
                 is_phrase: true,
-                str: "今天".into(),
+                text: "今天".into(),
             },
             Interval {
                 start: 2,
                 end: 4,
                 is_phrase: true,
-                str: "天氣".into(),
+                text: "天氣".into(),
             },
             Interval {
                 start: 4,
                 end: 6,
                 is_phrase: true,
-                str: "真好".into(),
+                text: "真好".into(),
             },
         ];
         let symbols = [
@@ -1998,25 +1994,25 @@ mod tests {
                 start: 0,
                 end: 2,
                 is_phrase: true,
-                str: "今天".into(),
+                text: "今天".into(),
             },
             Interval {
                 start: 2,
                 end: 3,
                 is_phrase: true,
-                str: "也".into(),
+                text: "也".into(),
             },
             Interval {
                 start: 3,
                 end: 4,
                 is_phrase: true,
-                str: "是".into(),
+                text: "是".into(),
             },
             Interval {
                 start: 4,
                 end: 7,
                 is_phrase: true,
-                str: "好天氣".into(),
+                text: "好天氣".into(),
             },
         ];
         let symbols = [
