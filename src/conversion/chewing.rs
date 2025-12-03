@@ -3,7 +3,7 @@ use std::{
     fmt::{Debug, Display, Write},
 };
 
-use log::trace;
+use tracing::trace;
 
 use crate::{
     conversion::Outcome,

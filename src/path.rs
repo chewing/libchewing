@@ -8,7 +8,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{info, warn};
+use tracing::{info, warn};
 
 #[cfg(target_family = "windows")]
 const DEFAULT_SYS_PATH: &str = "C:\\Program Files\\ChewingTextService\\Dictionary";

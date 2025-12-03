@@ -96,7 +96,7 @@ impl From<u8> for ChewingHandle {
 }
 
 pub fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let syspath = env::args()
         .nth(1)

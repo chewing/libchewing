@@ -16,7 +16,7 @@ use std::{
 
 pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
-use log::{debug, error, info, trace, warn};
+use tracing::{debug, error, info, trace, warn};
 
 use crate::{
     conversion::{

@@ -17,7 +17,7 @@ use der::{
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
     asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
 };
-use log::{error, warn};
+use tracing::{error, warn};
 
 use crate::zhuyin::Syllable;
 

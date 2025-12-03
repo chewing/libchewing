@@ -7,7 +7,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use log::{error, info};
+use tracing::{error, info};
 
 use crate::zhuyin::Syllable;
 

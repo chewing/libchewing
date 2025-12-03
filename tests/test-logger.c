@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 {
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
     putenv("CHEWING_USER_PATH=" TEST_HASH_DIR);
+    putenv("RUST_LOG=debug");
 
     test_set_logger();
     test_set_null_logger();

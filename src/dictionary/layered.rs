@@ -3,7 +3,7 @@ use std::{
     iter,
 };
 
-use log::error;
+use tracing::error;
 
 use crate::zhuyin::Syllable;
 

@@ -7,7 +7,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{error, info};
+use tracing::{error, info};
 
 use crate::{
     editor::{AbbrevTable, SymbolSelector},

@@ -1,97 +1,101 @@
 use std::{
     ffi::{CString, c_char, c_int, c_void},
-    sync::{
-        Mutex,
-        atomic::{AtomicPtr, Ordering::Relaxed},
-    },
+    io::Write,
+    mem,
 };
 
-use log::{Level, Log, Metadata, Record};
+use tracing::Level;
+use tracing::dispatcher::DefaultGuard;
+use tracing_subscriber::{fmt::MakeWriter, util::SubscriberInitExt};
 
-use super::setup::{
+use crate::setup::{
     CHEWING_LOG_DEBUG, CHEWING_LOG_ERROR, CHEWING_LOG_INFO, CHEWING_LOG_VERBOSE, CHEWING_LOG_WARN,
 };
 
-type ExternLoggerFn =
+pub(crate) type ExternLoggerFn =
     unsafe extern "C" fn(data: *mut c_void, level: c_int, fmt: *const c_char, arg: ...);
 
+#[derive(Clone)]
 pub(crate) struct ChewingLogger {
-    env_logger: Mutex<Option<env_logger::Logger>>,
-    logger: Mutex<Option<(ExternLoggerFn, AtomicPtr<c_void>)>>,
+    level: c_int,
+    buffer: Vec<u8>,
+    logger_fn: ExternLoggerFn,
+    logger_data: *mut c_void,
 }
 
 impl ChewingLogger {
-    pub(crate) const fn new() -> ChewingLogger {
+    pub(crate) fn new(logger_fn: ExternLoggerFn, logger_data: *mut c_void) -> ChewingLogger {
         ChewingLogger {
-            env_logger: Mutex::new(None),
-            logger: Mutex::new(None),
-        }
-    }
-    pub(crate) fn init(&self) {
-        if let Ok(mut prev) = self.env_logger.lock() {
-            *prev = Some(env_logger::Logger::from_default_env());
-        }
-    }
-    pub(crate) fn set(&self, logger: Option<(ExternLoggerFn, *mut c_void)>) {
-        if let Ok(mut prev) = self.logger.lock() {
-            *prev = logger.map(|(l, d)| (l, d.into()));
+            level: 0,
+            buffer: vec![],
+            logger_fn,
+            logger_data,
         }
     }
 }
 
-impl Log for ChewingLogger {
-    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        if let Ok(logger) = self.logger.lock() {
-            if logger.is_some() && metadata.level() <= Level::Debug {
-                return true;
-            }
-        }
-        if let Ok(logger) = self.env_logger.lock() {
-            if let Some(el) = logger.as_ref() {
-                return el.enabled(metadata);
-            }
-        }
-        false
-    }
+unsafe impl Send for ChewingLogger {}
+unsafe impl Sync for ChewingLogger {}
 
-    fn log(&self, record: &Record<'_>) {
-        if let Ok(logger) = self.logger.lock() {
-            if let Some((logger, logger_data)) = logger.as_ref() {
-                let fmt = format!(
-                    "[{}:{} {}] {}",
-                    record.file().unwrap_or("unknown"),
-                    record.line().unwrap_or_default(),
-                    record.module_path().unwrap_or("unknown"),
-                    record.args()
-                );
-                let fmt_cstring = CString::new(fmt).unwrap();
-                unsafe {
-                    logger(
-                        logger_data.load(Relaxed),
-                        as_chewing_level(record.level()),
-                        c"%s\n".as_ptr().cast(),
-                        fmt_cstring.as_ptr(),
-                    )
-                }
-                return;
-            }
-        }
-        if let Ok(logger) = self.env_logger.lock() {
-            if let Some(el) = logger.as_ref() {
-                el.log(record);
-            }
-        }
+impl<'a> MakeWriter<'a> for ChewingLogger {
+    type Writer = ChewingLogger;
+    fn make_writer(&'a self) -> Self::Writer {
+        self.clone()
     }
-
-    fn flush(&self) {}
+    fn make_writer_for(&'a self, meta: &tracing::Metadata<'_>) -> Self::Writer {
+        let mut writer = self.make_writer();
+        writer.level = as_chewing_level(meta.level());
+        writer
+    }
 }
 
-fn as_chewing_level(level: Level) -> c_int {
-    (match level {
-        Level::Error => CHEWING_LOG_ERROR,
-        Level::Warn => CHEWING_LOG_WARN,
-        Level::Info => CHEWING_LOG_INFO,
-        Level::Debug => CHEWING_LOG_DEBUG,
-        Level::Trace => CHEWING_LOG_VERBOSE,
+impl Write for ChewingLogger {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.buffer.write(buf)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+impl Drop for ChewingLogger {
+    fn drop(&mut self) {
+        if !self.buffer.is_empty() {
+            let buffer = mem::take(&mut self.buffer);
+            let fmt_cstring = CString::new(buffer).unwrap();
+            unsafe {
+                (self.logger_fn)(
+                    self.logger_data,
+                    self.level,
+                    c"%s".as_ptr().cast(),
+                    fmt_cstring.as_ptr(),
+                )
+            }
+            return;
+        }
+    }
+}
+
+fn as_chewing_level(level: &Level) -> c_int {
+    (match *level {
+        Level::ERROR => CHEWING_LOG_ERROR,
+        Level::WARN => CHEWING_LOG_WARN,
+        Level::INFO => CHEWING_LOG_INFO,
+        Level::DEBUG => CHEWING_LOG_DEBUG,
+        Level::TRACE => CHEWING_LOG_VERBOSE,
     }) as c_int
+}
+
+pub(crate) fn init_scoped_logging_subscriber(
+    logger_fn: Option<ExternLoggerFn>,
+    logger_data: *mut c_void,
+) -> Option<DefaultGuard> {
+    logger_fn.map(|logger_fn| {
+        tracing_subscriber::fmt()
+            .with_writer(ChewingLogger::new(logger_fn, logger_data))
+            .without_time()
+            .with_ansi(false)
+            .finish()
+            .set_default()
+    })
 }

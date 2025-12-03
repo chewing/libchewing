@@ -1,5 +1,10 @@
-use std::{ffi::c_int, fmt::Debug, iter::Peekable};
+use std::{
+    ffi::{c_int, c_void},
+    fmt::Debug,
+    iter::Peekable,
+};
 
+use crate::logger::ExternLoggerFn;
 use chewing::{
     conversion::Interval,
     dictionary::Entries,
@@ -138,6 +143,8 @@ pub struct ChewingContext {
     pub(crate) cand_buf: [u8; 256],
     pub(crate) aux_buf: [u8; 256],
     pub(crate) kbtype_buf: [u8; 32],
+    pub(crate) logger_fn: Option<ExternLoggerFn>,
+    pub(crate) logger_data: *mut c_void,
 }
 
 impl Debug for ChewingContext {
@@ -151,6 +158,8 @@ impl Debug for ChewingContext {
             .field("interval_iter.is_some()", &self.interval_iter.is_some())
             .field("userphrase_iter.is_some()", &self.userphrase_iter.is_some())
             .field("sel_keys", &self.sel_keys)
+            .field("logger_fn", &self.logger_fn)
+            .field("logger_data", &self.logger_data)
             .finish_non_exhaustive()
     }
 }
