@@ -41,8 +41,9 @@ mod tests {
     use std::error::Error;
     use std::fs;
 
-    use super::AbbrevTable;
     use tempfile::NamedTempFile;
+
+    use super::AbbrevTable;
 
     #[test]
     fn load_good_abbrev_file() -> Result<(), Box<dyn Error>> {

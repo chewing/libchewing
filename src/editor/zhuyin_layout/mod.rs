@@ -20,8 +20,6 @@ use std::{
     str::FromStr,
 };
 
-use crate::{input::KeyboardEvent, zhuyin::Syllable};
-
 pub use self::{
     dc26::DaiChien26,
     et::Et,
@@ -32,6 +30,7 @@ pub use self::{
     pinyin::{Pinyin, PinyinVariant},
     standard::Standard,
 };
+use crate::{input::KeyboardEvent, zhuyin::Syllable};
 
 mod dc26;
 mod et;

@@ -9,12 +9,11 @@ use std::{
 
 use tracing::{error, info};
 
-use crate::zhuyin::Syllable;
-
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
     LookupStrategy, Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
+use crate::zhuyin::Syllable;
 
 /// A mutable dictionary backed by a Trie and a BTreeMap.
 #[derive(Debug)]
@@ -374,13 +373,12 @@ impl Drop for TrieBuf {
 mod tests {
     use std::error::Error;
 
+    use super::{Dictionary, TrieBuf};
     use crate::{
         dictionary::{DictionaryMut, LookupStrategy, Phrase},
         syl,
         zhuyin::Bopomofo::*,
     };
-
-    use super::{Dictionary, TrieBuf};
 
     #[test]
     fn create_new_dictionary_in_memory_and_query() -> Result<(), Box<dyn Error>> {

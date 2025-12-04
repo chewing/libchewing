@@ -5,12 +5,11 @@ use std::{
 
 use tracing::error;
 
-use crate::zhuyin::Syllable;
-
 use super::{
     Dictionary, DictionaryInfo, DictionaryMut, Entries, LookupStrategy, Phrase,
     UpdateDictionaryError,
 };
+use crate::zhuyin::Syllable;
 
 /// A collection of dictionaries that returns the union of the lookup results.
 /// # Examples
@@ -220,6 +219,7 @@ mod tests {
         io::{Cursor, Seek},
     };
 
+    use super::Layered;
     use crate::{
         dictionary::{
             Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase, Trie, TrieBuf,
@@ -228,8 +228,6 @@ mod tests {
         syl,
         zhuyin::Bopomofo,
     };
-
-    use super::Layered;
 
     #[test]
     fn test_entries() -> Result<(), Box<dyn Error>> {

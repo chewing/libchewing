@@ -5,10 +5,9 @@ use std::{
 };
 
 use anyhow::{Result, bail};
-use chewing::dictionary::{Dictionary, Trie};
-
 #[cfg(feature = "sqlite")]
 use chewing::dictionary::SqliteDictionary;
+use chewing::dictionary::{Dictionary, Trie};
 
 use crate::flags;
 

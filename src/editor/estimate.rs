@@ -86,9 +86,8 @@ impl UserFreqEstimate for LaxUserFreqEstimate {
 
 #[cfg(test)]
 mod tests {
-    use crate::{dictionary::TrieBuf, editor::UserFreqEstimate, syl};
-
     use super::LaxUserFreqEstimate;
+    use crate::{dictionary::TrieBuf, editor::UserFreqEstimate, syl};
 
     #[test]
     fn load_from_dictionary() {

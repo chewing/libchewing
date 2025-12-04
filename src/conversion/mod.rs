@@ -10,12 +10,11 @@ use std::{
     fmt::Debug,
 };
 
-use crate::{dictionary::Dictionary, zhuyin::Syllable};
-
 pub use self::chewing::ChewingEngine;
 pub use self::fuzzy::FuzzyChewingEngine;
 pub use self::simple::SimpleEngine;
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
+use crate::{dictionary::Dictionary, zhuyin::Syllable};
 
 /// Converts a composition buffer to list of intervals.
 ///

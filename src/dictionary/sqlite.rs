@@ -8,12 +8,11 @@ use std::{
 
 use rusqlite::{Connection, Error as RusqliteError, OpenFlags, OptionalExtension, params};
 
-use crate::zhuyin::Syllable;
-
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
     LookupStrategy, Phrase, UpdateDictionaryError,
 };
+use crate::zhuyin::Syllable;
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
 const USER_VERSION: u32 = 0;
@@ -592,6 +591,7 @@ mod tests {
     use rusqlite::{Connection, params};
     use tempfile::{NamedTempFile, tempdir};
 
+    use super::SqliteDictionary;
     use crate::{
         dictionary::{
             Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase,
@@ -600,8 +600,6 @@ mod tests {
         syl,
         zhuyin::Bopomofo,
     };
-
-    use super::SqliteDictionary;
 
     #[test]
     fn migration_from_userphrase_v1() {

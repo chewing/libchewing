@@ -256,11 +256,10 @@ impl KeyboardEventBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::input::KeyState;
-
     use super::KeyboardEvent;
     use super::keycode;
     use super::keysym;
+    use crate::input::KeyState;
 
     #[test]
     fn keyboard_event_builder() {

@@ -162,9 +162,8 @@ impl SpecialSymbolSelector {
 mod tests {
     use std::io;
 
-    use crate::conversion::Symbol;
-
     use super::SymbolSelector;
+    use crate::conversion::Symbol;
 
     #[test]
     fn select_level_one_leaf() {

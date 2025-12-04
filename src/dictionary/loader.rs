@@ -9,14 +9,13 @@ use std::{
 
 use tracing::{error, info};
 
+#[cfg(feature = "sqlite")]
+use super::SqliteDictionary;
+use super::{Dictionary, TrieBuf, uhash};
 use crate::{
     editor::{AbbrevTable, SymbolSelector},
     path::{find_files_by_names, find_path_by_files, sys_path_from_env_var, userphrase_path},
 };
-
-#[cfg(feature = "sqlite")]
-use super::SqliteDictionary;
-use super::{Dictionary, TrieBuf, uhash};
 
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
 // const UD_TRIE_FILE_NAME: &str = "chewing.dat";

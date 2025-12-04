@@ -10,8 +10,6 @@ use std::{
     path::Path,
 };
 
-use crate::zhuyin::Syllable;
-
 pub use layered::Layered;
 pub use loader::{
     DEFAULT_DICT_NAMES, LoadDictionaryError, SingleDictionaryLoader, SystemDictionaryLoader,
@@ -21,6 +19,8 @@ pub use loader::{
 pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
 pub use trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};
 pub use trie_buf::TrieBuf;
+
+use crate::zhuyin::Syllable;
 
 mod layered;
 mod loader;

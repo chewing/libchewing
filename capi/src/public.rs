@@ -4,13 +4,14 @@ use std::{
     iter::Peekable,
 };
 
-use crate::logger::ExternLoggerFn;
 use chewing::{
     conversion::Interval,
     dictionary::Entries,
     editor::{Editor, zhuyin_layout::KeyboardLayoutCompat},
     input::keymap::Keymap,
 };
+
+use crate::logger::ExternLoggerFn;
 
 /// Indicates chewing will translate keystrokes to Chinese characters.
 pub const CHINESE_MODE: c_int = 1;

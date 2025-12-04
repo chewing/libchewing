@@ -1,5 +1,6 @@
 //! ET26 (倚天26鍵)
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::{
     input::{
         KeyboardEvent,
@@ -8,8 +9,6 @@ use crate::{
     syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]

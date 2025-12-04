@@ -1,9 +1,8 @@
+use super::{Composition, ConversionEngine, Interval};
 use crate::{
     conversion::Outcome,
     dictionary::{Dictionary, LookupStrategy},
 };
-
-use super::{Composition, ConversionEngine, Interval};
 
 /// Simple engine does not perform any intelligent conversion.
 #[derive(Debug, Default)]
@@ -65,14 +64,13 @@ impl ConversionEngine for SimpleEngine {
 
 #[cfg(test)]
 mod tests {
+    use super::SimpleEngine;
     use crate::{
         conversion::{Composition, Interval, Outcome, Symbol},
         dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
-
-    use super::SimpleEngine;
 
     fn test_dictionary() -> impl Dictionary {
         TrieBuf::from([

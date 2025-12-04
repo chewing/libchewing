@@ -3,13 +3,12 @@
 //! Also known as the Dai Chien (大千) layout. It's the default layout on almost
 //! all platforms and the most commonly used one.
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::input::keycode::*;
 use crate::{
     input::KeyboardEvent,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]
@@ -126,12 +125,11 @@ impl SyllableEditor for Standard {
 
 #[cfg(test)]
 mod test {
+    use super::Standard;
     use crate::{
         editor::zhuyin_layout::{KeyBehavior, SyllableEditor},
         input::{KeyboardEvent, keycode::KEY_SPACE, keysym::SYM_SPACE},
     };
-
-    use super::Standard;
 
     #[test]
     fn space() {

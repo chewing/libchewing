@@ -1,12 +1,11 @@
 //! Hsu keyboard layout
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::{
     input::KeyboardEvent,
     syl,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]
@@ -295,6 +294,7 @@ impl SyllableEditor for Hsu {
 #[cfg(test)]
 mod test {
 
+    use super::Hsu;
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
         input::{
@@ -303,8 +303,6 @@ mod test {
         },
         zhuyin::Bopomofo,
     };
-
-    use super::Hsu;
 
     fn map_key(ksym: Keysym) -> KeyboardEvent {
         KeyboardEvent::builder().ksym(ksym).build()

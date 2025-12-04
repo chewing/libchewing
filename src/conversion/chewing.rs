@@ -5,13 +5,12 @@ use std::{
 
 use tracing::trace;
 
+use super::{Composition, ConversionEngine, Gap, Interval, Symbol};
 use crate::{
     conversion::Outcome,
     dictionary::{Dictionary, LookupStrategy, Phrase},
     zhuyin::Syllable,
 };
-
-use super::{Composition, ConversionEngine, Gap, Interval, Symbol};
 
 /// The default Chewing conversion method.
 #[derive(Debug, Default)]
@@ -517,14 +516,13 @@ impl Display for PossiblePath {
 mod tests {
     use std::collections::HashSet;
 
+    use super::ChewingEngine;
     use crate::{
         conversion::{Composition, Gap, Interval, Outcome, Symbol, chewing::Edge},
         dictionary::{Dictionary, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
-
-    use super::ChewingEngine;
 
     fn test_dictionary() -> impl Dictionary {
         TrieBuf::from([

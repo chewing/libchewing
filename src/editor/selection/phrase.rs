@@ -261,14 +261,13 @@ impl PhraseSelector {
 
 #[cfg(test)]
 mod tests {
+    use super::PhraseSelector;
     use crate::{
         conversion::{Composition, Interval, Symbol},
         dictionary::{LookupStrategy, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
     };
-
-    use super::PhraseSelector;
 
     #[test]
     fn init_when_cursor_end_of_buffer_syllable() {

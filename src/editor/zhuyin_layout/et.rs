@@ -2,13 +2,12 @@
 //!
 //! Another commonly used keyboard layout on older IBM PC.
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::input::keycode::*;
 use crate::{
     input::KeyboardEvent,
     zhuyin::{Bopomofo, BopomofoKind, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]
@@ -125,12 +124,11 @@ impl SyllableEditor for Et {
 
 #[cfg(test)]
 mod test {
+    use super::Et;
     use crate::{
         editor::zhuyin_layout::{KeyBehavior, SyllableEditor},
         input::{KeyboardEvent, keycode::KEY_SPACE, keysym::SYM_SPACE},
     };
-
-    use super::Et;
 
     #[test]
     fn space() {

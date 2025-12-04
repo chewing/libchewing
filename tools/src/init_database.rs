@@ -1,3 +1,11 @@
+use std::{
+    error::Error,
+    fmt::Display,
+    fs::{self, File},
+    io::{BufRead, BufReader},
+    path::Path,
+};
+
 #[cfg(not(feature = "sqlite"))]
 use anyhow::bail;
 use anyhow::{Context, Result, anyhow};
@@ -6,13 +14,6 @@ use chewing::dictionary::SqliteDictionaryBuilder;
 use chewing::{
     dictionary::{DictionaryBuilder, DictionaryInfo, TrieBuilder},
     zhuyin::{Bopomofo, Syllable},
-};
-use std::{
-    error::Error,
-    fmt::Display,
-    fs::{self, File},
-    io::{BufRead, BufReader},
-    path::Path,
 };
 
 use crate::flags;

@@ -14,10 +14,15 @@ use std::{
     mem,
 };
 
-pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use tracing::{debug, error, info, trace, warn};
 
+pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
+use self::{
+    composition_editor::CompositionEditor,
+    selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
+    zhuyin_layout::{KeyBehavior, Standard, SyllableEditor},
+};
 use crate::{
     conversion::{
         ChewingEngine, ConversionEngine, Interval, Symbol, full_width_symbol_input,
@@ -29,12 +34,6 @@ use crate::{
     },
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,
-};
-
-use self::{
-    composition_editor::CompositionEditor,
-    selection::{phrase::PhraseSelector, symbol::SpecialSymbolSelector},
-    zhuyin_layout::{KeyBehavior, Standard, SyllableEditor},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1548,6 +1547,8 @@ impl State for Highlighting {
 mod tests {
     use estimate::LaxUserFreqEstimate;
 
+    use super::collect_new_phrases;
+    use super::{BasicEditor, Editor};
     use crate::{
         conversion::{ChewingEngine, Interval, Symbol},
         dictionary::{Layered, TrieBuf},
@@ -1560,9 +1561,6 @@ mod tests {
         syl,
         zhuyin::Bopomofo as bpmf,
     };
-
-    use super::collect_new_phrases;
-    use super::{BasicEditor, Editor};
 
     const CAPSLOCK_EVENT: KeyboardEvent = KeyboardEvent::builder()
         .code(keycode::KEY_CAPSLOCK)

@@ -1,12 +1,11 @@
 //! Dai Chien CP26
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::input::keycode::*;
 use crate::{
     input::KeyboardEvent,
     zhuyin::{Bopomofo, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 /// TODO: docs
 #[derive(Debug, Clone, Copy)]

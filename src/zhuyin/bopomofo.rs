@@ -400,9 +400,8 @@ impl TryFrom<char> for Bopomofo {
 
 #[cfg(test)]
 mod tests {
-    use crate::zhuyin::{BopomofoErrorKind, ParseBopomofoError};
-
     use super::Bopomofo;
+    use crate::zhuyin::{BopomofoErrorKind, ParseBopomofoError};
 
     #[test]
     fn parse() {

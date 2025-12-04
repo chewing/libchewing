@@ -19,12 +19,11 @@ use der::{
 };
 use tracing::{error, warn};
 
-use crate::zhuyin::Syllable;
-
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
     Phrase,
 };
+use crate::zhuyin::Syllable;
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -1188,6 +1187,7 @@ mod tests {
         num::NonZeroUsize,
     };
 
+    use super::{Trie, TrieBuilder};
     use crate::{
         dictionary::{
             Dictionary, DictionaryBuilder, DictionaryInfo, LookupStrategy, Phrase, TrieOpenOptions,
@@ -1196,8 +1196,6 @@ mod tests {
         syl,
         zhuyin::Bopomofo,
     };
-
-    use super::{Trie, TrieBuilder};
 
     #[test]
     fn test_tree_construction() -> Result<(), Box<dyn std::error::Error>> {

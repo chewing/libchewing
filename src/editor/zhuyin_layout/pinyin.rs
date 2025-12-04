@@ -1,11 +1,10 @@
 //! Pinyin
 
+use super::{KeyBehavior, SyllableEditor};
 use crate::{
     input::{KeyboardEvent, keysym},
     zhuyin::{Bopomofo, Syllable},
 };
-
-use super::{KeyBehavior, SyllableEditor};
 
 const MAX_PINYIN_LEN: usize = 10;
 
@@ -348,9 +347,8 @@ macro_rules! fin {
 
 mod table {
 
-    use crate::{syl, zhuyin::Bopomofo::*};
-
     use super::{AmbiguousMapEntry, FinalMapEntry, InitialMapEntry};
+    use crate::{syl, zhuyin::Bopomofo::*};
 
     pub(super) const COMMON_MAPPING: [AmbiguousMapEntry; 18] = [
         // Special cases for WG
@@ -529,6 +527,7 @@ mod table {
 
 #[cfg(test)]
 mod tests {
+    use super::Pinyin;
     use crate::{
         editor::zhuyin_layout::SyllableEditor,
         input::{
@@ -538,8 +537,6 @@ mod tests {
         syl,
         zhuyin::Bopomofo,
     };
-
-    use super::Pinyin;
 
     fn map_key(ksym: Keysym) -> KeyboardEvent {
         KeyboardEvent::builder().ksym(ksym).build()

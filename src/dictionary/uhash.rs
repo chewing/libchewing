@@ -17,9 +17,8 @@ use std::{
     str::{self, FromStr},
 };
 
-use crate::zhuyin::Syllable;
-
 use super::Phrase;
+use crate::zhuyin::Syllable;
 
 const BIN_FIELD_SIZE: usize = 125;
 const BIN_HASH_SIG: &str = "CBiH";
@@ -127,9 +126,8 @@ pub(crate) fn try_load_bin<R: Read>(mut input: R) -> io::Result<Vec<(Vec<Syllabl
 mod tests {
     use std::{ffi::c_int, mem::size_of};
 
-    use crate::zhuyin::Syllable;
-
     use super::{BIN_FIELD_SIZE, Phrase, try_load_bin, try_load_text};
+    use crate::zhuyin::Syllable;
 
     #[test]
     fn load_valid_text() {
