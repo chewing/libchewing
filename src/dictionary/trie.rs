@@ -419,10 +419,6 @@ impl Dictionary for Trie {
     fn path(&self) -> Option<&Path> {
         self.path.as_ref().map(|p| p as &Path)
     }
-
-    fn as_dict_mut(&mut self) -> Option<&mut dyn super::DictionaryMut> {
-        None
-    }
 }
 
 fn context_specific<T: EncodeValue + Tagged>(

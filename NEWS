@@ -39,6 +39,7 @@ What's New in libchewing (unreleased)
     and without the break word.
   - rust: simplified dictionary API.
   - rust: logging now depends on tracing and tracing-subscriber.
+  - rust: the DictionaryMut trait is merged back to the Dictionary trait.
 
 * Dictionary
   - Default symbols.dat now includes commonly used emojis.

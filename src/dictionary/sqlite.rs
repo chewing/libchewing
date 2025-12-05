@@ -9,8 +9,8 @@ use std::{
 use rusqlite::{Connection, Error as RusqliteError, OpenFlags, OptionalExtension, params};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
-    LookupStrategy, Phrase, UpdateDictionaryError,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
+    Phrase, UpdateDictionaryError,
 };
 use crate::zhuyin::Syllable;
 
@@ -383,17 +383,16 @@ impl Dictionary for SqliteDictionary {
         self.path.as_ref().map(|p| p as &Path)
     }
 
-    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        if !self.readonly { Some(self) } else { None }
-    }
-}
-
-impl DictionaryMut for SqliteDictionary {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
+        if self.readonly {
+            return Err(UpdateDictionaryError {
+                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+            });
+        }
         self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
         Ok(())
     }
@@ -594,8 +593,7 @@ mod tests {
     use super::SqliteDictionary;
     use crate::{
         dictionary::{
-            Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase,
-            SqliteDictionaryBuilder,
+            Dictionary, DictionaryBuilder, LookupStrategy, Phrase, SqliteDictionaryBuilder,
         },
         syl,
         zhuyin::Bopomofo,
@@ -666,7 +664,7 @@ mod tests {
         let mut dict =
             SqliteDictionary::open_readonly(&temp_path).expect("Unable to open database");
         assert_eq!(temp_path.to_path_buf(), dict.path().unwrap());
-        assert!(dict.as_dict_mut().is_none());
+        assert!(dict.flush().is_err());
     }
 
     #[test]

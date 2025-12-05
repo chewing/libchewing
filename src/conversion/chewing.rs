@@ -681,8 +681,7 @@ mod tests {
     #[test]
     fn convert_zero_length_entry() {
         let mut dict = test_dictionary();
-        let dict_mut = dict.as_dict_mut().unwrap();
-        dict_mut.add_phrase(&[], ("", 0).into()).unwrap();
+        dict.add_phrase(&[], ("", 0).into()).unwrap();
         let engine = ChewingEngine::new();
         let mut composition = Composition::new();
         for sym in [

@@ -29,8 +29,8 @@ use crate::{
         special_symbol_input,
     },
     dictionary::{
-        DEFAULT_DICT_NAMES, Dictionary, DictionaryMut, Layered, LookupStrategy,
-        SystemDictionaryLoader, UpdateDictionaryError, UserDictionaryLoader,
+        DEFAULT_DICT_NAMES, Dictionary, Layered, LookupStrategy, SystemDictionaryLoader,
+        UpdateDictionaryError, UserDictionaryLoader,
     },
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,

@@ -323,7 +323,7 @@ pub enum LookupStrategy {
 /// ```
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
-/// use chewing::{dictionary::{Dictionary, DictionaryMut, LookupStrategy, TrieBuf}, syl, zhuyin::Bopomofo};
+/// use chewing::{dictionary::{Dictionary, LookupStrategy, TrieBuf}, syl, zhuyin::Bopomofo};
 ///
 /// let mut dict = TrieBuf::new_in_memory();
 /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
@@ -348,21 +348,20 @@ pub trait Dictionary: Debug {
     fn about(&self) -> DictionaryInfo;
     /// Returns the dictionary file path if it's backed by a file.
     fn path(&self) -> Option<&Path>;
-    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut>;
-}
-
-/// An interface for updating dictionaries.
-pub trait DictionaryMut: Debug {
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
-    fn reopen(&mut self) -> Result<(), UpdateDictionaryError>;
+    fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
+        Err(UpdateDictionaryError { source: None })
+    }
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
-    fn flush(&mut self) -> Result<(), UpdateDictionaryError>;
+    fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
+        Err(UpdateDictionaryError { source: None })
+    }
     /// An method for updating dictionaries.
     ///
     /// For more about the concept of dictionaries generally, please see the
@@ -373,7 +372,7 @@ pub trait DictionaryMut: Debug {
     /// ```
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// use chewing::{dictionary::{DictionaryMut, TrieBuf}, syl, zhuyin::Bopomofo};
+    /// use chewing::{dictionary::{Dictionary, TrieBuf}, syl, zhuyin::Bopomofo};
     ///
     /// let mut dict = TrieBuf::new_in_memory();
     /// dict.add_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], ("測", 100).into())?;
@@ -383,25 +382,29 @@ pub trait DictionaryMut: Debug {
     /// TODO: doc
     fn add_phrase(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase,
-    ) -> Result<(), UpdateDictionaryError>;
-
+        _syllables: &[Syllable],
+        _phrase: Phrase,
+    ) -> Result<(), UpdateDictionaryError> {
+        Err(UpdateDictionaryError { source: None })
+    }
     /// TODO: doc
     fn update_phrase(
         &mut self,
-        syllables: &[Syllable],
-        phrase: Phrase,
-        user_freq: u32,
-        time: u64,
-    ) -> Result<(), UpdateDictionaryError>;
-
+        _syllables: &[Syllable],
+        _phrase: Phrase,
+        _user_freq: u32,
+        _time: u64,
+    ) -> Result<(), UpdateDictionaryError> {
+        Err(UpdateDictionaryError { source: None })
+    }
     /// TODO: doc
     fn remove_phrase(
         &mut self,
-        syllables: &[Syllable],
-        phrase_str: &str,
-    ) -> Result<(), UpdateDictionaryError>;
+        _syllables: &[Syllable],
+        _phrase_str: &str,
+    ) -> Result<(), UpdateDictionaryError> {
+        Err(UpdateDictionaryError { source: None })
+    }
 }
 
 /// Errors during dictionary construction.
@@ -447,12 +450,11 @@ pub trait DictionaryBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::dictionary::{Dictionary, DictionaryBuilder, DictionaryMut};
+    use crate::dictionary::{Dictionary, DictionaryBuilder};
 
     #[test]
     fn ensure_object_safe() {
         const _: Option<&dyn Dictionary> = None;
-        const _: Option<&dyn DictionaryMut> = None;
         const _: Option<&dyn DictionaryBuilder> = None;
     }
 }

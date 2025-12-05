@@ -5,10 +5,7 @@ use std::{
 
 use tracing::error;
 
-use super::{
-    Dictionary, DictionaryInfo, DictionaryMut, Entries, LookupStrategy, Phrase,
-    UpdateDictionaryError,
-};
+use super::{Dictionary, DictionaryInfo, Entries, LookupStrategy, Phrase, UpdateDictionaryError};
 use crate::zhuyin::Syllable;
 
 /// A collection of dictionaries that returns the union of the lookup results.
@@ -143,26 +140,12 @@ impl Dictionary for Layered {
         None
     }
 
-    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        self.user_dict.as_dict_mut()
-    }
-}
-
-impl DictionaryMut for Layered {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
-        if let Some(writer) = self.user_dict.as_dict_mut() {
-            writer.reopen()
-        } else {
-            Ok(())
-        }
+        self.user_dict.reopen()
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
-        if let Some(writer) = self.user_dict.as_dict_mut() {
-            writer.flush()
-        } else {
-            Ok(())
-        }
+        self.user_dict.flush()
     }
 
     fn add_phrase(
@@ -174,11 +157,7 @@ impl DictionaryMut for Layered {
             error!("BUG! added phrase is empty");
             return Ok(());
         }
-        if let Some(writer) = self.user_dict.as_dict_mut() {
-            writer.add_phrase(syllables, phrase)
-        } else {
-            Ok(())
-        }
+        self.user_dict.add_phrase(syllables, phrase)
     }
 
     fn update_phrase(
@@ -192,11 +171,8 @@ impl DictionaryMut for Layered {
             error!("BUG! added phrase is empty");
             return Ok(());
         }
-        if let Some(writer) = self.user_dict.as_dict_mut() {
-            writer.update_phrase(syllables, phrase, user_freq, time)
-        } else {
-            Ok(())
-        }
+        self.user_dict
+            .update_phrase(syllables, phrase, user_freq, time)
     }
 
     fn remove_phrase(
@@ -204,11 +180,7 @@ impl DictionaryMut for Layered {
         syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        if let Some(writer) = self.user_dict.as_dict_mut() {
-            writer.remove_phrase(syllables, phrase_str)
-        } else {
-            Ok(())
-        }
+        self.user_dict.remove_phrase(syllables, phrase_str)
     }
 }
 
@@ -222,8 +194,7 @@ mod tests {
     use super::Layered;
     use crate::{
         dictionary::{
-            Dictionary, DictionaryBuilder, DictionaryMut, LookupStrategy, Phrase, Trie, TrieBuf,
-            TrieBuilder,
+            Dictionary, DictionaryBuilder, LookupStrategy, Phrase, Trie, TrieBuf, TrieBuilder,
         },
         syl,
         zhuyin::Bopomofo,
@@ -354,15 +325,14 @@ mod tests {
             ),
         );
         let _ = dict.about();
-        assert!(dict.as_dict_mut().is_none());
-        assert!(dict.reopen().is_ok());
-        assert!(dict.flush().is_ok());
+        assert!(dict.reopen().is_err());
+        assert!(dict.flush().is_err());
         assert!(
             dict.add_phrase(
                 &[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]],
                 ("冊", 100).into()
             )
-            .is_ok()
+            .is_err()
         );
         assert!(
             dict.update_phrase(
@@ -371,11 +341,11 @@ mod tests {
                 0,
                 0,
             )
-            .is_ok()
+            .is_err()
         );
         assert!(
             dict.remove_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], "冊")
-                .is_ok()
+                .is_err()
         );
         Ok(())
     }

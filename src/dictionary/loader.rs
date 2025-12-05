@@ -174,14 +174,10 @@ impl UserDictionaryLoader {
                     let freq = phrase.freq();
                     let last_used = phrase.last_used().unwrap_or_default();
                     fresh_dict
-                        .as_dict_mut()
-                        .unwrap()
                         .update_phrase(&syllables, phrase, freq, last_used)
                         .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
                 }
                 fresh_dict
-                    .as_dict_mut()
-                    .unwrap()
                     .flush()
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
             }
@@ -197,14 +193,10 @@ impl UserDictionaryLoader {
                         let freq = phrase.freq();
                         let last_used = phrase.last_used().unwrap_or_default();
                         fresh_dict
-                            .as_dict_mut()
-                            .unwrap()
                             .update_phrase(&syllables, phrase, freq, last_used)
                             .map_err(|e| io::Error::other(Box::new(e)))?;
                     }
                     fresh_dict
-                        .as_dict_mut()
-                        .unwrap()
                         .flush()
                         .map_err(|e| io::Error::other(Box::new(e)))?;
                 }

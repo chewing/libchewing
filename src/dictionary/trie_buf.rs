@@ -10,8 +10,8 @@ use std::{
 use tracing::{error, info};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryMut, Entries,
-    LookupStrategy, Phrase, Trie, TrieBuilder, UpdateDictionaryError,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
+    Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 use crate::zhuyin::Syllable;
 
@@ -304,12 +304,6 @@ impl Dictionary for TrieBuf {
         self.trie.as_ref()?.path()
     }
 
-    fn as_dict_mut(&mut self) -> Option<&mut dyn DictionaryMut> {
-        Some(self)
-    }
-}
-
-impl DictionaryMut for TrieBuf {
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.sync()?;
         Ok(())
@@ -375,7 +369,7 @@ mod tests {
 
     use super::{Dictionary, TrieBuf};
     use crate::{
-        dictionary::{DictionaryMut, LookupStrategy, Phrase},
+        dictionary::{LookupStrategy, Phrase},
         syl,
         zhuyin::Bopomofo::*,
     };
