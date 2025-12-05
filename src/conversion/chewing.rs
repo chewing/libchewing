@@ -5,9 +5,8 @@ use std::{
 
 use tracing::trace;
 
-use super::{Composition, ConversionEngine, Gap, Interval, Symbol};
+use super::{Composition, ConversionEngine, Gap, Interval, Outcome, Symbol};
 use crate::{
-    conversion::Outcome,
     dictionary::{Dictionary, LookupStrategy, Phrase},
     zhuyin::Syllable,
 };

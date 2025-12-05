@@ -1,5 +1,5 @@
-use super::{ChewingEngine, ConversionEngine};
-use crate::{conversion::Outcome, dictionary::LookupStrategy};
+use super::{ChewingEngine, ConversionEngine, Outcome};
+use crate::dictionary::LookupStrategy;
 
 /// Same conversion method as Chewing but uses fuzzy phrase search.
 #[derive(Debug, Default)]

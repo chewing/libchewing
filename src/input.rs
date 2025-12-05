@@ -2,10 +2,8 @@
 
 use std::fmt::Display;
 
-use keycode::Keycode;
-use keysym::Keysym;
-
-use crate::input::keysym::SYM_NONE;
+use self::keycode::Keycode;
+use self::keysym::{Keysym, SYM_NONE};
 
 pub mod keycode;
 pub mod keymap;

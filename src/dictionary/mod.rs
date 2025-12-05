@@ -10,16 +10,15 @@ use std::{
     path::Path,
 };
 
-pub use layered::Layered;
-pub use loader::{
+pub use self::layered::Layered;
+pub use self::loader::{
     DEFAULT_DICT_NAMES, LoadDictionaryError, SingleDictionaryLoader, SystemDictionaryLoader,
     UserDictionaryLoader,
 };
 #[cfg(feature = "sqlite")]
-pub use sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
-pub use trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};
-pub use trie_buf::TrieBuf;
-
+pub use self::sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictionaryError};
+pub use self::trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};
+pub use self::trie_buf::TrieBuf;
 use crate::zhuyin::Syllable;
 
 mod layered;

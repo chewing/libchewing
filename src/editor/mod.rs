@@ -1,11 +1,5 @@
 //! Abstract input method editors.
 
-mod abbrev;
-mod composition_editor;
-mod estimate;
-mod selection;
-pub mod zhuyin_layout;
-
 use std::{
     any::Any,
     cmp::{max, min},
@@ -14,9 +8,9 @@ use std::{
     mem,
 };
 
-pub use estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 use tracing::{debug, error, info, trace, warn};
 
+pub use self::estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};
 use self::{
     composition_editor::CompositionEditor,
@@ -35,6 +29,12 @@ use crate::{
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,
 };
+
+mod abbrev;
+mod composition_editor;
+mod estimate;
+mod selection;
+pub mod zhuyin_layout;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LanguageMode {
@@ -1545,14 +1545,13 @@ impl State for Highlighting {
 
 #[cfg(test)]
 mod tests {
-    use estimate::LaxUserFreqEstimate;
-
     use super::collect_new_phrases;
+    use super::estimate::LaxUserFreqEstimate;
     use super::{BasicEditor, Editor};
     use crate::{
         conversion::{ChewingEngine, Interval, Symbol},
         dictionary::{Layered, TrieBuf},
-        editor::{EditorKeyBehavior, EditorOptions, SymbolSelector, abbrev::AbbrevTable, estimate},
+        editor::{EditorKeyBehavior, EditorOptions, SymbolSelector, abbrev::AbbrevTable},
         input::{
             KeyboardEvent, keycode,
             keymap::{QWERTY_MAP, map_ascii},

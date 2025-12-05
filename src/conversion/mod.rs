@@ -1,10 +1,5 @@
 //! Algorithms to convert syllables to Chinese characters.
 
-mod chewing;
-mod fuzzy;
-mod simple;
-mod symbol;
-
 use std::{
     cmp::{max, min},
     fmt::Debug,
@@ -15,6 +10,11 @@ pub use self::fuzzy::FuzzyChewingEngine;
 pub use self::simple::SimpleEngine;
 pub(crate) use self::symbol::{full_width_symbol_input, special_symbol_input};
 use crate::{dictionary::Dictionary, zhuyin::Syllable};
+
+mod chewing;
+mod fuzzy;
+mod simple;
+mod symbol;
 
 /// Converts a composition buffer to list of intervals.
 ///

@@ -8,10 +8,10 @@
 //! It's recommended to use full featured library like xkbcommon to map keycode
 //! to keysyms.
 
-use crate::input::KeyState;
-use crate::input::KeyboardEvent;
-use crate::input::keycode::*;
-use crate::input::keysym::*;
+use super::KeyState;
+use super::KeyboardEvent;
+use super::keycode::*;
+use super::keysym::*;
 
 macro_rules! keymap {
     ($($k:expr => ($code:expr, $ksym:expr, $state:expr)),* $(,)?) => {{

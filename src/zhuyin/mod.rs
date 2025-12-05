@@ -1,10 +1,10 @@
 //! Chinese syllables and bopomofo phonetic symbols.
 
-mod bopomofo;
-mod syllable;
-
-pub use bopomofo::{Bopomofo, BopomofoErrorKind, BopomofoKind, ParseBopomofoError};
-pub use syllable::{
+pub use self::bopomofo::{Bopomofo, BopomofoErrorKind, BopomofoKind, ParseBopomofoError};
+pub use self::syllable::{
     BuildSyllableError, DecodeSyllableError, ParseSyllableError, Syllable, SyllableBuilder,
     SyllableErrorKind,
 };
+
+mod bopomofo;
+mod syllable;

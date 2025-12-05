@@ -1,6 +1,5 @@
-use super::{Composition, ConversionEngine, Interval};
 use crate::{
-    conversion::Outcome,
+    conversion::{Composition, ConversionEngine, Interval, Outcome},
     dictionary::{Dictionary, LookupStrategy},
 };
 
