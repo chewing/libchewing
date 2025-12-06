@@ -23,8 +23,8 @@ use crate::{
         special_symbol_input,
     },
     dictionary::{
-        DEFAULT_DICT_NAMES, Dictionary, Layered, LookupStrategy, SystemDictionaryLoader,
-        UpdateDictionaryError, UserDictionaryLoader,
+        Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie, UpdateDictionaryError,
+        UserDictionaryLoader,
     },
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,
@@ -106,7 +106,7 @@ impl Default for EditorOptions {
 /// An editor can react to KeyEvents and change its state.
 pub trait BasicEditor {
     /// Handles a KeyEvent
-    fn process_keyevent(&mut self, key_event: KeyboardEvent) -> EditorKeyBehavior;
+    fn process_keyevent(&mut self, evt: KeyboardEvent) -> EditorKeyBehavior;
 }
 
 /// The internal state of the editor.
@@ -188,17 +188,64 @@ pub(crate) struct SharedState {
 }
 
 impl Editor {
-    pub fn chewing() -> Result<Editor, Box<dyn Error>> {
-        let sys_loader = SystemDictionaryLoader::new();
-        let system_dict = sys_loader.load(DEFAULT_DICT_NAMES)?;
-        let user_dict = UserDictionaryLoader::new().load()?;
-        let estimate = LaxUserFreqEstimate::max_from(user_dict.as_ref());
-        let dict = Layered::new(system_dict, user_dict);
+    pub fn chewing<T>(
+        syspath: Option<String>,
+        userpath: Option<String>,
+        enabled_dicts: &[T],
+    ) -> Editor
+    where
+        T: AsRef<str>,
+    {
+        let mut sys_loader = SystemDictionaryLoader::new();
+        if let Some(syspath) = syspath {
+            sys_loader = sys_loader.sys_path(syspath);
+        }
+        let system_dicts = match sys_loader.load(enabled_dicts) {
+            Ok(d) => d,
+            Err(e) => {
+                let builtin = Trie::new(&include_bytes!("../../capi/data/mini.dat")[..]);
+                error!("Failed to load system dict: {e}");
+                error!("Loading builtin minimum dictionary...");
+                // NB: we can unwrap because the built-in dictionary should always
+                // be valid.
+                vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
+            }
+        };
+        let abbrev = sys_loader.load_abbrev();
+        let abbrev = match abbrev {
+            Ok(abbr) => abbr,
+            Err(e) => {
+                error!("Failed to load abbrev table: {e}");
+                error!("Loading empty table...");
+                AbbrevTable::new()
+            }
+        };
+        let sym_sel = sys_loader.load_symbol_selector();
+        let sym_sel = match sym_sel {
+            Ok(sym_sel) => sym_sel,
+            Err(e) => {
+                error!("Failed to load symbol table: {e}");
+                error!("Loading empty table...");
+                // NB: we can unwrap here because empty table is always valid.
+                SymbolSelector::new(b"".as_slice()).unwrap()
+            }
+        };
+        let mut user_dict_loader = UserDictionaryLoader::new();
+        if let Some(userpath) = userpath {
+            user_dict_loader = user_dict_loader.userphrase_path(userpath);
+        }
+        let user_dictionary = match user_dict_loader.load() {
+            Ok(d) => d,
+            Err(e) => {
+                error!("Failed to load user dict: {e}");
+                UserDictionaryLoader::in_memory()
+            }
+        };
+        let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
+        let dict = Layered::new(system_dicts, user_dictionary);
         let conversion_engine = Box::new(ChewingEngine::new());
-        let abbrev = sys_loader.load_abbrev()?;
-        let sym_sel = sys_loader.load_symbol_selector()?;
         let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
-        Ok(editor)
+        editor
     }
 
     pub fn new(

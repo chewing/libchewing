@@ -13,13 +13,10 @@ use std::{
 
 use chewing::{
     conversion::{ChewingEngine, FuzzyChewingEngine, Interval, SimpleEngine, Symbol},
-    dictionary::{
-        DEFAULT_DICT_NAMES, Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie,
-        UserDictionaryLoader,
-    },
+    dictionary::{DEFAULT_DICT_NAMES, LookupStrategy},
     editor::{
-        AbbrevTable, BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior,
-        LanguageMode, LaxUserFreqEstimate, SymbolSelector, UserPhraseAddDirection,
+        BasicEditor, CharacterForm, ConversionEngineKind, Editor, EditorKeyBehavior, LanguageMode,
+        UserPhraseAddDirection,
         zhuyin_layout::{
             DaiChien26, Et, Et26, GinYieh, Hsu, Ibm, KeyboardLayoutCompat, Pinyin, Standard,
             SyllableEditor,
@@ -37,7 +34,7 @@ use chewing::{
     },
     zhuyin::Syllable,
 };
-use tracing::{debug, error, info, level_filters::LevelFilter};
+use tracing::{debug, info, level_filters::LevelFilter};
 use tracing_subscriber::{filter::Targets, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
@@ -184,13 +181,7 @@ pub unsafe extern "C" fn chewing_new3(
         .with(targets)
         .try_init();
     let _logger_guard = init_scoped_logging_subscriber(logger_fn, logger_data);
-    let mut sys_loader = SystemDictionaryLoader::new();
     let mut dict_names: Vec<String> = DEFAULT_DICT_NAMES.iter().map(|&n| n.to_owned()).collect();
-    if !syspath.is_null() {
-        if let Ok(search_path) = unsafe { CStr::from_ptr(syspath).to_str() } {
-            sys_loader = sys_loader.sys_path(search_path);
-        }
-    }
     if !enabled_dicts.is_null() {
         if let Ok(enabled_dicts) = unsafe { CStr::from_ptr(enabled_dicts).to_str() } {
             dict_names = enabled_dicts
@@ -199,56 +190,22 @@ pub unsafe extern "C" fn chewing_new3(
                 .collect();
         }
     }
-    let system_dicts = match sys_loader.load(&dict_names) {
-        Ok(d) => d,
-        Err(e) => {
-            let builtin = Trie::new(&include_bytes!("../data/mini.dat")[..]);
-            error!("Failed to load system dict: {e}");
-            error!("Loading builtin minimum dictionary...");
-            // NB: we can unwrap because the built-in dictionary should always
-            // be valid.
-            vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
-        }
+    let syspath = if syspath.is_null() {
+        None
+    } else {
+        unsafe { CStr::from_ptr(syspath).to_str() }
+            .ok()
+            .map(|p| p.to_owned())
     };
-    let abbrev = sys_loader.load_abbrev();
-    let abbrev = match abbrev {
-        Ok(abbr) => abbr,
-        Err(e) => {
-            error!("Failed to load abbrev table: {e}");
-            error!("Loading empty table...");
-            AbbrevTable::new()
-        }
+    let userpath = if userpath.is_null() {
+        None
+    } else {
+        unsafe { CStr::from_ptr(userpath).to_str() }
+            .ok()
+            .map(|p| p.to_owned())
     };
-    let sym_sel = sys_loader.load_symbol_selector();
-    let sym_sel = match sym_sel {
-        Ok(sym_sel) => sym_sel,
-        Err(e) => {
-            error!("Failed to load symbol table: {e}");
-            error!("Loading empty table...");
-            // NB: we can unwrap here because empty table is always valid.
-            SymbolSelector::new(b"".as_slice()).unwrap()
-        }
-    };
-    let mut user_dictionary = UserDictionaryLoader::new();
-    if !userpath.is_null() {
-        if let Ok(data_path) = unsafe { CStr::from_ptr(userpath).to_str() } {
-            user_dictionary = user_dictionary.userphrase_path(data_path);
-        }
-    }
-    let user_dictionary = match user_dictionary.load() {
-        Ok(d) => d,
-        Err(e) => {
-            error!("Failed to load user dict: {e}");
-            UserDictionaryLoader::in_memory()
-        }
-    };
-
-    let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
-
-    let dict = Layered::new(system_dicts, user_dictionary);
-    let conversion_engine = Box::new(ChewingEngine::new());
     let kb_compat = KeyboardLayoutCompat::Default;
-    let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
+    let editor = Editor::chewing(syspath, userpath, &dict_names);
     let context = Box::new(ChewingContext {
         kb_compat,
         keymap: &QWERTY_MAP,
