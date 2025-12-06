@@ -1,4 +1,5 @@
 use std::{
+    any::Any,
     error::Error,
     fmt::Display,
     fs::{self, File},
@@ -156,7 +157,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
 
     builder.build(path)?;
 
-    if let Some(trie_builder) = builder.as_any().downcast_ref::<TrieBuilder>() {
+    if let Some(trie_builder) = (builder as Box<dyn Any>).downcast_ref::<TrieBuilder>() {
         let stats = trie_builder.statistics();
         eprintln!("== Trie Dictionary Statistics ==");
         eprintln!("Name                 : {}", info.name);

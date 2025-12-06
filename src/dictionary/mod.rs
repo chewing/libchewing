@@ -433,7 +433,7 @@ impl From<io::Error> for BuildDictionaryError {
 }
 
 /// TODO: doc
-pub trait DictionaryBuilder {
+pub trait DictionaryBuilder: Any {
     /// TODO: doc
     fn set_info(&mut self, info: DictionaryInfo) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
@@ -444,7 +444,6 @@ pub trait DictionaryBuilder {
     ) -> Result<(), BuildDictionaryError>;
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
-    fn as_any(&self) -> &dyn Any;
 }
 
 #[cfg(test)]

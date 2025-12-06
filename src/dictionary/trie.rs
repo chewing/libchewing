@@ -1,5 +1,4 @@
 use std::{
-    any::Any,
     cmp::Ordering,
     collections::VecDeque,
     error::Error,
@@ -1163,10 +1162,6 @@ impl DictionaryBuilder for TrieBuilder {
         database.sync_data()?;
         fs::rename(&tmpname, path)?;
         Ok(())
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 

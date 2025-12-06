@@ -1,5 +1,4 @@
 use std::{
-    any::Any,
     error::Error,
     fmt::Display,
     path::{Path, PathBuf},
@@ -576,10 +575,6 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         })?;
         self.dict.conn.execute("VACUUM INTO ?", [path])?;
         Ok(())
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 
