@@ -304,11 +304,15 @@ impl Editor {
     pub fn editor_options(&self) -> EditorOptions {
         self.shared.options
     }
-    pub fn set_editor_options(&mut self, options: EditorOptions) {
-        if self.shared.options.language_mode != options.language_mode {
+    pub fn set_editor_options<F>(&mut self, update_op: F)
+    where
+        F: FnOnce(&mut EditorOptions),
+    {
+        let old = self.shared.options;
+        update_op(&mut self.shared.options);
+        if self.shared.options.language_mode != old.language_mode {
             self.cancel_entering_syllable();
         }
-        self.shared.options = options;
     }
     pub fn entering_syllable(&self) -> bool {
         !self.shared.syl.is_empty()
@@ -1598,7 +1602,7 @@ mod tests {
     use crate::{
         conversion::{ChewingEngine, Interval, Symbol},
         dictionary::{Layered, TrieBuf},
-        editor::{EditorKeyBehavior, EditorOptions, SymbolSelector, abbrev::AbbrevTable},
+        editor::{EditorKeyBehavior, SymbolSelector, abbrev::AbbrevTable},
         input::{
             KeyboardEvent, keycode,
             keymap::{QWERTY_MAP, map_ascii},
@@ -1692,10 +1696,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        editor.set_editor_options(EditorOptions {
-            sort_candidates_by_frequency: false,
-            ..Default::default()
-        });
+        editor.set_editor_options(|opt| opt.sort_candidates_by_frequency = false);
 
         editor.process_keyevent(
             KeyboardEvent::builder()
@@ -1740,10 +1741,7 @@ mod tests {
         let sym_sel = SymbolSelector::default();
         let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
 
-        editor.set_editor_options(EditorOptions {
-            sort_candidates_by_frequency: true,
-            ..Default::default()
-        });
+        editor.set_editor_options(|opt| opt.sort_candidates_by_frequency = true);
 
         editor.process_keyevent(
             KeyboardEvent::builder()

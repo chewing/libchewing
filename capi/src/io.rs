@@ -570,7 +570,7 @@ pub unsafe extern "C" fn chewing_config_set_int(
         _ => return ERROR,
     };
 
-    ctx.editor.set_editor_options(options);
+    ctx.editor.set_editor_options(|opt| *opt = options);
 
     OK
 }
