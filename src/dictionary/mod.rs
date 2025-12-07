@@ -347,6 +347,8 @@ pub trait Dictionary: Debug {
     fn about(&self) -> DictionaryInfo;
     /// Returns the dictionary file path if it's backed by a file.
     fn path(&self) -> Option<&Path>;
+    /// Returns whether the dictionary was opened readonly.
+    fn is_readonly(&self) -> bool;
     /// Reopens the dictionary if it was changed by a different process
     ///
     /// It should not fail if the dictionary is read-only or able to sync across
