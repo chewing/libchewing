@@ -382,6 +382,10 @@ impl Dictionary for SqliteDictionary {
         self.path.as_ref().map(|p| p as &Path)
     }
 
+    fn is_readonly(&self) -> bool {
+        self.readonly
+    }
+
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())
     }

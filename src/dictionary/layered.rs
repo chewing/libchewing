@@ -140,6 +140,13 @@ impl Dictionary for Layered {
         None
     }
 
+    fn is_readonly(&self) -> bool {
+        self.sys_dict
+            .iter()
+            .chain(iter::once(&self.user_dict))
+            .any(|d| !d.is_readonly())
+    }
+
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         self.user_dict.reopen()
     }
@@ -347,6 +354,7 @@ mod tests {
             dict.remove_phrase(&[syl![Bopomofo::C, Bopomofo::E, Bopomofo::TONE4]], "冊")
                 .is_err()
         );
+        assert!(dict.is_readonly());
         Ok(())
     }
 }
