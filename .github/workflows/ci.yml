@@ -28,7 +28,7 @@ jobs:
     name: ${{ matrix.os }}, preset=${{ matrix.preset }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -68,7 +68,7 @@ jobs:
     name: Aarch64 cross-compile smoke test
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup rustup
         run: |
           rustup set auto-self-update disable
@@ -94,7 +94,7 @@ jobs:
     steps:
       - run: sudo dnf -y install clang cmake ninja-build sqlite-devel llvm rustup bzip2 git gnupg2
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
