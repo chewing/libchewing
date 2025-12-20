@@ -38,6 +38,8 @@ include(FetchContent)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(USE_SYSTEM_CHEWING_CLI "Use system-installed chewing-cli to build dictionary" OFF)
+option(BUILD_DOC "Build documentation" ON)
+option(BUILD_DATA "Build chewing dictionaries" ON)
 
 if(CMAKE_C_COMPILER_ID MATCHES GNU|Clang)
     set(CMAKE_C_FLAGS "-std=gnu99 -finput-charset=utf-8 ${CMAKE_C_FLAGS}")
@@ -168,8 +170,14 @@ if(NOT USE_SYSTEM_CHEWING_CLI)
     set(CHEWING_CLI $<TARGET_FILE:chewing-cli>)
 endif()
 
-add_subdirectory(doc)
-add_subdirectory(data)
+if(BUILD_DOC)
+    add_subdirectory(doc)
+endif()
+
+if(BUILD_DATA)
+    add_subdirectory(data)
+endif()
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
@@ -240,15 +248,19 @@ install(TARGETS libchewing
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(
-    FILES
-        ${PROJECT_BINARY_DIR}/data/dict/chewing/tsi.dat
-        ${PROJECT_BINARY_DIR}/data/dict/chewing/word.dat
-        ${PROJECT_BINARY_DIR}/data/misc/swkb.dat
-        ${PROJECT_BINARY_DIR}/data/misc/symbols.dat
-    DESTINATION
-        ${CMAKE_INSTALL_DATADIR}/libchewing
-)
+
+if(BUILD_DATA)
+    install(
+        FILES
+            ${PROJECT_BINARY_DIR}/data/dict/chewing/tsi.dat
+            ${PROJECT_BINARY_DIR}/data/dict/chewing/word.dat
+            ${PROJECT_BINARY_DIR}/data/misc/swkb.dat
+            ${PROJECT_BINARY_DIR}/data/misc/symbols.dat
+        DESTINATION
+            ${CMAKE_INSTALL_DATADIR}/libchewing
+    )
+endif()
+
 install(IMPORTED_RUNTIME_ARTIFACTS chewing-cli DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # generate CMake Config files
