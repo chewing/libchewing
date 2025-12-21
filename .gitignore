@@ -44,6 +44,9 @@ config.h
 /CMakeFiles/
 /cmake_install.cmake
 
+# Scratch folders
+.scratch/
+
 # test suite
 test/genkeystroke
 test/performance
