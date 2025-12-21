@@ -135,6 +135,7 @@ contrib/test.sqlite3
 
 # OS X
 .DS_Store
+.Spotlight-V100
 
 # python
 *.pyc
@@ -148,3 +149,9 @@ contrib/test.sqlite3
 # fuzzer
 /fuzzer/in
 /fuzzer/out
+
+# Swift
+./[Bb]uild/
+.build/
+.swiftpm/
+index-build/
