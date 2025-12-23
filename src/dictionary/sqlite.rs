@@ -198,7 +198,7 @@ impl SqliteDictionary {
             return Ok(());
         }
 
-        let mut userphrases: Vec<(Vec<Syllable>, String, u32, u32, u64)> = vec![];
+        let mut userphrases: Vec<(Vec<Syllable>, String, u32, u32, i64)> = vec![];
         {
             let mut stmt = conn.prepare(
                 "SELECT
@@ -327,10 +327,10 @@ impl Dictionary for SqliteDictionary {
             )
             .expect("SQL error");
         stmt.query_map([syllables_bytes], |row| {
-            let (phrase, freq, time): (Box<str>, _, _) = row.try_into()?;
+            let (phrase, freq, time): (Box<str>, _, Option<i64>) = row.try_into()?;
             let mut phrase = Phrase::new(phrase, freq);
             if let Some(last_used) = time {
-                phrase = phrase.with_time(last_used);
+                phrase = phrase.with_time(last_used as u64);
             }
             Ok(phrase)
         })
@@ -350,7 +350,7 @@ impl Dictionary for SqliteDictionary {
             .expect("SQL error");
         Box::new(
             stmt.query_map([], |row| {
-                let (syllables_bytes, phrase, freq, time): (Vec<u8>, Box<str>, _, _) =
+                let (syllables_bytes, phrase, freq, time): (Vec<u8>, Box<str>, _, Option<i64>) =
                     row.try_into()?;
                 let syllables = syllables_bytes
                     .chunks_exact(2)
@@ -363,7 +363,7 @@ impl Dictionary for SqliteDictionary {
                     .collect::<Vec<_>>();
                 let mut phrase = Phrase::new(phrase, freq);
                 if let Some(last_used) = time {
-                    phrase = phrase.with_time(last_used);
+                    phrase = phrase.with_time(last_used as u64);
                 }
                 Ok((syllables, phrase))
             })
@@ -425,6 +425,8 @@ impl Dictionary for SqliteDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), UpdateDictionaryError> {
+        // sqlite only supports i64
+        let time: i64 = time.clamp(0, i64::MAX as u64) as i64;
         if self.readonly {
             return Err(UpdateDictionaryError {
                 source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
@@ -436,7 +438,7 @@ impl Dictionary for SqliteDictionary {
             let mut stmt = tx.prepare_cached(
                 "SELECT userphrase_id FROM dictionary_v1 WHERE syllables = ? AND phrase = ?",
             )?;
-            let userphrase_id: Option<Option<u64>> = stmt
+            let userphrase_id: Option<Option<i64>> = stmt
                 .query_row(params![syllables_bytes, phrase.as_str()], |row| row.get(0))
                 .optional()?;
             match userphrase_id {
@@ -490,7 +492,7 @@ impl Dictionary for SqliteDictionary {
 #[derive(Debug)]
 pub struct SqliteDictionaryBuilder {
     dict: SqliteDictionary,
-    sort_id: u64,
+    sort_id: i64,
 }
 
 impl SqliteDictionaryBuilder {
