@@ -134,6 +134,36 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  # On macOS we run Swift Package Manager tests to validate SPM integration.
+  # Use macOS 26 runner if available—fall back to macos-latest if not.
+  # No need to add code-coverage for this target as we already do that on Linux above.
+  # The essense of this Swift package is to allow all C APIs to be accessible from Swift.
+  macos-swift:
+    # If your org's runner image naming differs, replace `macos-26` with `macos-latest`.
+    runs-on: macos-26
+    name: macOS Swift tests (macOS 26)
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Setup rustup
+        run: |
+          rustup set auto-self-update disable
+          rustup install ${{ env.RUST_VERSION }}
+          rustup default ${{ env.RUST_VERSION }}
+
+      - name: Build chewing_capi via cargo (macOS)
+        # Ensure the cargo-built static lib is present for the Swift package to link
+        run: |
+          chmod +x ./swift/scripts/build-cargo.sh
+          ./swift/scripts/build-cargo.sh
+
+      - name: Run Swift tests
+        run: |
+          swift test -v
+
   # https://github.com/orgs/community/discussions/26822
   results:
     if: ${{ always() }}
