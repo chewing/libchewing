@@ -18,10 +18,9 @@ let package = Package(
       publicHeadersPath: "include",
       // Instruct the linker to search common Cargo target dirs where the built library may be placed
       linkerSettings: [
-        .unsafeFlags(["-L", "./target/cargo-target/release"]),
         .unsafeFlags([
           "-L",
-          ".build/plugins/outputs/libchewing-spm/CChewing/destination/CargoBuild/cargo-target/release",
+          ".build/plugins/outputs/libchewing/CChewing/destination/CargoBuild/cargo-target/release",
         ]),
         .linkedLibrary("chewing_capi"),
       ],
