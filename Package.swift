@@ -33,13 +33,13 @@ let package = Package(
     .plugin(
       name: "CargoBuild",
       capability: .buildTool(),
-      path: "tools/CargoBuildPlugin"
+      path: "swift/tools/CargoBuildPlugin"
     ),
-    // Swift test target in `tests_swift` to validate C API accessibility from Swift
+    // Swift test target in `swift/unit_tests` to validate C API accessibility from Swift
     .testTarget(
       name: "ChewingTests",
       dependencies: ["CChewing"],
-      path: "tests_swift"
+      path: "swift/unit_tests"
     ),
   ]
 )
