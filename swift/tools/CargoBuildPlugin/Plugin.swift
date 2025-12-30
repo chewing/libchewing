@@ -39,7 +39,7 @@ struct CargoBuildPlugin: BuildToolPlugin {
         init(_ s: String) { description = s }
       }
       throw UserError(
-        "`cargo` not found on the system. Please install Rust (https://rustup.rs/) to enable automatic builds, or disable automatic Cargo build by setting `LIBCHEWING_AUTO_BUILD_CARGO=0` and run `swift/scripts/build-cargo.sh` manually to produce the library before running `swift build`."
+        "`cargo` not found on the system. Please install Rust (https://rustup.rs/) to enable automatic builds, or disable automatic Cargo build by setting `LIBCHEWING_AUTO_BUILD_CARGO=0` and manually compile the Rust library before running `swift build`."
       )
     }
 
