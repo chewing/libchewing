@@ -23,6 +23,7 @@ pub struct TrieBuf {
     graveyard: BTreeSet<PhraseKey>,
     join_handle: Option<JoinHandle<Result<(), UpdateDictionaryError>>>,
     dirty: bool,
+    readonly: bool,
 }
 
 type PhraseKey = (Cow<'static, [Syllable]>, Cow<'static, str>);
@@ -61,6 +62,7 @@ impl TrieBuf {
             graveyard: BTreeSet::new(),
             join_handle: None,
             dirty: false,
+            readonly: false,
         })
     }
 
@@ -72,6 +74,7 @@ impl TrieBuf {
             graveyard: BTreeSet::new(),
             join_handle: None,
             dirty: false,
+            readonly: false,
         }
     }
 
@@ -257,6 +260,7 @@ impl TrieBuf {
             graveyard: self.graveyard.clone(),
             join_handle: None,
             dirty: false,
+            readonly: false,
         };
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieBuilder::new();
@@ -302,6 +306,10 @@ impl Dictionary for TrieBuf {
 
     fn path(&self) -> Option<&Path> {
         self.trie.as_ref()?.path()
+    }
+
+    fn is_readonly(&self) -> bool {
+        self.readonly
     }
 
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
