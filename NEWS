@@ -16,6 +16,7 @@ What's New in libchewing (unreleased)
   - New boolean config option `chewing.sort_candidates_by_frequency` can be
     set to enable sorting candidates by frequency.
   - Rust type SyllableSlice is removed from public interfaces.
+  - Provide libchewing as a Swift package (C based API only).
 
 * Bug Fixes
   - Auto shift cursor after candidate selection now moves the cursor to the
