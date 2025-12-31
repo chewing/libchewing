@@ -408,7 +408,6 @@ impl Editor {
     pub fn cancel_selecting(&mut self) -> Result<(), EditorError> {
         if self.is_selecting() {
             self.shared.cancel_selecting();
-            self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
             self.state = Box::new(Entering);
             Ok(())
         } else {
@@ -417,7 +416,6 @@ impl Editor {
     }
     pub fn cancel_entering_syllable(&mut self) {
         self.shared.syl.clear();
-        self.shared.last_key_behavior = EditorKeyBehavior::Absorb;
         self.state = Box::new(Entering);
     }
     pub fn last_key_behavior(&self) -> EditorKeyBehavior {
@@ -1599,6 +1597,7 @@ mod tests {
     use super::collect_new_phrases;
     use super::estimate::LaxUserFreqEstimate;
     use super::{BasicEditor, Editor};
+    use crate::editor::LanguageMode;
     use crate::{
         conversion::{ChewingEngine, Interval, Symbol},
         dictionary::{Layered, TrieBuf},
@@ -1869,6 +1868,26 @@ mod tests {
         );
         assert!(editor.syllable_buffer().is_empty());
         assert_eq!("冊", editor.display());
+    }
+
+    #[test]
+    fn editing_mode_input_switch_mode_behavior() {
+        let dict = TrieBuf::new_in_memory();
+        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let conversion_engine = Box::new(ChewingEngine::new());
+        let estimate = LaxUserFreqEstimate::new(0);
+        let abbrev = AbbrevTable::new();
+        let sym_sel = SymbolSelector::default();
+        let mut editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
+
+        editor.set_editor_options(|opt| opt.language_mode = LanguageMode::English);
+
+        editor.process_keyevent(map_ascii(&QWERTY_MAP, b'X'));
+
+        editor.set_editor_options(|opt| opt.language_mode = LanguageMode::Chinese);
+
+        assert_eq!(EditorKeyBehavior::Commit, editor.last_key_behavior());
+        assert_eq!("X", editor.display_commit());
     }
 
     #[test]
