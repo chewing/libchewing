@@ -203,7 +203,7 @@ impl Editor {
         let system_dicts = match sys_loader.load(enabled_dicts) {
             Ok(d) => d,
             Err(e) => {
-                let builtin = Trie::new(&include_bytes!("../../capi/data/mini.dat")[..]);
+                let builtin = Trie::new(&include_bytes!("data/mini.dat")[..]);
                 error!("Failed to load system dict: {e}");
                 error!("Loading builtin minimum dictionary...");
                 // NB: we can unwrap because the built-in dictionary should always

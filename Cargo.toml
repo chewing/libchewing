@@ -10,7 +10,7 @@ edition = "2024"
 include = [
     "src/**/*.rs",
     "src/**/*.asn1",
-    "data/*",
+    "src/editor/data/*",
     "Cargo.toml",
     "AUTHORS",
     "COPYING",
