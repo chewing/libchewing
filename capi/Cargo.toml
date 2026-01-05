@@ -2,7 +2,7 @@
 name = "chewing_capi"
 description = "The Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
-version = "0.11.0-alpha.6"
+version = "0.11.0-alpha.7"
 rust-version = "1.88"
 edition = "2024"
 
@@ -10,7 +10,7 @@ edition = "2024"
 crate-type = ["rlib", "staticlib"]
 
 [dependencies]
-chewing = { version = "0.11.0-alpha.6", path = ".." }
+chewing = { version = "0.11.0-alpha.7", path = ".." }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
