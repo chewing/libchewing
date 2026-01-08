@@ -7,7 +7,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use tracing::{error, info};
+use log::{error, info};
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,

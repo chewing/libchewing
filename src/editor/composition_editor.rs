@@ -2,7 +2,7 @@
 
 use std::cmp::min;
 
-use tracing::warn;
+use log::warn;
 
 use crate::conversion::{Composition, Gap, Interval, Symbol};
 

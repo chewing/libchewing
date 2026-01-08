@@ -39,7 +39,6 @@ What's New in libchewing (unreleased)
   - autolearn: new phrases with break words inside will be learned both with
     and without the break word.
   - rust: simplified dictionary API.
-  - rust: logging now depends on tracing and tracing-subscriber.
   - rust: the DictionaryMut trait is merged back to the Dictionary trait.
   - rust: the Editor::set_editor_options now accepts a closure for setting
     options in place.

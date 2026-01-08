@@ -3,7 +3,7 @@ use std::{
     fmt::{Debug, Display, Write},
 };
 
-use tracing::trace;
+use log::trace;
 
 use super::{Composition, ConversionEngine, Gap, Interval, Outcome, Symbol};
 use crate::{

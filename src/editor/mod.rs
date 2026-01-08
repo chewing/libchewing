@@ -8,7 +8,7 @@ use std::{
     mem,
 };
 
-use tracing::{debug, error, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 
 pub use self::estimate::{LaxUserFreqEstimate, UserFreqEstimate};
 pub use self::{abbrev::AbbrevTable, selection::symbol::SymbolSelector};

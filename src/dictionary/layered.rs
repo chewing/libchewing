@@ -3,7 +3,7 @@ use std::{
     iter,
 };
 
-use tracing::error;
+use log::error;
 
 use super::{Dictionary, DictionaryInfo, Entries, LookupStrategy, Phrase, UpdateDictionaryError};
 use crate::zhuyin::Syllable;

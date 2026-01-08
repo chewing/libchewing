@@ -17,7 +17,7 @@ use der::{
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
     asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
 };
-use tracing::{error, warn};
+use log::{error, warn};
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,

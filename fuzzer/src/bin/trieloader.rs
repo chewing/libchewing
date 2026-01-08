@@ -5,10 +5,10 @@ use chewing::{
     syl,
     zhuyin::Bopomofo,
 };
-use tracing::{debug, info};
+use log::{debug, info};
 
 pub fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
+    env_logger::init();
 
     let dict_path = env::args()
         .nth(1)

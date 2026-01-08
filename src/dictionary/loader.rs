@@ -7,7 +7,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use tracing::{error, info};
+use log::{error, info};
 
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;

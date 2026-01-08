@@ -19,8 +19,8 @@ include = [
 
 [dependencies]
 der = { version = "0.7.7", features = ["std"] }
+log = { workspace = true }
 rusqlite = { version = ">= 0.28.0", optional = true }
-tracing = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
@@ -29,24 +29,15 @@ tempfile = { workspace = true }
 default = []
 sqlite = ["dep:rusqlite"]
 sqlite-bundled = ["sqlite", "rusqlite/bundled"]
-log = ["tracing/log"]
 
 [workspace]
 members = ["capi", "fuzzer", "tests/testhelper", "tools"]
 resolver = "3"
 
 [workspace.dependencies]
+env_logger = "0.11.0"
+log = "0.4.0"
 tempfile = "3.10.1"
-
-[workspace.dependencies.tracing]
-version = "0.1.18"
-default-features = false
-features = ["std", "release_max_level_info"]
-
-[workspace.dependencies.tracing-subscriber]
-version = "0.3.0"
-default-features = false
-features = ["ansi", "fmt", "std"]
 
 [profile.release]
 lto = true
