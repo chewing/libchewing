@@ -1,9 +1,10 @@
-What's New in libchewing (unreleased)
+What's New in libchewing 0.11.0 (January 10, 2026)
 ---------------------------------------------------------
 
 * Features
   - cli: Now outputs and reads dictionary metadata in source file
   - cli: Detects mismatched phrase word count and syllable count
+  - cli: Ignores empty line or line starts with # when processing dictionary
   - editor: Support optional sorting candidates by frequency. Previously the
     candidates are always sorted by their order in the dictionary.
 
@@ -32,8 +33,8 @@ What's New in libchewing (unreleased)
   - rust: new sqlite-bundled feature can be used to build with bundled sqlite
     to simplify the build configuration on Windows
   - cli: will try to migrate to new schema when dumping chewing.sqlite3 file
-  - Use less heuristic when calculating phrase segmentation score
-  - Dictionary data are built directly from the libchewing-data repository
+  - Use less heuristic when calculating phrase segmentation score.
+  - Reimplement scoring algorithm to use conditional probability.
   - cli: init-database will no longer normalize the frequency of single word
     phrase to zero.
   - autolearn: new phrases with break words inside will be learned both with
@@ -45,6 +46,7 @@ What's New in libchewing (unreleased)
 
 * Dictionary
   - Default symbols.dat now includes commonly used emojis.
+  - Dictionary data are built directly from the libchewing-data repository
 
 * Build
   - Bump MSRV to 1.88
