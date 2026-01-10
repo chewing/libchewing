@@ -271,8 +271,8 @@ struct ChewingContext *chewing_new2(const char *syspath,
 struct ChewingContext *chewing_new3(const char *syspath,
                                     const char *userpath,
                                     const char *enabled_dicts,
-                                    void (*logger)(void *data, int level, const char *fmt, ...),
-                                    void *loggerdata);
+                                    void (*logger_fn)(void *data, int level, const char *fmt, ...),
+                                    void *logger_data);
 
 /**
  * Returns the default comma separated dictionary names.
@@ -785,10 +785,10 @@ int chewing_get_phoneSeqLen(const struct ChewingContext *ctx);
  *
  * This function should be called with valid pointers.
  */
-void chewing_set_logger(struct ChewingContext *ctx, void (*logger)(void *data,
-                                                                   int level,
-                                                                   const char *fmt,
-                                                                   ...), void *user_data);
+void chewing_set_logger(struct ChewingContext *ctx, void (*logger_fn)(void *data,
+                                                                      int level,
+                                                                      const char *fmt,
+                                                                      ...), void *logger_data);
 
 /**
  * Starts a userphrase enumeration.
