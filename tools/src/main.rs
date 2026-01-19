@@ -7,6 +7,7 @@ mod info;
 mod init_database;
 
 fn main() -> Result<()> {
+    env_logger::init();
     #[cfg(feature = "mangen")]
     {
         use clap::CommandFactory;

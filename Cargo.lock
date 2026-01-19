@@ -113,6 +113,7 @@ dependencies = [
  "chewing",
  "clap",
  "clap_mangen",
+ "env_logger",
 ]
 
 [[package]]
