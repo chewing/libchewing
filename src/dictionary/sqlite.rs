@@ -5,6 +5,7 @@ use std::{
     str,
 };
 
+use log::debug;
 use rusqlite::{Connection, Error as RusqliteError, OpenFlags, OptionalExtension, params};
 
 use super::{
@@ -50,11 +51,26 @@ pub enum SqliteDictionaryError {
 
 impl Display for SqliteDictionaryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "sqlite error")
+        match self {
+            SqliteDictionaryError::SqliteError { source: _ } => {
+                write!(f, "failed to perform sqlite operation")
+            }
+            SqliteDictionaryError::MissingTable { table } => {
+                write!(f, "sqlite {table} does not exist")
+            }
+            SqliteDictionaryError::ReadOnly => write!(f, "sqlite file is readonly"),
+        }
     }
 }
 
-impl Error for SqliteDictionaryError {}
+impl Error for SqliteDictionaryError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            SqliteDictionaryError::SqliteError { source } => Some(source),
+            _ => None,
+        }
+    }
+}
 
 impl From<RusqliteError> for SqliteDictionaryError {
     fn from(value: RusqliteError) -> Self {
@@ -75,11 +91,16 @@ impl SqliteDictionary {
     /// TODO: doc
     pub fn open<P: AsRef<Path>>(path: P) -> Result<SqliteDictionary, SqliteDictionaryError> {
         let path = path.as_ref().to_path_buf();
+        debug!("open sqlite dictionary at {path:?}");
         let mut conn = Connection::open(&path)?;
+        debug!("initialize dictionary tables");
         Self::initialize_tables(&conn)?;
+        debug!("migrate from userphrase_v1");
         Self::migrate_from_userphrase_v1(&mut conn)?;
+        debug!("ensure tables exist");
         Self::ensure_tables(&conn)?;
         let info = Self::read_info_v1(&conn)?;
+        debug!("read dictionary info {info:?}");
 
         Ok(SqliteDictionary {
             conn,
@@ -179,16 +200,19 @@ impl SqliteDictionary {
     }
 
     fn migrate_from_userphrase_v1(conn: &mut Connection) -> Result<(), SqliteDictionaryError> {
+        debug!("query has_userphrase_v1");
         let has_userphrase_v1: bool = conn.query_row(
             "SELECT EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='userphrase_v1')",
             [],
             |row| row.get(0)
         )?;
+        debug!("query migrated");
         let migrated: bool = conn.query_row(
             "SELECT EXISTS (SELECT 1 FROM migration_v1 WHERE name='migrate_from_userphrase_v1')",
             [],
             |row| row.get(0),
         )?;
+        debug!("has_userphrase_v1={has_userphrase_v1} migrated={migrated}");
         if !has_userphrase_v1 || migrated {
             // Don't need to migrate
             conn.execute(
@@ -233,13 +257,13 @@ impl SqliteDictionary {
                 userphrases.push((
                     syllables,
                     row.get(0)?,
-                    row.get(1)?,
-                    row.get(2)?,
-                    row.get(3)?,
+                    row.get(1).unwrap_or(0),
+                    row.get(2).unwrap_or(0),
+                    row.get(3).unwrap_or(0),
                 ));
             }
         }
-
+        debug!("{} phrases loaded", userphrases.len());
         let tx = conn.transaction()?;
         {
             for item in userphrases {
