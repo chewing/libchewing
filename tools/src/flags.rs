@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use chewing::dictionary::DictionaryUsage;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
@@ -37,6 +38,9 @@ pub(crate) struct InitDatabase {
     /// Version of the dictionary
     #[arg(short('r'), long, default_value = "1.0.0")]
     pub(crate) version: String,
+    /// The usage type of the dictionary
+    #[arg(short, long, default_value = "unknown")]
+    pub(crate) usage: DictionaryUsage,
     /// Skip invalid lines
     #[arg(short, long)]
     pub(crate) skip_invalid: bool,

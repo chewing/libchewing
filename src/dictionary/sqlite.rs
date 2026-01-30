@@ -12,7 +12,7 @@ use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
     Phrase, UpdateDictionaryError,
 };
-use crate::zhuyin::Syllable;
+use crate::{dictionary::DictionaryUsage, zhuyin::Syllable};
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
 const USER_VERSION: u32 = 0;
@@ -405,6 +405,8 @@ impl Dictionary for SqliteDictionary {
     fn path(&self) -> Option<&Path> {
         self.path.as_ref().map(|p| p as &Path)
     }
+
+    fn set_usage(&mut self, _usage: DictionaryUsage) {}
 
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
         Ok(())

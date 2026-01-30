@@ -23,8 +23,8 @@ use crate::{
         special_symbol_input,
     },
     dictionary::{
-        Dictionary, Layered, LookupStrategy, SystemDictionaryLoader, Trie, UpdateDictionaryError,
-        UserDictionaryLoader,
+        AssetLoader, Dictionary, DictionaryUsage, Layered, LookupStrategy, Trie,
+        UpdateDictionaryError, UserDictionaryManager,
     },
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,
@@ -189,29 +189,60 @@ pub(crate) struct SharedState {
 
 impl Editor {
     pub fn chewing<T>(
-        syspath: Option<String>,
+        search_path: Option<String>,
         userpath: Option<String>,
         enabled_dicts: &[T],
     ) -> Editor
     where
         T: AsRef<str>,
     {
-        let mut sys_loader = SystemDictionaryLoader::new();
-        if let Some(syspath) = syspath {
-            sys_loader = sys_loader.sys_path(syspath);
-        }
-        let system_dicts = match sys_loader.load(enabled_dicts) {
-            Ok(d) => d,
-            Err(e) => {
-                let builtin = Trie::new(&include_bytes!("data/mini.dat")[..]);
-                error!("Failed to load system dict: {e}");
-                error!("Loading builtin minimum dictionary...");
-                // NB: we can unwrap because the built-in dictionary should always
-                // be valid.
-                vec![Box::new(builtin.unwrap()) as Box<dyn Dictionary>]
+        let mut enabled_dicts: Vec<String> = enabled_dicts
+            .iter()
+            .map(|it| it.as_ref().to_owned())
+            .collect();
+        let mut user_dict_mgr = UserDictionaryManager::new();
+        let user_dict = {
+            let mut custom_userpath = false;
+            if let Some(userpath) = userpath {
+                custom_userpath = true;
+                user_dict_mgr = user_dict_mgr.userphrase_path(userpath);
             }
+            if custom_userpath && let Some(file_name) = user_dict_mgr.file_name() {
+                // If we load user dictionary from passed in path then we should not load it again.
+                if let Some(index) = enabled_dicts.iter().position(|d| d == &file_name) {
+                    enabled_dicts.remove(index);
+                }
+            }
+            let user_dict = user_dict_mgr
+                .init()
+                .inspect_err(|error| {
+                    error!("Failed to load user dict: {error}");
+                })
+                .ok();
+            if custom_userpath { user_dict } else { None }
         };
-        let abbrev = sys_loader.load_abbrev();
+        let mut loader = AssetLoader::new();
+        if let Some(syspath) = search_path {
+            loader = loader.search_path(syspath);
+        }
+        let mut dicts = loader.load(&enabled_dicts);
+        if let Some(user_dict) = user_dict {
+            dicts.push(user_dict);
+        }
+        if !dicts.iter().any(|dict| {
+            matches!(
+                dict.about().usage,
+                DictionaryUsage::BuiltIn | DictionaryUsage::Extension | DictionaryUsage::Custom
+            )
+        }) {
+            let builtin = Trie::new(&include_bytes!("data/mini.dat")[..]);
+            error!("Failed to load any system dictionaries");
+            error!("Loading builtin mini dictionary...");
+            // SAFETY: we can unwrap because the built-in dictionary should always be valid.
+            dicts.insert(0, Box::new(builtin.unwrap()));
+        }
+
+        let abbrev = loader.load_abbrev();
         let abbrev = match abbrev {
             Ok(abbr) => abbr,
             Err(e) => {
@@ -220,7 +251,7 @@ impl Editor {
                 AbbrevTable::new()
             }
         };
-        let sym_sel = sys_loader.load_symbol_selector();
+        let sym_sel = loader.load_symbol_selector();
         let sym_sel = match sym_sel {
             Ok(sym_sel) => sym_sel,
             Err(e) => {
@@ -230,19 +261,8 @@ impl Editor {
                 SymbolSelector::new(b"".as_slice()).unwrap()
             }
         };
-        let mut user_dict_loader = UserDictionaryLoader::new();
-        if let Some(userpath) = userpath {
-            user_dict_loader = user_dict_loader.userphrase_path(userpath);
-        }
-        let user_dictionary = match user_dict_loader.load() {
-            Ok(d) => d,
-            Err(e) => {
-                error!("Failed to load user dict: {e}");
-                UserDictionaryLoader::in_memory()
-            }
-        };
-        let estimate = LaxUserFreqEstimate::max_from(user_dictionary.as_ref());
-        let dict = Layered::new(system_dicts, user_dictionary);
+        let mut dict = Layered::new(dicts);
+        let estimate = LaxUserFreqEstimate::max_from(dict.user_dict());
         let conversion_engine = Box::new(ChewingEngine::new());
         let editor = Editor::new(conversion_engine, dict, estimate, abbrev, sym_sel);
         editor
@@ -1619,10 +1639,7 @@ mod tests {
 
     #[test]
     fn editing_mode_input_bopomofo() {
-        let dict = Layered::new(
-            vec![Box::new(TrieBuf::new_in_memory())],
-            Box::new(TrieBuf::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1656,7 +1673,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1688,7 +1705,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100), ("測", 200)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1733,7 +1750,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100), ("測", 200)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1778,7 +1795,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1819,7 +1836,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1873,7 +1890,7 @@ mod tests {
     #[test]
     fn editing_mode_input_switch_mode_behavior() {
         let dict = TrieBuf::new_in_memory();
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1896,7 +1913,7 @@ mod tests {
             vec![crate::syl![bpmf::C, bpmf::E, bpmf::TONE4]],
             vec![("冊", 100)],
         )]);
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1933,7 +1950,7 @@ mod tests {
     #[test]
     fn editing_mode_input_full_shape_symbol() {
         let dict = TrieBuf::new_in_memory();
-        let dict = Layered::new(vec![Box::new(dict)], Box::new(TrieBuf::new_in_memory()));
+        let dict = Layered::new(vec![Box::new(dict), Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();
@@ -1972,10 +1989,7 @@ mod tests {
 
     #[test]
     fn editing_mode_open_empty_symbol_table_then_bell() {
-        let dict = Layered::new(
-            vec![Box::new(TrieBuf::new_in_memory())],
-            Box::new(TrieBuf::new_in_memory()),
-        );
+        let dict = Layered::new(vec![Box::new(TrieBuf::new_in_memory())]);
         let conversion_engine = Box::new(ChewingEngine::new());
         let estimate = LaxUserFreqEstimate::new(0);
         let abbrev = AbbrevTable::new();

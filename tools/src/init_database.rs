@@ -82,6 +82,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     let mut copyright = args.copyright;
     let mut license = args.license;
     let mut version = args.version;
+    let mut usage = args.usage;
     let software = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
     let tsi = File::open(args.tsi_src)?;
@@ -111,6 +112,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
                 "dc:rights" => copyright = value,
                 "dc:license" => license = value,
                 "dc:identifier" => version = value,
+                "dc:type" => usage = value.parse().unwrap(),
                 _ => (),
             }
             continue;
@@ -152,6 +154,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         license,
         version,
         software,
+        usage,
     };
     builder.set_info(info.clone())?;
 
@@ -164,6 +167,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         eprintln!("Copyright            : {}", info.copyright);
         eprintln!("License              : {}", info.license);
         eprintln!("Version              : {}", info.version);
+        eprintln!("Usage                : {}", info.usage);
         eprintln!("Node count           : {}", stats.node_count);
         eprintln!("Leaf count           : {}", stats.leaf_count);
         eprintln!("Phrase count         : {}", stats.phrase_count);

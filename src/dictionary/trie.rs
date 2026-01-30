@@ -23,7 +23,7 @@ use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
     Phrase,
 };
-use crate::zhuyin::Syllable;
+use crate::{dictionary::DictionaryUsage, zhuyin::Syllable};
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -419,26 +419,32 @@ impl Dictionary for Trie {
     fn path(&self) -> Option<&Path> {
         self.path.as_ref().map(|p| p as &Path)
     }
+
+    fn set_usage(&mut self, usage: DictionaryUsage) {
+        self.info.usage = usage;
+    }
 }
 
 fn context_specific<T: EncodeValue + Tagged>(
     tag_number: u8,
+    tag_mode: TagMode,
     value: &T,
 ) -> ContextSpecificRef<'_, T> {
     ContextSpecificRef {
         tag_number: TagNumber::new(tag_number),
-        tag_mode: TagMode::Implicit,
+        tag_mode,
         value,
     }
 }
 
 fn context_specific_opt<T: EncodeValue + Tagged>(
     tag_number: u8,
+    tag_mode: TagMode,
     value: &Option<T>,
 ) -> Option<ContextSpecificRef<'_, T>> {
     value
         .as_ref()
-        .map(|value| context_specific(tag_number, value))
+        .map(|value| context_specific(tag_number, tag_mode, value))
 }
 
 struct DictionaryInfoRef<'a> {
@@ -447,6 +453,7 @@ struct DictionaryInfoRef<'a> {
     license: Utf8StringRef<'a>,
     version: Utf8StringRef<'a>,
     software: Utf8StringRef<'a>,
+    usage: DictionaryUsage,
 }
 
 impl From<DictionaryInfoRef<'_>> for DictionaryInfo {
@@ -457,6 +464,7 @@ impl From<DictionaryInfoRef<'_>> for DictionaryInfo {
             license: value.license.into(),
             version: value.version.into(),
             software: value.software.into(),
+            usage: value.usage.into(),
         }
     }
 }
@@ -469,6 +477,7 @@ impl DictionaryInfoRef<'_> {
             license: Utf8StringRef::new(&info.license).unwrap(),
             version: Utf8StringRef::new(&info.version).unwrap(),
             software: Utf8StringRef::new(&info.software).unwrap(),
+            usage: info.usage,
         }
     }
 }
@@ -485,12 +494,19 @@ impl<'a> DecodeValue<'a> for DictionaryInfoRef<'a> {
             let license = reader.decode()?;
             let version = reader.decode()?;
             let software = reader.decode()?;
+            let raw_usage = reader
+                .context_specific(TagNumber::N0, TagMode::Explicit)?
+                .unwrap_or(0);
+            let usage = DictionaryUsage::from(raw_usage);
+            // consume the remaining unknown data
+            let _ = reader.read_slice(reader.remaining_len());
             Ok(DictionaryInfoRef {
                 name,
                 copyright,
                 license,
                 version,
                 software,
+                usage,
             })
         })
     }
@@ -503,6 +519,9 @@ impl EncodeValue for DictionaryInfoRef<'_> {
             + self.license.encoded_len()?
             + self.version.encoded_len()?
             + self.software.encoded_len()?
+        // TODO - enable this will break chewing <= 0.11.0 because old
+        // parser did not handle extension marker properly
+        // + context_specific(0, TagMode::Explicit, &(self.usage as u8)).encoded_len()?
     }
 
     fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
@@ -511,6 +530,9 @@ impl EncodeValue for DictionaryInfoRef<'_> {
         self.license.encode(encoder)?;
         self.version.encode(encoder)?;
         self.software.encode(encoder)?;
+        // TODO - enable this will break chewing <= 0.11.0 because old
+        // parser did not handle extension marker properly
+        // context_specific(0, TagMode::Explicit, &(self.usage as u8)).encode(encoder)?;
         Ok(())
     }
 }
@@ -538,6 +560,8 @@ impl<'a> DecodeValue<'a> for TrieFileRef<'a> {
             let info = reader.decode()?;
             let index = reader.decode()?;
             let phrase_seq = reader.decode()?;
+            // consume the remaining unknown data
+            let _ = reader.read_slice(reader.remaining_len());
             Ok(Self {
                 info,
                 index,
@@ -576,6 +600,8 @@ impl<'a> DecodeValue<'a> for Phrase {
             let phrase: Utf8StringRef<'_> = reader.decode()?;
             let freq = reader.decode()?;
             let last_used = reader.context_specific(TagNumber::N0, TagMode::Implicit)?;
+            // consume the remaining unknown data
+            let _ = reader.read_slice(reader.remaining_len());
             Ok(Phrase {
                 text: String::from(phrase).into_boxed_str(),
                 freq,
@@ -589,13 +615,13 @@ impl EncodeValue for Phrase {
     fn value_len(&self) -> der::Result<Length> {
         Utf8StringRef::new(self.as_str())?.encoded_len()?
             + self.freq.encoded_len()?
-            + context_specific_opt(0, &self.last_used).encoded_len()?
+            + context_specific_opt(0, TagMode::Implicit, &self.last_used).encoded_len()?
     }
 
     fn encode_value(&self, encoder: &mut impl Writer) -> der::Result<()> {
         Utf8StringRef::new(self.as_ref())?.encode(encoder)?;
         self.freq.encode(encoder)?;
-        context_specific_opt(0, &self.last_used).encode(encoder)?;
+        context_specific_opt(0, TagMode::Implicit, &self.last_used).encode(encoder)?;
         Ok(())
     }
 }
@@ -890,6 +916,11 @@ impl TrieBuilder {
         node_id
     }
 
+    /// Set the intended usage of this trie dictionary.
+    pub fn set_usage(&mut self, usage: DictionaryUsage) {
+        self.info.usage = usage;
+    }
+
     /// Writes the dictionary to an output stream and returns the number of
     /// bytes written.
     ///
@@ -986,8 +1017,9 @@ impl TrieBuilder {
             }
         }
 
+        let info = DictionaryInfoRef::new(&self.info);
         let trie_dict_ref = TrieFileRef {
-            info: DictionaryInfoRef::new(&self.info),
+            info,
             index: OctetStringRef::new(&dict_buf).map_err(io_error)?,
             phrase_seq: PhraseSeqRef {
                 der_bytes: &data_buf.buf,
@@ -1214,8 +1246,8 @@ mod tests {
     use super::{Trie, TrieBuilder};
     use crate::{
         dictionary::{
-            Dictionary, DictionaryBuilder, DictionaryInfo, LookupStrategy, Phrase, TrieOpenOptions,
-            trie::TrieBuilderNode,
+            Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUsage, LookupStrategy, Phrase,
+            TrieOpenOptions, trie::TrieBuilderNode,
         },
         syl,
         zhuyin::Bopomofo,
@@ -1615,6 +1647,7 @@ mod tests {
             license: "license".into(),
             version: "version".into(),
             software: "software".into(),
+            usage: DictionaryUsage::BuiltIn,
         };
         builder.set_info(info)?;
 

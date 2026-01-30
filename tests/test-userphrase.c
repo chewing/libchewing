@@ -894,10 +894,14 @@ void test_userphrase_remove()
     ok(ret == 1, "chewing_userphrase_add() return value `%d' shall be `%d'", ret, 1);
     ret = chewing_userphrase_remove(ctx, p1, b1);
     ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_lookup(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1);
     chewing_delete(ctx);
     ctx = NULL;
 
     ctx = chewing_new();
+    ret = chewing_userphrase_lookup(ctx, p2, b1);
+    ok(ret == 1, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 1);
     ret = chewing_userphrase_remove(ctx, p2, b1);
     ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
     chewing_delete(ctx);

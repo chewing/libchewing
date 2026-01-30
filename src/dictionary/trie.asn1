@@ -19,7 +19,8 @@ BEGIN
     license     UTF8String,
     version     UTF8String,
     software    UTF8String,
-    ...
+    ...,
+    usage       [0] Usage OPTIONAL
   }
   Index ::= OCTET STRING
   Phrase ::= SEQUENCE
@@ -30,5 +31,6 @@ BEGIN
     ...
   }
   Version ::= INTEGER { v1(0) }
+  Usage ::= INTEGER { unknown(0), built-in(1), extension(2), custom(3), user(4), exclude-list(5) }
   Uint64 ::= INTEGER (0..18446744073709551615)
 END

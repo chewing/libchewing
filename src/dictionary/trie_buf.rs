@@ -7,11 +7,11 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use log::{error, info};
+use log::{debug, error, info};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
-    Phrase, Trie, TrieBuilder, UpdateDictionaryError,
+    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUsage, Entries,
+    LookupStrategy, Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 use crate::zhuyin::Syllable;
 
@@ -45,6 +45,7 @@ impl TrieBuf {
                 license: "Unknown".to_string(),
                 version: "0.0.0".to_string(),
                 software: software_version(),
+                usage: DictionaryUsage::Unknown,
             };
             let mut builder = TrieBuilder::new();
             builder
@@ -130,6 +131,11 @@ impl TrieBuf {
         let mut sort_map = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
+        debug!(
+            "lookup {syllables:?} result: {:?}",
+            self.entries_iter_for(syllables, strategy)
+                .collect::<Vec<_>>()
+        );
         for phrase in self.entries_iter_for(syllables, strategy) {
             match sort_map.entry(phrase.to_string()) {
                 Entry::Occupied(entry) => {
@@ -161,6 +167,7 @@ impl TrieBuf {
             return Err(UpdateDictionaryError { source: None });
         }
 
+        debug!("added phrase {} {syllables:?}", phrase.text);
         self.btree.insert(
             (
                 Cow::from(syllables.to_vec()),
@@ -180,6 +187,7 @@ impl TrieBuf {
         user_freq: u32,
         time: u64,
     ) -> Result<(), UpdateDictionaryError> {
+        debug!("updated phrase {} {syllables:?}", phrase.text);
         self.btree.insert(
             (
                 Cow::from(syllables.to_vec()),
@@ -188,6 +196,7 @@ impl TrieBuf {
             (user_freq, time),
         );
         self.dirty = true;
+        debug!("{:?}", self.btree);
 
         Ok(())
     }
@@ -204,6 +213,7 @@ impl TrieBuf {
             .insert((syllables_key, phrase_str.to_owned().into()));
         self.dirty = true;
 
+        debug!("removed phrase {phrase_str} {syllables:?}");
         Ok(())
     }
 
@@ -302,6 +312,12 @@ impl Dictionary for TrieBuf {
 
     fn path(&self) -> Option<&Path> {
         self.trie.as_ref()?.path()
+    }
+
+    fn set_usage(&mut self, usage: DictionaryUsage) {
+        if let Some(trie) = self.trie.as_mut() {
+            trie.set_usage(usage);
+        }
     }
 
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {

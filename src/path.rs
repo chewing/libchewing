@@ -34,29 +34,29 @@ fn file_exists(path: &Path) -> bool {
     }
 }
 
-pub fn sys_path_from_env_var() -> String {
+pub fn search_path_from_env_var() -> String {
+    let mut paths = vec![];
+    if let Some(user_datadir) = data_dir() {
+        paths.push(
+            user_datadir
+                .join(DICT_FOLDER)
+                .to_string_lossy()
+                .into_owned(),
+        );
+        paths.push(user_datadir.to_string_lossy().into_owned());
+    }
     let chewing_path = env::var("CHEWING_PATH");
     if let Ok(chewing_path) = chewing_path {
-        info!("Using syspath from env CHEWING_PATH: {}", chewing_path);
-        chewing_path
+        info!("Add path from CHEWING_PATH: {}", chewing_path);
+        paths.push(chewing_path);
     } else {
-        let mut paths = vec![];
-        if let Some(user_datadir) = data_dir() {
-            paths.push(
-                user_datadir
-                    .join(DICT_FOLDER)
-                    .to_string_lossy()
-                    .into_owned(),
-            );
-            paths.push(user_datadir.to_string_lossy().into_owned());
-        }
         let sys_datadir = PathBuf::from(SYS_PATH.unwrap_or(DEFAULT_SYS_PATH));
         paths.push(sys_datadir.join(DICT_FOLDER).to_string_lossy().into_owned());
         paths.push(sys_datadir.to_string_lossy().into_owned());
-        let chewing_path = paths.join(&SEARCH_PATH_SEP.to_string());
-        info!("Using default syspath: {}", chewing_path);
-        chewing_path
     }
+    let chewing_path = paths.join(&SEARCH_PATH_SEP.to_string());
+    info!("Using search path: {}", chewing_path);
+    chewing_path
 }
 
 pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<PathBuf> {

@@ -19,10 +19,14 @@ pub struct Syllable {
 
 impl Debug for Syllable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Syllable")
-            .field("value", &self.value)
-            .field("to_string()", &self.to_string())
-            .finish()
+        if f.alternate() {
+            f.debug_struct("Syllable")
+                .field("value", &self.value)
+                .field("to_string()", &self.to_string())
+                .finish()
+        } else {
+            f.write_str(&self.to_string())
+        }
     }
 }
 

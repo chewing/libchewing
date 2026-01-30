@@ -54,6 +54,7 @@ fn dump_dict_tsi_src(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary)
     writeln!(sink, "# dc:rights {}", info.copyright)?;
     writeln!(sink, "# dc:license {}", info.license)?;
     writeln!(sink, "# dc:identifier {}", info.version)?;
+    writeln!(sink, "# dc:type {}", info.usage)?;
     writeln!(sink, "# 詞(phrase) 詞頻(freq) 注音(bopomofo)")?;
     for (syllables, phrase) in dict.entries() {
         writeln!(
@@ -77,6 +78,7 @@ fn dump_dict_csv(mut sink: BufWriter<Box<dyn Write>>, dict: &dyn Dictionary) -> 
     writeln!(sink, "# dc:rights,{},", info.copyright)?;
     writeln!(sink, "# dc:license,{},", info.license)?;
     writeln!(sink, "# dc:identifier,{},", info.version)?;
+    writeln!(sink, "# dc:type,{},", info.usage)?;
     writeln!(sink, "# 詞(phrase),詞頻(freq),注音(bopomofo)")?;
     for (syllables, phrase) in dict.entries() {
         writeln!(

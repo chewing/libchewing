@@ -13,8 +13,9 @@ use log::{error, info};
 use super::SqliteDictionary;
 use super::{Dictionary, TrieBuf, uhash};
 use crate::{
+    dictionary::DictionaryUsage,
     editor::{AbbrevTable, SymbolSelector},
-    path::{find_files_by_names, find_path_by_files, sys_path_from_env_var, userphrase_path},
+    path::{find_files_by_names, find_path_by_files, search_path_from_env_var, userphrase_path},
 };
 
 const UD_UHASH_FILE_NAME: &str = "uhash.dat";
@@ -24,12 +25,12 @@ const UD_MEM_FILE_NAME: &str = ":memory:";
 const ABBREV_FILE_NAME: &str = "swkb.dat";
 const SYMBOLS_FILE_NAME: &str = "symbols.dat";
 
-pub const DEFAULT_DICT_NAMES: &[&str] = &["word.dat", "tsi.dat"];
+pub const DEFAULT_DICT_NAMES: &[&str] = &["word.dat", "tsi.dat", "chewing.dat"];
 
-/// Automatically searchs and loads system dictionaries.
+/// Automatically searchs and loads dictionaries.
 #[derive(Debug, Default)]
-pub struct SystemDictionaryLoader {
-    sys_path: Option<String>,
+pub struct AssetLoader {
+    search_path: Option<String>,
 }
 
 /// Errors during loading system or user dictionaries.
@@ -53,27 +54,29 @@ fn io_err(err: io::Error) -> LoadDictionaryError {
     LoadDictionaryError::IoError(err)
 }
 
-impl SystemDictionaryLoader {
-    /// Creates a new system dictionary loader.
-    pub fn new() -> SystemDictionaryLoader {
-        SystemDictionaryLoader::default()
+impl AssetLoader {
+    /// Creates a new dictionary loader.
+    pub fn new() -> AssetLoader {
+        AssetLoader::default()
     }
-    /// Override the default system dictionary search path.
-    pub fn sys_path(mut self, search_path: impl Into<String>) -> SystemDictionaryLoader {
-        self.sys_path = Some(search_path.into());
+    /// Override the default dictionary search path.
+    pub fn search_path(mut self, search_path: impl Into<String>) -> AssetLoader {
+        self.search_path = Some(search_path.into());
         self
     }
     /// Searches and loads the specified dictionaries.
     ///
-    /// Search path can be changed using [`sys_path`][SystemDictionaryLoader::sys_path].
-    pub fn load<T>(&self, names: &[T]) -> Result<Vec<Box<dyn Dictionary>>, LoadDictionaryError>
+    /// Search path can be changed using [`search_path`][SystemDictionaryLoader::search_path].
+    ///
+    /// Any dictionary that is not in the search paths or cannot be load is skipped.
+    pub fn load<T>(&self, names: &[T]) -> Vec<Box<dyn Dictionary>>
     where
         T: AsRef<str>,
     {
-        let search_path = if let Some(sys_path) = &self.sys_path {
-            sys_path.to_owned()
+        let search_path = if let Some(path) = &self.search_path {
+            path.to_owned()
         } else {
-            sys_path_from_env_var()
+            search_path_from_env_var()
         };
         let loader = SingleDictionaryLoader::new();
         let files = find_files_by_names(&search_path, names);
@@ -82,67 +85,90 @@ impl SystemDictionaryLoader {
             for file in files.iter() {
                 if let Some(file_name) = file.file_name()
                     && target_name.as_ref() == file_name.to_string_lossy()
-                    && let Ok(dict) = loader.guess_format_and_load(file)
+                    && let Ok(mut dict) = loader.guess_format_and_load(file)
                 {
-                    info!("Load dictionary {}", file.display());
+                    match target_name.as_ref() {
+                        "tsi.dat" | "word.dat" => {
+                            dict.set_usage(DictionaryUsage::BuiltIn);
+                        }
+                        "chewing.dat" => {
+                            dict.set_usage(DictionaryUsage::User);
+                        }
+                        _ => {
+                            dict.set_usage(DictionaryUsage::Unknown);
+                        }
+                    }
                     results.push(dict);
                     continue 'next;
                 }
             }
             error!("Dictionary file not found: {}", target_name.as_ref());
-            return Err(LoadDictionaryError::NotFound);
+            continue;
         }
-        Ok(results)
+        results
     }
     /// Loads the abbrev table.
     pub fn load_abbrev(&self) -> Result<AbbrevTable, LoadDictionaryError> {
-        let search_path = if let Some(sys_path) = &self.sys_path {
-            sys_path.to_owned()
+        let search_path = if let Some(path) = &self.search_path {
+            path.to_owned()
         } else {
-            sys_path_from_env_var()
+            search_path_from_env_var()
         };
-        let sys_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
+        let parent_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
             .ok_or(LoadDictionaryError::NotFound)?;
-        let abbrev_path = sys_path.join(ABBREV_FILE_NAME);
+        let abbrev_path = parent_path.join(ABBREV_FILE_NAME);
         info!("Loading {ABBREV_FILE_NAME}");
         AbbrevTable::open(abbrev_path).map_err(io_err)
     }
     /// Loads the symbol table.
     pub fn load_symbol_selector(&self) -> Result<SymbolSelector, LoadDictionaryError> {
-        let search_path = if let Some(sys_path) = &self.sys_path {
-            sys_path.to_owned()
+        let search_path = if let Some(path) = &self.search_path {
+            path.to_owned()
         } else {
-            sys_path_from_env_var()
+            search_path_from_env_var()
         };
-        let sys_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
+        let parent_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
             .ok_or(LoadDictionaryError::NotFound)?;
-        let symbol_path = sys_path.join(SYMBOLS_FILE_NAME);
+        let symbol_path = parent_path.join(SYMBOLS_FILE_NAME);
         info!("Loading {SYMBOLS_FILE_NAME}");
         SymbolSelector::open(symbol_path).map_err(io_err)
     }
 }
 
-/// Automatically searches and loads the user dictionary.
+/// Automatically searches and initializes the user dictionary.
 #[derive(Debug, Default)]
-pub struct UserDictionaryLoader {
+pub struct UserDictionaryManager {
     data_path: Option<PathBuf>,
 }
 
-impl UserDictionaryLoader {
-    /// Creates a user dictionary loader.
-    pub fn new() -> UserDictionaryLoader {
-        UserDictionaryLoader::default()
+impl UserDictionaryManager {
+    /// Creates a user dictionary manager.
+    pub fn new() -> UserDictionaryManager {
+        UserDictionaryManager::default()
     }
-    /// Override the default user dictionary search path.
-    pub fn userphrase_path(mut self, path: impl AsRef<Path>) -> UserDictionaryLoader {
+    /// Override the default user dictionary path.
+    pub fn userphrase_path(mut self, path: impl AsRef<Path>) -> UserDictionaryManager {
         self.data_path = Some(path.as_ref().to_path_buf());
         self
     }
-    /// Searches and loads the user dictionary.
+    /// Return the resolved file name of the user dictionary file.
+    pub fn file_name(&self) -> Option<String> {
+        self.data_path
+            .clone()
+            .or_else(userphrase_path)
+            .and_then(|p| {
+                if p.is_file() {
+                    p.file_name().map(|p| p.to_string_lossy().into_owned())
+                } else {
+                    None
+                }
+            })
+    }
+    /// Searches and initializes the user dictionary.
     ///
     /// If no user dictionary were found, a new dictionary will be created at
     /// the default path.
-    pub fn load(self) -> io::Result<Box<dyn Dictionary>> {
+    pub fn init(self) -> io::Result<Box<dyn Dictionary>> {
         let mut loader = SingleDictionaryLoader::new();
         loader.migrate_sqlite(true);
         let data_path = self
@@ -153,24 +179,34 @@ impl UserDictionaryLoader {
             return Ok(Self::in_memory());
         }
         if data_path.exists() {
-            info!("Loading {}", data_path.display());
-            return loader.guess_format_and_load(&data_path);
+            info!("Use existing user dictionary {}", data_path.display());
+            return loader.guess_format_and_load(&data_path).map(|mut dict| {
+                dict.set_usage(DictionaryUsage::User);
+                dict
+            });
         }
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
             info!("Creating userdata_dir: {}", userdata_dir.display());
             fs::create_dir_all(userdata_dir)?;
         }
-        info!("Loading {}", data_path.display());
+        info!(
+            "Creating a fresh user dictionary at {}",
+            data_path.display()
+        );
         let mut fresh_dict = loader.guess_format_and_load(&data_path)?;
 
         let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);
         if cfg!(feature = "sqlite") && user_dict_path.exists() {
             #[cfg(feature = "sqlite")]
             {
-                let trie_dict = SqliteDictionary::open(user_dict_path)
+                info!(
+                    "Importing existing sqlite dictionary at {}",
+                    user_dict_path.display()
+                );
+                let dict = SqliteDictionary::open(user_dict_path)
                     .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
-                for (syllables, phrase) in trie_dict.entries() {
+                for (syllables, phrase) in dict.entries() {
                     let freq = phrase.freq();
                     let last_used = phrase.last_used().unwrap_or_default();
                     fresh_dict
@@ -184,6 +220,10 @@ impl UserDictionaryLoader {
         } else {
             let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
             if uhash_path.exists() {
+                info!(
+                    "Importing existing uhash dictionary at {}",
+                    user_dict_path.display()
+                );
                 let mut input = File::open(uhash_path)?;
                 if let Ok(phrases) = uhash::try_load_bin(&input).or_else(|_| {
                     input.rewind()?;
@@ -203,6 +243,7 @@ impl UserDictionaryLoader {
             }
         }
 
+        fresh_dict.set_usage(DictionaryUsage::User);
         Ok(fresh_dict)
     }
     /// Load a in-memory user dictionary.
@@ -227,6 +268,7 @@ impl SingleDictionaryLoader {
         self.migrate_sqlite = migrate;
     }
     pub fn guess_format_and_load(&self, dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
+        info!("Loading dictionary {}", dict_path.display());
         if self.migrate_sqlite && dict_path.is_file() {
             let metadata = dict_path.metadata()?;
             if metadata.permissions().readonly() {
