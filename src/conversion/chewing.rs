@@ -18,7 +18,7 @@ pub struct ChewingEngine {
 }
 
 impl ChewingEngine {
-    const MAX_OUT_PATHS: usize = 100;
+    const MAX_OUT_PATHS: usize = 10;
     /// Creates a new conversion engine.
     pub fn new() -> ChewingEngine {
         ChewingEngine {
