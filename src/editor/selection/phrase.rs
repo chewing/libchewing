@@ -205,13 +205,9 @@ impl PhraseSelector {
     }
 
     fn after_previous_break_point(&self, mut cursor: usize) -> usize {
-        let selection_ends: Vec<_> = self.com.selections().iter().map(|sel| sel.end).collect();
         loop {
             if cursor == 0 {
                 return 0;
-            }
-            if selection_ends.contains(&cursor) {
-                break;
             }
             if let Some(Gap::Break) = self.com.gap(cursor) {
                 break;
@@ -263,7 +259,7 @@ impl PhraseSelector {
 mod tests {
     use super::PhraseSelector;
     use crate::{
-        conversion::{Composition, Interval, Symbol},
+        conversion::{Composition, Symbol},
         dictionary::{LookupStrategy, TrieBuf},
         syl,
         zhuyin::Bopomofo::*,
@@ -370,35 +366,6 @@ mod tests {
         for sym in [Symbol::from(','), Symbol::from(syl![C, E, TONE4])] {
             com.push(sym);
         }
-        let sel = PhraseSelector {
-            begin: 0,
-            end: 2,
-            forward_select: false,
-            orig: 0,
-            lookup_strategy: LookupStrategy::Standard,
-            com,
-        };
-
-        assert_eq!(0, sel.after_previous_break_point(0));
-        assert_eq!(1, sel.after_previous_break_point(1));
-        assert_eq!(1, sel.after_previous_break_point(2));
-    }
-
-    #[test]
-    fn should_stop_after_first_selection() {
-        let mut com = Composition::new();
-        for sym in [
-            Symbol::from(syl![C, E, TONE4]),
-            Symbol::from(syl![C, E, TONE4]),
-        ] {
-            com.push(sym);
-        }
-        com.push_selection(Interval {
-            start: 0,
-            end: 1,
-            is_phrase: true,
-            text: "冊".into(),
-        });
         let sel = PhraseSelector {
             begin: 0,
             end: 2,

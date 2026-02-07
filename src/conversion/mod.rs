@@ -81,6 +81,15 @@ impl Interval {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+    /// Return the texts in the interval
+    pub fn sub_intervals(&self) -> impl Iterator<Item = Interval> {
+        self.text.chars().enumerate().map(|(offset, ch)| Interval {
+            start: self.start + offset,
+            end: self.start + offset + 1,
+            is_phrase: self.is_phrase,
+            text: ch.to_string().into_boxed_str(),
+        })
+    }
 }
 
 /// Represents the gap between symbols.

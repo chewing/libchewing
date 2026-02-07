@@ -78,6 +78,7 @@ pub struct EditorOptions {
     pub conversion_engine: ConversionEngineKind,
     pub enable_fullwidth_toggle_key: bool,
     pub sort_candidates_by_frequency: bool,
+    pub auto_snapshot_selections: bool,
 }
 
 impl Default for EditorOptions {
@@ -99,6 +100,7 @@ impl Default for EditorOptions {
             conversion_engine: ConversionEngineKind::ChewingEngine,
             enable_fullwidth_toggle_key: true,
             sort_candidates_by_frequency: false,
+            auto_snapshot_selections: false,
         }
     }
 }
@@ -600,14 +602,21 @@ impl SharedState {
         }
         paths[self.nth_conversion % paths.len()].intervals.clone()
     }
-    fn intervals(&self) -> impl Iterator<Item = Interval> {
+    fn intervals(&self) -> impl Iterator<Item = Interval> + use<> {
         self.conversion().into_iter()
     }
     fn snapshot(&mut self) {
-        // for interval in self.intervals() {
-        //     self.com.select(interval);
-        // }
-        // self.nth_conversion = 0;
+        if !self.options.auto_snapshot_selections {
+            return;
+        }
+        for interval in self.intervals() {
+            if interval.is_phrase {
+                for i in interval.sub_intervals() {
+                    self.com.select(i);
+                }
+            }
+        }
+        self.nth_conversion = 0;
     }
     fn cursor(&self) -> usize {
         self.com.cursor()

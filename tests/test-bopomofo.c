@@ -373,7 +373,7 @@ void test_select_candidate_4_bytes_utf8()
     type_keystroke_by_string(ctx, "<D>8");
     ok_preedit_buffer(ctx, "\xF0\xA2\x94\xA8\xE5\xBE\x97" /* 𢔨得 */ );
 
-    type_keystroke_by_string(ctx, "<D>8");
+    type_keystroke_by_string(ctx, "<D><D>8");
 
     ok_preedit_buffer(ctx, "\xF0\xA2\x94\xA8\xF0\xA2\x94\xA8" /* 𢔨𢔨 */ );
 
@@ -532,7 +532,7 @@ void test_select_candidate_shift_cursor_rearword()
 
     ok_preedit_buffer(ctx, "七上八下納裡");
 
-    type_keystroke_by_string(ctx, "<D>2");
+    type_keystroke_by_string(ctx, "<D><D>2");
 
     ok_preedit_buffer(ctx, "七上八下納里");
 
@@ -569,6 +569,40 @@ void test_select_candidate_sorted()
     chewing_delete(ctx);
 }
 
+void test_select_without_auto_snapshot()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    chewing_config_set_int(ctx, "chewing.auto_snapshot_selections", 0);
+
+    type_keystroke_by_string(ctx, "hk4g4<L><D><D>5");
+    ok_preedit_buffer(ctx, "策士");
+
+    chewing_delete(ctx);
+}
+
+void test_select_with_auto_snapshot()
+{
+    ChewingContext *ctx;
+
+    clean_userphrase();
+
+    ctx = chewing_new();
+    start_testcase(ctx);
+    chewing_set_phraseChoiceRearward(ctx, 1);
+    chewing_config_set_int(ctx, "chewing.auto_snapshot_selections", 1);
+
+    type_keystroke_by_string(ctx, "hk4g4<L><D><D>5");
+    ok_preedit_buffer(ctx, "測士");
+
+    chewing_delete(ctx);
+}
+
 void test_select_candidate()
 {
     test_select_candidate_no_rearward();
@@ -586,6 +620,8 @@ void test_select_candidate()
     test_select_candidate_shift_cursor();
     test_select_candidate_shift_cursor_rearword();
     test_select_candidate_sorted();
+    test_select_without_auto_snapshot();
+    test_select_with_auto_snapshot();
 }
 
 void test_Esc_not_entering_chewing()
@@ -1921,7 +1957,7 @@ void test_KB_HSU_example()
     ok_preedit_buffer(ctx, "一隻隻可愛的小花貓");
     chewing_clean_preedit_buf(ctx);
 
-    type_keystroke_by_string(ctx, "sm sxajdwj<D><D>1xfsxajdgscewfhidxfdwj<D><D>1cd<D>1rnd");
+    type_keystroke_by_string(ctx, "sm sxajdwj<D><D>1xfsxajdgscewfhidxfdwj<D><D>1cd<D><D>1rnd");
     ok_preedit_buffer(ctx, "三歲到五歲的小孩五到十人");
     chewing_clean_preedit_buf(ctx);
 

@@ -7,6 +7,9 @@ What's New in libchewing (unreleased)
   - dict: deleted phrases now can be recorded in a separate chewing-deleted.dat
     exclusion dictionary. This allows excluding phrases from even built-in
     dictionaries. Deleted phrases will not be auto learned again.
+  - editor: new config option "chewing.auto_snapshot_selections" (default false)
+    can be used to control whether phrase selections are automatically locked
+    after any cursor movement.
 
 * Bug Fixes
   - dict: fixed parsing trie dictionary file with extension fields.

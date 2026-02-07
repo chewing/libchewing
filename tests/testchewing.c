@@ -13,7 +13,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 static int selKey_define[11] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0 }; /* Default */
 
@@ -59,6 +58,7 @@ int main(int argc, char *argv[])
     chewing_set_addPhraseDirection(ctx, 1);
     chewing_set_selKey(ctx, selKey_define, 10);
     chewing_set_spaceAsSelection(ctx, 1);
+    chewing_config_set_int(ctx, "chewing.auto_snapshot_selections", 0);
 
     while (1) {
         i = get_keystroke(get_char_from_fp, fp);
