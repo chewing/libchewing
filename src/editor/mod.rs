@@ -221,6 +221,11 @@ impl Editor {
                 .ok();
             if custom_userpath { user_dict } else { None }
         };
+        if enabled_dicts.iter().any(|d| d == "chewing-deleted.dat") {
+            if let Err(error) = user_dict_mgr.init_deleted() {
+                error!("Failed to load user exclusion dict: {error}");
+            }
+        }
         let mut loader = AssetLoader::new();
         if let Some(syspath) = search_path {
             loader = loader.search_path(syspath);
@@ -620,7 +625,7 @@ impl SharedState {
             }
             Err(msg) => {
                 msg.clone_into(&mut self.notice_buffer);
-                Err(UpdateDictionaryError::new())
+                Err(UpdateDictionaryError::new("failed to learn new phrase"))
             }
         }
     }
@@ -677,7 +682,9 @@ impl SharedState {
                 &phrase,
                 phrase.chars().count()
             );
-            return Err(UpdateDictionaryError::new());
+            return Err(UpdateDictionaryError::new(
+                "failed to learn phrase: syllables and phrase has different length",
+            ));
         }
         let phrases = self.dict.lookup(syllables, LookupStrategy::Standard);
         if phrases.is_empty() {

@@ -326,14 +326,6 @@ impl SqliteDictionary {
     }
 }
 
-impl From<RusqliteError> for UpdateDictionaryError {
-    fn from(source: RusqliteError) -> Self {
-        UpdateDictionaryError {
-            source: Some(source.into()),
-        }
-    }
-}
-
 impl Dictionary for SqliteDictionary {
     fn lookup(&self, syllables: &[Syllable], strategy: LookupStrategy) -> Vec<Phrase> {
         let _ = strategy;
@@ -413,12 +405,19 @@ impl Dictionary for SqliteDictionary {
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
+        let make_error = |e| UpdateDictionaryError {
+            message: "flush sqlite failed",
+            source: Some(Box::new(e)),
+        };
         if self.readonly {
             return Err(UpdateDictionaryError {
-                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+                message: "sqlite dictionary is readonly",
+                source: None,
             });
         }
-        self.conn.pragma_update(None, "wal_checkpoint", "PASSIVE")?;
+        self.conn
+            .pragma_update(None, "wal_checkpoint", "PASSIVE")
+            .map_err(make_error)?;
         Ok(())
     }
 
@@ -427,20 +426,29 @@ impl Dictionary for SqliteDictionary {
         syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
+        let make_error = |e| UpdateDictionaryError {
+            message: "add phrae to sqlite failed",
+            source: Some(Box::new(e)),
+        };
         if self.readonly {
             return Err(UpdateDictionaryError {
-                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+                message: "sqlite dictionary is readonly",
+                source: None,
             });
         }
         let syllables_bytes = syllables.to_bytes();
-        let mut stmt = self.conn.prepare_cached(
-            "INSERT OR REPLACE INTO dictionary_v1 (
+        let mut stmt = self
+            .conn
+            .prepare_cached(
+                "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
                     phrase,
                     freq
             ) VALUES (?, ?, ?)",
-        )?;
-        stmt.execute(params![syllables_bytes, phrase.as_str(), phrase.freq()])?;
+            )
+            .map_err(make_error)?;
+        stmt.execute(params![syllables_bytes, phrase.as_str(), phrase.freq()])
+            .map_err(make_error)?;
         Ok(())
     }
 
@@ -451,52 +459,64 @@ impl Dictionary for SqliteDictionary {
         user_freq: u32,
         time: u64,
     ) -> Result<(), UpdateDictionaryError> {
+        let make_error = |e| UpdateDictionaryError {
+            message: "update phrae in sqlite failed",
+            source: Some(Box::new(e)),
+        };
         // sqlite only supports i64
         let time: i64 = time.clamp(0, i64::MAX as u64) as i64;
         if self.readonly {
             return Err(UpdateDictionaryError {
-                source: Some(Box::new(SqliteDictionaryError::ReadOnly)),
+                message: "sqlite dictionary is readonly",
+                source: None,
             });
         }
         let syllables_bytes = syllables.to_bytes();
-        let tx = self.conn.transaction()?;
+        let tx = self.conn.transaction().map_err(make_error)?;
         {
-            let mut stmt = tx.prepare_cached(
-                "SELECT userphrase_id FROM dictionary_v1 WHERE syllables = ? AND phrase = ?",
-            )?;
+            let mut stmt = tx
+                .prepare_cached(
+                    "SELECT userphrase_id FROM dictionary_v1 WHERE syllables = ? AND phrase = ?",
+                )
+                .map_err(make_error)?;
             let userphrase_id: Option<Option<i64>> = stmt
                 .query_row(params![syllables_bytes, phrase.as_str()], |row| row.get(0))
-                .optional()?;
+                .optional()
+                .map_err(make_error)?;
             match userphrase_id {
                 Some(Some(id)) => {
-                    let mut stmt =
-                        tx.prepare_cached("UPDATE userphrase_v2 SET user_freq = ? WHERE id = ?")?;
-                    stmt.execute(params![user_freq, id])?;
+                    let mut stmt = tx
+                        .prepare_cached("UPDATE userphrase_v2 SET user_freq = ? WHERE id = ?")
+                        .map_err(make_error)?;
+                    stmt.execute(params![user_freq, id]).map_err(make_error)?;
                 }
                 Some(None) | None => {
-                    let mut stmt = tx.prepare_cached(
-                        "INSERT INTO userphrase_v2 (user_freq, time) VALUES (?, ?)",
-                    )?;
-                    stmt.execute(params![user_freq, time])?;
+                    let mut stmt = tx
+                        .prepare_cached("INSERT INTO userphrase_v2 (user_freq, time) VALUES (?, ?)")
+                        .map_err(make_error)?;
+                    stmt.execute(params![user_freq, time]).map_err(make_error)?;
                     let userphrase_id = tx.last_insert_rowid();
-                    let mut stmt = tx.prepare_cached(
-                        "INSERT OR REPLACE INTO dictionary_v1 (
+                    let mut stmt = tx
+                        .prepare_cached(
+                            "INSERT OR REPLACE INTO dictionary_v1 (
                             syllables,
                             phrase,
                             freq,
                             userphrase_id
                         ) VALUES (?, ?, ?, ?)",
-                    )?;
+                        )
+                        .map_err(make_error)?;
                     stmt.execute(params![
                         syllables_bytes,
                         phrase.as_str(),
                         phrase.freq(),
                         userphrase_id
-                    ])?;
+                    ])
+                    .map_err(make_error)?;
                 }
             }
         }
-        tx.commit()?;
+        tx.commit().map_err(make_error)?;
         Ok(())
     }
 
@@ -505,11 +525,17 @@ impl Dictionary for SqliteDictionary {
         syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
+        let make_error = |e| UpdateDictionaryError {
+            message: "remove phrae from sqlite failed",
+            source: Some(Box::new(e)),
+        };
         let syllables_bytes = syllables.to_bytes();
         let mut stmt = self
             .conn
-            .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")?;
-        stmt.execute(params![syllables_bytes, phrase_str])?;
+            .prepare_cached("DELETE FROM dictionary_v1 WHERE syllables = ? AND phrase = ?")
+            .map_err(make_error)?;
+        stmt.execute(params![syllables_bytes, phrase_str])
+            .map_err(make_error)?;
         Ok(())
     }
 }

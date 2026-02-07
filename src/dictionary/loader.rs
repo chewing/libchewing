@@ -94,6 +94,9 @@ impl AssetLoader {
                         "chewing.dat" => {
                             dict.set_usage(DictionaryUsage::User);
                         }
+                        "chewing-deleted.dat" => {
+                            dict.set_usage(DictionaryUsage::ExcludeList);
+                        }
                         _ => {
                             dict.set_usage(DictionaryUsage::Unknown);
                         }
@@ -168,11 +171,12 @@ impl UserDictionaryManager {
     ///
     /// If no user dictionary were found, a new dictionary will be created at
     /// the default path.
-    pub fn init(self) -> io::Result<Box<dyn Dictionary>> {
+    pub fn init(&self) -> io::Result<Box<dyn Dictionary>> {
         let mut loader = SingleDictionaryLoader::new();
         loader.migrate_sqlite(true);
         let data_path = self
             .data_path
+            .clone()
             .or_else(userphrase_path)
             .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
@@ -245,6 +249,25 @@ impl UserDictionaryManager {
 
         fresh_dict.set_usage(DictionaryUsage::User);
         Ok(fresh_dict)
+    }
+    /// Searches and initializes the user exclusion dictionary.
+    ///
+    /// If no user exclusion dictionary were found, a new dictionary
+    /// will be created at the default path.
+    pub fn init_deleted(&self) -> io::Result<Box<dyn Dictionary>> {
+        let loader = SingleDictionaryLoader::new();
+        let data_path = self
+            .data_path
+            .clone()
+            .or_else(userphrase_path)
+            .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
+        let userdata_dir = data_path.parent().expect("path should contain a filename");
+        if !userdata_dir.exists() {
+            info!("Creating userdata_dir: {}", userdata_dir.display());
+            fs::create_dir_all(&userdata_dir)?;
+        }
+        let exclude_dict_path = userdata_dir.join("chewing-deleted.dat");
+        Ok(loader.guess_format_and_load(&exclude_dict_path)?)
     }
     /// Load a in-memory user dictionary.
     pub fn in_memory() -> Box<dyn Dictionary> {

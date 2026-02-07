@@ -134,7 +134,7 @@ pub unsafe extern "C" fn chewing_new2(
         chewing_new3(
             syspath,
             userpath,
-            c"word.dat,tsi.dat,chewing.dat".as_ptr(),
+            c"word.dat,tsi.dat,chewing.dat,chewing-deleted.dat".as_ptr(),
             logger,
             loggerdata,
         )
@@ -237,7 +237,7 @@ pub unsafe extern "C" fn chewing_new3(
 /// don't need to be freed.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn chewing_get_defaultDictionaryNames() -> *const c_char {
-    c"word.dat,tsi.dat,chewing.dat".as_ptr()
+    c"word.dat,tsi.dat,chewing.dat,chewing-deleted.dat".as_ptr()
 }
 
 /// Releases the resources used by the given Chewing IM instance.

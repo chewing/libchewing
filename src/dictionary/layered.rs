@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, btree_map::Entry};
+use std::collections::{BTreeMap, BTreeSet, btree_map::Entry};
 
 use log::error;
 
@@ -74,6 +74,21 @@ impl Layered {
     pub fn user_dict(&mut self) -> &mut dyn Dictionary {
         self.dicts[self.user_dict_index].as_mut()
     }
+    fn enabled_dicts(&self) -> impl Iterator<Item = &Box<dyn Dictionary>> {
+        self.dicts
+            .iter()
+            .filter(|d| d.about().usage != DictionaryUsage::ExcludeList)
+    }
+    fn exclusion_dicts(&self) -> impl Iterator<Item = &Box<dyn Dictionary>> {
+        self.dicts
+            .iter()
+            .filter(|d| d.about().usage == DictionaryUsage::ExcludeList)
+    }
+    fn exclusion_dicts_mut(&mut self) -> impl Iterator<Item = &mut Box<dyn Dictionary>> {
+        self.dicts
+            .iter_mut()
+            .filter(|d| d.about().usage == DictionaryUsage::ExcludeList)
+    }
 }
 
 impl Dictionary for Layered {
@@ -100,7 +115,7 @@ impl Dictionary for Layered {
         let mut sort_map: BTreeMap<String, usize> = BTreeMap::new();
         let mut phrases: Vec<Phrase> = Vec::new();
 
-        self.dicts.iter().for_each(|d| {
+        self.enabled_dicts().for_each(|d| {
             for phrase in d.lookup(syllables, strategy) {
                 debug_assert!(!phrase.as_str().is_empty());
                 match sort_map.entry(phrase.to_string()) {
@@ -122,14 +137,24 @@ impl Dictionary for Layered {
                 }
             }
         });
+
+        // Remove excluded
+        let excluded: BTreeSet<Box<str>> = self
+            .exclusion_dicts()
+            .flat_map(|d| d.lookup(syllables, strategy))
+            .map(|p| p.text)
+            .collect();
         phrases
+            .into_iter()
+            .filter(|p| !excluded.contains(&p.text))
+            .collect()
     }
 
     /// Returns all entries from all dictionaries.
     ///
     /// **NOTE**: Duplicate entries are not removed.
     fn entries(&self) -> Entries<'_> {
-        Box::new(self.dicts.iter().flat_map(|dict| dict.entries()))
+        Box::new(self.enabled_dicts().flat_map(|dict| dict.entries()))
     }
 
     fn about(&self) -> DictionaryInfo {
@@ -146,10 +171,20 @@ impl Dictionary for Layered {
     fn set_usage(&mut self, _usage: DictionaryUsage) {}
 
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
+        self.exclusion_dicts_mut().for_each(|d| {
+            if let Err(error) = d.reopen() {
+                error!("Failed to reopen exclusion dictionary: {error}");
+            }
+        });
         self.user_dict().reopen()
     }
 
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
+        self.exclusion_dicts_mut().for_each(|d| {
+            if let Err(error) = d.flush() {
+                error!("Failed to flush exclusion dictionary: {error}");
+            }
+        });
         self.user_dict().flush()
     }
 
@@ -162,6 +197,13 @@ impl Dictionary for Layered {
             error!("BUG! added phrase is empty");
             return Ok(());
         }
+        self.exclusion_dicts_mut().for_each(|d| {
+            if let Err(error) = d.remove_phrase(syllables, &phrase.text) {
+                error!(
+                    "Failed to remove {phrase} {syllables:?} from exclusion dictionary: {error}"
+                );
+            }
+        });
         self.user_dict().add_phrase(syllables, phrase)
     }
 
@@ -185,7 +227,11 @@ impl Dictionary for Layered {
         syllables: &[Syllable],
         phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        // TODO use exclude list
+        self.exclusion_dicts_mut().for_each(|d| {
+            if let Err(error) = d.add_phrase(syllables, (phrase_str, 0).into()) {
+                error!("Failed to add {phrase_str} {syllables:?} to exclusion dictionary: {error}");
+            }
+        });
         self.user_dict().remove_phrase(syllables, phrase_str)
     }
 }

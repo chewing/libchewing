@@ -35,26 +35,22 @@ mod usage;
 #[derive(Debug)]
 pub struct UpdateDictionaryError {
     /// TODO: doc
+    message: &'static str,
     source: Option<Box<dyn Error + Send + Sync>>,
 }
 
 impl UpdateDictionaryError {
-    pub(crate) fn new() -> UpdateDictionaryError {
-        UpdateDictionaryError { source: None }
-    }
-}
-
-impl From<io::Error> for UpdateDictionaryError {
-    fn from(value: io::Error) -> Self {
+    pub(crate) fn new(message: &'static str) -> UpdateDictionaryError {
         UpdateDictionaryError {
-            source: Some(Box::new(value)),
+            message,
+            source: None,
         }
     }
 }
 
 impl Display for UpdateDictionaryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "update dictionary failed")
+        write!(f, "update dictionary failed: {}", self.message)
     }
 }
 
@@ -358,14 +354,14 @@ pub trait Dictionary: Debug {
     /// It should not fail if the dictionary is read-only or able to sync across
     /// processes automatically.
     fn reopen(&mut self) -> Result<(), UpdateDictionaryError> {
-        Err(UpdateDictionaryError { source: None })
+        Err(UpdateDictionaryError::new("unimplemented"))
     }
     /// Flushes all the changes back to the filesystem
     ///
     /// The change made to the dictionary might not be persisted without
     /// calling this method.
     fn flush(&mut self) -> Result<(), UpdateDictionaryError> {
-        Err(UpdateDictionaryError { source: None })
+        Err(UpdateDictionaryError::new("unimplemented"))
     }
     /// An method for updating dictionaries.
     ///
@@ -390,7 +386,7 @@ pub trait Dictionary: Debug {
         _syllables: &[Syllable],
         _phrase: Phrase,
     ) -> Result<(), UpdateDictionaryError> {
-        Err(UpdateDictionaryError { source: None })
+        Err(UpdateDictionaryError::new("unimplemented"))
     }
     /// TODO: doc
     fn update_phrase(
@@ -400,7 +396,7 @@ pub trait Dictionary: Debug {
         _user_freq: u32,
         _time: u64,
     ) -> Result<(), UpdateDictionaryError> {
-        Err(UpdateDictionaryError { source: None })
+        Err(UpdateDictionaryError::new("unimplemented"))
     }
     /// TODO: doc
     fn remove_phrase(
@@ -408,7 +404,7 @@ pub trait Dictionary: Debug {
         _syllables: &[Syllable],
         _phrase_str: &str,
     ) -> Result<(), UpdateDictionaryError> {
-        Err(UpdateDictionaryError { source: None })
+        Err(UpdateDictionaryError::new("unimplemented"))
     }
 }
 

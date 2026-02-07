@@ -4,6 +4,9 @@ What's New in libchewing (unreleased)
 * Features
   - dict: loading user dictionary are now also controlled by enabled_dicts
     in `chewing_new3()`.
+  - dict: deleted phrases now can be recorded in a separate chewing-deleted.dat
+    exclusion dictionary. This allows excluding phrases from even built-in
+    dictionaries.
 
 * Bug Fixes
   - dict: fixed parsing trie dictionary file with extension fields.

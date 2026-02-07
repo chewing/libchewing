@@ -415,10 +415,25 @@ char *get_test_userphrase_path()
         return TEST_HASH_DIR "/" DB_NAME;
 }
 
+char *get_test_user_deleted_path()
+{
+    char *path = getenv("TEST_USER_DELETED_PATH");
+
+    if (path)
+        return path;
+    else
+        return TEST_HASH_DIR "/" "chewing-deleted.dat";
+}
+
 void clean_userphrase()
 {
-    char *userphrase_path = get_test_userphrase_path();
+    char *path = get_test_userphrase_path();
 
-    if (remove(userphrase_path) != 0 && errno != ENOENT)
+    if (remove(path) != 0 && errno != ENOENT)
+        fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
+
+    path = get_test_user_deleted_path();
+
+    if (remove(path) != 0 && errno != ENOENT)
         fprintf(stderr, "remove fails at %s:%d\n", __FILE__, __LINE__);
 }

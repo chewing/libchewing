@@ -7,11 +7,11 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 
 use super::{
-    BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUsage, Entries,
-    LookupStrategy, Phrase, Trie, TrieBuilder, UpdateDictionaryError,
+    Dictionary, DictionaryBuilder, DictionaryInfo, DictionaryUsage, Entries, LookupStrategy,
+    Phrase, Trie, TrieBuilder, UpdateDictionaryError,
 };
 use crate::zhuyin::Syllable;
 
@@ -164,7 +164,8 @@ impl TrieBuf {
             .entries_iter_for(syllables, LookupStrategy::Standard)
             .any(|ph| ph.as_str() == phrase.as_str())
         {
-            return Err(UpdateDictionaryError { source: None });
+            warn!("phrase {} {syllables:?} already exist", phrase.text);
+            return Ok(());
         }
 
         debug!("added phrase {} {syllables:?}", phrase.text);
@@ -219,6 +220,10 @@ impl TrieBuf {
 
     pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
         info!("Synchronize dictionary from disk...");
+        let make_error = |e| UpdateDictionaryError {
+            message: "synchornize dictionary from disk failed",
+            source: Some(Box::new(e)),
+        };
         if let Some(join_handle) = self.join_handle.take() {
             if !join_handle.is_finished() {
                 info!("Aborted. Wait until previous sync is finished.");
@@ -228,7 +233,7 @@ impl TrieBuf {
             match join_handle.join() {
                 Ok(Ok(())) => {
                     info!("Reloading...");
-                    self.trie = Some(Trie::open(self.path().unwrap())?);
+                    self.trie = Some(Trie::open(self.path().unwrap()).map_err(make_error)?);
                     if !self.dirty {
                         self.btree.clear();
                         self.graveyard.clear();
@@ -245,13 +250,17 @@ impl TrieBuf {
             // TODO: reduce reading
             if self.path().is_some() {
                 info!("Reloading...");
-                self.trie = Some(Trie::open(self.path().unwrap())?);
+                self.trie = Some(Trie::open(self.path().unwrap()).map_err(make_error)?);
             }
         }
         Ok(())
     }
 
     pub(crate) fn checkpoint(&mut self) {
+        let make_error = |e| UpdateDictionaryError {
+            message: "failed to save snapshot",
+            source: Some(Box::new(e)),
+        };
         info!("Check pointing...");
         if self.join_handle.is_some() {
             info!("Aborted. Wait until previous checkpoint result is handled.");
@@ -271,27 +280,23 @@ impl TrieBuf {
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieBuilder::new();
             info!("Saving snapshot...");
-            builder.set_info(DictionaryInfo {
-                software: software_version(),
-                ..snapshot.about()
-            })?;
+            builder
+                .set_info(DictionaryInfo {
+                    software: software_version(),
+                    ..snapshot.about()
+                })
+                .map_err(make_error)?;
             for (syllables, phrase) in snapshot.entries() {
-                builder.insert(&syllables, phrase)?;
+                builder.insert(&syllables, phrase).map_err(make_error)?;
             }
             info!("Flushing snapshot...");
-            builder.build(snapshot.path().unwrap())?;
+            builder
+                .build(snapshot.path().unwrap())
+                .map_err(make_error)?;
             info!("    Done");
             Ok(())
         }));
         self.dirty = false;
-    }
-}
-
-impl From<BuildDictionaryError> for UpdateDictionaryError {
-    fn from(value: BuildDictionaryError) -> Self {
-        UpdateDictionaryError {
-            source: Some(Box::new(value)),
-        }
     }
 }
 
