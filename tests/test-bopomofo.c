@@ -2202,6 +2202,8 @@ void test_KB_ET26_choice_append()
 
 void test_KB_DACHEN_CP26()
 {
+    clean_userphrase();
+
     ChewingContext *ctx;
 
     ctx = chewing_new();
@@ -2277,6 +2279,8 @@ void test_KB_DACHEN_CP26()
 
 void test_KB_GIN_YIEH()
 {
+    clean_userphrase();
+
     ChewingContext *ctx;
     ctx = chewing_new();
     start_testcase(ctx);
@@ -2296,6 +2300,8 @@ void test_KB_GIN_YIEH()
 
 void test_KB_IBM()
 {
+    clean_userphrase();
+
     ChewingContext *ctx;
     ctx = chewing_new();
     start_testcase(ctx);

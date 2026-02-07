@@ -89,6 +89,13 @@ impl Layered {
             .iter_mut()
             .filter(|d| d.about().usage == DictionaryUsage::ExcludeList)
     }
+    pub(crate) fn is_excluded(&self, syllables: &[Syllable], phrase: &str) -> bool {
+        self.exclusion_dicts().any(|d| {
+            d.lookup(syllables, LookupStrategy::Standard)
+                .iter()
+                .any(|p| p.text.as_ref() == phrase)
+        })
+    }
 }
 
 impl Dictionary for Layered {

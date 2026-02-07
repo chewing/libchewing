@@ -2,6 +2,7 @@ use std::{
     borrow::Cow,
     cmp,
     collections::{BTreeMap, BTreeSet, btree_map::Entry},
+    error::Error,
     io,
     path::{Path, PathBuf},
     thread::{self, JoinHandle},
@@ -23,6 +24,8 @@ pub struct TrieBuf {
     graveyard: BTreeSet<PhraseKey>,
     join_handle: Option<JoinHandle<Result<(), UpdateDictionaryError>>>,
     dirty: bool,
+    // TODO: currently usage is not saved in file
+    usage: DictionaryUsage,
 }
 
 type PhraseKey = (Cow<'static, [Syllable]>, Cow<'static, str>);
@@ -62,6 +65,7 @@ impl TrieBuf {
             graveyard: BTreeSet::new(),
             join_handle: None,
             dirty: false,
+            usage: DictionaryUsage::Unknown,
         })
     }
 
@@ -73,6 +77,7 @@ impl TrieBuf {
             graveyard: BTreeSet::new(),
             join_handle: None,
             dirty: false,
+            usage: DictionaryUsage::Unknown,
         }
     }
 
@@ -218,6 +223,25 @@ impl TrieBuf {
         Ok(())
     }
 
+    pub(crate) fn wait(&mut self) {
+        if let Some(join_handle) = self.join_handle.take() {
+            match join_handle.join() {
+                Ok(Err(error)) => {
+                    error!("flushing dictionary failed: {error}");
+                    let mut error = &error as &(dyn Error + 'static);
+                    while let Some(source) = error.source() {
+                        error = source;
+                        error!("|-> {error}");
+                    }
+                }
+                Err(error) => {
+                    error!("flushing dictionary thread panicked: {error:?}");
+                }
+                _ => {}
+            }
+        }
+    }
+
     pub(crate) fn sync(&mut self) -> Result<(), UpdateDictionaryError> {
         info!("Synchronize dictionary from disk...");
         let make_error = |e| UpdateDictionaryError {
@@ -233,7 +257,9 @@ impl TrieBuf {
             match join_handle.join() {
                 Ok(Ok(())) => {
                     info!("Reloading...");
-                    self.trie = Some(Trie::open(self.path().unwrap()).map_err(make_error)?);
+                    let mut trie = Trie::open(self.path().unwrap()).map_err(make_error)?;
+                    trie.set_usage(self.usage);
+                    self.trie = Some(trie);
                     if !self.dirty {
                         self.btree.clear();
                         self.graveyard.clear();
@@ -241,6 +267,11 @@ impl TrieBuf {
                 }
                 Ok(Err(e)) => {
                     error!("Failed to flush dictionary due to error: {e}");
+                    let mut error = &e as &(dyn Error + 'static);
+                    while let Some(source) = error.source() {
+                        error = source;
+                        error!("|-> {error}");
+                    }
                 }
                 Err(_) => {
                     error!("Failed to join thread.");
@@ -250,7 +281,9 @@ impl TrieBuf {
             // TODO: reduce reading
             if self.path().is_some() {
                 info!("Reloading...");
-                self.trie = Some(Trie::open(self.path().unwrap()).map_err(make_error)?);
+                let mut trie = Trie::open(self.path().unwrap()).map_err(make_error)?;
+                trie.set_usage(self.usage);
+                self.trie = Some(trie);
             }
         }
         Ok(())
@@ -276,6 +309,7 @@ impl TrieBuf {
             graveyard: self.graveyard.clone(),
             join_handle: None,
             dirty: false,
+            usage: self.usage,
         };
         self.join_handle = Some(thread::spawn(move || {
             let mut builder = TrieBuilder::new();
@@ -289,7 +323,10 @@ impl TrieBuf {
             for (syllables, phrase) in snapshot.entries() {
                 builder.insert(&syllables, phrase).map_err(make_error)?;
             }
-            info!("Flushing snapshot...");
+            info!(
+                "Flushing snapshot to {}...",
+                snapshot.path().unwrap().display()
+            );
             builder
                 .build(snapshot.path().unwrap())
                 .map_err(make_error)?;
@@ -320,6 +357,7 @@ impl Dictionary for TrieBuf {
     }
 
     fn set_usage(&mut self, usage: DictionaryUsage) {
+        self.usage = usage;
         if let Some(trie) = self.trie.as_mut() {
             trie.set_usage(usage);
         }
@@ -376,11 +414,10 @@ impl<P: Into<Phrase>, const N: usize> From<[(Vec<Syllable>, Vec<P>); N]> for Tri
 
 impl Drop for TrieBuf {
     fn drop(&mut self) {
+        self.wait();
         let _ = self.sync();
         let _ = self.flush();
-        if let Some(join_handle) = self.join_handle.take() {
-            let _ = join_handle.join();
-        }
+        self.wait();
     }
 }
 

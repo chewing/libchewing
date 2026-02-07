@@ -6,7 +6,7 @@ What's New in libchewing (unreleased)
     in `chewing_new3()`.
   - dict: deleted phrases now can be recorded in a separate chewing-deleted.dat
     exclusion dictionary. This allows excluding phrases from even built-in
-    dictionaries.
+    dictionaries. Deleted phrases will not be auto learned again.
 
 * Bug Fixes
   - dict: fixed parsing trie dictionary file with extension fields.

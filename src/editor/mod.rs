@@ -776,6 +776,10 @@ impl SharedState {
     }
     fn auto_learn(&mut self, intervals: &[Interval]) {
         for (syllables, phrase) in collect_new_phrases(intervals, self.com.symbols()) {
+            if self.dict.is_excluded(&syllables, &phrase) {
+                debug!("skip autolearn excluded phrase {phrase} {syllables:?}");
+                continue;
+            }
             if let Err(error) = self.learn_phrase(&syllables, &phrase) {
                 error!("Failed to learn phrase {phrase} from {syllables:?}: {error:#}");
             }

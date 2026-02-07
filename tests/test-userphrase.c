@@ -420,12 +420,55 @@ void test_userphrase_auto_learn_only_after_commit()
     chewing_delete(ctx);
 }
 
+void test_userphrase_auto_learn_skip_excluded()
+{
+    ChewingContext *ctx = NULL;
+    char p[] = "下雪";
+    char b[] = "ㄒㄧㄚˋ ㄒㄩㄝˇ";
+
+    static const char *CAND_1[] = {
+        "下雪"
+    };
+    static const char *CAND_2[] = {
+        "雪", "鱈"
+    };
+    int ret = 0;
+
+    clean_userphrase();
+
+    start_testcase(ctx);
+
+    ctx = chewing_new();
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "vu84vm,3<E>");
+    type_keystroke_by_string(ctx, "vu84vm,3<D>");
+    ok_candidate(ctx, CAND_1, ARRAY_SIZE(CAND_1));
+    ret = chewing_userphrase_remove(ctx, p, b);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_lookup(ctx, p, b);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    type_keystroke_by_string(ctx, "vu84vm,3<E>");
+    ret = chewing_userphrase_lookup(ctx, p, b);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    type_keystroke_by_string(ctx, "vu84vm,3<D>");
+    ok_candidate(ctx, CAND_2, ARRAY_SIZE(CAND_2));
+
+    chewing_delete(ctx);
+    ctx = NULL;
+}
+
 void test_userphrase_autolearn()
 {
     test_userphrase_auto_learn();
     test_userphrase_auto_learn_with_symbol();
     test_userphrase_auto_learn_hardcode_break();
     test_userphrase_auto_learn_only_after_commit();
+    test_userphrase_auto_learn_skip_excluded();
 }
 
 void test_userphrase_enumerate_normal()
@@ -914,6 +957,47 @@ void test_userphrase_remove()
     ctx = NULL;
 }
 
+void test_userphrase_remove_builtin()
+{
+    ChewingContext *ctx = NULL;
+    char p[] = "下雪";
+    char b[] = "ㄒㄧㄚˋ ㄒㄩㄝˇ";
+
+    static const char *CAND_1[] = {
+        "下雪"
+    };
+    static const char *CAND_2[] = {
+        "雪", "鱈"
+    };
+    int ret = 0;
+
+    clean_userphrase();
+
+    start_testcase(ctx);
+
+    ctx = chewing_new();
+    chewing_set_phraseChoiceRearward(ctx, 1);
+
+    type_keystroke_by_string(ctx, "vu84vm,3<E>");
+    type_keystroke_by_string(ctx, "vu84vm,3<D>");
+    ok_candidate(ctx, CAND_1, ARRAY_SIZE(CAND_1));
+    ret = chewing_userphrase_remove(ctx, p, b);
+    ok(ret == 1, "chewing_userphrase_remove() return value `%d' shall be `%d'", ret, 1);
+    ret = chewing_userphrase_lookup(ctx, p, b);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    chewing_delete(ctx);
+    ctx = NULL;
+
+    ctx = chewing_new();
+    ret = chewing_userphrase_lookup(ctx, p, b);
+    ok(ret == 0, "chewing_userphrase_lookup() return value `%d' shall be `%d'", ret, 0);
+    type_keystroke_by_string(ctx, "vu84vm,3<D>");
+    ok_candidate(ctx, CAND_2, ARRAY_SIZE(CAND_2));
+
+    chewing_delete(ctx);
+    ctx = NULL;
+}
+
 int main(int argc, char *argv[])
 {
     putenv("CHEWING_PATH=" CHEWING_DATA_PREFIX);
@@ -928,6 +1012,7 @@ int main(int argc, char *argv[])
     test_userphrase_lookup();
     test_userphrase_double_free();
     test_userphrase_remove();
+    test_userphrase_remove_builtin();
 
     return exit_status();
 }

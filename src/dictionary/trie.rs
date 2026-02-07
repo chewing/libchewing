@@ -1,5 +1,4 @@
 use std::{
-    cell::Cell,
     cmp::Ordering,
     collections::VecDeque,
     error::Error,
@@ -9,7 +8,6 @@ use std::{
     iter,
     num::NonZeroUsize,
     path::{Path, PathBuf},
-    time::SystemTime,
 };
 
 use der::{
@@ -17,7 +15,7 @@ use der::{
     SliceReader, Tag, TagMode, TagNumber, Tagged, Writer,
     asn1::{ContextSpecificRef, OctetStringRef, Utf8StringRef},
 };
-use log::{error, warn};
+use log::{debug, error};
 
 use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
@@ -266,7 +264,6 @@ impl Dictionary for Trie {
 
         // Return early for empty dictionary
         if root.child_begin() == root.child_end() {
-            warn!("[!] detected empty dictionary.");
             return vec![];
         }
 
@@ -1190,44 +1187,17 @@ impl DictionaryBuilder for TrieBuilder {
         self.write(&mut writer)?;
         writer.flush()?;
         database.sync_data()?;
+        debug!("rename from {} to {}", tmpname.display(), path.display());
         fs::rename(&tmpname, path)?;
         Ok(())
     }
 }
 
-// xoshiro256** PRNG
-//
-// Ref: <https://en.wikipedia.org/wiki/Xorshift#xoshiro256**>
 fn rand() -> u64 {
-    thread_local! {
-        static PRNG_STATE: Cell<[u64; 4]> = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .map(|du| {
-                Cell::new([
-                    du.as_secs(),
-                    du.subsec_millis() as u64,
-                    du.subsec_micros() as u64,
-                    du.subsec_nanos() as u64,
-                ])
-            })
-            .unwrap_or_default();
-    }
-    fn rol64(x: u64, k: u32) -> u64 {
-        x.wrapping_shl(k) | x.wrapping_shr(64 - k)
-    }
-    PRNG_STATE.with(|state| {
-        let mut s = state.get();
-        let result = rol64(s[1].wrapping_mul(5), 7).wrapping_mul(9);
-        let t = s[1].wrapping_shl(17);
-        s[2] ^= s[0];
-        s[3] ^= s[1];
-        s[1] ^= s[2];
-        s[0] ^= s[3];
-        s[2] ^= t;
-        s[3] = rol64(s[3], 45);
-        state.set(s);
-        result
-    })
+    use std::collections::hash_map::RandomState;
+    use std::hash::BuildHasher;
+    use std::hash::Hasher;
+    RandomState::new().build_hasher().finish()
 }
 
 impl Default for TrieBuilder {
