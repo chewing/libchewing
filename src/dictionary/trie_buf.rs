@@ -172,7 +172,10 @@ impl TrieBuf {
             warn!("phrase {} {syllables:?} already exist", phrase.text);
             return Ok(());
         }
-
+        self.graveyard.remove(&(
+            Cow::from(syllables.to_vec()),
+            Cow::from(phrase.text.to_string()),
+        ));
         debug!("added phrase {} {syllables:?}", phrase.text);
         self.btree.insert(
             (
@@ -193,6 +196,10 @@ impl TrieBuf {
         user_freq: u32,
         time: u64,
     ) -> Result<(), UpdateDictionaryError> {
+        self.graveyard.remove(&(
+            Cow::from(syllables.to_vec()),
+            Cow::from(phrase.text.to_string()),
+        ));
         debug!("updated phrase {} {syllables:?}", phrase.text);
         self.btree.insert(
             (
@@ -451,6 +458,62 @@ mod tests {
             )
             .first()
             .cloned()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn remove_then_add_phrase() -> Result<(), Box<dyn Error>> {
+        let tmp_dir = tempfile::tempdir()?;
+        let file_path = tmp_dir.path().join("user.dat");
+        let mut dict = TrieBuf::open(file_path)?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        dict.remove_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]], "dict")?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        assert_eq!(
+            Some(("dict", 1, 2).into()),
+            dict.lookup(
+                &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+                LookupStrategy::Standard
+            )
+            .first()
+            .cloned(),
+            "remove and add phrase again should cancel out"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn remove_then_update_phrase() -> Result<(), Box<dyn Error>> {
+        let tmp_dir = tempfile::tempdir()?;
+        let file_path = tmp_dir.path().join("user.dat");
+        let mut dict = TrieBuf::open(file_path)?;
+        dict.add_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+        )?;
+        dict.remove_phrase(&[syl![Z, TONE4], syl![D, I, AN, TONE3]], "dict")?;
+        dict.update_phrase(
+            &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+            ("dict", 1, 2).into(),
+            0,
+            0,
+        )?;
+        assert_eq!(
+            Some(("dict", 0, 0).into()),
+            dict.lookup(
+                &[syl![Z, TONE4], syl![D, I, AN, TONE3]],
+                LookupStrategy::Standard
+            )
+            .first()
+            .cloned(),
+            "remove and update phrase again should cancel out"
         );
         Ok(())
     }

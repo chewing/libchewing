@@ -13,6 +13,7 @@ What's New in libchewing (unreleased)
 
 * Bug Fixes
   - dict: fixed parsing trie dictionary file with extension fields.
+  - dict: fixed trie_buf tombstone is not cleared after adding phrase again.
 
 * Changes
   - rust: breaking! renamed SystemDictionaryLoader to AssetLoader.
