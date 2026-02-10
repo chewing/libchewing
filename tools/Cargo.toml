@@ -2,12 +2,12 @@
 name = "chewing-cli"
 description = "Tools of the Chewing (酷音) intelligent Zhuyin input method."
 license = "LGPL-2.1-or-later"
-version = "0.12.0-alpha.1"
+version = "0.12.0-alpha.2"
 edition = "2024"
 
 [dependencies]
 anyhow = "1.0.0"
-chewing = { version = "0.12.0-alpha.1", path = ".." }
+chewing = { version = "0.12.0-alpha.2", path = ".." }
 clap = { version = "4.4.18", features = ["derive"] }
 env_logger.workspace = true
 
