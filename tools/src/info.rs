@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use chewing::{
     dictionary::{Dictionary, SingleDictionaryLoader, UserDictionaryManager},
     path::{find_files_by_ext, search_path_from_env_var},
@@ -7,6 +7,7 @@ use chewing::{
 use crate::flags;
 
 pub(crate) fn run(args: flags::Info) -> Result<()> {
+    let error = || "failed to inspect file";
     if args.system {
         // FIXME: use find_files_by_ext and generic loader
         let loader = SingleDictionaryLoader::new();
@@ -24,7 +25,7 @@ pub(crate) fn run(args: flags::Info) -> Result<()> {
         }
     }
     if args.user {
-        let dict = UserDictionaryManager::new().init()?;
+        let dict = UserDictionaryManager::new().init().with_context(error)?;
         if args.json {
             print_json_info(&[dict], "user");
         } else {
@@ -32,7 +33,9 @@ pub(crate) fn run(args: flags::Info) -> Result<()> {
         }
     }
     if let Some(path) = args.path {
-        let dict = SingleDictionaryLoader::new().guess_format_and_load(&path)?;
+        let dict = SingleDictionaryLoader::new()
+            .guess_format_and_load(&path)
+            .with_context(error)?;
         if args.json {
             print_json_info(&[dict], "input");
         } else {

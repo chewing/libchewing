@@ -75,6 +75,9 @@
 //! Other required files `swkb.dat` and `symbols.dat` can be copied directly to
 //! the dictionary folder.
 
+#[macro_use]
+mod exn;
+
 pub mod conversion;
 pub mod dictionary;
 pub mod editor;

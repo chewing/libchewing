@@ -1,7 +1,5 @@
 use std::{
     any::Any,
-    error::Error,
-    fmt::Display,
     fs::{self, File},
     io::{BufRead, BufReader},
     path::Path,
@@ -9,7 +7,7 @@ use std::{
 
 #[cfg(not(feature = "sqlite"))]
 use anyhow::bail;
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result};
 #[cfg(feature = "sqlite")]
 use chewing::dictionary::SqliteDictionaryBuilder;
 use chewing::{
@@ -19,53 +17,12 @@ use chewing::{
 
 use crate::flags;
 
-#[derive(Debug)]
-struct ParseError {
-    line_num: usize,
-    line: String,
-    source: anyhow::Error,
-}
-
-fn parse_error(line_num: usize, line: &str) -> ParseError {
-    ParseError {
-        line_num,
-        line: line.to_string(),
-        source: anyhow::anyhow!("Invalid format. Use the --csv flag to enable CSV parsing."),
-    }
-}
-
-impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Parsing failed at line {}: {}",
-            self.line_num + 1,
-            self.line
-        )
-    }
-}
-
-impl Error for ParseError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(self.source.as_ref())
-    }
-}
-
-trait IntoParseError<T> {
-    fn parse_error(self, line_num: usize, line: &str) -> std::result::Result<T, ParseError>;
-}
-
-impl<T> IntoParseError<T> for Result<T> {
-    fn parse_error(self, line_num: usize, line: &str) -> std::result::Result<T, ParseError> {
-        self.map_err(|source| ParseError {
-            line_num,
-            line: line.to_string(),
-            source,
-        })
-    }
-}
-
 pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
+    let error = "Failed to build dictionary file.";
+    let parse_error = |line_num, line: &str, msg| {
+        anyhow::Error::msg(format!("{line_num:>5} | {line}\n{msg} at line {line_num}"))
+    };
+
     let mut builder: Box<dyn DictionaryBuilder> = match args.db_type {
         flags::DbType::Sqlite => {
             #[cfg(feature = "sqlite")]
@@ -85,14 +42,14 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     let mut usage = args.usage;
     let software = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
-    let tsi = File::open(args.tsi_src)?;
+    let tsi = File::open(args.tsi_src).context(error)?;
     let reader = BufReader::new(tsi);
     let delimiter = if args.csv { ',' } else { ' ' };
     let mut read_front_matter = true;
     let mut errors = vec![];
 
     for (line_num, line) in reader.lines().enumerate() {
-        let line = line?;
+        let line = line.context(error)?;
         let line = line.trim();
         if line.is_empty() {
             continue;
@@ -103,7 +60,7 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         } else if read_front_matter {
             let Some((key, value)) = line.trim_start_matches('#').trim().split_once(delimiter)
             else {
-                errors.push(parse_error(line_num, "invalid metadata").into());
+                errors.push(parse_error(line_num, line, "Invalid metadata"));
                 continue;
             };
             let value = value.trim_end_matches(delimiter).to_string();
@@ -119,17 +76,17 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
         } else if line.starts_with('#') {
             continue;
         }
-        match parse_line(line_num, delimiter, &line, args.fix) {
+        match parse_line(delimiter, &line, args.fix) {
             Ok((syllables, phrase, freq)) => {
                 if syllables.len() != phrase.chars().count() {
-                    errors.push(
-                        anyhow!("word count doesn't match").context(parse_error(line_num, line)),
-                    );
+                    errors.push(parse_error(line_num, line, "Word count doesn't match"));
                     continue;
                 }
-                builder.insert(&syllables, (phrase, freq).into())?;
+                builder
+                    .insert(&syllables, (phrase, freq).into())
+                    .context(error)?;
             }
-            Err(error) => errors.push(error),
+            Err(error) => errors.push(error.context(parse_error(line_num, line, "Parse error"))),
         };
     }
     if !errors.is_empty() {
@@ -137,7 +94,9 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
             eprintln!("{:#}", err);
         }
         if !args.fix {
-            eprintln!("Hint: Use --fix to automatically fix common errors");
+            eprintln!();
+            eprintln!("Hint: Use --csv flag to enable CSV parsing.");
+            eprintln!("Hint: Use --fix to automatically fix common errors.");
         }
         if !args.skip_invalid {
             std::process::exit(1)
@@ -180,27 +139,21 @@ pub(crate) fn run(args: flags::InitDatabase) -> Result<()> {
     Ok(())
 }
 
-fn parse_line(
-    line_num: usize,
-    delimiter: char,
-    line: &str,
-    fix: bool,
-) -> Result<(Vec<Syllable>, &str, u32)> {
+fn parse_line(delimiter: char, line: &str, fix: bool) -> Result<(Vec<Syllable>, &str, u32)> {
     let phrase = line
         .split(delimiter)
         .find(|s| !s.is_empty())
-        .ok_or(parse_error(line_num, line))?
+        .context("failed to parse phrase")?
         .trim_matches('"');
 
     let freq: u32 = line
         .split(delimiter)
         .filter(|s| !s.is_empty())
         .nth(1)
-        .ok_or(parse_error(line_num, line))?
+        .context("failed to parse frequency")?
         .trim_matches('"')
         .parse()
-        .context("Unable to parse frequency")
-        .parse_error(line_num, line)?;
+        .context("failed to parse frequency")?;
 
     let mut syllables = vec![];
 
@@ -225,13 +178,8 @@ fn parse_line(
                 c
             };
             syllable_builder = syllable_builder
-                .insert(
-                    Bopomofo::try_from(c)
-                        .context("parsing bopomofo")
-                        .parse_error(line_num, line)?,
-                )
-                .with_context(|| format!("Parsing syllables {}", syllable_str))
-                .parse_error(line_num, line)?;
+                .insert(Bopomofo::try_from(c)?)
+                .with_context(|| format!("failed to parse syllables {}", syllable_str))?;
         }
         syllables.push(syllable_builder.build());
     }
@@ -257,7 +205,7 @@ mod tests {
     #[test]
     fn parse_ssv() {
         let line = "鑰匙 668 ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(' ', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -269,7 +217,7 @@ mod tests {
     #[test]
     fn parse_ssv_multiple_whitespace() {
         let line = "鑰匙     668 ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(' ', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -281,7 +229,7 @@ mod tests {
     #[test]
     fn parse_ssv_syllable_errors() {
         let line = "地永天長 50 ㄉ一ˋ ㄩㄥˇ ㄊ一ㄢ ㄔ丫ˊ";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ' ', &line, true) {
+        if let Ok((syllables, phrase, freq)) = parse_line(' ', &line, true) {
             assert_eq!(
                 syllables,
                 vec![
@@ -301,7 +249,7 @@ mod tests {
     #[test]
     fn parse_csv() {
         let line = "鑰匙,668,ㄧㄠˋ ㄔˊ # not official";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(',', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);
@@ -313,7 +261,7 @@ mod tests {
     #[test]
     fn parse_csv_quoted() {
         let line = "\"鑰匙\",668,\"ㄧㄠˋ ㄔˊ # not official\"";
-        if let Ok((syllables, phrase, freq)) = parse_line(0, ',', &line, false) {
+        if let Ok((syllables, phrase, freq)) = parse_line(',', &line, false) {
             assert_eq!(syllables, vec![syl![I, AU, TONE4], syl![CH, TONE2]]);
             assert_eq!("鑰匙", phrase);
             assert_eq!(668, freq);

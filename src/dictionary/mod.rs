@@ -6,7 +6,6 @@ use std::{
     cmp::Ordering,
     error::Error,
     fmt::{Debug, Display},
-    io,
     path::Path,
 };
 
@@ -20,6 +19,7 @@ pub use self::sqlite::{SqliteDictionary, SqliteDictionaryBuilder, SqliteDictiona
 pub use self::trie::{Trie, TrieBuilder, TrieOpenOptions, TrieStatistics};
 pub use self::trie_buf::TrieBuf;
 pub use self::usage::DictionaryUsage;
+use crate::exn::Exn;
 use crate::zhuyin::Syllable;
 
 mod layered;
@@ -30,35 +30,6 @@ mod trie;
 mod trie_buf;
 mod uhash;
 mod usage;
-
-/// The error type which is returned from updating a dictionary.
-#[derive(Debug)]
-pub struct UpdateDictionaryError {
-    /// TODO: doc
-    message: &'static str,
-    source: Option<Box<dyn Error + Send + Sync>>,
-}
-
-impl UpdateDictionaryError {
-    pub(crate) fn new(message: &'static str) -> UpdateDictionaryError {
-        UpdateDictionaryError {
-            message,
-            source: None,
-        }
-    }
-}
-
-impl Display for UpdateDictionaryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "update dictionary failed: {}", self.message)
-    }
-}
-
-impl Error for UpdateDictionaryError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.source.as_ref().map(|err| err.as_ref() as &dyn Error)
-    }
-}
 
 /// A collection of metadata of a dictionary.
 ///
@@ -408,32 +379,6 @@ pub trait Dictionary: Debug {
     }
 }
 
-/// Errors during dictionary construction.
-#[derive(Debug)]
-pub struct BuildDictionaryError {
-    source: Box<dyn Error + Send + Sync>,
-}
-
-impl Display for BuildDictionaryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "build dictionary error")
-    }
-}
-
-impl Error for BuildDictionaryError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(self.source.as_ref())
-    }
-}
-
-impl From<io::Error> for BuildDictionaryError {
-    fn from(source: io::Error) -> Self {
-        BuildDictionaryError {
-            source: Box::new(source),
-        }
-    }
-}
-
 /// TODO: doc
 pub trait DictionaryBuilder: Any {
     /// TODO: doc
@@ -447,6 +392,55 @@ pub trait DictionaryBuilder: Any {
     /// TODO: doc
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError>;
 }
+
+/// The error type which is returned from updating a dictionary.
+#[derive(Debug)]
+pub struct UpdateDictionaryError {
+    /// TODO: doc
+    message: &'static str,
+    source: Option<Box<dyn Error + Send + Sync>>,
+}
+
+impl UpdateDictionaryError {
+    pub(crate) fn new(message: &'static str) -> UpdateDictionaryError {
+        UpdateDictionaryError {
+            message,
+            source: None,
+        }
+    }
+}
+
+impl Display for UpdateDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "update dictionary failed: {}", self.message)
+    }
+}
+
+impl_exn!(UpdateDictionaryError);
+
+/// Errors during dictionary construction.
+#[derive(Debug)]
+pub struct BuildDictionaryError {
+    msg: String,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+}
+
+impl BuildDictionaryError {
+    fn new(msg: &str) -> BuildDictionaryError {
+        BuildDictionaryError {
+            msg: msg.to_string(),
+            source: None,
+        }
+    }
+}
+
+impl Display for BuildDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "build dictionary error: {}", self.msg)
+    }
+}
+
+impl_exn!(BuildDictionaryError);
 
 #[cfg(test)]
 mod tests {

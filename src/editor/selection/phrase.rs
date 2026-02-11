@@ -3,7 +3,7 @@ use std::cmp::{Reverse, min};
 use crate::{
     conversion::{Composition, Gap, Interval},
     dictionary::{Dictionary, Layered, LookupStrategy},
-    editor::{EditorError, SharedState},
+    editor::{EditorError, EditorErrorKind, SharedState},
     zhuyin::Syllable,
 };
 
@@ -140,7 +140,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError::Impossible)
+            Err(EditorError::new(EditorErrorKind::Impossible))
         }
     }
     pub(crate) fn jump_to_prev_selection_point<D: Dictionary>(
@@ -152,7 +152,7 @@ impl PhraseSelector {
             self.end = end;
             Ok(())
         } else {
-            Err(EditorError::Impossible)
+            Err(EditorError::new(EditorErrorKind::Impossible))
         }
     }
     pub(crate) fn jump_to_first_selection_point<D: Dictionary>(&mut self, dict: &D) {

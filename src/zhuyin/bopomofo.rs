@@ -208,74 +208,6 @@ impl Bopomofo {
     }
 }
 
-/// Enum to store the various types of errors that can cause parsing a bopomofo
-/// symbol to fail.
-///
-/// # Example
-///
-/// ```
-/// # use std::str::FromStr;
-/// # use chewing::zhuyin::Bopomofo;
-/// if let Err(e) = Bopomofo::from_str("a12") {
-///     println!("Failed conversion to bopomofo: {e}");
-/// }
-/// ```
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum BopomofoErrorKind {
-    /// Value being parsed is empty.
-    Empty,
-    /// Contains an invalid symbol.
-    InvalidSymbol,
-}
-
-/// An error which can be returned when parsing an bopomofo symbol.
-///
-/// # Potential causes
-///
-/// Among other causes, `ParseBopomofoError` can be thrown because of leading or trailing whitespace
-/// in the string e.g., when it is obtained from the standard input.
-/// Using the [`str::trim()`] method ensures that no whitespace remains before parsing.
-///
-/// # Example
-///
-/// ```
-/// # use std::str::FromStr;
-/// # use chewing::zhuyin::Bopomofo;
-/// if let Err(e) = Bopomofo::from_str("a12") {
-///     println!("Failed conversion to bopomofo: {e}");
-/// }
-/// ```
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ParseBopomofoError {
-    kind: BopomofoErrorKind,
-}
-
-impl ParseBopomofoError {
-    fn empty() -> ParseBopomofoError {
-        Self {
-            kind: BopomofoErrorKind::Empty,
-        }
-    }
-    fn invalid_symbol() -> ParseBopomofoError {
-        Self {
-            kind: BopomofoErrorKind::InvalidSymbol,
-        }
-    }
-    /// Outputs the detailed cause of parsing an bopomofo failing.
-    pub fn kind(&self) -> &BopomofoErrorKind {
-        &self.kind
-    }
-}
-
-impl Display for ParseBopomofoError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Parse bopomofo error: {:?}", self.kind)
-    }
-}
-
-impl Error for ParseBopomofoError {}
-
 impl Display for Bopomofo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_char((*self).into())
@@ -286,14 +218,14 @@ impl FromStr for Bopomofo {
     type Err = ParseBopomofoError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.is_empty() {
+        let mut chars = s.chars();
+        let Some(bopomofo) = chars.next().map(|ch| ch.try_into()) else {
             return Err(ParseBopomofoError::empty());
+        };
+        if let Some(ch) = chars.next() {
+            return Err(ParseBopomofoError::invalid_symbol(ch));
         }
-        if s.chars().count() != 1 {
-            return Err(ParseBopomofoError::invalid_symbol());
-        }
-
-        s.chars().next().unwrap().try_into()
+        bopomofo
     }
 }
 
@@ -393,10 +325,78 @@ impl TryFrom<char> for Bopomofo {
             'ˊ' => Ok(TONE2),
             'ˇ' => Ok(TONE3),
             'ˋ' => Ok(TONE4),
-            _ => Err(ParseBopomofoError::invalid_symbol()),
+            _ => Err(ParseBopomofoError::invalid_symbol(c)),
         }
     }
 }
+
+/// Enum to store the various types of errors that can cause parsing a bopomofo
+/// symbol to fail.
+///
+/// # Example
+///
+/// ```
+/// # use std::str::FromStr;
+/// # use chewing::zhuyin::Bopomofo;
+/// if let Err(e) = Bopomofo::from_str("a12") {
+///     println!("Failed conversion to bopomofo: {e}");
+/// }
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum BopomofoErrorKind {
+    /// Value being parsed is empty.
+    Empty,
+    /// Contains an invalid symbol.
+    InvalidSymbol(char),
+}
+
+/// An error which can be returned when parsing an bopomofo symbol.
+///
+/// # Potential causes
+///
+/// Among other causes, `ParseBopomofoError` can be thrown because of leading or trailing whitespace
+/// in the string e.g., when it is obtained from the standard input.
+/// Using the [`str::trim()`] method ensures that no whitespace remains before parsing.
+///
+/// # Example
+///
+/// ```
+/// # use std::str::FromStr;
+/// # use chewing::zhuyin::Bopomofo;
+/// if let Err(e) = Bopomofo::from_str("a12") {
+///     println!("Failed conversion to bopomofo: {e}");
+/// }
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ParseBopomofoError {
+    kind: BopomofoErrorKind,
+}
+
+impl ParseBopomofoError {
+    fn empty() -> ParseBopomofoError {
+        Self {
+            kind: BopomofoErrorKind::Empty,
+        }
+    }
+    fn invalid_symbol(ch: char) -> ParseBopomofoError {
+        Self {
+            kind: BopomofoErrorKind::InvalidSymbol(ch),
+        }
+    }
+    /// Outputs the detailed cause of parsing an bopomofo failing.
+    pub fn kind(&self) -> &BopomofoErrorKind {
+        &self.kind
+    }
+}
+
+impl Display for ParseBopomofoError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Parse bopomofo error: {:?}", self.kind)
+    }
+}
+
+impl Error for ParseBopomofoError {}
 
 #[cfg(test)]
 mod tests {
@@ -420,12 +420,12 @@ mod tests {
     #[test]
     fn parse_invalid() {
         assert_eq!(
-            Err(ParseBopomofoError::invalid_symbol()),
+            Err(ParseBopomofoError::invalid_symbol('b')),
             "abc".parse::<Bopomofo>()
         );
         assert_eq!(
-            &BopomofoErrorKind::InvalidSymbol,
-            ParseBopomofoError::invalid_symbol().kind()
+            &BopomofoErrorKind::InvalidSymbol('c'),
+            ParseBopomofoError::invalid_symbol('c').kind()
         );
     }
 

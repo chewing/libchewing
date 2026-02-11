@@ -21,7 +21,7 @@ use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
     Phrase,
 };
-use crate::{dictionary::DictionaryUsage, zhuyin::Syllable};
+use crate::{dictionary::DictionaryUsage, exn::ResultExt, zhuyin::Syllable};
 
 const DICT_FORMAT_VERSION: u8 = 0;
 
@@ -1179,16 +1179,17 @@ impl DictionaryBuilder for TrieBuilder {
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
+        let err = || BuildDictionaryError::new("failed to finalize dictionary");
         let mut tmpname = path.to_path_buf();
         let pseudo_random = rand();
         tmpname.set_file_name(format!("chewing-{pseudo_random}.dat"));
-        let database = File::create(&tmpname)?;
+        let database = File::create(&tmpname).or_raise(err)?;
         let mut writer = BufWriter::new(&database);
-        self.write(&mut writer)?;
-        writer.flush()?;
-        database.sync_data()?;
+        self.write(&mut writer).or_raise(err)?;
+        writer.flush().or_raise(err)?;
+        database.sync_data().or_raise(err)?;
         debug!("rename from {} to {}", tmpname.display(), path.display());
-        fs::rename(&tmpname, path)?;
+        fs::rename(&tmpname, path).or_raise(err)?;
         Ok(())
     }
 }

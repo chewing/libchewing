@@ -26,6 +26,7 @@ use crate::{
         AssetLoader, Dictionary, DictionaryUsage, Layered, LookupStrategy, Trie,
         UpdateDictionaryError, UserDictionaryManager,
     },
+    exn::{Exn, ResultExt},
     input::{KeyState, KeyboardEvent, keysym::*},
     zhuyin::Syllable,
 };
@@ -151,25 +152,6 @@ pub struct Editor {
     shared: SharedState,
     state: Box<dyn State>,
 }
-
-/// All different errors that may happen when changing editor state.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum EditorError {
-    /// Requested invalid state change.
-    InvalidState,
-    /// Requested invalid input.
-    InvalidInput,
-    /// Requested state change was not possible.
-    Impossible,
-}
-
-impl Display for EditorError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Editor cannot perform requested action.")
-    }
-}
-
-impl Error for EditorError {}
 
 #[derive(Debug)]
 pub(crate) struct SharedState {
@@ -363,15 +345,19 @@ impl Editor {
         &mut self,
         syllables: &[Syllable],
         phrase: &str,
-    ) -> Result<(), UpdateDictionaryError> {
-        self.shared.learn_phrase(syllables, phrase)
+    ) -> Result<(), EditorError> {
+        self.shared
+            .learn_phrase(syllables, phrase)
+            .or_raise(|| EditorError::new(EditorErrorKind::InvalidState))
     }
     pub fn unlearn_phrase(
         &mut self,
         syllables: &[Syllable],
         phrase: &str,
-    ) -> Result<(), UpdateDictionaryError> {
-        self.shared.unlearn_phrase(syllables, phrase)
+    ) -> Result<(), EditorError> {
+        self.shared
+            .unlearn_phrase(syllables, phrase)
+            .or_raise(|| EditorError::new(EditorErrorKind::InvalidState))
     }
     /// All candidates after current page
     pub fn paginated_candidates(&self) -> Result<Vec<String>, EditorError> {
@@ -383,7 +369,7 @@ impl Editor {
                 .skip(selecting.page_no * self.shared.options.candidates_per_page)
                 .collect())
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn all_candidates(&self) -> Result<Vec<String>, EditorError> {
@@ -391,7 +377,7 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.candidates(&self.shared, &self.shared.dict))
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn current_page_no(&self) -> Result<usize, EditorError> {
@@ -399,7 +385,7 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.page_no)
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn total_page(&self) -> Result<usize, EditorError> {
@@ -407,14 +393,14 @@ impl Editor {
         if let Some(selecting) = any.downcast_ref::<Selecting>() {
             Ok(selecting.total_page(&self.shared, &self.shared.dict))
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn select(&mut self, n: usize) -> Result<(), EditorError> {
         let any = self.state.as_mut() as &mut dyn Any;
         let selecting = match any.downcast_mut::<Selecting>() {
             Some(selecting) => selecting,
-            None => return Err(EditorError::InvalidState),
+            None => return Err(EditorError::new(EditorErrorKind::InvalidState)),
         };
         match selecting.select(&mut self.shared, n) {
             Transition::ToState(to_state) => {
@@ -427,7 +413,7 @@ impl Editor {
             self.shared.try_auto_commit();
         }
         if self.shared.last_key_behavior == EditorKeyBehavior::Bell {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         } else {
             Ok(())
         }
@@ -438,7 +424,7 @@ impl Editor {
             self.state = Box::new(Entering);
             Ok(())
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn cancel_entering_syllable(&mut self) {
@@ -479,7 +465,7 @@ impl Editor {
     }
     pub fn commit(&mut self) -> Result<(), EditorError> {
         if self.shared.com.is_empty() {
-            return Err(EditorError::InvalidState);
+            return Err(EditorError::new(EditorErrorKind::InvalidState));
         }
         self.shared.commit();
         Ok(())
@@ -513,10 +499,10 @@ impl Editor {
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_next_selection_point(&self.shared.dict),
-                _ => Err(EditorError::InvalidState),
+                _ => Err(EditorError::new(EditorErrorKind::InvalidState)),
             }
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn jump_to_prev_selection_point(&mut self) -> Result<(), EditorError> {
@@ -524,10 +510,10 @@ impl Editor {
         if let Some(s) = any.downcast_mut::<Selecting>() {
             match &mut s.sel {
                 Selector::Phrase(s) => s.jump_to_prev_selection_point(&self.shared.dict),
-                _ => Err(EditorError::InvalidState),
+                _ => Err(EditorError::new(EditorErrorKind::InvalidState)),
             }
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn jump_to_first_selection_point(&mut self) -> Result<(), EditorError> {
@@ -538,10 +524,10 @@ impl Editor {
                     s.jump_to_first_selection_point(&self.shared.dict);
                     Ok(())
                 }
-                _ => Err(EditorError::InvalidState),
+                _ => Err(EditorError::new(EditorErrorKind::InvalidState)),
             }
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn jump_to_last_selection_point(&mut self) -> Result<(), EditorError> {
@@ -552,10 +538,10 @@ impl Editor {
                     s.jump_to_last_selection_point(&self.shared.dict);
                     Ok(())
                 }
-                _ => Err(EditorError::InvalidState),
+                _ => Err(EditorError::new(EditorErrorKind::InvalidState)),
             }
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn start_selecting(&mut self) -> Result<(), EditorError> {
@@ -578,7 +564,7 @@ impl Editor {
         if self.is_selecting() {
             Ok(())
         } else {
-            Err(EditorError::InvalidState)
+            Err(EditorError::new(EditorErrorKind::InvalidState))
         }
     }
     pub fn notification(&self) -> &str {
@@ -625,7 +611,7 @@ impl SharedState {
         &mut self,
         start: usize,
         end: usize,
-    ) -> Result<(), UpdateDictionaryError> {
+    ) -> Result<(), EditorError> {
         let result = self.learn_phrase_in_range_quiet(start, end);
         match &result {
             Ok(phrase) => {
@@ -635,6 +621,7 @@ impl SharedState {
             Err(msg) => {
                 msg.clone_into(&mut self.notice_buffer);
                 Err(UpdateDictionaryError::new("failed to learn new phrase"))
+                    .or_raise(|| EditorError::new(EditorErrorKind::InvalidState))
             }
         }
     }
@@ -678,11 +665,7 @@ impl SharedState {
         }
         result.map(|_| phrase)
     }
-    fn learn_phrase(
-        &mut self,
-        syllables: &[Syllable],
-        phrase: &str,
-    ) -> Result<(), UpdateDictionaryError> {
+    fn learn_phrase(&mut self, syllables: &[Syllable], phrase: &str) -> Result<(), EditorError> {
         if syllables.len() != phrase.chars().count() {
             warn!(
                 "syllables({:?})[{}] and phrase({})[{}] has different length",
@@ -693,11 +676,14 @@ impl SharedState {
             );
             return Err(UpdateDictionaryError::new(
                 "failed to learn phrase: syllables and phrase has different length",
-            ));
+            ))
+            .or_raise(|| EditorError::new(EditorErrorKind::InvalidState));
         }
         let phrases = self.dict.lookup(syllables, LookupStrategy::Standard);
         if phrases.is_empty() {
-            self.dict.add_phrase(syllables, (phrase, 10).into())?;
+            self.dict
+                .add_phrase(syllables, (phrase, 10).into())
+                .or_raise(|| EditorError::new(EditorErrorKind::InvalidState))?;
             return Ok(());
         }
         let phrase = phrases
@@ -714,12 +700,11 @@ impl SharedState {
         self.dirty_level += 1;
         Ok(())
     }
-    fn unlearn_phrase(
-        &mut self,
-        syllables: &[Syllable],
-        phrase: &str,
-    ) -> Result<(), UpdateDictionaryError> {
-        let _ = self.dict.remove_phrase(syllables, phrase);
+    fn unlearn_phrase(&mut self, syllables: &[Syllable], phrase: &str) -> Result<(), EditorError> {
+        let _ = self
+            .dict
+            .remove_phrase(syllables, phrase)
+            .or_raise(|| EditorError::new(EditorErrorKind::InvalidState))?;
         self.dirty_level += 1;
         Ok(())
     }
@@ -1631,6 +1616,37 @@ impl State for Highlighting {
         }
     }
 }
+
+/// All different errors that may happen when changing editor state.
+#[derive(Debug)]
+pub enum EditorErrorKind {
+    /// Requested invalid state change.
+    InvalidState,
+    /// Requested invalid input.
+    InvalidInput,
+    /// Requested state change was not possible.
+    Impossible,
+}
+
+#[derive(Debug)]
+pub struct EditorError {
+    kind: EditorErrorKind,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+}
+
+impl EditorError {
+    fn new(kind: EditorErrorKind) -> EditorError {
+        EditorError { kind, source: None }
+    }
+}
+
+impl Display for EditorError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Editor cannot perform requested action: {:?}", self.kind)
+    }
+}
+
+impl_exn!(EditorError);
 
 #[cfg(test)]
 mod tests {

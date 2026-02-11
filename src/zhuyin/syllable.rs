@@ -6,7 +6,8 @@ use std::{
     str::FromStr,
 };
 
-use super::{Bopomofo, BopomofoKind, ParseBopomofoError};
+use super::{Bopomofo, BopomofoKind};
+use crate::exn::{Exn, ResultExt};
 
 /// The consonants and vowels that are taken together to make a single sound.
 ///
@@ -230,7 +231,7 @@ impl TryFrom<u16> for Syllable {
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         // TODO check invalid value
         Ok(Syllable {
-            value: NonZeroU16::try_from(value).map_err(|_| DecodeSyllableError)?,
+            value: NonZeroU16::try_from(value).or_raise(|| DecodeSyllableError::new())?,
         })
     }
 }
@@ -239,10 +240,11 @@ impl FromStr for Syllable {
     type Err = ParseSyllableError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let error = || ParseSyllableError::new();
         let mut builder = Syllable::builder();
         for c in s.chars() {
-            let bopomofo = Bopomofo::try_from(c)?;
-            builder = builder.insert(bopomofo)?;
+            let bopomofo = Bopomofo::try_from(c).or_raise(error)?;
+            builder = builder.insert(bopomofo).or_raise(error)?;
         }
         Ok(builder.build())
     }
@@ -352,8 +354,16 @@ impl SyllableBuilder {
 }
 
 /// Errors during decoding a syllable from a u16.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct DecodeSyllableError;
+#[derive(Debug)]
+pub struct DecodeSyllableError {
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+}
+
+impl DecodeSyllableError {
+    fn new() -> DecodeSyllableError {
+        DecodeSyllableError { source: None }
+    }
+}
 
 impl Display for DecodeSyllableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -361,7 +371,7 @@ impl Display for DecodeSyllableError {
     }
 }
 
-impl Error for DecodeSyllableError {}
+impl_exn!(DecodeSyllableError);
 
 /// Errors when parsing a str to a syllable.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -421,14 +431,14 @@ impl Display for BuildSyllableError {
 impl Error for BuildSyllableError {}
 
 /// Errors when parsing a str to a syllable.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct ParseSyllableError {
-    kind: SyllableErrorKind,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
 }
 
 impl ParseSyllableError {
-    pub fn kind(&self) -> &SyllableErrorKind {
-        &self.kind
+    fn new() -> ParseSyllableError {
+        ParseSyllableError { source: None }
     }
 }
 
@@ -438,21 +448,7 @@ impl Display for ParseSyllableError {
     }
 }
 
-impl Error for ParseSyllableError {}
-
-impl From<ParseBopomofoError> for ParseSyllableError {
-    fn from(_: ParseBopomofoError) -> Self {
-        ParseSyllableError {
-            kind: SyllableErrorKind::InvalidBopomofo,
-        }
-    }
-}
-
-impl From<BuildSyllableError> for ParseSyllableError {
-    fn from(value: BuildSyllableError) -> Self {
-        ParseSyllableError { kind: value.kind }
-    }
-}
+impl_exn!(ParseSyllableError);
 
 /// Builds a syllable from bopomofos.
 ///

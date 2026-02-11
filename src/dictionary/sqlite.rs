@@ -12,7 +12,7 @@ use super::{
     BuildDictionaryError, Dictionary, DictionaryBuilder, DictionaryInfo, Entries, LookupStrategy,
     Phrase, UpdateDictionaryError,
 };
-use crate::{dictionary::DictionaryUsage, zhuyin::Syllable};
+use crate::{dictionary::DictionaryUsage, exn::ResultExt, zhuyin::Syllable};
 
 const APPLICATION_ID: u32 = 0x43484557; // 'CHEW' in big-endian
 const USER_VERSION: u32 = 0;
@@ -561,35 +561,21 @@ impl Default for SqliteDictionaryBuilder {
     }
 }
 
-impl From<RusqliteError> for BuildDictionaryError {
-    fn from(source: RusqliteError) -> Self {
-        BuildDictionaryError {
-            source: Box::new(source),
-        }
-    }
-}
-
-impl From<str::Utf8Error> for BuildDictionaryError {
-    fn from(source: str::Utf8Error) -> Self {
-        BuildDictionaryError {
-            source: Box::new(source),
-        }
-    }
-}
-
 impl DictionaryBuilder for SqliteDictionaryBuilder {
     fn set_info(&mut self, info: DictionaryInfo) -> Result<(), BuildDictionaryError> {
-        let tx = self.dict.conn.transaction()?;
+        let err = || BuildDictionaryError::new("failed to set dictionary info");
+        let tx = self.dict.conn.transaction().or_raise(err)?;
         {
-            let mut stmt =
-                tx.prepare("INSERT OR REPLACE INTO info_v1 (key, value) VALUES (?, ?)")?;
-            stmt.execute(["name", &info.name])?;
-            stmt.execute(["copyright", &info.copyright])?;
-            stmt.execute(["license", &info.license])?;
-            stmt.execute(["version", &info.version])?;
-            stmt.execute(["software", &info.software])?;
+            let mut stmt = tx
+                .prepare("INSERT OR REPLACE INTO info_v1 (key, value) VALUES (?, ?)")
+                .or_raise(err)?;
+            stmt.execute(["name", &info.name]).or_raise(err)?;
+            stmt.execute(["copyright", &info.copyright]).or_raise(err)?;
+            stmt.execute(["license", &info.license]).or_raise(err)?;
+            stmt.execute(["version", &info.version]).or_raise(err)?;
+            stmt.execute(["software", &info.software]).or_raise(err)?;
         }
-        tx.commit()?;
+        tx.commit().or_raise(err)?;
         Ok(())
     }
 
@@ -598,6 +584,7 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
         syllables: &[Syllable],
         phrase: Phrase,
     ) -> Result<(), BuildDictionaryError> {
+        let err = || BuildDictionaryError::new("failed to insert phrase");
         let sort_id = if syllables.len() == 1 {
             self.sort_id += 1;
             self.sort_id
@@ -605,29 +592,37 @@ impl DictionaryBuilder for SqliteDictionaryBuilder {
             0
         };
         let syllables_bytes = syllables.to_bytes();
-        let mut stmt = self.dict.conn.prepare_cached(
-            "INSERT OR REPLACE INTO dictionary_v1 (
+        let mut stmt = self
+            .dict
+            .conn
+            .prepare_cached(
+                "INSERT OR REPLACE INTO dictionary_v1 (
                     syllables,
                     phrase,
                     freq,
                     sort_id
             ) VALUES (?, ?, ?, ?)",
-        )?;
+            )
+            .or_raise(err)?;
         stmt.execute(params![
             syllables_bytes,
             phrase.as_str(),
             phrase.freq(),
             sort_id
-        ])?;
+        ])
+        .or_raise(err)?;
 
         Ok(())
     }
 
     fn build(&mut self, path: &Path) -> Result<(), BuildDictionaryError> {
-        let path = path.to_str().ok_or(BuildDictionaryError {
-            source: "cannot convert file path to utf8".into(),
-        })?;
-        self.dict.conn.execute("VACUUM INTO ?", [path])?;
+        let path = path
+            .to_str()
+            .or_raise(|| BuildDictionaryError::new("cannot convert file path to utf8"))?;
+        self.dict
+            .conn
+            .execute("VACUUM INTO ?", [path])
+            .or_raise(|| BuildDictionaryError::new("failed to finalize dictionary"))?;
         Ok(())
     }
 }

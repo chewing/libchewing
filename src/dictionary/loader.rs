@@ -12,6 +12,7 @@ use log::{error, info};
 #[cfg(feature = "sqlite")]
 use super::SqliteDictionary;
 use super::{Dictionary, TrieBuf, uhash};
+use crate::exn::{Exn, ResultExt};
 use crate::{
     dictionary::DictionaryUsage,
     editor::{AbbrevTable, SymbolSelector},
@@ -31,27 +32,6 @@ pub const DEFAULT_DICT_NAMES: &[&str] = &["word.dat", "tsi.dat", "chewing.dat"];
 #[derive(Debug, Default)]
 pub struct AssetLoader {
     search_path: Option<String>,
-}
-
-/// Errors during loading system or user dictionaries.
-#[derive(Debug)]
-pub enum LoadDictionaryError {
-    /// Cannot find any system or user dictionary.
-    NotFound,
-    /// IO Error.
-    IoError(io::Error),
-}
-
-impl Display for LoadDictionaryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Unable to load system dictionary: {self:?}")
-    }
-}
-
-impl Error for LoadDictionaryError {}
-
-fn io_err(err: io::Error) -> LoadDictionaryError {
-    LoadDictionaryError::IoError(err)
 }
 
 impl AssetLoader {
@@ -112,29 +92,33 @@ impl AssetLoader {
     }
     /// Loads the abbrev table.
     pub fn load_abbrev(&self) -> Result<AbbrevTable, LoadDictionaryError> {
+        let error = || LoadDictionaryError::new("failed to load abbrev table");
+        let not_found = || error().with_source(io::Error::from(io::ErrorKind::NotFound));
         let search_path = if let Some(path) = &self.search_path {
             path.to_owned()
         } else {
             search_path_from_env_var()
         };
-        let parent_path = find_path_by_files(&search_path, &[ABBREV_FILE_NAME])
-            .ok_or(LoadDictionaryError::NotFound)?;
+        let parent_path =
+            find_path_by_files(&search_path, &[ABBREV_FILE_NAME]).or_raise(not_found)?;
         let abbrev_path = parent_path.join(ABBREV_FILE_NAME);
         info!("Loading {ABBREV_FILE_NAME}");
-        AbbrevTable::open(abbrev_path).map_err(io_err)
+        AbbrevTable::open(abbrev_path).or_raise(error)
     }
     /// Loads the symbol table.
     pub fn load_symbol_selector(&self) -> Result<SymbolSelector, LoadDictionaryError> {
+        let error = || LoadDictionaryError::new("failed to load symbol table");
+        let not_found = || error().with_source(io::Error::from(io::ErrorKind::NotFound));
         let search_path = if let Some(path) = &self.search_path {
             path.to_owned()
         } else {
             search_path_from_env_var()
         };
-        let parent_path = find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME])
-            .ok_or(LoadDictionaryError::NotFound)?;
+        let parent_path =
+            find_path_by_files(&search_path, &[SYMBOLS_FILE_NAME]).or_raise(not_found)?;
         let symbol_path = parent_path.join(SYMBOLS_FILE_NAME);
         info!("Loading {SYMBOLS_FILE_NAME}");
-        SymbolSelector::open(symbol_path).map_err(io_err)
+        SymbolSelector::open(symbol_path).or_raise(error)
     }
 }
 
@@ -171,34 +155,39 @@ impl UserDictionaryManager {
     ///
     /// If no user dictionary were found, a new dictionary will be created at
     /// the default path.
-    pub fn init(&self) -> io::Result<Box<dyn Dictionary>> {
+    pub fn init(&self) -> Result<Box<dyn Dictionary>, LoadDictionaryError> {
+        let error = || LoadDictionaryError::new("failed to init user dictionary");
+        let not_found = || error().with_source(io::Error::from(io::ErrorKind::NotFound));
         let mut loader = SingleDictionaryLoader::new();
         loader.migrate_sqlite(true);
         let data_path = self
             .data_path
             .clone()
             .or_else(userphrase_path)
-            .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
+            .or_raise(not_found)?;
         if data_path.ends_with(UD_MEM_FILE_NAME) {
             return Ok(Self::in_memory());
         }
         if data_path.exists() {
             info!("Use existing user dictionary {}", data_path.display());
-            return loader.guess_format_and_load(&data_path).map(|mut dict| {
-                dict.set_usage(DictionaryUsage::User);
-                dict
-            });
+            return loader
+                .guess_format_and_load(&data_path)
+                .map(|mut dict| {
+                    dict.set_usage(DictionaryUsage::User);
+                    dict
+                })
+                .or_raise(error);
         }
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
             info!("Creating userdata_dir: {}", userdata_dir.display());
-            fs::create_dir_all(userdata_dir)?;
+            fs::create_dir_all(userdata_dir).or_raise(error)?;
         }
         info!(
             "Creating a fresh user dictionary at {}",
             data_path.display()
         );
-        let mut fresh_dict = loader.guess_format_and_load(&data_path)?;
+        let mut fresh_dict = loader.guess_format_and_load(&data_path).or_raise(error)?;
 
         let user_dict_path = userdata_dir.join(UD_SQLITE_FILE_NAME);
         if cfg!(feature = "sqlite") && user_dict_path.exists() {
@@ -208,18 +197,15 @@ impl UserDictionaryManager {
                     "Importing existing sqlite dictionary at {}",
                     user_dict_path.display()
                 );
-                let dict = SqliteDictionary::open(user_dict_path)
-                    .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                let dict = SqliteDictionary::open(user_dict_path).or_raise(error)?;
                 for (syllables, phrase) in dict.entries() {
                     let freq = phrase.freq();
                     let last_used = phrase.last_used().unwrap_or_default();
                     fresh_dict
                         .update_phrase(&syllables, phrase, freq, last_used)
-                        .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                        .or_raise(error)?;
                 }
-                fresh_dict
-                    .flush()
-                    .map_err(|e| io::Error::new(io::ErrorKind::Other, Box::new(e)))?;
+                fresh_dict.flush().or_raise(error)?;
             }
         } else {
             let uhash_path = userdata_dir.join(UD_UHASH_FILE_NAME);
@@ -228,7 +214,7 @@ impl UserDictionaryManager {
                     "Importing existing uhash dictionary at {}",
                     user_dict_path.display()
                 );
-                let mut input = File::open(uhash_path)?;
+                let mut input = File::open(uhash_path).or_raise(error)?;
                 if let Ok(phrases) = uhash::try_load_bin(&input).or_else(|_| {
                     input.rewind()?;
                     uhash::try_load_text(&input)
@@ -238,11 +224,9 @@ impl UserDictionaryManager {
                         let last_used = phrase.last_used().unwrap_or_default();
                         fresh_dict
                             .update_phrase(&syllables, phrase, freq, last_used)
-                            .map_err(|e| io::Error::other(Box::new(e)))?;
+                            .or_raise(error)?;
                     }
-                    fresh_dict
-                        .flush()
-                        .map_err(|e| io::Error::other(Box::new(e)))?;
+                    fresh_dict.flush().or_raise(error)?;
                 }
             }
         }
@@ -254,20 +238,24 @@ impl UserDictionaryManager {
     ///
     /// If no user exclusion dictionary were found, a new dictionary
     /// will be created at the default path.
-    pub fn init_deleted(&self) -> io::Result<Box<dyn Dictionary>> {
+    pub fn init_deleted(&self) -> Result<Box<dyn Dictionary>, LoadDictionaryError> {
+        let error = || LoadDictionaryError::new("failed to init user exclusion dictionary");
+        let not_found = || error().with_source(io::Error::from(io::ErrorKind::NotFound));
         let loader = SingleDictionaryLoader::new();
         let data_path = self
             .data_path
             .clone()
             .or_else(userphrase_path)
-            .ok_or(io::Error::from(io::ErrorKind::NotFound))?;
+            .or_raise(not_found)?;
         let userdata_dir = data_path.parent().expect("path should contain a filename");
         if !userdata_dir.exists() {
             info!("Creating userdata_dir: {}", userdata_dir.display());
-            fs::create_dir_all(&userdata_dir)?;
+            fs::create_dir_all(&userdata_dir).or_raise(error)?;
         }
         let exclude_dict_path = userdata_dir.join("chewing-deleted.dat");
-        Ok(loader.guess_format_and_load(&exclude_dict_path)?)
+        loader
+            .guess_format_and_load(&exclude_dict_path)
+            .or_raise(error)
     }
     /// Load a in-memory user dictionary.
     pub fn in_memory() -> Box<dyn Dictionary> {
@@ -290,12 +278,16 @@ impl SingleDictionaryLoader {
     pub fn migrate_sqlite(&mut self, migrate: bool) {
         self.migrate_sqlite = migrate;
     }
-    pub fn guess_format_and_load(&self, dict_path: &PathBuf) -> io::Result<Box<dyn Dictionary>> {
+    pub fn guess_format_and_load(
+        &self,
+        dict_path: &PathBuf,
+    ) -> Result<Box<dyn Dictionary>, LoadDictionaryError> {
+        let error = || LoadDictionaryError::new("failed to parse and load dictionary");
         info!("Loading dictionary {}", dict_path.display());
         if self.migrate_sqlite && dict_path.is_file() {
-            let metadata = dict_path.metadata()?;
+            let metadata = dict_path.metadata().or_raise(error)?;
             if metadata.permissions().readonly() {
-                return Err(io::Error::from(io::ErrorKind::PermissionDenied));
+                return Err(error().with_source(io::Error::from(io::ErrorKind::PermissionDenied)));
             }
         }
 
@@ -306,23 +298,47 @@ impl SingleDictionaryLoader {
                 if self.migrate_sqlite {
                     SqliteDictionary::open(dict_path)
                         .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+                        .or_raise(error)
                 } else {
                     SqliteDictionary::open_readonly(dict_path)
                         .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+                        .or_raise(error)
                 }
             }
             #[cfg(not(feature = "sqlite"))]
             {
-                Err(io::Error::from(io::ErrorKind::Unsupported))
+                Err(error().with_source(io::Error::from(io::ErrorKind::Unsupported)))
             }
         } else if ext.eq_ignore_ascii_case("dat") {
             TrieBuf::open(dict_path)
                 .map(|dict| Box::new(dict) as Box<dyn Dictionary>)
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, Box::new(e)))
+                .or_raise(error)
         } else {
-            Err(io::Error::from(io::ErrorKind::Other))
+            Err(error())
         }
     }
 }
+
+/// Errors during loading system or user dictionaries.
+#[derive(Debug)]
+pub struct LoadDictionaryError {
+    msg: String,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+}
+
+impl LoadDictionaryError {
+    fn new(msg: &str) -> LoadDictionaryError {
+        LoadDictionaryError {
+            msg: msg.to_string(),
+            source: None,
+        }
+    }
+}
+
+impl Display for LoadDictionaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.msg)
+    }
+}
+
+impl_exn!(LoadDictionaryError);

@@ -4,7 +4,7 @@ use std::{
     env,
     ffi::OsStr,
     fs,
-    io::ErrorKind,
+    io::{self, ErrorKind},
     path::{Path, PathBuf},
 };
 
@@ -59,7 +59,7 @@ pub fn search_path_from_env_var() -> String {
     chewing_path
 }
 
-pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<PathBuf> {
+pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Result<PathBuf, io::Error> {
     for path in search_path.split(SEARCH_PATH_SEP) {
         let prefix = Path::new(path).to_path_buf();
         info!("Search files {:?} in {}", files, prefix.display());
@@ -73,10 +73,10 @@ pub(crate) fn find_path_by_files(search_path: &str, files: &[&str]) -> Option<Pa
             .all(|it| file_exists(&it))
         {
             info!("Found {:?} in {}", files, prefix.display());
-            return Some(prefix);
+            return Ok(prefix);
         }
     }
-    None
+    Err(ErrorKind::NotFound.into())
 }
 
 pub fn find_files_by_ext(search_path: &str, exts: &[&str]) -> Vec<PathBuf> {
