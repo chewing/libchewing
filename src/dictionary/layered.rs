@@ -33,7 +33,7 @@ use crate::{
 /// assert_eq!(
 ///     [
 ///         ("側", 1, 0).into(),
-///         ("冊", 101, 0).into(),
+///         ("冊", 100, 0).into(),
 ///         ("測", 1, 0).into(),
 ///         ("策", 100, 0).into(),
 ///     ]
@@ -105,7 +105,7 @@ impl Dictionary for Layered {
     /// dictionaries.
     ///
     /// When a phrase appears in multiple dictionaries, the final
-    /// frequency is the sum of all frequency in all dictionaries.
+    /// frequency is the max of all frequency in all dictionaries.
     ///
     /// Pseudo code
     ///
@@ -114,7 +114,7 @@ impl Dictionary for Layered {
     /// Foreach d in d_layers
     ///   Foreach phrase, freq in d.lookup_syllables()
     ///     If phrase in phrases
-    ///       Set phrases[phrase].freq += freq
+    ///       Set phrases[phrase].freq = max(phrases[phrase].freq, freq)
     ///     Else
     ///       Add phrases <- (phrase, freq)
     /// ```
@@ -128,7 +128,7 @@ impl Dictionary for Layered {
                 match sort_map.entry(phrase.to_string()) {
                     Entry::Occupied(entry) => {
                         let index = *entry.get();
-                        phrases[index].freq += phrase.freq;
+                        phrases[index].freq = phrase.freq.max(phrases[index].freq);
                         phrases[index].last_used =
                             match (phrases[index].last_used, phrase.last_used) {
                                 (Some(orig), Some(new)) => Some(u64::max(orig, new)),
@@ -326,7 +326,7 @@ mod tests {
         assert_eq!(
             [
                 ("側", 1, 0).into(),
-                ("冊", 101, 0).into(),
+                ("冊", 100, 0).into(),
                 ("測", 1, 0).into(),
                 ("策", 100, 0).into(),
             ]
@@ -375,7 +375,7 @@ mod tests {
         assert_eq!(
             [
                 ("側", 1, 0).into(),
-                ("冊", 101, 0).into(),
+                ("冊", 100, 0).into(),
                 ("測", 1, 0).into(),
                 ("策", 100, 0).into(),
             ]
