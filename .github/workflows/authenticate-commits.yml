@@ -1,0 +1,22 @@
+name: authenticate-commits
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+jobs:
+  authenticate-commits:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Authenticating commits
+        uses: sequoia-pgp/authenticate-commits@v1
+        with:
+          # To reduce the workflow's verbosity, use 'on-error'
+          # to only post a comment when an error occurs, or 'never' to
+          # never post a comment.  (In all cases the information is
+          # still available in the step's summary.)
+          comment: on-error
