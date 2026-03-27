@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 問題追蹤 (Issues)
+    url: https://codeberg.org/chewing/libchewing/issues
+    about: 問題追蹤已經遷移到 Codeberg 平台
