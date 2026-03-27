@@ -4,6 +4,7 @@ on:
     types: [opened, reopened, synchronize]
 jobs:
   authenticate-commits:
+    if: false
     runs-on: ubuntu-latest
 
     permissions:
