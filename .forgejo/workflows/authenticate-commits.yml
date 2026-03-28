@@ -1,11 +1,12 @@
 name: authenticate-commits
+env:
+  TRUST_ROOT: e582b07e73f9376be102df97d46a70282763fe32
 on:
   pull_request:
     types: [opened, reopened, synchronize]
 jobs:
   authenticate-commits:
-    if: false
-    runs-on: ubuntu-latest
+    runs-on: fedora-latest
 
     permissions:
       contents: read
@@ -13,13 +14,10 @@ jobs:
       issues: write
 
     steps:
-      - name: Authenticating commits
-        uses: sequoia-pgp/authenticate-commits@v1
-        env:
-          COMMENT: on-error
+      - name: Install sq-git
+        run: dnf install -y sequoia-git
+      - uses: actions/checkout@v6
         with:
-          # To reduce the workflow's verbosity, use 'on-error'
-          # to only post a comment when an error occurs, or 'never' to
-          # never post a comment.  (In all cases the information is
-          # still available in the step's summary.)
-          comment: on-error
+          fetch-depth: 0
+      - name: Authenticating commits
+        run: sq-git log --trust-root $TRUST_ROOT
