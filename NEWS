@@ -9,7 +9,7 @@ What's New in libchewing (unreleased)
     dictionaries. Deleted phrases will not be auto learned again.
   - editor: new config option "chewing.auto_snapshot_selections" (default false)
     can be used to control whether phrase selections are automatically locked
-    after any cursor movement.
+    after some condition.
 
 * Bug Fixes
   - dict: fixed parsing trie dictionary file with extension fields.

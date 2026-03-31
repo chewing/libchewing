@@ -588,18 +588,21 @@ impl SharedState {
         }
         paths[self.nth_conversion % paths.len()].intervals.clone()
     }
-    fn intervals(&self) -> impl Iterator<Item = Interval> + use<> {
+    fn intervals(&self) -> impl DoubleEndedIterator<Item = Interval> + use<> {
         self.conversion().into_iter()
     }
-    fn snapshot(&mut self) {
-        if !self.options.auto_snapshot_selections {
+    fn snapshot(&mut self, force: bool, flex: usize) {
+        if !force && !self.options.auto_snapshot_selections {
             return;
         }
-        for interval in self.intervals() {
+        let mut should_skip = flex;
+        for interval in self.intervals().rev() {
+            if should_skip > interval.len() {
+                should_skip -= interval.len();
+                continue;
+            }
             if interval.is_phrase {
-                for i in interval.sub_intervals() {
-                    self.com.select(i);
-                }
+                self.com.select(interval);
             }
         }
         self.nth_conversion = 0;
@@ -878,6 +881,7 @@ impl BasicEditor for Editor {
         if self.is_entering() && self.shared.last_key_behavior == EditorKeyBehavior::Absorb {
             self.shared.try_auto_commit();
         }
+        self.shared.snapshot(false, 5);
         trace!("last_key_behavior = {:?}", self.shared.last_key_behavior);
         trace!("comp: {:?}", &self.shared.com);
         const DIRTY_THRESHOLD: u16 = 0;
@@ -1043,7 +1047,7 @@ impl State for Entering {
                 }
             }
             SYM_HOME => {
-                shared.snapshot();
+                // shared.snapshot();
                 shared.com.move_cursor_to_beginning();
                 self.spin_absorb()
             }
@@ -1051,23 +1055,23 @@ impl State for Entering {
                 if shared.com.is_beginning_of_buffer() {
                     return self.spin_ignore();
                 }
-                shared.snapshot();
+                // shared.snapshot();
                 self.start_highlighting(shared.cursor() - 1)
             }
             SYM_RIGHT if ev.is_state_on(KeyState::Shift) => {
                 if shared.com.is_end_of_buffer() {
                     return self.spin_ignore();
                 }
-                shared.snapshot();
+                // shared.snapshot();
                 self.start_highlighting(shared.cursor() + 1)
             }
             SYM_LEFT => {
-                shared.snapshot();
+                // shared.snapshot();
                 shared.com.move_cursor_left(1);
                 self.spin_absorb()
             }
             SYM_RIGHT => {
-                shared.snapshot();
+                // shared.snapshot();
                 shared.com.move_cursor_right(1);
                 self.spin_absorb()
             }
@@ -1090,7 +1094,7 @@ impl State for Entering {
                 self.start_selecting(shared)
             }
             SYM_END | SYM_PAGEUP | SYM_PAGEDOWN => {
-                shared.snapshot();
+                // shared.snapshot();
                 shared.com.move_cursor_to_end();
                 self.spin_absorb()
             }
@@ -1118,7 +1122,7 @@ impl State for Entering {
             }
             _ => {
                 if shared.nth_conversion != 0 {
-                    shared.snapshot();
+                    shared.snapshot(true, 0);
                 }
                 match shared.options.language_mode {
                     LanguageMode::Chinese if ev.ksym == SYM_GRAVE && !ev.has_modifiers() => {
@@ -1156,6 +1160,7 @@ impl State for Entering {
                                 expended
                                     .chars()
                                     .for_each(|ch| shared.com.insert(Symbol::from(ch)));
+                                shared.snapshot(false, 0);
                                 return self.spin_absorb();
                             }
                         }
@@ -1164,6 +1169,7 @@ impl State for Entering {
                         }
                         if let Some(symbol) = special_symbol_input(ev.ksym.to_unicode()) {
                             shared.com.insert(Symbol::from(symbol));
+                            shared.snapshot(false, 0);
                             return self.spin_absorb();
                         }
                         if ev.ksym.is_unicode() {

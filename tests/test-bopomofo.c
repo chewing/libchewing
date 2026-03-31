@@ -586,6 +586,7 @@ void test_select_without_auto_snapshot()
     chewing_delete(ctx);
 }
 
+// FIXME we need a better test that actually test snapshot phrase not changing
 void test_select_with_auto_snapshot()
 {
     ChewingContext *ctx;
@@ -597,8 +598,8 @@ void test_select_with_auto_snapshot()
     chewing_set_phraseChoiceRearward(ctx, 1);
     chewing_config_set_int(ctx, "chewing.auto_snapshot_selections", 1);
 
-    type_keystroke_by_string(ctx, "hk4g4<L><D><D>5");
-    ok_preedit_buffer(ctx, "測士");
+    type_keystroke_by_string(ctx, "hk4hk4g4<<><L><L><D><D>5");
+    ok_preedit_buffer(ctx, "測策士，");
 
     chewing_delete(ctx);
 }
